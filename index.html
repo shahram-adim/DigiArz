@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DigiArz | صرافی آزمایشی</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0b1220;color:white;font-family:tahoma,Arial}
+header{padding:22px;background:#111d32;text-align:center}
+h1{color:#19d5a2;margin:0}
+main{padding:16px;max-width:650px;margin:auto}
+.card{background:#17243a;padding:18px;border-radius:14px;margin:14px 0}
+.balance{font-size:27px;color:#19d5a2}
+button{background:#19d5a2;border:0;padding:12px;border-radius:9px;font-weight:bold}
+input,select{width:100%;padding:12px;margin:8px 0;border-radius:8px;border:0}
+table{width:100%;text-align:center}
+td,th{padding:12px;border-bottom:1px solid #33445d}
+</style>
+</head>
+<body>
+<header>
+<h1>DigiArz</h1>
+<p>صرافی ارز دیجیتال آزمایشی</p>
+</header>
+<main>
+<div class="card">
+<p>موجودی کیف پول آزمایشی</p>
+<div class="balance" id="balance">100,000 USDT</div>
+</div>
+<div class="card">
+<h3>بازار ارز دیجیتال</h3>
+<table>
+<tr><th>ارز</th><th>قیمت آزمایشی</th></tr>
+<tr><td>Bitcoin</td><td>95000 USDT</td></tr>
+<tr><td>Ethereum</td><td>3200 USDT</td></tr>
+<tr><td>USDT</td><td>1 USDT</td></tr>
+</table>
+</div>
+<div class="card">
+<h3>خرید و فروش آزمایشی</h3>
+<select id="coin">
+<option value="BTC">Bitcoin</option>
+<option value="ETH">Ethereum</option>
+</select>
+<select id="side">
+<option value="buy">خرید</option>
+<option value="sell">فروش</option>
+</select>
+<input id="amount" type="number" placeholder="مقدار ارز">
+<button onclick="trade()">ثبت معامله آزمایشی</button>
+<p id="message"></p>
+</div>
+</main>
+<script>
+let balance=100000;
+let holdings={BTC:0,ETH:0};
+const prices={BTC:95000,ETH:3200};
+function trade(){
+let coin=document.getElementById('coin').value;
+let side=document.getElementById('side').value;
+let amount=Number(document.getElementById('amount').value);
+let cost=amount*prices[coin];
+let msg=document.getElementById('message');
+if(!Number.isFinite(amount)||amount<=0){
+msg.textContent='مقدار معتبر وارد کنید';return;
+}
+if(side==='buy'){
+if(cost>balance){msg.textContent='موجودی کافی نیست';return;}
+balance-=cost;holdings[coin]+=amount;
+}else{
+if(amount>holdings[coin]){msg.textContent='موجودی ارز کافی نیست';return;}
+holdings[coin]-=amount;balance+=cost;
+}
+document.getElementById('balance').textContent=balance.toLocaleString()+' USDT';
+msg.textContent='معامله آزمایشی با موفقیت ثبت شد';
+}
+</script>
+</body>
+</html>
