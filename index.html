@@ -576,5 +576,17 @@ render();
 loadPrices();
 setInterval(loadPrices,60000);
 </script>
-</body>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const SUPABASE_URL = "PROJECT_URL";
+const SUPABASE_KEY = "PUBLISHABLE_KEY";
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+console.log("DigiArz database connected");
+</script></body>
 </html>
