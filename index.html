@@ -243,7 +243,7 @@ DigiArz Demo · پول واقعی و واریز/برداشت واقعی در ا�
 (() => {
 'use strict';
 
-// کلید عمومی Supabase؛ هرگز کلید Secret را در این فایل قرار ندهید.
+// کلید عمومی Supabase؛ کلید Secret را هرگز اینجا قرار ندهید.
 const SUPABASE_URL = 'https://gfoaubfilhttnwjykaox.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_4rXQLoakyaY9GrfbLOlKAw_YNp3Riwi';
 
@@ -324,9 +324,7 @@ const {data,error}=await supabaseClient.auth.signUp({
 email:email,
 password:password,
 options:{
-data:{
-full_name:name
-},
+data:{full_name:name},
 emailRedirectTo:window.location.href
 }
 });
@@ -379,11 +377,7 @@ throw new Error('ورود انجام نشد. دوباره تلاش کنید.');
 await showApp(data.session);
 
 }catch(e){
-showMessage(
-authMsg,
-'ورود انجام نشد: '+(e.message||String(e)),
-'err'
-);
+showMessage(authMsg,'ورود انجام نشد: '+(e.message||String(e)),'err');
 }finally{
 btn.disabled=false;
 }
@@ -402,18 +396,12 @@ throw new Error('ابتدا ایمیل خود را وارد کنید.');
 
 const {error}=await supabaseClient.auth.resetPasswordForEmail(
 email,
-{
-redirectTo:window.location.href
-}
+{redirectTo:window.location.href}
 );
 
 if(error)throw error;
 
-showMessage(
-authMsg,
-'لینک بازیابی رمز عبور به ایمیل شما ارسال شد.',
-'ok'
-);
+showMessage(authMsg,'لینک بازیابی رمز عبور به ایمیل شما ارسال شد.','ok');
 
 }catch(e){
 showMessage(authMsg,'خطا: '+(e.message||String(e)),'err');
@@ -425,8 +413,7 @@ authView.classList.add('hidden');
 appView.classList.remove('hidden');
 $('logoutBtn').classList.remove('hidden');
 
-$('userEmail').textContent=
-session.user.email||'کاربر واردشده';
+$('userEmail').textContent=session.user.email||'کاربر واردشده';
 
 try{
 await loadDashboard();
@@ -462,8 +449,7 @@ loadHistory()
 }
 
 async function loadWallet(){
-const {data:userData,error:userError}=
-await supabaseClient.auth.getUser();
+const {data:userData,error:userError}=await supabaseClient.auth.getUser();
 
 if(userError||!userData.user){
 throw userError||new Error('کاربر وارد نشده است.');
@@ -586,6 +572,7 @@ body.appendChild(tr);
 }
 }
 
+// خرید و فروش آزمایشی
 async function trade(side){
 const buy=side==='buy';
 
@@ -657,28 +644,71 @@ btn.disabled=false;
 }
 }
 
+// نسخه اصلاح‌شده به‌روزرسانی قیمت
 async function refreshAll(){
 const btn=$('refreshBtn');
 btn.disabled=true;
+hideMessage(tradeMsg);
 
 try{
-const {error}=await supabaseClient.functions.invoke(
+
+// دریافت نشست و توکن واقعی کاربر
+const {data:sessionData,error:sessionError}=
+await supabaseClient.auth.getSession();
+
+if(sessionError)throw sessionError;
+
+const session=sessionData.session;
+
+if(!session||!session.access_token){
+throw new Error('نشست ورود معتبر نیست. خارج شوید و دوباره با ایمیل وارد شوید.');
+}
+
+// ارسال توکن معتبر همراه درخواست
+const {data,error}=await supabaseClient.functions.invoke(
 'refresh-market-prices',
-{body:{}}
+{
+body:{},
+headers:{
+Authorization:'Bearer '+session.access_token
+}
+}
 );
 
-if(error)throw error;
+if(error){
+
+let details=error.message||'خطای نامشخص';
+
+if(error.context){
+try{
+const response=await error.context.json();
+details+=' | '+JSON.stringify(response);
+}catch(_){}
+}
+
+throw new Error(details);
+}
+
+console.log('Refresh response:',data);
 
 await loadDashboard();
 
-showMessage(tradeMsg,'درخواست به‌روزرسانی قیمت‌ها ارسال شد.','ok');
-
-}catch(e){
 showMessage(
 tradeMsg,
-'به‌روزرسانی انجام نشد: '+(e.message||String(e)),
+'درخواست به‌روزرسانی قیمت‌ها با موفقیت ارسال شد.',
+'ok'
+);
+
+}catch(e){
+
+console.error('Refresh error:',e);
+
+showMessage(
+tradeMsg,
+'به‌روزرسانی ناموفق: '+(e.message||String(e)),
 'err'
 );
+
 }finally{
 btn.disabled=false;
 }
