@@ -1,360 +1,273 @@
-
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#080d19">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#08111f">
 <title>DigiArz | صرافی آزمایشی</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{
- --bg:#080d19;--panel:#111a2b;--panel2:#172238;
- --gold:#f0b90b;--text:#f5f7fa;--muted:#8995aa;
- --green:#0ecb81;--red:#f6465d;--line:#253149;
+:root {
+  --bg:#08111f;
+  --panel:#101d30;
+  --line:#263951;
+  --text:#edf4ff;
+  --muted:#9eb0c8;
+  --green:#16c784;
+  --red:#ea5964;
+  --blue:#5b9cff;
 }
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);
- font-family:Tahoma,Arial,sans-serif;font-size:14px}
-button,input,select{font:inherit}
-button{cursor:pointer;border:0;border-radius:9px;padding:12px 16px;font-weight:bold}
-header{background:#0d1423;border-bottom:1px solid var(--line);
- padding:15px 5%;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.logo{font-size:25px;font-weight:900;color:var(--gold)}
-.logo span{color:white}
-.tag{font-size:10px;color:var(--muted);margin-top:5px}
-nav{display:flex;gap:8px;flex-wrap:wrap}
-nav button{background:transparent;color:#b7c1d2;padding:10px}
-nav button.active,nav button:hover{color:var(--gold);background:#1c2940}
-main{max-width:1200px;margin:auto;padding:22px 4%}
-.page{display:none}.page.active{display:block}
-h2{font-size:20px;margin:10px 0 20px}
-h3{font-size:15px;margin:0 0 15px}
-.muted{color:var(--muted)}
-.small{font-size:11px;color:var(--muted)}
-.card{background:var(--panel);border:1px solid var(--line);
- border-radius:14px;padding:18px;margin-bottom:16px}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-.stat{background:var(--panel);padding:18px;border-radius:13px;border:1px solid var(--line)}
-.stat strong{display:block;font-size:22px;margin-top:12px}
-.gold{color:var(--gold)}.green{color:var(--green)}.red{color:var(--red)}
-.btn-gold{background:var(--gold);color:#111}
-.btn-dark{background:var(--panel2);color:white;border:1px solid var(--line)}
-.btn-green{background:var(--green);color:#06150e}
-.btn-red{background:var(--red);color:white}
-input,select{width:100%;padding:13px;background:#0b1322;
- border:1px solid #33415b;border-radius:9px;color:white;margin:8px 0 14px}
-label{display:block;color:#b8c3d6;font-size:12px}
-.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-.row>*{flex:1}
-table{width:100%;border-collapse:collapse;min-width:530px}
-th,td{padding:14px 10px;text-align:right;border-bottom:1px solid var(--line)}
-th{color:var(--muted);font-size:12px}
-.table-wrap{overflow-x:auto}
-.coin{display:flex;align-items:center;gap:10px;font-weight:bold}
-.coin img{width:29px;height:29px;border-radius:50%}
-.actions{display:flex;gap:8px}
-.actions button{padding:8px 13px}
-.notice{background:#29240e;color:#f4d66a;border:1px solid #594914;
- padding:12px;border-radius:9px;margin-bottom:16px;font-size:12px;line-height:2}
-.login{max-width:430px;margin:45px auto}
-.login .logo{text-align:center;margin-bottom:24px}
-.hidden{display:none!important}
-footer{text-align:center;padding:30px;color:var(--muted);font-size:11px}
-#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
- background:#253149;color:white;padding:13px 20px;border-radius:10px;
- display:none;z-index:10;max-width:90%;text-align:center}
-@media(max-width:700px){
- .grid{grid-template-columns:repeat(2,1fr)}
- header{padding:12px 4%}
- nav{width:100%;overflow-x:auto}
- nav button{white-space:nowrap;font-size:12px}
- main{padding:16px 4%}
- .stat strong{font-size:18px}
+* {box-sizing:border-box}
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Tahoma,Arial,sans-serif;
+}
+button,input {
+  font:inherit;
+}
+button {
+  border:0;
+  border-radius:12px;
+  padding:13px 16px;
+  background:var(--blue);
+  color:#071322;
+  font-weight:bold;
+}
+input {
+  width:100%;
+  padding:13px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:#091626;
+  color:white;
+}
+.wrap {
+  max-width:1100px;
+  margin:auto;
+  padding:18px 14px;
+}
+.card {
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:17px;
+  padding:17px;
+  margin-bottom:14px;
+}
+.brand {
+  font-size:27px;
+  font-weight:900;
+}
+.brand span {color:var(--green)}
+.muted {color:var(--muted)}
+.hidden {display:none!important}
+.field {margin:12px 0}
+.field label {
+  display:block;
+  margin-bottom:7px;
+  color:var(--muted);
+}
+.notice {
+  padding:12px;
+  border-radius:11px;
+  background:#182b42;
+  margin:12px 0;
+  font-size:13px;
+  line-height:1.9;
+}
+.auth {
+  max-width:470px;
+  margin:8vh auto;
+}
+.grid {
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+}
+.stat {
+  background:#0a1727;
+  border:1px solid var(--line);
+  border-radius:13px;
+  padding:14px;
+}
+.value {
+  font-size:20px;
+  font-weight:bold;
+  margin-top:9px;
+  direction:ltr;
+}
+.tabs {
+  display:flex;
+  gap:8px;
+  overflow:auto;
+  margin:14px 0;
+}
+.tabs button {
+  white-space:nowrap;
+  background:#243951;
+  color:white;
+}
+.coin {
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+  padding:13px;
+  margin:8px 0;
+  background:#0a1727;
+  border-radius:12px;
+}
+.price {
+  direction:ltr;
+  text-align:left;
+}
+.buy {background:var(--green)}
+.sell {background:var(--red);color:white}
+.secondary {background:#243951;color:white}
+.trade-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.trade-box {
+  background:#0a1727;
+  padding:14px;
+  border-radius:13px;
+}
+table {width:100%;border-collapse:collapse}
+td,th {
+  padding:10px;
+  border-bottom:1px solid var(--line);
+  text-align:right;
+}
+@media(max-width:600px) {
+  .trade-grid {grid-template-columns:1fr}
 }
 </style>
 </head>
-<body>
 
-<header>
- <div>
-  <div class="logo">Digi<span>Arz</span></div>
-  <div class="tag">DEMO CRYPTO EXCHANGE</div>
- </div>
- <nav id="navigation" class="hidden">
-  <button class="active" onclick="showPage('dashboard',this)">داشبورد</button>
-  <button onclick="showPage('market',this)">بازار</button>
-  <button onclick="showPage('trade',this)">خرید و فروش</button>
-  <button onclick="showPage('wallet',this)">کیف پول</button>
-  <button onclick="showPage('history',this)">تاریخچه</button>
-  <button onclick="logout()">خروج</button>
- </nav>
+<body>
+<div class="wrap">
+
+<header style="display:flex;justify-content:space-between;align-items:center">
+  <div>
+    <div class="brand">Digi<span>Arz</span></div>
+    <div class="muted">صرافی آزمایشی ارز دیجیتال</div>
+  </div>
+  <button id="logoutBtn" class="secondary hidden">خروج</button>
 </header>
 
-<main>
-<section id="loginPage" class="page active">
- <div class="login card">
-  <div class="logo">DigiArz</div>
-  <h2 style="text-align:center">ورود به صرافی آزمایشی</h2>
-  <div class="notice">این نسخه آزمایشی است. ورود با شماره موبایل در این نسخه کد پیامکی ارسال نمی‌کند. از اطلاعات حساس واقعی استفاده نکنید.</div>
-  <label>شماره موبایل آزمایشی</label>
-  <input id="phone" type="tel" placeholder="مثلاً 09123456789" maxlength="11">
-  <label>نام نمایشی</label>
-  <input id="username" placeholder="نام شما">
-  <button class="btn-gold" style="width:100%" onclick="login()">ورود آزمایشی</button>
-  <p class="small" style="text-align:center">بدون پیامک • بدون پرداخت • فقط پول مجازی</p>
- </div>
-</section>
-
-<section id="dashboard" class="page">
- <h2>داشبورد <span class="gold">DigiArz</span></h2>
- <div class="notice">حساب آزمایشی فعال است. تمام معاملات و موجودی‌ها مجازی هستند و ارزش واقعی مالی ندارند.</div>
- <div class="grid">
-  <div class="stat"><span class="muted">موجودی دلاری</span><strong id="balance">$10,000</strong></div>
-  <div class="stat"><span class="muted">ارزش دارایی‌ها</span><strong id="assets">$10,000</strong></div>
-  <div class="stat"><span class="muted">سود و زیان</span><strong id="profit">$0</strong></div>
-  <div class="stat"><span class="muted">تعداد معاملات</span><strong id="tradeCount">0</strong></div>
- </div>
- <div class="card" style="margin-top:18px">
-  <h3>بازارهای منتخب</h3>
-  <div class="table-wrap"><table>
-   <thead><tr><th>ارز</th><th>قیمت دلار</th><th>تغییر ۲۴ ساعته</th><th></th></tr></thead>
-   <tbody id="dashboardMarkets"></tbody>
-  </table></div>
- </div>
- <div class="card">
-  <h3>دسترسی سریع</h3>
-  <div class="row">
-   <button class="btn-gold" onclick="showPage('trade')">خرید و فروش</button>
-   <button class="btn-dark" onclick="showPage('market')">مشاهده بازار</button>
-   <button class="btn-dark" onclick="showPage('wallet')">کیف پول من</button>
+<section id="authView" class="card auth">
+  <h2>ورود و ثبت‌نام</h2>
+  <div class="notice">
+    ورود امن با شماره موبایل و کد یک‌بارمصرف پیامکی
   </div>
- </div>
+
+  <div id="phoneStep">
+    <div class="field">
+      <label>شماره موبایل با کد کشور</label>
+      <input id="phone" type="tel"
+        placeholder="+989121234567" dir="ltr">
+    </div>
+    <button id="sendOtpBtn" style="width:100%">
+      ارسال کد تأیید
+    </button>
+  </div>
+
+  <div id="otpStep" class="hidden">
+    <div class="field">
+      <label>کد پیامک‌شده</label>
+      <input id="otp" inputmode="numeric"
+        placeholder="کد تأیید" dir="ltr">
+    </div>
+    <button id="verifyBtn" style="width:100%">
+      تأیید و ورود
+    </button>
+  </div>
+
+  <div id="authMsg" class="notice hidden"></div>
 </section>
 
-<section id="market" class="page">
- <h2>بازار ارزهای دیجیتال</h2>
- <div class="row">
-  <input id="searchCoin" placeholder="جستجوی ارز..." oninput="renderMarkets()">
-  <button class="btn-dark" onclick="loadMarkets()">به‌روزرسانی قیمت‌ها</button>
- </div>
- <p class="small" id="marketStatus">در حال دریافت قیمت بازار...</p>
- <div class="card table-wrap">
+<main id="appView" class="hidden">
+
+<section class="card">
+  <h2>داشبورد DigiArz</h2>
+  <div id="userPhone" class="muted"></div>
+
+  <div class="grid" style="margin-top:15px">
+    <div class="stat">
+      <div class="muted">موجودی USDT</div>
+      <div class="value" id="usdtBalance">—</div>
+    </div>
+    <div class="stat">
+      <div class="muted">موجودی ریال</div>
+      <div class="value" id="irrBalance">—</div>
+    </div>
+  </div>
+</section>
+
+<nav class="tabs">
+  <button data-tab="markets">بازارها</button>
+  <button data-tab="trade">خرید و فروش</button>
+  <button data-tab="assets">دارایی‌ها</button>
+  <button data-tab="history">تاریخچه</button>
+</nav>
+
+<section id="tab-markets" class="card">
+  <h2>قیمت بازار</h2>
+  <div id="marketList">در حال دریافت قیمت‌ها...</div>
+</section>
+
+<section id="tab-trade" class="card hidden">
+  <h2>معاملات آزمایشی</h2>
+
+  <div class="trade-grid">
+    <div class="trade-box">
+      <h3>خرید</h3>
+      <input id="buySymbol" value="BTCUSDT" dir="ltr">
+      <br><br>
+      <input id="buyAmount" type="number"
+        placeholder="مقدار خرید">
+      <br><br>
+      <button id="buyBtn" class="buy" style="width:100%">
+        خرید آزمایشی
+      </button>
+    </div>
+
+    <div class="trade-box">
+      <h3>فروش</h3>
+      <input id="sellSymbol" value="BTCUSDT" dir="ltr">
+      <br><br>
+      <input id="sellAmount" type="number"
+        placeholder="مقدار فروش">
+      <br><br>
+      <button id="sellBtn" class="sell" style="width:100%">
+        فروش آزمایشی
+      </button>
+    </div>
+  </div>
+  <div id="tradeMsg" class="notice hidden"></div>
+</section>
+
+<section id="tab-assets" class="card hidden">
+  <h2>دارایی‌های من</h2>
+  <div id="assetList"></div>
+</section>
+
+<section id="tab-history" class="card hidden">
+  <h2>تاریخچه معاملات</h2>
   <table>
-   <thead><tr><th>ارز دیجیتال</th><th>قیمت (USD)</th><th>تغییر ۲۴ ساعته</th><th>معامله</th></tr></thead>
-   <tbody id="marketRows"></tbody>
+    <thead>
+      <tr>
+        <th>نماد</th>
+        <th>نوع</th>
+        <th>مقدار</th>
+        <th>قیمت</th>
+      </tr>
+    </thead>
+    <tbody id="historyBody"></tbody>
   </table>
- </div>
 </section>
 
-<section id="trade" class="page">
- <h2>خرید و فروش آزمایشی</h2>
- <div class="notice">سفارش‌ها فقط در همین حساب آزمایشی ثبت می‌شوند. این سامانه به صرافی واقعی متصل نیست.</div>
- <div class="card">
-  <label>نوع معامله</label>
-  <select id="tradeType">
-   <option value="buy">خرید</option>
-   <option value="sell">فروش</option>
-  </select>
-  <label>انتخاب ارز</label>
-  <select id="tradeCoin" onchange="updateTradeInfo()"></select>
-  <label>مبلغ به دلار</label>
-  <input type="number" id="tradeAmount" min="1" step="0.01" placeholder="مثلاً 100">
-  <div class="small" id="tradeInfo">قیمت و مقدار معامله نمایش داده می‌شود.</div>
-  <br>
-  <button class="btn-gold" style="width:100%" onclick="executeTrade()">ثبت معامله آزمایشی</button>
- </div>
-</section>
-
-<section id="wallet" class="page">
- <h2>کیف پول مجازی</h2>
- <div class="grid" id="walletStats">
-  <div class="stat"><span class="muted">موجودی دلار مجازی</span><strong id="walletUsd">$10,000</strong></div>
-  <div class="stat"><span class="muted">ارزش کل دارایی</span><strong id="walletTotal">$10,000</strong></div>
- </div>
- <div class="card">
-  <h3>دارایی‌های من</h3>
-  <div class="table-wrap"><table>
-   <thead><tr><th>ارز</th><th>مقدار</th><th>ارزش دلاری</th></tr></thead>
-   <tbody id="walletRows"></tbody>
-  </table></div>
- </div>
-</section>
-
-<section id="history" class="page">
- <h2>تاریخچه معاملات</h2>
- <div class="card table-wrap">
-  <table>
-   <thead><tr><th>زمان</th><th>نوع</th><th>ارز</th><th>مبلغ دلاری</th><th>مقدار ارز</th></tr></thead>
-   <tbody id="historyRows"></tbody>
-  </table>
- </div>
-</section>
 </main>
-
-<footer>
- DigiArz Demo Exchange © 2026
- <br>نسخه آزمایشی؛ بدون واریز و برداشت پول واقعی
-</footer>
-<div id="toast"></div>
-
-<script>
-const coins=[
- {id:'bitcoin',symbol:'BTC',name:'بیت‌کوین'},
- {id:'ethereum',symbol:'ETH',name:'اتریوم'},
- {id:'binancecoin',symbol:'BNB',name:'بایننس کوین'},
- {id:'solana',symbol:'SOL',name:'سولانا'},
- {id:'ripple',symbol:'XRP',name:'ریپل'},
- {id:'dogecoin',symbol:'DOGE',name:'دوج‌کوین'},
- {id:'cardano',symbol:'ADA',name:'کاردانو'},
- {id:'tron',symbol:'TRX',name:'ترون'},
- {id:'the-open-network',symbol:'TON',name:'تون‌کوین'},
- {id:'avalanche-2',symbol:'AVAX',name:'آوالانچ'}
-];
-let prices={};
-let changes={};
-let state={phone:'',name:'',usd:10000,holdings:{},history:[]};
-const $=id=>document.getElementById(id);
-function save(){localStorage.setItem('digiarz_demo',JSON.stringify(state))}
-function money(n){return '$'+Number(n||0).toLocaleString('en-US',{maximumFractionDigits:2})}
-function toast(msg){
- $('toast').textContent=msg;$('toast').style.display='block';
- setTimeout(()=>$('toast').style.display='none',2800);
-}
-function login(){
- const p=$('phone').value.trim();
- if(!/^09\d{9}$/.test(p)){toast('شماره موبایل باید ۱۱ رقم و با 09 شروع شود');return}
- let old=localStorage.getItem('digiarz_demo');
- if(old){try{let d=JSON.parse(old);if(d.phone===p)state=d;}catch(e){}}
- state.phone=p;state.name=$('username').value.trim()||'کاربر آزمایشی';
- if(!state.usd && state.usd!==0)state.usd=10000;
- save();enterApp();
-}
-function enterApp(){
- $('loginPage').classList.remove('active');
- $('navigation').classList.remove('hidden');
- showPage('dashboard');
- renderAll();
-}
-function logout(){
- $('navigation').classList.add('hidden');
- document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
- $('loginPage').classList.add('active');
-}
-function showPage(id,btn){
- document.querySelectorAll('main .page').forEach(x=>x.classList.remove('active'));
- $(id).classList.add('active');
- document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
- if(btn)btn.classList.add('active');
- if(id==='wallet')renderWallet();
- if(id==='history')renderHistory();
- if(id==='market')renderMarkets();
- if(id==='trade')updateTradeInfo();
-}
-async function loadMarkets(){
- $('marketStatus').textContent='در حال دریافت قیمت‌های واقعی بازار...';
- try{
-  const ids=coins.map(c=>c.id).join(',');
-  const url='https://api.coingecko.com/api/v3/simple/price?ids='+ids+'&vs_currencies=usd&include_24hr_change=true';
-  const response=await fetch(url);
-  if(!response.ok)throw new Error('network');
-  const data=await response.json();
-  coins.forEach(c=>{
-   if(data[c.id]){
-    prices[c.symbol]=data[c.id].usd;
-    changes[c.symbol]=data[c.id].usd_24h_change||0;
-   }
-  });
-  $('marketStatus').textContent='قیمت‌ها از بازار واقعی دریافت شدند؛ زمان دریافت: '+new Date().toLocaleTimeString('fa-IR');
- }catch(e){
-  $('marketStatus').textContent='دریافت قیمت آنلاین ناموفق بود. اتصال اینترنت یا محدودیت سرویس را بررسی کن.';
- }
- renderAll();
-}
-function renderMarkets(){
- const q=($('searchCoin')?.value||'').toLowerCase();
- const html=coins.filter(c=>(c.name+c.symbol).toLowerCase().includes(q)).map(c=>{
-  const price=prices[c.symbol],change=changes[c.symbol];
-  return `<tr><td><div class="coin">${c.name} <span class="muted">${c.symbol}</span></div></td>
-  <td>${price?money(price):'—'}</td>
-  <td class="${change>=0?'green':'red'}">${change===undefined?'—':change.toFixed(2)+'%'}</td>
-  <td><button class="btn-gold" onclick="selectCoin('${c.symbol}')">معامله</button></td></tr>`;
- }).join('');
- $('marketRows').innerHTML=html||'<tr><td colspan="4">موردی پیدا نشد</td></tr>';
-}
-function renderDashboard(){
- $('balance').textContent=money(state.usd);
- $('walletUsd').textContent=money(state.usd);
- $('tradeCount').textContent=state.history.length;
- let total=state.usd;
- Object.entries(state.holdings).forEach(([s,q])=>total+=q*(prices[s]||0));
- $('assets').textContent=money(total);
- $('walletTotal').textContent=money(total);
- const profit=total-10000;
- $('profit').textContent=money(profit);
- $('profit').className=profit>=0?'green':'red';
- $('dashboardMarkets').innerHTML=coins.slice(0,5).map(c=>
- `<tr><td>${c.name} (${c.symbol})</td><td>${prices[c.symbol]?money(prices[c.symbol]):'—'}</td>
- <td class="${(changes[c.symbol]||0)>=0?'green':'red'}">${changes[c.symbol]===undefined?'—':changes[c.symbol].toFixed(2)+'%'}</td>
- <td><button class="btn-dark" onclick="selectCoin('${c.symbol}')">معامله</button></td></tr>`
- ).join('');
-}
-function renderWallet(){
- $('walletUsd').textContent=money(state.usd);
- let total=state.usd,rows='';
- Object.entries(state.holdings).forEach(([s,q])=>{
-  const c=coins.find(x=>x.symbol===s),value=q*(prices[s]||0);total+=value;
-  rows+=`<tr><td>${c?c.name:s} (${s})</td><td>${q.toFixed(8)}</td><td>${money(value)}</td></tr>`;
- });
- $('walletTotal').textContent=money(total);
- $('walletRows').innerHTML='<tr><td>دلار مجازی (USD)</td><td>—</td><td>'+money(state.usd)+'</td></tr>'+rows;
-}
-function renderHistory(){
- $('historyRows').innerHTML=state.history.length?state.history.slice().reverse().map(t=>
- `<tr><td>${t.date}</td><td class="${t.type==='buy'?'green':'red'}">${t.type==='buy'?'خرید':'فروش'}</td>
- <td>${t.symbol}</td><td>${money(t.amount)}</td><td>${t.quantity.toFixed(8)}</td></tr>`
- ).join(''):'<tr><td colspan="5">هنوز معامله‌ای ثبت نشده است.</td></tr>';
-}
-function renderTradeOptions(){
- $('tradeCoin').innerHTML=coins.map(c=>`<option value="${c.symbol}">${c.name} (${c.symbol})</option>`).join('');
-}
-function selectCoin(symbol){
- $('tradeCoin').value=symbol;showPage('trade');updateTradeInfo();
-}
-function updateTradeInfo(){
- const s=$('tradeCoin').value,c=coins.find(x=>x.symbol===s),p=prices[s];
- $('tradeInfo').textContent=c?(p?'قیمت فعلی '+c.name+': '+money(p):'قیمت '+c.name+' هنوز دریافت نشده است'):'';
-}
-function executeTrade(){
- const type=$('tradeType').value,s=$('tradeCoin').value;
- const amount=Number($('tradeAmount').value),price=prices[s];
- if(!price){toast('قیمت ارز دریافت نشده است؛ بازار را به‌روزرسانی کن');return}
- if(!Number.isFinite(amount)||amount<=0){toast('مبلغ معتبر وارد کن');return}
- const qty=amount/price;
- const held=state.holdings[s]||0;
- if(type==='buy'){
-  if(amount>state.usd){toast('موجودی دلار مجازی کافی نیست');return}
-  state.usd-=amount;state.holdings[s]=held+qty;
- }else{
-  if(qty>held){toast('موجودی این ارز برای فروش کافی نیست');return}
-  state.holdings[s]=held-qty;state.usd+=amount;
- }
- state.history.push({type,symbol:s,amount,quantity:qty,date:new Date().toLocaleString('fa-IR')});
- save();renderAll();$('tradeAmount').value='';
- toast('معامله آزمایشی با موفقیت ثبت شد');
-}
-function renderAll(){
- renderDashboard();renderMarkets();renderWallet();renderHistory();updateTradeInfo();
-}
-function init(){
- try{
-  const old=localStorage.getItem('digiarz_demo');
-  if(old){const d=JSON.parse(old);if(d&&d.phone){state={...state,...d};enterApp();}}
- }catch(e){}
- renderTradeOptions();
- loadMarkets();
-}
-init();
-setInterval(loadMarkets,60000);
-</script>
-</body>
-</html>
+</div>
