@@ -43,8 +43,9 @@ h3{font-size:15px;margin:0 0 10px}
 .tabs button{white-space:nowrap;background:#14243a;color:var(--muted);padding:10px 14px}
 .tabs button.active{background:var(--blue);color:#061426}
 .market-list{display:grid;gap:8px}
-.coin{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:8px;align-items:center;padding:12px;background:#0a1727;border:1px solid #1d3048;border-radius:12px;font-size:13px}
+.coin{display:grid;grid-template-columns:1.1fr 1fr 1.2fr .8fr;gap:8px;align-items:center;padding:12px;background:#0a1727;border:1px solid #1d3048;border-radius:12px;font-size:13px}
 .coin .price{direction:ltr;text-align:left;font-weight:700}
+.coin .toman{direction:rtl;text-align:right;color:var(--green);font-weight:700}
 .ltr{direction:ltr;text-align:left}
 .trade-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .trade-box{background:#0a1727;border:1px solid var(--line);padding:14px;border-radius:13px}
@@ -59,12 +60,17 @@ th{color:var(--muted);font-weight:500}
 .footer{text-align:center;color:#7488a3;font-size:11px;margin:24px 0 0;line-height:2}
 .auth-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
 .auth-actions button{width:100%}
+.fx-box{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:#0a1727;border:1px solid #28445d;border-radius:12px;padding:12px;margin:10px 0 14px}
+.fx-price{font-size:17px;font-weight:800;color:var(--green)}
+.market-head{font-size:11px;color:var(--muted);padding:0 5px}
 @media(max-width:700px){
 .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 .trade-grid{grid-template-columns:1fr}
 .top{align-items:flex-start}
 .brand{font-size:22px}
 .stat .value{font-size:18px}
+.coin{grid-template-columns:1fr 1fr;gap:10px}
+.coin>div{min-width:0}
 }
 </style>
 </head>
@@ -157,11 +163,25 @@ th{color:var(--muted);font-weight:500}
 <h2>قیمت بازار</h2>
 <span class="muted small" id="marketUpdated">—</span>
 </div>
+
+<div class="fx-box">
+<div>
+<div class="muted small">نرخ دلار آزاد تهران</div>
+<div class="fx-price" id="fxRate">در حال دریافت...</div>
+</div>
+<div class="muted small" id="fxUpdated">منبع: NerkhAra</div>
+</div>
+
+<div class="market-head">
+نماد / قیمت دلاری / قیمت تومانی / منبع
+</div>
+
 <div id="marketList" class="market-list">
 <div class="muted small">در حال دریافت قیمت‌ها…</div>
 </div>
+
 <div class="notice warn">
-اگر فهرست خالی است، تابع به‌روزرسانی قیمت بازار در Supabase را بررسی کنید.
+قیمت دلاری از بازار واقعی دریافت می‌شود. قیمت تومانی از ضرب قیمت دلاری در نرخ آزاد دلار محاسبه می‌شود. معاملات این نسخه فقط آزمایشی هستند.
 </div>
 </section>
 
@@ -243,7 +263,6 @@ DigiArz Demo · پول واقعی و واریز/برداشت واقعی در ا�
 (() => {
 'use strict';
 
-// کلید عمومی Supabase؛ کلید Secret را هرگز اینجا قرار ندهید.
 const SUPABASE_URL = 'https://gfoaubfilhttnwjykaox.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_4rXQLoakyaY9GrfbLOlKAw_YNp3Riwi';
 
@@ -255,6 +274,8 @@ const authMsg = $('authMsg');
 const tradeMsg = $('tradeMsg');
 
 let supabaseClient = null;
+let currentFxRate = null;
+let currentFxIsValid = false;
 
 function showMessage(el,message,type=''){
 el.textContent=message;
@@ -301,7 +322,6 @@ detectSessionInUrl:true
 );
 }
 
-// ثبت‌نام با ایمیل
 async function signup(){
 const btn=$('signupBtn');
 btn.disabled=true;
@@ -335,11 +355,7 @@ if(data.session){
 showMessage(authMsg,'ثبت‌نام موفق بود. در حال ورود به حساب...','ok');
 await showApp(data.session);
 }else{
-showMessage(
-authMsg,
-'ثبت‌نام انجام شد. لطفاً ایمیل خود را باز کنید و روی لینک تأیید کلیک کنید. سپس از قسمت ورود وارد حساب شوید.',
-'ok'
-);
+showMessage(authMsg,'ثبت‌نام انجام شد. لطفاً ایمیل خود را باز کنید و روی لینک تأیید کلیک کنید. سپس از قسمت ورود وارد حساب شوید.','ok');
 }
 
 }catch(e){
@@ -349,7 +365,6 @@ btn.disabled=false;
 }
 }
 
-// ورود با ایمیل
 async function login(){
 const btn=$('loginBtn');
 btn.disabled=true;
@@ -383,7 +398,6 @@ btn.disabled=false;
 }
 }
 
-// بازیابی رمز عبور
 async function forgotPassword(){
 hideMessage(authMsg);
 
@@ -474,14 +488,60 @@ $('irrBalance').textContent=formatNum(data.balance_irr,0);
 }
 
 async function loadMarkets(){
-const {data,error}=await supabaseClient
+
+// دریافت قیمت دلاری و نرخ دلار تومان به صورت جداگانه
+const [marketResult,fxResult]=await Promise.all([
+supabaseClient
 .from('market_prices')
 .select('symbol,price,source,updated_at')
 .order('symbol')
-.limit(100);
+.limit(100),
 
-if(error)throw error;
+supabaseClient
+.from('market_fx_rates')
+.select('price_toman,source,source_updated_at,is_stale')
+.eq('symbol','USD_IRT')
+.maybeSingle()
+]);
 
+if(marketResult.error)throw marketResult.error;
+
+const fx=fxResult.data;
+currentFxRate=null;
+currentFxIsValid=false;
+
+if(!fxResult.error&&fx){
+const rate=Number(fx.price_toman);
+const updated=fx.source_updated_at
+?new Date(fx.source_updated_at).getTime()
+:0;
+
+const age=Date.now()-updated;
+
+if(
+Number.isFinite(rate)&&
+rate>0&&
+fx.is_stale===false&&
+updated>0&&
+age>=-120000&&
+age<=1200000
+){
+currentFxRate=rate;
+currentFxIsValid=true;
+$('fxRate').textContent=formatNum(rate,0)+' تومان';
+$('fxUpdated').textContent='منبع: '+(fx.source||'NerkhAra')+' · '+new Date(fx.source_updated_at).toLocaleString('fa-IR');
+}else{
+$('fxRate').textContent='نرخ دلار قدیمی است';
+$('fxUpdated').textContent='لطفاً به‌روزرسانی نرخ را بررسی کنید.';
+}
+}else{
+$('fxRate').textContent='نرخ دلار دریافت نشد';
+$('fxUpdated').textContent=fxResult.error
+?'خطا در دریافت نرخ دلار'
+:'نرخ دلار هنوز ثبت نشده است';
+}
+
+const data=marketResult.data;
 const list=$('marketList');
 list.innerHTML='';
 
@@ -492,13 +552,31 @@ return;
 }
 
 for(const item of data){
+const usd=Number(item.price);
+const validUsd=Number.isFinite(usd)&&usd>0;
+const toman=validUsd&&currentFxIsValid
+?usd*currentFxRate
+:null;
+
 const div=document.createElement('div');
 div.className='coin';
 
-div.innerHTML=
-`<b dir="ltr">${safeText(item.symbol)}</b>
-<span class="price">${formatNum(item.price,10)}</span>
-<span class="muted small">${safeText(item.source||'—')}</span>`;
+div.innerHTML=`
+<div>
+<b dir="ltr">${safeText(item.symbol)}</b>
+</div>
+<div>
+<div class="muted small">قیمت دلاری</div>
+<div class="price">${validUsd?formatNum(usd,10)+' $':'—'}</div>
+</div>
+<div>
+<div class="muted small">قیمت تومانی</div>
+<div class="toman">${toman!==null?formatNum(toman,0)+' تومان':'—'}</div>
+</div>
+<div>
+<div class="muted small">منبع</div>
+<div class="muted small">${safeText(item.source||'—')}</div>
+</div>`;
 
 list.appendChild(div);
 }
@@ -534,8 +612,8 @@ div.className='coin';
 
 div.innerHTML=
 `<b dir="ltr">${safeText(item.asset)}</b>
-<span class="price">${formatNum(item.balance,10)}</span>
-<span class="muted small">موجودی</span>`;
+<div><div class="muted small">موجودی</div>
+<span class="price">${formatNum(item.balance,10)}</span></div>`;
 
 list.appendChild(div);
 }
@@ -572,7 +650,6 @@ body.appendChild(tr);
 }
 }
 
-// خرید و فروش آزمایشی
 async function trade(side){
 const buy=side==='buy';
 
@@ -644,15 +721,12 @@ btn.disabled=false;
 }
 }
 
-// نسخه اصلاح‌شده به‌روزرسانی قیمت
 async function refreshAll(){
 const btn=$('refreshBtn');
 btn.disabled=true;
 hideMessage(tradeMsg);
 
 try{
-
-// دریافت نشست و توکن واقعی کاربر
 const {data:sessionData,error:sessionError}=
 await supabaseClient.auth.getSession();
 
@@ -664,7 +738,6 @@ if(!session||!session.access_token){
 throw new Error('نشست ورود معتبر نیست. خارج شوید و دوباره با ایمیل وارد شوید.');
 }
 
-// ارسال توکن معتبر همراه درخواست
 const {data,error}=await supabaseClient.functions.invoke(
 'refresh-market-prices',
 {
@@ -676,7 +749,6 @@ Authorization:'Bearer '+session.access_token
 );
 
 if(error){
-
 let details=error.message||'خطای نامشخص';
 
 if(error.context){
@@ -700,7 +772,6 @@ tradeMsg,
 );
 
 }catch(e){
-
 console.error('Refresh error:',e);
 
 showMessage(
