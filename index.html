@@ -4,73 +4,161 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#08111f">
+<meta name="theme-color" content="#0b0e11">
 <title>DigiArz | صرافی آزمایشی</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{color-scheme:dark;--bg:#08111f;--panel:#101d30;--line:#263951;--text:#edf4ff;--muted:#9eb0c8;--green:#16c784;--red:#ea5964;--blue:#5b9cff;--gold:#f2c66d}
+:root{
+ color-scheme:dark;
+ --bg:#0b0e11;
+ --panel:#181a20;
+ --panel2:#20232b;
+ --line:#30343d;
+ --text:#f5f5f5;
+ --muted:#9299a5;
+ --yellow:#f0b90b;
+ --green:#0ecb81;
+ --red:#f6465d;
+}
 *{box-sizing:border-box}
-body{margin:0;background:radial-gradient(ellipse at top,#122642 0,#08111f 55%);color:var(--text);font-family:Tahoma,Arial,sans-serif;min-height:100vh}
+body{
+ margin:0;background:var(--bg);color:var(--text);
+ font-family:Tahoma,Arial,sans-serif;min-height:100vh
+}
 button,input{font:inherit}
-button{border:0;border-radius:12px;padding:13px 16px;background:var(--blue);color:#071322;font-weight:700;cursor:pointer}
+button{
+ border:0;border-radius:9px;padding:13px 17px;
+ background:var(--yellow);color:#111;font-weight:800;cursor:pointer
+}
 button:disabled{opacity:.45;cursor:not-allowed}
-input{width:100%;padding:13px;border:1px solid var(--line);border-radius:11px;background:#091626;color:var(--text);outline:none}
-input:focus{border-color:var(--blue)}
-.wrap{max-width:1100px;margin:auto;padding:18px 14px 40px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
-.brand{font-size:25px;font-weight:900;letter-spacing:.3px}
-.brand span{color:var(--green)}
-.tag{font-size:11px;color:var(--gold);border:1px solid #705d32;padding:5px 8px;border-radius:30px;margin-right:8px}
+input{
+ width:100%;padding:14px;border:1px solid var(--line);
+ border-radius:9px;background:#0b0e11;color:white;outline:none
+}
+input:focus{border-color:var(--yellow)}
+.wrap{max-width:1200px;margin:auto;padding:16px 15px 45px}
+.top{
+ display:flex;justify-content:space-between;align-items:center;
+ padding:12px 0 19px;border-bottom:1px solid var(--line)
+}
+.brand{font-size:27px;font-weight:900;letter-spacing:.5px}
+.brand span{color:var(--yellow)}
+.tag{
+ font-size:10px;color:var(--yellow);border:1px solid #79600c;
+ padding:5px 9px;border-radius:5px;margin-right:7px
+}
 .muted{color:var(--muted)}
-.small{font-size:12px}
-.card{background:linear-gradient(145deg,#122239,#0d192a);border:1px solid var(--line);border-radius:17px;padding:17px;margin-bottom:14px;box-shadow:0 12px 28px #0002}
-h2{font-size:18px;margin:0 0 14px}
-h3{font-size:15px;margin:0 0 10px}
-.auth{max-width:470px;margin:8vh auto}
-.field{margin:12px 0}
-.field label{display:block;font-size:13px;color:var(--muted);margin-bottom:7px}
-.row{display:flex;gap:10px;align-items:center}
-.row>*{flex:1}
+.small{font-size:11px}
+.card{
+ background:var(--panel);border:1px solid var(--line);
+ border-radius:15px;padding:19px;margin:15px 0
+}
+h2{font-size:18px;margin:0 0 15px}
+h3{font-size:15px;margin:0 0 12px}
 .hidden{display:none!important}
-.notice{padding:11px 13px;border-radius:11px;background:#182b42;color:#cbdcf1;font-size:12px;line-height:1.9;margin:12px 0}
-.notice.warn{background:#392c18;color:#ffe2a5}
-.notice.err{background:#3a1d29;color:#ffc6ce}
-.notice.ok{background:#12372d;color:#aaf2d2}
+.notice{
+ padding:12px 14px;border-radius:9px;background:#242a33;
+ color:#d5d9df;font-size:12px;line-height:2;margin:12px 0
+}
+.notice.warn{background:#332b16;color:#f8d77c}
+.notice.err{background:#3b1c24;color:#ffb8c1}
+.notice.ok{background:#123528;color:#a6f0cc}
+.auth{max-width:460px;margin:8vh auto}
+.field{margin:13px 0}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:8px}
+.row{display:flex;gap:12px;align-items:center}
+.row>*{min-width:0}
 .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-.stat{background:#0a1727;border:1px solid var(--line);border-radius:13px;padding:14px}
-.stat .value{font-size:21px;font-weight:800;margin-top:9px;direction:ltr;text-align:right;overflow-wrap:anywhere}
-.tabs{display:flex;gap:8px;overflow:auto;margin:14px 0}
-.tabs button{white-space:nowrap;background:#14243a;color:var(--muted);padding:10px 14px}
-.tabs button.active{background:var(--blue);color:#061426}
-.market-list{display:grid;gap:8px}
-.coin{display:grid;grid-template-columns:1.1fr 1fr 1.2fr .8fr;gap:8px;align-items:center;padding:12px;background:#0a1727;border:1px solid #1d3048;border-radius:12px;font-size:13px}
-.coin .price{direction:ltr;text-align:left;font-weight:700}
-.coin .toman{direction:rtl;text-align:right;color:var(--green);font-weight:700}
+.stat{
+ background:#101318;border:1px solid #30343d;
+ border-radius:12px;padding:15px;min-width:0
+}
+.stat .value{
+ font-size:21px;font-weight:900;margin-top:10px;
+ direction:ltr;text-align:right;overflow-wrap:anywhere
+}
+.tabs{
+ display:flex;gap:7px;overflow:auto;margin:17px 0;
+ padding:5px 0;scrollbar-width:none
+}
+.tabs button{
+ white-space:nowrap;background:#20232b;color:#b8bec8;
+ padding:12px 17px;border:1px solid #30343d
+}
+.tabs button.active{
+ background:var(--yellow);color:#111;border-color:var(--yellow)
+}
+.market-list{display:grid;gap:9px}
+.coin{
+ display:grid;grid-template-columns:1.2fr 1fr 1.2fr .8fr;
+ gap:9px;align-items:center;padding:15px;
+ background:#101318;border:1px solid #2b3039;
+ border-radius:11px;font-size:13px
+}
+.coin .price{direction:ltr;text-align:left;font-weight:800}
+.coin .toman{direction:rtl;text-align:right;color:var(--green);font-weight:800}
 .ltr{direction:ltr;text-align:left}
-.trade-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.trade-box{background:#0a1727;border:1px solid var(--line);padding:14px;border-radius:13px}
-.buy{background:var(--green);color:#062117}
-.sell{background:var(--red);color:#fff}
-.secondary{background:#243951;color:#eaf2ff}
+.trade-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.trade-box{
+ background:#101318;border:1px solid var(--line);
+ padding:17px;border-radius:12px
+}
+.buy{background:var(--green);color:#061a12}
+.sell{background:var(--red);color:white}
+.secondary{background:#30343d;color:#f5f5f5}
 .danger{background:#512430;color:#ffd8df}
 .table-wrap{overflow:auto}
 table{width:100%;border-collapse:collapse;min-width:520px;font-size:12px}
-th,td{padding:11px 9px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th,td{padding:13px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
 th{color:var(--muted);font-weight:500}
-.footer{text-align:center;color:#7488a3;font-size:11px;margin:24px 0 0;line-height:2}
+.footer{text-align:center;color:#68717d;font-size:11px;margin:25px 0;line-height:2}
 .auth-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
 .auth-actions button{width:100%}
-.fx-box{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:#0a1727;border:1px solid #28445d;border-radius:12px;padding:12px;margin:10px 0 14px}
-.fx-price{font-size:17px;font-weight:800;color:var(--green)}
-.market-head{font-size:11px;color:var(--muted);padding:0 5px}
+.fx-box{
+ display:flex;justify-content:space-between;align-items:center;
+ gap:10px;flex-wrap:wrap;background:#101318;
+ border:1px solid #3d351d;border-radius:11px;padding:15px;margin:12px 0
+}
+.fx-price{font-size:19px;font-weight:900;color:var(--yellow)}
+.market-head{font-size:11px;color:var(--muted);padding:8px}
+.hero{
+ background:linear-gradient(115deg,#29230d,#181a20 60%,#20232b);
+ border:1px solid #5d4b15;border-radius:17px;padding:22px;margin-top:17px
+}
+.hero-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.hero-label{color:#c3b47d;font-size:12px}
+.hero-title{font-size:25px;font-weight:900;margin:10px 0}
+.hero-sub{font-size:12px;color:#aeb3bd;line-height:2}
+.hero-mark{font-size:42px;color:var(--yellow);font-weight:900}
+.section-title{
+ display:flex;align-items:center;justify-content:space-between;
+ gap:10px;margin-bottom:14px
+}
+.section-title h2{margin:0}
+.live{
+ color:var(--green);font-size:11px;display:flex;align-items:center;gap:6px
+}
+.live:before{
+ content:"";width:7px;height:7px;border-radius:50%;background:var(--green)
+}
+.quick{
+ display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px
+}
+.quick button{width:100%;padding:13px 5px}
+.quick .secondary{border:1px solid var(--line)}
+.market-note{font-size:11px;color:var(--muted);line-height:2;margin-top:13px}
 @media(max-width:700px){
-.grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-.trade-grid{grid-template-columns:1fr}
-.top{align-items:flex-start}
-.brand{font-size:22px}
-.stat .value{font-size:18px}
-.coin{grid-template-columns:1fr 1fr;gap:10px}
-.coin>div{min-width:0}
+ .wrap{padding:12px 11px 35px}
+ .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .trade-grid{grid-template-columns:1fr}
+ .top{align-items:center}
+ .brand{font-size:23px}
+ .stat .value{font-size:18px}
+ .coin{grid-template-columns:1fr 1fr;gap:11px}
+ .hero{padding:18px}
+ .hero-title{font-size:21px}
+ .quick{gap:7px}
+ .tabs button{padding:11px 14px}
 }
 </style>
 </head>
@@ -78,184 +166,178 @@ th{color:var(--muted);font-weight:500}
 <div class="wrap">
 
 <header class="top">
-<div>
-<div class="brand">Digi<span>Arz</span> <span class="tag">DEMO</span></div>
-<div class="muted small">صرافی آزمایشی با قیمت بازار</div>
-</div>
-<button id="logoutBtn" class="secondary hidden">خروج</button>
+ <div>
+  <div class="brand">Digi<span>Arz</span><span class="tag">DEMO</span></div>
+  <div class="muted small">تجربه حرفه‌ای معاملات رمزارز</div>
+ </div>
+ <button id="logoutBtn" class="secondary hidden">خروج</button>
 </header>
 
 <section id="authView" class="card auth">
-<h2>ورود یا ثبت‌نام در DigiArz</h2>
-
-<div class="notice">
-برای ساخت حساب، ایمیل معتبر و رمز عبور وارد کنید.
-پس از ثبت‌نام، لینک تأیید به ایمیل شما ارسال می‌شود.
-</div>
-
-<div class="field">
-<label for="fullName">نام و نام خانوادگی (برای ثبت‌نام)</label>
-<input id="fullName" type="text" placeholder="نام شما">
-</div>
-
-<div class="field">
-<label for="email">آدرس ایمیل</label>
-<input id="email" type="email" autocomplete="email" placeholder="example@gmail.com" dir="ltr">
-</div>
-
-<div class="field">
-<label for="password">رمز عبور</label>
-<input id="password" type="password" autocomplete="current-password" placeholder="حداقل ۶ کاراکتر" dir="ltr">
-</div>
-
-<div class="auth-actions">
-<button id="signupBtn">ثبت‌نام</button>
-<button id="loginBtn" class="secondary">ورود</button>
-</div>
-
-<button id="forgotBtn" class="secondary" style="width:100%;margin-top:9px">
-فراموشی رمز عبور
-</button>
-
-<div id="authMsg" class="notice hidden" role="status"></div>
+ <div class="hero" style="margin:0 0 18px">
+  <div class="hero-top">
+   <div>
+    <div class="hero-label">به دنیای معاملات خوش آمدید</div>
+    <div class="hero-title">DigiArz</div>
+    <div class="hero-sub">بازار واقعی، معاملات کاملاً آزمایشی</div>
+   </div>
+   <div class="hero-mark">₿</div>
+  </div>
+ </div>
+ <h2>ورود یا ساخت حساب</h2>
+ <div class="notice">برای ساخت حساب، ایمیل معتبر و رمز عبور وارد کنید. پس از ثبت‌نام لینک تأیید به ایمیل شما ارسال می‌شود.</div>
+ <div class="field">
+  <label for="fullName">نام و نام خانوادگی</label>
+  <input id="fullName" type="text" placeholder="نام شما">
+ </div>
+ <div class="field">
+  <label for="email">آدرس ایمیل</label>
+  <input id="email" type="email" autocomplete="email" placeholder="example@gmail.com" dir="ltr">
+ </div>
+ <div class="field">
+  <label for="password">رمز عبور</label>
+  <input id="password" type="password" autocomplete="current-password" placeholder="حداقل ۶ کاراکتر" dir="ltr">
+ </div>
+ <div class="auth-actions">
+  <button id="signupBtn">ثبت‌نام</button>
+  <button id="loginBtn" class="secondary">ورود</button>
+ </div>
+ <button id="forgotBtn" class="secondary" style="width:100%;margin-top:9px">فراموشی رمز عبور</button>
+ <div id="authMsg" class="notice hidden" role="status"></div>
 </section>
 
 <main id="appView" class="hidden">
 
-<div class="card">
-<div class="row" style="justify-content:space-between">
-<div>
-<h2 style="margin-bottom:5px">داشبورد حساب</h2>
-<div class="muted small" id="userEmail">کاربر</div>
-</div>
-<button id="refreshBtn" class="secondary">به‌روزرسانی</button>
-</div>
+ <section class="hero">
+  <div class="hero-top">
+   <div>
+    <div class="hero-label">داشبورد معاملاتی DigiArz</div>
+    <div class="hero-title">بازار رمزارزها</div>
+    <div class="hero-sub" id="userEmail">کاربر</div>
+   </div>
+   <div class="hero-mark">₿</div>
+  </div>
+  <div class="quick">
+   <button id="heroTradeBtn">معامله</button>
+   <button id="heroMarketBtn" class="secondary">بازارها</button>
+   <button id="refreshBtn" class="secondary">به‌روزرسانی</button>
+  </div>
+ </section>
 
-<div class="grid" style="margin-top:14px">
-<div class="stat">
-<div class="muted small">موجودی آزمایشی USDT</div>
-<div class="value" id="usdtBalance">—</div>
-</div>
-<div class="stat">
-<div class="muted small">موجودی آزمایشی ریال</div>
-<div class="value" id="irrBalance">—</div>
-</div>
-<div class="stat">
-<div class="muted small">تعداد دارایی‌ها</div>
-<div class="value" id="assetCount">—</div>
-</div>
-<div class="stat">
-<div class="muted small">وضعیت حساب</div>
-<div class="value" style="font-size:16px;color:var(--green)">آزمایشی</div>
-</div>
-</div>
-</div>
+ <section class="card">
+  <div class="section-title">
+   <h2>نمای کلی حساب</h2>
+   <span class="live">حساب آزمایشی</span>
+  </div>
+  <div class="grid">
+   <div class="stat">
+    <div class="muted small">موجودی USDT</div>
+    <div class="value" id="usdtBalance">—</div>
+   </div>
+   <div class="stat">
+    <div class="muted small">موجودی ریالی</div>
+    <div class="value" id="irrBalance">—</div>
+   </div>
+   <div class="stat">
+    <div class="muted small">تعداد دارایی‌ها</div>
+    <div class="value" id="assetCount">—</div>
+   </div>
+   <div class="stat">
+    <div class="muted small">نوع حساب</div>
+    <div class="value" style="font-size:16px;color:var(--yellow)">DEMO</div>
+   </div>
+  </div>
+ </section>
 
-<nav class="tabs">
-<button class="active" data-tab="markets">بازارها</button>
-<button data-tab="trade">خرید و فروش</button>
-<button data-tab="assets">دارایی‌ها</button>
-<button data-tab="history">تاریخچه</button>
-</nav>
+ <nav class="tabs">
+  <button class="active" data-tab="markets">بازارها</button>
+  <button data-tab="trade">خرید و فروش</button>
+  <button data-tab="assets">دارایی‌ها</button>
+  <button data-tab="history">تاریخچه</button>
+ </nav>
 
-<section id="tab-markets" class="card">
-<div class="row">
-<h2>قیمت بازار</h2>
-<span class="muted small" id="marketUpdated">—</span>
-</div>
+ <section id="tab-markets" class="card">
+  <div class="section-title">
+   <h2>بازار رمزارزها</h2>
+   <span class="live">قیمت‌های دریافتی</span>
+  </div>
+  <div class="fx-box">
+   <div>
+    <div class="muted small">نرخ دلار آزاد</div>
+    <div class="fx-price" id="fxRate">در حال دریافت...</div>
+   </div>
+   <div class="muted small" id="fxUpdated">منبع: NerkhAra</div>
+  </div>
+  <div class="market-head">نماد / قیمت دلاری / قیمت تومانی / منبع</div>
+  <div id="marketList" class="market-list">
+   <div class="muted small">در حال دریافت قیمت‌ها…</div>
+  </div>
+  <div class="market-note">
+   قیمت دلاری از بازار واقعی دریافت می‌شود. قیمت تومانی از ضرب قیمت دلاری در نرخ آزاد دلار محاسبه می‌شود. معاملات فقط آزمایشی هستند.
+  </div>
+ </section>
 
-<div class="fx-box">
-<div>
-<div class="muted small">نرخ دلار آزاد تهران</div>
-<div class="fx-price" id="fxRate">در حال دریافت...</div>
-</div>
-<div class="muted small" id="fxUpdated">منبع: NerkhAra</div>
-</div>
+ <section id="tab-trade" class="card hidden">
+  <div class="section-title">
+   <h2>پنل معامله</h2>
+   <span class="live">معاملات مجازی</span>
+  </div>
+  <div class="notice">قیمت معامله توسط تابع امن سمت سرور بررسی می‌شود. هیچ پول واقعی جابه‌جا نمی‌شود.</div>
+  <div class="trade-grid">
+   <div class="trade-box">
+    <h3 style="color:var(--green)">خرید رمزارز</h3>
+    <div class="field">
+     <label>نماد معاملاتی</label>
+     <input id="buySymbol" value="BTCUSDT" dir="ltr">
+    </div>
+    <div class="field">
+     <label>مقدار دارایی</label>
+     <input id="buyAmount" type="number" min="0" step="any" placeholder="0.001" dir="ltr">
+    </div>
+    <button id="buyBtn" class="buy" style="width:100%">ثبت خرید آزمایشی</button>
+   </div>
+   <div class="trade-box">
+    <h3 style="color:var(--red)">فروش رمزارز</h3>
+    <div class="field">
+     <label>نماد معاملاتی</label>
+     <input id="sellSymbol" value="BTCUSDT" dir="ltr">
+    </div>
+    <div class="field">
+     <label>مقدار دارایی</label>
+     <input id="sellAmount" type="number" min="0" step="any" placeholder="0.001" dir="ltr">
+    </div>
+    <button id="sellBtn" class="sell" style="width:100%">ثبت فروش آزمایشی</button>
+   </div>
+  </div>
+  <div id="tradeMsg" class="notice hidden"></div>
+ </section>
 
-<div class="market-head">
-نماد / قیمت دلاری / قیمت تومانی / منبع
-</div>
+ <section id="tab-assets" class="card hidden">
+  <div class="section-title"><h2>دارایی‌های من</h2></div>
+  <div id="assetList" class="market-list">
+   <div class="muted small">در حال دریافت…</div>
+  </div>
+ </section>
 
-<div id="marketList" class="market-list">
-<div class="muted small">در حال دریافت قیمت‌ها…</div>
-</div>
-
-<div class="notice warn">
-قیمت دلاری از بازار واقعی دریافت می‌شود. قیمت تومانی از ضرب قیمت دلاری در نرخ آزاد دلار محاسبه می‌شود. معاملات این نسخه فقط آزمایشی هستند.
-</div>
-</section>
-
-<section id="tab-trade" class="card hidden">
-<h2>معامله آزمایشی</h2>
-<div class="notice">
-معاملات فقط با موجودی مجازی انجام می‌شوند.
-قیمت نهایی باید توسط تابع امن سمت سرور بررسی شود.
-</div>
-
-<div class="trade-grid">
-<div class="trade-box">
-<h3>خرید</h3>
-<div class="field">
-<label>نماد (مثلاً BTCUSDT)</label>
-<input id="buySymbol" value="BTCUSDT" dir="ltr">
-</div>
-<div class="field">
-<label>مقدار دارایی</label>
-<input id="buyAmount" type="number" min="0" step="any" placeholder="0.001" dir="ltr">
-</div>
-<button id="buyBtn" class="buy" style="width:100%">ثبت خرید آزمایشی</button>
-</div>
-
-<div class="trade-box">
-<h3>فروش</h3>
-<div class="field">
-<label>نماد (مثلاً BTCUSDT)</label>
-<input id="sellSymbol" value="BTCUSDT" dir="ltr">
-</div>
-<div class="field">
-<label>مقدار دارایی</label>
-<input id="sellAmount" type="number" min="0" step="any" placeholder="0.001" dir="ltr">
-</div>
-<button id="sellBtn" class="sell" style="width:100%">ثبت فروش آزمایشی</button>
-</div>
-</div>
-
-<div id="tradeMsg" class="notice hidden"></div>
-</section>
-
-<section id="tab-assets" class="card hidden">
-<h2>دارایی‌های رمزارزی</h2>
-<div id="assetList" class="market-list">
-<div class="muted small">در حال دریافت…</div>
-</div>
-</section>
-
-<section id="tab-history" class="card hidden">
-<h2>آخرین معاملات</h2>
-<div class="table-wrap">
-<table>
-<thead>
-<tr>
-<th>زمان</th>
-<th>نماد</th>
-<th>نوع</th>
-<th>مقدار</th>
-<th>قیمت</th>
-</tr>
-</thead>
-<tbody id="historyBody">
-<tr><td colspan="5">در حال دریافت…</td></tr>
-</tbody>
-</table>
-</div>
-</section>
+ <section id="tab-history" class="card hidden">
+  <div class="section-title"><h2>تاریخچه معاملات</h2></div>
+  <div class="table-wrap">
+   <table>
+    <thead>
+     <tr><th>زمان</th><th>نماد</th><th>نوع</th><th>مقدار</th><th>قیمت</th></tr>
+    </thead>
+    <tbody id="historyBody">
+     <tr><td colspan="5">در حال دریافت…</td></tr>
+    </tbody>
+   </table>
+  </div>
+ </section>
 
 </main>
 
 <div class="footer">
-DigiArz Demo · پول واقعی و واریز/برداشت واقعی در این نسخه وجود ندارد.
-<br>
-این نسخه برای آزمایش رابط کاربری است.
+ DigiArz Demo · پول واقعی و واریز/برداشت واقعی در این نسخه وجود ندارد.
+ <br>این نسخه برای آزمایش رابط کاربری و معاملات مجازی است.
 </div>
 </div>
 
@@ -267,7 +349,6 @@ const SUPABASE_URL = 'https://gfoaubfilhttnwjykaox.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_4rXQLoakyaY9GrfbLOlKAw_YNp3Riwi';
 
 const $ = id => document.getElementById(id);
-
 const authView = $('authView');
 const appView = $('appView');
 const authMsg = $('authMsg');
@@ -278,576 +359,315 @@ let currentFxRate = null;
 let currentFxIsValid = false;
 
 function showMessage(el,message,type=''){
-el.textContent=message;
-el.className='notice'+(type?' '+type:'');
-el.classList.remove('hidden');
+ el.textContent=message;
+ el.className='notice'+(type?' '+type:'');
+ el.classList.remove('hidden');
 }
-
-function hideMessage(el){
-el.classList.add('hidden');
-}
+function hideMessage(el){el.classList.add('hidden')}
 
 function formatNum(value,max=8){
-const n=Number(value||0);
-return Number.isFinite(n)
-?n.toLocaleString('en-US',{maximumFractionDigits:max})
-:'—';
+ const n=Number(value||0);
+ return Number.isFinite(n)
+ ?n.toLocaleString('en-US',{maximumFractionDigits:max})
+ :'—';
 }
 
 function safeText(value){
-return String(value??'').replace(/[&<>"']/g,c=>({
-'&':'&amp;',
-'<':'&lt;',
-'>':'&gt;',
-'"':'&quot;',
-"'":'&#39;'
-}[c]));
+ return String(value??'').replace(/[&<>"']/g,c=>({
+ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+ }[c]));
 }
 
 function initClient(){
-if(!window.supabase||!window.supabase.createClient){
-throw new Error('کتابخانه اتصال بارگذاری نشد. اینترنت را بررسی کنید.');
-}
-
-supabaseClient=window.supabase.createClient(
-SUPABASE_URL,
-SUPABASE_ANON_KEY,
-{
-auth:{
-persistSession:true,
-autoRefreshToken:true,
-detectSessionInUrl:true
-}
-}
-);
+ if(!window.supabase||!window.supabase.createClient){
+  throw new Error('کتابخانه اتصال بارگذاری نشد. اینترنت را بررسی کنید.');
+ }
+ supabaseClient=window.supabase.createClient(
+  SUPABASE_URL,SUPABASE_ANON_KEY,
+  {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}
+ );
 }
 
 async function signup(){
-const btn=$('signupBtn');
-btn.disabled=true;
-hideMessage(authMsg);
-
-try{
-const name=$('fullName').value.trim();
-const email=$('email').value.trim().toLowerCase();
-const password=$('password').value;
-
-if(!email||!email.includes('@')){
-throw new Error('آدرس ایمیل معتبر وارد کنید.');
-}
-
-if(password.length<6){
-throw new Error('رمز عبور باید حداقل ۶ کاراکتر باشد.');
-}
-
-const {data,error}=await supabaseClient.auth.signUp({
-email:email,
-password:password,
-options:{
-data:{full_name:name},
-emailRedirectTo:window.location.href
-}
-});
-
-if(error)throw error;
-
-if(data.session){
-showMessage(authMsg,'ثبت‌نام موفق بود. در حال ورود به حساب...','ok');
-await showApp(data.session);
-}else{
-showMessage(authMsg,'ثبت‌نام انجام شد. لطفاً ایمیل خود را باز کنید و روی لینک تأیید کلیک کنید. سپس از قسمت ورود وارد حساب شوید.','ok');
-}
-
-}catch(e){
-showMessage(authMsg,'ثبت‌نام انجام نشد: '+(e.message||String(e)),'err');
-}finally{
-btn.disabled=false;
-}
+ const btn=$('signupBtn');btn.disabled=true;hideMessage(authMsg);
+ try{
+  const name=$('fullName').value.trim();
+  const email=$('email').value.trim().toLowerCase();
+  const password=$('password').value;
+  if(!email||!email.includes('@'))throw new Error('آدرس ایمیل معتبر وارد کنید.');
+  if(password.length<6)throw new Error('رمز عبور باید حداقل ۶ کاراکتر باشد.');
+  const {data,error}=await supabaseClient.auth.signUp({
+   email,password,options:{data:{full_name:name},emailRedirectTo:window.location.href}
+  });
+  if(error)throw error;
+  if(data.session){
+   showMessage(authMsg,'ثبت‌نام موفق بود. در حال ورود به حساب...','ok');
+   await showApp(data.session);
+  }else{
+   showMessage(authMsg,'ثبت‌نام انجام شد. لطفاً ایمیل خود را باز کنید و روی لینک تأیید کلیک کنید. سپس وارد حساب شوید.','ok');
+  }
+ }catch(e){
+  showMessage(authMsg,'ثبت‌نام انجام نشد: '+(e.message||String(e)),'err');
+ }finally{btn.disabled=false}
 }
 
 async function login(){
-const btn=$('loginBtn');
-btn.disabled=true;
-hideMessage(authMsg);
-
-try{
-const email=$('email').value.trim().toLowerCase();
-const password=$('password').value;
-
-if(!email||!password){
-throw new Error('ایمیل و رمز عبور را وارد کنید.');
-}
-
-const {data,error}=await supabaseClient.auth.signInWithPassword({
-email:email,
-password:password
-});
-
-if(error)throw error;
-
-if(!data.session){
-throw new Error('ورود انجام نشد. دوباره تلاش کنید.');
-}
-
-await showApp(data.session);
-
-}catch(e){
-showMessage(authMsg,'ورود انجام نشد: '+(e.message||String(e)),'err');
-}finally{
-btn.disabled=false;
-}
+ const btn=$('loginBtn');btn.disabled=true;hideMessage(authMsg);
+ try{
+  const email=$('email').value.trim().toLowerCase();
+  const password=$('password').value;
+  if(!email||!password)throw new Error('ایمیل و رمز عبور را وارد کنید.');
+  const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
+  if(error)throw error;
+  if(!data.session)throw new Error('ورود انجام نشد. دوباره تلاش کنید.');
+  await showApp(data.session);
+ }catch(e){
+  showMessage(authMsg,'ورود انجام نشد: '+(e.message||String(e)),'err');
+ }finally{btn.disabled=false}
 }
 
 async function forgotPassword(){
-hideMessage(authMsg);
-
-try{
-const email=$('email').value.trim().toLowerCase();
-
-if(!email||!email.includes('@')){
-throw new Error('ابتدا ایمیل خود را وارد کنید.');
-}
-
-const {error}=await supabaseClient.auth.resetPasswordForEmail(
-email,
-{redirectTo:window.location.href}
-);
-
-if(error)throw error;
-
-showMessage(authMsg,'لینک بازیابی رمز عبور به ایمیل شما ارسال شد.','ok');
-
-}catch(e){
-showMessage(authMsg,'خطا: '+(e.message||String(e)),'err');
-}
+ hideMessage(authMsg);
+ try{
+  const email=$('email').value.trim().toLowerCase();
+  if(!email||!email.includes('@'))throw new Error('ابتدا ایمیل خود را وارد کنید.');
+  const {error}=await supabaseClient.auth.resetPasswordForEmail(
+   email,{redirectTo:window.location.href}
+  );
+  if(error)throw error;
+  showMessage(authMsg,'لینک بازیابی رمز عبور به ایمیل شما ارسال شد.','ok');
+ }catch(e){
+  showMessage(authMsg,'خطا: '+(e.message||String(e)),'err');
+ }
 }
 
 async function showApp(session){
-authView.classList.add('hidden');
-appView.classList.remove('hidden');
-$('logoutBtn').classList.remove('hidden');
-
-$('userEmail').textContent=session.user.email||'کاربر واردشده';
-
-try{
-await loadDashboard();
-}catch(e){
-console.error(e);
-}
+ authView.classList.add('hidden');
+ appView.classList.remove('hidden');
+ $('logoutBtn').classList.remove('hidden');
+ $('userEmail').textContent=session.user.email||'کاربر واردشده';
+ try{await loadDashboard()}catch(e){console.error(e)}
 }
 
 async function signOut(){
-try{
-const {error}=await supabaseClient.auth.signOut();
-if(error)throw error;
-
-appView.classList.add('hidden');
-$('logoutBtn').classList.add('hidden');
-authView.classList.remove('hidden');
-
-$('password').value='';
-hideMessage(authMsg);
-
-}catch(e){
-showMessage(authMsg,'خروج انجام نشد: '+e.message,'err');
-}
+ try{
+  const {error}=await supabaseClient.auth.signOut();
+  if(error)throw error;
+  appView.classList.add('hidden');
+  $('logoutBtn').classList.add('hidden');
+  authView.classList.remove('hidden');
+  $('password').value='';
+  hideMessage(authMsg);
+ }catch(e){
+  showMessage(authMsg,'خروج انجام نشد: '+e.message,'err');
+ }
 }
 
 async function loadDashboard(){
-await Promise.allSettled([
-loadWallet(),
-loadMarkets(),
-loadAssets(),
-loadHistory()
-]);
+ await Promise.allSettled([loadWallet(),loadMarkets(),loadAssets(),loadHistory()]);
 }
 
 async function loadWallet(){
-const {data:userData,error:userError}=await supabaseClient.auth.getUser();
-
-if(userError||!userData.user){
-throw userError||new Error('کاربر وارد نشده است.');
-}
-
-const {data,error}=await supabaseClient
-.from('wallets')
-.select('balance_usdt,balance_irr')
-.eq('user_id',userData.user.id)
-.maybeSingle();
-
-if(error)throw error;
-
-if(!data){
-$('usdtBalance').textContent='ساخته نشده';
-$('irrBalance').textContent='ساخته نشده';
-return;
-}
-
-$('usdtBalance').textContent=formatNum(data.balance_usdt,2);
-$('irrBalance').textContent=formatNum(data.balance_irr,0);
+ const {data:userData,error:userError}=await supabaseClient.auth.getUser();
+ if(userError||!userData.user)throw userError||new Error('کاربر وارد نشده است.');
+ const {data,error}=await supabaseClient.from('wallets')
+  .select('balance_usdt,balance_irr')
+  .eq('user_id',userData.user.id).maybeSingle();
+ if(error)throw error;
+ if(!data){
+  $('usdtBalance').textContent='ساخته نشده';
+  $('irrBalance').textContent='ساخته نشده';
+  return;
+ }
+ $('usdtBalance').textContent=formatNum(data.balance_usdt,2);
+ $('irrBalance').textContent=formatNum(data.balance_irr,0);
 }
 
 async function loadMarkets(){
-
-// دریافت قیمت دلاری و نرخ دلار تومان به صورت جداگانه
-const [marketResult,fxResult]=await Promise.all([
-supabaseClient
-.from('market_prices')
-.select('symbol,price,source,updated_at')
-.order('symbol')
-.limit(100),
-
-supabaseClient
-.from('market_fx_rates')
-.select('price_toman,source,source_updated_at,is_stale')
-.eq('symbol','USD_IRT')
-.maybeSingle()
-]);
-
-if(marketResult.error)throw marketResult.error;
-
-const fx=fxResult.data;
-currentFxRate=null;
-currentFxIsValid=false;
-
-if(!fxResult.error&&fx){
-const rate=Number(fx.price_toman);
-const updated=fx.source_updated_at
-?new Date(fx.source_updated_at).getTime()
-:0;
-
-const age=Date.now()-updated;
-
-if(
-Number.isFinite(rate)&&
-rate>0&&
-fx.is_stale===false&&
-updated>0&&
-age>=-120000&&
-age<=1200000
-){
-currentFxRate=rate;
-currentFxIsValid=true;
-$('fxRate').textContent=formatNum(rate,0)+' تومان';
-$('fxUpdated').textContent='منبع: '+(fx.source||'NerkhAra')+' · '+new Date(fx.source_updated_at).toLocaleString('fa-IR');
-}else{
-$('fxRate').textContent='نرخ دلار قدیمی است';
-$('fxUpdated').textContent='لطفاً به‌روزرسانی نرخ را بررسی کنید.';
-}
-}else{
-$('fxRate').textContent='نرخ دلار دریافت نشد';
-$('fxUpdated').textContent=fxResult.error
-?'خطا در دریافت نرخ دلار'
-:'نرخ دلار هنوز ثبت نشده است';
-}
-
-const data=marketResult.data;
-const list=$('marketList');
-list.innerHTML='';
-
-if(!data||data.length===0){
-list.innerHTML='<div class="notice warn">هنوز قیمتی در market_prices ثبت نشده است.</div>';
-$('marketUpdated').textContent='بدون داده';
-return;
-}
-
-for(const item of data){
-const usd=Number(item.price);
-const validUsd=Number.isFinite(usd)&&usd>0;
-const toman=validUsd&&currentFxIsValid
-?usd*currentFxRate
-:null;
-
-const div=document.createElement('div');
-div.className='coin';
-
-div.innerHTML=`
-<div>
-<b dir="ltr">${safeText(item.symbol)}</b>
-</div>
-<div>
-<div class="muted small">قیمت دلاری</div>
-<div class="price">${validUsd?formatNum(usd,10)+' $':'—'}</div>
-</div>
-<div>
-<div class="muted small">قیمت تومانی</div>
-<div class="toman">${toman!==null?formatNum(toman,0)+' تومان':'—'}</div>
-</div>
-<div>
-<div class="muted small">منبع</div>
-<div class="muted small">${safeText(item.source||'—')}</div>
-</div>`;
-
-list.appendChild(div);
-}
-
-const latest=data.map(x=>x.updated_at).filter(Boolean).sort().at(-1);
-
-$('marketUpdated').textContent=
-latest?new Date(latest).toLocaleString('fa-IR'):'—';
+ const [marketResult,fxResult]=await Promise.all([
+  supabaseClient.from('market_prices')
+   .select('symbol,price,source,updated_at').order('symbol').limit(100),
+  supabaseClient.from('market_fx_rates')
+   .select('price_toman,source,source_updated_at,is_stale')
+   .eq('symbol','USD_IRT').maybeSingle()
+ ]);
+ if(marketResult.error)throw marketResult.error;
+ const fx=fxResult.data;
+ currentFxRate=null;currentFxIsValid=false;
+ if(!fxResult.error&&fx){
+  const rate=Number(fx.price_toman);
+  const updated=fx.source_updated_at?new Date(fx.source_updated_at).getTime():0;
+  const age=Date.now()-updated;
+  if(Number.isFinite(rate)&&rate>0&&fx.is_stale===false&&updated>0&&age>=-120000&&age<=1200000){
+   currentFxRate=rate;currentFxIsValid=true;
+   $('fxRate').textContent=formatNum(rate,0)+' تومان';
+   $('fxUpdated').textContent='منبع: '+(fx.source||'NerkhAra')+' · '+new Date(fx.source_updated_at).toLocaleString('fa-IR');
+  }else{
+   $('fxRate').textContent='نرخ دلار قدیمی است';
+   $('fxUpdated').textContent='لطفاً به‌روزرسانی نرخ را بررسی کنید.';
+  }
+ }else{
+  $('fxRate').textContent='نرخ دلار دریافت نشد';
+  $('fxUpdated').textContent=fxResult.error?'خطا در دریافت نرخ دلار':'نرخ دلار هنوز ثبت نشده است';
+ }
+ const data=marketResult.data;
+ const list=$('marketList');list.innerHTML='';
+ if(!data||data.length===0){
+  list.innerHTML='<div class="notice warn">هنوز قیمتی در market_prices ثبت نشده است.</div>';
+  $('marketUpdated').textContent='بدون داده';
+  return;
+ }
+ for(const item of data){
+  const usd=Number(item.price);
+  const validUsd=Number.isFinite(usd)&&usd>0;
+  const toman=validUsd&&currentFxIsValid?usd*currentFxRate:null;
+  const div=document.createElement('div');div.className='coin';
+  div.innerHTML=`
+   <div><b dir="ltr">${safeText(item.symbol)}</b></div>
+   <div><div class="muted small">قیمت دلاری</div><div class="price">${validUsd?formatNum(usd,10)+' $':'—'}</div></div>
+   <div><div class="muted small">قیمت تومانی</div><div class="toman">${toman!==null?formatNum(toman,0)+' تومان':'—'}</div></div>
+   <div><div class="muted small">منبع</div><div class="muted small">${safeText(item.source||'—')}</div></div>`;
+  list.appendChild(div);
+ }
+ const latest=data.map(x=>x.updated_at).filter(Boolean).sort().at(-1);
+ $('marketUpdated').textContent=latest?new Date(latest).toLocaleString('fa-IR'):'—';
 }
 
 async function loadAssets(){
-const {data,error}=await supabaseClient
-.from('asset_balances')
-.select('asset,balance')
-.order('asset')
-.limit(100);
-
-if(error)throw error;
-
-$('assetCount').textContent=String((data||[]).length);
-
-const list=$('assetList');
-list.innerHTML='';
-
-if(!data||data.length===0){
-list.innerHTML='<div class="muted small">هنوز دارایی رمزارزی ثبت نشده است.</div>';
-return;
-}
-
-for(const item of data){
-const div=document.createElement('div');
-div.className='coin';
-
-div.innerHTML=
-`<b dir="ltr">${safeText(item.asset)}</b>
-<div><div class="muted small">موجودی</div>
-<span class="price">${formatNum(item.balance,10)}</span></div>`;
-
-list.appendChild(div);
-}
+ const {data,error}=await supabaseClient.from('asset_balances')
+  .select('asset,balance').order('asset').limit(100);
+ if(error)throw error;
+ $('assetCount').textContent=String((data||[]).length);
+ const list=$('assetList');list.innerHTML='';
+ if(!data||data.length===0){
+  list.innerHTML='<div class="muted small">هنوز دارایی رمزارزی ثبت نشده است.</div>';
+  return;
+ }
+ for(const item of data){
+  const div=document.createElement('div');div.className='coin';
+  div.innerHTML=`<b dir="ltr">${safeText(item.asset)}</b>
+   <div><div class="muted small">موجودی</div><span class="price">${formatNum(item.balance,10)}</span></div>`;
+  list.appendChild(div);
+ }
 }
 
 async function loadHistory(){
-const {data,error}=await supabaseClient
-.from('trades')
-.select('symbol,side,amount,price,created_at')
-.order('created_at',{ascending:false})
-.limit(30);
-
-if(error)throw error;
-
-const body=$('historyBody');
-body.innerHTML='';
-
-if(!data||data.length===0){
-body.innerHTML='<tr><td colspan="5" class="muted">هنوز معامله‌ای ثبت نشده است.</td></tr>';
-return;
-}
-
-for(const item of data){
-const tr=document.createElement('tr');
-
-tr.innerHTML=
-`<td>${safeText(new Date(item.created_at).toLocaleString('fa-IR'))}</td>
-<td dir="ltr">${safeText(item.symbol)}</td>
-<td>${item.side==='buy'?'خرید':item.side==='sell'?'فروش':safeText(item.side)}</td>
-<td>${formatNum(item.amount,10)}</td>
-<td>${formatNum(item.price,10)}</td>`;
-
-body.appendChild(tr);
-}
+ const {data,error}=await supabaseClient.from('trades')
+  .select('symbol,side,amount,price,created_at')
+  .order('created_at',{ascending:false}).limit(30);
+ if(error)throw error;
+ const body=$('historyBody');body.innerHTML='';
+ if(!data||data.length===0){
+  body.innerHTML='<tr><td colspan="5" class="muted">هنوز معامله‌ای ثبت نشده است.</td></tr>';
+  return;
+ }
+ for(const item of data){
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td>${safeText(new Date(item.created_at).toLocaleString('fa-IR'))}</td>
+   <td dir="ltr">${safeText(item.symbol)}</td>
+   <td>${item.side==='buy'?'خرید':item.side==='sell'?'فروش':safeText(item.side)}</td>
+   <td>${formatNum(item.amount,10)}</td><td>${formatNum(item.price,10)}</td>`;
+  body.appendChild(tr);
+ }
 }
 
 async function trade(side){
-const buy=side==='buy';
-
-const symbol=$(buy?'buySymbol':'sellSymbol')
-.value.trim().toUpperCase();
-
-const amount=Number($(buy?'buyAmount':'sellAmount').value);
-
-const btn=$(buy?'buyBtn':'sellBtn');
-
-btn.disabled=true;
-hideMessage(tradeMsg);
-
-try{
-if(!/^[A-Z0-9]{2,20}USDT$/.test(symbol)){
-throw new Error('نماد باید مانند BTCUSDT باشد.');
-}
-
-if(!Number.isFinite(amount)||amount<=0){
-throw new Error('مقدار باید عددی بزرگ‌تر از صفر باشد.');
-}
-
-const {data:priceRow,error:priceError}=await supabaseClient
-.from('market_prices')
-.select('price,updated_at')
-.eq('symbol',symbol)
-.maybeSingle();
-
-if(priceError)throw priceError;
-
-if(!priceRow){
-throw new Error('قیمت این نماد در بازار موجود نیست.');
-}
-
-const age=Date.now()-new Date(priceRow.updated_at).getTime();
-
-if(!Number.isFinite(age)||age>120000||age< -60000){
-throw new Error('قیمت بازار قدیمی است؛ ابتدا بازار را به‌روزرسانی کنید.');
-}
-
-const {data,error}=await supabaseClient.rpc(
-'execute_demo_trade',
-{
-p_symbol:symbol,
-p_side:side,
-p_amount:amount,
-p_price:Number(priceRow.price)
-}
-);
-
-if(error)throw error;
-
-if(data&&data.success===false){
-throw new Error(data.message||data.error||'معامله رد شد.');
-}
-
-showMessage(
-tradeMsg,
-'درخواست معامله ارسال شد. پاسخ سرور: '+JSON.stringify(data),
-'ok'
-);
-
-await loadDashboard();
-
-}catch(e){
-showMessage(tradeMsg,'معامله انجام نشد: '+(e.message||String(e)),'err');
-}finally{
-btn.disabled=false;
-}
+ const buy=side==='buy';
+ const symbol=$(buy?'buySymbol':'sellSymbol').value.trim().toUpperCase();
+ const amount=Number($(buy?'buyAmount':'sellAmount').value);
+ const btn=$(buy?'buyBtn':'sellBtn');
+ btn.disabled=true;hideMessage(tradeMsg);
+ try{
+  if(!/^[A-Z0-9]{2,20}USDT$/.test(symbol))throw new Error('نماد باید مانند BTCUSDT باشد.');
+  if(!Number.isFinite(amount)||amount<=0)throw new Error('مقدار باید عددی بزرگ‌تر از صفر باشد.');
+  const {data:priceRow,error:priceError}=await supabaseClient.from('market_prices')
+   .select('price,updated_at').eq('symbol',symbol).maybeSingle();
+  if(priceError)throw priceError;
+  if(!priceRow)throw new Error('قیمت این نماد در بازار موجود نیست.');
+  const age=Date.now()-new Date(priceRow.updated_at).getTime();
+  if(!Number.isFinite(age)||age>120000||age< -60000)throw new Error('قیمت بازار قدیمی است؛ ابتدا بازار را به‌روزرسانی کنید.');
+  const {data,error}=await supabaseClient.rpc('execute_demo_trade',{
+   p_symbol:symbol,p_side:side,p_amount:amount,p_price:Number(priceRow.price)
+  });
+  if(error)throw error;
+  if(data&&data.success===false)throw new Error(data.message||data.error||'معامله رد شد.');
+  showMessage(tradeMsg,'درخواست معامله ارسال شد. پاسخ سرور: '+JSON.stringify(data),'ok');
+  await loadDashboard();
+ }catch(e){
+  showMessage(tradeMsg,'معامله انجام نشد: '+(e.message||String(e)),'err');
+ }finally{btn.disabled=false}
 }
 
 async function refreshAll(){
-const btn=$('refreshBtn');
-btn.disabled=true;
-hideMessage(tradeMsg);
-
-try{
-const {data:sessionData,error:sessionError}=
-await supabaseClient.auth.getSession();
-
-if(sessionError)throw sessionError;
-
-const session=sessionData.session;
-
-if(!session||!session.access_token){
-throw new Error('نشست ورود معتبر نیست. خارج شوید و دوباره با ایمیل وارد شوید.');
+ const btn=$('refreshBtn');btn.disabled=true;hideMessage(tradeMsg);
+ try{
+  const {data:sessionData,error:sessionError}=await supabaseClient.auth.getSession();
+  if(sessionError)throw sessionError;
+  const session=sessionData.session;
+  if(!session||!session.access_token)throw new Error('نشست ورود معتبر نیست. خارج شوید و دوباره وارد شوید.');
+  const {data,error}=await supabaseClient.functions.invoke('refresh-market-prices',{
+   body:{},headers:{Authorization:'Bearer '+session.access_token}
+  });
+  if(error){
+   let details=error.message||'خطای نامشخص';
+   if(error.context){
+    try{const response=await error.context.json();details+=' | '+JSON.stringify(response)}catch(_){}
+   }
+   throw new Error(details);
+  }
+  console.log('Refresh response:',data);
+  await loadDashboard();
+  showMessage(tradeMsg,'درخواست به‌روزرسانی قیمت‌ها با موفقیت ارسال شد.','ok');
+ }catch(e){
+  console.error('Refresh error:',e);
+  showMessage(tradeMsg,'به‌روزرسانی ناموفق: '+(e.message||String(e)),'err');
+ }finally{btn.disabled=false}
 }
 
-const {data,error}=await supabaseClient.functions.invoke(
-'refresh-market-prices',
-{
-body:{},
-headers:{
-Authorization:'Bearer '+session.access_token
-}
-}
-);
-
-if(error){
-let details=error.message||'خطای نامشخص';
-
-if(error.context){
-try{
-const response=await error.context.json();
-details+=' | '+JSON.stringify(response);
-}catch(_){}
-}
-
-throw new Error(details);
-}
-
-console.log('Refresh response:',data);
-
-await loadDashboard();
-
-showMessage(
-tradeMsg,
-'درخواست به‌روزرسانی قیمت‌ها با موفقیت ارسال شد.',
-'ok'
-);
-
-}catch(e){
-console.error('Refresh error:',e);
-
-showMessage(
-tradeMsg,
-'به‌روزرسانی ناموفق: '+(e.message||String(e)),
-'err'
-);
-
-}finally{
-btn.disabled=false;
-}
+function switchTab(name){
+ document.querySelectorAll('.tabs button').forEach(b=>{
+  b.classList.toggle('active',b.dataset.tab===name);
+ });
+ ['markets','trade','assets','history'].forEach(tab=>{
+  $('tab-'+tab).classList.toggle('hidden',tab!==name);
+ });
 }
 
 function bindTabs(){
-document.querySelectorAll('.tabs button').forEach(btn=>{
-btn.addEventListener('click',()=>{
-document.querySelectorAll('.tabs button').forEach(b=>{
-b.classList.toggle('active',b===btn);
-});
-
-['markets','trade','assets','history'].forEach(name=>{
-$('tab-'+name).classList.toggle(
-'hidden',
-name!==btn.dataset.tab
-);
-});
-});
-});
+ document.querySelectorAll('.tabs button').forEach(btn=>{
+  btn.addEventListener('click',()=>switchTab(btn.dataset.tab));
+ });
+ $('heroTradeBtn').addEventListener('click',()=>switchTab('trade'));
+ $('heroMarketBtn').addEventListener('click',()=>switchTab('markets'));
 }
 
 async function start(){
-try{
-initClient();
-
-$('signupBtn').addEventListener('click',signup);
-$('loginBtn').addEventListener('click',login);
-$('forgotBtn').addEventListener('click',forgotPassword);
-$('logoutBtn').addEventListener('click',signOut);
-$('refreshBtn').addEventListener('click',refreshAll);
-
-$('buyBtn').addEventListener('click',()=>trade('buy'));
-$('sellBtn').addEventListener('click',()=>trade('sell'));
-
-bindTabs();
-
-const {data,error}=await supabaseClient.auth.getSession();
-
-if(error)throw error;
-
-if(data.session){
-await showApp(data.session);
+ try{
+  initClient();
+  $('signupBtn').addEventListener('click',signup);
+  $('loginBtn').addEventListener('click',login);
+  $('forgotBtn').addEventListener('click',forgotPassword);
+  $('logoutBtn').addEventListener('click',signOut);
+  $('refreshBtn').addEventListener('click',refreshAll);
+  $('buyBtn').addEventListener('click',()=>trade('buy'));
+  $('sellBtn').addEventListener('click',()=>trade('sell'));
+  bindTabs();
+  const {data,error}=await supabaseClient.auth.getSession();
+  if(error)throw error;
+  if(data.session)await showApp(data.session);
+  supabaseClient.auth.onAuthStateChange((event,session)=>{
+   if(event==='SIGNED_OUT'){
+    appView.classList.add('hidden');
+    $('logoutBtn').classList.add('hidden');
+    authView.classList.remove('hidden');
+   }
+   if(event==='SIGNED_IN'&&session)showApp(session);
+  });
+ }catch(e){
+  showMessage(authMsg,'راه‌اندازی برنامه با خطا روبه‌رو شد: '+(e.message||String(e)),'err');
+ }
 }
-
-supabaseClient.auth.onAuthStateChange((event,session)=>{
-if(event==='SIGNED_OUT'){
-appView.classList.add('hidden');
-$('logoutBtn').classList.add('hidden');
-authView.classList.remove('hidden');
-}
-
-if(event==='SIGNED_IN'&&session){
-showApp(session);
-}
-});
-
-}catch(e){
-showMessage(
-authMsg,
-'راه‌اندازی برنامه با خطا روبه‌رو شد: '+(e.message||String(e)),
-'err'
-);
-}
-}
-
 start();
-
 })();
 </script>
 </body>
