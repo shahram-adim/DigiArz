@@ -1,273 +1,335 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fa" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#08111f">
-<title>DigiArz | صرافی آزمایشی</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-:root {
-  --bg:#08111f;
-  --panel:#101d30;
-  --line:#263951;
-  --text:#edf4ff;
-  --muted:#9eb0c8;
-  --green:#16c784;
-  --red:#ea5964;
-  --blue:#5b9cff;
-}
-* {box-sizing:border-box}
-body {
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:Tahoma,Arial,sans-serif;
-}
-button,input {
-  font:inherit;
-}
-button {
-  border:0;
-  border-radius:12px;
-  padding:13px 16px;
-  background:var(--blue);
-  color:#071322;
-  font-weight:bold;
-}
-input {
-  width:100%;
-  padding:13px;
-  border:1px solid var(--line);
-  border-radius:11px;
-  background:#091626;
-  color:white;
-}
-.wrap {
-  max-width:1100px;
-  margin:auto;
-  padding:18px 14px;
-}
-.card {
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:17px;
-  padding:17px;
-  margin-bottom:14px;
-}
-.brand {
-  font-size:27px;
-  font-weight:900;
-}
-.brand span {color:var(--green)}
-.muted {color:var(--muted)}
-.hidden {display:none!important}
-.field {margin:12px 0}
-.field label {
-  display:block;
-  margin-bottom:7px;
-  color:var(--muted);
-}
-.notice {
-  padding:12px;
-  border-radius:11px;
-  background:#182b42;
-  margin:12px 0;
-  font-size:13px;
-  line-height:1.9;
-}
-.auth {
-  max-width:470px;
-  margin:8vh auto;
-}
-.grid {
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:12px;
-}
-.stat {
-  background:#0a1727;
-  border:1px solid var(--line);
-  border-radius:13px;
-  padding:14px;
-}
-.value {
-  font-size:20px;
-  font-weight:bold;
-  margin-top:9px;
-  direction:ltr;
-}
-.tabs {
-  display:flex;
-  gap:8px;
-  overflow:auto;
-  margin:14px 0;
-}
-.tabs button {
-  white-space:nowrap;
-  background:#243951;
-  color:white;
-}
-.coin {
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:8px;
-  padding:13px;
-  margin:8px 0;
-  background:#0a1727;
-  border-radius:12px;
-}
-.price {
-  direction:ltr;
-  text-align:left;
-}
-.buy {background:var(--green)}
-.sell {background:var(--red);color:white}
-.secondary {background:#243951;color:white}
-.trade-grid {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-}
-.trade-box {
-  background:#0a1727;
-  padding:14px;
-  border-radius:13px;
-}
-table {width:100%;border-collapse:collapse}
-td,th {
-  padding:10px;
-  border-bottom:1px solid var(--line);
-  text-align:right;
-}
-@media(max-width:600px) {
-  .trade-grid {grid-template-columns:1fr}
-}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#08111f">
+  <title>DigiArz | صرافی آزمایشی</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{color-scheme:dark;--bg:#08111f;--panel:#101d30;--panel2:#14243a;--line:#263951;--text:#edf4ff;--muted:#9eb0c8;--green:#16c784;--red:#ea5964;--blue:#5b9cff;--gold:#f2c66d}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#122642 0,#08111f 55%);color:var(--text);font-family:Tahoma,Arial,sans-serif;min-height:100vh}
+    button,input{font:inherit}button{border:0;border-radius:12px;padding:13px 16px;background:var(--blue);color:#071322;font-weight:700;cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}
+    input{width:100%;padding:13px;border:1px solid var(--line);border-radius:11px;background:#091626;color:var(--text);outline:none}input:focus{border-color:var(--blue)}
+    .wrap{max-width:1100px;margin:auto;padding:18px 14px 40px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+    .brand{font-size:25px;font-weight:900;letter-spacing:.3px}.brand span{color:var(--green)}.tag{font-size:11px;color:var(--gold);border:1px solid #705d32;padding:5px 8px;border-radius:30px;margin-right:8px}
+    .muted{color:var(--muted)}.small{font-size:12px}.card{background:linear-gradient(145deg,#122239,#0d192a);border:1px solid var(--line);border-radius:17px;padding:17px;margin-bottom:14px;box-shadow:0 12px 28px #0002}
+    h2{font-size:18px;margin:0 0 14px}h3{font-size:15px;margin:0 0 10px}.auth{max-width:470px;margin:8vh auto}.field{margin:12px 0}.field label{display:block;font-size:13px;color:var(--muted);margin-bottom:7px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.hidden{display:none!important}
+    .notice{padding:11px 13px;border-radius:11px;background:#182b42;color:#cbdcf1;font-size:12px;line-height:1.9;margin:12px 0}.notice.warn{background:#392c18;color:#ffe2a5}.notice.err{background:#3a1d29;color:#ffc6ce}.notice.ok{background:#12372d;color:#aaf2d2}
+    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.stat{background:#0a1727;border:1px solid var(--line);border-radius:13px;padding:14px}.stat .value{font-size:21px;font-weight:800;margin-top:9px;direction:ltr;text-align:right;overflow-wrap:anywhere}
+    .tabs{display:flex;gap:8px;overflow:auto;margin:14px 0}.tabs button{white-space:nowrap;background:#14243a;color:var(--muted);padding:10px 14px}.tabs button.active{background:var(--blue);color:#061426}
+    .market-list{display:grid;gap:8px}.coin{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:8px;align-items:center;padding:12px;background:#0a1727;border:1px solid #1d3048;border-radius:12px;font-size:13px}.coin .price{direction:ltr;text-align:left;font-weight:700}.ltr{direction:ltr;text-align:left}
+    .trade-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.trade-box{background:#0a1727;border:1px solid var(--line);padding:14px;border-radius:13px}.buy{background:var(--green);color:#062117}.sell{background:var(--red);color:#fff}.secondary{background:#243951;color:#eaf2ff}.danger{background:#512430;color:#ffd8df}
+    .table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:520px;font-size:12px}th,td{padding:11px 9px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}th{color:var(--muted);font-weight:500}
+    .footer{text-align:center;color:#7488a3;font-size:11px;margin:24px 0 0;line-height:2}
+    @media(max-width:700px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.trade-grid{grid-template-columns:1fr}.top{align-items:flex-start}.brand{font-size:22px}.stat .value{font-size:18px}}
+  </style>
 </head>
-
 <body>
 <div class="wrap">
+  <header class="top">
+    <div><div class="brand">Digi<span>Arz</span> <span class="tag">DEMO</span></div><div class="muted small">صرافی آزمایشی با قیمت بازار</div></div>
+    <button id="logoutBtn" class="secondary hidden">خروج</button>
+  </header>
 
-<header style="display:flex;justify-content:space-between;align-items:center">
-  <div>
-    <div class="brand">Digi<span>Arz</span></div>
-    <div class="muted">صرافی آزمایشی ارز دیجیتال</div>
-  </div>
-  <button id="logoutBtn" class="secondary hidden">خروج</button>
-</header>
-
-<section id="authView" class="card auth">
-  <h2>ورود و ثبت‌نام</h2>
-  <div class="notice">
-    ورود امن با شماره موبایل و کد یک‌بارمصرف پیامکی
-  </div>
-
-  <div id="phoneStep">
-    <div class="field">
-      <label>شماره موبایل با کد کشور</label>
-      <input id="phone" type="tel"
-        placeholder="+989121234567" dir="ltr">
+  <section id="authView" class="card auth">
+    <h2>ورود یا ثبت‌نام با شماره موبایل</h2>
+    <div class="notice">برای ورود امن، کد یک‌بارمصرف پیامکی لازم است. شماره را با کد کشور وارد کنید؛ برای ایران مانند <bdi dir="ltr">+989121234567</bdi>.</div>
+    <div id="phoneStep">
+      <div class="field"><label for="phone">شماره موبایل</label><input id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+989121234567" dir="ltr"></div>
+      <button id="sendOtpBtn" style="width:100%">ارسال کد تأیید</button>
     </div>
-    <button id="sendOtpBtn" style="width:100%">
-      ارسال کد تأیید
-    </button>
-  </div>
-
-  <div id="otpStep" class="hidden">
-    <div class="field">
-      <label>کد پیامک‌شده</label>
-      <input id="otp" inputmode="numeric"
-        placeholder="کد تأیید" dir="ltr">
+    <div id="otpStep" class="hidden">
+      <div class="field"><label for="otp">کد پیامک‌شده</label><input id="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="کد تأیید" dir="ltr"></div>
+      <button id="verifyBtn" style="width:100%">تأیید و ورود</button>
+      <button id="backPhoneBtn" class="secondary" style="width:100%;margin-top:9px">اصلاح شماره</button>
     </div>
-    <button id="verifyBtn" style="width:100%">
-      تأیید و ورود
-    </button>
-  </div>
+    <div id="authMsg" class="notice hidden" role="status"></div>
+  </section>
 
-  <div id="authMsg" class="notice hidden"></div>
-</section>
-
-<main id="appView" class="hidden">
-
-<section class="card">
-  <h2>داشبورد DigiArz</h2>
-  <div id="userPhone" class="muted"></div>
-
-  <div class="grid" style="margin-top:15px">
-    <div class="stat">
-      <div class="muted">موجودی USDT</div>
-      <div class="value" id="usdtBalance">—</div>
-    </div>
-    <div class="stat">
-      <div class="muted">موجودی ریال</div>
-      <div class="value" id="irrBalance">—</div>
-    </div>
-  </div>
-</section>
-
-<nav class="tabs">
-  <button data-tab="markets">بازارها</button>
-  <button data-tab="trade">خرید و فروش</button>
-  <button data-tab="assets">دارایی‌ها</button>
-  <button data-tab="history">تاریخچه</button>
-</nav>
-
-<section id="tab-markets" class="card">
-  <h2>قیمت بازار</h2>
-  <div id="marketList">در حال دریافت قیمت‌ها...</div>
-</section>
-
-<section id="tab-trade" class="card hidden">
-  <h2>معاملات آزمایشی</h2>
-
-  <div class="trade-grid">
-    <div class="trade-box">
-      <h3>خرید</h3>
-      <input id="buySymbol" value="BTCUSDT" dir="ltr">
-      <br><br>
-      <input id="buyAmount" type="number"
-        placeholder="مقدار خرید">
-      <br><br>
-      <button id="buyBtn" class="buy" style="width:100%">
-        خرید آزمایشی
-      </button>
+  <main id="appView" class="hidden">
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <div><h2 style="margin-bottom:5px">داشبورد حساب</h2><div class="muted small" id="userPhone">کاربر</div></div>
+        <button id="refreshBtn" class="secondary">به‌روزرسانی</button>
+      </div>
+      <div class="grid" style="margin-top:14px">
+        <div class="stat"><div class="muted small">موجودی آزمایشی USDT</div><div class="value" id="usdtBalance">—</div></div>
+        <div class="stat"><div class="muted small">موجودی آزمایشی ریال</div><div class="value" id="irrBalance">—</div></div>
+        <div class="stat"><div class="muted small">تعداد دارایی‌ها</div><div class="value" id="assetCount">—</div></div>
+        <div class="stat"><div class="muted small">وضعیت حساب</div><div class="value" style="font-size:16px;color:var(--green)">آزمایشی</div></div>
+      </div>
     </div>
 
-    <div class="trade-box">
-      <h3>فروش</h3>
-      <input id="sellSymbol" value="BTCUSDT" dir="ltr">
-      <br><br>
-      <input id="sellAmount" type="number"
-        placeholder="مقدار فروش">
-      <br><br>
-      <button id="sellBtn" class="sell" style="width:100%">
-        فروش آزمایشی
-      </button>
-    </div>
-  </div>
-  <div id="tradeMsg" class="notice hidden"></div>
-</section>
+    <nav class="tabs">
+      <button class="active" data-tab="markets">بازارها</button>
+      <button data-tab="trade">خرید و فروش</button>
+      <button data-tab="assets">دارایی‌ها</button>
+      <button data-tab="history">تاریخچه</button>
+    </nav>
 
-<section id="tab-assets" class="card hidden">
-  <h2>دارایی‌های من</h2>
-  <div id="assetList"></div>
-</section>
+    <section id="tab-markets" class="card">
+      <div class="row"><h2>قیمت بازار</h2><span class="muted small" id="marketUpdated">—</span></div>
+      <div id="marketList" class="market-list"><div class="muted small">در حال دریافت قیمت‌ها…</div></div>
+      <div class="notice warn">اگر فهرست خالی است، ابتدا تابع به‌روزرسانی قیمت بازار در Supabase باید اجرا شود.</div>
+    </section>
 
-<section id="tab-history" class="card hidden">
-  <h2>تاریخچه معاملات</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>نماد</th>
-        <th>نوع</th>
-        <th>مقدار</th>
-        <th>قیمت</th>
-      </tr>
-    </thead>
-    <tbody id="historyBody"></tbody>
-  </table>
-</section>
+    <section id="tab-trade" class="card hidden">
+      <h2>معامله آزمایشی</h2>
+      <div class="notice">معاملات فقط با موجودی مجازی انجام می‌شوند. قیمت ارسالی از صفحه، مبنای نهایی نیست؛ تابع امن سمت سرور باید قیمت تازه بازار را بررسی کند.</div>
+      <div class="trade-grid">
+        <div class="trade-box">
+          <h3>خرید</h3>
+          <div class="field"><label>نماد (مثلاً BTCUSDT)</label><input id="buySymbol" value="BTCUSDT" dir="ltr" autocapitalize="characters"></div>
+          <div class="field"><label>مقدار دارایی</label><input id="buyAmount" type="number" min="0" step="any" placeholder="مثلاً 0.001" dir="ltr"></div>
+          <button id="buyBtn" class="buy" style="width:100%">ثبت خرید آزمایشی</button>
+        </div>
+        <div class="trade-box">
+          <h3>فروش</h3>
+          <div class="field"><label>نماد (مثلاً BTCUSDT)</label><input id="sellSymbol" value="BTCUSDT" dir="ltr" autocapitalize="characters"></div>
+          <div class="field"><label>مقدار دارایی</label><input id="sellAmount" type="number" min="0" step="any" placeholder="مثلاً 0.001" dir="ltr"></div>
+          <button id="sellBtn" class="sell" style="width:100%">ثبت فروش آزمایشی</button>
+        </div>
+      </div>
+      <div id="tradeMsg" class="notice hidden"></div>
+    </section>
 
-</main>
+    <section id="tab-assets" class="card hidden">
+      <h2>دارایی‌های رمزارزی</h2><div id="assetList" class="market-list"><div class="muted small">در حال دریافت…</div></div>
+    </section>
+
+    <section id="tab-history" class="card hidden">
+      <h2>آخرین معاملات</h2><div class="table-wrap"><table><thead><tr><th>زمان</th><th>نماد</th><th>نوع</th><th>مقدار</th><th>قیمت</th></tr></thead><tbody id="historyBody"><tr><td colspan="5">در حال دریافت…</td></tr></tbody></table></div>
+    </section>
+  </main>
+  <div class="footer">DigiArz Demo · پول واقعی و واریز/برداشت واقعی در این نسخه وجود ندارد.<br>این نسخه برای آزمایش رابط کاربری است و جایگزین بررسی امنیتی و حقوقی صرافی واقعی نیست.</div>
 </div>
+
+<script>
+(() => {
+  'use strict';
+
+  // Public browser key only. Never put a service_role/secret key in this file.
+  const SUPABASE_URL = 'https://gfoaubfilhttnwjykaox.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_4rXQLoakyaY9GrfbLOlKAw_YNp3Riwi';
+
+  const $ = (id) => document.getElementById(id);
+  const authView = $('authView'), appView = $('appView');
+  const authMsg = $('authMsg'), tradeMsg = $('tradeMsg');
+  let supabaseClient = null;
+  let pendingPhone = '';
+
+  function showMessage(el, message, type='') {
+    el.textContent = message;
+    el.className = 'notice' + (type ? ' ' + type : '');
+    el.classList.remove('hidden');
+  }
+  function hideMessage(el) { el.classList.add('hidden'); }
+  function formatNum(value, max=8) {
+    const n = Number(value || 0);
+    return Number.isFinite(n) ? n.toLocaleString('en-US',{maximumFractionDigits:max}) : '—';
+  }
+  function safeText(value) {
+    return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function initClient() {
+    if (!window.supabase || !window.supabase.createClient) throw new Error('کتابخانه اتصال بارگذاری نشد. اینترنت را بررسی و صفحه را دوباره باز کنید.');
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true }
+    });
+  }
+  function normalizePhone(value) {
+    let p = value.trim().replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+    p = p.replace(/[\s()-]/g,'');
+    if (p.startsWith('00')) p = '+' + p.slice(2);
+    if (p.startsWith('09')) p = '+98' + p.slice(1);
+    if (!/^\+[1-9]\d{7,14}$/.test(p)) throw new Error('شماره را با کد کشور وارد کنید؛ نمونه ایران: +989121234567');
+    return p;
+  }
+
+  async function sendOtp() {
+    const btn = $('sendOtpBtn'); btn.disabled = true; hideMessage(authMsg);
+    try {
+      pendingPhone = normalizePhone($('phone').value);
+      const { error } = await supabaseClient.auth.signInWithOtp({
+        phone: pendingPhone,
+        options: { shouldCreateUser: true }
+      });
+      if (error) throw error;
+      $('phoneStep').classList.add('hidden');
+      $('otpStep').classList.remove('hidden');
+      showMessage(authMsg, 'کد پیامکی درخواست شد. کد دریافتی را وارد کنید.', 'ok');
+      $('otp').focus();
+    } catch (e) {
+      showMessage(authMsg, 'ارسال کد انجام نشد: ' + (e.message || String(e)) + ' — تنظیمات Phone و ارائه‌دهنده SMS در Supabase را بررسی کنید.', 'err');
+    } finally { btn.disabled = false; }
+  }
+
+  async function verifyOtp() {
+    const btn = $('verifyBtn'); btn.disabled = true; hideMessage(authMsg);
+    try {
+      const token = $('otp').value.trim();
+      if (!pendingPhone || !token) throw new Error('شماره و کد پیامک‌شده را وارد کنید.');
+      const { data, error } = await supabaseClient.auth.verifyOtp({
+        phone: pendingPhone, token, type: 'sms'
+      });
+      if (error) throw error;
+      if (!data.session) throw new Error('نشست کاربری ایجاد نشد. دوباره تلاش کنید.');
+      await showApp(data.session);
+    } catch (e) {
+      showMessage(authMsg, 'تأیید انجام نشد: ' + (e.message || String(e)), 'err');
+    } finally { btn.disabled = false; }
+  }
+
+  async function showApp(session) {
+    authView.classList.add('hidden'); appView.classList.remove('hidden'); $('logoutBtn').classList.remove('hidden');
+    $('userPhone').textContent = session.user.phone || 'کاربر واردشده';
+    await loadDashboard();
+  }
+  async function signOut() {
+    const { error } = await supabaseClient.auth.signOut();
+    if (error) showMessage(authMsg, error.message, 'err');
+    appView.classList.add('hidden'); $('logoutBtn').classList.add('hidden');
+    authView.classList.remove('hidden'); $('phoneStep').classList.remove('hidden'); $('otpStep').classList.add('hidden');
+    $('otp').value = ''; pendingPhone = '';
+  }
+
+  async function loadDashboard() {
+    await Promise.allSettled([loadWallet(), loadMarkets(), loadAssets(), loadHistory()]);
+  }
+  async function loadWallet() {
+    const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+    if (userError || !userData.user) throw userError || new Error('کاربر وارد نشده است.');
+    const { data, error } = await supabaseClient.from('wallets')
+      .select('balance_usdt,balance_irr').eq('user_id', userData.user.id).maybeSingle();
+    if (error) throw error;
+    if (!data) {
+      $('usdtBalance').textContent = 'ساخته نشده';
+      $('irrBalance').textContent = 'ساخته نشده';
+      return;
+    }
+    $('usdtBalance').textContent = formatNum(data.balance_usdt,2);
+    $('irrBalance').textContent = formatNum(data.balance_irr,0);
+  }
+  async function loadMarkets() {
+    const { data, error } = await supabaseClient.from('market_prices')
+      .select('symbol,price,source,updated_at').order('symbol').limit(100);
+    if (error) throw error;
+    const list = $('marketList'); list.innerHTML = '';
+    if (!data || data.length === 0) {
+      list.innerHTML = '<div class="notice warn">هنوز قیمتی در market_prices ثبت نشده است.</div>';
+      $('marketUpdated').textContent = 'بدون داده';
+      return;
+    }
+    for (const item of data) {
+      const div = document.createElement('div'); div.className = 'coin';
+      div.innerHTML = `<b dir="ltr">${safeText(item.symbol)}</b><span class="price">${formatNum(item.price,10)}</span><span class="muted small">${safeText(item.source || '—')}</span>`;
+      list.appendChild(div);
+    }
+    const latest = data.map(x=>x.updated_at).filter(Boolean).sort().at(-1);
+    $('marketUpdated').textContent = latest ? new Date(latest).toLocaleString('fa-IR') : '—';
+  }
+  async function loadAssets() {
+    const { data, error } = await supabaseClient.from('asset_balances')
+      .select('asset,balance').order('asset').limit(100);
+    if (error) throw error;
+    $('assetCount').textContent = String((data || []).length);
+    const list = $('assetList'); list.innerHTML = '';
+    if (!data || data.length === 0) {
+      list.innerHTML = '<div class="muted small">هنوز دارایی رمزارزی ثبت نشده است.</div>'; return;
+    }
+    for (const item of data) {
+      const div = document.createElement('div'); div.className = 'coin';
+      div.innerHTML = `<b dir="ltr">${safeText(item.asset)}</b><span class="price">${formatNum(item.balance,10)}</span><span class="muted small">موجودی</span>`;
+      list.appendChild(div);
+    }
+  }
+  async function loadHistory() {
+    const { data, error } = await supabaseClient.from('trades')
+      .select('symbol,side,amount,price,created_at').order('created_at',{ascending:false}).limit(30);
+    if (error) throw error;
+    const body = $('historyBody'); body.innerHTML = '';
+    if (!data || data.length === 0) {
+      body.innerHTML = '<tr><td colspan="5" class="muted">هنوز معامله‌ای ثبت نشده است.</td></tr>'; return;
+    }
+    for (const item of data) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${safeText(new Date(item.created_at).toLocaleString('fa-IR'))}</td><td dir="ltr">${safeText(item.symbol)}</td><td>${item.side === 'buy' ? 'خرید' : item.side === 'sell' ? 'فروش' : safeText(item.side)}</td><td>${formatNum(item.amount,10)}</td><td>${formatNum(item.price,10)}</td>`;
+      body.appendChild(tr);
+    }
+  }
+
+  async function trade(side) {
+    const buy = side === 'buy';
+    const symbol = $(buy ? 'buySymbol' : 'sellSymbol').value.trim().toUpperCase();
+    const amount = Number($(buy ? 'buyAmount' : 'sellAmount').value);
+    const btn = $(buy ? 'buyBtn' : 'sellBtn'); btn.disabled = true; hideMessage(tradeMsg);
+    try {
+      if (!/^[A-Z0-9]{2,20}USDT$/.test(symbol)) throw new Error('نماد باید مانند BTCUSDT و با پسوند USDT باشد.');
+      if (!Number.isFinite(amount) || amount <= 0) throw new Error('مقدار باید عددی بزرگ‌تر از صفر باشد.');
+      const { data: priceRow, error: priceError } = await supabaseClient.from('market_prices')
+        .select('price,updated_at').eq('symbol',symbol).maybeSingle();
+      if (priceError) throw priceError;
+      if (!priceRow) throw new Error('قیمت این نماد در بازار موجود نیست. ابتدا قیمت بازار را به‌روزرسانی کنید.');
+      const age = Date.now() - new Date(priceRow.updated_at).getTime();
+      if (!Number.isFinite(age) || age > 120000 || age < -60000) throw new Error('قیمت بازار قدیمی است؛ ابتدا بازار را به‌روزرسانی کنید.');
+      const { data, error } = await supabaseClient.rpc('execute_demo_trade', {
+        p_symbol: symbol, p_side: side, p_amount: amount, p_price: Number(priceRow.price)
+      });
+      if (error) throw error;
+      if (data && data.success === false) throw new Error(data.message || data.error || 'معامله رد شد.');
+      showMessage(tradeMsg, 'درخواست معامله ارسال شد. پاسخ سرور: ' + JSON.stringify(data), 'ok');
+      await loadDashboard();
+    } catch (e) {
+      showMessage(tradeMsg, 'معامله انجام نشد: ' + (e.message || String(e)), 'err');
+    } finally { btn.disabled = false; }
+  }
+
+  async function refreshAll() {
+    const btn = $('refreshBtn'); btn.disabled = true;
+    try {
+      // Calls the existing Edge Function. It must be deployed and configured in Supabase.
+      const { error } = await supabaseClient.functions.invoke('refresh-market-prices', { body: {} });
+      if (error) throw error;
+      await loadDashboard();
+      showMessage(tradeMsg, 'درخواست به‌روزرسانی قیمت‌ها ارسال شد.', 'ok');
+    } catch (e) {
+      showMessage(tradeMsg, 'به‌روزرسانی خودکار انجام نشد: ' + (e.message || String(e)) + ' — سپس وضعیت Edge Function را در Supabase بررسی کنید.', 'err');
+    } finally { btn.disabled = false; }
+  }
+
+  function bindTabs() {
+    document.querySelectorAll('.tabs button').forEach(btn => btn.addEventListener('click', () => {
+      document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active',b===btn));
+      ['markets','trade','assets','history'].forEach(name=>$('tab-'+name).classList.toggle('hidden',name!==btn.dataset.tab));
+    }));
+  }
+
+  async function start() {
+    try {
+      initClient();
+      $('sendOtpBtn').addEventListener('click',sendOtp);
+      $('verifyBtn').addEventListener('click',verifyOtp);
+      $('backPhoneBtn').addEventListener('click',()=>{$('otpStep').classList.add('hidden');$('phoneStep').classList.remove('hidden');hideMessage(authMsg);});
+      $('logoutBtn').addEventListener('click',signOut);
+      $('refreshBtn').addEventListener('click',refreshAll);
+      $('buyBtn').addEventListener('click',()=>trade('buy'));
+      $('sellBtn').addEventListener('click',()=>trade('sell'));
+      bindTabs();
+      const { data, error } = await supabaseClient.auth.getSession();
+      if (error) throw error;
+      if (data.session) await showApp(data.session);
+      supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_OUT') {
+          appView.classList.add('hidden'); $('logoutBtn').classList.add('hidden'); authView.classList.remove('hidden');
+        }
+      });
+    } catch (e) {
+      showMessage(authMsg, 'راه‌اندازی برنامه با خطا روبه‌رو شد: ' + (e.message || String(e)), 'err');
+    }
+  }
+  start();
+})();
+</script>
+</body>
+</html>
