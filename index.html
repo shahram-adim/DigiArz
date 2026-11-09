@@ -1,4 +1,3 @@
-`html
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
@@ -31,23 +30,2080 @@ input,select{width:100%;padding:13px;border:1px solid var(--line);border-radius:
 .quick{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.quick button{width:100%;padding:13px 5px}.quick .secondary{border:1px solid var(--line)}
 .market-note{font-size:11px;color:var(--muted);line-height:2;margin-top:13px}
 .market-tools{display:grid;grid-template-columns:minmax(160px,1fr) 180px;gap:10px;margin:12px 0}.chart-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}.chart-symbol{font-weight:900;font-size:17px;direction:ltr}.chart-price{color:var(--yellow);font-weight:900;direction:ltr}.timeframes{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.timeframes button{background:#252a33;color:#c8ced8;border:1px solid #363d48;padding:8px 11px;font-size:11px}.timeframes button.active{background:var(--yellow);color:#111;border-color:var(--yellow)}
-#priceChart{height:360px;width:100%;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#101318}.chart-caption{font-size:11px;color:var(--muted);line-height:2;margin-top:9px}.market-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:12px 0}.market-summary .stat{padding:12px}.market-summary .value{font-size:15px}.performance-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:12px 0}.performance-item{background:#101318;border:1px solid #30343d;border-radius:10px;padding:11px;min-width:0}.performance-item small{display:block;color:var(--muted);font-size:10px}.performance-item strong{display:block;margin-top:7px;font-size:14px;direction:ltr;text-align:right;white-space:nowrap}.performance-item .pos{color:var(--green)}.performance-item .neg{color:var(--red)}.coin-icon{width:30px;height:30px;border-radius:50%;background:#252a33;display:inline-flex;align-items:center;justify-content:center;color:var(--yellow);font-weight:900;margin-left:8px;overflow:hidden;flex:0 0 30px}.coin-icon img{width:100%;height:100%;object-fit:contain;image-rendering:auto}.coin-identity{direction:rtl;display:flex;align-items:center;gap:9px;min-width:0;justify-content:flex-start}.coin-identity b{direction:rtl;text-align:right;white-space:normal;line-height:1.6}.coin-identity .coin-en{display:block;color:var(--muted);font-size:10px;font-weight:500;direction:ltr;text-align:right}.coin .price-stack{align-items:flex-end;min-width:0}.coin .price-usd{font-size:12px;color:#d9dde5}.coin .price-toman{font-size:14px;color:var(--yellow);font-weight:900}.coin-actions{display:flex;align-items:center;gap:7px}.coin{touch-action:manipulation}.coin:focus-visible{outline:2px solid var(--yellow);outline-offset:2px}.price-stack{display:flex;flex-direction:column;gap:4px;align-items:flex-start}.price-usd{direction:ltr;text-align:right;font-size:12px;color:#d9dde5;font-weight:700}.price-toman{direction:rtl;text-align:right;font-size:13px;color:var(--yellow);font-weight:900}/* DigiArz market enhancement */
-.coin-icon{width:40px;height:40px;flex:0 0 40px;margin-left:0;border-radius:50%;}
-.coin-icon img,.asset-logo{width:40px;height:40px;object-fit:contain;image-rendering:auto;}
-.asset-logo{flex:0 0 40px;border-radius:50%;}
-.coin-identity{gap:10px;}
-.market-highlights{display:grid;grid-template-columns:1fr;gap:15px;margin:16px 0;}
-.gainers-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;}
-.gainer-card{min-width:0;padding:11px;background:#101318;border:1px solid #2b3039;border-radius:11px;display:flex;align-items:center;gap:8px;cursor:pointer;}
-.gainer-card .gainer-info{min-width:0;flex:1;}
-.gainer-card b,.gainer-card small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.gainer-card small{font-size:10px;color:var(--muted);margin-top:4px;}
-.gainer-card strong{display:block;color:var(--green);font-size:12px;direction:ltr;white-space:nowrap;}
-.volatility-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;}
-.change-pos{color:var(--green)!important}.change-neg{color:var(--red)!important}
-.market-note{line-height:2.1}
-@media(max-width:700px){.gainers-grid{grid-template-columns:repeat(2,minmax(0,1fr));}.gainer-card:last-child{grid-column:1/-1}.volatility-grid{grid-template-columns:repeat(3,minmax(0,1fr));}}
-.market-categories{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:14px 0}.category-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:76px;padding:10px 5px;background:#101318;border:1px solid #30343d;color:#d5d9df;border-radius:12px;font-size:11px;font-weight:700}.category-btn svg{width:20px;height:20px;stroke:var(--yellow)}.category-btn.active{border-color:var(--yellow);background:#29230d;color:#fff}.favorite-btn{background:transparent;color:var(--yellow);padding:4px 7px;border:1px solid #3b3520;border-radius:8px}.favorite-btn svg{width:17px;height:17px;vertical-align:middle}.asset-logo{width:32px;height:32px;border-radius:50%;object-fit:cover;background:#252a33}.asset-row{display:grid;grid-template-columns:minmax(120px,1fr) minmax(120px,1fr) auto;align-items:center;gap:10px;padding:12px;background:#101318;border:1px solid #2b3039;border-radius:11px}.asset-row .price-stack{align-items:flex-start}.asset-symbol{display:flex;align-items:center;gap:8px;font-weight:800}.asset-symbol small{display:block;color:var(--muted);font-size:10px;font-weight:500}.icon-tab{display:inline-flex;align-items:center;gap:7px}.icon-tab svg{width:16px;height:16px}.coin{grid-template-columns:minmax(0,1fr) minmax(125px,auto) auto}.coin .toman{display:block}
+#priceChart{height:360px;width:100%;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#101318}.chart-caption{font-size:11px;color:var(--muted);line-height:2;margin-top:9px}.market-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:12px 0}.market-summary .stat{padding:12px}.market-summary .value{font-size:15px}.performance-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:12px 0}.performance-item{background:#101318;border:1px solid #30343d;border-radius:10px;padding:11px;min-width:0}.performance-item small{display:block;color:var(--muted);font-size:10px}.performance-item strong{display:block;margin-top:7px;font-size:14px;direction:ltr;text-align:right;white-space:nowrap}.performance-item .pos{color:var(--green)}.performance-item .neg{color:var(--red)}.coin-icon{width:30px;height:30px;border-radius:50%;background:#252a33;display:inline-flex;align-items:center;justify-content:center;color:var(--yellow);font-weight:900;margin-left:8px;overflow:hidden;flex:0 0 30px}.coin-icon img{width:100%;height:100%;object-fit:cover}.coin-identity{direction:rtl;display:flex;align-items:center;gap:9px;min-width:0;justify-content:flex-start}.coin-identity b{direction:rtl;text-align:right;white-space:normal;line-height:1.6}.coin-identity .coin-en{display:block;color:var(--muted);font-size:10px;font-weight:500;direction:ltr;text-align:right}.coin .price-stack{align-items:flex-end;min-width:0}.coin .price-usd{font-size:12px;color:#d9dde5}.coin .price-toman{font-size:14px;color:var(--yellow);font-weight:900}.coin-actions{display:flex;align-items:center;gap:7px}.coin{touch-action:manipulation}.coin:focus-visible{outline:2px solid var(--yellow);outline-offset:2px}.price-stack{display:flex;flex-direction:column;gap:4px;align-items:flex-start}.price-usd{direction:ltr;text-align:right;font-size:12px;color:#d9dde5;font-weight:700}.price-toman{direction:rtl;text-align:right;font-size:13px;color:var(--yellow);font-weight:900}.market-categories{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:14px 0}.category-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:76px;padding:10px 5px;background:#101318;border:1px solid #30343d;color:#d5d9df;border-radius:12px;font-size:11px;font-weight:700}.category-btn svg{width:20px;height:20px;stroke:var(--yellow)}.category-btn.active{border-color:var(--yellow);background:#29230d;color:#fff}.favorite-btn{background:transparent;color:var(--yellow);padding:4px 7px;border:1px solid #3b3520;border-radius:8px}.favorite-btn svg{width:17px;height:17px;vertical-align:middle}.asset-logo{width:32px;height:32px;border-radius:50%;object-fit:cover;background:#252a33}.asset-row{display:grid;grid-template-columns:minmax(120px,1fr) minmax(120px,1fr) auto;align-items:center;gap:10px;padding:12px;background:#101318;border:1px solid #2b3039;border-radius:11px}.asset-row .price-stack{align-items:flex-start}.asset-symbol{display:flex;align-items:center;gap:8px;font-weight:800}.asset-symbol small{display:block;color:var(--muted);font-size:10px;font-weight:500}.icon-tab{display:inline-flex;align-items:center;gap:7px}.icon-tab svg{width:16px;height:16px}.coin{grid-template-columns:minmax(0,1fr) minmax(125px,auto) auto}.coin .toman{display:block}
 .asset-detail-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0 16px}.asset-detail-head .asset-logo{width:48px;height:48px}.asset-detail-title{font-size:21px;font-weight:900}.asset-detail-sub{font-size:12px;color:var(--muted);direction:ltr}.detail-price{margin-right:auto;text-align:left;direction:ltr;color:var(--yellow);font-size:19px;font-weight:900}.detail-description{color:#c6cbd4;font-size:13px;line-height:2.1}.chart-types{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.chart-types button{background:#252a33;color:#c8ced8;border:1px solid #363d48;padding:8px 12px;font-size:11px}.chart-types button.active{background:var(--yellow);color:#111;border-color:var(--yellow)}.review-form{display:grid;gap:10px}.review-form textarea{width:100%;min-height:90px;padding:12px;border:1px solid var(--line);border-radius:9px;background:#0b0e11;color:white;font:inherit;resize:vertical}.review-row{padding:13px;background:#101318;border:1px solid var(--line);border-radius:10px;margin:9px 0}.review-meta{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:11px;margin-bottom:8px}.news-item{padding:13px;background:#101318;border:1px solid var(--line);border-radius:10px;margin:9px 0}.news-item a{color:var(--text);text-decoration:none;font-weight:700;line-height:1.9}.news-item a:hover{color:var(--yellow)}.news-meta{display:flex;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:11px;margin-top:7px}.review-stars{color:var(--yellow);letter-spacing:2px}.detail-trade{margin-top:18px}.detail-section{margin-top:20px;padding-top:17px;border-top:1px solid var(--line)}
-@media(max-width:760px){.auth{grid-template-columns:1fr;min-height:auto}.auth-visual{min-height:300px;padding:25px}.auth-form{padding:25px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.trade-grid{grid-template-columns:1fr}.coin{grid-template-columns:minmax(0,1fr) minmax(112px,auto) auto;gap:8px}.hero{padding:18px}.hero-title{font-size:21px}.quick{gap:7px}.tabs button{padding:10px 13px}.market-tools{grid-template-columns:1fr}.market-summary{grid-template-columns:1fr 1fr}.performance-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#priceChart{height:300px}}
+.volatility-panel{margin:14px auto 16px;padding:15px 16px;max-width:820px;text-align:center;background:linear-gradient(135deg,#171a20,#20232b);border:1px solid #3a414c;border-radius:14px}.volatility-title{font-size:13px;font-weight:900;color:#e7d28a;margin-bottom:12px}.volatility-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.volatility-stat{padding:10px 7px;border-radius:10px;background:#101318;border:1px solid #30343d;min-width:0}.volatility-stat small{display:block;color:var(--muted);font-size:10px}.volatility-stat strong{display:block;margin-top:7px;font-size:15px;direction:ltr;overflow-wrap:anywhere}.volatility-stat .pos{color:var(--green)}.volatility-stat .neg{color:var(--red)}.volatility-updated{font-size:10px;color:var(--muted);margin-top:10px}.coin-icon{width:40px!important;height:40px!important;flex-basis:40px!important}.asset-logo{width:40px!important;height:40px!important;flex:0 0 40px}
+@media(max-width:700px){.auth{grid-template-columns:1fr;margin:18px auto}.auth-visual{padding:23px 22px;min-height:260px;border-left:0;border-bottom:1px solid #403719}.auth-headline{font-size:21px;margin:10px 0}.auth-copy{font-size:11px}.auth-benefits{grid-template-columns:1fr 1fr;gap:9px;margin-top:15px}.auth-benefit{font-size:10px}.auth-benefit i{width:25px;height:25px}.auth-form{padding:24px 20px}.market-categories{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.category-btn{min-height:70px;font-size:10px}.coin{grid-template-columns:minmax(0,1fr) minmax(118px,auto) auto;gap:8px;padding:12px}.coin-icon{width:34px;height:34px;flex-basis:34px}.coin-identity b{font-size:12px}.coin .price-toman{font-size:13px}.coin-actions .muted{display:none}.asset-row{grid-template-columns:minmax(100px,1fr) minmax(100px,1fr) auto}.wrap{padding:12px 11px 35px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.trade-grid{grid-template-columns:1fr}.brand{font-size:23px}.stat .value{font-size:18px}.coin{grid-template-columns:minmax(0,1fr) minmax(112px,auto) auto;gap:8px}.hero{padding:18px}.hero-title{font-size:21px}.quick{gap:7px}.tabs button{padding:10px 13px}.market-tools{grid-template-columns:1fr}.market-summary{grid-template-columns:1fr 1fr}.performance-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#priceChart{height:300px}}
 </style>
+<body>
+<div class="wrap">
+
+<header class="top">
+ <div>
+  <div class="brand">Digi<span>Arz</span><span class="tag">DEMO</span></div>
+  <div class="muted small">تجربه حرفه‌ای معاملات رمزارز</div>
+ </div>
+ <button id="logoutBtn" class="secondary hidden">خروج</button>
+</header>
+
+<section id="authView" class="card auth">
+
+ <div class="auth-visual">
+  <div>
+   <div class="auth-brand">Digi<span>Arz</span></div>
+   <div class="auth-kicker">DEMO CRYPTO EXCHANGE</div>
+   <div class="auth-headline">بازار واقعی را تجربه کن؛<br>بدون ریسک پول واقعی</div>
+   <div class="auth-copy">با قیمت‌های بازار و سرمایه مجازی، خریدوفروش رمزارزها را تمرین کن و عملکرد خودت را بسنج.</div>
+  </div>
+
+  <div class="auth-benefits">
+   <div class="auth-benefit"><i data-lucide="chart-candlestick"></i>نمودارهای حرفه‌ای بازار</div>
+   <div class="auth-benefit"><i data-lucide="wallet"></i>کیف پول آزمایشی</div>
+   <div class="auth-benefit"><i data-lucide="shield-check"></i>بدون واریز پول واقعی</div>
+   <div class="auth-benefit"><i data-lucide="newspaper"></i>اخبار و تحلیل رمزارزها</div>
+  </div>
+ </div>
+
+ <div class="auth-form">
+  <div class="auth-kicker">خوش آمدید به DigiArz</div>
+  <h2>ورود به حساب کاربری</h2>
+  <div class="auth-intro">برای ادامه وارد حساب خود شوید؛ اگر حساب ندارید، ثبت‌نام کنید.</div>
+
+  <div class="field">
+   <label for="fullName">نام و نام خانوادگی <span class="muted">(برای ثبت‌نام)</span></label>
+   <input id="fullName" type="text" autocomplete="name" placeholder="نام شما">
+  </div>
+
+  <div class="field">
+   <label for="email">آدرس ایمیل</label>
+   <input id="email" type="email" autocomplete="email" placeholder="name@example.com" dir="ltr">
+  </div>
+
+  <div class="field">
+   <label for="password">رمز عبور</label>
+   <input id="password" type="password" autocomplete="current-password" placeholder="رمز عبور">
+  </div>
+
+  <div class="auth-actions">
+   <button id="loginBtn">ورود</button>
+   <button id="signupBtn" class="secondary">ثبت‌نام</button>
+  </div>
+
+  <div id="authMessage" class="notice hidden"></div>
+
+  <div class="auth-security">
+   <i data-lucide="shield-check"></i>
+   معاملات این برنامه آزمایشی هستند و از پول واقعی استفاده نمی‌کنند.
+  </div>
+ </div>
+</section>
+
+<main id="appView" class="hidden">
+
+ <section class="hero">
+  <div class="hero-top">
+   <div>
+    <div class="hero-label">به صرافی آزمایشی دیجی ارز خوش آمدید</div>
+    <div class="hero-title">معامله حرفه‌ای، بدون ریسک واقعی</div>
+    <div class="hero-sub">قیمت‌های بازار را دنبال کن و با موجودی مجازی خریدوفروش انجام بده.</div>
+   </div>
+   <div class="hero-mark">₿</div>
+  </div>
+ </section>
+
+ <div class="notice warn">
+  <b>حالت آزمایشی:</b>
+  تمام معاملات و موجودی‌ها مجازی هستند. قیمت‌ها برای نمایش از منابع بازار دریافت می‌شوند.
+ </div>
+
+ <section class="grid">
+  <div class="stat">
+   <div class="muted small">ارزش کل دارایی</div>
+   <div class="value" id="totalBalance">$0.00</div>
+  </div>
+  <div class="stat">
+   <div class="muted small">موجودی نقدی</div>
+   <div class="value" id="cashBalance">$0.00</div>
+  </div>
+  <div class="stat">
+   <div class="muted small">سود و زیان</div>
+   <div class="value" id="totalProfit">$0.00</div>
+  </div>
+  <div class="stat">
+   <div class="muted small">تعداد معاملات</div>
+   <div class="value" id="tradeCount">0</div>
+  </div>
+ </section>
+
+ <nav class="tabs" id="mainTabs">
+  <button class="active" data-tab="market">بازار</button>
+  <button data-tab="wallet">کیف پول</button>
+  <button data-tab="trade">معامله</button>
+  <button data-tab="orders">سفارش‌ها</button>
+  <button data-tab="history">تاریخچه</button>
+  <button data-tab="news">اخبار</button>
+ </nav>
+
+ <section id="marketPage" class="page">
+
+  <div class="card">
+   <div class="section-title">
+    <h2>بازار رمزارزها</h2>
+    <span class="live">قیمت زنده</span>
+   </div>
+
+   <div class="fx-box">
+    <div>
+     <div class="muted small">قیمت تقریبی دلار به تومان</div>
+     <div class="fx-price" id="usdToman">در انتظار دریافت قیمت</div>
+    </div>
+    <div class="muted small" id="marketUpdateTime">در حال دریافت اطلاعات بازار...</div>
+   </div>
+
+   <div class="market-categories">
+    <button class="category-btn active" data-category="all">
+     <i data-lucide="globe"></i>
+     همه ارزها
+    </button>
+    <button class="category-btn" data-category="gainers">
+     <i data-lucide="trending-up"></i>
+     بیشترین رشد
+    </button>
+    <button class="category-btn" data-category="losers">
+     <i data-lucide="trending-down"></i>
+     بیشترین افت
+    </button>
+    <button class="category-btn" data-category="favorites">
+     <i data-lucide="star"></i>
+     علاقه‌مندی‌ها
+    </button>
+   </div>
+
+   <div class="volatility-panel">
+    <div class="volatility-title">نمای کلی نوسان بازار ۲۴ ساعته</div>
+    <div class="volatility-grid">
+     <div class="volatility-stat">
+      <small>میانگین تغییرات</small>
+      <strong id="avgChange">۰٫۰۰٪</strong>
+     </div>
+     <div class="volatility-stat">
+      <small>بیشترین افزایش</small>
+      <strong class="pos" id="topGainer">--</strong>
+     </div>
+     <div class="volatility-stat">
+      <small>بیشترین کاهش</small>
+      <strong class="neg" id="topLoser">--</strong>
+     </div>
+    </div>
+    <div class="volatility-updated" id="volatilityUpdated">آخرین به‌روزرسانی: در انتظار دریافت اطلاعات</div>
+   </div>
+
+   <div class="section-title">
+    <h3>پنج ارز برتر بازار</h3>
+    <span class="muted small">بر اساس تغییرات ۲۴ ساعته</span>
+   </div>
+   <div class="performance-grid" id="topFiveGainers"></div>
+
+   <div class="section-title">
+    <h3>پنج ارز با بیشترین افت</h3>
+    <span class="muted small">بر اساس تغییرات ۲۴ ساعته</span>
+   </div>
+   <div class="performance-grid" id="topFiveLosers"></div>
+
+   <div class="market-tools">
+    <input id="coinSearch" placeholder="جستجوی نام یا نماد ارز..." autocomplete="off">
+    <select id="marketSort">
+     <option value="changeDesc">بیشترین افزایش</option>
+     <option value="changeAsc">بیشترین کاهش</option>
+     <option value="priceDesc">بالاترین قیمت</option>
+     <option value="priceAsc">پایین‌ترین قیمت</option>
+     <option value="name">نام ارز</option>
+    </select>
+   </div>
+
+   <div class="section-title">
+    <h3>فهرست ارزها</h3>
+    <span class="muted small" id="coinCount">۰ ارز</span>
+   </div>
+
+   <div class="market-list" id="marketList">
+    <div class="notice">در حال دریافت اطلاعات ارزها...</div>
+   </div>
+
+   <div class="market-note">
+    تغییرات بر اساس درصد تغییر قیمت در ۲۴ ساعت گذشته مرتب می‌شوند. اطلاعات بازار به‌صورت دوره‌ای به‌روزرسانی خواهد شد.
+   </div>
+  </div>
+
+ </section>
+
+ <section id="walletPage" class="page hidden">
+  <div class="card">
+   <div class="section-title">
+    <h2>کیف پول من</h2>
+    <span class="live">موجودی آزمایشی</span>
+   </div>
+   <div class="grid">
+    <div class="stat">
+     <div class="muted small">موجودی کل</div>
+     <div class="value" id="walletTotal">$0.00</div>
+    </div>
+    <div class="stat">
+     <div class="muted small">دارایی نقدی</div>
+     <div class="value" id="walletCash">$0.00</div>
+    </div>
+   </div>
+   <div class="section-title" style="margin-top:20px">
+    <h3>دارایی‌های رمزارزی</h3>
+   </div>
+   <div id="walletAssets" class="market-list">
+    <div class="notice">در حال دریافت دارایی‌ها...</div>
+   </div>
+  </div>
+ </section>
+
+ <section id="tradePage" class="page hidden">
+  <div class="card">
+   <h2>معاملات آزمایشی</h2>
+   <div class="trade-grid">
+    <div class="trade-box">
+     <h3>خرید رمزارز</h3>
+     <div class="field">
+      <label>انتخاب ارز</label>
+      <select id="buySymbol"></select>
+     </div>
+     <div class="field">
+      <label>مبلغ خرید به دلار</label>
+      <input id="buyAmount" type="number" min="0" step="any" placeholder="مثلاً 100">
+     </div>
+     <div id="buyEstimate" class="notice">مقدار دریافتی محاسبه می‌شود.</div>
+     <button class="buy" id="buyBtn">ثبت خرید آزمایشی</button>
+    </div>
+
+    <div class="trade-box">
+     <h3>فروش رمزارز</h3>
+     <div class="field">
+      <label>انتخاب ارز</label>
+      <select id="sellSymbol"></select>
+     </div>
+     <div class="field">
+      <label>مقدار فروش</label>
+      <input id="sellAmount" type="number" min="0" step="any" placeholder="مقدار ارز">
+     </div>
+     <div id="sellEstimate" class="notice">مبلغ دریافتی محاسبه می‌شود.</div>
+     <button class="sell" id="sellBtn">ثبت فروش آزمایشی</button>
+    </div>
+   </div>
+   <div id="tradeMessage" class="notice hidden"></div>
+  </div>
+ </section>
+
+ <section id="ordersPage" class="page hidden">
+  <div class="card">
+   <h2>سفارش‌های من</h2>
+   <div class="table-wrap">
+    <table>
+     <thead><tr><th>ارز</th><th>نوع</th><th>مقدار</th><th>قیمت</th><th>وضعیت</th></tr></thead>
+     <tbody id="ordersTable"></tbody>
+    </table>
+   </div>
+  </div>
+ </section>
+
+ <section id="historyPage" class="page hidden">
+  <div class="card">
+   <h2>تاریخچه معاملات</h2>
+   <div class="table-wrap">
+    <table>
+     <thead><tr><th>زمان</th><th>ارز</th><th>نوع</th><th>مقدار</th><th>ارزش دلاری</th></tr></thead>
+     <tbody id="historyTable"></tbody>
+    </table>
+   </div>
+  </div>
+ </section>
+
+ <section id="newsPage" class="page hidden">
+  <div class="card">
+   <h2>اخبار بازار رمزارز</h2>
+   <div id="newsList">
+    <div class="notice">اخبار بازار در این بخش نمایش داده می‌شوند.</div>
+   </div>
+  </div>
+ </section>
+
+</main>
+
+<div class="footer">DigiArz — صرافی آزمایشی رمزارز<br>تمام موجودی‌ها و معاملات این برنامه مجازی هستند.</div>
+</div><script type="module">
+
+/* =====================================================
+   DigiArz — بخش ۳
+   موتور بازار و اطلاعات لحظه‌ای ارزهای دیجیتال
+   ===================================================== */
+
+/* فهرست ارزهای بازار */
+const DA_COINS = [
+  {id:"bitcoin",symbol:"BTC",name:"بیت‌کوین"},
+  {id:"ethereum",symbol:"ETH",name:"اتریوم"},
+  {id:"binancecoin",symbol:"BNB",name:"بایننس کوین"},
+  {id:"solana",symbol:"SOL",name:"سولانا"},
+  {id:"ripple",symbol:"XRP",name:"ریپل"},
+  {id:"dogecoin",symbol:"DOGE",name:"دوج‌کوین"},
+  {id:"cardano",symbol:"ADA",name:"کاردانو"},
+  {id:"avalanche-2",symbol:"AVAX",name:"آوالانچ"},
+  {id:"tron",symbol:"TRX",name:"ترون"},
+  {id:"polkadot",symbol:"DOT",name:"پولکادات"},
+  {id:"chainlink",symbol:"LINK",name:"چین‌لینک"},
+  {id:"litecoin",symbol:"LTC",name:"لایت‌کوین"},
+  {id:"shiba-inu",symbol:"SHIB",name:"شیبا اینو"},
+  {id:"toncoin",symbol:"TON",name:"تون‌کوین"},
+  {id:"bitcoin-cash",symbol:"BCH",name:"بیت‌کوین کش"},
+  {id:"stellar",symbol:"XLM",name:"استلار"},
+  {id:"uniswap",symbol:"UNI",name:"یونی‌سواپ"},
+  {id:"near",symbol:"NEAR",name:"نیر"},
+  {id:"ethereum-classic",symbol:"ETC",name:"اتریوم کلاسیک"},
+  {id:"internet-computer",symbol:"ICP",name:"اینترنت کامپیوتر"},
+  {id:"cosmos",symbol:"ATOM",name:"کازماس"},
+  {id:"filecoin",symbol:"FIL",name:"فایل‌کوین"},
+  {id:"aptos",symbol:"APT",name:"آپتوس"},
+  {id:"arbitrum",symbol:"ARB",name:"آربیتروم"},
+  {id:"optimism",symbol:"OP",name:"آپتیمیسم"},
+  {id:"hedera-hashgraph",symbol:"HBAR",name:"هدرا"},
+  {id:"the-open-network",symbol:"TON",name:"تون"},
+  {id:"sui",symbol:"SUI",name:"سویی"},
+  {id:"pepe",symbol:"PEPE",name:"پپه"},
+  {id:"render-token",symbol:"RENDER",name:"رندر"}
+];
+
+/* اطلاعات بازار */
+let DA_marketData = [];
+let DA_marketCategory = "all";
+let DA_marketSort = "change_desc";
+let DA_marketSearch = "";
+let DA_favorites = new Set();
+let DA_marketLoading = false;
+let DA_lastMarketUpdate = null;
+
+/* آدرس آیکن ارزها */
+function DA_coinImage(coin){
+  return `https://assets.coingecko.com/coins/images/${coin.image_id || 1}/large/`;
+}
+
+/* فرمت قیمت */
+function DA_formatPrice(value){
+  if(!Number.isFinite(Number(value))) return "—";
+
+  return new Intl.NumberFormat("en-US",{
+    minimumFractionDigits:2,
+    maximumFractionDigits:8
+  }).format(Number(value));
+}
+
+/* فرمت درصد تغییر */
+function DA_formatPercent(value){
+  if(!Number.isFinite(Number(value))) return "—";
+
+  const number = Number(value);
+  const sign = number > 0 ? "+" : "";
+
+  return sign + number.toFixed(2) + "%";
+}
+
+/* کلاس وضعیت رشد و افت */
+function DA_changeClass(value){
+  if(Number(value) > 0) return "positive";
+  if(Number(value) < 0) return "negative";
+  return "neutral";
+}
+
+/* ایجاد آیکن ارز */
+function DA_coinLogo(coin){
+  const knownImages = {
+    BTC:"https://assets.coingecko.com/coins/images/1/large/bitcoin.png",
+    ETH:"https://assets.coingecko.com/coins/images/279/large/ethereum.png",
+    BNB:"https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png",
+    SOL:"https://assets.coingecko.com/coins/images/4128/large/solana.png",
+    XRP:"https://assets.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png",
+    DOGE:"https://assets.coingecko.com/coins/images/5/large/dogecoin.png",
+    ADA:"https://assets.coingecko.com/coins/images/975/large/cardano.png",
+    AVAX:"https://assets.coingecko.com/coins/images/12559/large/Avalanche_Circle_RedWhite_Trans.png",
+    TRX:"https://assets.coingecko.com/coins/images/1094/large/tron-logo.png",
+    DOT:"https://assets.coingecko.com/coins/images/12171/large/polkadot.png",
+    LINK:"https://assets.coingecko.com/coins/images/877/large/chainlink-new-logo.png",
+    LTC:"https://assets.coingecko.com/coins/images/2/large/litecoin.png",
+    SHIB:"https://assets.coingecko.com/coins/images/11939/large/shiba.png",
+    TON:"https://assets.coingecko.com/coins/images/17980/large/ton_symbol.png",
+    BCH:"https://assets.coingecko.com/coins/images/780/large/bitcoin-cash-circle.png",
+    XLM:"https://assets.coingecko.com/coins/images/100/large/Stellar_symbol_black_RGB.png",
+    UNI:"https://assets.coingecko.com/coins/images/12504/large/uni.jpg",
+    NEAR:"https://assets.coingecko.com/coins/images/10365/large/near.jpg",
+    ETC:"https://assets.coingecko.com/coins/images/453/large/ethereum-classic-logo.png",
+    ICP:"https://assets.coingecko.com/coins/images/14495/large/Internet_Computer_logo.png",
+    ATOM:"https://assets.coingecko.com/coins/images/1481/large/cosmos_hub.png",
+    FIL:"https://assets.coingecko.com/coins/images/12817/large/filecoin.png",
+    APT:"https://assets.coingecko.com/coins/images/26455/large/aptos_round.png",
+    ARB:"https://assets.coingecko.com/coins/images/16547/large/arb.jpg",
+    OP:"https://assets.coingecko.com/coins/images/25244/large/Optimism.png",
+    HBAR:"https://assets.coingecko.com/coins/images/3688/large/hbar.png",
+    SUI:"https://assets.coingecko.com/coins/images/26375/large/sui_asset.jpeg",
+    PEPE:"https://assets.coingecko.com/coins/images/29850/large/pepe-token.jpeg",
+    RENDER:"https://assets.coingecko.com/coins/images/11636/large/rndr.png"
+  };
+
+  return knownImages[coin.symbol] || "";
+}
+
+/* دریافت قیمت‌های واقعی بازار */
+async function DA_fetchMarket(){
+  if(DA_marketLoading) return;
+
+  DA_marketLoading = true;
+
+  try{
+    const ids = [...new Set(DA_COINS.map(c=>c.id))].join(",");
+
+    const url =
+      "https://api.coingecko.com/api/v3/coins/markets" +
+      "?vs_currency=usd" +
+      "&ids=" + encodeURIComponent(ids) +
+      "&order=market_cap_desc" +
+      "&per_page=100" +
+      "&page=1" +
+      "&sparkline=false" +
+      "&price_change_percentage=24h";
+
+    const response = await fetch(url,{
+      method:"GET",
+      headers:{"accept":"application/json"}
+    });
+
+    if(!response.ok){
+      throw new Error("Market API error: " + response.status);
+    }
+
+    const data = await response.json();
+
+    DA_marketData = DA_COINS.map(coin=>{
+      const item = data.find(
+        x => x.id === coin.id
+      );
+
+      if(!item) return null;
+
+      return {
+        ...coin,
+        price:Number(item.current_price),
+        change:Number(item.price_change_percentage_24h || 0),
+        marketCap:Number(item.market_cap || 0),
+        volume:Number(item.total_volume || 0),
+        high24:Number(item.high_24h || 0),
+        low24:Number(item.low_24h || 0),
+        image:item.image || DA_coinLogo(coin),
+        lastUpdated:item.last_updated
+      };
+    }).filter(Boolean);
+
+    DA_lastMarketUpdate = new Date();
+
+    DA_renderMarket();
+    DA_renderVolatility();
+    DA_renderTopCoins();
+    DA_updateMarketTimestamp();
+
+  }catch(error){
+    console.error("DigiArz market error:",error);
+
+    const status = document.getElementById("marketStatus");
+    if(status){
+      status.textContent =
+        "دریافت اطلاعات بازار با مشکل مواجه شد؛ در حال تلاش مجدد...";
+    }
+
+  }finally{
+    DA_marketLoading = false;
+  }
+}
+
+/* مرتب‌سازی بازار */
+function DA_getSortedMarket(){
+  let coins = [...DA_marketData];
+
+  if(DA_marketCategory === "gainers"){
+    coins = coins.filter(c=>c.change > 0);
+  }
+
+  if(DA_marketCategory === "losers"){
+    coins = coins.filter(c=>c.change < 0);
+  }
+
+  if(DA_marketCategory === "favorites"){
+    coins = coins.filter(c=>DA_favorites.has(c.symbol));
+  }
+
+  if(DA_marketSearch){
+    const query = DA_marketSearch.toLowerCase();
+
+    coins = coins.filter(c=>
+      c.name.toLowerCase().includes(query) ||
+      c.symbol.toLowerCase().includes(query)
+    );
+  }
+
+  if(DA_marketSort === "change_desc"){
+    coins.sort((a,b)=>b.change-a.change);
+  }else if(DA_marketSort === "change_asc"){
+    coins.sort((a,b)=>a.change-b.change);
+  }else if(DA_marketSort === "price_desc"){
+    coins.sort((a,b)=>b.price-a.price);
+  }else if(DA_marketSort === "price_asc"){
+    coins.sort((a,b)=>a.price-b.price);
+  }else if(DA_marketSort === "volume_desc"){
+    coins.sort((a,b)=>b.volume-a.volume);
+  }else{
+    coins.sort((a,b)=>b.marketCap-a.marketCap);
+  }
+
+  return coins;
+}
+
+/* نمایش فهرست بازار */
+function DA_renderMarket(){
+  const container = document.getElementById("marketList");
+  if(!container) return;
+
+  const coins = DA_getSortedMarket();
+
+  if(!coins.length){
+    container.innerHTML =
+      '<div class="empty-state">ارزی برای نمایش پیدا نشد.</div>';
+    return;
+  }
+
+  container.innerHTML = coins.map(coin=>{
+    const changeClass = DA_changeClass(coin.change);
+    const favorite = DA_favorites.has(coin.symbol);
+
+    return `
+      <div class="market-row" data-symbol="${coin.symbol}">
+
+        <div class="market-coin">
+          <img
+            class="coin-icon"
+            src="${coin.image || DA_coinLogo(coin)}"
+            alt="${coin.symbol}"
+            width="40"
+            height="40"
+            loading="lazy"
+            onerror="this.style.opacity='.25'"
+          >
+
+          <div class="coin-details">
+            <strong>${coin.name}</strong>
+            <small>${coin.symbol}</small>
+          </div>
+        </div>
+
+        <div class="market-price">
+          <strong>$${DA_formatPrice(coin.price)}</strong>
+          <small>قیمت دلاری</small>
+        </div>
+
+        <div class="market-change ${changeClass}">
+          ${DA_formatPercent(coin.change)}
+        </div>
+
+        <button
+          class="favorite-button ${favorite ? "active" : ""}"
+          type="button"
+          data-favorite="${coin.symbol}"
+          aria-label="افزودن به علاقه‌مندی‌ها"
+        >${favorite ? "★" : "☆"}</button>
+
+      </div>
+    `;
+  }).join("");
+
+  container.querySelectorAll("[data-favorite]").forEach(button=>{
+    button.addEventListener("click",()=>{
+      const symbol = button.dataset.favorite;
+
+      if(DA_favorites.has(symbol)){
+        DA_favorites.delete(symbol);
+      }else{
+        DA_favorites.add(symbol);
+      }
+
+      DA_renderMarket();
+    });
+  });
+}
+
+/* محاسبه و نمایش نوسان بازار */
+function DA_renderVolatility(){
+  const container = document.getElementById("volatilityPanel");
+  if(!container || !DA_marketData.length) return;
+
+  const changes = DA_marketData.map(c=>c.change);
+
+  const average =
+    changes.reduce((sum,value)=>sum+value,0) /
+    changes.length;
+
+  const highest = [...DA_marketData].sort(
+    (a,b)=>b.change-a.change
+  )[0];
+
+  const lowest = [...DA_marketData].sort(
+    (a,b)=>a.change-b.change
+  )[0];
+
+  container.innerHTML = `
+    <div class="volatility-stat">
+      <span>میانگین تغییرات ۲۴ ساعته</span>
+      <strong class="${DA_changeClass(average)}">
+        ${DA_formatPercent(average)}
+      </strong>
+    </div>
+
+    <div class="volatility-stat">
+      <span>بیشترین رشد</span>
+      <strong class="positive">
+        ${highest.name}
+        ${DA_formatPercent(highest.change)}
+      </strong>
+    </div>
+
+    <div class="volatility-stat">
+      <span>بیشترین افت</span>
+      <strong class="negative">
+        ${lowest.name}
+        ${DA_formatPercent(lowest.change)}
+      </strong>
+    </div>
+  `;
+}
+
+/* پنج ارز برتر رشد و پنج ارز دارای بیشترین افت */
+function DA_renderTopCoins(){
+  const gainersBox = document.getElementById("topGainers");
+  const losersBox = document.getElementById("topLosers");
+
+  if(!DA_marketData.length) return;
+
+  const sorted = [...DA_marketData].sort(
+    (a,b)=>b.change-a.change
+  );
+
+  const gainers = sorted.filter(c=>c.change>0).slice(0,5);
+  const losers = [...sorted].reverse()
+    .filter(c=>c.change<0).slice(0,5);
+
+  function makeCards(list){
+    if(!list.length){
+      return '<div class="empty-state">اطلاعاتی موجود نیست.</div>';
+    }
+
+    return list.map((coin,index)=>`
+      <div class="top-coin-card">
+        <span class="top-coin-rank">${index+1}</span>
+
+        <img
+          class="coin-icon"
+          src="${coin.image || DA_coinLogo(coin)}"
+          width="40"
+          height="40"
+          alt="${coin.symbol}"
+          loading="lazy"
+        >
+
+        <div class="top-coin-info">
+          <strong>${coin.symbol}</strong>
+          <small>${coin.name}</small>
+        </div>
+
+        <strong class="${DA_changeClass(coin.change)}">
+          ${DA_formatPercent(coin.change)}
+        </strong>
+      </div>
+    `).join("");
+  }
+
+  if(gainersBox) gainersBox.innerHTML=makeCards(gainers);
+  if(losersBox) losersBox.innerHTML=makeCards(losers);
+}
+
+/* زمان آخرین به‌روزرسانی */
+function DA_updateMarketTimestamp(){
+  const element = document.getElementById("marketStatus");
+
+  if(element){
+    element.textContent =
+      "آخرین به‌روزرسانی: " +
+      DA_lastMarketUpdate.toLocaleTimeString("fa-IR");
+  }
+}
+
+/* اتصال دسته‌بندی‌های بازار */
+document.querySelectorAll("[data-market-category]").forEach(button=>{
+  button.addEventListener("click",()=>{
+    DA_marketCategory = button.dataset.marketCategory;
+    DA_renderMarket();
+  });
+});
+
+/* اتصال جستجوی بازار */
+const DA_searchInput = document.getElementById("marketSearch");
+
+if(DA_searchInput){
+  DA_searchInput.addEventListener("input",event=>{
+    DA_marketSearch = event.target.value.trim();
+    DA_renderMarket();
+  });
+}
+
+/* اتصال مرتب‌سازی */
+const DA_sortSelect = document.getElementById("marketSort");
+
+if(DA_sortSelect){
+  DA_sortSelect.addEventListener("change",event=>{
+    DA_marketSort = event.target.value;
+    DA_renderMarket();
+  });
+}
+
+/* دریافت اولیه اطلاعات بازار */
+DA_fetchMarket();
+
+/* به‌روزرسانی خودکار هر ۶۰ ثانیه */
+setInterval(()=>{
+  DA_fetchMarket();
+},60000);
+
+/* =====================================================
+   پایان بخش ۳ — ادامه کد در بخش ۴
+   ===================================================== *//* =====================================================
+   DigiArz — بخش ۴
+   کیف پول و مدیریت نمایش دارایی‌ها
+   ===================================================== */
+
+let DA_walletBalances = {};
+let DA_walletTransactions = [];
+
+/* فرمت مقدار دارایی */
+function DA_formatAmount(value){
+  const number = Number(value || 0);
+
+  return new Intl.NumberFormat("en-US",{
+    minimumFractionDigits:0,
+    maximumFractionDigits:8
+  }).format(number);
+}
+
+/* یافتن اطلاعات ارز */
+function DA_findCoin(symbol){
+  return DA_marketData.find(
+    coin=>coin.symbol.toUpperCase()===String(symbol).toUpperCase()
+  );
+}
+
+/* قیمت ارز */
+function DA_getCoinPrice(symbol){
+  const coin = DA_findCoin(symbol);
+  return coin ? coin.price : 0;
+}
+
+/* محاسبه ارزش دلاری موجودی */
+function DA_getAssetValue(symbol,amount){
+  return DA_getCoinPrice(symbol)*Number(amount || 0);
+}
+
+/* مجموع ارزش کیف پول */
+function DA_getWalletTotal(){
+  return Object.entries(DA_walletBalances).reduce(
+    (total,[symbol,amount])=>{
+      return total+DA_getAssetValue(symbol,amount);
+    },0
+  );
+}
+
+/* نمایش کیف پول */
+function DA_renderWallet(){
+  const container = document.getElementById("walletList");
+  if(!container) return;
+
+  const entries = Object.entries(DA_walletBalances)
+    .filter(([symbol,amount])=>Number(amount)>0)
+    .sort((a,b)=>{
+      return DA_getAssetValue(b[0],b[1])-
+             DA_getAssetValue(a[0],a[1]);
+    });
+
+  const total = DA_getWalletTotal();
+
+  const totalElement = document.getElementById("walletTotal");
+
+  if(totalElement){
+    totalElement.textContent="$"+DA_formatPrice(total);
+  }
+
+  if(!entries.length){
+    container.innerHTML=`
+      <div class="empty-state">
+        هنوز دارایی آزمایشی در کیف پول شما وجود ندارد.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML=entries.map(([symbol,amount])=>{
+    const coin=DA_findCoin(symbol);
+
+    const name=coin ? coin.name : symbol;
+    const price=DA_getCoinPrice(symbol);
+    const value=Number(amount)*price;
+    const image=coin ? (coin.image || DA_coinLogo(coin)) : "";
+
+    return `
+      <div class="wallet-asset-row">
+
+        <div class="wallet-coin">
+          <img
+            class="asset-logo"
+            src="${image}"
+            alt="${symbol}"
+            width="40"
+            height="40"
+            loading="lazy"
+          >
+
+          <div>
+            <strong>${name}</strong>
+            <small>${symbol}</small>
+          </div>
+        </div>
+
+        <div class="wallet-amount">
+          <strong>${DA_formatAmount(amount)} ${symbol}</strong>
+          <small>$${DA_formatPrice(value)}</small>
+        </div>
+
+      </div>
+    `;
+  }).join("");
+}
+
+/* افزودن موجودی به نمایش کیف پول */
+function DA_setWalletBalance(symbol,amount){
+  const key=String(symbol).toUpperCase();
+  const value=Number(amount);
+
+  if(!Number.isFinite(value) || value<0){
+    throw new Error("مقدار موجودی نامعتبر است.");
+  }
+
+  DA_walletBalances[key]=value;
+  DA_renderWallet();
+}
+
+/* ثبت تراکنش در تاریخچه محلی رابط */
+function DA_addWalletTransaction(data){
+  DA_walletTransactions.unshift({
+    id:"DA-"+Date.now()+"-"+Math.random().toString(36).slice(2,8),
+    symbol:data.symbol,
+    type:data.type,
+    amount:Number(data.amount),
+    time:new Date().toISOString(),
+    description:data.description || ""
+  });
+
+  DA_renderWalletTransactions();
+}
+
+/* نمایش تاریخچه تراکنش‌های کیف پول */
+function DA_renderWalletTransactions(){
+  const container=document.getElementById("walletTransactions");
+  if(!container) return;
+
+  if(!DA_walletTransactions.length){
+    container.innerHTML=
+      '<div class="empty-state">تراکنشی ثبت نشده است.</div>';
+    return;
+  }
+
+  container.innerHTML=DA_walletTransactions.map(item=>`
+    <div class="wallet-transaction-row">
+      <div>
+        <strong>${item.type==="buy" ? "خرید آزمایشی" : "فروش آزمایشی"}</strong>
+        <small>${item.symbol}</small>
+      </div>
+
+      <strong class="${item.type==="buy" ? "positive" : "negative"}">
+        ${item.type==="buy" ? "+" : "-"}${DA_formatAmount(item.amount)}
+      </strong>
+
+      <small>
+        ${new Date(item.time).toLocaleString("fa-IR")}
+      </small>
+    </div>
+  `).join("");
+}
+
+/* با تغییر قیمت‌ها، ارزش دارایی‌ها نیز به‌روز می‌شود */
+const DA_previousRenderMarket=DA_renderMarket;
+
+DA_renderMarket=function(){
+  DA_previousRenderMarket();
+  DA_renderWallet();
+};
+
+/* به‌روزرسانی کیف پول پس از دریافت قیمت‌ها */
+const DA_previousFetchMarket=DA_fetchMarket;
+
+DA_fetchMarket=async function(){
+  await DA_previousFetchMarket();
+  DA_renderWallet();
+};
+
+/* =====================================================
+   پایان بخش ۴
+   ادامه در بخش ۵
+   ===================================================== *//* =====================================================
+   DigiArz — بخش ۵
+   موتور خرید و فروش آزمایشی
+   ===================================================== */
+
+let DA_selectedTradeSymbol="BTC";
+let DA_selectedTradeSide="buy";
+let DA_tradeFeeRate=0.001;
+
+/* ساخت رابط معامله */
+function DA_buildTradeInterface(){
+
+  const container=document.getElementById("tradePage");
+  if(!container) return;
+
+  container.innerHTML=`
+    <section class="trade-panel">
+
+      <h2>معامله آزمایشی</h2>
+
+      <p class="trade-warning">
+        معاملات این بخش آزمایشی هستند و با پول مجازی انجام می‌شوند.
+      </p>
+
+      <div class="trade-side-buttons">
+        <button type="button" id="tradeBuyButton" class="active">
+          خرید
+        </button>
+
+        <button type="button" id="tradeSellButton">
+          فروش
+        </button>
+      </div>
+
+      <label for="tradePair">انتخاب ارز</label>
+      <select id="tradePair"></select>
+
+      <div class="trade-price-box">
+        <span>قیمت لحظه‌ای</span>
+        <strong id="tradeCurrentPrice">—</strong>
+      </div>
+
+      <label for="tradeAmount">مقدار ارز</label>
+      <input
+        id="tradeAmount"
+        type="number"
+        min="0"
+        step="any"
+        placeholder="مثلاً 0.01"
+      >
+
+      <div class="trade-calculation">
+        <div>
+          <span>مبلغ معامله</span>
+          <strong id="tradeSubtotal">$0.00</strong>
+        </div>
+
+        <div>
+          <span>کارمزد تخمینی</span>
+          <strong id="tradeFee">$0.00</strong>
+        </div>
+
+        <div>
+          <span>مجموع پرداختی / دریافتی</span>
+          <strong id="tradeTotal">$0.00</strong>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        id="executeTradeButton"
+        class="trade-submit-button"
+      >
+        ثبت خرید آزمایشی
+      </button>
+
+      <p id="tradeMessage" role="status"></p>
+
+    </section>
+  `;
+
+  const pairSelect=document.getElementById("tradePair");
+
+  pairSelect.innerHTML=DA_COINS.map(coin=>`
+    <option value="${coin.symbol}">
+      ${coin.name} (${coin.symbol}) / USDT
+    </option>
+  `).join("");
+
+  pairSelect.value=DA_selectedTradeSymbol;
+
+  pairSelect.addEventListener("change",()=>{
+    DA_selectedTradeSymbol=pairSelect.value;
+    DA_updateTradeCalculation();
+  });
+
+  document.getElementById("tradeAmount")
+    .addEventListener("input",DA_updateTradeCalculation);
+
+  document.getElementById("tradeBuyButton")
+    .addEventListener("click",()=>{
+      DA_selectedTradeSide="buy";
+      DA_updateTradeButtons();
+      DA_updateTradeCalculation();
+    });
+
+  document.getElementById("tradeSellButton")
+    .addEventListener("click",()=>{
+      DA_selectedTradeSide="sell";
+      DA_updateTradeButtons();
+      DA_updateTradeCalculation();
+    });
+
+  document.getElementById("executeTradeButton")
+    .addEventListener("click",DA_executeDemoTrade);
+
+  DA_updateTradeCalculation();
+}
+
+/* قیمت ارز انتخاب‌شده */
+function DA_getSelectedTradePrice(){
+  return DA_getCoinPrice(DA_selectedTradeSymbol);
+}
+
+/* محاسبه معامله */
+function DA_updateTradeCalculation(){
+
+  const amountInput=document.getElementById("tradeAmount");
+  if(!amountInput) return;
+
+  const amount=Number(amountInput.value || 0);
+  const price=DA_getSelectedTradePrice();
+
+  const subtotal=amount*price;
+  const fee=subtotal*DA_tradeFeeRate;
+
+  const total=DA_selectedTradeSide==="buy"
+    ? subtotal+fee
+    : subtotal-fee;
+
+  const priceElement=document.getElementById("tradeCurrentPrice");
+  const subtotalElement=document.getElementById("tradeSubtotal");
+  const feeElement=document.getElementById("tradeFee");
+  const totalElement=document.getElementById("tradeTotal");
+  const submitButton=document.getElementById("executeTradeButton");
+
+  if(priceElement){
+    priceElement.textContent="$"+DA_formatPrice(price);
+  }
+
+  if(subtotalElement){
+    subtotalElement.textContent="$"+DA_formatPrice(subtotal);
+  }
+
+  if(feeElement){
+    feeElement.textContent="$"+DA_formatPrice(fee);
+  }
+
+  if(totalElement){
+    totalElement.textContent="$"+DA_formatPrice(total);
+  }
+
+  if(submitButton){
+    submitButton.textContent=
+      DA_selectedTradeSide==="buy"
+      ? "ثبت خرید آزمایشی"
+      : "ثبت فروش آزمایشی";
+  }
+}
+
+/* تغییر حالت دکمه خرید و فروش */
+function DA_updateTradeButtons(){
+
+  const buy=document.getElementById("tradeBuyButton");
+  const sell=document.getElementById("tradeSellButton");
+
+  if(buy){
+    buy.classList.toggle("active",DA_selectedTradeSide==="buy");
+  }
+
+  if(sell){
+    sell.classList.toggle("active",DA_selectedTradeSide==="sell");
+  }
+}
+
+/* پیام وضعیت معامله */
+function DA_tradeMessage(message,type="info"){
+
+  const element=document.getElementById("tradeMessage");
+  if(!element) return;
+
+  element.textContent=message;
+  element.className="trade-message "+type;
+}
+
+/* ثبت معامله از طریق تابع امن سمت سرور */
+async function DA_executeDemoTrade(){
+
+  const button=document.getElementById("executeTradeButton");
+  const amountInput=document.getElementById("tradeAmount");
+
+  if(!button || !amountInput) return;
+
+  const amount=Number(amountInput.value);
+  const symbol=DA_selectedTradeSymbol+"USDT";
+  const side=DA_selectedTradeSide;
+  const price=DA_getSelectedTradePrice();
+
+  if(!Number.isFinite(amount) || amount<=0){
+    DA_tradeMessage("لطفاً مقدار معتبر وارد کنید.","error");
+    return;
+  }
+
+  if(!Number.isFinite(price) || price<=0){
+    DA_tradeMessage("قیمت ارز در دسترس نیست. دوباره تلاش کنید.","error");
+    return;
+  }
+
+  if(typeof DA_supabase==="undefined" || !DA_supabase){
+    DA_tradeMessage(
+      "اتصال Supabase هنوز تنظیم نشده است؛ معامله ثبت نشد.",
+      "error"
+    );
+    return;
+  }
+
+  button.disabled=true;
+  button.textContent="در حال ثبت معامله...";
+
+  try{
+
+    const {data,error}=await DA_supabase.rpc(
+      "execute_demo_trade",
+      {
+        p_symbol:symbol,
+        p_side:side,
+        p_amount:amount
+      }
+    );
+
+    if(error){
+      throw error;
+    }
+
+    DA_tradeMessage(
+      "درخواست معامله با موفقیت به سرور ارسال شد.",
+      "success"
+    );
+
+    amountInput.value="";
+
+    await DA_loadWalletFromServer();
+    await DA_loadOrdersFromServer();
+    await DA_loadTradeHistoryFromServer();
+
+    DA_updateTradeCalculation();
+
+  }catch(error){
+
+    console.error("DigiArz trade error:",error);
+
+    DA_tradeMessage(
+      error.message || "ثبت معامله انجام نشد.",
+      "error"
+    );
+
+  }finally{
+
+    button.disabled=false;
+    DA_updateTradeCalculation();
+
+  }
+}
+
+/* =====================================================
+   پایان بخش ۵
+   ادامه در بخش ۶
+   ===================================================== *//* =====================================================
+   DigiArz — بخش ۶
+   اتصال حساب کاربری و Supabase
+   ===================================================== */
+
+/*
+  تنظیمات Supabase:
+  این دو مقدار باید با اطلاعات پروژه Supabase خودت
+  جایگزین شوند.
+*/
+const DA_SUPABASE_URL =
+  "YOUR_SUPABASE_PROJECT_URL";
+
+const DA_SUPABASE_ANON_KEY =
+  "YOUR_SUPABASE_ANON_PUBLIC_KEY";
+
+/* ایجاد اتصال Supabase */
+let DA_supabase=null;
+
+if(
+  DA_SUPABASE_URL.startsWith("https://") &&
+  DA_SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_PUBLIC_KEY"
+){
+  try{
+    const {createClient}=await import(
+      "https://esm.sh/@supabase/supabase-js@2"
+    );
+
+    DA_supabase=createClient(
+      DA_SUPABASE_URL,
+      DA_SUPABASE_ANON_KEY
+    );
+
+  }catch(error){
+    console.error("Supabase initialization error:",error);
+  }
+}
+
+/* کاربر فعلی */
+let DA_currentUser=null;
+
+/* پیام‌های احراز هویت */
+function DA_authMessage(message,type="info"){
+  const element=document.getElementById("authMessage");
+  if(!element) return;
+
+  element.textContent=message;
+  element.className="auth-message "+type;
+}
+
+/* نمایش وضعیت ورود */
+function DA_updateAuthView(){
+  const authSection=document.getElementById("authSection");
+  const appSection=document.getElementById("appSection");
+  const userLabel=document.getElementById("currentUserEmail");
+
+  if(authSection){
+    authSection.style.display=DA_currentUser?"none":"block";
+  }
+
+  if(appSection){
+    appSection.style.display=DA_currentUser?"block":"none";
+  }
+
+  if(userLabel && DA_currentUser){
+    userLabel.textContent=DA_currentUser.email || "";
+  }
+}
+
+/* ثبت‌نام */
+async function DA_signUp(){
+
+  if(!DA_supabase){
+    DA_authMessage("اتصال Supabase تنظیم نشده است.","error");
+    return;
+  }
+
+  const name=document.getElementById("fullName")?.value.trim();
+  const email=document.getElementById("email")?.value.trim();
+  const password=document.getElementById("password")?.value;
+
+  if(!name || !email || !password){
+    DA_authMessage("تمام فیلدها را تکمیل کنید.","error");
+    return;
+  }
+
+  if(password.length<8){
+    DA_authMessage("رمز عبور باید حداقل ۸ کاراکتر باشد.","error");
+    return;
+  }
+
+  try{
+
+    const {data,error}=await DA_supabase.auth.signUp({
+      email,
+      password,
+      options:{
+        data:{
+          full_name:name
+        }
+      }
+    });
+
+    if(error) throw error;
+
+    if(data.session){
+      DA_currentUser=data.user;
+      DA_updateAuthView();
+      await DA_loadUserData();
+    }else{
+      DA_authMessage(
+        "ثبت‌نام انجام شد. ایمیل خود را برای تأیید حساب بررسی کنید.",
+        "success"
+      );
+    }
+
+  }catch(error){
+    DA_authMessage(error.message || "ثبت‌نام ناموفق بود.","error");
+  }
+}
+
+/* ورود */
+async function DA_signIn(){
+
+  if(!DA_supabase){
+    DA_authMessage("اتصال Supabase تنظیم نشده است.","error");
+    return;
+  }
+
+  const email=document.getElementById("email")?.value.trim();
+  const password=document.getElementById("password")?.value;
+
+  if(!email || !password){
+    DA_authMessage("ایمیل و رمز عبور را وارد کنید.","error");
+    return;
+  }
+
+  try{
+
+    const {data,error}=await DA_supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if(error) throw error;
+
+    DA_currentUser=data.user;
+    DA_updateAuthView();
+
+    await DA_loadUserData();
+
+  }catch(error){
+    DA_authMessage(error.message || "ورود ناموفق بود.","error");
+  }
+}
+
+/* خروج */
+async function DA_signOut(){
+
+  if(!DA_supabase) return;
+
+  const {error}=await DA_supabase.auth.signOut();
+
+  if(error){
+    console.error(error);
+    return;
+  }
+
+  DA_currentUser=null;
+  DA_walletBalances={};
+  DA_walletTransactions=[];
+
+  DA_updateAuthView();
+}
+
+/* دریافت اطلاعات حساب */
+async function DA_checkSession(){
+
+  if(!DA_supabase) return;
+
+  const {data,error}=await DA_supabase.auth.getSession();
+
+  if(error){
+    console.error(error);
+    return;
+  }
+
+  DA_currentUser=data.session?.user || null;
+
+  DA_updateAuthView();
+
+  if(DA_currentUser){
+    await DA_loadUserData();
+  }
+}
+
+/* دریافت اطلاعات اولیه حساب */
+async function DA_loadUserData(){
+  await DA_loadWalletFromServer();
+  await DA_loadOrdersFromServer();
+  await DA_loadTradeHistoryFromServer();
+  DA_renderWallet();
+}
+
+/* دریافت موجودی از سرور */
+async function DA_loadWalletFromServer(){
+
+  if(!DA_supabase || !DA_currentUser) return;
+
+  const {data,error}=await DA_supabase
+    .from("asset_balances")
+    .select("*")
+    .eq("user_id",DA_currentUser.id);
+
+  if(error){
+    console.error("Wallet loading error:",error);
+    return;
+  }
+
+  const balances={};
+
+  for(const item of data || []){
+    const symbol=String(
+      item.asset_symbol ||
+      item.symbol ||
+      item.asset ||
+      ""
+    ).toUpperCase();
+
+    if(symbol){
+      balances[symbol]=Number(item.balance || item.available_balance || 0);
+    }
+  }
+
+  DA_walletBalances=balances;
+  DA_renderWallet();
+}
+
+/* دریافت سفارش‌ها */
+let DA_userOrders=[];
+
+async function DA_loadOrdersFromServer(){
+
+  if(!DA_supabase || !DA_currentUser) return;
+
+  const {data,error}=await DA_supabase
+    .from("orders")
+    .select("*")
+    .eq("user_id",DA_currentUser.id)
+    .order("created_at",{ascending:false})
+    .limit(100);
+
+  if(error){
+    console.error("Orders loading error:",error);
+    return;
+  }
+
+  DA_userOrders=data || [];
+  DA_renderOrders();
+}
+
+/* دریافت تاریخچه معاملات */
+let DA_userTrades=[];
+
+async function DA_loadTradeHistoryFromServer(){
+
+  if(!DA_supabase || !DA_currentUser) return;
+
+  const {data,error}=await DA_supabase
+    .from("trades")
+    .select("*")
+    .eq("user_id",DA_currentUser.id)
+    .order("created_at",{ascending:false})
+    .limit(100);
+
+  if(error){
+    console.error("Trade history loading error:",error);
+    return;
+  }
+
+  DA_userTrades=data || [];
+  DA_renderTradeHistory();
+}
+
+/* نمایش سفارش‌ها */
+function DA_renderOrders(){
+
+  const container=document.getElementById("ordersList");
+  if(!container) return;
+
+  if(!DA_userOrders.length){
+    container.innerHTML=
+      '<div class="empty-state">سفارشی ثبت نشده است.</div>';
+    return;
+  }
+
+  container.innerHTML=DA_userOrders.map(order=>`
+    <div class="order-row">
+      <strong>${order.symbol || "—"}</strong>
+      <span>${order.side || "—"}</span>
+      <span>${order.status || "—"}</span>
+      <span>${DA_formatAmount(order.amount || 0)}</span>
+      <small>
+        ${order.created_at
+          ?new Date(order.created_at).toLocaleString("fa-IR")
+          :"—"}
+      </small>
+    </div>
+  `).join("");
+}
+
+/* نمایش تاریخچه معاملات */
+function DA_renderTradeHistory(){
+
+  const container=document.getElementById("historyList");
+  if(!container) return;
+
+  if(!DA_userTrades.length){
+    container.innerHTML=
+      '<div class="empty-state">تاریخچه معامله‌ای وجود ندارد.</div>';
+    return;
+  }
+
+  container.innerHTML=DA_userTrades.map(trade=>`
+    <div class="history-row">
+      <strong>${trade.symbol || "—"}</strong>
+
+      <span class="${trade.side==="buy"?"positive":"negative"}">
+        ${trade.side==="buy"?"خرید":"فروش"}
+      </span>
+
+      <span>${DA_formatAmount(trade.amount || 0)}</span>
+
+      <span>$${DA_formatPrice(trade.price || 0)}</span>
+
+      <small>
+        ${trade.created_at
+          ?new Date(trade.created_at).toLocaleString("fa-IR")
+          :"—"}
+      </small>
+    </div>
+  `).join("");
+}
+
+/* اتصال فرم ورود و ثبت‌نام */
+document.getElementById("loginButton")
+  ?.addEventListener("click",DA_signIn);
+
+document.getElementById("signupButton")
+  ?.addEventListener("click",DA_signUp);
+
+document.getElementById("logoutButton")
+  ?.addEventListener("click",DA_signOut);
+
+/* بررسی نشست هنگام شروع برنامه */
+await DA_checkSession();
+
+/* =====================================================
+   پایان بخش ۶
+   ادامه در بخش ۷
+   ===================================================== *//* =====================================================
+   DigiArz — بخش ۷
+   نمودار، صفحات و به‌روزرسانی اطلاعات
+   ===================================================== */
+
+/* تنظیمات نمودار */
+let DA_chartInterval="1h";
+let DA_chartData=[];
+let DA_chartLoading=false;
+
+/* تبدیل نماد ارز به نماد معاملاتی Binance */
+function DA_getBinanceSymbol(symbol){
+  return String(symbol).toUpperCase()+"USDT";
+}
+
+/* ایجاد بخش نمودار */
+function DA_createChartInterface(){
+
+  const tradePage=document.getElementById("tradePage");
+  if(!tradePage) return;
+
+  if(document.getElementById("DA_chartSection")) return;
+
+  const chart=document.createElement("section");
+
+  chart.id="DA_chartSection";
+  chart.className="chart-section";
+
+  chart.innerHTML=`
+    <div class="chart-header">
+      <div>
+        <h3>نمودار قیمت</h3>
+        <p id="DA_chartTitle">نمودار ${DA_selectedTradeSymbol}/USDT</p>
+      </div>
+
+      <select id="DA_chartInterval">
+        <option value="1m">۱ دقیقه</option>
+        <option value="5m">۵ دقیقه</option>
+        <option value="15m">۱۵ دقیقه</option>
+        <option value="1h" selected>۱ ساعت</option>
+        <option value="4h">۴ ساعت</option>
+        <option value="1d">روزانه</option>
+        <option value="1w">هفتگی</option>
+      </select>
+    </div>
+
+    <div class="chart-price-summary">
+      <strong id="DA_chartPrice">—</strong>
+      <span id="DA_chartChange">—</span>
+    </div>
+
+    <div class="chart-canvas-wrapper">
+      <canvas id="DA_priceCanvas"></canvas>
+    </div>
+
+    <p id="DA_chartStatus">در حال دریافت اطلاعات نمودار...</p>
+  `;
+
+  tradePage.prepend(chart);
+
+  document.getElementById("DA_chartInterval")
+    .addEventListener("change",event=>{
+      DA_chartInterval=event.target.value;
+      DA_loadChart();
+    });
+
+  DA_loadChart();
+}
+
+/* دریافت اطلاعات کندل از Binance */
+async function DA_loadChart(){
+
+  if(DA_chartLoading) return;
+
+  const canvas=document.getElementById("DA_priceCanvas");
+  if(!canvas) return;
+
+  DA_chartLoading=true;
+
+  const status=document.getElementById("DA_chartStatus");
+
+  try{
+
+    const symbol=DA_getBinanceSymbol(DA_selectedTradeSymbol);
+
+    const url=
+      "https://api.binance.com/api/v3/klines"+
+      "?symbol="+encodeURIComponent(symbol)+
+      "&interval="+encodeURIComponent(DA_chartInterval)+
+      "&limit=80";
+
+    const response=await fetch(url);
+
+    if(!response.ok){
+      throw new Error("خطا در دریافت نمودار: "+response.status);
+    }
+
+    const raw=await response.json();
+
+    DA_chartData=raw.map(item=>({
+      time:Number(item[0]),
+      open:Number(item[1]),
+      high:Number(item[2]),
+      low:Number(item[3]),
+      close:Number(item[4]),
+      volume:Number(item[5])
+    }));
+
+    DA_drawChart();
+
+    const last=DA_chartData[DA_chartData.length-1];
+    const first=DA_chartData[0];
+
+    if(last && first){
+      const change=((last.close-first.open)/first.open)*100;
+
+      document.getElementById("DA_chartPrice").textContent=
+        "$"+DA_formatPrice(last.close);
+
+      const changeElement=document.getElementById("DA_chartChange");
+
+      changeElement.textContent=DA_formatPercent(change);
+      changeElement.className=DA_changeClass(change);
+    }
+
+    if(status){
+      status.textContent="نمودار با اطلاعات بازار Binance به‌روزرسانی شد.";
+    }
+
+  }catch(error){
+
+    console.error("DigiArz chart error:",error);
+
+    if(status){
+      status.textContent="دریافت نمودار ممکن نشد؛ اتصال را بررسی کنید.";
+    }
+
+  }finally{
+    DA_chartLoading=false;
+  }
+}
+
+/* رسم نمودار کندل‌استیک */
+function DA_drawChart(){
+
+  const canvas=document.getElementById("DA_priceCanvas");
+
+  if(!canvas || !DA_chartData.length) return;
+
+  const rect=canvas.getBoundingClientRect();
+
+  if(!rect.width || !rect.height) return;
+
+  const ratio=window.devicePixelRatio || 1;
+
+  canvas.width=Math.round(rect.width*ratio);
+  canvas.height=Math.round(rect.height*ratio);
+
+  const ctx=canvas.getContext("2d");
+
+  ctx.setTransform(ratio,0,0,ratio,0,0);
+
+  const width=rect.width;
+  const height=rect.height;
+
+  ctx.clearRect(0,0,width,height);
+
+  const padding={
+    top:15,
+    bottom:25,
+    left:10,
+    right:65
+  };
+
+  const chartWidth=width-padding.left-padding.right;
+  const chartHeight=height-padding.top-padding.bottom;
+
+  const values=DA_chartData.flatMap(c=>[c.high,c.low]);
+
+  const min=Math.min(...values);
+  const max=Math.max(...values);
+
+  const range=max-min || 1;
+
+  const y=value=>
+    padding.top+
+    ((max-value)/range)*chartHeight;
+
+  /* خطوط راهنمای نمودار */
+  ctx.strokeStyle="rgba(140,150,170,.18)";
+  ctx.lineWidth=1;
+
+  ctx.fillStyle="#8993a5";
+  ctx.font="11px sans-serif";
+  ctx.textAlign="left";
+
+  for(let i=0;i<=4;i++){
+
+    const yy=padding.top+(chartHeight/4)*i;
+
+    ctx.beginPath();
+    ctx.moveTo(padding.left,yy);
+    ctx.lineTo(width-padding.right,yy);
+    ctx.stroke();
+
+    const value=max-(range/4)*i;
+
+    ctx.fillText(
+      "$"+DA_formatPrice(value),
+      width-padding.right+5,
+      yy+4
+    );
+  }
+
+  /* کندل‌ها */
+  const candleSpace=chartWidth/DA_chartData.length;
+  const candleWidth=Math.max(2,candleSpace*.58);
+
+  DA_chartData.forEach((candle,index)=>{
+
+    const x=padding.left+
+      index*candleSpace+
+      candleSpace/2;
+
+    const rising=candle.close>=candle.open;
+
+    const color=rising?"#16a879":"#e05260";
+
+    ctx.strokeStyle=color;
+    ctx.fillStyle=color;
+    ctx.lineWidth=1;
+
+    /* سایه کندل */
+    ctx.beginPath();
+    ctx.moveTo(x,y(candle.high));
+    ctx.lineTo(x,y(candle.low));
+    ctx.stroke();
+
+    /* بدنه کندل */
+    const top=y(Math.max(candle.open,candle.close));
+    const bottom=y(Math.min(candle.open,candle.close));
+
+    const bodyHeight=Math.max(1,bottom-top);
+
+    ctx.fillRect(
+      x-candleWidth/2,
+      top,
+      candleWidth,
+      bodyHeight
+    );
+  });
+
+}
+
+/* تغییر ارز نمودار با انتخاب ارز معامله */
+const DA_originalTradeCalculation=DA_updateTradeCalculation;
+
+DA_updateTradeCalculation=function(){
+
+  DA_originalTradeCalculation();
+
+  const title=document.getElementById("DA_chartTitle");
+
+  if(title){
+    title.textContent=
+      "نمودار "+DA_selectedTradeSymbol+"/USDT";
+  }
+
+  if(document.getElementById("DA_priceCanvas")){
+    DA_loadChart();
+  }
+
+};
+
+/* ایجاد نمودار بعد از ساخت فرم معامله */
+const DA_originalBuildTrade=DA_buildTradeInterface;
+
+DA_buildTradeInterface=function(){
+
+  DA_originalBuildTrade();
+
+  DA_createChartInterface();
+
+};
+
+/* رسم مجدد نمودار هنگام تغییر اندازه صفحه */
+window.addEventListener("resize",()=>{
+  DA_drawChart();
+});
+
+/* جابه‌جایی بین صفحات برنامه */
+function DA_showPage(pageName){
+
+  const pages=[
+    "marketPage",
+    "walletPage",
+    "tradePage",
+    "ordersPage",
+    "historyPage",
+    "newsPage"
+  ];
+
+  pages.forEach(id=>{
+    const element=document.getElementById(id);
+
+    if(element){
+      element.style.display=
+        id===pageName ? "block" : "none";
+    }
+  });
+
+  document.querySelectorAll("[data-page]").forEach(button=>{
+    button.classList.toggle(
+      "active",
+      button.dataset.page===pageName
+    );
+  });
+
+  if(pageName==="walletPage"){
+    DA_renderWallet();
+  }
+
+  if(pageName==="tradePage"){
+    DA_updateTradeCalculation();
+
+    if(!document.getElementById("DA_chartSection")){
+      DA_buildTradeInterface();
+    }
+  }
+
+  if(pageName==="ordersPage"){
+    DA_loadOrdersFromServer();
+  }
+
+  if(pageName==="historyPage"){
+    DA_loadTradeHistoryFromServer();
+  }
+
+}
+
+/* اتصال دکمه‌های ناوبری */
+document.querySelectorAll("[data-page]").forEach(button=>{
+
+  button.addEventListener("click",()=>{
+
+    const pageName=button.dataset.page;
+
+    if(pageName){
+      DA_showPage(pageName);
+    }
+
+  });
+
+});
+
+/* به‌روزرسانی دستی اطلاعات */
+async function DA_refreshAll(){
+
+  await DA_fetchMarket();
+
+  if(DA_currentUser){
+    await DA_loadUserData();
+  }
+
+  if(document.getElementById("DA_priceCanvas")){
+    await DA_loadChart();
+  }
+
+}
+
+/* جلوگیری از ارسال فرم با بارگذاری مجدد صفحه */
+document.querySelectorAll("form").forEach(form=>{
+
+  form.addEventListener("submit",event=>{
+    event.preventDefault();
+  });
+
+});
+
+/* بروزرسانی اطلاعات بازار در زمان بازگشت به برنامه */
+document.addEventListener("visibilitychange",()=>{
+
+  if(document.visibilityState==="visible"){
+    DA_refreshAll();
+  }
+
+});
+
+/* =====================================================
+   پایان بخش ۷
+   بخش ۸: راه‌اندازی نهایی و بستن اسکریپت
+   ===================================================== *//* =====================================================
+   DigiArz — بخش ۸
+   راه‌اندازی نهایی و کنترل خطاها
+   ===================================================== */
+
+/* جلوگیری از اجرای چندباره راه‌اندازی */
+let DA_appInitialized=false;
+
+/* بررسی اجزای ضروری برنامه */
+function DA_checkAppElements(){
+
+  const required=[
+    "marketList",
+    "walletList",
+    "tradePage",
+    "ordersList",
+    "historyList"
+  ];
+
+  const missing=required.filter(
+    id=>!document.getElementById(id)
+  );
+
+  if(missing.length){
+    console.warn(
+      "DigiArz missing HTML elements:",
+      missing
+    );
+  }
+
+  return missing;
+}
+
+/* نمایش پیام عمومی */
+function DA_showNotice(message){
+
+  let notice=document.getElementById("DA_notice");
+
+  if(!notice){
+
+    notice=document.createElement("div");
+
+    notice.id="DA_notice";
+    notice.className="DA-notice";
+
+    document.body.appendChild(notice);
+  }
+
+  notice.textContent=message;
+  notice.style.display="block";
+
+}
+
+/* راه‌اندازی نهایی */
+async function DA_initializeApp(){
+
+  if(DA_appInitialized) return;
+
+  DA_appInitialized=true;
+
+  DA_checkAppElements();
+
+  /* نمایش صفحه بازار */
+  DA_showPage("marketPage");
+
+  /* آماده‌سازی بخش معامله */
+  DA_buildTradeInterface();
+
+  /* نمایش کیف پول */
+  DA_renderWallet();
+
+  /* بررسی نشست کاربر */
+  if(DA_supabase){
+    await DA_checkSession();
+  }else{
+    console.warn(
+      "DigiArz: Supabase configuration is required for accounts and trades."
+    );
+  }
+
+  /* دریافت قیمت بازار */
+  await DA_fetchMarket();
+
+  console.log(
+    "DigiArz initialized."
+  );
+
+}
+
+/* اجرای برنامه پس از آماده شدن سند */
+if(document.readyState==="loading"){
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    DA_initializeApp,
+    {once:true}
+  );
+
+}else{
+
+  await DA_initializeApp();
+
+}
+
+/* =====================================================
+   پایان کد JavaScript
+   ===================================================== */
+
+</script>
+
+</body>
+</html>
