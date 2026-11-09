@@ -1,108 +1,53 @@
-```html
-</div><div class="muted small">تجربه حرفه‌ای معاملات رمزارز</div></div><button id="logoutBtn" class="secondary hidden">خروج</button></header>
-
-<section id="authView" class="card auth">
- <div class="auth-visual">
-  <div><div class="auth-brand">Digi<span>Arz</span></div><div class="auth-kicker">DEMO CRYPTO EXCHANGE</div><div class="auth-headline">بازار واقعی را تجربه کن؛<br>بدون ریسک پول واقعی</div><div class="auth-copy">با قیمت‌های بازار و سرمایه مجازی، خریدوفروش رمزارزها را تمرین کن و عملکرد خودت را بسنج.</div></div>
-  <div class="auth-benefits"><div class="auth-benefit"><i data-lucide="chart-candlestick"></i>نمودارهای حرفه‌ای بازار</div><div class="auth-benefit"><i data-lucide="wallet"></i>کیف پول آزمایشی</div><div class="auth-benefit"><i data-lucide="shield-check"></i>بدون واریز پول واقعی</div><div class="auth-benefit"><i data-lucide="newspaper"></i>اخبار و تحلیل رمزارزها</div></div>
- </div>
- <div class="auth-form">
-  <div class="auth-kicker">خوش آمدید به DigiArz</div><h2>ورود به حساب کاربری</h2><div class="auth-intro">برای ادامه وارد حساب خود شوید؛ اگر حساب ندارید، ثبت‌نام کنید.</div>
-  <div class="field"><label for="fullName">نام و نام خانوادگی <span class="muted">(برای ثبت‌نام)</span></label><input id="fullName" type="text" autocomplete="name" placeholder="نام شما"></div>
-  <div class="field"><label for="email">آدرس ایمیل</label><input id="email" type="email" autocomplete="email" placeholder="name@example.com" dir="ltr"></div>
-  <div class="field"><label for="password">رمز عبور</label><input id="password" type="password" autocomplete="current-password" placeholder="حداقل ۶ کاراکتر" dir="ltr"></div>
-  <div class="auth-actions"><button id="loginBtn">ورود به حساب</button><button id="signupBtn" class="secondary">ساخت حساب جدید</button></div>
-  <button id="forgotBtn" class="secondary" style="width:100%;margin-top:9px">بازیابی رمز عبور</button><div id="authMsg" class="notice hidden" role="status"></div>
-  <div class="auth-security"><i data-lucide="lock-keyhole"></i><span>حساب کاربری برای ورود امن است؛ معاملات این نسخه صرفاً آزمایشی هستند و پول واقعی جابه‌جا نمی‌شود.</span></div>
- </div>
-</section>
-
-<main id="appView" class="hidden">
- <section class="hero"><div class="hero-top"><div><div class="hero-label">داشبورد معاملاتی DigiArz</div><div class="hero-title">بازار رمزارزها</div><div class="hero-sub" id="userEmail">کاربر</div></div><div class="hero-mark">₿</div></div>
- <div class="quick"><button id="heroTradeBtn">معامله</button><button id="heroMarketBtn" class="secondary"><span class="icon-tab"><i data-lucide="chart-no-axes-combined"></i>بازارها</span></button><button id="refreshBtn" class="secondary"><span class="icon-tab"><i data-lucide="refresh-cw"></i>به‌روزرسانی بازار</span></button></div></section>
- <section class="card"><div class="section-title"><h2>نمای کلی حساب</h2><span class="live">حساب آزمایشی</span></div><div class="grid">
-  <div class="stat"><div class="muted small">موجودی USDT</div><div class="value" id="usdtBalance">—</div></div><div class="stat"><div class="muted small">موجودی ریالی</div><div class="value" id="irrBalance">—</div></div><div class="stat"><div class="muted small">تعداد دارایی‌ها</div><div class="value" id="assetCount">—</div></div><div class="stat"><div class="muted small">نوع حساب</div><div class="value" style="font-size:16px;color:var(--yellow)">DEMO</div></div>
- </div></section>
- <nav class="tabs"><button class="active" data-tab="markets"><span class="icon-tab"><i data-lucide="chart-no-axes-combined"></i>بازارها</span></button><button data-tab="trade">خرید و فروش</button><button data-tab="assets"><span class="icon-tab"><i data-lucide="wallet"></i>دارایی‌ها</span></button><button data-tab="history"><span class="icon-tab"><i data-lucide="history"></i>تاریخچه</span></button></nav>
-
- <section id="tab-markets" class="card">
-  <div class="section-title"><h2>بازار رمزارزها</h2><span class="live">قیمت‌های ثبت‌شده در سرور</span></div>
-  <div class="fx-box"><div><div class="muted small">نرخ دلار آزاد</div><div class="fx-price" id="fxRate">در حال دریافت...</div></div><div class="muted small" id="fxUpdated">منبع: —</div></div>
-  <div class="market-highlights">
-   <section><div class="section-title"><h2>۵ ارز برتر از نظر تغییر ۲۴ ساعته</h2><span class="live">رتبه‌بندی زنده</span></div><div id="topGainers" class="gainers-grid"><div class="muted small">در حال دریافت تغییرات بازار…</div></div></section>
-   <section><div class="section-title"><h2>نوسان بازار</h2><span class="muted small">بر پایه درصد تغییر ۲۴ ساعته ارزهای قابل‌نمایش</span></div><div class="volatility-grid"><div class="stat"><div class="muted small">ارزهای مثبت</div><div class="value change-pos" id="positiveCount">—</div></div><div class="stat"><div class="muted small">ارزهای منفی</div><div class="value change-neg" id="negativeCount">—</div></div><div class="stat"><div class="muted small">میانگین تغییر</div><div class="value" id="averageChange">—</div></div></div><div id="volatilityNote" class="market-note">در انتظار داده تغییرات ۲۴ ساعته از Binance…</div></section>
-  </div>
-  <div id="marketCategories" class="market-categories"></div>
-  <div class="market-tools"><input id="marketSearch" type="search" placeholder="جست‌وجوی نماد؛ مثل BTC یا ETH" dir="auto"><select id="marketSort"><option value="change-desc">درصد رشد: بیشترین تا کمترین</option><option value="change-asc">درصد افت: کمترین تا بیشترین</option><option value="price-desc">قیمت: بیشترین</option><option value="price-asc">قیمت: کمترین</option><option value="symbol">مرتب‌سازی: نماد</option></select></div>
-  <div class="market-head">لوگو و نام فارسی ارز / قیمت دلار و تومان — برای ورود به صفحه اختصاصی، روی لوگو یا نام ارز بزنید</div><div id="marketList" class="market-list"><div class="muted small">در حال دریافت قیمت‌ها…</div></div><div id="autoMarketStatus" class="market-note" aria-live="polite">فهرست ارزها پس از ورود به‌صورت خودکار با بازار به‌روزرسانی می‌شود.</div>
-  <div class="market-note">قیمت‌های این فهرست از جدول market_prices در Supabase خوانده می‌شوند. قیمت تومانی با نرخ دلار ثبت‌شده در market_fx_rates محاسبه می‌شود. معاملات فقط مجازی هستند.</div>
- </section>
-
- <section id="tab-chart" class="card hidden">
-  <div class="section-title"><h2>صفحه اختصاصی ارز</h2><button id="backMarketBtn" class="secondary">بازگشت به بازار</button></div>
-  <div class="asset-detail-head"><img id="detailLogo" class="asset-logo" src="" alt="لوگوی ارز"><div><div class="asset-detail-title" id="detailName">Bitcoin</div><div class="asset-detail-sub" id="chartSymbol">BTCUSDT</div></div><div class="detail-price" id="chartLastPrice">—</div></div>
-  <div class="notice detail-description" id="detailDescription">اطلاعات این رمزارز</div>
-  <div class="detail-section"><div class="section-title"><h2>نمودار قیمت</h2><span class="live">داده بازار</span></div>
-  <div class="chart-types" id="chartTypes"><button class="active" data-chart-type="candle">شمعی</button><button data-chart-type="line">خطی</button><button data-chart-type="area">ناحیه‌ای</button></div>
-  <div class="timeframes" id="timeframes"><button class="active" data-interval="15m">۱۵ دقیقه</button><button data-interval="1h">۱ ساعت</button><button data-interval="4h">۴ ساعت</button><button data-interval="1d">۱ روز</button><button data-interval="1w">۱ هفته</button><button data-interval="1M">۱ ماه</button><button data-interval="1y">سالانه</button><button data-interval="all">از ابتدا</button></div>
-  <div id="priceChart"></div><div id="chartMessage" class="chart-caption">برای نمایش نمودار، ارز را از بازار انتخاب کنید.</div>
-  <div class="market-summary"><div class="stat"><div class="muted small">آخرین قیمت</div><div class="value" id="sumLast">—</div></div><div class="stat"><div class="muted small">بیشترین بازه</div><div class="value" id="sumHigh">—</div></div><div class="stat"><div class="muted small">کمترین بازه</div><div class="value" id="sumLow">—</div></div></div></div>
-  <div class="detail-section"><div class="section-title"><h2>عملکرد تاریخی قیمت</h2><span class="muted small" id="performanceUpdated">—</span></div><div class="performance-grid"><div class="performance-item"><small>۲۴ ساعت</small><strong id="perf24">—</strong></div><div class="performance-item"><small>۷ روز</small><strong id="perf7">—</strong></div><div class="performance-item"><small>۳۰ روز</small><strong id="perf30">—</strong></div><div class="performance-item"><small>۹۰ روز</small><strong id="perf90">—</strong></div><div class="performance-item"><small>۳۶۵ روز</small><strong id="perf365">—</strong></div></div></div>
-  <div class="detail-section detail-trade"><h2>معامله آزمایشی <span id="tradeDetailSymbol" class="muted small"></span></h2><div class="trade-grid"><div class="trade-box"><h3>خرید</h3><div class="field"><label>مقدار USDT</label><input id="detailBuyAmount" type="number" min="0" step="any" placeholder="مقدار به تتر" dir="ltr"></div><button id="detailBuyBtn" class="buy" style="width:100%">خرید آزمایشی</button></div><div class="trade-box"><h3>فروش</h3><div class="field"><label>مقدار ارز</label><input id="detailSellAmount" type="number" min="0" step="any" placeholder="مقدار ارز" dir="ltr"></div><button id="detailSellBtn" class="sell" style="width:100%">فروش آزمایشی</button></div></div><div id="detailTradeMsg" class="notice hidden" role="status"></div></div>
-  <div class="detail-section"><div class="section-title"><h2>دیدگاه کاربران</h2><span class="muted small">ثبت نظر درباره این ارز</span></div><div class="review-form"><textarea id="reviewText" placeholder="دیدگاه خود را بنویسید..." maxlength="1000"></textarea><button id="submitReviewBtn">ثبت دیدگاه</button></div><div id="reviewMessage" class="notice hidden"></div><div id="reviewsList"></div></div>
-  <div class="detail-section"><div class="section-title"><h2>اخبار مرتبط با ارز</h2><span class="muted small">منبع: CryptoCompare</span></div><div id="coinNewsList"></div><div id="coinNewsNote" class="market-note"></div></div>
- </section>
-
- <section id="tab-trade" class="card hidden"><h2>خرید و فروش آزمایشی</h2><div class="trade-grid">
-  <div class="trade-box"><h3>خرید ارز با USDT</h3><div class="field"><label>جفت‌ارز</label><select id="buySymbol"></select></div><div class="field"><label>مقدار USDT</label><input id="buyAmount" type="number" min="0" step="any" placeholder="مثلاً 100" dir="ltr"></div><button id="buyBtn" class="buy" style="width:100%">خرید آزمایشی</button></div>
-  <div class="trade-box"><h3>فروش ارز به USDT</h3><div class="field"><label>جفت‌ارز</label><select id="sellSymbol"></select></div><div class="field"><label>مقدار ارز</label><input id="sellAmount" type="number" min="0" step="any" placeholder="مثلاً 0.01" dir="ltr"></div><button id="sellBtn" class="sell" style="width:100%">فروش آزمایشی</button></div>
- </div><div id="tradeMsg" class="notice hidden" role="status"></div><div class="notice">قیمت‌ها از بازار دریافت می‌شوند، اما تمام سفارش‌ها و دارایی‌ها مجازی هستند.</div></section>
-
- <section id="tab-assets" class="card hidden"><div class="section-title"><h2>کیف پول و دارایی‌ها</h2><span class="live">موجودی آزمایشی</span></div><div id="assetList" class="market-list"><div class="muted small">در حال دریافت دارایی‌ها…</div></div></section>
- <section id="tab-history" class="card hidden"><div class="section-title"><h2>تاریخچه معاملات</h2><span class="muted small">سوابق حساب</span></div><div id="historyList" class="table-wrap"><div class="muted small">در حال دریافت تاریخچه…</div></div></section>
-</main>
-<div class="footer">DigiArz DEMO · قیمت‌های بازار برای تمرین · پول و معاملات کاملاً مجازی</div>
-</div>
-
-<script>
-(()=>{
-'use strict';
-const SUPABASE_URL='https://jzrymqmmxdjvibihjtwg.supabase.co';
-const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6cnltcW14ZGp2aWJpaGp0d2ciLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc2MjQwOTI2MSwiZXhwIjoyMDc3OTg1MjYxfQ.Tq1Oqk5z5nZ1pE4Q5c7s1lPq8fG2yR0xJ7mN3vK9aBc';
-const $=id=>document.getElementById(id);
-const authView=$('authView'),appView=$('appView');
-let supabaseClient=null,marketRows=[],assetRows=[],currentFxRate=null,currentFxIsValid=false,selectedSymbol='BTCUSDT',chart=null,candleSeries=null,lineSeries=null,areaSeries=null,chartResizeObserver=null,chartInterval='1d',chartType='candle',activeMarketCategory='all',favoriteSymbols=JSON.parse(localStorage.getItem('digiArzFavorites')||'[]'),marketRefreshTimer=null,performanceRequestId=0;
-const coinInfo={
-BTC:{name:'Bitcoin',fa:'بیت‌کوین',description:'بیت‌کوین نخستین رمزارز غیرمتمرکز است که برای انتقال ارزش بدون واسطه طراحی شده است.'},
-ETH:{name:'Ethereum',fa:'اتریوم',description:'اتریوم یک بستر قرارداد هوشمند و برنامه‌های غیرمتمرکز است.'},
-BNB:{name:'BNB',fa:'بایننس کوین',description:'BNB دارایی بومی اکوسیستم BNB Chain و کاربردهای مرتبط با آن است.'},
-SOL:{name:'Solana',fa:'سولانا',description:'سولانا شبکه‌ای برای اجرای برنامه‌های غیرمتمرکز با توان پردازش بالا است.'},
-XRP:{name:'XRP',fa:'ریپل',description:'XRP دارایی دیجیتال شبکه XRP Ledger برای انتقال ارزش است.'},
-ADA:{name:'Cardano',fa:'کاردانو',description:'کاردانو یک شبکه بلاک‌چینی مبتنی بر پژوهش و قرارداد هوشمند است.'},
-DOGE:{name:'Dogecoin',fa:'دوج‌کوین',description:'دوج‌کوین رمزارزی همتابه‌همتا است که در ابتدا با الهام از یک میم اینترنتی ایجاد شد.'},
-TRX:{name:'TRON',fa:'ترون',description:'ترون شبکه‌ای برای برنامه‌های غیرمتمرکز و انتقال دارایی‌های دیجیتال است.'},
-TON:{name:'Toncoin',fa:'تون‌کوین',description:'تون‌کوین دارایی بومی شبکه The Open Network است.'},
-LINK:{name:'Chainlink',fa:'چین‌لینک',description:'چین‌لینک زیرساخت اوراکل برای اتصال قراردادهای هوشمند به داده‌های بیرونی فراهم می‌کند.'},
-AVAX:{name:'Avalanche',fa:'آوالانچ',description:'آوالانچ یک پلتفرم بلاک‌چینی برای برنامه‌ها و دارایی‌های دیجیتال است.'},
-DOT:{name:'Polkadot',fa:'پولکادات',description:'پولکادات برای اتصال و تعامل میان بلاک‌چین‌های مستقل طراحی شده است.'},
-LTC:{name:'Litecoin',fa:'لایت‌کوین',description:'لایت‌کوین یک شبکه پرداخت همتابه‌همتا و رمزارز قدیمی بازار است.'},
-BCH:{name:'Bitcoin Cash',fa:'بیت‌کوین کش',description:'بیت‌کوین کش یک رمزارز همتابه‌همتا با تمرکز بر پرداخت است.'},
-ATOM:{name:'Cosmos',fa:'کازماس',description:'کازماس اکوسیستمی برای ارتباط میان بلاک‌چین‌های مستقل است.'},
-ETC:{name:'Ethereum Classic',fa:'اتریوم کلاسیک',description:'اتریوم کلاسیک زنجیره اصلی اتریوم پس از انشعاب سال ۲۰۱۶ است.'},
-XLM:{name:'Stellar',fa:'استلار',description:'استلار شبکه‌ای برای انتقال سریع ارزش و پرداخت‌های فرامرزی است.'},
-NEAR:{name:'NEAR Protocol',fa:'نیر',description:'نیر پروتکلی برای ساخت و اجرای برنامه‌های غیرمتمرکز است.'},
-APT:{name:'Aptos',fa:'آپتوس',description:'آپتوس یک بلاک‌چین لایه اول با تمرکز بر مقیاس‌پذیری است.'},
-ARB:{name:'Arbitrum',fa:'آربیتروم',description:'آربیتروم راهکار مقیاس‌پذیری لایه دوم اتریوم است.'},
-OP:{name:'Optimism',fa:'آپتیمیزم',description:'آپتیمیزم یک راهکار لایه دوم برای افزایش ظرفیت شبکه اتریوم است.'},
-SUI:{name:'Sui',fa:'سوئی',description:'سوئی بلاک‌چینی لایه اول برای برنامه‌ها و دارایی‌های دیجیتال است.'},
-UNI:{name:'Uniswap',fa:'یونی‌سواپ',description:'UNI توکن حاکمیتی پروتکل مبادله غیرمتمرکز Uniswap است.'},
-AAVE:{name:'Aave',fa:'آوه',description:'آوه پروتکل وام‌دهی و وام‌گیری غیرمتمرکز است.'},
-SHIB:{name:'Shiba Inu',fa:'شیبا اینو',description:'شیبا اینو یک توکن مبتنی بر اتریوم است.'},
-PEPE:{name:'Pepe',fa:'پپه',description:'پپه یک میم‌کوین مبتنی بر اتریوم است.'},
-FIL:{name:'Filecoin',fa:'فایل‌کوین',description:'فایل‌کوین بازار غیرمتمرکز ذخیره‌سازی داده ایجاد می‌کند.'},
-ICP:{name:'Internet Computer',fa:'اینترنت کامپیوتر',description:'اینترنت کامپیوتر زیرساخت اجرای سرویس‌ها و برنامه‌ها روی بلاک‌چین است.'},
-USDT:{name:'Tether',fa:'تتر',description:'تتر یک استیبل‌کوین با هدف دنبال‌کردن ارزش دلار آمریکا است؛ قیمت آن ممکن است اندکی نوسان کند.'},
-};
-یک نکته مهم: ارسال قبلی در میانه کد به‌هم خورد و بخش‌هایی تکراری شدند؛ **آن متن را کپی نکن.**
-
-فایل کامل نسخه اصلاح‌شده ۶۸٬۵۳۱ کاراکتر است و در یک پیام متنی از محدودیت طول پاسخ بیشتر می‌شود. نمی‌خواهم کد ناقص تحویلت بدهم. برای ارسال مستقیم و قابل‌کپی، باید آن را در چند پیام پیوسته بفرستم تا در نهایت به یک فایل `index.html` کامل تبدیل شود.
+`html
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0e11">
+<title>DigiArz | صرافی آزمایشی</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+:root{color-scheme:dark;--bg:#0b0e11;--panel:#181a20;--panel2:#20232b;--line:#30343d;--text:#f5f5f5;--muted:#9299a5;--yellow:#f0b90b;--green:#0ecb81;--red:#f6465d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Tahoma,Arial,sans-serif;min-height:100vh}
+button,input,select{font:inherit}button{border:0;border-radius:9px;padding:12px 16px;background:var(--yellow);color:#111;font-weight:800;cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}
+input,select{width:100%;padding:13px;border:1px solid var(--line);border-radius:9px;background:#0b0e11;color:white;outline:none}input:focus,select:focus{border-color:var(--yellow)}
+.wrap{max-width:1280px;margin:auto;padding:14px 15px 45px}.top{display:flex;justify-content:space-between;align-items:center;padding:12px 0 18px;border-bottom:1px solid var(--line)}
+.brand{font-size:27px;font-weight:900;letter-spacing:.5px}.brand span{color:var(--yellow)}.tag{font-size:10px;color:var(--yellow);border:1px solid #79600c;padding:5px 9px;border-radius:5px;margin-right:7px}
+.muted{color:var(--muted)}.small{font-size:11px}.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:18px;margin:15px 0}h2{font-size:18px;margin:0 0 15px}h3{font-size:15px;margin:0 0 12px}.hidden{display:none!important}
+.notice{padding:12px 14px;border-radius:9px;background:#242a33;color:#d5d9df;font-size:12px;line-height:2;margin:12px 0}.notice.warn{background:#332b16;color:#f8d77c}.notice.err{background:#3b1c24;color:#ffb8c1}.notice.ok{background:#123528;color:#a6f0cc}
+.auth{max-width:980px;margin:5vh auto;padding:0;overflow:hidden;display:grid;grid-template-columns:1fr 1.05fr;min-height:570px}.auth-visual{position:relative;display:flex;flex-direction:column;justify-content:space-between;padding:34px;background:radial-gradient(circle at 15% 15%,rgba(240,185,11,.22),transparent 38%),linear-gradient(145deg,#29230d,#171a22 68%,#101318);border-left:1px solid #403719}.auth-visual:after{content:"";position:absolute;width:220px;height:220px;border:1px solid rgba(240,185,11,.18);border-radius:50%;left:-75px;bottom:-85px;box-shadow:0 0 0 25px rgba(240,185,11,.035),0 0 0 55px rgba(240,185,11,.025)}.auth-brand{font-size:31px;font-weight:900;letter-spacing:.4px}.auth-brand span{color:var(--yellow)}.auth-kicker{color:#d9bd5d;font-size:12px;letter-spacing:1px}.auth-headline{font-size:27px;line-height:1.8;font-weight:900;margin:18px 0}.auth-copy{color:#b8bec8;font-size:13px;line-height:2.2;max-width:350px}.auth-benefits{display:grid;gap:12px;margin-top:25px}.auth-benefit{display:flex;align-items:center;gap:10px;color:#e0e3e8;font-size:12px}.auth-benefit i{width:30px;height:30px;border:1px solid #594919;border-radius:9px;display:grid;place-items:center;color:var(--yellow)}.auth-form{padding:34px 38px;display:flex;flex-direction:column;justify-content:center}.auth-form h2{font-size:22px;margin:0 0 8px}.auth-intro{font-size:12px;color:var(--muted);line-height:2;margin-bottom:15px}.auth-form .field{margin:11px 0}.auth-form input{min-height:48px}.auth-actions button{min-height:48px}.auth-security{display:flex;align-items:center;gap:8px;color:#9299a5;font-size:10px;line-height:1.8;margin-top:17px}.auth-security svg{width:16px;color:var(--green);flex:0 0 16px}.field{margin:13px 0}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:8px}.row{display:flex;gap:12px;align-items:center}.row>*{min-width:0}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.stat{background:#101318;border:1px solid #30343d;border-radius:12px;padding:15px;min-width:0}.stat .value{font-size:21px;font-weight:900;margin-top:10px;direction:ltr;text-align:right;overflow-wrap:anywhere}
+.tabs{display:flex;gap:7px;overflow:auto;margin:17px 0;padding:5px 0;scrollbar-width:none}.tabs button{white-space:nowrap;background:#20232b;color:#b8bec8;padding:11px 16px;border:1px solid #30343d}.tabs button.active{background:var(--yellow);color:#111;border-color:var(--yellow)}
+.market-list{display:grid;gap:9px}.coin{direction:ltr;display:grid;grid-template-columns:minmax(0,1fr) minmax(145px,auto) auto;gap:12px;align-items:center;padding:14px;background:#101318;border:1px solid #2b3039;border-radius:11px;font-size:13px;cursor:pointer;min-width:0}.coin:hover,.coin.selected{border-color:var(--yellow);background:#171811}.coin{cursor:pointer}.coin-identity{cursor:pointer}.coin-identity img{cursor:pointer}.coin .price{direction:ltr;text-align:left;font-weight:800}.coin .toman{direction:rtl;text-align:right;color:var(--green);font-weight:800}.ltr{direction:ltr;text-align:left}
+.trade-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.trade-box{background:#101318;border:1px solid var(--line);padding:17px;border-radius:12px}.buy{background:var(--green);color:#061a12}.sell{background:var(--red);color:white}.secondary{background:#30343d;color:#f5f5f5}.danger{background:#512430;color:#ffd8df}
+.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:520px;font-size:12px}th,td{padding:13px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}th{color:var(--muted);font-weight:500}
+.footer{text-align:center;color:#68717d;font-size:11px;margin:25px 0;line-height:2}.auth-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}.auth-actions button{width:100%}
+.fx-box{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:#101318;border:1px solid #3d351d;border-radius:11px;padding:15px;margin:12px 0}.fx-price{font-size:19px;font-weight:900;color:var(--yellow)}
+.hero{background:linear-gradient(115deg,#29230d,#181a20 60%,#20232b);border:1px solid #5d4b15;border-radius:17px;padding:22px;margin-top:17px}.hero-top{display:flex;justify-content:space-between;align-items:center;gap:10px}.hero-label{color:#c3b47d;font-size:12px}.hero-title{font-size:25px;font-weight:900;margin:10px 0}.hero-sub{font-size:12px;color:#aeb3bd;line-height:2}.hero-mark{font-size:42px;color:var(--yellow);font-weight:900}
+.section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}.section-title h2{margin:0}.live{color:var(--green);font-size:11px;display:flex;align-items:center;gap:6px}.live:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green)}
+.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.quick button{width:100%;padding:13px 5px}.quick .secondary{border:1px solid var(--line)}
+.market-note{font-size:11px;color:var(--muted);line-height:2;margin-top:13px}
+.market-tools{display:grid;grid-template-columns:minmax(160px,1fr) 180px;gap:10px;margin:12px 0}.chart-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}.chart-symbol{font-weight:900;font-size:17px;direction:ltr}.chart-price{color:var(--yellow);font-weight:900;direction:ltr}.timeframes{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.timeframes button{background:#252a33;color:#c8ced8;border:1px solid #363d48;padding:8px 11px;font-size:11px}.timeframes button.active{background:var(--yellow);color:#111;border-color:var(--yellow)}
+#priceChart{height:360px;width:100%;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#101318}.chart-caption{font-size:11px;color:var(--muted);line-height:2;margin-top:9px}.market-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:12px 0}.market-summary .stat{padding:12px}.market-summary .value{font-size:15px}.performance-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:12px 0}.performance-item{background:#101318;border:1px solid #30343d;border-radius:10px;padding:11px;min-width:0}.performance-item small{display:block;color:var(--muted);font-size:10px}.performance-item strong{display:block;margin-top:7px;font-size:14px;direction:ltr;text-align:right;white-space:nowrap}.performance-item .pos{color:var(--green)}.performance-item .neg{color:var(--red)}.coin-icon{width:30px;height:30px;border-radius:50%;background:#252a33;display:inline-flex;align-items:center;justify-content:center;color:var(--yellow);font-weight:900;margin-left:8px;overflow:hidden;flex:0 0 30px}.coin-icon img{width:100%;height:100%;object-fit:contain;image-rendering:auto}.coin-identity{direction:rtl;display:flex;align-items:center;gap:9px;min-width:0;justify-content:flex-start}.coin-identity b{direction:rtl;text-align:right;white-space:normal;line-height:1.6}.coin-identity .coin-en{display:block;color:var(--muted);font-size:10px;font-weight:500;direction:ltr;text-align:right}.coin .price-stack{align-items:flex-end;min-width:0}.coin .price-usd{font-size:12px;color:#d9dde5}.coin .price-toman{font-size:14px;color:var(--yellow);font-weight:900}.coin-actions{display:flex;align-items:center;gap:7px}.coin{touch-action:manipulation}.coin:focus-visible{outline:2px solid var(--yellow);outline-offset:2px}.price-stack{display:flex;flex-direction:column;gap:4px;align-items:flex-start}.price-usd{direction:ltr;text-align:right;font-size:12px;color:#d9dde5;font-weight:700}.price-toman{direction:rtl;text-align:right;font-size:13px;color:var(--yellow);font-weight:900}/* DigiArz market enhancement */
+.coin-icon{width:40px;height:40px;flex:0 0 40px;margin-left:0;border-radius:50%;}
+.coin-icon img,.asset-logo{width:40px;height:40px;object-fit:contain;image-rendering:auto;}
+.asset-logo{flex:0 0 40px;border-radius:50%;}
+.coin-identity{gap:10px;}
+.market-highlights{display:grid;grid-template-columns:1fr;gap:15px;margin:16px 0;}
+.gainers-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;}
+.gainer-card{min-width:0;padding:11px;background:#101318;border:1px solid #2b3039;border-radius:11px;display:flex;align-items:center;gap:8px;cursor:pointer;}
+.gainer-card .gainer-info{min-width:0;flex:1;}
+.gainer-card b,.gainer-card small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.gainer-card small{font-size:10px;color:var(--muted);margin-top:4px;}
+.gainer-card strong{display:block;color:var(--green);font-size:12px;direction:ltr;white-space:nowrap;}
+.volatility-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;}
+.change-pos{color:var(--green)!important}.change-neg{color:var(--red)!important}
+.market-note{line-height:2.1}
+@media(max-width:700px){.gainers-grid{grid-template-columns:repeat(2,minmax(0,1fr));}.gainer-card:last-child{grid-column:1/-1}.volatility-grid{grid-template-columns:repeat(3,minmax(0,1fr));}}
+.market-categories{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:14px 0}.category-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:76px;padding:10px 5px;background:#101318;border:1px solid #30343d;color:#d5d9df;border-radius:12px;font-size:11px;font-weight:700}.category-btn svg{width:20px;height:20px;stroke:var(--yellow)}.category-btn.active{border-color:var(--yellow);background:#29230d;color:#fff}.favorite-btn{background:transparent;color:var(--yellow);padding:4px 7px;border:1px solid #3b3520;border-radius:8px}.favorite-btn svg{width:17px;height:17px;vertical-align:middle}.asset-logo{width:32px;height:32px;border-radius:50%;object-fit:cover;background:#252a33}.asset-row{display:grid;grid-template-columns:minmax(120px,1fr) minmax(120px,1fr) auto;align-items:center;gap:10px;padding:12px;background:#101318;border:1px solid #2b3039;border-radius:11px}.asset-row .price-stack{align-items:flex-start}.asset-symbol{display:flex;align-items:center;gap:8px;font-weight:800}.asset-symbol small{display:block;color:var(--muted);font-size:10px;font-weight:500}.icon-tab{display:inline-flex;align-items:center;gap:7px}.icon-tab svg{width:16px;height:16px}.coin{grid-template-columns:minmax(0,1fr) minmax(125px,auto) auto}.coin .toman{display:block}
+.asset-detail-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0 16px}.asset-detail-head .asset-logo{width:48px;height:48px}.asset-detail-title{font-size:21px;font-weight:900}.asset-detail-sub{font-size:12px;color:var(--muted);direction:ltr}.detail-price{margin-right:auto;text-align:left;direction:ltr;color:var(--yellow);font-size:19px;font-weight:900}.detail-description{color:#c6cbd4;font-size:13px;line-height:2.1}.chart-types{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.chart-types button{background:#252a33;color:#c8ced8;border:1px solid #363d48;padding:8px 12px;font-size:11px}.chart-types button.active{background:var(--yellow);color:#111;border-color:var(--yellow)}.review-form{display:grid;gap:10px}.review-form textarea{width:100%;min-height:90px;padding:12px;border:1px solid var(--line);border-radius:9px;background:#0b0e11;color:white;font:inherit;resize:vertical}.review-row{padding:13px;background:#101318;border:1px solid var(--line);border-radius:10px;margin:9px 0}.review-meta{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:11px;margin-bottom:8px}.news-item{padding:13px;background:#101318;border:1px solid var(--line);border-radius:10px;margin:9px 0}.news-item a{color:var(--text);text-decoration:none;font-weight:700;line-height:1.9}.news-item a:hover{color:var(--yellow)}.news-meta{display:flex;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:11px;margin-top:7px}.review-stars{color:var(--yellow);letter-spacing:2px}.detail-trade{margin-top:18px}.detail-section{margin-top:20px;padding-top:17px;border-top:1px solid var(--line)}
+@media(max-width:760px){.auth{grid-template-columns:1fr;min-height:auto}.auth-visual{min-height:300px;padding:25px}.auth-form{padding:25px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.trade-grid{grid-template-columns:1fr}.coin{grid-template-columns:minmax(0,1fr) minmax(112px,auto) auto;gap:8px}.hero{padding:18px}.hero-title{font-size:21px}.quick{gap:7px}.tabs button{padding:10px 13px}.market-tools{grid-template-columns:1fr}.market-summary{grid-template-columns:1fr 1fr}.performance-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#priceChart{height:300px}}
+</style>
