@@ -119,6 +119,15 @@ input,select,textarea{background:#fff;color:#20242b;border-color:#dfe5ed}input:f
 .footer{color:#87909c}
 @media(max-width:700px){.wrap{padding:8px 10px calc(95px + env(safe-area-inset-bottom))}.top{margin:0 -10px;padding:12px 14px}.brand{font-size:25px}.market-announcement{margin:12px 0 9px;padding:11px 12px;font-size:11px}.reference-market-strip{padding:13px 11px}.reference-strip-content{grid-template-columns:1fr;gap:7px}.reference-mini{padding:9px 10px}.reference-mini strong{font-size:9px}.tabs{gap:2px}.tabs button{font-size:10px;min-width:0;flex-direction:column;gap:3px}.hero{margin-top:12px}.card{padding:14px}.coin{background:#fff}.footer{margin-bottom:8px}}
 
+
+/* DigiArz market row layout correction: logo opposite the name, 24h change centered */
+.coin{grid-template-columns:minmax(0,1fr) minmax(82px,auto) minmax(125px,auto) auto!important;gap:12px!important}
+.coin-identity{direction:rtl!important;flex-direction:row!important;justify-content:flex-start!important;gap:9px!important}
+.coin-identity .coin-icon{margin:0!important}
+.coin-change-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:82px;text-align:center}
+.coin-change{font-size:14px!important;min-width:76px;padding:7px 9px!important}
+.coin-volume{text-align:center}
+@media(max-width:700px){.coin{grid-template-columns:minmax(0,1fr) minmax(72px,auto) minmax(105px,auto) auto!important;gap:7px!important;padding:11px 9px!important}.coin-identity{gap:6px!important}.coin-identity b{font-size:12px}.coin-change-wrap{min-width:72px}.coin-change{font-size:12px!important;min-width:68px;padding:6px 5px!important}.coin .price-toman{font-size:12px}}
 </style>
 </head>
 <body>
@@ -420,7 +429,7 @@ function renderMarkets(){
   const priceMarkup=displayCurrencyMode==='usd'?usdMarkup:displayCurrencyMode==='toman'?tomanMarkup:usdMarkup+tomanMarkup;
   const changeMarkup=change===null?'<span class="coin-change">—</span>':`<span class="coin-change ${change>0?'pos':change<0?'neg':''}" aria-label="تغییر ۲۴ ساعته">${change>0?'+':''}${formatNum(change,2)}٪</span>`;
   const volumeMarkup=activeMarketCategory==='volume'&&ticker&&Number.isFinite(ticker.quoteVolume)?`<small class="coin-volume">حجم ۲۴س: ${formatNum(ticker.quoteVolume,0)}</small>`:'';
-  div.innerHTML=`<div class="coin-identity">${coinLogo(base)}<span><b>${safeText(persianCoinName(item.symbol))}</b><small class="coin-en">${safeText(base)}</small></span></div><div class="price-stack">${priceMarkup}</div><div class="coin-actions">${changeMarkup}${volumeMarkup}<button type="button" class="favorite-btn" aria-label="افزودن به محبوب‌ها" aria-pressed="${favoriteSymbols.includes(item.symbol)?'true':'false'}" data-favorite="${safeText(item.symbol)}"><i data-lucide="star" style="${favoriteSymbols.includes(item.symbol)?'fill:var(--yellow);':''}"></i></button></div>`;
+  div.innerHTML=`<div class="coin-identity"><span><b>${safeText(persianCoinName(item.symbol))}</b><small class="coin-en">${safeText(base)}</small></span>${coinLogo(base)}</div><div class="coin-change-wrap">${changeMarkup}${volumeMarkup}</div><div class="price-stack">${priceMarkup}</div><div class="coin-actions"><button type="button" class="favorite-btn" aria-label="افزودن به محبوب‌ها" aria-pressed="${favoriteSymbols.includes(item.symbol)?'true':'false'}" data-favorite="${safeText(item.symbol)}"><i data-lucide="star" style="${favoriteSymbols.includes(item.symbol)?'fill:var(--yellow);':''}"></i></button></div>`;
   div.querySelector('[data-favorite]').addEventListener('click',e=>{e.stopPropagation();const sym=item.symbol;favoriteSymbols=favoriteSymbols.includes(sym)?favoriteSymbols.filter(x=>x!==sym):[...favoriteSymbols,sym];try{localStorage.setItem('digiArzFavorites',JSON.stringify(favoriteSymbols))}catch(storageError){console.warn('Favorite preference could not be saved on this device:',storageError)}renderMarkets()});
   div.addEventListener('click',()=>openChart(item.symbol));
   div.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openChart(item.symbol)}});
