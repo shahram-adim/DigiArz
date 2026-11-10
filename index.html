@@ -85,30 +85,6 @@ body.light-theme .volatility-panel,body.light-theme .gainers-panel{background:#f
 .toman-stale{color:var(--red)}.toman-fresh{color:var(--green)}
 @media(max-width:700px){.toman-toolbar{grid-template-columns:1fr}.toman-table{min-width:980px}}
 
-
-/* Bit24-inspired DigiArz home refresh: original brand, real backend and demo-only trades remain intact. */
-:root{color-scheme:light;--bg:#f3f5f8;--panel:#fff;--panel2:#f7f9fc;--line:#e6eaf0;--text:#20242b;--muted:#737b86;--yellow:#0878ee;--green:#229d78;--red:#d84b5b;--soft:#f7f9fc}
-body{background:#f3f5f8;color:#20242b}
-.wrap{max-width:1180px;padding:12px 18px 100px}
-.top{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);margin:0 -18px;padding:15px 22px;border-bottom:1px solid #edf0f4;box-shadow:0 2px 12px rgba(24,39,75,.04)}
-.brand{font-size:29px;color:#101828}.brand span:first-child{color:#0878ee}.tag{background:#eaf3ff;color:#0878ee;border-color:#cfe3ff}
-.card,.stat,.trade-box,.coin,.asset-row,.performance-item,.indicator-panel,.fx-box{background:#fff;border-color:#e7ebf1;box-shadow:0 4px 18px rgba(30,45,70,.035)}
-.hero{background:linear-gradient(115deg,#e8f4ff,#fff 62%,#f0f7ff);border:1px solid #d9eaff;color:#20242b;box-shadow:0 6px 24px rgba(8,120,238,.06)}
-.hero-label,.hero-sub{color:#66758a}.hero-title{color:#14243a}.hero-mark{color:#0878ee}
-button{background:#0878ee;color:white;border-radius:11px}button.secondary,.tabs button{background:#f2f5f9;color:#3d4653;border:1px solid #e4e9f0}.tabs button.active,.timeframes button.active{background:#0878ee;color:white;border-color:#0878ee}
-input,select,textarea{background:#fff;color:#20242b;border-color:#dfe5ed}input:focus,select:focus{border-color:#0878ee}
-.stat{background:#fff}.stat .value{color:#20242b}.coin{background:#fff;border-color:#e9edf2}.coin:hover,.coin.selected{background:#f2f8ff;border-color:#0878ee}.coin .price-usd{color:#20242b}.coin .price-toman,.price-toman,.fx-price{color:#0878ee}
-.market-note,.chart-caption{color:#78818d}.notice{background:#eff6ff;color:#42536a}.notice.warn{background:#fff7e5;color:#80601a}.notice.err{background:#fff0f1;color:#a92d3c}.notice.ok{background:#eaf8f1;color:#176b4c}
-#priceChart,#volumeChart{background:#fff;border-color:#e7ebf1}.trade-box{background:#f9fbfd}.buy{background:#1eaa7b;color:white}.sell{background:#df5261;color:white}
-.auth{box-shadow:0 12px 40px rgba(30,45,70,.08)}.auth-form{background:#fff}.auth-visual{background:radial-gradient(circle at 15% 15%,rgba(8,120,238,.2),transparent 38%),linear-gradient(145deg,#e7f2ff,#f7faff 68%,#eaf3ff);border-color:#dbeaff}.auth-brand span{color:#0878ee}.auth-headline,.auth-benefit{color:#1d3554}.auth-copy{color:#5f7088}.auth-benefit i{color:#0878ee;border-color:#c8ddf7}.auth-kicker{color:#0878ee}
-.market-announcement{display:flex;align-items:center;gap:12px;background:#e8f7ff;color:#23516f;border-radius:12px;padding:13px 17px;margin:16px 0 12px;font-size:13px;font-weight:700}.announcement-icon{color:#0878ee;font-size:20px}.announcement-pill{margin-right:auto;background:#d4eaff;color:#0878ee;border-radius:20px;padding:4px 10px;font-size:10px}
-.reference-market-strip{margin:12px 0;padding:16px 18px}.reference-market-strip .section-title{margin-bottom:12px}.reference-strip-content{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.reference-mini{display:flex;align-items:center;gap:10px;padding:12px;background:#f8fafc;border:1px solid #edf0f4;border-radius:12px;min-width:0}.reference-mini b{display:block;font-size:13px}.reference-mini small{display:block;color:#7b8490;font-size:10px;direction:ltr;text-align:right}.reference-mini strong{font-size:10px;color:#6f7c8d;margin-right:auto;text-align:left;line-height:1.7}.reference-coin{width:37px;height:37px;border-radius:50%;display:grid;place-items:center;color:white;font-size:21px;font-weight:900;flex:0 0 37px}.reference-coin.btc{background:#f49b22}.reference-coin.eth{background:#6875cf}.reference-coin.usdt{background:#269d7c}
-.tabs{position:fixed;z-index:40;bottom:0;left:0;right:0;margin:0;padding:8px max(10px,env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom));background:rgba(255,255,255,.97);backdrop-filter:blur(14px);border-top:1px solid #e7ebf1;justify-content:space-around;box-shadow:0 -4px 20px rgba(30,45,70,.06)}.tabs button{flex:1;display:flex;justify-content:center;align-items:center;min-height:48px;padding:8px 6px;font-size:11px;border:0;background:transparent}.tabs button.active{background:#eaf3ff;color:#0878ee;border-radius:12px}.tabs button svg{width:17px;height:17px}
-.section-title h2{color:#202b3a}.live{color:#229d78}.live:before{background:#229d78}.market-categories .category-btn{background:#f8fafc;color:#465365;border-color:#e7ebf1}.market-categories .category-btn.active{background:#eaf3ff;color:#0878ee;border-color:#b9d8ff}.category-btn svg{stroke:#0878ee}
-.gainers-panel,.top-assets-panel,.volatility-panel{background:#fff;border-color:#e7ebf1}.top-assets-strip{background:transparent}.top-asset-card{background:#f8fafc;border-color:#e7ebf1}
-.footer{color:#87909c}
-@media(max-width:700px){.wrap{padding:8px 10px calc(95px + env(safe-area-inset-bottom))}.top{margin:0 -10px;padding:12px 14px}.brand{font-size:25px}.market-announcement{margin:12px 0 9px;padding:11px 12px;font-size:11px}.reference-market-strip{padding:13px 11px}.reference-strip-content{grid-template-columns:1fr;gap:7px}.reference-mini{padding:9px 10px}.reference-mini strong{font-size:9px}.tabs{gap:2px}.tabs button{font-size:10px;min-width:0;flex-direction:column;gap:3px}.hero{margin-top:12px}.card{padding:14px}.coin{background:#fff}.footer{margin-bottom:8px}}
-
 </style>
 </head>
 <body>
@@ -140,8 +116,6 @@ input,select,textarea{background:#fff;color:#20242b;border-color:#dfe5ed}input:f
 </section>
 
 <main id="appView" class="hidden">
- <div class="market-announcement"><span class="announcement-icon">◆</span><span>بازار رمزارزها به‌صورت آزمایشی و با قیمت‌های به‌روز</span><span class="announcement-pill">DEMO</span></div>
- <section class="reference-market-strip card"><div class="section-title"><h2>نگاهی سریع به بازار</h2><span class="live">اطلاعات دریافتی از بازار</span></div><div class="reference-strip-content"><div class="reference-mini"><span class="reference-coin btc">₿</span><div><b>بیت‌کوین</b><small>BTC</small></div><strong>قیمت زنده در فهرست بازار</strong></div><div class="reference-mini"><span class="reference-coin eth">◆</span><div><b>اتریوم</b><small>ETH</small></div><strong>قیمت زنده در فهرست بازار</strong></div><div class="reference-mini"><span class="reference-coin usdt">₮</span><div><b>تتر</b><small>USDT</small></div><strong>قیمت زنده در فهرست بازار</strong></div></div></section>
  <section class="hero"><div class="hero-top"><div><div class="hero-label">داشبورد معاملاتی DigiArz</div><div class="hero-title">بازار رمزارزها</div><div class="hero-sub" id="userEmail">کاربر</div></div><div class="hero-mark">₿</div></div>
  <div class="quick"><button id="heroTradeBtn">معامله</button><button id="heroMarketBtn" class="secondary"><span class="icon-tab"><i data-lucide="chart-no-axes-combined"></i>بازارها</span></button><button id="refreshBtn" class="secondary"><span class="icon-tab"><i data-lucide="refresh-cw"></i>به‌روزرسانی بازار</span></button></div></section>
  <section class="card"><div class="section-title"><h2>نمای کلی حساب</h2><span class="live">حساب آزمایشی</span></div><div class="grid">
@@ -330,11 +304,33 @@ async function discoverMultiExchangeMarkets(){
     if(!/^[A-Z0-9]{2,20}USDT$/.test(symbol)||!Number.isFinite(price)||price<=0)return;
     const old=found.get(symbol);
     if(!old)found.set(symbol,{symbol,price,source,updated_at:now,auto_discovered:true,baseAsset:base||symbol.slice(0,-4),change:Number.isFinite(Number(change))?Number(change):null,quoteVolume:Number.isFinite(Number(quoteVolume))?Number(quoteVolume):null});
-    else {old.source+=' · '+source;if(old.quoteVolume===null&&Number.isFinite(Number(quoteVolume)))old.quoteVolume=Number(quoteVolume);}
+    else {if(!old.source.split(' · ').includes(source))old.source+=' · '+source;if(Number.isFinite(Number(quoteVolume))&&Number(quoteVolume)>Number(old.quoteVolume||0)){old.quoteVolume=Number(quoteVolume);if(Number.isFinite(price)&&price>0)old.price=price;}if(old.change===null&&Number.isFinite(Number(change)))old.change=Number(change);}
   };
   const jobs=[
     (async()=>{const [ir,pr]=await Promise.all([fetch('https://api.binance.com/api/v3/exchangeInfo',{cache:'no-store'}),fetch('https://api.binance.com/api/v3/ticker/24hr',{cache:'no-store'})]);if(!ir.ok||!pr.ok)throw new Error('Binance HTTP');const [info,tickers]=await Promise.all([ir.json(),pr.json()]);const tm=new Map((Array.isArray(tickers)?tickers:[]).map(x=>[x.symbol,x]));for(const p of info.symbols||[]){if(p.status!=='TRADING'||p.isSpotTradingAllowed===false||p.quoteAsset!=='USDT')continue;const t=tm.get(p.symbol);if(t)add(p.symbol,t.lastPrice,'Binance',p.baseAsset,t.priceChangePercent,t.quoteVolume)}})(),
-    (async()=>{const [ir,tr]=await Promise.all([fetch('https://api.bybit.com/v5/market/instruments-info?category=spot',{cache:'no-store'}),fetch('https://api.bybit.com/v5/market/tickers?category=spot',{cache:'no-store'})]);if(!ir.ok||!tr.ok)throw new Error('Bybit HTTP');const [info,tickers]=await Promise.all([ir.json(),tr.json()]);if(info.retCode!==0||tickers.retCode!==0)throw new Error('Bybit response');const tm=new Map((tickers.result?.list||[]).map(x=>[x.symbol,x]));for(const p of info.result?.list||[]){if(p.status!=='Trading'||p.quoteCoin!=='USDT')continue;const t=tm.get(p.symbol);if(t)add(p.symbol,t.lastPrice,'Bybit',p.baseCoin,t.price24hPcnt?Number(t.price24hPcnt)*100:null,t.turnover24h)}})(),
+    (async()=>{
+      const tickerResponse=await fetch('https://api.bybit.com/v5/market/tickers?category=spot',{cache:'no-store'});
+      if(!tickerResponse.ok)throw new Error('Bybit ticker HTTP '+tickerResponse.status);
+      const tickerPayload=await tickerResponse.json();
+      if(tickerPayload.retCode!==0)throw new Error('Bybit ticker response');
+      const tickerMap=new Map((tickerPayload.result?.list||[]).map(x=>[x.symbol,x]));
+      let cursor='',pages=0;
+      do{
+        const url='https://api.bybit.com/v5/market/instruments-info?category=spot&limit=1000'+(cursor?'&cursor='+encodeURIComponent(cursor):'');
+        const response=await fetch(url,{cache:'no-store'});
+        if(!response.ok)throw new Error('Bybit instruments HTTP '+response.status);
+        const payload=await response.json();
+        if(payload.retCode!==0)throw new Error('Bybit instruments response');
+        for(const p of payload.result?.list||[]){
+          if(p.status!=='Trading'||p.quoteCoin!=='USDT')continue;
+          const t=tickerMap.get(p.symbol);
+          if(t)add(p.symbol,t.lastPrice,'Bybit',p.baseCoin,t.price24hPcnt!==undefined?Number(t.price24hPcnt)*100:null,t.turnover24h);
+        }
+        cursor=payload.result?.nextPageCursor||'';
+        pages++;
+        if(pages>20)throw new Error('Bybit pagination safety limit reached');
+      }while(cursor);
+    })(),
     (async()=>{const [ir,tr]=await Promise.all([fetch('https://www.okx.com/api/v5/public/instruments?instType=SPOT',{cache:'no-store'}),fetch('https://www.okx.com/api/v5/market/tickers?instType=SPOT',{cache:'no-store'})]);if(!ir.ok||!tr.ok)throw new Error('OKX HTTP');const [info,tickers]=await Promise.all([ir.json(),tr.json()]);if(info.code!=='0'||tickers.code!=='0')throw new Error('OKX response');const tm=new Map((tickers.data||[]).map(x=>[x.instId,x]));for(const p of info.data||[]){if(p.state!=='live'||p.quoteCcy!=='USDT')continue;const t=tm.get(p.instId);if(t)add(String(p.instId).replace('-',''),'last' in (t||{})?t.last:null,'OKX',p.baseCcy,null,t.volCcy24h)}})()
   ];
   const settled=await Promise.allSettled(jobs);settled.forEach((x,i)=>{if(x.status==='rejected')errors.push(['Binance','Bybit','OKX'][i]+': '+String(x.reason?.message||x.reason))});
@@ -356,7 +352,7 @@ async function submitReview(){const btn=$('submitReviewBtn'),msg=$('reviewMsg'),
 const logoUrl=symbol=>`https://assets.coincap.io/assets/icons/${String(symbol||'').toLowerCase().replace(/[^a-z0-9]/g,'')}@2x.png`;
 function coinLogo(symbol,sizeClass='coin-icon'){const clean=String(symbol||'').replace(/USDT$/i,'').toUpperCase();return `<span class="${sizeClass}"><img src="${logoUrl(clean)}" alt="${safeText(clean)}" loading="lazy" onerror="this.style.display='none';this.parentElement.textContent='${safeText(clean.slice(0,1))}'"></span>`}
 function applyTheme(theme){const light=theme==='light';document.body.classList.toggle('light-theme',light);const btn=$('themeToggle');if(btn)btn.textContent=light?'حالت تیره':'حالت روشن';const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=light?'#f3f5f8':'#0b0e11';try{localStorage.setItem('digiArzTheme',light?'light':'dark')}catch(_){} }
-function initTheme(){let saved='light';try{saved=localStorage.getItem('digiArzTheme')||'light'}catch(_){}applyTheme(saved)}
+function initTheme(){let saved='dark';try{saved=localStorage.getItem('digiArzTheme')||'dark'}catch(_){}applyTheme(saved)}
 function showAllGainers(){activeMarketCategory='gainers';$('marketSearch').value='';$('marketSort').value='change-desc';renderCategoryButtons();renderMarkets();$('marketList').scrollIntoView({behavior:'smooth',block:'start'})}
 function renderTopGainers(){const root=$('topGainersList');if(!root)return;const rows=[...marketRows].map(x=>({item:x,t:marketTickerMap.get(x.symbol)})).filter(x=>x.t&&Number.isFinite(x.t.change)&&x.t.change>0).sort((a,b)=>b.t.change-a.t.change).slice(0,5);if(!rows.length){root.innerHTML='<div class="muted small">اطلاعات رشد ۲۴ ساعته هنوز در دسترس نیست.</div>';return}root.innerHTML='';for(const row of rows){const base=String(row.item.symbol).replace(/USDT$/i,'');const el=document.createElement('button');el.type='button';el.className='gainer-card';el.innerHTML=`${coinLogo(base)}<span><b>${safeText(persianCoinName(row.item.symbol))}</b><small>${safeText(base)}</small></span><strong>+${formatNum(row.t.change,2)}٪</strong><span class="muted small">ورود ←</span>`;el.addEventListener('click',()=>openChart(row.item.symbol));root.appendChild(el)}}
 function renderTopAssets(){const root=$('topAssetsList');if(!root)return;const rows=[...marketRows].map(item=>({item,t:marketTickerMap.get(item.symbol)})).filter(x=>x.t&&Number.isFinite(x.t.quoteVolume)&&x.t.quoteVolume>0).sort((a,b)=>b.t.quoteVolume-a.t.quoteVolume).slice(0,10);if(!rows.length){root.innerHTML='<div class="muted small">اطلاعات حجم معاملات برای رتبه‌بندی در دسترس نیست.</div>';return}root.innerHTML='';for(const row of rows){const symbol=String(row.item.symbol),base=symbol.replace(/USDT$/i,''),usd=Number(row.item.price),toman=Number.isFinite(usd)&&usd>0&&currentFxIsValid?usd*currentFxRate:null;const el=document.createElement('button');el.type='button';el.className='top-asset-card';el.innerHTML=`${coinLogo(base)}<b>${safeText(persianCoinName(symbol))}</b><small>${safeText(base)}</small><span class="top-usd">${Number.isFinite(usd)&&usd>0?formatNum(usd,8)+' $':'—'}</span><span class="top-toman">${toman!==null?formatNum(toman,0)+' تومان':'نرخ تومان ناموجود'}</span><small style="direction:ltr">حجم: ${formatNum(row.t.quoteVolume,0)} USDT</small>`;el.addEventListener('click',()=>openChart(symbol));root.appendChild(el)}}
