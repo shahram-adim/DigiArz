@@ -417,9 +417,34 @@ async function loadAdminPairReview(){
    const row=document.createElement('article');row.className='asset-row';
    const info=document.createElement('div');info.className='asset-symbol';
    const title=document.createElement('span');title.textContent=(a.name||a.symbol)+' · '+a.pair_symbol;
-   const sub=document.createElement('small');sub.textContent='حجم ۲۴س: '+formatNum(a.total_volume_usd,0)+' $ · رتبه: '+(a.market_cap_rank??'نامشخص')+' · قیمت: '+(Number(a.market_price)>0?formatNum(a.market_price,10)+' 
+   const sub=document.createElement('small');sub.textContent='حجم ۲۴س: '+formatNum(a.total_volume_usd,0)+' USD · رتبه: '+(a.market_cap_rank??'نامشخص')+' · قیمت: '+(Number(a.market_price)>0?formatNum(a.market_price,10)+' USD':'دریافت نشده');
+   const reason=document.createElement('small');reason.textContent=a.eligibility_reason||'وضعیت نامشخص';reason.style.color=a.is_enabled?'var(--green)':a.is_eligible?'var(--green)':'var(--red)';
+   title.append(sub,reason);info.append(title);
+   const action=document.createElement('button');action.type='button';
+   if(a.is_enabled){action.className='danger';action.textContent='غیرفعال‌سازی';action.dataset.disableMarketPair=a.coingecko_id}
+   else if(a.is_eligible){action.textContent='فعال‌سازی خریدوفروش';action.dataset.enableMarketPair=a.coingecko_id}
+   else{action.className='secondary';action.textContent='هنوز آماده نیست';action.disabled=true}
+   row.append(info,action);host.append(row);
+  }
+ }catch(e){host.innerHTML='<div class="notice err">بررسی جفت‌ارزها ناموفق بود: '+safeText(e.message||String(e))+'</div>'}
+}
+async function enableAdminMarketPair(button){
+ if(!isSuperAdmin||!button)return;button.disabled=true;hideMessage($('adminPairMsg'));
+ try{
+  const {data,error}=await supabaseClient.rpc('admin_enable_market_pair',{p_coingecko_id:button.dataset.enableMarketPair});if(error)throw error;if(!data||!data.success)throw new Error('سرور فعال‌سازی را تأیید نکرد.');
+  showMessage($('adminPairMsg'),data.pair_symbol+' با قیمت زنده و کنترل‌های سمت سرور فعال شد.','ok');await loadAdminMarketListings();
+ }catch(e){showMessage($('adminPairMsg'),'فعال‌سازی انجام نشد: '+(e.message||String(e)),'err');button.disabled=false;await loadAdminPairReview()}
+}
+async function disableAdminMarketPair(button){
+ if(!isSuperAdmin||!button)return;const id=button.dataset.disableMarketPair;if(!confirm('این جفت‌ارز غیرفعال شود؟ سفارش‌های Limit و حد سود/ضرر باز لغو و موجودی رزروشده آزاد می‌شود.'))return;button.disabled=true;hideMessage($('adminPairMsg'));
+ try{
+  const {data,error}=await supabaseClient.rpc('admin_disable_market_pair',{p_coingecko_id:id,p_reason:'Disabled from DigiArz admin panel'});if(error)throw error;if(!data||!data.success)throw new Error('سرور غیرفعال‌سازی را تأیید نکرد.');
+  showMessage($('adminPairMsg'),data.pair_symbol+' غیرفعال شد؛ '+Number(data.cancelled_open_orders||0).toLocaleString('fa-IR')+' سفارش باز لغو و '+Number(data.reservations_released||0).toLocaleString('fa-IR')+' رزرو آزاد شد.','ok');await loadAdminMarketListings();
+ }catch(e){showMessage($('adminPairMsg'),'غیرفعال‌سازی انجام نشد: '+(e.message||String(e)),'err');button.disabled=false;await loadAdminPairReview()}
+}
+async function addAdminMarketListing(button){
  if(!isSuperAdmin||!button)return;button.disabled=true;hideMessage($('adminAssetMsg'));
- try{const {data,error}=await supabaseClient.rpc('admin_add_market_listing',{p_coingecko_id:button.dataset.addMarketAsset});if(error)throw error;if(!data||!data.success)throw new Error('سرور افزودن ارز را تأیید نکرد.');showMessage($('adminAssetMsg'),(data.name||data.symbol)+' به فهرست ارزهای جدید اضافه شد. این ارز فعلاً فقط نمایشی است.','ok');await loadAdminMarketListings();await loadFeaturedMarketAssets()}
+ try{const {data,error}=await supabaseClient.rpc('admin_add_market_listing',{p_coingecko_id:button.dataset.addMarketAsset});if(error)throw error;if(!data||!data.success)throw new Error('سرور افزودن ارز را تأیید نکرد.');showMessage($('adminAssetMsg'),(data.name||data.symbol)+' به فهرست ارزهای جدید اضافه شد. قیمت زنده در چرخه بعدی دریافت می‌شود.','ok');await loadAdminMarketListings();await loadFeaturedMarketAssets()}
  catch(e){showMessage($('adminAssetMsg'),'افزودن ارز انجام نشد: '+(e.message||String(e)),'err');button.disabled=false}
 }
 async function removeAdminMarketListing(button){
