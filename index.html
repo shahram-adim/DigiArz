@@ -376,13 +376,48 @@ async function searchAdminAssets(){
  try{
   const {data,error}=await supabaseClient.rpc('get_crypto_assets',{p_search:q,p_limit:20,p_offset:0,p_sort:'rank'});if(error)throw error;
   host.replaceChildren();
-  if(!data?.length){host.innerHTML='<div class="muted small">ارزی با این نام یا نماد پیدا نشد.</div>';return}
+  if(!data||!data.length){host.innerHTML='<div class="muted small">ارزی با این نام یا نماد پیدا نشد.</div>';return}
   for(const a of data){
    const row=document.createElement('article');row.className='asset-row';
    const info=document.createElement('div');info.className='asset-symbol';
    const title=document.createElement('span');title.textContent=(a.name||a.symbol)+' · '+a.symbol;
    const sub=document.createElement('small');sub.textContent='CoinGecko ID: '+a.coingecko_id+' · رتبه: '+(a.market_cap_rank??'—');title.append(sub);info.append(title);
-   const price=document.createElement('div');price.className='price-stack';price.textContent=Number(a.current_price_usd)>0?formatNum(a.current_price_usd,10)+' 
+   const price=document.createElement('div');price.className='price-stack';price.textContent=Number(a.current_price_usd)>0?formatNum(a.current_price_usd,10)+' $':'قیمت ناموجود';
+   const add=document.createElement('button');add.type='button';add.textContent='افزودن به بازار جدید';add.dataset.addMarketAsset=a.coingecko_id;
+   row.append(info,price,add);host.append(row);
+  }
+ }catch(e){showMessage($('adminAssetMsg'),'جست‌وجوی ارز ناموفق بود: '+(e.message||String(e)),'err');host.replaceChildren()}
+ finally{$('adminAssetSearchBtn').disabled=false}
+}
+async function loadAdminMarketListings(){
+ if(!isSuperAdmin)return;const host=$('adminAssetListings');if(!host)return;host.innerHTML='<div class="muted small">در حال دریافت فهرست…</div>';
+ try{
+  const {data,error}=await supabaseClient.rpc('get_admin_market_listings');if(error)throw error;
+  host.replaceChildren();
+  if(!data||!data.length){host.innerHTML='<div class="muted small">هنوز ارزی توسط مدیر به فهرست جدید اضافه نشده است.</div>';featuredMarketRows=[];if(activeMarketCategory==='new')renderMarkets();return}
+  for(const a of data){
+   const row=document.createElement('article');row.className='asset-row';
+   const info=document.createElement('div');info.className='asset-symbol';
+   const label=document.createElement('span');label.textContent=(a.name||a.symbol)+' · '+a.symbol;
+   const small=document.createElement('small');small.textContent='افزوده‌شده: '+(a.added_at?new Date(a.added_at).toLocaleString('fa-IR'):'—');label.append(small);info.append(label);
+   const price=document.createElement('div');price.className='price-stack';price.textContent=Number(a.current_price_usd)>0?formatNum(a.current_price_usd,10)+' $':'قیمت ناموجود';
+   const remove=document.createElement('button');remove.type='button';remove.className='danger';remove.textContent='حذف از فهرست';remove.dataset.removeMarketAsset=a.coingecko_id;
+   row.append(info,price,remove);host.append(row);
+  }
+  await loadFeaturedMarketAssets();
+ }catch(e){host.innerHTML='<div class="notice err">دریافت فهرست ارزهای مدیر ناموفق بود: '+safeText(e.message||String(e))+'</div>'}
+}
+async function addAdminMarketListing(button){
+ if(!isSuperAdmin||!button)return;button.disabled=true;hideMessage($('adminAssetMsg'));
+ try{const {data,error}=await supabaseClient.rpc('admin_add_market_listing',{p_coingecko_id:button.dataset.addMarketAsset});if(error)throw error;if(!data||!data.success)throw new Error('سرور افزودن ارز را تأیید نکرد.');showMessage($('adminAssetMsg'),(data.name||data.symbol)+' به فهرست ارزهای جدید اضافه شد. این ارز فعلاً فقط نمایشی است.','ok');await loadAdminMarketListings();await loadFeaturedMarketAssets()}
+ catch(e){showMessage($('adminAssetMsg'),'افزودن ارز انجام نشد: '+(e.message||String(e)),'err');button.disabled=false}
+}
+async function removeAdminMarketListing(button){
+ if(!isSuperAdmin||!button)return;const id=button.dataset.removeMarketAsset;if(!confirm('این ارز از فهرست «ارزهای جدید» حذف شود؟'))return;button.disabled=true;hideMessage($('adminAssetMsg'));
+ try{const {data,error}=await supabaseClient.rpc('admin_remove_market_listing',{p_coingecko_id:id});if(error)throw error;if(!data||!data.success)throw new Error('حذف ارز تأیید نشد.');showMessage($('adminAssetMsg'),'ارز از فهرست جدید حذف شد. سوابق معاملات و کاتالوگ اصلی دست‌نخورده ماند.','ok');await loadAdminMarketListings();await loadFeaturedMarketAssets()}
+ catch(e){showMessage($('adminAssetMsg'),'حذف ارز انجام نشد: '+(e.message||String(e)),'err');button.disabled=false}
+}
+function renderMarketPriceFreshness(){
  const el=$('marketPriceFreshness');if(!el)return;
  const rows=(marketRows||[]).filter(x=>x.updated_at&&Number(x.price)>0);
  if(!rows.length){el.textContent='منبع قیمت‌ها: داده‌ای در سرور موجود نیست.';return}
