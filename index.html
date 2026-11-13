@@ -736,7 +736,7 @@ async function loadConditionalOrders(){
  if(userError||!userData.user)throw userError||new Error('برای مشاهده سفارش‌ها وارد حساب شوید.');
  const {data,error}=await supabaseClient.from('conditional_orders')
   .select('id,order_id,symbol,order_kind,trigger_price,amount,status,created_at')
-  .eq('user_id',userData.user.id).eq('status','pending').order('created_at',{ascending:true}).limit(100);
+  .eq('user_id',userData.user.id).in('order_kind',['take_profit','stop_loss']).eq('status','pending').order('created_at',{ascending:true}).limit(100);
  if(error)throw error;
  root.replaceChildren();
  if(!data?.length){const empty=document.createElement('div');empty.className='muted small';empty.textContent='سفارش شرطی بازی وجود ندارد.';root.append(empty);return}
@@ -821,7 +821,7 @@ async function loadOpenOrders(){
   .in('status',['pending','partially_filled']).order('created_at',{ascending:true}).limit(100);
  if(error)throw error;
  root.innerHTML='';
- if(!data?.length){root.innerHTML='<div class="muted small">سفارش Limit بازی وجود ندارد.</div>';await loadConditionalOrders();return}
+ if(!data?.length){root.innerHTML='<div class="muted small">سفارش Limit بازی وجود ندارد.</div>';await loadConditionalOrders();await loadStopLimitOrders();return}
  const ids=data.map(o=>o.id),symbols=[...new Set(data.map(o=>o.symbol))];
  const [reservationResult,priceResult]=await Promise.all([
   supabaseClient.from('order_reservations')
