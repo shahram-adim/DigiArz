@@ -1,0 +1,23 @@
+{
+  "id": "./",
+  "name": "DigiArz | صرافی آزمایشی",
+  "short_name": "DigiArz",
+  "description": "صرافی آزمایشی رمزارز با موجودی و معاملات مجازی",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0b0e11",
+  "theme_color": "#0b0e11",
+  "categories": ["finance", "utilities"],
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
