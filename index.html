@@ -208,6 +208,7 @@ input,select,textarea{background:#fff;color:#20242b;border-color:#dfe5ed}input:f
  <section id="tab-markets" class="card">
   <div class="section-title"><h2>بازار رمزارزها</h2><span class="live">قیمت‌های ثبت‌شده در سرور</span></div>
   <div class="fx-box"><div><div class="muted small">نرخ دلار آزاد</div><div class="fx-price" id="fxRate">در حال دریافت...</div></div><div class="muted small" id="fxUpdated">منبع: —</div></div>
+  <div id="marketPriceFreshness" class="market-note" aria-live="polite">در حال بررسی منبع و زمان به‌روزرسانی قیمت‌ها…</div>
   <div id="marketCategories" class="market-categories"></div>
   <div class="volatility-panel" aria-live="polite"><div class="volatility-title">نمای نوسان بازار در ۲۴ ساعت گذشته</div><div class="volatility-grid"><div class="volatility-stat"><small>میانگین تغییر بازار</small><strong id="marketAvgChange">—</strong></div><div class="volatility-stat"><small>بیشترین افزایش</small><strong id="marketTopGain">—</strong></div><div class="volatility-stat"><small>بیشترین کاهش</small><strong id="marketTopLoss">—</strong></div></div><div class="volatility-updated" id="marketTickerUpdated">در انتظار دریافت داده‌های ۲۴ ساعته بازارهای جهانی</div></div>
   <section class="gainers-panel" aria-live="polite"><div class="gainers-head"><strong>۵ ارز با بیشترین رشد ۲۴ ساعته</strong><small>بر اساس داده زنده بازار</small></div><div id="topGainersList" class="gainers-grid"><div class="muted small">در انتظار دریافت اطلاعات بازار…</div></div><button type="button" id="allGainersBtn" class="gainers-more">مشاهده همه ارزهای افزایشی <span aria-hidden="true">←</span></button></section>
@@ -362,7 +363,19 @@ async function fetchAllSupabaseRows(queryFactory,pageSize=1000){
  while(true){const {data,error}=await queryFactory().range(offset,offset+pageSize-1);if(error)throw error;const page=data||[];all.push(...page);if(page.length<pageSize)break;offset+=pageSize;}
  return all;
 }
-async function loadMarkets(){const [marketData,fr]=await Promise.all([fetchAllSupabaseRows(()=>supabaseClient.from('market_prices').select('symbol,price,source,updated_at').order('symbol')),supabaseClient.from('market_fx_rates').select('price_toman,source,source_updated_at,is_stale').eq('symbol','USD_IRT').maybeSingle()]);const fx=fr.data;currentFxRate=null;currentFxIsValid=false;if(!fr.error&&fx){const rate=Number(fx.price_toman),updated=fx.source_updated_at?new Date(fx.source_updated_at).getTime():0,age=Date.now()-updated;if(Number.isFinite(rate)&&rate>0&&fx.is_stale===false&&updated>0&&age>=-120000&&age<=1200000){currentFxRate=rate;currentFxIsValid=true;$('fxRate').textContent=formatNum(rate,0)+' تومان';$('fxUpdated').textContent='آخرین به‌روزرسانی: '+new Date(fx.source_updated_at).toLocaleString('fa-IR')}else{$('fxRate').textContent='نرخ دلار قدیمی است';$('fxUpdated').textContent='به‌روزرسانی نرخ را بررسی کنید.'}}else{$('fxRate').textContent='نرخ دلار دریافت نشد';$('fxUpdated').textContent=fr.error?'خطا در دریافت نرخ دلار':'نرخ ثبت نشده است'}marketRows=marketData||[];renderCategoryButtons();renderMarkets();await refreshAutoMarkets();await refreshMarketTickers();renderMarkets()}
+async function loadMarkets(){const [marketData,fr]=await Promise.all([fetchAllSupabaseRows(()=>supabaseClient.from('market_prices').select('symbol,price,source,updated_at').order('symbol')),supabaseClient.from('market_fx_rates').select('price_toman,source,source_updated_at,is_stale').eq('symbol','USD_IRT').maybeSingle()]);const fx=fr.data;currentFxRate=null;currentFxIsValid=false;if(!fr.error&&fx){const rate=Number(fx.price_toman),updated=fx.source_updated_at?new Date(fx.source_updated_at).getTime():0,age=Date.now()-updated;if(Number.isFinite(rate)&&rate>0&&fx.is_stale===false&&updated>0&&age>=-120000&&age<=1200000){currentFxRate=rate;currentFxIsValid=true;$('fxRate').textContent=formatNum(rate,0)+' تومان';$('fxUpdated').textContent='منبع: '+safeText(fx.source||'نامشخص')+' · زمان منبع: '+new Date(fx.source_updated_at).toLocaleString('fa-IR')}else{$('fxRate').textContent='نرخ دلار قدیمی است';$('fxUpdated').textContent='به‌روزرسانی نرخ را بررسی کنید.'}}else{$('fxRate').textContent='نرخ دلار دریافت نشد';$('fxUpdated').textContent=fr.error?'خطا در دریافت نرخ دلار':'نرخ ثبت نشده است'}marketRows=marketData||[];renderMarketPriceFreshness();renderCategoryButtons();renderMarkets();await refreshAutoMarkets();await refreshMarketTickers();renderMarkets()}
+function renderMarketPriceFreshness(){
+ const el=$('marketPriceFreshness');if(!el)return;
+ const rows=(marketRows||[]).filter(x=>x.updated_at&&Number(x.price)>0);
+ if(!rows.length){el.textContent='منبع قیمت‌ها: داده‌ای در سرور موجود نیست.';return}
+ const times=rows.map(x=>new Date(x.updated_at).getTime()).filter(Number.isFinite);
+ if(!times.length){el.textContent='زمان دریافت قیمت‌ها معتبر نیست؛ تا بررسی منبع، به تازگی داده‌ها اعتماد نکنید.';return}
+ const newest=Math.max(...times),oldest=Math.min(...times),age=Date.now()-oldest;
+ const sources=[...new Set(rows.map(x=>x.source).filter(Boolean))];
+ const state=age>=0&&age<=120000?'به‌روز':age>120000?'قدیمی':'زمان نامعتبر';
+ el.textContent='منبع: '+(sources.join('، ')||'نامشخص')+' · '+rows.length.toLocaleString('fa-IR')+' جفت‌ارز · آخرین دریافت: '+new Date(newest).toLocaleString('fa-IR')+' · وضعیت قدیمی‌ترین قیمت: '+state;
+ el.style.color=state==='به‌روز'?'var(--green)':'var(--red)';
+}
 const marketCategories=[
  {id:'all',label:'همه بازار',icon:'layout-grid'},
  {id:'mine',label:'ارزهای من',icon:'wallet'},
