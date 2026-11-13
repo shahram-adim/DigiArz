@@ -154,7 +154,7 @@ AS $function$
       mp.source AS price_source,
       mp.updated_at AS price_updated_at,
       CASE WHEN mp.updated_at IS NULL THEN NULL
-           ELSE pg_catalog.extract(epoch FROM (pg_catalog.now() - mp.updated_at)) END AS price_age_seconds,
+           ELSE EXTRACT(EPOCH FROM (pg_catalog.now() - mp.updated_at)) END AS price_age_seconds,
       COALESCE(dp.is_enabled, false) AS is_enabled,
       ca.is_active,
       EXISTS (
@@ -393,7 +393,7 @@ BEGIN
     pair_symbol, coingecko_id, action, admin_user_id, reason, validation_snapshot
   )
   VALUES(v_pair.pair_symbol, v_pair.base_coingecko_id, 'disabled', v_admin,
-         pg_catalog.left(pg_catalog.coalesce(p_reason, 'Disabled by super administrator'), 500),
+         pg_catalog.left(COALESCE(p_reason, 'Disabled by super administrator'), 500),
          pg_catalog.jsonb_build_object(
            'cancelled_open_orders', v_cancelled,
            'reservations_released', v_released
