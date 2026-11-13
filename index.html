@@ -288,7 +288,7 @@ const SUPABASE_ANON_KEY='sb_publishable_4rXQLoakyaY9GrfbLOlKAw_YNp3Riwi';
 const $=id=>document.getElementById(id);
 const authView=$('authView'),appView=$('appView'),authMsg=$('authMsg'),tradeMsg=$('tradeMsg');
 let supabaseClient=null,isRecoveryMode=false,currentFxRate=null,currentFxIsValid=false,currentWalletUsdt=0,marketRows=[],marketTickerMap=new Map(),assetRows=[],selectedSymbol='BTCUSDT',chart=null,candleSeries=null,lineSeries=null,areaSeries=null,volumeChart=null,volumeSeries=null,chartType='candle',chartInterval='1h',chartResizeObserver=null,activeMarketCategory='all',performanceRequestId=0,favoriteSymbols=loadFavoriteSymbols(),tomanAssetNames=new Map();
-let displayCurrencyMode='both',marketAutoRefreshTimer=null,isSuperAdmin=false,featuredMarketRows=[];
+let displayCurrencyMode='both',isSuperAdmin=false,featuredMarketRows=[];
 function initCurrencyMode(){try{const saved=localStorage.getItem('digiArzCurrencyMode');if(['usd','toman','both'].includes(saved))displayCurrencyMode=saved}catch(_){}const el=$('marketCurrencyMode');if(el)el.value=displayCurrencyMode}
 function setCurrencyMode(value){displayCurrencyMode=['usd','toman','both'].includes(value)?value:'both';try{localStorage.setItem('digiArzCurrencyMode',displayCurrencyMode)}catch(_){}renderMarkets();}
 function loadFavoriteSymbols(){try{const value=JSON.parse(localStorage.getItem('digiArzFavorites')||'[]');return Array.isArray(value)?value.filter(x=>typeof x==='string'):[]}catch(_){return []}}
@@ -529,10 +529,6 @@ async function refreshAutoMarkets(){
   const status=$('autoMarketStatus');if(status)status.textContent='در حال شناسایی خودکار جفت‌ارزهای اسپات USDT از Binance، Bybit و OKX…';
   try{const result=await discoverMultiExchangeMarkets();const existing=new Set(marketRows.filter(x=>!x.auto_discovered).map(x=>String(x.symbol).toUpperCase()));const fresh=result.rows.filter(x=>!existing.has(x.symbol));marketRows=marketRows.filter(x=>!x.auto_discovered).concat(fresh);if(status)status.textContent=`کشف خودکار: ${fresh.length.toLocaleString('fa-IR')} جفت‌ارز جدید از سه صرافی جهانی. موارد تازه تا همگام‌سازی امن سمت سرور فقط نمایشی هستند.${result.errors.length?' منابع ناموفق: '+result.errors.join('؛ '):''}`;
   }catch(e){if(status)status.textContent='کشف خودکار بازارهای جهانی فعلاً در دسترس نیست؛ فهرست ثبت‌شده در سرور نمایش داده می‌شود.';console.warn('Multi-exchange discovery:',e)}
-}
-async function syncDemoMarketUniverse(showNotice=false){
-  try{const {data,error}=await supabaseClient.functions.invoke('sync-demo-market-universe',{body:{}});if(error)throw error;if(data?.success===false)throw new Error(data.error||'همگام‌سازی بازار انجام نشد');if(showNotice)showMessage(tradeMsg,`همگام‌سازی بازار انجام شد؛ ${Number(data.enabled_pairs||0)} جفت‌ارز فعال شد.`, 'ok');return data}
-  catch(e){console.warn('Server market universe sync:',e);if(showNotice)showMessage(tradeMsg,'همگام‌سازی خودکار سمت سرور هنوز نصب نشده یا در دسترس نیست. بازارهای تازه فعلاً فقط برای مشاهده‌اند.','err');return null}
 }
 function currentBase(){return String(selectedSymbol||'BTCUSDT').toUpperCase().replace(/USDT$/,'')}
 function setChartType(type){chartType=['candle','line','area'].includes(type)?type:'candle';if(candleSeries)candleSeries.applyOptions({visible:chartType==='candle'});if(lineSeries)lineSeries.applyOptions({visible:chartType==='line'});if(areaSeries)areaSeries.applyOptions({visible:chartType==='area'});$('chartTypes')?.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.chartType===chartType))}
