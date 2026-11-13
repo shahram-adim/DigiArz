@@ -382,3 +382,9 @@
 - Migration: `20261113175312_allow_existing_pair_in_admin_asset_listing` (Supabase)
 - فایل migration در GitHub: `baffb2450de9fc64e2df1e7196ae648dba4eb553`
 - [x] پس از ثبت SOL، RPC خواندنی `admin_review_market_listings()` نیز با هویت super_admin اجرا شد: SOL در فهرست دیده می‌شود، `is_enabled=true`، `is_eligible=true` و `eligibility_reason='آماده فعال‌سازی'`. قیمت مرجع بازار CoinGecko نیز در بررسی تازه بود.
+
+
+## پیگیری آزمون دستی رابط کاربری SOL — 2026-11-13
+- [x] کاربر اعلام کرد مرحله بررسی/تازه‌سازی صفحه DigiArz روی گوشی انجام شده است.
+- [ ] نتیجه قابل مشاهده در رابط کاربری (اینکه SOL در فهرست مدیریت و/یا «ارزهای جدید» نمایش داده شده است) هنوز صریحاً گزارش نشده؛ بنابراین تأیید نمایش UI را موفق تلقی نمی‌کنیم.
+- [x] وضعیت دیتابیس بدون تغییر باقی است: SOL در `admin_market_listings` ثبت شده و جفت‌ارز موجود `SOLUSDT` فعال است؛ هیچ رکورد تکراری ساخته نشده است.
