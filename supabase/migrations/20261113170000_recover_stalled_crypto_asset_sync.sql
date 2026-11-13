@@ -29,7 +29,7 @@ BEGIN
 
   IF v_retry_page IS NOT NULL THEN
     UPDATE private.crypto_assets_sync_state
-       SET next_page = pg_catalog.least(next_page, v_retry_page),
+       SET next_page = CASE WHEN next_page < v_retry_page THEN next_page ELSE v_retry_page END,
            scan_complete = false,
            updated_at = pg_catalog.now()
      WHERE singleton = true;
