@@ -422,7 +422,45 @@ async function syncDemoMarketUniverse(showNotice=false){
 }
 function currentBase(){return String(selectedSymbol||'BTCUSDT').toUpperCase().replace(/USDT$/,'')}
 function setChartType(type){chartType=['candle','line','area'].includes(type)?type:'candle';if(candleSeries)candleSeries.applyOptions({visible:chartType==='candle'});if(lineSeries)lineSeries.applyOptions({visible:chartType==='line'});if(areaSeries)areaSeries.applyOptions({visible:chartType==='area'});$('chartTypes')?.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.chartType===chartType))}
-async function loadReviews(){const list=$('reviewList'),summary=$('reviewSummary');list.innerHTML='<div class="muted small">در حال دریافت نظرات…</div>';try{const {data,error}=await supabaseClient.from('coin_reviews').select('id,user_id,rating,comment,created_at').eq('symbol',selectedSymbol).order('created_at',{ascending:false}).limit(50);if(error)throw error;const rows=data||[];if(!rows.length){summary.textContent='هنوز نظری برای این ارز ثبت نشده است.';list.innerHTML='';return}const avg=rows.reduce((a,x)=>a+Number(x.rating||0),0)/rows.length;summary.textContent=`میانگین امتیاز ${avg.toFixed(1)} از ۵ · ${rows.length} نظر`;list.innerHTML='';for(const r of rows){const el=document.createElement('article');el.className='review-row';const meta=document.createElement('div');meta.className='review-meta';const stars=document.createElement('span');stars.className='review-stars';stars.textContent='★'.repeat(Math.max(0,Math.min(5,Number(r.rating)||0)))+'☆'.repeat(5-Math.max(0,Math.min(5,Number(r.rating)||0)));const date=document.createElement('span');date.textContent=r.created_at?new Date(r.created_at).toLocaleDateString('fa-IR'):'—';const body=document.createElement('div');body.textContent=r.comment||'';body.style.cssText='font-size:12px;line-height:2;white-space:pre-wrap';meta.append(stars,date);el.append(meta,body);list.append(el)}}catch(e){summary.textContent='دریافت نظرات ممکن نشد؛ مطمئن شوید جدول coin_reviews در Supabase ساخته شده است.';list.innerHTML=''}}
+async function loadReviews(){
+ const list=$('reviewList'),summary=$('reviewSummary');
+ list.innerHTML='<div class="muted small">در حال دریافت نظرات…</div>';
+ try{
+  const [{data,error},{data:userData}]=await Promise.all([
+   supabaseClient.from('coin_reviews').select('id,user_id,rating,comment,created_at').eq('symbol',selectedSymbol).order('created_at',{ascending:false}).limit(50),
+   supabaseClient.auth.getUser()
+  ]);
+  if(error)throw error;
+  const rows=data||[],viewerId=userData?.user?.id||null;
+  if(!rows.length){summary.textContent='هنوز نظری برای این ارز ثبت نشده است.';list.innerHTML='';return}
+  const avg=rows.reduce((a,x)=>a+Number(x.rating||0),0)/rows.length;
+  summary.textContent=`میانگین امتیاز ${avg.toFixed(1)} از ۵ · ${rows.length} نظر`;
+  list.innerHTML='';
+  for(const r of rows){
+   const el=document.createElement('article');el.className='review-row';
+   const meta=document.createElement('div');meta.className='review-meta';
+   const stars=document.createElement('span');stars.className='review-stars';
+   stars.textContent='★'.repeat(Math.max(0,Math.min(5,Number(r.rating)||0)))+'☆'.repeat(5-Math.max(0,Math.min(5,Number(r.rating)||0)));
+   const date=document.createElement('span');date.textContent=r.created_at?new Date(r.created_at).toLocaleDateString('fa-IR'):'—';
+   const body=document.createElement('div');body.textContent=r.comment||'';body.style.cssText='font-size:12px;line-height:2;white-space:pre-wrap';
+   meta.append(stars,date);el.append(meta,body);
+   if(viewerId&&viewerId!==r.user_id){
+    const report=document.createElement('button');report.type='button';report.className='secondary';report.textContent='گزارش نظر';
+    report.addEventListener('click',async()=>{
+     const reason=window.prompt('دلیل گزارش این نظر را بنویسید (حداقل ۵ نویسه):');
+     if(reason===null)return;
+     if(reason.trim().length<5||reason.trim().length>500){window.alert('دلیل گزارش باید بین ۵ تا ۵۰۰ نویسه باشد.');return}
+     report.disabled=true;
+     const {error:reportError}=await supabaseClient.from('coin_review_reports').insert({review_id:r.id,reporter_user_id:viewerId,reason:reason.trim()});
+     if(reportError){window.alert(reportError.code==='23505'?'این نظر را قبلاً گزارش کرده‌اید.':'ثبت گزارش انجام نشد: '+reportError.message);report.disabled=false;return}
+     report.textContent='گزارش ثبت شد';
+    });
+    el.append(report);
+   }
+   list.append(el);
+  }
+ }catch(e){summary.textContent='دریافت نظرات ممکن نشد؛ اتصال یا دسترسی جدول نظرات را بررسی کنید.';list.innerHTML=''}
+}
 async function submitReview(){const btn=$('submitReviewBtn'),msg=$('reviewMsg'),comment=$('reviewComment').value.trim(),rating=Number($('reviewRating').value);msg.classList.remove('hidden','err','ok');msg.textContent='';btn.disabled=true;try{if(comment.length<5||comment.length>1000)throw new Error('متن نظر باید بین ۵ تا ۱۰۰۰ نویسه باشد.');if(!Number.isInteger(rating)||rating<1||rating>5)throw new Error('امتیاز معتبر نیست.');const {data:{user},error:ue}=await supabaseClient.auth.getUser();if(ue)throw ue;if(!user)throw new Error('برای ثبت نظر ابتدا وارد حساب شوید.');const {error}=await supabaseClient.from('coin_reviews').insert({user_id:user.id,symbol:selectedSymbol,rating,comment});if(error)throw error;$('reviewComment').value='';msg.textContent='نظر شما با موفقیت ثبت شد.';msg.classList.add('ok');await loadReviews()}catch(e){msg.textContent=e.message||'ثبت نظر انجام نشد.';msg.classList.add('err')}finally{btn.disabled=false}}
 const cleanCoinSymbol=symbol=>String(symbol||'').replace(/USDT$/i,'').replace(/[^a-z0-9]/gi,'').toUpperCase();
 const logoUrl=symbol=>`https://assets.coincap.io/assets/icons/${cleanCoinSymbol(symbol).toLowerCase()}@2x.png`;
