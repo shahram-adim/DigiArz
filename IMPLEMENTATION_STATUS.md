@@ -117,8 +117,7 @@
 - ساختار فعلی orders فاقد ستون trigger/stop/take-profit است و جدول سفارش شرطی وجود ندارد. از تغییر کورکورانه موتور مالی یا افزودن فرم غیرفعال پرهیز شد تا مانده کیف پول و دفترکل موجود آسیب نبیند.
 
 ## اصلاح امنیتی فوری 2026-11-13 — جلوگیری از معامله حساب غیرفعال
-- [x] بررسی تابع‌های SECURITY DEFINER نشان داد `execute_demo_trade` و `place_limit_order` پیش از اصلاح، وضعیت فعال‌بودن حساب را کنترل نمی‌کردند؛ RLS به‌تنهایی کافی نبود چون این توابع با دسترسی مالک اجرا می‌شوند.- [x] هر دو تابع اکنون `public.current_account_is_active()` را بررسی می‌کنند و برای حساب غیرفعال خطای `Account is inactive` می‌دهند.
-- [x] worker زمان‌بندی‌شده `process_limit_orders()` اکنون فقط سفارش‌های کاربران دارای `profiles.is_active = true` را پردازش می‌کند.
+- [x] بررسی تابع‌های SECURITY DEFINER نشان داد `execute_demo_trade` و `place_limit_order` پیش از اصلاح، وضعیت فعال‌بودن حساب را کنترل نمی‌کردند؛ RLS به‌تنهایی کافی نبود چون این توابع با دسترسی مالک اجرا می‌شوند.- [x] هر دو تابع اکنون `public.current_account_is_active()` را بررسی می‌کنند و برای حساب غیرفعال خطای `Account is inactive` می‌دهند.- [x] worker زمان‌بندی‌شده `process_limit_orders()` اکنون فقط سفارش‌های کاربران دارای `profiles.is_active = true` را پردازش می‌کند.
 - [x] Migration با موفقیت روی Supabase پروژه gfoaubfilhttnwjykaox اعمال شد؛ نسخه ثبت‌شده: `20261113161641`.
 - [x] پس از اجرا، تعریف هر سه تابع بازخوانی شد و وجود guardها/فیلتر حساب فعال تأیید شد.
 - [x] فایل SQL همان migration در مخزن، مسیر `supabase/migrations/20261113161641_enforce_active_accounts_in_demo_trade_and_limit_engine.sql` ثبت شد.
@@ -237,8 +236,7 @@
 - [x] `loadMarkets()` فقط قیمت‌هایی را به `marketRows` وارد می‌کند که جفت‌ارز متناظر در `demo_trading_pairs` فعال باشد. وجود یک ردیف قیمت برای ارزِ صرفاً فهرست‌شده، دیگر به‌تنهایی آن را قابل‌معامله نشان نمی‌دهد.
 - [x] قیمت «ارزهای جدید» از `market_prices` و فقط در صورت تازه‌بودن حداکثر ۲ دقیقه نمایش داده می‌شود؛ قیمت کاتالوگ قدیمی به‌عنوان قیمت زنده نمایش داده نمی‌شود.
 ### کنترل مدیر و فعال‌سازی
-- [x] RPC مدیر `admin_review_market_listings()` وضعیت قیمت، منبع، زمان دریافت، حجم ۲۴ساعته، رتبه و دلیل آماده‌نبودن را نمایش می‌دهد.
-- [x] RPC `admin_enable_market_pair(text)` فقط برای super_admin است و در سمت سرور دوباره تمام شروط را بررسی می‌کند: دارایی فعال، نماد معتبر، داده کاتالوگ حداکثر ۲۴ساعته، قیمت مثبت، حجم ۲۴ساعته حداقل ۱ میلیون دلار، رتبه حداکثر ۲۰۰۰ در صورت وجود رتبه، قیمت CoinGecko حداکثر ۲ دقیقه قدیمی و نبود تداخل نماد.
+- [x] RPC مدیر `admin_review_market_listings()` وضعیت قیمت، منبع، زمان دریافت، حجم ۲۴ساعته، رتبه و دلیل آماده‌نبودن را نمایش می‌دهد.- [x] RPC `admin_enable_market_pair(text)` فقط برای super_admin است و در سمت سرور دوباره تمام شروط را بررسی می‌کند: دارایی فعال، نماد معتبر، داده کاتالوگ حداکثر ۲۴ساعته، قیمت مثبت، حجم ۲۴ساعته حداقل ۱ میلیون دلار، رتبه حداکثر ۲۰۰۰ در صورت وجود رتبه، قیمت CoinGecko حداکثر ۲ دقیقه قدیمی و نبود تداخل نماد.
 - [x] فعال‌سازی، جفت‌ارز را در `demo_trading_pairs` ثبت/فعال می‌کند و snapshot قیمت و معیارهای بررسی را در جدول خصوصی `private.market_pair_admin_audit` نگه می‌دارد.
 - [x] trigger خصوصی از ثبت دو دارایی با ticker یکسان در فهرست مدیر یا تداخل با جفت‌ارز موجود جلوگیری می‌کند.
 - [x] RPC `admin_disable_market_pair(text,text)` نیز اضافه شد. هنگام غیرفعال‌سازی، سفارش‌های Limit و حد سود/ضرر باز لغو و رزروهای استفاده‌نشده آزاد می‌شوند؛ سوابق معامله حذف نمی‌شوند.
@@ -357,7 +355,6 @@
 ### Commitهای این مرحله
 - Migration: `a0938ce0722a10d72f07c88b679446f27e71e357`- UI: `445ff2804f2b6759baef87db49e9f830a47973a2`
 - Service Worker cache v5: `51e638189bef6026afd09ba7ffb6c137f3a57d25`
-
 ## پیگیری خطای افزودن SOL به فهرست مدیریت‌شده — 2026-11-13
 - [x] گزارش کاربر: افزودن ارز با پیام `Asset already exists in the demo trading-pair list` متوقف شد.
 - [x] بررسی مستقیم دیتابیس تأیید کرد `demo_trading_pairs` از قبل یک ردیف فعال برای `SOLUSDT` دارد: `base_coingecko_id='solana'`, `quote_asset='USDT'`, `is_enabled=true`. بنابراین ساخت دوباره جفت‌ارز SOLUSDT لازم و مجاز نیست.
@@ -368,3 +365,22 @@
 - [ ] هنوز هیچ تابع، migration، ردیف دیتابیس، سفارش یا جفت‌ارزی تغییر نکرده است. اصلاح پیشنهادی فقط پس از تأیید صریح کاربر اجرا می‌شود.
 - [ ] گام بعدی پس از تأیید: طراحی اصلاح حداقلی و امن برای `admin_add_market_listing`، حفظ کنترل‌های super_admin و eligibility، سپس آزمون تراکنشی/rollback و تأیید اینکه SOL به `admin_market_listings` افزوده می‌شود بدون ایجاد ردیف تکراری در `demo_trading_pairs`.
 
+
+## اصلاح نهایی افزودن دارایی دارای جفت‌ارز موجود — 2026-11-13
+- [x] با تأیید صریح کاربر، migration دیتابیس `20261113175312_allow_existing_pair_in_admin_asset_listing` با موفقیت روی پروژه `gfoaubfilhttnwjykaox` اعمال شد.
+- [x] تابع `public.admin_add_market_listing(text)` اکنون وجود جفت‌ارز برای همان CoinGecko ID را مانع ثبت در فهرست مدیریت‌شده نمی‌داند؛ جفت‌ارز موجود تکرار یا بازنویسی نمی‌شود.
+- [x] کنترل‌های super_admin، اعتبارسنجی CoinGecko ID، فعال بودن دارایی، قیمت مثبت، تازگی metadata حداکثر 24 ساعت و اعتبار نماد حفظ شدند.
+- [x] کنترل برخورد نماد افزوده شد: اگر نماد جفت‌ارز پیشنهادی متعلق به CoinGecko ID دیگری باشد، تابع با خطای `Trading-pair symbol conflicts with another asset` رد می‌کند.
+- [x] درج فهرست مدیریت‌شده idempotent است: `ON CONFLICT (coingecko_id) DO NOTHING`. خروجی JSON اکنون `pair_symbol` و `pair_already_exists` را نیز برمی‌گرداند.
+- [x] SOL واقعاً با RPC اصلاح‌شده و هویت super_admin در `admin_market_listings` ثبت شد؛ `added_by=a9daf990-bd7f-4af8-a2cd-bff176688771`.
+- [x] آزمون فراخوانی مجدد موفق بود: `listing_rows=1`، `pair_rows=1`، `all_existing_pairs_enabled=true`؛ نتیجه تابع `success=true` و `pair_already_exists=true` بود.
+- [x] جفت‌ارز قبلی `SOLUSDT` با `base_coingecko_id='solana'` همچنان فعال ماند؛ هیچ جفت‌ارز جدید یا تکراری ساخته نشد.
+- [x] بازبینی ACL پس از `CREATE OR REPLACE`: مالک `postgres`، `SECURITY DEFINER`، `search_path=''` و مجوز اجرا برای `authenticated` و `service_role` حفظ شده؛ `anon` مجوز اجرا ندارد.
+- [x] Security/Performance Advisors پس از migration اجرا شدند. هشدارهای قبلی پروژه در RLS بدون policy برای جداول private، برخی SECURITY DEFINERهای دیگر، تنظیمات رمز عبور و بهینه‌سازی policy/FK همچنان گزارش می‌شوند؛ این migration هشدار جدیدی برای `admin_add_market_listing` در دسته دسترسی anon ایجاد نکرد.
+- [x] فایل migration در مخزن GitHub ثبت شد: `supabase/migrations/20261113175312_allow_existing_pair_in_admin_asset_listing.sql`.
+- [ ] آزمون دستی رابط مدیر روی گوشی پس از refresh صفحه هنوز لازم است تا نمایش SOL در فهرست «ارزهای جدید/مدیریت بازار» تأیید شود. ثبت سمت دیتابیس تأیید شده است.
+- [x] هیچ سفارش، معامله، کیف پول، مانده مجازی، قیمت بازار یا سابقه مالی تغییر نکرد.
+
+### Commitهای این اصلاح
+- Migration: `20261113175312_allow_existing_pair_in_admin_asset_listing` (Supabase)
+- فایل migration در GitHub: `baffb2450de9fc64e2df1e7196ae648dba4eb553`
