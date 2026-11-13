@@ -554,10 +554,56 @@ async function placeLimitOrder(){
 }
 async function loadOpenOrders(){
  const root=$('openOrdersList');if(!root||!supabaseClient)return;
- const {data:userData,error:userError}=await supabaseClient.auth.getUser();if(userError||!userData.user)throw userError||new Error('برای مشاهده سفارش‌ها وارد حساب شوید.');
- const {data,error}=await supabaseClient.from('orders').select('id,symbol,side,amount,price,filled_amount,remaining_amount,status,created_at').eq('user_id',userData.user.id).eq('order_type','limit').in('status',['pending','partially_filled']).order('created_at',{ascending:true}).limit(100);
- if(error)throw error;root.innerHTML='';if(!data?.length){root.innerHTML='<div class="muted small">سفارش محدود بازی وجود ندارد.</div>';return}
- for(const o of data){const row=document.createElement('article');row.className='open-order-row';const details=document.createElement('div');details.className='open-order-details';const title=document.createElement('strong');title.textContent=`${o.symbol} · ${o.side==='buy'?'خرید':'فروش'} Limit`;const meta=document.createElement('small');meta.textContent=`قیمت: ${formatNum(o.price,10)} USDT · کل: ${formatNum(o.amount,10)} · پرشده: ${formatNum(o.filled_amount,10)} · باقی‌مانده: ${formatNum(o.remaining_amount,10)} · ${o.status==='partially_filled'?'نیمه‌پرشده':'در انتظار'}`;details.append(title,meta);const cancel=document.createElement('button');cancel.type='button';cancel.className='danger';cancel.textContent='لغو سفارش';cancel.addEventListener('click',()=>cancelLimitOrder(o.id,cancel));row.append(details,cancel);root.append(row)}
+ const {data:userData,error:userError}=await supabaseClient.auth.getUser();
+ if(userError||!userData.user)throw userError||new Error('برای مشاهده سفارش‌ها وارد حساب شوید.');
+ const {data,error}=await supabaseClient.from('orders')
+  .select('id,symbol,side,amount,price,filled_amount,remaining_amount,status,created_at')
+  .eq('user_id',userData.user.id).eq('order_type','limit')
+  .in('status',['pending','partially_filled']).order('created_at',{ascending:true}).limit(100);
+ if(error)throw error;
+ root.innerHTML='';
+ if(!data?.length){root.innerHTML='<div class="muted small">سفارش محدود بازی وجود ندارد.</div>';return}
+ const ids=data.map(o=>o.id),symbols=[...new Set(data.map(o=>o.symbol))];
+ const [reservationResult,priceResult]=await Promise.all([
+  supabaseClient.from('order_reservations')
+   .select('order_id,asset,reserved_amount,consumed_amount,released_amount,status')
+   .eq('user_id',userData.user.id).in('order_id',ids),
+  supabaseClient.from('market_prices').select('symbol,price,updated_at').in('symbol',symbols)
+ ]);
+ const reservations=reservationResult.error?[]:(reservationResult.data||[]);
+ const prices=priceResult.error?[]:(priceResult.data||[]);
+ for(const o of data){
+  const reservation=reservations.find(r=>r.order_id===o.id);
+  const market=prices.find(p=>p.symbol===o.symbol);
+  const row=document.createElement('article');row.className='open-order-row';
+  const details=document.createElement('div');details.className='open-order-details';
+  const title=document.createElement('strong');
+  title.textContent=o.symbol+' · '+(o.side==='buy'?'خرید':'فروش')+' Limit';
+  const meta=document.createElement('small');
+  meta.textContent='قیمت هدف: '+formatNum(o.price,10)+' USDT · کل: '+formatNum(o.amount,10)+' · انجام‌شده: '+formatNum(o.filled_amount,10)+' · باقی‌مانده: '+formatNum(o.remaining_amount,10)+' · وضعیت: '+(orderStatusFa[o.status]||o.status);
+  const reserveLine=document.createElement('small');
+  if(reservation){
+   const free=Math.max(0,Number(reservation.reserved_amount||0)-Number(reservation.consumed_amount||0)-Number(reservation.released_amount||0));
+   reserveLine.textContent='رزرو باقیمانده: '+formatNum(free,10)+' '+reservation.asset+' · وضعیت رزرو: '+reservation.status;
+  }else{
+   reserveLine.textContent=reservationResult.error?'وضعیت رزرو از دیتابیس قابل خواندن نیست.':'هشدار: رزرو متناظر این سفارش پیدا نشد؛ نیازمند بررسی سرور.';
+   reserveLine.className='small muted';
+  }
+  const reason=document.createElement('small');
+  const age=market?.updated_at?Date.now()-new Date(market.updated_at).getTime():Infinity;
+  let why='قیمت بازار در دسترس نیست؛ سفارش با قیمت نامعتبر اجرا نمی‌شود.';
+  if(!priceResult.error&&market&&Number.isFinite(age)&&age>=0&&age<=60000&&Number(market.price)>0){
+   if(o.side==='buy'&&Number(market.price)>Number(o.price))why='علت انتظار: قیمت بازار هنوز به قیمت خرید هدف نرسیده است.';
+   else if(o.side==='sell'&&Number(market.price)<Number(o.price))why='علت انتظار: قیمت بازار هنوز به قیمت فروش هدف نرسیده است.';
+   else why='شرط قیمت برقرار است؛ اجرای سفارش به نقدشوندگی و چرخه پردازش سرور وابسته است.';
+  }else if(priceResult.error)why='علت انتظار نامشخص است؛ دریافت قیمت بازار با خطا روبه‌رو شد.';
+  else if(market&&age>60000)why='علت انتظار: قیمت بازار قدیمی‌تر از ۶۰ ثانیه است.';
+  reason.textContent=why;reason.className='small muted';
+  details.append(title,meta,reserveLine,reason);
+  const cancel=document.createElement('button');cancel.type='button';cancel.className='danger';cancel.textContent='لغو سفارش';
+  cancel.addEventListener('click',()=>cancelLimitOrder(o.id,cancel));
+  row.append(details,cancel);root.append(row);
+}
 }
 const orderStatusFa={pending:'در انتظار اجرا',partially_filled:'نیمه‌تکمیل‌شده',filled:'تکمیل‌شده',cancelled:'لغوشده',rejected:'ردشده'};
 let allOrderRows=[];
