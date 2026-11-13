@@ -317,6 +317,18 @@ tr:last-child td{border-bottom:0}
 .dashboard-market-coin-toman{font-size:10px;color:var(--muted)}
 .dashboard-market-coin:active{border-color:var(--yellow)}
 @media(max-width:620px){.dashboard-market-preview{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-market-coin{padding:10px}.dashboard-market-coin-price{font-size:12px}}
+
+/* Market row identity and dual-currency price layout */
+.coin{grid-template-columns:minmax(0,1fr) minmax(110px,auto) minmax(145px,auto) auto;gap:10px}
+.coin-actions{justify-content:center;gap:8px;direction:ltr}
+.coin-actions .coin-icon{margin:0;width:30px;height:30px;flex-basis:30px}
+.coin-actions .favorite-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;padding:4px}
+.price-stack{align-items:flex-end;min-width:0}
+.price-usd{color:#f0f2f5;font-weight:800}
+.price-toman{color:var(--yellow);font-weight:900}
+.coin-change-wrap{min-width:0}
+@media(max-width:700px){.coin{grid-template-columns:minmax(0,1fr) minmax(90px,auto) auto;gap:8px;padding:11px}.coin-identity{grid-column:1;grid-row:1}.coin-change-wrap{grid-column:1;grid-row:2}.price-stack{grid-column:2;grid-row:1/3}.coin-actions{grid-column:3;grid-row:1/3;flex-direction:column;gap:6px}}
+@media(max-width:390px){.coin{grid-template-columns:minmax(0,1fr) minmax(82px,auto) auto;gap:5px}.coin .price-usd{font-size:10px}.coin .price-toman{font-size:11px}.coin-actions .coin-icon{width:26px;height:26px;flex-basis:26px}.coin-actions .favorite-btn{width:30px;height:30px}}
 </style>
 </head>
 <body>
@@ -685,8 +697,9 @@ const coinInfo={
  AVAXUSDT:{name:'Avalanche',fa:'آوالانچ',description:'آوالانچ یک پلتفرم بلاک‌چینی برای برنامه‌های غیرمتمرکز و شبکه‌های سفارشی است.'}
 };
 const extraPersianNames={
- USDT:'تتر',USDC:'یو‌اس‌دی‌سی',BNB:'بایننس کوین',BTC:'بیت‌کوین',ETH:'اتریوم',SOL:'سولانا',XRP:'ریپل',ADA:'کاردانو',DOGE:'دوج‌کوین',TRX:'ترون',TON:'تون‌کوین',LINK:'چین‌لینک',LTC:'لایت‌کوین',BCH:'بیت‌کوین کش',AVAX:'آوالانچ',DOT:'پولکادات',SHIB:'شیبا اینو',UNI:'یونی‌سواپ',AAVE:'آوه',NEAR:'نیر',ATOM:'کازماس',ETC:'اتریوم کلاسیک',XLM:'استلار',FIL:'فایل‌کوین',APT:'آپتوس',ARB:'آربیتروم',OP:'آپتیمیسم',SUI:'سویی',SEI:'سی',INJ:'اینجکتیو',ICP:'اینترنت کامپیوتر',RENDER:'رندر',FET:'فچ',TAO:'بیتنسور',PEPE:'پپه',FLOKI:'فلوکی',BONK:'بونک',WIF:'داگ‌ویف‌هت',MKR:'میکردائو',CRV:'کرو',LDO:'لیدو دائو',GALA:'گالا',SAND:'سندباکس',MANA:'دیسنترالند',AXS:'اکسی اینفینیتی',IMX:'ایمیوتبل',HBAR:'هدرا',VET:'وی‌چین',ALGO:'الگوراند',EGLD:'الروند',THETA:'تتا',KAS:'کاسپا',ONDO:'اوندو',PENDLE:'پندل',JUP:'ژوپیتر',WLD:'ورلدکوین',ENA:'اتنا',PYTH:'پایث',TIA:'سلسیا',STRK:'استارک‌نت',ZK:'زی‌کی‌سینک',NOT:'نات‌کوین',ORDI:'اوردینالز',BOME:'بوم',JTO:'جیتو',RUNE:'تورچین',XTZ:'تزوس',EOS:'ایاس',NEO:'نئو',IOTA:'آیوتا',ZEC:'زی‌کش',DASH:'دش'
+ USDT:'تتر',USDC:'یو‌اس‌دی‌سی',FDUSD:'اف‌دی‌یو‌اس‌دی',TUSD:'ترویو‌اس‌دی',DAI:'دای',USDE:'اتنا یو‌اس‌دی',BTC:'بیت‌کوین',ETH:'اتریوم',BNB:'بایننس کوین',SOL:'سولانا',XRP:'ریپل',ADA:'کاردانو',DOGE:'دوج‌کوین',TRX:'ترون',TON:'تون‌کوین',LINK:'چین‌لینک',LTC:'لایت‌کوین',BCH:'بیت‌کوین کش',AVAX:'آوالانچ',DOT:'پولکادات',SHIB:'شیبا اینو',UNI:'یونی‌سواپ',AAVE:'آوه',NEAR:'نیر',ATOM:'کازماس',ETC:'اتریوم کلاسیک',XLM:'استلار',FIL:'فایل‌کوین',APT:'آپتوس',ARB:'آربیتروم',OP:'آپتیمیسم',SUI:'سویی',SEI:'سی',INJ:'اینجکتیو',ICP:'اینترنت کامپیوتر',RENDER:'رندر',FET:'فچ',TAO:'بیتنسور',PEPE:'پپه',FLOKI:'فلوکی',BONK:'بونک',WIF:'داگ‌ویف‌هت',MKR:'میکردائو',CRV:'کرو',LDO:'لیدو دائو',GALA:'گالا',SAND:'سندباکس',MANA:'دیسنترالند',AXS:'اکسی اینفینیتی',IMX:'ایمیوتبل',HBAR:'هدرا',VET:'وی‌چین',ALGO:'الگوراند',EGLD:'الروند',THETA:'تتا',KAS:'کاسپا',ONDO:'اوندو',PENDLE:'پندل',JUP:'ژوپیتر',WLD:'ورلدکوین',ENA:'اتنا',PYTH:'پایث',TIA:'سلسیا',STRK:'استارک‌نت',ZK:'زی‌کی‌سینک',NOT:'نات‌کوین',ORDI:'اوردینالز',BOME:'بوم',JTO:'جیتو',RUNE:'تورچین',XTZ:'تزوس',EOS:'ایاس',NEO:'نئو',IOTA:'آیوتا',ZEC:'زی‌کش',DASH:'دش',COMP:'کامپاند',SNX:'سینتتیکس',YFI:'یرن فایننس',1INCH:'وان‌اینچ',ENS:'اتریوم نیم سرویس',LRC:'لوپرینگ',ZRX:'زیرو ایکس',BAT:'بت',CHZ:'چیلیز',ENJ:'انجین',GRT:'گراف',MATIC:'پالیگان',POL:'پالیگان',FTM:'فانتوم',S:'سونیک',FLOW:'فلو',MINA:'مینا',ROSE:'اوسیس',CELO:'سلو',AR:'آرویو',STX:'استکس',KAVA:'کاوا',CFX:'کانفلاکس',IOTX:'آیوتکس',JASMY:'جاسمی',MASK:'مسک',GMT:'استپن',APE:'ایپ‌کوین',BLUR:'بلر',WOO:'وو نتورک',KNC:'کایبر نتورک',QTUM:'کوانتوم',ZIL:'زیلیکا',ONT:'آنتولوژی',ICX:'آیکون',RVN:'ریون‌کوین',DCR:'دیکرد',XMR:'مونرو',BTT:'بیت‌تورنت',HOT:'هولو',ANKR:'انکر',SKL:'اسکیل',API3:'ای‌پی‌آی۳',AUDIO:'آدیو',OCEAN:'اوشن',AGIX:'سینگولاریتی‌نت',RNDR:'رندر',FLOKI:'فلوکی',LUNA:'ترا',LUNC:'ترا کلاسیک',USTC:'یو‌اس‌تی‌سی',PEOPLE:'کانستیتوشن‌دائو',GMT:'استپن',ILV:'ایلوویوم',MAGIC:'مجیک',SUPER:'سوپر',HIGH:'های‌استریت',YGG:'ییلد گیلد گیمز',SSV:'اس‌اس‌وی',RPL:'راکت پول',FXS:'فرکس شیر',CVX:'کانوکس',BAL:'بالانسر',SUSHI:'سوشی‌سواپ',DYDX:'دی‌وای‌دی‌ایکس',GMX:'جی‌ام‌ایکس',STG:'استارگیت',ZETA:'زتاچین',OM:'مانترا',CORE:'کور',MANTA:'مانتا',ALT:'آلت‌لیر',AEVO:'ایوو',PIXEL:'پیکسلز',PORTAL:'پورتال',ETHFI:'اتر‌فای',LISTA:'لیستا',BANANA:'بانانا',CATI:'کتیزن',HMSTR:'همستر کامبت',EIGEN:'ایگن‌لیر',SCR:'اسکرول',MOVE:'موو',BERA:'برا',IP:'اینفینیت پرایم',TRUMP:'آفیشال ترامپ',MELANIA:'ملانیا'
 };
+
 function persianCoinName(symbol){const base=String(symbol||'').toUpperCase().replace(/USDT$/,'');return tomanAssetNames.get(base)||coinInfo[base]?.fa||extraPersianNames[base]||base}
 async function discoverMultiExchangeMarkets(){
   const now=new Date().toISOString(), found=new Map(), errors=[];
@@ -803,20 +816,20 @@ function renderMarkets(){
  else rows.sort((a,b)=>a.symbol.localeCompare(b.symbol));
  if(!rows.length){list.innerHTML='<div class="notice warn">در این بخش ارزی برای نمایش پیدا نشد یا هنوز موجودی/قیمت ثبت نشده است.</div>';return}
  for(const item of rows){
-  const usd=Number(item.price),valid=Number.isFinite(usd)&&usd>0,toman=valid&&currentFxIsValid?usd*currentFxRate:null,div=document.createElement('div');
+  const ticker=marketTickerMap.get(item.symbol),liveUsd=Number(ticker?.last),storedUsd=Number(item.price),usd=Number.isFinite(liveUsd)&&liveUsd>0?liveUsd:storedUsd,valid=Number.isFinite(usd)&&usd>0,toman=valid&&currentFxIsValid?usd*currentFxRate:null,div=document.createElement('div');
   div.className='coin'+(item.symbol===selectedSymbol?' selected':'');
   const fullSymbol=String(item.symbol).toUpperCase(),base=fullSymbol.replace(/USDT$/i,'');
-  const change=changeOf(item),ticker=marketTickerMap.get(item.symbol);
+  const change=Number.isFinite(Number(ticker?.change))?Number(ticker.change):changeOf(item);
   div.setAttribute('role','button');div.setAttribute('tabindex','0');div.setAttribute('aria-label',`باز کردن صفحه ${persianCoinName(item.symbol)} (${base})`);
   const usdMarkup=`<div class="price-usd">${valid?formatNum(usd,10)+' $':'—'}</div>`;
   const tomanMarkup=`<div class="price-toman">${toman!==null?formatNum(toman,0)+' تومان':'نرخ تومان ناموجود'}</div>`;
-  const priceMarkup=displayCurrencyMode==='usd'?usdMarkup:displayCurrencyMode==='toman'?tomanMarkup:usdMarkup+tomanMarkup;
+  const priceMarkup=usdMarkup+tomanMarkup;
   const changeMarkup=change===null?'<span class="coin-change">—</span>':`<span class="coin-change ${change>0?'pos':change<0?'neg':''}" aria-label="تغییر ۲۴ ساعته">${change>0?'+':''}${formatNum(change,2)}٪</span>`;
   const age=item.updated_at?Date.now()-new Date(item.updated_at).getTime():Infinity,serverFresh=Number.isFinite(age)&&age>=-60000&&age<=120000,serverState=serverFresh?'قیمت سرور تازه':age>120000?'قیمت سرور قدیمی':'زمان قیمت نامشخص',sourceLabel=item.source||'منبع ثبت نشده';
   const tickerMeta=ticker&&Number.isFinite(ticker.high)&&Number.isFinite(ticker.low)?` · سقف/کف ۲۴س: ${formatNum(ticker.high,8)} / ${formatNum(ticker.low,8)}`:'';
   const volumeMarkup=activeMarketCategory==='new'?(item.catalogStale?'<small class="coin-volume" style="color:var(--red)">داده قیمت قدیمی · قیمت نمایش داده نمی‌شود</small>':item.catalogOnly?'<small class="coin-volume">فقط نمایش · معامله هنوز فعال نیست</small>':'<small class="coin-volume" style="color:var(--green)">خریدوفروش آزمایشی فعال</small>'):ticker&&Number.isFinite(ticker.quoteVolume)?`<small class="coin-volume">حجم ۲۴س: ${formatNum(ticker.quoteVolume,0)} USDT${tickerMeta}</small>`:'';
   const sourceMarkup=`<small class="coin-source ${serverFresh?'fresh':'stale'}">${safeText(sourceLabel)} · ${serverState}${item.updated_at?' · '+new Date(item.updated_at).toLocaleTimeString('fa-IR'):''}</small>`;
-  div.innerHTML=`<div class="coin-identity"><span><b>${safeText(persianCoinName(item.symbol))}</b><small class="coin-en">${safeText(base)}</small></span>${coinLogo(base)}</div><div class="coin-change-wrap">${changeMarkup}${volumeMarkup}</div><div class="price-stack">${priceMarkup}${sourceMarkup}</div><div class="coin-actions"><button type="button" class="favorite-btn" aria-label="افزودن به محبوب‌ها" aria-pressed="${favoriteSymbols.includes(item.symbol)?'true':'false'}" data-favorite="${safeText(item.symbol)}"><i data-lucide="star" style="${favoriteSymbols.includes(item.symbol)?'fill:var(--yellow);':''}"></i></button></div>`;
+  div.innerHTML=`<div class="coin-identity"><span><b>${safeText(persianCoinName(item.symbol))}</b><small class="coin-en">${safeText(base)}</small></span></div><div class="coin-change-wrap">${changeMarkup}${volumeMarkup}</div><div class="price-stack">${priceMarkup}${sourceMarkup}</div><div class="coin-actions">${coinLogo(base)}<button type="button" class="favorite-btn" aria-label="افزودن به محبوب‌ها" aria-pressed="${favoriteSymbols.includes(item.symbol)?'true':'false'}" data-favorite="${safeText(item.symbol)}"><i data-lucide="star" style="${favoriteSymbols.includes(item.symbol)?'fill:var(--yellow);':''}"></i></button></div>`;
   div.querySelector('[data-favorite]').addEventListener('click',e=>{e.stopPropagation();const sym=item.symbol;favoriteSymbols=favoriteSymbols.includes(sym)?favoriteSymbols.filter(x=>x!==sym):[...favoriteSymbols,sym];try{localStorage.setItem('digiArzFavorites',JSON.stringify(favoriteSymbols))}catch(storageError){console.warn('Favorite preference could not be saved on this device:',storageError)}renderMarkets()});
   div.addEventListener('click',()=>openChart(item.symbol));
   div.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openChart(item.symbol)}});
