@@ -974,6 +974,198 @@ body.light-theme #tab-history tbody tr:hover{background:#f6f8fb}
 }
 @media(prefers-reduced-motion:reduce){#tab-history tbody tr{transition:none}}
 
+
+/* DigiArz complete visual system — premium graphite / gold */
+:root{
+ --bg:#090b0f;--panel:#12161d;--panel2:#181e27;--line:#29313d;--text:#f4f6fa;
+ --muted:#929cab;--field:#0c1016;--soft:#10151c;--yellow:#f5c542;
+ --green:#18c98b;--red:#f05c70;--gold-glow:rgba(245,197,66,.16);
+ --radius-lg:22px;--radius-md:16px;--shadow-card:0 14px 38px rgba(0,0,0,.22)
+}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{background:radial-gradient(ellipse at 85% -10%,rgba(245,197,66,.075),transparent 34%),radial-gradient(ellipse at 0% 35%,rgba(36,72,112,.10),transparent 32%),var(--bg);letter-spacing:0}
+.wrap{max-width:1440px;padding:18px clamp(12px,2.5vw,34px) 100px}
+.top{min-height:76px;margin:0 -4px 16px;padding:12px 8px 17px;border-bottom:1px solid rgba(245,197,66,.13)}
+.brand{font-size:30px;letter-spacing:-.7px}.brand span:first-child{color:#fff}.brand span:nth-child(2){color:var(--yellow)}
+.top .muted{margin-top:5px;font-size:10px;letter-spacing:.2px}
+.top-actions{display:flex;align-items:center;gap:9px}
+.top-actions button{min-height:42px;border-radius:12px;padding:9px 14px}
+.card{position:relative;background:linear-gradient(145deg,rgba(23,29,38,.98),rgba(15,19,26,.98));border:1px solid rgba(139,153,174,.16);border-radius:var(--radius-lg);padding:clamp(15px,2vw,24px);margin:16px 0;box-shadow:var(--shadow-card)}
+.card:focus-within{border-color:rgba(245,197,66,.35)}
+h2{font-size:clamp(16px,1.5vw,20px);font-weight:900;letter-spacing:-.25px}
+h3{font-size:15px;font-weight:850}
+.section-title{margin-bottom:18px}
+.section-title h2:before{content:"";display:inline-block;width:4px;height:18px;margin-left:10px;vertical-align:-3px;border-radius:5px;background:var(--yellow);box-shadow:0 0 15px var(--gold-glow)}
+.muted,.chart-caption{color:var(--muted)}
+button{border-radius:12px;min-height:42px;padding:10px 16px;background:linear-gradient(135deg,#ffdc70,#e9ad20);color:#17130a;box-shadow:0 5px 15px rgba(245,197,66,.10);transition:transform .16s ease,filter .16s ease,border-color .16s ease}
+button:hover{filter:brightness(1.07);transform:translateY(-1px)}
+button:active{transform:translateY(0) scale(.985)}
+button.secondary,.theme-switch{background:linear-gradient(145deg,#202936,#151b24);color:#e9edf4;border:1px solid #354151;box-shadow:none}
+button.danger{background:linear-gradient(135deg,#612a38,#351b25);color:#ffdce2;border:1px solid rgba(240,92,112,.25)}
+button.buy{background:linear-gradient(135deg,#22d99b,#0da875);color:#062217}
+button.sell{background:linear-gradient(135deg,#f16b7e,#cf4058);color:#fff}
+input,select,textarea{min-height:46px;padding:12px 14px;border-radius:12px;background:linear-gradient(145deg,#0b1017,#0e141c);border:1px solid #303b49;color:var(--text);transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--yellow);box-shadow:0 0 0 3px rgba(245,197,66,.10)}
+.field label{font-size:11px;font-weight:750;color:#aeb8c6}
+.notice{border:1px solid rgba(139,153,174,.12);border-radius:13px;background:#1a222d;color:#dbe2ec;line-height:2}
+.notice.warn{background:rgba(245,197,66,.09);border-color:rgba(245,197,66,.22);color:#f6d986}
+.notice.err{background:rgba(240,92,112,.09);border-color:rgba(240,92,112,.22);color:#ffc1ca}
+.notice.ok{background:rgba(24,201,139,.09);border-color:rgba(24,201,139,.22);color:#a8f0d4}
+.auth{max-width:1100px;min-height:620px;margin:clamp(22px,5vh,58px) auto 35px;border-radius:28px;grid-template-columns:1.02fr .98fr;box-shadow:0 25px 90px rgba(0,0,0,.38);border-color:rgba(245,197,66,.22)}
+.auth-visual{padding:clamp(25px,4vw,52px);background:radial-gradient(circle at 18% 20%,rgba(245,197,66,.2),transparent 32%),radial-gradient(circle at 80% 80%,rgba(44,83,128,.22),transparent 40%),linear-gradient(145deg,#22200f,#141a23 58%,#0d1219);border-left:1px solid rgba(245,197,66,.2)}
+.auth-brand{font-size:39px;letter-spacing:-1px}.auth-headline{font-size:clamp(25px,3vw,36px);line-height:1.7;max-width:430px}
+.auth-copy{font-size:13px;max-width:390px}
+.auth-benefits{gap:14px}.auth-benefit{font-size:12px}.auth-benefit i{width:36px;height:36px;border-radius:12px;background:rgba(245,197,66,.07)}
+.auth-form{padding:clamp(25px,4vw,54px)}
+.auth-form h2{font-size:25px}.auth-form .field{margin:14px 0}
+.auth-form input{min-height:50px}.auth-actions button{min-height:50px}
+.market-announcement{display:flex;align-items:center;gap:10px;padding:11px 15px;border:1px solid rgba(245,197,66,.2);border-radius:14px;background:linear-gradient(90deg,rgba(245,197,66,.09),rgba(20,27,37,.8));color:#e8d79f;font-size:11px}
+.announcement-icon{color:var(--yellow);font-size:17px}.announcement-pill{margin-right:auto;padding:4px 9px;border-radius:7px;background:rgba(245,197,66,.14);color:var(--yellow);font-size:9px;font-weight:900;letter-spacing:.8px}
+.reference-market-strip{background:linear-gradient(110deg,#171e28,#11161e);padding:14px 18px}
+.reference-mini{min-width:0}
+.hero{overflow:hidden;position:relative;margin-top:16px;padding:clamp(20px,3vw,34px);border-radius:24px;border:1px solid rgba(245,197,66,.28);background:radial-gradient(circle at 92% 0%,rgba(245,197,66,.20),transparent 28%),linear-gradient(115deg,#28230f 0%,#191d25 48%,#111720 100%);box-shadow:0 18px 40px rgba(0,0,0,.2)}
+.hero:after{content:"";position:absolute;width:240px;height:240px;border:1px solid rgba(245,197,66,.12);border-radius:50%;left:-90px;bottom:-170px;box-shadow:0 0 0 24px rgba(245,197,66,.025),0 0 0 50px rgba(245,197,66,.018);pointer-events:none}
+.hero-title{font-size:clamp(24px,3vw,34px);letter-spacing:-.6px}.hero-label{color:#d9c27b}.hero-sub{font-size:12px}
+.hero-mark{font-size:clamp(44px,7vw,72px);text-shadow:0 8px 25px rgba(245,197,66,.22)}
+.quick{max-width:620px;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:22px}
+.quick button{min-height:48px}
+.tabs{position:sticky;top:0;z-index:30;gap:8px;padding:10px 8px;margin:12px -4px 18px;background:rgba(9,11,15,.88);backdrop-filter:blur(16px);border:1px solid rgba(139,153,174,.12);border-radius:16px}
+.tabs button{min-height:43px;padding:10px 16px;border-radius:11px;background:#171e28;color:#aeb8c6;border:1px solid #2b3543;font-size:11px}
+.tabs button.active{background:linear-gradient(135deg,#ffdc70,#e9ad20);color:#15120a;border-color:#f5c542;box-shadow:0 5px 18px rgba(245,197,66,.15)}
+.grid{gap:12px}
+.stat{position:relative;overflow:hidden;padding:17px;border-radius:16px;background:linear-gradient(145deg,#1b232e,#121820);border:1px solid rgba(139,153,174,.15)}
+.stat:after{content:"";position:absolute;width:78px;height:78px;left:-35px;top:-38px;border-radius:50%;background:rgba(245,197,66,.045);pointer-events:none}
+.stat .muted{font-size:10px;line-height:1.8}.stat .value{font-size:clamp(17px,2vw,23px);margin-top:12px;color:#f4f6fa;font-variant-numeric:tabular-nums}
+.dashboard-stats .stat:first-child .value{color:var(--yellow)}
+.detail-section{margin-top:22px;padding-top:20px;border-top:1px solid rgba(139,153,174,.13)}
+.dashboard-shortcuts button{min-height:62px;border-radius:14px;background:linear-gradient(145deg,#1b2430,#121820);border-color:#303d4d;font-size:12px}
+.dashboard-shortcuts button svg{color:var(--yellow)}
+.dashboard-market-grid .stat{border-radius:14px}
+.market-tools{gap:10px;margin:16px 0}
+.market-categories{gap:10px}
+.category-btn{min-height:88px;border-radius:15px;background:linear-gradient(145deg,#1a222d,#111820);border-color:#2d3948;color:#dce2eb}
+.category-btn svg{width:23px;height:23px;stroke:var(--yellow)}
+.category-btn.active{background:linear-gradient(145deg,rgba(245,197,66,.17),rgba(22,28,37,.96));border-color:rgba(245,197,66,.55);color:#fff}
+.volatility-panel,.gainers-panel{border-radius:17px;border-color:rgba(245,197,66,.2);background:linear-gradient(135deg,rgba(245,197,66,.075),rgba(17,23,32,.96))}
+.coin{padding:15px;border-radius:15px;background:linear-gradient(100deg,#151d27,#10161e);border-color:#2a3543;min-height:72px}
+.coin:hover,.coin.selected{background:linear-gradient(100deg,rgba(245,197,66,.10),#141c26);border-color:rgba(245,197,66,.48)}
+.coin-icon{width:36px;height:36px;flex-basis:36px;border:1px solid rgba(255,255,255,.08)}
+.coin .price-usd{color:#e9edf4}.coin .price-toman{color:var(--yellow)}
+.coin-change{border-radius:8px;padding:6px 9px}
+.asset-row,.review-row,.news-item{padding:15px;border-radius:14px;background:linear-gradient(110deg,#18212c,#111820);border-color:#2b3745}
+.asset-logo{width:38px;height:38px;border:1px solid #354252}
+.asset-summary-grid .stat{padding:16px}
+.trade-grid{gap:14px}
+.trade-box{padding:18px;border-radius:17px;background:linear-gradient(145deg,#1a222d,#11171f);border-color:#303b49}
+.trade-box h3{margin-bottom:16px}
+.trade-box button{min-height:48px}
+.orderbook-side{border-radius:14px;background:#111821;border-color:#303b49}
+.orderbook-side h4{padding:13px 14px;background:#18212c}
+.orderbook-mid{padding:14px;background:rgba(245,197,66,.04)}
+#priceChart,#volumeChart{border-radius:15px;border-color:#2c3745;background:#0d131b}
+.chart-types button,.timeframes button{border-radius:10px;background:#1b2430;border-color:#334050}
+.chart-types button.active,.timeframes button.active{background:var(--yellow);color:#14110a;border-color:var(--yellow)}
+.performance-item{border-radius:13px;background:linear-gradient(145deg,#1a222d,#111820);border-color:#2d3947}
+.performance-item strong{font-variant-numeric:tabular-nums}
+.table-wrap{border:1px solid #2d3947;border-radius:15px;background:#111820}
+table{font-variant-numeric:tabular-nums}
+th{background:#19222d;color:#aeb8c6}
+td{border-color:#293441}
+#tab-orders .order-history-card,#tab-orders .open-order-row{border-radius:16px;background:linear-gradient(120deg,#1a222d,#111820);border-color:#2d3947}
+#tab-orders .detail-section{background:rgba(17,24,32,.45);border-radius:17px;padding:16px}
+#tab-history .table-wrap{box-shadow:0 12px 30px rgba(0,0,0,.12)}
+#tab-settings .setting-row{border-radius:15px;background:linear-gradient(120deg,#1a222d,#111820);border-color:#303b49}
+#tab-settings .theme-switch{min-height:44px}
+.footer{padding-top:16px;border-top:1px solid rgba(139,153,174,.12)}
+.mobile-bottom-nav{background:rgba(13,18,25,.94);border:1px solid rgba(139,153,174,.18);box-shadow:0 -10px 32px rgba(0,0,0,.28);backdrop-filter:blur(18px)}
+.mobile-bottom-nav button{border-radius:12px;background:transparent;color:#9ba7b6;box-shadow:none}
+.mobile-bottom-nav button.active{color:var(--yellow);background:rgba(245,197,66,.10)}
+.mobile-bottom-nav button svg{width:19px;height:19px}
+body.light-theme{
+ color-scheme:light;--bg:#f2f4f7;--panel:#fff;--panel2:#f5f7fa;--line:#e0e5ec;--text:#17202b;--muted:#697586;--field:#fff;--soft:#f7f9fc;
+ --shadow-card:0 12px 30px rgba(24,39,60,.07)
+}
+body.light-theme{background:radial-gradient(ellipse at 85% -10%,rgba(245,197,66,.15),transparent 34%),#f2f4f7}
+body.light-theme .top{background:rgba(242,244,247,.92)}
+body.light-theme .brand span:first-child{color:#17202b}
+body.light-theme .card{background:linear-gradient(145deg,#fff,#f9fafc);border-color:#e1e6ed}
+body.light-theme .tabs{background:rgba(242,244,247,.91);border-color:#e1e6ed}
+body.light-theme .tabs button{background:#edf1f6;color:#526071;border-color:#dfe5ed}
+body.light-theme .tabs button.active{background:linear-gradient(135deg,#ffdc70,#e9ad20);color:#17130a}
+body.light-theme .stat,body.light-theme .trade-box,body.light-theme .performance-item,body.light-theme .asset-row,body.light-theme .review-row,body.light-theme .news-item,body.light-theme #tab-orders .order-history-card,body.light-theme #tab-orders .open-order-row,body.light-theme #tab-settings .setting-row{background:linear-gradient(145deg,#fff,#f6f8fb);border-color:#e1e6ed}
+body.light-theme .stat .value{color:#182333}
+body.light-theme .dashboard-stats .stat:first-child .value{color:#9a6c00}
+body.light-theme .coin{background:#fff;border-color:#e1e6ed}
+body.light-theme .coin:hover,body.light-theme .coin.selected{background:#fff9e7;border-color:#e4bd50}
+body.light-theme .coin .price-usd{color:#243247}
+body.light-theme .category-btn{background:#f7f9fc;color:#344155;border-color:#e1e6ed}
+body.light-theme .category-btn.active{background:#fff6d9;border-color:#dfbd56;color:#46370f}
+body.light-theme input,body.light-theme select,body.light-theme textarea{background:#fff;color:#17202b;border-color:#dce2ea}
+body.light-theme button.secondary,body.light-theme .theme-switch{background:#edf1f6;color:#263448;border-color:#dce2ea}
+body.light-theme .market-announcement{background:linear-gradient(90deg,#fff8df,#fff);color:#765900}
+body.light-theme .reference-market-strip{background:linear-gradient(110deg,#fff,#f6f8fb)}
+body.light-theme .hero{background:radial-gradient(circle at 92% 0%,rgba(245,197,66,.22),transparent 28%),linear-gradient(115deg,#fff6d8,#fff 58%,#edf1f6);border-color:#e5d28a}
+body.light-theme .hero-sub{color:#596273}
+body.light-theme .trade-box h3{color:inherit}
+body.light-theme .orderbook-side,body.light-theme #priceChart,body.light-theme #volumeChart{background:#fff;border-color:#e1e6ed}
+body.light-theme .orderbook-side h4,body.light-theme th{background:#f0f3f7}
+body.light-theme td{border-color:#e4e8ef}
+body.light-theme .mobile-bottom-nav{background:rgba(255,255,255,.95);border-color:#e0e5ec;box-shadow:0 -8px 25px rgba(24,39,60,.10)}
+body.light-theme .mobile-bottom-nav button{color:#647185}
+body.light-theme .mobile-bottom-nav button.active{color:#8b6500;background:#fff6d9}
+@media(max-width:900px){
+ .wrap{padding-inline:12px}
+ .auth{min-height:0;grid-template-columns:1fr}
+ .auth-visual{min-height:330px;border-left:0;border-bottom:1px solid rgba(245,197,66,.2)}
+ .auth-form{padding:26px}
+ .dashboard-market-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .performance-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:700px){
+ .wrap{padding:9px 9px 92px}
+ .top{min-height:65px;padding:9px 3px 13px}
+ .brand{font-size:25px}.top .muted{font-size:9px}
+ .top-actions{gap:6px}.top-actions button{min-height:38px;padding:7px 10px;font-size:10px}
+ .card{padding:14px;margin:11px 0;border-radius:18px}
+ .hero{padding:19px;border-radius:19px}
+ .hero-title{font-size:24px}.hero-mark{font-size:44px}
+ .quick{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+ .quick button{font-size:10px;padding:10px 5px;min-height:44px}
+ .tabs{display:none!important}
+ .market-announcement{font-size:10px;padding:9px 11px}
+ .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .stat{padding:13px;border-radius:14px}.stat .value{font-size:17px}
+ .dashboard-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .dashboard-market-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .market-tools{grid-template-columns:1fr}
+ .market-categories{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+ .category-btn{min-height:75px;font-size:10px;padding:8px 3px}
+ .coin{grid-template-columns:minmax(0,1fr) minmax(94px,auto);gap:8px;padding:12px}
+ .coin-actions{grid-column:1/-1;justify-content:space-between;border-top:1px solid rgba(139,153,174,.12);padding-top:8px}
+ .coin-change{font-size:10px;min-width:58px}
+ .trade-grid{grid-template-columns:1fr}
+ .orderbook-grid{grid-template-columns:1fr 1fr}
+ .performance-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .indicator-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #priceChart{height:290px}
+ .mobile-bottom-nav{position:fixed;display:flex;z-index:1000;left:9px;right:9px;bottom:max(8px,env(safe-area-inset-bottom));justify-content:space-around;gap:3px;padding:7px 4px;border-radius:17px}
+ .mobile-bottom-nav button{display:flex;flex:1;min-width:0;min-height:52px;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:5px 2px;font-size:9px}
+ .mobile-bottom-nav button svg{display:block}
+}
+@media(max-width:390px){
+ .auth-visual{padding:22px;min-height:300px}
+ .auth-headline{font-size:23px}
+ .auth-form{padding:20px}
+ .auth-actions{grid-template-columns:1fr}
+ .market-categories{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .orderbook-grid{grid-template-columns:1fr}
+ .hero-title{font-size:21px}
+ .section-title{align-items:flex-start}
+ .section-title h2{font-size:15px}
+ .dashboard-market-grid{grid-template-columns:1fr 1fr}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}button{transition:none}}
+
 </style>
 </head>
 <body>
