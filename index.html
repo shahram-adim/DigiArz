@@ -2061,7 +2061,7 @@ async function cancelConditionalExitOrder(orderId,button){
   const {data,error}=await supabaseClient.rpc('cancel_conditional_exit_order',{p_order_id:orderId});
   if(error)throw error;if(!data||data.success!==true)throw new Error(data?.message||data?.error||'سرور لغو سفارش را تأیید نکرد.');
   showMessage($('conditionalOrderMsg'),'سفارش شرطی لغو شد و رزرو دارایی آزاد شد.','ok');
-  await Promise.all([loadConditionalOrders(),loadOpenOrders(),loadAllOrders(),loadWallet(),loadAssets()]);
+  await Promise.all([loadDashboard(),loadOpenOrders()]);
  }catch(e){showMessage($('conditionalOrderMsg'),'لغو سفارش شرطی ناموفق بود: '+(e.message||String(e)),'err');button.disabled=false}
 }
 function updateStopLimitPriceHint(){const side=$('stopLimitSide')?.value,hint=$('stopLimitPriceHint');if(!hint)return;hint.textContent=side==='sell'?'فروش: قیمت Limit باید مساوی یا پایین‌تر از قیمت Stop باشد.':'خرید: قیمت Limit باید مساوی یا بالاتر از قیمت Stop باشد.'}
@@ -2142,7 +2142,7 @@ async function cancelStopLimitOrder(orderId,button){
   const {data,error}=await supabaseClient.rpc('cancel_stop_limit_order',{p_order_id:orderId});
   if(error)throw error;if(!data||data.success!==true)throw new Error(data?.message||data?.error||'سرور لغو سفارش Stop-Limit را تأیید نکرد.');
   showMessage($('stopLimitMsg'),'وضعیت سفارش Stop-Limit: '+(orderStatusFa[data.status]||data.status)+'. رزرو مربوطه آزاد/تسویه شد.','ok');
-  await Promise.all([loadStopLimitOrders(),loadOpenOrders(),loadAllOrders(),loadWallet(),loadAssets()]);
+  await Promise.all([loadDashboard(),loadOpenOrders()]);
  }catch(e){showMessage($('stopLimitMsg'),'لغو سفارش Stop-Limit ناموفق بود: '+(e.message||String(e)),'err');button.disabled=false}
 }
 async function loadOpenOrders(){
@@ -2224,7 +2224,7 @@ function renderAllOrders(){
 async function cancelLimitOrder(orderId,button){
  if(!orderId)return;button.disabled=true;
  try{const {data,error}=await supabaseClient.rpc('cancel_limit_order',{p_order_id:orderId});if(error)throw error;if(!data||data.success!==true)throw new Error(data?.message||data?.error||'سرور لغو سفارش را تأیید نکرد.');
-  showMessage($('limitOrderMsg'),'سفارش لغو شد؛ وضعیت و آزادسازی رزرو از سرور تأیید شد.','ok');if($('allOrdersMsg'))showMessage($('allOrdersMsg'),'سفارش لغو شد؛ وضعیت و آزادسازی رزرو از سرور تأیید شد.','ok');await Promise.all([loadOpenOrders(),loadAllOrders(),loadWallet(),loadAssets()]);
+  showMessage($('limitOrderMsg'),'سفارش لغو شد؛ وضعیت و آزادسازی رزرو از سرور تأیید شد.','ok');if($('allOrdersMsg'))showMessage($('allOrdersMsg'),'سفارش لغو شد؛ وضعیت و آزادسازی رزرو از سرور تأیید شد.','ok');await Promise.all([loadDashboard(),loadOpenOrders()]);
  }catch(e){showMessage($('limitOrderMsg'),'لغو سفارش ناموفق بود: '+(e.message||String(e)),'err');if($('allOrdersMsg'))showMessage($('allOrdersMsg'),'لغو سفارش ناموفق بود: '+(e.message||String(e)),'err');button.disabled=false}
 }
 
