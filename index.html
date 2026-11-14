@@ -642,6 +642,91 @@ body:not(.light-theme) input,body:not(.light-theme) select,body:not(.light-theme
  .auth-benefits{grid-template-columns:1fr}
 }
 
+
+
+/* DigiArz interface refinement v3: dashboard, market and trading workspace */
+.dashboard-panel>.section-title{padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:15px}
+.dashboard-panel>.section-title .live{padding:6px 10px;border-radius:999px;background:rgba(34,157,120,.10);font-size:10px;letter-spacing:.7px}
+.dashboard-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.dashboard-stats .stat{min-height:94px;display:flex;flex-direction:column;justify-content:space-between;padding:16px}
+.dashboard-stats .stat .muted{font-size:11px;line-height:1.8}
+.dashboard-stats .stat .value{font-size:clamp(17px,2vw,23px);line-height:1.5;overflow-wrap:anywhere}
+.dashboard-portfolio-section,.dashboard-panel>.detail-section{padding:17px;margin-top:14px;border:1px solid var(--line);border-radius:17px;background:color-mix(in srgb,var(--panel2) 48%,transparent)}
+.dashboard-shortcuts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.dashboard-shortcuts button{display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:13px 14px;text-align:right;border:1px solid var(--line);background:var(--panel);color:var(--text);box-shadow:0 4px 14px rgba(0,0,0,.035)}
+.dashboard-shortcuts button svg{width:19px;height:19px;color:var(--accent2);flex:0 0 auto}
+.dashboard-market-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.dashboard-market-grid .stat{padding:13px}
+.dashboard-market-grid .value{font-size:18px}
+.dashboard-activity-list,.dashboard-alert-list{display:grid;gap:8px}
+#tab-markets>.section-title{align-items:center;flex-wrap:wrap}
+#tab-markets>.section-title .row{flex-wrap:wrap;justify-content:flex-end}
+.fx-box{border:1px solid var(--line);border-radius:16px;padding:15px 17px;background:linear-gradient(120deg,var(--panel2),var(--panel))}
+.volatility-panel{border-radius:16px;padding:15px}
+.volatility-grid{gap:9px}
+.volatility-stat{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--panel)}
+.market-categories{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:thin}
+.market-categories .category-btn{flex:0 0 auto;min-height:39px;border-radius:999px;padding-inline:14px}
+#tab-markets .market-tools{display:grid;grid-template-columns:minmax(0,1fr) minmax(130px,190px);gap:10px}
+#tab-markets #marketList{display:grid;gap:8px}
+#tab-trade>.notice{padding:13px 15px;border-radius:14px;line-height:1.9}
+#tab-trade .detail-section{padding:15px;margin-top:15px;border:1px solid var(--line);border-radius:17px;background:color-mix(in srgb,var(--panel2) 35%,transparent)}
+.orderbook-grid{gap:10px}
+.orderbook-side{border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--panel)}
+.orderbook-side h4{margin:0 0 10px}
+.orderbook-mid{border:1px solid var(--line);border-radius:0 0 12px 12px;padding:11px;text-align:center;font-weight:800}
+.trade-grid{gap:13px}
+.trade-box{border:1px solid var(--line);border-radius:17px;padding:17px}
+.trade-box h3{margin-top:0;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.trade-asset-preview{border-radius:11px}
+#chartSection{overflow:hidden}
+#chartSection .timeframes{display:flex;gap:6px;overflow-x:auto;padding:5px 2px 10px;scrollbar-width:thin}
+#chartSection .timeframes button{flex:0 0 auto;min-width:60px;border-radius:9px}
+#chartSection .chart-types{display:flex;gap:7px;flex-wrap:wrap}
+#chartSection .chart-types button{border-radius:9px;padding:8px 13px}
+#tab-assets .asset-summary-grid{gap:10px}
+#tab-assets .asset-tools{display:grid;grid-template-columns:minmax(0,1fr) minmax(130px,190px);gap:10px}
+#tab-assets .market-list{display:grid;gap:8px}
+body.light-theme .dashboard-panel>.detail-section{background:linear-gradient(145deg,#fff,#f8fbff)}
+body.light-theme .dashboard-shortcuts button{background:linear-gradient(145deg,#fff,#f7faff);border-color:#e1e8f1}
+body.light-theme .volatility-stat{background:#fff}
+body.light-theme .orderbook-side{background:#fff}
+body:not(.light-theme) .dashboard-panel>.detail-section{background:linear-gradient(145deg,rgba(32,35,43,.72),rgba(16,19,24,.72))}
+body:not(.light-theme) .dashboard-shortcuts button{background:linear-gradient(145deg,#202630,#171c25)}
+@media(min-width:980px){
+ .dashboard-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .dashboard-portfolio-section{padding:20px}
+ #tab-trade .trade-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:700px){
+ .dashboard-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .dashboard-stats .stat{min-height:82px;padding:12px}
+ .dashboard-stats .stat .muted{font-size:10px}
+ .dashboard-stats .stat .value{font-size:17px}
+ .dashboard-panel>.detail-section,.dashboard-portfolio-section{padding:12px;margin-top:10px}
+ .dashboard-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .dashboard-shortcuts button{min-height:51px;padding:10px;font-size:11px;gap:7px}
+ .dashboard-shortcuts button svg{width:17px;height:17px}
+ .dashboard-market-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+ .dashboard-market-grid .stat{padding:9px 7px}
+ .dashboard-market-grid .stat .muted{font-size:9px}
+ .dashboard-market-grid .value{font-size:14px}
+ #tab-markets>.section-title .row{width:100%;justify-content:space-between}
+ #tab-markets .market-tools,#tab-assets .asset-tools{grid-template-columns:1fr}
+ .volatility-stat{padding:9px 7px}
+ .volatility-stat small{font-size:9px}
+ .volatility-stat strong{font-size:13px}
+ #tab-trade .detail-section{padding:11px}
+ .trade-box{padding:13px}
+ #chartSection .section-title{align-items:center}
+ #chartSection .timeframes button{min-height:38px;font-size:10px}
+}
+@media(max-width:370px){
+ .dashboard-shortcuts button{font-size:10px;padding:9px 7px}
+ .dashboard-market-grid .value{font-size:12px}
+ .dashboard-stats .stat .value{font-size:15px}
+}
+
 </style>
 </head>
 <body>
