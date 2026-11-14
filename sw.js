@@ -1,5 +1,5 @@
 'use strict';
-const CACHE_NAME = 'digiarz-shell-v18';
+const CACHE_NAME = 'digiarz-shell-v19';
 const APP_SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', event => {
