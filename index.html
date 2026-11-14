@@ -1248,7 +1248,7 @@ async function loadStopLimitOrders(){
  const pending=data.filter(o=>o.status==='pending'),symbols=[...new Set(pending.map(o=>o.symbol))];
  const [priceResult,reservationResult]=await Promise.all([
   symbols.length?supabaseClient.from('market_prices').select('symbol,price,updated_at').in('symbol',symbols):Promise.resolve({data:[],error:null}),
-  pending.length?supabaseClient.from('order_reservations').select('order_id,asset,reserved_amount,consumed_amount,released_amount,status').eq('user_id',userData.user.id).in('order_id',pending.map(o=>o.order_id)):Promise.resolve({data:[],error:null})
+  pending.length?supabaseClient.rpc('get_my_order_reservations',{p_order_ids:pending.map(o=>o.order_id)}):Promise.resolve({data:[],error:null})
  ]);
  const prices=priceResult.error?[]:(priceResult.data||[]);
  const reservations=reservationResult.error?[]:(reservationResult.data||[]);
