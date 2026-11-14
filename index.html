@@ -845,6 +845,79 @@ body.light-theme #tab-chart .performance-item{background:#fff;border-color:#e3e9
 }
 @media(prefers-reduced-motion:reduce){.tabs button{transition:none}}
 
+
+
+/* DigiArz refinement v6: market discovery and quote cards */
+#tab-markets>.section-title{align-items:center;flex-wrap:wrap;padding-bottom:12px;border-bottom:1px solid var(--line)}
+#tab-markets>.section-title h2{font-size:20px;font-weight:900;letter-spacing:-.35px}
+#tab-markets .fx-box{border-radius:15px;padding:16px 18px;background:linear-gradient(115deg,rgba(240,185,11,.11),var(--panel2));border-color:rgba(240,185,11,.28)}
+#tab-markets .fx-price{font-size:clamp(19px,3vw,25px);font-variant-numeric:tabular-nums}
+#tab-markets .market-categories{grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:16px 0}
+#tab-markets .category-btn{position:relative;min-height:82px;border-radius:14px;background:var(--panel2);border-color:var(--line);transition:transform .16s ease,border-color .16s ease,background .16s ease}
+#tab-markets .category-btn:hover{transform:translateY(-2px);border-color:var(--yellow)}
+#tab-markets .category-btn.active{background:rgba(240,185,11,.12);border-color:var(--yellow);color:var(--text);box-shadow:inset 0 0 0 1px rgba(240,185,11,.12)}
+#tab-markets .category-btn svg{width:22px;height:22px}
+#tab-markets .volatility-panel{max-width:none;text-align:right;border-radius:15px;padding:16px;background:linear-gradient(125deg,var(--panel2),var(--panel));border-color:var(--line)}
+#tab-markets .volatility-title{font-size:13px;color:var(--text);margin-bottom:13px}
+#tab-markets .volatility-stat{padding:13px 12px;border-radius:12px;background:var(--panel);border-color:var(--line);text-align:right}
+#tab-markets .volatility-stat strong{font-size:17px;font-variant-numeric:tabular-nums}
+#tab-markets .gainers-panel,#tab-markets .top-assets-panel{border-radius:15px;padding:16px;background:var(--panel);border:1px solid var(--line)}
+#tab-markets .gainers-panel{background:linear-gradient(135deg,rgba(35,170,112,.055),var(--panel) 55%);border-color:rgba(35,170,112,.22)}
+#tab-markets .losers-panel{background:linear-gradient(135deg,rgba(220,75,90,.055),var(--panel) 55%);border-color:rgba(220,75,90,.22)}
+#tab-markets .gainers-head{align-items:flex-start;flex-wrap:wrap}
+#tab-markets .gainers-head strong{display:flex;align-items:center;gap:7px;font-size:13px}
+#tab-markets .gainers-head strong svg{width:17px;height:17px}
+#tab-markets .gainer-card{border-radius:12px;background:var(--panel2);border-color:var(--line);padding:11px 12px;transition:border-color .15s ease,transform .15s ease}
+#tab-markets .gainer-card:hover{border-color:var(--yellow);transform:translateY(-1px)}
+#tab-markets .gainers-more{border-radius:11px;border-color:var(--line);font-size:11px}
+#tab-markets .top-asset-card{border-radius:13px;background:var(--panel2);border-color:var(--line);transition:border-color .15s ease,transform .15s ease}
+#tab-markets .top-asset-card:hover{border-color:var(--yellow);transform:translateY(-2px)}
+#tab-markets .market-tools{grid-template-columns:minmax(180px,1fr) minmax(145px,180px) minmax(165px,200px);gap:9px;padding:13px;border:1px solid var(--line);border-radius:15px;background:var(--panel2)}
+#tab-markets .market-tools input,#tab-markets .market-tools select{min-width:0;min-height:45px;border-radius:11px;border:1px solid var(--line);background:var(--panel);color:var(--text);padding:10px 12px;font-size:12px}
+#tab-markets .market-tools input:focus,#tab-markets .market-tools select:focus{outline:2px solid rgba(240,185,11,.45);outline-offset:1px}
+#tab-markets .market-head{padding:9px 3px;color:var(--muted);font-size:11px;line-height:1.9}
+#tab-markets .market-list{gap:8px}
+#tab-markets .coin{grid-template-columns:minmax(0,1.25fr) minmax(120px,.9fr) minmax(100px,.75fr);gap:12px;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:var(--panel);transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease}
+#tab-markets .coin:hover,#tab-markets .coin.selected{background:var(--panel2);border-color:var(--yellow);box-shadow:0 5px 18px rgba(0,0,0,.06);transform:translateY(-1px)}
+#tab-markets .coin .price,#tab-markets .coin .toman{font-variant-numeric:tabular-nums;font-size:13px}
+#tab-markets .coin .price{font-weight:900}
+#tab-markets .coin .toman{font-size:12px}
+#tab-markets .coin-identity{min-width:0}
+#tab-markets .coin-identity b,#tab-markets .coin-identity strong{overflow-wrap:anywhere}
+#tab-markets .coin .coin-icon,#tab-markets .coin .asset-logo{border:1px solid var(--line);background:var(--panel2)}
+#tab-markets .market-note{font-size:10px;line-height:2.1;color:var(--muted);padding:10px 12px;border-radius:11px;background:var(--panel2);margin-top:12px}
+body.light-theme #tab-markets .gainers-panel{background:linear-gradient(135deg,#f0faf5,#fff 65%);border-color:#d9eee3}
+body.light-theme #tab-markets .losers-panel{background:linear-gradient(135deg,#fff3f3,#fff 65%);border-color:#f2dddd}
+body.light-theme #tab-markets .market-tools{background:#f5f7fa}
+body.light-theme #tab-markets .coin{background:#fff}
+body.light-theme #tab-markets .coin:hover,body.light-theme #tab-markets .coin.selected{background:#fffdf5}
+@media(max-width:760px){
+ #tab-markets{padding:14px}
+ #tab-markets>.section-title{align-items:flex-start}
+ #tab-markets>.section-title .row{width:100%;justify-content:space-between}
+ #tab-markets .market-categories{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+ #tab-markets .category-btn{min-height:72px;padding:8px 4px;font-size:10px}
+ #tab-markets .volatility-grid{gap:6px}
+ #tab-markets .volatility-stat{padding:10px 7px}
+ #tab-markets .volatility-stat small{font-size:9px;line-height:1.7}
+ #tab-markets .volatility-stat strong{font-size:13px}
+ #tab-markets .gainers-panel,#tab-markets .top-assets-panel{padding:12px}
+ #tab-markets .market-tools{grid-template-columns:1fr 1fr;padding:10px}
+ #tab-markets .market-tools input{grid-column:1/-1}
+ #tab-markets .coin{grid-template-columns:minmax(0,1fr) minmax(100px,auto);gap:8px;padding:11px}
+ #tab-markets .coin .price{grid-column:2;grid-row:1}
+ #tab-markets .coin .toman{grid-column:2;grid-row:2}
+}
+@media(max-width:390px){
+ #tab-markets .market-categories{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #tab-markets .market-tools{grid-template-columns:1fr}
+ #tab-markets .market-tools input{grid-column:auto}
+ #tab-markets .volatility-grid{grid-template-columns:1fr}
+ #tab-markets .gainer-card{grid-template-columns:32px minmax(0,1fr) auto;gap:7px}
+ #tab-markets .gainer-card small{display:none}
+}
+@media(prefers-reduced-motion:reduce){#tab-markets .category-btn,#tab-markets .gainer-card,#tab-markets .top-asset-card,#tab-markets .coin{transition:none}}
+
 </style>
 </head>
 <body>
