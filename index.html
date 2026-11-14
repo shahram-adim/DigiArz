@@ -1309,9 +1309,7 @@ async function loadOpenOrders(){
  if(!data?.length){root.innerHTML='<div class="muted small">سفارش Limit بازی وجود ندارد.</div>';await loadConditionalOrders();await loadStopLimitOrders();return}
  const ids=data.map(o=>o.id),symbols=[...new Set(data.map(o=>o.symbol))];
  const [reservationResult,priceResult]=await Promise.all([
-  supabaseClient.from('order_reservations')
-   .select('order_id,asset,reserved_amount,consumed_amount,released_amount,status')
-   .eq('user_id',userData.user.id).in('order_id',ids),
+  supabaseClient.rpc('get_my_order_reservations',{p_order_ids:ids}),
   supabaseClient.from('market_prices').select('symbol,price,updated_at').in('symbol',symbols)
  ]);
  const reservations=reservationResult.error?[]:(reservationResult.data||[]);
