@@ -1184,14 +1184,29 @@ async function loadConditionalOrders(){
  if(error)throw error;
  root.replaceChildren();
  if(!data?.length){const empty=document.createElement('div');empty.className='muted small';empty.textContent='سفارش شرطی بازی وجود ندارد.';root.append(empty);return}
- const symbols=[...new Set(data.map(o=>o.symbol))];
- const priceResult=await supabaseClient.from('market_prices').select('symbol,price,updated_at').in('symbol',symbols);
+ const symbols=[...new Set(data.map(o=>o.symbol))],orderIds=data.map(o=>o.order_id).filter(Boolean);
+ const [priceResult,reservationResult]=await Promise.all([
+  supabaseClient.from('market_prices').select('symbol,price,updated_at').in('symbol',symbols),
+  orderIds.length?supabaseClient.rpc('get_my_order_reservations',{p_order_ids:orderIds}):Promise.resolve({data:[],error:null})
+ ]);
  const prices=priceResult.error?[]:(priceResult.data||[]);
+ const reservations=reservationResult.error?[]:(reservationResult.data||[]);
  for(const o of data){
   const row=document.createElement('article');row.className='open-order-row';
   const details=document.createElement('div');details.className='open-order-details';
   const title=document.createElement('strong');title.textContent=o.symbol+' · '+(o.order_kind==='take_profit'?'حد سود':'حد ضرر')+' · فروش';
-  const meta=document.createElement('small');meta.textContent='قیمت فعال‌سازی: '+formatNum(o.trigger_price,10)+' USDT · مقدار رزروشده: '+formatNum(o.amount,10);
+  const meta=document.createElement('small');meta.textContent='قیمت فعال‌سازی: '+formatNum(o.trigger_price,10)+' USDT · مقدار سفارش: '+formatNum(o.amount,10);
+  const reservation=reservations.find(r=>r.order_id===o.order_id);
+  const reserveLine=document.createElement('small');reserveLine.className='small muted';
+  if(reservationResult.error){
+   reserveLine.textContent='وضعیت رزرو با خطا روبه‌رو شد؛ رزروشدن دارایی تأیید نشده است.';
+  }else if(!reservation){
+   reserveLine.textContent='رزرو متناظر این سفارش پیدا نشد؛ نیازمند بررسی سرور.';
+  }else{
+   const reserved=Number(reservation.reserved_amount),consumed=Number(reservation.consumed_amount||0),released=Number(reservation.released_amount||0),remaining=reserved-consumed-released;
+   const valid=reservation.status==='reserved'&&Number.isFinite(reserved)&&Number.isFinite(consumed)&&Number.isFinite(released)&&reserved>0&&consumed>=0&&released>=0&&consumed+released<=reserved&&remaining>0;
+   reserveLine.textContent=valid?'رزرو باقیمانده: '+formatNum(remaining,10)+' '+String(reservation.asset||'')+' · وضعیت: '+reservation.status:'رزرو آزاد، نامعتبر یا بدون مانده است؛ سفارش نیازمند بررسی است.';
+  }
   const note=document.createElement('small');note.className='small muted';note.textContent=o.order_kind==='take_profit'?'شرط اجرا: قیمت بازار مساوی یا بالاتر از هدف':'شرط اجرا: قیمت بازار مساوی یا پایین‌تر از هدف';
   const marketLine=document.createElement('small');marketLine.className='small muted';
   const market=prices.find(p=>p.symbol===o.symbol),age=market?.updated_at?Date.now()-new Date(market.updated_at).getTime():Infinity;
@@ -1201,7 +1216,7 @@ async function loadConditionalOrders(){
   }else if(priceResult.error){marketLine.textContent='علت انتظار مشخص نیست؛ دریافت قیمت بازار با خطا روبه‌رو شد.'}
   else if(market&&age>60000){marketLine.textContent='علت انتظار: قیمت بازار قدیمی‌تر از ۶۰ ثانیه است؛ سفارش با قیمت تازه بررسی می‌شود.'}
   else{marketLine.textContent='قیمت تازه بازار در دسترس نیست؛ سفارش تا دریافت قیمت معتبر اجرا نمی‌شود.'}
-  details.append(title,meta,note,marketLine);
+  details.append(title,meta,reserveLine,note,marketLine);
   const cancel=document.createElement('button');cancel.type='button';cancel.className='danger';cancel.textContent='لغو و آزادسازی';cancel.addEventListener('click',()=>cancelConditionalExitOrder(o.order_id,cancel));
   row.append(details,cancel);root.append(row);
  }
