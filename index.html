@@ -977,7 +977,7 @@ function renderMarkets(){
   div.className='coin'+(item.symbol===selectedSymbol?' selected':'');
   const fullSymbol=String(item.symbol).toUpperCase(),base=fullSymbol.replace(/USDT$/i,'');
   const change=changeOf(item),isFavorite=favoriteSymbols.includes(item.symbol);
-  div.setAttribute('role','group');div.setAttribute('aria-label',`اطلاعات ${persianCoinName(item.symbol)} (${base})`);
+  div.setAttribute('role','group');div.setAttribute('tabindex','0');div.setAttribute('aria-label',`اطلاعات ${persianCoinName(item.symbol)} (${base})`);
   const usdMarkup=`<div class="price-usd"><strong>${valid?'$ '+formatNum(usd,10):'—'}</strong></div>`;
   const tomanMarkup=`<div class="price-toman"><strong>${toman!==null?formatNum(toman,0)+' تومان':'نرخ تومان ناموجود'}</strong></div>`;
   const priceMarkup=usdMarkup+tomanMarkup;
