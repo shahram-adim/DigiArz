@@ -399,6 +399,34 @@ body{background:radial-gradient(ellipse at 85% -10%,rgba(232,185,73,.09),transpa
  .market-categories{gap:6px}
  .category-btn{min-height:68px;font-size:9px}
 }
+
+/* DigiArz exchange-grade market controls and 24h performance badges */
+.market-categories{grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:10px;margin:16px 0}
+.market-categories .category-btn{position:relative;min-height:88px;padding:11px 7px;gap:8px;border:1px solid rgba(148,163,184,.2);border-radius:14px;background:linear-gradient(155deg,rgba(31,41,55,.92),rgba(15,23,35,.96));color:#dbe4f0;box-shadow:0 5px 16px rgba(0,0,0,.12);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.market-categories .category-btn:hover{transform:translateY(-2px);border-color:rgba(240,185,11,.55);box-shadow:0 8px 22px rgba(0,0,0,.2)}
+.market-categories .category-btn.active{background:linear-gradient(145deg,rgba(240,185,11,.2),rgba(22,30,42,.98));border-color:var(--yellow);color:#fff;box-shadow:0 0 0 1px rgba(240,185,11,.14),0 8px 22px rgba(240,185,11,.08)}
+.category-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:rgba(148,163,184,.12);color:var(--yellow)}
+.category-icon svg{width:19px;height:19px;stroke:currentColor;stroke-width:2.1}
+.category-btn.active .category-icon{background:rgba(240,185,11,.18);color:var(--yellow)}
+.category-label{font-size:11px;line-height:1.5;text-align:center}
+.coin-change-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:82px;text-align:center}
+.coin-change-label{font-size:9px;color:var(--muted);white-space:nowrap}
+.coin-change{font-variant-numeric:tabular-nums}
+.losers-panel{border-color:rgba(246,70,93,.28);background:linear-gradient(135deg,rgba(246,70,93,.07),rgba(16,19,24,.92))}
+.losers-panel .gainers-head strong,.losers-panel .gainers-head svg{color:var(--red)}
+.loser-card strong,.top-change.neg{color:var(--red)!important}
+.top-change{font-size:12px;font-weight:900;direction:ltr}
+.top-change.pos{color:var(--green)}
+.top-asset-card .top-change{padding:4px 8px;border-radius:7px;background:rgba(14,203,129,.1)}
+.top-asset-card .top-change.neg{background:rgba(246,70,93,.1)}
+.gainers-head strong{display:flex;align-items:center;gap:7px}
+.gainers-head svg{width:18px;height:18px;color:var(--green)}
+body.light-theme .market-categories .category-btn{background:linear-gradient(155deg,#fff,#f3f7fc);color:#3c4b60;border-color:#dce5f0}
+body.light-theme .market-categories .category-btn.active{background:linear-gradient(145deg,#eaf3ff,#fff);color:#0878ee;border-color:#80b8f4}
+body.light-theme .category-icon{background:#edf3fa;color:#0878ee}
+body.light-theme .losers-panel{background:linear-gradient(135deg,#fff0f1,#fff);border-color:#f1c8ce}
+@media(max-width:700px){.market-categories{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.market-categories .category-btn{min-height:78px;padding:9px 4px}.category-label{font-size:10px}.coin-change-wrap{min-width:68px}.coin-change{min-width:64px;font-size:12px!important}}
+@media(prefers-reduced-motion:reduce){.market-categories .category-btn{transition:none}}
 </style>
 </head>
 <body>
@@ -1392,31 +1420,3 @@ if ("serviceWorker" in navigator && (location.protocol === "https:" || location.
 </script>
 </body>
 </html>
-
-/* DigiArz exchange-grade market controls and 24h performance badges */
-.market-categories{grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:10px;margin:16px 0}
-.market-categories .category-btn{position:relative;min-height:88px;padding:11px 7px;gap:8px;border:1px solid rgba(148,163,184,.2);border-radius:14px;background:linear-gradient(155deg,rgba(31,41,55,.92),rgba(15,23,35,.96));color:#dbe4f0;box-shadow:0 5px 16px rgba(0,0,0,.12);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
-.market-categories .category-btn:hover{transform:translateY(-2px);border-color:rgba(240,185,11,.55);box-shadow:0 8px 22px rgba(0,0,0,.2)}
-.market-categories .category-btn.active{background:linear-gradient(145deg,rgba(240,185,11,.2),rgba(22,30,42,.98));border-color:var(--yellow);color:#fff;box-shadow:0 0 0 1px rgba(240,185,11,.14),0 8px 22px rgba(240,185,11,.08)}
-.category-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:rgba(148,163,184,.12);color:var(--yellow)}
-.category-icon svg{width:19px;height:19px;stroke:currentColor;stroke-width:2.1}
-.category-btn.active .category-icon{background:rgba(240,185,11,.18);color:var(--yellow)}
-.category-label{font-size:11px;line-height:1.5;text-align:center}
-.coin-change-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:82px;text-align:center}
-.coin-change-label{font-size:9px;color:var(--muted);white-space:nowrap}
-.coin-change{font-variant-numeric:tabular-nums}
-.losers-panel{border-color:rgba(246,70,93,.28);background:linear-gradient(135deg,rgba(246,70,93,.07),rgba(16,19,24,.92))}
-.losers-panel .gainers-head strong,.losers-panel .gainers-head svg{color:var(--red)}
-.loser-card strong,.top-change.neg{color:var(--red)!important}
-.top-change{font-size:12px;font-weight:900;direction:ltr}
-.top-change.pos{color:var(--green)}
-.top-asset-card .top-change{padding:4px 8px;border-radius:7px;background:rgba(14,203,129,.1)}
-.top-asset-card .top-change.neg{background:rgba(246,70,93,.1)}
-.gainers-head strong{display:flex;align-items:center;gap:7px}
-.gainers-head svg{width:18px;height:18px;color:var(--green)}
-body.light-theme .market-categories .category-btn{background:linear-gradient(155deg,#fff,#f3f7fc);color:#3c4b60;border-color:#dce5f0}
-body.light-theme .market-categories .category-btn.active{background:linear-gradient(145deg,#eaf3ff,#fff);color:#0878ee;border-color:#80b8f4}
-body.light-theme .category-icon{background:#edf3fa;color:#0878ee}
-body.light-theme .losers-panel{background:linear-gradient(135deg,#fff0f1,#fff);border-color:#f1c8ce}
-@media(max-width:700px){.market-categories{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.market-categories .category-btn{min-height:78px;padding:9px 4px}.category-label{font-size:10px}.coin-change-wrap{min-width:68px}.coin-change{min-width:64px;font-size:12px!important}}
-@media(prefers-reduced-motion:reduce){.market-categories .category-btn{transition:none}}
