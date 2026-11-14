@@ -918,6 +918,62 @@ body.light-theme #tab-markets .coin:hover,body.light-theme #tab-markets .coin.se
 }
 @media(prefers-reduced-motion:reduce){#tab-markets .category-btn,#tab-markets .gainer-card,#tab-markets .top-asset-card,#tab-markets .coin{transition:none}}
 
+
+
+/* DigiArz refinement v7: order lifecycle and trade history */
+#tab-orders>.section-title,#tab-history>.section-title{padding-bottom:13px;border-bottom:1px solid var(--line)}
+#tab-orders>.section-title h2,#tab-history>.section-title h2{font-size:19px;font-weight:900}
+#tab-orders>.market-tools,#tab-history>.market-tools{padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--panel2)}
+#tab-orders .market-tools select,#tab-history .market-tools input,#tab-history .market-tools select{min-height:45px;border-radius:10px;background:var(--panel);border-color:var(--line);color:var(--text)}
+#tab-orders #allOrdersList,#tab-orders #openOrdersList,#tab-orders #conditionalOrdersList,#tab-orders #stopLimitOrdersList{display:grid;gap:10px}
+#tab-orders .order-history-card,#tab-orders .open-order-row{display:flex;align-items:flex-start;justify-content:space-between;gap:13px;padding:15px;border:1px solid var(--line);border-radius:15px;background:var(--panel2);box-shadow:0 3px 12px rgba(0,0,0,.045);min-width:0}
+#tab-orders .order-history-main,#tab-orders .open-order-details{display:grid;gap:9px;min-width:0;flex:1}
+#tab-orders .order-history-title{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+#tab-orders .order-history-title strong,#tab-orders .open-order-details>strong{font-size:14px;font-weight:900;direction:ltr;text-align:left;overflow-wrap:anywhere}
+#tab-orders .order-history-meta,#tab-orders .open-order-details small{display:block;color:var(--muted);font-size:11px;line-height:2.05;overflow-wrap:anywhere}
+#tab-orders .order-status{display:inline-flex;align-items:center;justify-content:center;padding:5px 9px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--muted);font-size:10px;font-weight:850;white-space:nowrap}
+#tab-orders .order-status.good{color:var(--green);border-color:rgba(14,203,129,.3);background:rgba(14,203,129,.09)}
+#tab-orders .order-status.bad{color:var(--red);border-color:rgba(246,70,93,.3);background:rgba(246,70,93,.09)}
+#tab-orders .order-history-card button,#tab-orders .open-order-row button{flex:0 0 auto;min-height:40px;padding:9px 13px;border-radius:10px;font-size:11px}
+#tab-orders .open-order-details small:nth-of-type(1){padding:8px 10px;border-radius:9px;background:var(--panel);border:1px solid var(--line)}
+#tab-orders .open-order-details small:nth-of-type(2){padding:8px 10px;border-radius:9px;background:rgba(240,185,11,.07);border:1px solid rgba(240,185,11,.18);color:var(--text)}
+#tab-orders .detail-section{padding:15px;border:1px solid var(--line);border-radius:16px;background:var(--panel2)}
+#tab-orders .detail-section>.section-title{margin-bottom:12px}
+#tab-history .history-asset{min-width:100px}
+#tab-history .history-asset .asset-logo{border:1px solid var(--line);background:var(--panel2)}
+#tab-history .table-wrap{border-radius:15px;background:var(--panel);border-color:var(--line);box-shadow:0 3px 14px rgba(0,0,0,.04)}
+#tab-history table{min-width:610px;font-size:12px}
+#tab-history thead{background:var(--panel2)}
+#tab-history th{position:sticky;top:0;z-index:1;padding:14px 12px;color:var(--muted);font-size:10px;letter-spacing:.1px}
+#tab-history td{padding:13px 12px;border-bottom:1px solid var(--line);font-size:11px}
+#tab-history tbody tr{transition:background .15s ease}
+#tab-history tbody tr:hover{background:var(--panel2)}
+#tab-history td:nth-child(1){white-space:nowrap;color:var(--muted)}
+#tab-history td:nth-child(2){font-weight:850}
+#tab-history td:nth-child(3){font-weight:850}
+#tab-history td:nth-child(4),#tab-history td:nth-child(5){direction:ltr;text-align:right;font-variant-numeric:tabular-nums}
+#tab-orders .chart-caption,#tab-history .chart-caption{padding:9px 11px;border-radius:10px;background:var(--panel2);font-size:10px}
+body.light-theme #tab-orders .order-history-card,body.light-theme #tab-orders .open-order-row,body.light-theme #tab-orders .detail-section{background:#f7f9fc;border-color:#e2e8f0}
+body.light-theme #tab-orders .open-order-details small:nth-of-type(1),body.light-theme #tab-orders .market-tools,body.light-theme #tab-history .market-tools,body.light-theme #tab-history thead{background:#eef2f7}
+body.light-theme #tab-orders .order-status{background:#fff}
+body.light-theme #tab-history .table-wrap{background:#fff;border-color:#e2e8f0}
+body.light-theme #tab-history tbody tr:hover{background:#f6f8fb}
+@media(max-width:650px){
+ #tab-orders>.market-tools,#tab-history>.market-tools{grid-template-columns:1fr}
+ #tab-orders .order-history-card,#tab-orders .open-order-row{display:grid;grid-template-columns:minmax(0,1fr);gap:11px;padding:12px}
+ #tab-orders .order-history-card button,#tab-orders .open-order-row button{width:100%}
+ #tab-orders .order-history-title{align-items:flex-start}
+ #tab-orders .order-history-title strong,#tab-orders .open-order-details>strong{font-size:13px}
+ #tab-history .table-wrap{margin-inline:-2px}
+ #tab-history table{min-width:570px}
+}
+@media(max-width:380px){
+ #tab-orders>.section-title h2,#tab-history>.section-title h2{font-size:16px}
+ #tab-orders .order-status{font-size:9px;padding:4px 7px}
+ #tab-orders .detail-section{padding:11px}
+}
+@media(prefers-reduced-motion:reduce){#tab-history tbody tr{transition:none}}
+
 </style>
 </head>
 <body>
