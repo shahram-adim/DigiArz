@@ -863,7 +863,7 @@ function renderMarkets(){
   const change=Number.isFinite(Number(ticker?.change))?Number(ticker.change):changeOf(item);
   div.setAttribute('role','button');div.setAttribute('tabindex','0');div.setAttribute('aria-label',`باز کردن صفحه ${persianCoinName(item.symbol)} (${base})`);
   const usdMarkup=`<div class="price-usd"><small>قیمت دلاری</small><strong>${valid?'$ '+formatNum(usd,10):'—'}</strong></div>`;
-  const tomanMarkup=`<div class="price-toman"><small>قیمت تومانی</small><strong>${toman!==null?'$ '+formatNum(toman,0)+' تومان':'نرخ تومان ناموجود'}</strong></div>`;
+  const tomanMarkup=`<div class="price-toman"><small>قیمت تومانی</small><strong>${toman!==null?formatNum(toman,0)+' تومان':'نرخ تومان ناموجود'}</strong></div>`;
   const priceMarkup=usdMarkup+tomanMarkup;
   const changeMarkup=change===null?'<span class="coin-change">—</span>':`<span class="coin-change ${change>0?'pos':change<0?'neg':''}" aria-label="تغییر ۲۴ ساعته">${change>0?'+':''}${formatNum(change,2)}٪</span>`;
   const age=item.updated_at?Date.now()-new Date(item.updated_at).getTime():Infinity,serverFresh=Number.isFinite(age)&&age>=-60000&&age<=120000,serverState=serverFresh?'قیمت سرور تازه':age>120000?'قیمت سرور قدیمی':'زمان قیمت نامشخص',sourceLabel=item.source||'منبع ثبت نشده';
