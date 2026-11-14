@@ -94,3 +94,10 @@ Scope: Demo trading only. This document defines safe verification; it does not a
 
 ### Remaining blocker
 Full lifecycle testing remains blocked until an isolated Supabase test project with disposable users and balances is provisioned. The production project was used only for SELECT/read-only inspection in this review. Cron success is not being reported as Stop-Limit end-to-end QA success.
+
+
+### Additional access-control finding — reservation read path
+- [x] The RLS policy `Users can view own order reservations` exists for `authenticated` with predicate `auth.uid() = user_id`.
+- [x] The table ACL does not grant SELECT to `authenticated` or `anon`; `relacl` contains only `postgres` and `service_role`, and `has_table_privilege('authenticated', 'public.order_reservations', 'SELECT')` is false.
+- [x] Therefore the RLS policy alone does not make the browser query readable. The current Limit and Stop-Limit UI must show an unverified-reservation message rather than infer a reservation.
+- [ ] Do not solve this by granting broad direct table access without review. Preferred design: an owner-scoped SECURITY DEFINER read RPC that returns only order_id, asset, reserved_amount, consumed_amount, released_amount, and status for `auth.uid()`, with empty search_path and authenticated-only EXECUTE. This requires an isolated test and a separately reviewed migration before production application.
