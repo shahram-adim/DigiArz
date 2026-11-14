@@ -997,7 +997,8 @@ function renderCategoryButtons(){const root=$('marketCategories');if(!root)retur
 function renderMarkets(){
  const list=$('marketList');if(!list)return;list.replaceChildren();
  const q=String($('marketSearch')?.value||'').trim().toUpperCase(),sort=$('marketSort')?.value||'symbol';
- const changeOf=item=>{const raw=marketTickerMap.get(item.symbol)?.change;const live=raw===null||raw===undefined||raw===''?NaN:Number(raw);if(Number.isFinite(live))return live;const fallback=item.change===null||item.change===undefined||item.change===''?NaN:Number(item.change);return Number.isFinite(fallback)?fallback:null};
+ const changeCache=new Map();
+ const changeOf=item=>{if(changeCache.has(item.symbol))return changeCache.get(item.symbol);const raw=marketTickerMap.get(item.symbol)?.change;const live=raw===null||raw===undefined||raw===''?NaN:Number(raw);const fallback=item.change===null||item.change===undefined||item.change===''?NaN:Number(item.change);const value=Number.isFinite(live)?live:Number.isFinite(fallback)?fallback:null;changeCache.set(item.symbol,value);return value};
  const sourceRows=activeMarketCategory==='new'?featuredMarketRows:marketRows;let rows=sourceRows.filter(x=>String(x.symbol).toUpperCase().includes(q));
  if(activeMarketCategory==='gainers')rows=rows.filter(x=>changeOf(x)!==null&&changeOf(x)>0);
  else if(activeMarketCategory==='losers')rows=rows.filter(x=>changeOf(x)!==null&&changeOf(x)<0);
