@@ -1206,8 +1206,7 @@ function bindTabs(){$('adminRefreshBtn')?.addEventListener('click',loadAdminUser
 async function start(){
  // Bind the authentication controls before any optional page initialization.
  // This keeps login usable even if another dashboard control fails to initialize.
- const loginButton=$('loginBtn'),signupButton=$('signupBtn');
- if(loginButton)loginButton.addEventListener('click',login);
+ const signupButton=$('signupBtn');
  if(signupButton)signupButton.addEventListener('click',signup);
  try{
  initTheme();initCurrencyMode();initClient();
@@ -1261,8 +1260,26 @@ async function start(){
   await showApp(data.session);
  }
  }catch(e){showMessage(authMsg,'راه‌اندازی برنامه با خطا روبه‌رو شد: '+(e.message||String(e)),'err')}}
+window.__digiArzLogin=login;
 start();
 setInterval(()=>{if(!document.hidden&&supabaseClient){refreshMarketTickers().then(renderMarkets).catch(console.warn)}},60000);
+})();
+</script>
+<script>
+/* Independent authentication click bridge: still gives visible feedback if app startup fails. */
+(() => {
+ const button=document.getElementById('loginBtn');
+ if(!button)return;
+ button.addEventListener('click',()=>{
+  const message=document.getElementById('authMsg');
+  if(typeof window.__digiArzLogin==='function'){
+   window.__digiArzLogin();
+  }else if(message){
+   message.textContent='بخش ورود برنامه به‌درستی بارگذاری نشده است. صفحه را دوباره باز کنید؛ در حال بررسی مشکل هستیم.';
+   message.className='notice err';
+   message.classList.remove('hidden');
+  }
+ },{capture:true});
 })();
 </script>
 <script>
