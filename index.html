@@ -1402,12 +1402,11 @@ function renderDashboardMarketPreview(){
 }
 function renderDashboardSummary(){renderDashboardMarketPreview();const count=$('dashboardMarketCount'),fx=$('dashboardFxRate'),prices=$('dashboardPriceCount'),note=$('dashboardMarketNote');if(count)count.textContent=formatNum(marketRows.length,0);if(fx)fx.textContent=currentFxIsValid?formatNum(currentFxRate,0)+' تومان':'نامعتبر / ناموجود';let validPriceCount=0;for(const item of marketRows){const price=Number(item.price);if(Number.isFinite(price)&&price>0)validPriceCount++}if(prices)prices.textContent=formatNum(validPriceCount,0);if(note)note.textContent=currentFxIsValid?'نرخ تبدیل تومان معتبر است؛ قیمت‌ها از فهرست فعال بازار خوانده می‌شوند.':'نرخ تبدیل تومان در حال حاضر معتبر نیست؛ ارزش تومانی دارایی‌ها نمایش داده نمی‌شود.'}
 function renderDashboardActivity(){
- const activeStatuses=['pending','partially_filled','triggered'];
- const open=allOrderRows.filter(o=>activeStatuses.includes(o.status));
- const partial=allOrderRows.filter(o=>o.status==='partially_filled');
+ const open=[],activeStatuses=new Set(['pending','partially_filled','triggered']);let partialCountValue=0;
+ for(const order of allOrderRows){if(activeStatuses.has(order.status))open.push(order);if(order.status==='partially_filled')partialCountValue++}
  const openCount=$('dashboardOpenOrderCount'),partialCount=$('dashboardPartialOrderCount'),totalCount=$('dashboardOrderCount');
  if(openCount)openCount.textContent=formatNum(open.length,0);
- if(partialCount)partialCount.textContent=formatNum(partial.length,0);
+ if(partialCount)partialCount.textContent=formatNum(partialCountValue,0);
  if(totalCount)totalCount.textContent=formatNum(allOrderRows.length,0)+(allOrderRows.length>=200?' · ۲۰۰ مورد اخیر':'');
  const orderRoot=$('dashboardRecentOrders');
  if(orderRoot){orderRoot.replaceChildren();const rows=open.slice(0,5);
