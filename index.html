@@ -1388,17 +1388,19 @@ function renderDashboardMarketPreview(){
  const rows=(marketRows||[]).map(item=>({item,t:marketTickerMap.get(item.symbol)})).filter(x=>x.t&&Number.isFinite(x.t.last)&&x.t.last>0).sort((a,b)=>(b.t.quoteVolume||0)-(a.t.quoteVolume||0)).slice(0,6);
  root.replaceChildren();
  if(!rows.length){const empty=document.createElement('div');empty.className='muted small';empty.textContent='قیمت زنده شاخص‌ها هنوز دریافت نشده است؛ بخش بازار را تازه‌سازی کنید.';root.append(empty);if(stamp)stamp.textContent='اطلاعات قیمت در دسترس نیست.';return}
+ const fragment=document.createDocumentFragment();
  for(const row of rows){
   const symbol=String(row.item.symbol),base=symbol.replace(/USDT$/i,''),card=document.createElement('button');card.type='button';card.className='dashboard-market-coin';card.addEventListener('click',()=>openChart(symbol));
   const head=document.createElement('span');head.className='dashboard-market-coin-head';head.textContent=persianCoinName(symbol)+' · '+base;
   const price=document.createElement('strong');price.className='dashboard-market-coin-price';price.textContent=formatNum(row.t.last,10)+' USDT';
   const change=document.createElement('span');change.className='dashboard-market-coin-change '+(row.t.change>0?'pos':row.t.change<0?'neg':'');change.textContent=(row.t.change>0?'+':'')+formatNum(row.t.change,2)+'٪ · ۲۴ ساعت';
   const toman=document.createElement('small');toman.className='dashboard-market-coin-toman';toman.textContent=currentFxIsValid?formatNum(row.t.last*currentFxRate,0)+' تومان':'نرخ تومان ناموجود';
-  card.append(head,price,change,toman);root.append(card);
+  card.append(head,price,change,toman);fragment.append(card);
  }
+ root.append(fragment);
  if(stamp)stamp.textContent='فید قیمت: Binance · دریافت: '+new Date().toLocaleTimeString('fa-IR')+' · نمایش فقط اطلاعات بازار است، نه قیمت تضمینی اجرای سفارش.';
 }
-function renderDashboardSummary(){renderDashboardMarketPreview();const count=$('dashboardMarketCount'),fx=$('dashboardFxRate'),prices=$('dashboardPriceCount'),note=$('dashboardMarketNote');if(count)count.textContent=formatNum(marketRows.length,0);if(fx)fx.textContent=currentFxIsValid?formatNum(currentFxRate,0)+' تومان':'نامعتبر / ناموجود';if(prices)prices.textContent=formatNum(marketRows.filter(x=>Number(x.price)>0&&Number.isFinite(Number(x.price))).length,0);if(note)note.textContent=currentFxIsValid?'نرخ تبدیل تومان معتبر است؛ قیمت‌ها از فهرست فعال بازار خوانده می‌شوند.':'نرخ تبدیل تومان در حال حاضر معتبر نیست؛ ارزش تومانی دارایی‌ها نمایش داده نمی‌شود.'}
+function renderDashboardSummary(){renderDashboardMarketPreview();const count=$('dashboardMarketCount'),fx=$('dashboardFxRate'),prices=$('dashboardPriceCount'),note=$('dashboardMarketNote');if(count)count.textContent=formatNum(marketRows.length,0);if(fx)fx.textContent=currentFxIsValid?formatNum(currentFxRate,0)+' تومان':'نامعتبر / ناموجود';let validPriceCount=0;for(const item of marketRows){const price=Number(item.price);if(Number.isFinite(price)&&price>0)validPriceCount++}if(prices)prices.textContent=formatNum(validPriceCount,0);if(note)note.textContent=currentFxIsValid?'نرخ تبدیل تومان معتبر است؛ قیمت‌ها از فهرست فعال بازار خوانده می‌شوند.':'نرخ تبدیل تومان در حال حاضر معتبر نیست؛ ارزش تومانی دارایی‌ها نمایش داده نمی‌شود.'}
 function renderDashboardActivity(){
  const activeStatuses=['pending','partially_filled','triggered'];
  const open=allOrderRows.filter(o=>activeStatuses.includes(o.status));
