@@ -836,4 +836,6 @@
 - [ ] بررسی واقعی ظاهر و تعامل روی گوشی Android نیازمند بازکردن نسخه منتشرشده توسط کاربر است؛ تست دستگاه ادعا نمی‌شود.
 - [ ] این مرحله ارتقای پوسته و دسترسی‌پذیری است، نه فعال‌سازی قابلیت‌های بک‌اند جدید یا تضمین عملکردی که هنوز end-to-end تست نشده است.
 - نکته مالی: هیچ موجودی، سفارش، رزرو، معامله یا سابقه مالی تغییر نکرد.
-- Commit کد: در حال ثبت.
+- Commit کد: `6c188ce8e2c8dd800795e365d6d5a542fe8a8b69` — Add premium responsive light and dark theme controls.
+- Commit مستندات: `76be3daf151856a29031ea127b1e08b2acbab6b5` — Document premium light and dark theme implementation.
+- GitHub Actions run `43607244791` برای commit مستندات در زمان ثبت این یادداشت `in_progress` بود؛ انتشار نهایی هنوز تأیید نشده است.
