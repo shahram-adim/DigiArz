@@ -58,3 +58,39 @@ Scope: Demo trading only. This document defines safe verification; it does not a
 2. Reproduce the relevant schema, migrations, cron setup, and market-price fixtures there.
 3. Run the matrix above, capturing database state before/after each case.
 4. Only after all cases pass, consider a supervised production smoke test with explicit owner approval.
+
+
+## Review update — 2026-11-14
+
+### Read-only verification performed
+- [x] Re-read the current `main` tree and the latest commit before this review: `152d87efd75860e4c0abe4a9ce216c7427db87ee` (defer external libraries and start after DOMContentLoaded).
+- [x] Supabase project discovery returned only the production project `DigiArz` (`gfoaubfilhttnwjykaox`); no isolated test project is currently available to this connection.
+- [x] Production cron job `digiarz-stop-limit-orders` (job 12) is active with schedule `* * * * *`. The five most recent recorded invocations were `succeeded`; this proves the scheduled function was invoked, not that any order lifecycle passed.
+- [x] Aggregate production state at review time: no Stop-Limit conditional rows, no conditional parent orders, and zero active Stop-Limit reservations.
+- [x] Live function grants/settings were inspected: place/cancel are executable by `authenticated` and not `anon`; worker is executable by `service_role` only. All three are SECURITY DEFINER with an empty search_path.
+- [x] Front-end static checks: all three inline scripts parse; 190 HTML IDs are unique; the Stop-Limit form, place/cancel RPC calls, and open-order loader are wired.
+- [x] No production order, trade, wallet, balance, reservation, or financial-history row was inserted or modified.
+
+### UI safety correction
+- [x] The pending Stop-Limit card previously stated that assets were reserved without reading the reservation row.
+- [x] `index.html` now reads the user's own reservation for pending Stop-Limit orders and validates its status and arithmetic.
+- [x] The UI now shows the remaining reserved amount and asset only when a valid active reservation is found; query failure, missing reservation, released status, or inconsistent amounts are shown as an unverified/invalid reservation instead of claiming funds are reserved.
+- [x] Change committed as `6445729024dd2437cbc96b136c630fcdedc1fa69`.
+
+### Newly identified backend QA gap
+- [ ] In `process_stop_limit_orders()`, the reservation-validation failure branch increments `attempt_count` and records `last_error`, then skips the order. Unlike the child-creation exception branch, it does not apply the ten-attempt terminal transition. A pending order with a missing, released, or inconsistent reservation can therefore remain pending and be retried indefinitely.
+- [ ] Define a fail-closed recovery policy for this branch. Do not automatically release an invalid reservation unless its ownership and arithmetic are independently validated; expose the reason for operator review and ensure the parent/conditional state cannot imply that execution is progressing normally.
+- [ ] Add a concurrency test for cancellation racing with the trigger worker; verify exactly one child order and one reservation transition.
+- [ ] Add a deactivation-after-trigger test with a pending or partially filled child Limit; verify child cancellation, remaining reservation release, and parent/conditional synchronization.
+
+### Added/clarified QA cases
+| Case | Setup | Expected result | Safe execution boundary |
+|---|---|---|---|
+| Missing/released reservation | Pending Stop-Limit with no valid active reservation | Worker creates no child; UI does not claim assets are reserved; operator-visible reason | Isolated test DB |
+| Inconsistent reservation arithmetic | Pending Stop-Limit with negative or over-consumed/released amounts | Fail closed; no child or duplicate release; recovery policy is explicit | Isolated test DB |
+| Reservation validation retry exhaustion | Repeat the invalid-reservation condition | A bounded, observable terminal/recovery path; never an invisible infinite pending loop | Isolated test DB |
+| Cancel/trigger race | User cancellation overlaps worker trigger | Exactly one valid outcome; no orphan child or double release | Isolated test DB |
+| Deactivate after trigger | Child Limit is pending or partially filled when account is deactivated | Child Limit is cancelled, its remaining reservation released once, and parent/conditional state mirrors child | Isolated test DB |
+
+### Remaining blocker
+Full lifecycle testing remains blocked until an isolated Supabase test project with disposable users and balances is provisioned. The production project was used only for SELECT/read-only inspection in this review. Cron success is not being reported as Stop-Limit end-to-end QA success.
