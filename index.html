@@ -1428,24 +1428,49 @@ async function loadAdminUsers(){if(!isSuperAdmin)return;const host=$('adminUsers
 async function submitAdminAdjustment(card,button){if(!isSuperAdmin||!card)return;const userId=card.dataset.userId,currency=card.querySelector('.admin-currency').value,direction=card.querySelector('.admin-direction').value,amount=Number(card.querySelector('.admin-amount').value),reason=card.querySelector('.admin-reason').value.trim();if(!Number.isFinite(amount)||amount<=0){showMessage($('adminUsersMsg'),'مقدار باید عددی بزرگ‌تر از صفر باشد.','err');return}if(reason.length<5){showMessage($('adminUsersMsg'),'دلیل تغییر اعتبار باید حداقل ۵ نویسه داشته باشد.','err');return}const label=direction==='credit'?'افزایش':'کاهش';if(!confirm(label+' '+formatNum(amount,8)+' '+currency+' برای '+(card.querySelector('strong')?.textContent||'این کاربر')+' ثبت شود؟ این عملیات در سوابق مالی ثبت می‌شود.'))return;button.disabled=true;hideMessage($('adminUsersMsg'));try{const {data,error}=await supabaseClient.rpc('admin_adjust_wallet',{p_user_id:userId,p_currency:currency,p_direction:direction,p_amount:amount,p_reason:reason});if(error)throw error;if(!data?.success)throw new Error('تغییر اعتبار تأیید نشد.');showMessage($('adminUsersMsg'),'تغییر اعتبار با موفقیت ثبت شد. موجودی جدید: '+formatNum(data.balance_after,8)+' '+currency,'ok');await loadAdminUsers();const {data:userData}=await supabaseClient.auth.getUser();if(userData?.user?.id===userId)await loadWallet()}catch(e){showMessage($('adminUsersMsg'),'ثبت تغییر اعتبار انجام نشد: '+(e.message||String(e)),'err');button.disabled=false}}
 function renderDashboardMarketPreview(){
  const root=$('dashboardMarketPreview'),stamp=$('dashboardMarketPreviewUpdated');if(!root)return;
- const rows=(marketRows||[]).map(item=>({item,t:getFreshMarketTicker(item)})).filter(x=>x.t&&Number.isFinite(x.t.last)&&x.t.last>0).sort((a,b)=>(b.t.quoteVolume||0)-(a.t.quoteVolume||0)).slice(0,6);
+ const rows=(marketRows||[]).map(item=>{
+  const t=getFreshMarketTicker(item),live=Number(t?.last),trusted=getTrustedMarketPrice(item);
+  return {item,t,live:Number.isFinite(live)&&live>0,price:trusted};
+ }).filter(x=>Number.isFinite(x.price)&&x.price>0);
+ rows.sort((a,b)=>{
+  if(a.live&&b.live)return (Number(b.t.quoteVolume)||0)-(Number(a.t.quoteVolume)||0);
+  if(a.live!==b.live)return a.live?-1:1;
+  return String(a.item.symbol||'').localeCompare(String(b.item.symbol||''));
+ });
+ const visible=rows.slice(0,6);
  root.replaceChildren();
- if(!rows.length){const empty=document.createElement('div');empty.className='muted small';empty.textContent='قیمت زنده شاخص‌ها هنوز دریافت نشده است؛ بخش بازار را تازه‌سازی کنید.';root.append(empty);if(stamp)stamp.textContent='اطلاعات قیمت در دسترس نیست.';return}
+ if(!visible.length){
+  const empty=document.createElement('div');empty.className='muted small';
+  empty.textContent='قیمت معتبر و تازه‌ای برای نمایش شاخص‌های بازار در دسترس نیست.';
+  root.append(empty);if(stamp)stamp.textContent='اطلاعات قیمت در دسترس نیست.';return;
+ }
  const fragment=document.createDocumentFragment();
- for(const row of rows){
-  const symbol=String(row.item.symbol),base=symbol.replace(/USDT$/i,''),card=document.createElement('button');card.type='button';card.className='dashboard-market-coin';card.addEventListener('click',()=>openChart(symbol));
+ for(const row of visible){
+  const symbol=String(row.item.symbol),base=symbol.replace(/USDT$/i,''),card=document.createElement('button');
+  card.type='button';card.className='dashboard-market-coin';card.addEventListener('click',()=>openChart(symbol));
   const head=document.createElement('span');head.className='dashboard-market-coin-head';head.textContent=persianCoinName(symbol)+' · '+base;
-  const price=document.createElement('strong');price.className='dashboard-market-coin-price';price.textContent=formatNum(row.t.last,10)+' USDT';
-  const change=document.createElement('span');change.className='dashboard-market-coin-change '+(row.t.change>0?'pos':row.t.change<0?'neg':'');change.textContent=(row.t.change>0?'+':'')+formatNum(row.t.change,2)+'٪ · ۲۴ ساعت';
-  const toman=document.createElement('small');toman.className='dashboard-market-coin-toman';toman.textContent=currentFxIsValid?formatNum(row.t.last*currentFxRate,0)+' تومان':'نرخ تومان ناموجود';
+  const price=document.createElement('strong');price.className='dashboard-market-coin-price';price.textContent=formatNum(row.price,10)+' USDT';
+  const change=document.createElement('span');
+  const changeValue=Number(row.t?.change);
+  change.className='dashboard-market-coin-change '+(row.live&&Number.isFinite(changeValue)&&changeValue>0?'pos':row.live&&Number.isFinite(changeValue)&&changeValue<0?'neg':'');
+  change.textContent=row.live&&Number.isFinite(changeValue)?(changeValue>0?'+':'')+formatNum(changeValue,2)+'٪ · ۲۴ ساعت':(row.live?'تغییر ۲۴ساعته ناموجود':'قیمت مرجع تازه · تغییر ناموجود');
+  const toman=document.createElement('small');toman.className='dashboard-market-coin-toman';
+  toman.textContent=currentFxIsValid?formatNum(row.price*currentFxRate,0)+' تومان':'نرخ تومان ناموجود';
   card.append(head,price,change,toman);fragment.append(card);
  }
  root.append(fragment);
  if(stamp){
-  const fetchedAt=Number(marketTickerLastFetchedAt)||0,age=fetchedAt?Math.max(0,Date.now()-fetchedAt):Infinity;
-  const freshness=!Number.isFinite(age)?'زمان دریافت نامشخص':age<=120000?'داده تازه': 'داده قدیمی';
-  stamp.textContent='فید قیمت: Binance · '+freshness+(fetchedAt?' · دریافت واقعی: '+new Date(fetchedAt).toLocaleTimeString('fa-IR'):'')+' · این قیمت‌ها نمای بازارند و قیمت تضمینی اجرای سفارش نیستند.';
-  stamp.style.color=freshness==='داده تازه'?'var(--green)':'var(--muted)';
+  const liveRows=visible.filter(x=>x.live),storedRows=visible.filter(x=>!x.live);
+  if(liveRows.length){
+   const fetchedAt=Number(marketTickerLastFetchedAt)||0,age=fetchedAt?Math.max(0,Date.now()-fetchedAt):Infinity;
+   const freshness=Number.isFinite(age)&&age<=120000?'داده تازه':'زمان دریافت نامشخص';
+   stamp.textContent='فید قیمت زنده · '+freshness+' · '+liveRows.length.toLocaleString('fa-IR')+' قیمت زنده و '+storedRows.length.toLocaleString('fa-IR')+' قیمت مرجع · قیمت‌ها تضمین اجرای سفارش نیستند.';
+   stamp.style.color=freshness==='داده تازه'?'var(--green)':'var(--muted)';
+  }else{
+   const oldest=Math.min(...visible.map(x=>new Date(x.item.updated_at||0).getTime()).filter(Number.isFinite));
+   stamp.textContent='قیمت مرجع از market_prices · '+visible.length.toLocaleString('fa-IR')+' ارز · آخرین زمان داده: '+(oldest>0?new Date(oldest).toLocaleTimeString('fa-IR'):'نامشخص')+' · تغییر ۲۴ساعته از این داده قابل استنتاج نیست.';
+   stamp.style.color='var(--muted)';
+  }
  }
 }
 function renderDashboardSummary(){renderDashboardMarketPreview();const count=$('dashboardMarketCount'),fx=$('dashboardFxRate'),prices=$('dashboardPriceCount'),note=$('dashboardMarketNote');if(count)count.textContent=formatNum(marketRows.length,0);if(fx)fx.textContent=currentFxIsValid?formatNum(currentFxRate,0)+' تومان':'نامعتبر / ناموجود';let validPriceCount=0;for(const item of marketRows){if(getTrustedMarketPrice(item)!==null)validPriceCount++}if(prices)prices.textContent=formatNum(validPriceCount,0);if(note)note.textContent=currentFxIsValid?'نرخ تبدیل تومان معتبر است؛ قیمت‌ها از فهرست فعال بازار خوانده می‌شوند.':'نرخ تبدیل تومان در حال حاضر معتبر نیست؛ ارزش تومانی دارایی‌ها نمایش داده نمی‌شود.'}
