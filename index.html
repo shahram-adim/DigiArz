@@ -1426,7 +1426,12 @@ function renderDashboardMarketPreview(){
   card.append(head,price,change,toman);fragment.append(card);
  }
  root.append(fragment);
- if(stamp)stamp.textContent='فید قیمت: Binance · دریافت: '+new Date().toLocaleTimeString('fa-IR')+' · نمایش فقط اطلاعات بازار است، نه قیمت تضمینی اجرای سفارش.';
+ if(stamp){
+  const fetchedAt=Number(marketTickerLastFetchedAt)||0,age=fetchedAt?Math.max(0,Date.now()-fetchedAt):Infinity;
+  const freshness=!Number.isFinite(age)?'زمان دریافت نامشخص':age<=120000?'داده تازه': 'داده قدیمی';
+  stamp.textContent='فید قیمت: Binance · '+freshness+(fetchedAt?' · دریافت واقعی: '+new Date(fetchedAt).toLocaleTimeString('fa-IR'):'')+' · این قیمت‌ها نمای بازارند و قیمت تضمینی اجرای سفارش نیستند.';
+  stamp.style.color=freshness==='داده تازه'?'var(--green)':'var(--muted)';
+ }
 }
 function renderDashboardSummary(){renderDashboardMarketPreview();const count=$('dashboardMarketCount'),fx=$('dashboardFxRate'),prices=$('dashboardPriceCount'),note=$('dashboardMarketNote');if(count)count.textContent=formatNum(marketRows.length,0);if(fx)fx.textContent=currentFxIsValid?formatNum(currentFxRate,0)+' تومان':'نامعتبر / ناموجود';let validPriceCount=0;for(const item of marketRows){const price=Number(item.price);if(Number.isFinite(price)&&price>0)validPriceCount++}if(prices)prices.textContent=formatNum(validPriceCount,0);if(note)note.textContent=currentFxIsValid?'نرخ تبدیل تومان معتبر است؛ قیمت‌ها از فهرست فعال بازار خوانده می‌شوند.':'نرخ تبدیل تومان در حال حاضر معتبر نیست؛ ارزش تومانی دارایی‌ها نمایش داده نمی‌شود.'}
 function renderDashboardActivity(){
