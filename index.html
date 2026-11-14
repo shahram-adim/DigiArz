@@ -1470,10 +1470,8 @@ function renderDashboardActivity(){
  if(alerts){alerts.replaceChildren();const messages=[];
   for(const failure of dashboardLoadErrors)messages.push(['warn','بارگذاری بخش '+failure.section+' ناموفق بود: '+failure.message]);
   if(!currentFxIsValid)messages.push(['warn','نرخ تبدیل USD/IRT معتبر نیست؛ ارزش تومانی قابل اتکا نیست.']);
-  const missing=marketRows.filter(x=>getTrustedMarketPrice(x)===null).length;
-  if(missing)messages.push(['warn',formatNum(missing,0)+' جفت‌ارز بدون قیمت معتبر در فهرست فعال وجود دارد.']);
-  const stale=marketRows.filter(x=>getTrustedMarketPrice(x)===null).length;
-  if(stale)messages.push(['warn',formatNum(stale,0)+' قیمت بازار قدیمی یا خارج از بازه تازگی است.']);
+  const unavailable=marketRows.filter(x=>getTrustedMarketPrice(x)===null).length;
+  if(unavailable)messages.push(['warn',formatNum(unavailable,0)+' جفت‌ارز در فهرست فعال قیمت قابل اعتماد و به‌روز ندارد؛ این قیمت‌ها در ارزش‌گذاری دارایی و نمایش قیمت معتبر لحاظ نمی‌شوند.']);
   if(open.some(o=>o.status==='triggered'))messages.push(['info','یک یا چند سفارش شرطی فعال شده و سفارش اجرایی آن در انتظار تکمیل است.']);
   if(!messages.length)messages.push(['ok','هشدار مهمی بر اساس اطلاعات بارگذاری‌شده حساب و بازار شناسایی نشد.']);
   for(const [kind,message] of messages){const item=document.createElement('div');item.className='dashboard-alert '+kind;item.textContent=message;alerts.append(item)}
