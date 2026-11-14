@@ -1049,13 +1049,24 @@ async function loadConditionalOrders(){
  if(error)throw error;
  root.replaceChildren();
  if(!data?.length){const empty=document.createElement('div');empty.className='muted small';empty.textContent='سفارش شرطی بازی وجود ندارد.';root.append(empty);return}
+ const symbols=[...new Set(data.map(o=>o.symbol))];
+ const priceResult=await supabaseClient.from('market_prices').select('symbol,price,updated_at').in('symbol',symbols);
+ const prices=priceResult.error?[]:(priceResult.data||[]);
  for(const o of data){
   const row=document.createElement('article');row.className='open-order-row';
   const details=document.createElement('div');details.className='open-order-details';
   const title=document.createElement('strong');title.textContent=o.symbol+' · '+(o.order_kind==='take_profit'?'حد سود':'حد ضرر')+' · فروش';
   const meta=document.createElement('small');meta.textContent='قیمت فعال‌سازی: '+formatNum(o.trigger_price,10)+' USDT · مقدار رزروشده: '+formatNum(o.amount,10);
   const note=document.createElement('small');note.className='small muted';note.textContent=o.order_kind==='take_profit'?'شرط اجرا: قیمت بازار مساوی یا بالاتر از هدف':'شرط اجرا: قیمت بازار مساوی یا پایین‌تر از هدف';
-  details.append(title,meta,note);
+  const marketLine=document.createElement('small');marketLine.className='small muted';
+  const market=prices.find(p=>p.symbol===o.symbol),age=market?.updated_at?Date.now()-new Date(market.updated_at).getTime():Infinity;
+  if(!priceResult.error&&market&&Number.isFinite(age)&&age>=0&&age<=60000&&Number(market.price)>0){
+   const met=o.order_kind==='take_profit'?Number(market.price)>=Number(o.trigger_price):Number(market.price)<=Number(o.trigger_price);
+   marketLine.textContent='قیمت فعلی بازار: '+formatNum(market.price,10)+' USDT · '+(met?'شرط قیمت برقرار است؛ منتظر چرخه اجرای سرور.':'علت انتظار: قیمت هنوز به حد فعال‌سازی نرسیده است.');
+  }else if(priceResult.error){marketLine.textContent='علت انتظار مشخص نیست؛ دریافت قیمت بازار با خطا روبه‌رو شد.'}
+  else if(market&&age>60000){marketLine.textContent='علت انتظار: قیمت بازار قدیمی‌تر از ۶۰ ثانیه است؛ سفارش با قیمت تازه بررسی می‌شود.'}
+  else{marketLine.textContent='قیمت تازه بازار در دسترس نیست؛ سفارش تا دریافت قیمت معتبر اجرا نمی‌شود.'}
+  details.append(title,meta,note,marketLine);
   const cancel=document.createElement('button');cancel.type='button';cancel.className='danger';cancel.textContent='لغو و آزادسازی';cancel.addEventListener('click',()=>cancelConditionalExitOrder(o.order_id,cancel));
   row.append(details,cancel);root.append(row);
  }
@@ -1099,14 +1110,30 @@ async function loadStopLimitOrders(){
  if(error)throw error;
  root.replaceChildren();
  if(!data?.length){const empty=document.createElement('div');empty.className='muted small';empty.textContent='سفارش Stop-Limit بازی وجود ندارد.';root.append(empty);return}
+ const pending=data.filter(o=>o.status==='pending'),symbols=[...new Set(pending.map(o=>o.symbol))];
+ const priceResult=symbols.length?await supabaseClient.from('market_prices').select('symbol,price,updated_at').in('symbol',symbols):{data:[],error:null};
+ const prices=priceResult.error?[]:(priceResult.data||[]);
  for(const o of data){
   const row=document.createElement('article');row.className='open-order-row';
   const details=document.createElement('div');details.className='open-order-details';
   const title=document.createElement('strong');title.textContent=o.symbol+' · '+(o.side==='buy'?'خرید':'فروش')+' Stop-Limit';
   const meta=document.createElement('small');meta.textContent='Stop: '+formatNum(o.trigger_price,10)+' USDT · Limit: '+formatNum(o.limit_price,10)+' USDT · مقدار: '+formatNum(o.amount,10);
   const state=document.createElement('small');state.className='small muted';
-  state.textContent=o.status==='pending'?'وضعیت: منتظر رسیدن قیمت به Stop؛ دارایی رزرو شده است.':'وضعیت: فعال شد؛ سفارش Limit فرزند '+(o.execution_order_id||'ثبت شده')+' در موتور معاملات قرار دارد.';
-  details.append(title,meta,state);
+  if(o.status==='pending'){
+   state.textContent='وضعیت: منتظر رسیدن قیمت به Stop؛ دارایی رزرو شده است.';
+   const marketLine=document.createElement('small');marketLine.className='small muted';
+   const market=prices.find(p=>p.symbol===o.symbol),age=market?.updated_at?Date.now()-new Date(market.updated_at).getTime():Infinity;
+   if(priceResult.error){marketLine.textContent='علت انتظار مشخص نیست؛ دریافت قیمت بازار با خطا روبه‌رو شد.'}
+   else if(market&&Number.isFinite(age)&&age>=0&&age<=60000&&Number(market.price)>0){
+    const met=o.side==='buy'?Number(market.price)>=Number(o.trigger_price):Number(market.price)<=Number(o.trigger_price);
+    marketLine.textContent='قیمت فعلی بازار: '+formatNum(market.price,10)+' USDT · '+(met?'شرط Stop برقرار است؛ منتظر پردازش سرور.':'علت انتظار: قیمت هنوز به Stop نرسیده است.');
+   }else if(market&&age>60000){marketLine.textContent='علت انتظار: قیمت بازار قدیمی‌تر از ۶۰ ثانیه است؛ پردازشگر قیمت تازه می‌خواهد.'}
+   else{marketLine.textContent='قیمت تازه بازار در دسترس نیست؛ سفارش تا دریافت قیمت معتبر فعال نمی‌شود.'}
+   details.append(title,meta,state,marketLine);
+  }else{
+   state.textContent='وضعیت: فعال شد؛ سفارش Limit فرزند '+(o.execution_order_id||'ثبت شده')+' در موتور معاملات قرار دارد.';
+   details.append(title,meta,state);
+  }
   const cancel=document.createElement('button');cancel.type='button';cancel.className='danger';cancel.textContent=o.status==='pending'?'لغو و آزادسازی':'لغو سفارش Limit';
   cancel.addEventListener('click',()=>cancelStopLimitOrder(o.order_id,cancel));
   row.append(details,cancel);root.append(row);
