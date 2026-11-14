@@ -1052,7 +1052,7 @@ function renderMarkets(){
   const price=document.createElement('div');price.className='price-stack';price.innerHTML=priceMarkup;
   div.append(star,identity,changeWrap,price);
   div.addEventListener('click',()=>openChart(item.symbol));
-  div.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openChart(item.symbol)}});
+  div.addEventListener('keydown',event=>{if(event.target!==div||event.target.closest('button,a,input,select,textarea,[role="button"]'))return;if(event.key==='Enter'||event.key===' '){event.preventDefault();openChart(item.symbol)}});
   fragment.appendChild(div);
  }
  list.appendChild(fragment);
