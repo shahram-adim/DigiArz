@@ -1987,7 +1987,7 @@ async function placeLimitOrder(){
   if(error)throw error;if(!data||data.success!==true)throw new Error(data?.message||data?.error||'سرور سفارش را تأیید نکرد.');
   showMessage($('limitOrderMsg'),`سفارش Limit ثبت شد. شناسه: ${data.order_id||'—'} · رزرو: ${formatNum(data.reserved_amount,10)} ${safeText(data.reserved_asset||'')}`,'ok');
   $('limitAmount').value='';$('limitPrice').value='';
-  await Promise.all([loadOpenOrders(),loadAllOrders(),loadWallet(),loadAssets()]);
+  await Promise.all([loadDashboard(),loadOpenOrders()]);
  }catch(e){showMessage($('limitOrderMsg'),'ثبت سفارش ناموفق بود: '+(e.message||String(e)),'err')}
  finally{btn.disabled=false}
 }
@@ -2004,7 +2004,7 @@ async function placeConditionalExitOrder(){
   if(error)throw error;if(!data||data.success!==true)throw new Error(data?.message||data?.error||'سرور سفارش شرطی را تأیید نکرد.');
   showMessage($('conditionalOrderMsg'),(kind==='take_profit'?'حد سود':'حد ضرر')+' ثبت شد. مقدار رزروشده: '+formatNum(data.reserved_amount,10)+' '+safeText(data.reserved_asset||'')+' · شناسه: '+(data.order_id||'—'),'ok');
   $('conditionalAmount').value='';$('conditionalTriggerPrice').value='';
-  await Promise.all([loadConditionalOrders(),loadOpenOrders(),loadAllOrders(),loadWallet(),loadAssets()]);
+  await Promise.all([loadDashboard(),loadOpenOrders()]);
  }catch(e){showMessage($('conditionalOrderMsg'),'ثبت سفارش شرطی ناموفق بود: '+(e.message||String(e)),'err')}
  finally{btn.disabled=false}
 }
@@ -2079,7 +2079,7 @@ async function placeStopLimitOrder(){
   if(error)throw error;if(!data||data.success!==true)throw new Error(data?.message||data?.error||'سرور سفارش Stop-Limit را تأیید نکرد.');
   showMessage($('stopLimitMsg'),'سفارش Stop-Limit ثبت شد؛ رزرو: '+formatNum(data.reserved_amount,10)+' '+safeText(data.reserved_asset||'')+' · شناسه: '+(data.order_id||'—'),'ok');
   $('stopLimitAmount').value='';$('stopLimitStopPrice').value='';$('stopLimitLimitPrice').value='';
-  await Promise.all([loadStopLimitOrders(),loadOpenOrders(),loadAllOrders(),loadWallet(),loadAssets()]);
+  await Promise.all([loadDashboard(),loadOpenOrders()]);
  }catch(e){showMessage($('stopLimitMsg'),'ثبت سفارش Stop-Limit ناموفق بود: '+(e.message||String(e)),'err')}
  finally{btn.disabled=false}
 }
