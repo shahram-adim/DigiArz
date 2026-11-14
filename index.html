@@ -1433,6 +1433,52 @@ body.light-theme .mobile-bottom-nav button.active{background:#fff6df;color:#8d67
  .coin-change{min-width:52px}
 }
 
+
+/* DIGIARZ-HOME-REDESIGN-V33: semantic home hero and dashboard composition */
+.digiarz-home-hero{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1fr) 210px;align-items:center;gap:22px;overflow:hidden;margin:2px 0 20px;padding:28px 30px 17px;border:1px solid rgba(227,183,91,.38);border-radius:22px;background:radial-gradient(ellipse at 83% 15%,rgba(227,183,91,.18),transparent 34%),radial-gradient(ellipse at 5% 100%,rgba(54,119,194,.25),transparent 45%),linear-gradient(112deg,#143b6c,#102744 57%,#0c1a2e);box-shadow:0 20px 46px rgba(0,0,0,.2)}
+.digiarz-home-hero:before{content:"";position:absolute;z-index:-1;width:330px;height:330px;border:1px solid rgba(227,183,91,.14);border-radius:50%;right:6%;top:-210px;box-shadow:0 0 0 28px rgba(227,183,91,.025),0 0 0 62px rgba(227,183,91,.02)}
+.digiarz-home-copy{max-width:700px}.digiarz-home-eyebrow{display:flex;align-items:center;gap:9px;color:#f0d28a;font-size:12px;font-weight:800;margin-bottom:8px}
+.digiarz-live-dot{width:8px;height:8px;border-radius:50%;background:#37d99c;box-shadow:0 0 0 5px rgba(55,217,156,.12)}
+.digiarz-home-copy h1{margin:0 0 8px;font-size:clamp(24px,3vw,35px);line-height:1.55;color:#fff;font-weight:900}
+.digiarz-home-copy h1 span{color:#f0ce7d}.digiarz-home-copy p{max-width:570px;margin:0;color:#c2d2e7;font-size:13px;line-height:2}
+.digiarz-home-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:17px}
+.digiarz-home-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:43px;padding:0 17px;border-radius:11px;font-size:12px;font-weight:800}
+.digiarz-home-actions button svg{width:16px;height:16px}
+.digiarz-home-actions .digiarz-outline-action{background:rgba(7,19,36,.34);border:1px solid rgba(222,194,128,.45);color:#f6e5bd;box-shadow:none}
+.digiarz-home-emblem{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;color:#edca78;font-size:11px;font-weight:900;letter-spacing:3px}
+.digiarz-emblem-ring{display:grid;place-items:center;width:132px;height:132px;border:1px solid rgba(239,203,119,.7);border-radius:50%;background:radial-gradient(circle,rgba(239,203,119,.17),rgba(239,203,119,.025) 65%);box-shadow:0 0 0 10px rgba(239,203,119,.045),inset 0 0 28px rgba(239,203,119,.12)}
+.digiarz-emblem-ring span{font-size:44px;font-weight:950;letter-spacing:-4px;text-shadow:0 5px 18px rgba(239,203,119,.3)}
+.digiarz-home-foot{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:20px;padding-top:13px;border-top:1px solid rgba(207,222,241,.13);color:#b7c9df;font-size:10px}
+.digiarz-home-foot span{display:inline-flex;align-items:center;gap:6px}.digiarz-home-foot svg{width:14px;height:14px;color:#e8c775}
+.dashboard-panel>.section-title{margin-bottom:13px}
+.dashboard-panel>.dashboard-stats{margin-bottom:17px}
+.dashboard-panel>.dashboard-stats .stat{min-height:94px;display:flex;flex-direction:column;justify-content:center}
+.dashboard-panel>.dashboard-stats .stat .value{margin-top:8px;font-weight:850}
+.dashboard-panel>.detail-section{margin-top:15px}
+.dashboard-panel>.detail-section .section-title{margin-bottom:14px}
+.dashboard-shortcuts.digiarz-shortcut-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
+.dashboard-shortcuts.digiarz-shortcut-grid button{display:flex;align-items:center;justify-content:center;gap:10px;min-height:76px;padding:12px;border-radius:14px;font-size:12px;font-weight:750}
+.dashboard-shortcuts.digiarz-shortcut-grid button svg{width:21px;height:21px;color:#e7c36f}
+.dashboard-shortcuts.digiarz-shortcut-grid button:first-child{background:linear-gradient(145deg,#e9c875,#c99b42);color:#172237;border-color:#e9c875}
+.dashboard-shortcuts.digiarz-shortcut-grid button:first-child svg{color:#172237}
+body.light-theme .digiarz-home-hero{background:radial-gradient(ellipse at 83% 15%,rgba(227,183,91,.2),transparent 34%),linear-gradient(112deg,#e5effc,#f8fbff 60%,#f5f0e2);border-color:#d7bd7c}
+body.light-theme .digiarz-home-copy h1{color:#18365a}
+body.light-theme .digiarz-home-copy h1 span{color:#9b741e}
+body.light-theme .digiarz-home-copy p,body.light-theme .digiarz-home-foot{color:#536984}
+body.light-theme .digiarz-home-foot{border-color:#d9e2ed}
+body.light-theme .digiarz-home-actions .digiarz-outline-action{background:#fff;color:#24466f;border-color:#c8d5e5}
+@media(max-width:700px){
+ .digiarz-home-hero{grid-template-columns:minmax(0,1fr) 82px;gap:8px;padding:19px 15px 13px;border-radius:17px}
+ .digiarz-home-copy h1{font-size:21px}.digiarz-home-copy p{font-size:11px}
+ .digiarz-home-emblem{font-size:8px;letter-spacing:2px}.digiarz-emblem-ring{width:74px;height:74px}.digiarz-emblem-ring span{font-size:27px;letter-spacing:-3px}
+ .digiarz-home-actions{gap:7px;margin-top:12px}.digiarz-home-actions button{min-height:38px;padding:0 10px;font-size:10px}
+ .digiarz-home-foot{gap:7px 13px;padding-top:10px;font-size:9px}
+ .dashboard-shortcuts.digiarz-shortcut-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .dashboard-shortcuts.digiarz-shortcut-grid button{min-height:61px;font-size:10px;gap:7px;padding:8px}
+ .dashboard-panel>.dashboard-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .dashboard-panel>.dashboard-stats .stat{min-height:82px;padding:12px}
+}
+
 </style>
 </head>
 <body>
@@ -1476,9 +1522,23 @@ body.light-theme .mobile-bottom-nav button.active{background:#fff6df;color:#8d67
  <button type="button" data-tab="settings"><i data-lucide="user-round"></i><span>حساب</span></button>
 </nav>
 
-<section id="tab-dashboard" class="card dashboard-panel"><div class="section-title"><div><h2>داشبورد حساب</h2><div class="chart-caption">نمای زنده حساب آزمایشی و میانبر امکانات اصلی DigiArz</div></div><span class="live">DEMO</span></div><div class="grid dashboard-stats">
+<section id="tab-dashboard" class="card dashboard-panel">
+ <div class="digiarz-home-hero">
+  <div class="digiarz-home-copy">
+   <div class="digiarz-home-eyebrow"><span class="digiarz-live-dot"></span> بازار رمزارزها · حساب آزمایشی</div>
+   <h1>هوشمندانه معامله کن، <span>بدون ریسک پول واقعی</span></h1>
+   <p>قیمت‌های بازار واقعی را دنبال کن و با موجودی مجازی، تجربه معامله حرفه‌ای داشته باش.</p>
+   <div class="digiarz-home-actions">
+    <button type="button" data-dashboard-tab="trade"><i data-lucide="arrow-left-right"></i> شروع معامله</button>
+    <button type="button" class="digiarz-outline-action" data-dashboard-tab="markets"><i data-lucide="chart-no-axes-combined"></i> مشاهده بازار</button>
+   </div>
+  </div>
+  <div class="digiarz-home-emblem" aria-hidden="true"><div class="digiarz-emblem-ring"><span>DA</span></div><small>DIGIARZ</small></div>
+  <div class="digiarz-home-foot"><span><i data-lucide="shield-check"></i> سرمایه کاملاً مجازی</span><span><i data-lucide="activity"></i> قیمت‌های بازار زنده</span><span><i data-lucide="wallet"></i> کنترل کامل دارایی</span></div>
+ </div>
+<div class="section-title"><div><h2>داشبورد حساب</h2><div class="chart-caption">نمای زنده حساب آزمایشی و میانبر امکانات اصلی DigiArz</div></div><span class="live">DEMO</span></div><div class="grid dashboard-stats">
   <div class="stat"><div class="muted small">موجودی قابل معامله USDT</div><div class="value" id="usdtBalance">—</div></div><div class="stat"><div class="muted small">ارزش کل دارایی‌ها به USDT</div><div class="value" id="dashboardTotalUsdValue">—</div></div><div class="stat"><div class="muted small">ارزش کل دارایی‌ها به تومان</div><div class="value" id="totalTomanValue">—</div></div><div class="stat"><div class="muted small">تعداد دارایی‌ها</div><div class="value" id="assetCount">—</div></div><div class="stat"><div class="muted small">سود و زیان تاریخی</div><div class="value" id="dashboardPnlStatus" style="font-size:13px">داده مبنا موجود نیست</div></div><div class="stat"><div class="muted small">نوع حساب</div><div class="value" style="font-size:16px;color:var(--yellow)">DEMO</div></div>
- </div><div class="detail-section dashboard-portfolio-section"><div class="section-title"><h3>ترکیب سبد دارایی</h3><button type="button" class="secondary" data-dashboard-tab="assets">جزئیات دارایی‌ها</button></div><div id="dashboardPortfolio" class="dashboard-portfolio"><div class="muted small">در حال محاسبه ترکیب دارایی‌ها…</div></div><div id="dashboardPortfolioNote" class="chart-caption">فقط دارایی‌های دارای قیمت معتبر در نمودار سهم نمایش داده می‌شوند؛ ارزش‌های نامشخص حدس زده نمی‌شوند.</div></div><div class="detail-section"><div class="section-title"><h3>دسترسی سریع</h3><span class="muted small">انتخاب بخش موردنظر</span></div><div class="dashboard-shortcuts"><button type="button" data-dashboard-tab="trade"><i data-lucide="arrow-left-right"></i><span>خرید و فروش سریع</span></button><button type="button" data-dashboard-tab="markets"><i data-lucide="chart-no-axes-combined"></i><span>بازار رمزارزها</span></button><button type="button" data-dashboard-tab="assets"><i data-lucide="wallet"></i><span>کیف پول و دارایی‌ها</span></button><button type="button" data-dashboard-tab="orders"><i data-lucide="clipboard-list"></i><span>سفارش‌های من</span></button></div></div><div class="detail-section"><div class="section-title"><h3>وضعیت بازار</h3><button type="button" class="secondary" id="dashboardRefreshBtn">به‌روزرسانی</button></div><div class="dashboard-market-grid"><div class="stat"><div class="muted small">جفت‌ارزهای فعال</div><div class="value" id="dashboardMarketCount">—</div></div><div class="stat"><div class="muted small">نرخ معتبر دلار</div><div class="value" id="dashboardFxRate">—</div></div><div class="stat"><div class="muted small">قیمت‌های دارای داده</div><div class="value" id="dashboardPriceCount">—</div></div></div><div id="dashboardMarketNote" class="market-note" aria-live="polite">در حال دریافت وضعیت بازار…</div></div>
+ </div><div class="detail-section dashboard-portfolio-section"><div class="section-title"><h3>ترکیب سبد دارایی</h3><button type="button" class="secondary" data-dashboard-tab="assets">جزئیات دارایی‌ها</button></div><div id="dashboardPortfolio" class="dashboard-portfolio"><div class="muted small">در حال محاسبه ترکیب دارایی‌ها…</div></div><div id="dashboardPortfolioNote" class="chart-caption">فقط دارایی‌های دارای قیمت معتبر در نمودار سهم نمایش داده می‌شوند؛ ارزش‌های نامشخص حدس زده نمی‌شوند.</div></div><div class="detail-section"><div class="section-title"><h3>دسترسی سریع</h3><span class="muted small">انتخاب بخش موردنظر</span></div><div class="dashboard-shortcuts digiarz-shortcut-grid"><button type="button" data-dashboard-tab="trade"><i data-lucide="arrow-left-right"></i><span>خرید و فروش سریع</span></button><button type="button" data-dashboard-tab="markets"><i data-lucide="chart-no-axes-combined"></i><span>بازار رمزارزها</span></button><button type="button" data-dashboard-tab="assets"><i data-lucide="wallet"></i><span>کیف پول و دارایی‌ها</span></button><button type="button" data-dashboard-tab="orders"><i data-lucide="clipboard-list"></i><span>سفارش‌های من</span></button></div></div><div class="detail-section"><div class="section-title"><h3>وضعیت بازار</h3><button type="button" class="secondary" id="dashboardRefreshBtn">به‌روزرسانی</button></div><div class="dashboard-market-grid"><div class="stat"><div class="muted small">جفت‌ارزهای فعال</div><div class="value" id="dashboardMarketCount">—</div></div><div class="stat"><div class="muted small">نرخ معتبر دلار</div><div class="value" id="dashboardFxRate">—</div></div><div class="stat"><div class="muted small">قیمت‌های دارای داده</div><div class="value" id="dashboardPriceCount">—</div></div></div><div id="dashboardMarketNote" class="market-note" aria-live="polite">در حال دریافت وضعیت بازار…</div></div>
  <div class="detail-section dashboard-market-preview-section"><div class="section-title"><h3>نمای سریع قیمت ارزها</h3><button type="button" class="secondary" data-dashboard-tab="markets">همه قیمت‌ها</button></div><div id="dashboardMarketPreview" class="dashboard-market-preview"><div class="muted small">در حال دریافت قیمت بازار…</div></div><div id="dashboardMarketPreviewUpdated" class="chart-caption">قیمت‌های شاخص از فید عمومی بازار؛ قیمت تسویه معاملات فقط از موتور سرور تعیین می‌شود.</div></div>
  <div class="detail-section"><div class="section-title"><h3>نمای کلی سفارش‌ها</h3><button type="button" class="secondary" data-dashboard-tab="orders">همه سفارش‌ها</button></div><div class="dashboard-market-grid"><div class="stat"><div class="muted small">سفارش‌های باز</div><div class="value" id="dashboardOpenOrderCount">—</div></div><div class="stat"><div class="muted small">نیمه‌تکمیل‌شده</div><div class="value" id="dashboardPartialOrderCount">—</div></div><div class="stat"><div class="muted small">کل سفارش‌های اخیر</div><div class="value" id="dashboardOrderCount">—</div></div></div><div id="dashboardRecentOrders" class="dashboard-activity-list"><div class="muted small">در حال دریافت سفارش‌ها…</div></div></div>
  <div class="detail-section"><div class="section-title"><h3>آخرین معاملات</h3><button type="button" class="secondary" data-dashboard-tab="history">تاریخچه کامل</button></div><div id="dashboardRecentTrades" class="dashboard-activity-list"><div class="muted small">در حال دریافت معاملات…</div></div></div>
