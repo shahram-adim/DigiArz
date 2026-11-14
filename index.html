@@ -2094,18 +2094,22 @@ async function loadStopLimitOrders(){
  if(error)throw error;
  root.replaceChildren();
  if(!data?.length){const empty=document.createElement('div');empty.className='muted small';empty.textContent='سفارش Stop-Limit بازی وجود ندارد.';root.append(empty);return}
- const pending=data.filter(o=>o.status==='pending'),symbols=[...new Set(pending.map(o=>o.symbol))];
- const [priceResult,reservationResult]=await Promise.all([
+ const pending=data.filter(o=>o.status==='pending'),symbols=[...new Set(pending.map(o=>o.symbol))],parentIds=[...new Set(data.map(o=>o.order_id).filter(Boolean))];
+ const [priceResult,reservationResult,parentResult]=await Promise.all([
   symbols.length?supabaseClient.from('market_prices').select('symbol,price,updated_at').in('symbol',symbols):Promise.resolve({data:[],error:null}),
-  pending.length?supabaseClient.rpc('get_my_order_reservations',{p_order_ids:pending.map(o=>o.order_id)}):Promise.resolve({data:[],error:null})
+  pending.length?supabaseClient.rpc('get_my_order_reservations',{p_order_ids:pending.map(o=>o.order_id)}):Promise.resolve({data:[],error:null}),
+  parentIds.length?supabaseClient.from('orders').select('id,filled_amount,remaining_amount,status').eq('user_id',userData.user.id).in('id',parentIds):Promise.resolve({data:[],error:null})
  ]);
+ if(parentResult.error)throw parentResult.error;
  const prices=priceResult.error?[]:(priceResult.data||[]);
  const reservations=reservationResult.error?[]:(reservationResult.data||[]);
+ const parentOrders=new Map((parentResult.data||[]).map(x=>[x.id,x]));
  for(const o of data){
   const row=document.createElement('article');row.className='open-order-row';
   const details=document.createElement('div');details.className='open-order-details';
   const title=document.createElement('strong');title.textContent=o.symbol+' · '+(o.side==='buy'?'خرید':'فروش')+' Stop-Limit';
-  const meta=document.createElement('small');meta.textContent='Stop: '+formatNum(o.trigger_price,10)+' USDT · Limit: '+formatNum(o.limit_price,10)+' USDT · مقدار: '+formatNum(o.amount,10);
+  const parent=parentOrders.get(o.order_id);
+  const meta=document.createElement('small');meta.textContent='Stop: '+formatNum(o.trigger_price,10)+' USDT · Limit: '+formatNum(o.limit_price,10)+' USDT · کل: '+formatNum(o.amount,10)+' · انجام‌شده: '+formatNum(parent?.filled_amount||0,10)+' · باقی‌مانده: '+formatNum(parent?.remaining_amount??o.amount,10);
   const state=document.createElement('small');state.className='small muted';
   if(o.status==='pending'){
    const reservation=reservations.find(r=>r.order_id===o.order_id);
