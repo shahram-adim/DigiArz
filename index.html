@@ -322,7 +322,20 @@ tr:last-child td{border-bottom:0}
 .dashboard-market-coin:active{border-color:var(--yellow)}
 @media(max-width:620px){.dashboard-market-preview{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-market-coin{padding:10px}.dashboard-market-coin-price{font-size:12px}}
 
-/* Market row identity and dual-currency price layout */
+/* Market row: favorite star, logo, then coin name; prices without captions/source */
+.coin{grid-template-columns:minmax(0,1fr) minmax(110px,auto) minmax(145px,auto);gap:10px}
+.coin-identity{direction:rtl;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:8px;min-width:0}
+.coin-identity .favorite-btn{display:inline-flex;align-items:center;justify-content:center;flex:0 0 32px;width:32px;height:32px;padding:4px;margin:0}
+.coin-identity .coin-icon{margin:0;width:30px;height:30px;flex:0 0 30px}
+.coin-identity>span{min-width:0}
+.coin-identity b{display:block;direction:rtl;text-align:right}
+.price-stack{align-items:flex-end;min-width:0}
+.price-usd{color:#f0f2f5;font-weight:800}
+.price-toman{color:var(--yellow);font-weight:900}
+.coin-change-wrap{min-width:0}
+@media(max-width:700px){.coin{grid-template-columns:minmax(0,1fr) minmax(90px,auto);gap:8px;padding:11px}.coin-identity{grid-column:1;grid-row:1}.coin-change-wrap{grid-column:1;grid-row:2}.price-stack{grid-column:2;grid-row:1/3}}
+@media(max-width:390px){.coin{grid-template-columns:minmax(0,1fr) minmax(82px,auto);gap:5px}.coin .price-usd{font-size:10px}.coin .price-toman{font-size:11px}.coin-identity .coin-icon{width:26px;height:26px;flex-basis:26px}.coin-identity .favorite-btn{width:28px;height:28px;flex-basis:28px}}
+
 .coin{grid-template-columns:minmax(0,1fr) minmax(110px,auto) minmax(145px,auto) auto;gap:10px}
 .coin-actions{justify-content:center;gap:8px;direction:ltr}
 .coin-actions .coin-icon{margin:0;width:30px;height:30px;flex-basis:30px}
@@ -416,8 +429,8 @@ body{background:radial-gradient(ellipse at 85% -10%,rgba(232,185,73,.09),transpa
 
  <section id="tab-markets" class="card hidden">
   <div class="section-title"><h2>بازار رمزارزها</h2><div class="row"><span class="live">قیمت‌های ثبت‌شده در سرور</span><button type="button" class="secondary" id="refreshMarketPageBtn">به‌روزرسانی بازار</button></div></div>
-  <div class="fx-box"><div><div class="muted small">نرخ دلار آزاد</div><div class="fx-price" id="fxRate">در حال دریافت...</div></div><div class="muted small" id="fxUpdated">منبع: —</div></div>
-  <div id="marketPriceFreshness" class="market-note" aria-live="polite">در حال بررسی منبع و زمان به‌روزرسانی قیمت‌ها…</div>
+  <div class="fx-box"><div><div class="muted small">نرخ دلار آزاد</div><div class="fx-price" id="fxRate">در حال دریافت...</div></div><div class="muted small" id="fxUpdated" style="display:none" aria-hidden="true"></div></div>
+  <div id="marketPriceFreshness" class="market-note" aria-live="polite" style="display:none" aria-hidden="true"></div>
   <div id="marketCategories" class="market-categories"></div>
   <div class="volatility-panel" aria-live="polite"><div class="volatility-title">نمای نوسان بازار در ۲۴ ساعت گذشته</div><div class="volatility-grid"><div class="volatility-stat"><small>میانگین تغییر بازار</small><strong id="marketAvgChange">—</strong></div><div class="volatility-stat"><small>بیشترین افزایش</small><strong id="marketTopGain">—</strong></div><div class="volatility-stat"><small>بیشترین کاهش</small><strong id="marketTopLoss">—</strong></div></div><div class="volatility-updated" id="marketTickerUpdated">در انتظار دریافت داده‌های ۲۴ ساعته بازارهای جهانی</div></div>
   <section class="gainers-panel" aria-live="polite"><div class="gainers-head"><strong>۵ ارز با بیشترین رشد ۲۴ ساعته</strong><small>بر اساس داده زنده بازار</small></div><div id="topGainersList" class="gainers-grid"><div class="muted small">در انتظار دریافت اطلاعات بازار…</div></div><button type="button" id="allGainersBtn" class="gainers-more">مشاهده همه ارزهای افزایشی <span aria-hidden="true">←</span></button></section>
@@ -862,15 +875,13 @@ function renderMarkets(){
   const fullSymbol=String(item.symbol).toUpperCase(),base=fullSymbol.replace(/USDT$/i,'');
   const change=Number.isFinite(Number(ticker?.change))?Number(ticker.change):changeOf(item);
   div.setAttribute('role','button');div.setAttribute('tabindex','0');div.setAttribute('aria-label',`باز کردن صفحه ${persianCoinName(item.symbol)} (${base})`);
-  const usdMarkup=`<div class="price-usd"><small>قیمت دلاری</small><strong>${valid?'$ '+formatNum(usd,10):'—'}</strong></div>`;
-  const tomanMarkup=`<div class="price-toman"><small>قیمت تومانی</small><strong>${toman!==null?formatNum(toman,0)+' تومان':'نرخ تومان ناموجود'}</strong></div>`;
+  const usdMarkup=`<div class="price-usd"><strong>${valid?'$ '+formatNum(usd,10):'—'}</strong></div>`;
+  const tomanMarkup=`<div class="price-toman"><strong>${toman!==null?formatNum(toman,0)+' تومان':'نرخ تومان ناموجود'}</strong></div>`;
   const priceMarkup=usdMarkup+tomanMarkup;
   const changeMarkup=change===null?'<span class="coin-change">—</span>':`<span class="coin-change ${change>0?'pos':change<0?'neg':''}" aria-label="تغییر ۲۴ ساعته">${change>0?'+':''}${formatNum(change,2)}٪</span>`;
-  const age=item.updated_at?Date.now()-new Date(item.updated_at).getTime():Infinity,serverFresh=Number.isFinite(age)&&age>=-60000&&age<=120000,serverState=serverFresh?'قیمت سرور تازه':age>120000?'قیمت سرور قدیمی':'زمان قیمت نامشخص',sourceLabel=item.source||'منبع ثبت نشده';
   const tickerMeta=ticker&&Number.isFinite(ticker.high)&&Number.isFinite(ticker.low)?` · سقف/کف ۲۴س: ${formatNum(ticker.high,8)} / ${formatNum(ticker.low,8)}`:'';
   const volumeMarkup=activeMarketCategory==='new'?(item.catalogStale?'<small class="coin-volume" style="color:var(--red)">داده قیمت قدیمی · قیمت نمایش داده نمی‌شود</small>':item.catalogOnly?'<small class="coin-volume">فقط نمایش · معامله هنوز فعال نیست</small>':'<small class="coin-volume" style="color:var(--green)">خریدوفروش آزمایشی فعال</small>'):ticker&&Number.isFinite(ticker.quoteVolume)?`<small class="coin-volume">حجم ۲۴س: ${formatNum(ticker.quoteVolume,0)} USDT${tickerMeta}</small>`:'';
-  const tickerTime=ticker&&Number.isFinite(ticker.closeTime)?new Date(ticker.closeTime).toLocaleTimeString('fa-IR'):null;const sourceMarkup=ticker&&Number.isFinite(ticker.last)&&ticker.last>0?`<small class="coin-source fresh">Binance · آخرین معامله: ${tickerTime||'زمان نامشخص'}</small>`:`<small class="coin-source ${serverFresh?'fresh':'stale'}">${safeText(sourceLabel)} · ${serverState}${item.updated_at?' · '+new Date(item.updated_at).toLocaleTimeString('fa-IR'):''}</small>`;
-  div.innerHTML=`<div class="coin-identity"><span><b>${safeText(persianCoinName(item.symbol))}</b><small class="coin-en">${safeText(base)}</small></span></div><div class="coin-change-wrap">${changeMarkup}${volumeMarkup}</div><div class="price-stack">${priceMarkup}${sourceMarkup}</div><div class="coin-actions">${coinLogo(base)}<button type="button" class="favorite-btn" aria-label="افزودن به محبوب‌ها" aria-pressed="${favoriteSymbols.includes(item.symbol)?'true':'false'}" data-favorite="${safeText(item.symbol)}"><i data-lucide="star" style="${favoriteSymbols.includes(item.symbol)?'fill:var(--yellow);':''}"></i></button></div>`;
+  div.innerHTML=`<div class="coin-identity"><button type="button" class="favorite-btn" aria-label="افزودن به محبوب‌ها" aria-pressed="${favoriteSymbols.includes(item.symbol)?'true':'false'}" data-favorite="${safeText(item.symbol)}"><i data-lucide="star" style="${favoriteSymbols.includes(item.symbol)?'fill:var(--yellow);':''}"></i></button>${coinLogo(base)}<span><b>${safeText(persianCoinName(item.symbol))}</b><small class="coin-en">${safeText(base)}</small></span></div><div class="coin-change-wrap">${changeMarkup}${volumeMarkup}</div><div class="price-stack">${priceMarkup}</div>`;
   div.querySelector('[data-favorite]').addEventListener('click',e=>{e.stopPropagation();const sym=item.symbol;favoriteSymbols=favoriteSymbols.includes(sym)?favoriteSymbols.filter(x=>x!==sym):[...favoriteSymbols,sym];try{localStorage.setItem('digiArzFavorites',JSON.stringify(favoriteSymbols))}catch(storageError){console.warn('Favorite preference could not be saved on this device:',storageError)}renderMarkets()});
   div.addEventListener('click',()=>openChart(item.symbol));
   div.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openChart(item.symbol)}});
