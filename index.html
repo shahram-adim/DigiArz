@@ -1166,6 +1166,106 @@ body.light-theme .mobile-bottom-nav button.active{color:#8b6500;background:#fff6
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}button{transition:none}}
 
+
+/* DigiArz Royal Blue + Gold visual system — complete light-first redesign */
+:root{--brand-blue:#1769ff;--brand-blue-dark:#1054d4;--brand-gold:#e6ad32}
+body.light-theme{
+ color-scheme:light!important;
+ --bg:#f3f6fb!important;--panel:#fff!important;--panel2:#f7f9fd!important;
+ --line:#e2e8f1!important;--text:#1b2b43!important;--muted:#68778d!important;
+ --field:#fff!important;--soft:#f7f9fc!important;--yellow:#1769ff!important;
+ --accent:#1769ff!important;--accent2:#1769ff!important;--green:#15966c!important;
+ --red:#d94b5d!important;--surface-shadow:0 12px 34px rgba(27,55,95,.075)!important;
+ background:radial-gradient(ellipse at 10% 0%,rgba(23,105,255,.09),transparent 35%),radial-gradient(ellipse at 95% 5%,rgba(230,173,50,.12),transparent 28%),#f3f6fb!important;
+ color:#1b2b43!important
+}
+body.light-theme .wrap{max-width:1380px}
+body.light-theme .top{background:rgba(255,255,255,.94)!important;border:1px solid #e4eaf3!important;border-bottom:2px solid #e6ad32!important;border-radius:0 0 18px 18px!important;box-shadow:0 8px 28px rgba(26,55,96,.07)!important}
+body.light-theme .brand,body.light-theme .brand span:first-child{color:#172b49!important}
+body.light-theme .brand span:nth-child(2),body.light-theme .auth-brand span{color:#1769ff!important}
+body.light-theme .tag{background:#fff6df!important;color:#9a6b08!important;border-color:#f0d99d!important}
+body.light-theme .top .muted{color:#748198!important}
+body.light-theme .card,body.light-theme #appView .card{background:#fff!important;border:1px solid #e3eaf3!important;border-radius:19px!important;box-shadow:0 10px 30px rgba(29,55,91,.055)!important;color:#1b2b43!important}
+body.light-theme h1,body.light-theme h2,body.light-theme h3,body.light-theme h4{color:#1a2c46!important}
+body.light-theme .section-title h2:before{background:#e6ad32!important;box-shadow:0 0 12px rgba(230,173,50,.22)!important}
+body.light-theme .muted,body.light-theme .chart-caption,body.light-theme .market-note{color:#718097!important}
+body.light-theme button{background:linear-gradient(135deg,#2879ff,#1760e8)!important;color:#fff!important;border:1px solid #1769ff!important;box-shadow:0 5px 14px rgba(23,105,255,.13)!important}
+body.light-theme button.secondary,body.light-theme .tabs button,body.light-theme .timeframes button,body.light-theme .chart-types button{background:#f2f6fc!important;color:#43536b!important;border:1px solid #e1e8f2!important;box-shadow:none!important}
+body.light-theme button.danger{background:#fff0f1!important;color:#b52e40!important;border-color:#f0cbd0!important}
+body.light-theme .buy{background:linear-gradient(135deg,#19a979,#138b64)!important;color:#fff!important;border:0!important}
+body.light-theme .sell{background:linear-gradient(135deg,#e65a69,#cf4053)!important;color:#fff!important;border:0!important}
+body.light-theme .theme-switch{background:linear-gradient(135deg,#fff7e5,#edf4ff)!important;color:#23508e!important;border:1px solid #d9e4f3!important}
+body.light-theme input,body.light-theme select,body.light-theme textarea{background:#fff!important;color:#1b2b43!important;border:1px solid #dce5f0!important;box-shadow:none}
+body.light-theme input:focus,body.light-theme select:focus,body.light-theme textarea:focus{border-color:#1769ff!important;box-shadow:0 0 0 3px rgba(23,105,255,.10)!important}
+body.light-theme .hero{background:linear-gradient(115deg,#eaf3ff 0%,#fff 58%,#fff8e9 100%)!important;border:1px solid #d9e6f7!important;box-shadow:0 12px 28px rgba(23,105,255,.06)!important}
+body.light-theme .hero-title,body.light-theme .hero-mark{color:#174b91!important}
+body.light-theme .hero-label,body.light-theme .hero-sub{color:#5e718d!important}
+body.light-theme .hero-mark{text-shadow:none!important}
+body.light-theme .stat,body.light-theme .dashboard-stats .stat,body.light-theme #tab-dashboard .dashboard-stats .stat{background:linear-gradient(145deg,#fff,#f7faff)!important;border:1px solid #e2eaf4!important;box-shadow:0 4px 16px rgba(32,61,100,.035)!important}
+body.light-theme .stat .value,body.light-theme #tab-dashboard .dashboard-stats .value{color:#1d3556!important}
+body.light-theme .dashboard-stats .stat:first-child{border-color:#efd99f!important}
+body.light-theme .dashboard-stats .stat:first-child .value{color:#1769ff!important}
+body.light-theme .dashboard-panel>.detail-section,body.light-theme .dashboard-panel>.detail-section,body.light-theme .dashboard-portfolio-section{background:#f8faff!important;border:1px solid #e4ebf4!important}
+body.light-theme .dashboard-shortcuts button{background:linear-gradient(145deg,#fff,#f7faff)!important;border:1px solid #e1e9f3!important;color:#2b405e!important}
+body.light-theme .dashboard-shortcuts button svg{color:#1769ff!important}
+body.light-theme .dashboard-market-coin,body.light-theme .reference-mini,body.light-theme .top-asset-card{background:#f8faff!important;border:1px solid #e4ebf4!important;color:#263b58!important}
+body.light-theme .dashboard-market-coin-price,body.light-theme .dashboard-market-coin-head{color:#263b58!important}
+body.light-theme .tabs{background:rgba(255,255,255,.97)!important;border:1px solid #e3eaf3!important;box-shadow:0 5px 18px rgba(31,56,91,.045)!important}
+body.light-theme .tabs button.active{background:#1769ff!important;border-color:#1769ff!important;color:#fff!important}
+body.light-theme .mobile-bottom-nav{background:rgba(255,255,255,.97)!important;border-top:1px solid #dfe7f1!important;box-shadow:0 -8px 28px rgba(28,53,87,.10)!important}
+body.light-theme .mobile-bottom-nav button{color:#6c7b91!important;background:transparent!important;border-color:transparent!important;box-shadow:none!important}
+body.light-theme .mobile-bottom-nav button.active{background:#eaf2ff!important;color:#1769ff!important;border-color:#cfe0fb!important}
+body.light-theme .market-announcement{background:linear-gradient(100deg,#eaf3ff,#fff8e8)!important;color:#34516f!important;border:1px solid #dfe8f4!important}
+body.light-theme .announcement-pill{background:#fff0c9!important;color:#946a13!important}
+body.light-theme .fx-box{background:linear-gradient(110deg,#fff8e8,#f3f7ff)!important;border:1px solid #eddfb9!important}
+body.light-theme .fx-price,body.light-theme .price-toman,body.light-theme .coin .price-toman{color:#1769ff!important}
+body.light-theme .market-categories .category-btn,body.light-theme #tab-markets .category-btn{background:linear-gradient(145deg,#fff,#f5f8fd)!important;color:#43536b!important;border:1px solid #e0e8f2!important;box-shadow:0 3px 12px rgba(30,57,94,.035)!important}
+body.light-theme .market-categories .category-btn.active,body.light-theme #tab-markets .category-btn.active{background:#eaf2ff!important;color:#1769ff!important;border-color:#9fc4fa!important}
+body.light-theme .category-icon,body.light-theme .category-btn.active .category-icon{background:#eaf2ff!important;color:#1769ff!important}
+body.light-theme .category-icon svg,body.light-theme .category-btn svg{stroke:#1769ff!important}
+body.light-theme .coin,body.light-theme #tab-markets .coin{background:#fff!important;border:1px solid #e5ebf3!important;box-shadow:0 3px 13px rgba(29,55,91,.035)!important;color:#253a57!important}
+body.light-theme .coin:hover,body.light-theme .coin.selected,body.light-theme #tab-markets .coin:hover,body.light-theme #tab-markets .coin.selected{background:#f5f9ff!important;border-color:#9fc4fa!important}
+body.light-theme .coin-identity b,body.light-theme .coin .price-usd,body.light-theme .price-usd strong{color:#263b58!important}
+body.light-theme .coin-en,body.light-theme .coin-change-label{color:#75849a!important}
+body.light-theme .coin-change{background:#edf2f8!important}
+body.light-theme .gainers-panel,body.light-theme .top-assets-panel,body.light-theme .volatility-panel{background:#fff!important;border:1px solid #e3eaf3!important}
+body.light-theme .gainer-card{background:#f8fbff!important;border:1px solid #e5ecf4!important;color:#263b58!important}
+body.light-theme .losers-panel{background:#fff8f8!important;border-color:#f0d9dc!important}
+body.light-theme .market-tools,body.light-theme #tab-markets .market-tools,body.light-theme #tab-orders .market-tools,body.light-theme #tab-history .market-tools{background:#f6f8fc!important;border:1px solid #e3eaf3!important}
+body.light-theme .market-tools input,body.light-theme .market-tools select{background:#fff!important;color:#263b58!important}
+body.light-theme .trade-box,body.light-theme .orderbook-side,body.light-theme .performance-item,body.light-theme .indicator-panel{background:#f8faff!important;border:1px solid #e2eaf4!important;color:#263b58!important}
+body.light-theme .orderbook-mid{background:#eef4fc!important;color:#1769ff!important;border-color:#e0e8f2!important}
+body.light-theme .orderbook-row{color:#41536d!important}
+body.light-theme .asset-row,body.light-theme .order-history-card,body.light-theme .open-order-row{background:#f8faff!important;border:1px solid #e3eaf3!important;color:#263b58!important}
+body.light-theme .order-status{background:#fff!important;color:#52627a!important;border-color:#e0e7f0!important}
+body.light-theme .table-wrap,body.light-theme #tab-history .table-wrap{background:#fff!important;border:1px solid #e2e9f2!important}
+body.light-theme table th,body.light-theme #tab-history th{background:#f1f5fa!important;color:#586a82!important}
+body.light-theme table td,body.light-theme #tab-history td{border-color:#e8edf4!important;color:#30445f!important}
+body.light-theme #priceChart,body.light-theme #volumeChart,body.light-theme #tab-chart #chartSection{background:#fff!important;border-color:#e2e9f2!important}
+body.light-theme #tab-chart .asset-detail-head,body.light-theme #tab-chart .detail-section{background:#f7f9fc!important;border-color:#e3eaf3!important}
+body.light-theme .notice{background:#eff5ff!important;border:1px solid #dce8f7!important;color:#405773!important}
+body.light-theme .notice.warn{background:#fff7e5!important;border-color:#f0dfb5!important;color:#795b19!important}
+body.light-theme .notice.err{background:#fff0f1!important;border-color:#f1d2d7!important;color:#a02f40!important}
+body.light-theme .notice.ok{background:#eaf8f1!important;border-color:#ccebdc!important;color:#216b4d!important}
+body.light-theme #authView.auth{background:#fff!important;border:1px solid #e2eaf4!important;box-shadow:0 24px 65px rgba(29,55,91,.10)!important}
+body.light-theme #authView .auth-visual{background:radial-gradient(circle at 12% 12%,rgba(230,173,50,.18),transparent 38%),linear-gradient(145deg,#eaf2ff,#fff 70%,#f8faff)!important;border:0!important;border-left:1px solid #e4ebf4!important}
+body.light-theme #authView .auth-brand,body.light-theme #authView .auth-headline{color:#193b68!important}
+body.light-theme #authView .auth-brand span{color:#1769ff!important}
+body.light-theme #authView .auth-kicker{color:#1769ff!important}
+body.light-theme #authView .auth-copy{color:#62748e!important}
+body.light-theme #authView .auth-benefit{background:rgba(255,255,255,.72)!important;border:1px solid #e0e9f5!important;color:#36506f!important}
+body.light-theme #authView .auth-benefit i{background:#fff!important;border:1px solid #d8e5f5!important;color:#1769ff!important}
+body.light-theme #authView .auth-form{background:#fff!important}
+body.light-theme #authView .auth-form h2{color:#1d3556!important}
+body.light-theme #authView .auth-security{background:#f5f8fc!important;border-color:#e4ebf3!important;color:#718097!important}
+body.light-theme #authView #forgotBtn{background:#f5f8fc!important;color:#52647c!important;border-color:#e1e8f1!important}
+body.light-theme .footer{color:#8290a3!important}
+body.light-theme .coin-icon,body.light-theme .asset-logo{background:#f0f4f9!important;border:1px solid #e2e9f2!important}
+@media(max-width:760px){
+ body.light-theme #authView .auth-visual{border-left:0!important;border-bottom:1px solid #e4ebf4!important}
+ body.light-theme .top{border-radius:0 0 15px 15px!important}
+}
+
 </style>
 </head>
 <body>
@@ -1622,7 +1722,7 @@ function handleCoinLogoError(img){const symbol=cleanCoinSymbol(img.dataset.symbo
 function coinLogo(symbol,sizeClass='coin-icon'){const clean=cleanCoinSymbol(symbol);return `<span class="${sizeClass}" aria-label="لوگوی ${safeText(clean)}"><img src="${logoUrl(clean)}" data-symbol="${safeText(clean)}" data-fallback-index="0" alt="${safeText(clean)}" loading="lazy" decoding="async" onerror="handleCoinLogoError(this)"></span>`}
 function updateTradeAssetPreview(side){const input=$(side+'Symbol'),root=$(side+'AssetPreview');if(!input||!root)return;const symbol=String(input.value||'').trim().toUpperCase(),base=cleanCoinSymbol(symbol);root.innerHTML=base?`${coinLogo(base,'asset-logo')}<b dir="ltr">${safeText(symbol)}</b>`:'<span>نماد ارز را وارد کنید</span>'}
 function applyTheme(theme){const light=theme==='light';document.body.classList.toggle('light-theme',light);const label=light?'حالت تیره':'حالت روشن';const btn=$('themeToggle');if(btn)btn.textContent=label;const topBtn=$('themeToggleTop');if(topBtn){topBtn.setAttribute('aria-label',label);topBtn.setAttribute('title',label);const icon=topBtn.querySelector('.theme-switch-icon');const text=topBtn.querySelector('.theme-switch-label');if(icon)icon.textContent=light?'☾':'☀';if(text)text.textContent=light?'تیره':'روشن'}const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=light?'#f4f7fb':'#080d1b';try{localStorage.setItem('digiArzTheme',light?'light':'dark')}catch(_){} }
-function initTheme(){let saved='light';try{saved=localStorage.getItem('digiArzTheme')||'light'}catch(_){}applyTheme(saved)}
+function initTheme(){let saved='light';try{if(localStorage.getItem('digiArzVisualSystem')!=='royal-blue-gold-v1'){localStorage.setItem('digiArzTheme','light');localStorage.setItem('digiArzVisualSystem','royal-blue-gold-v1')}saved=localStorage.getItem('digiArzTheme')||'light'}catch(_){}applyTheme(saved)}
 function showAllGainers(){activeMarketCategory='gainers';$('marketSearch').value='';$('marketSort').value='change-desc';renderCategoryButtons();renderMarkets();$('marketList').scrollIntoView({behavior:'smooth',block:'start'})}
 function showAllLosers(){activeMarketCategory='losers';$('marketSearch').value='';$('marketSort').value='change-asc';renderCategoryButtons();renderMarkets();$('marketList').scrollIntoView({behavior:'smooth',block:'start'})}
 function renderTopGainers(){const root=$('topGainersList');if(!root)return;const rows=[...marketRows].map(x=>({item:x,t:getFreshMarketTicker(x)})).filter(x=>x.t&&Number.isFinite(x.t.change)&&x.t.change>0).sort((a,b)=>b.t.change-a.t.change).slice(0,5);if(!rows.length){root.innerHTML='<div class="muted small">اطلاعات رشد ۲۴ ساعته هنوز در دسترس نیست.</div>';return}root.innerHTML='';for(const row of rows){const base=String(row.item.symbol).replace(/USDT$/i,'');const el=document.createElement('button');el.type='button';el.className='gainer-card';el.innerHTML=`${coinLogo(base)}<span><b>${safeText(persianCoinName(row.item.symbol))}</b><small>${safeText(base)}</small></span><strong>+${formatNum(row.t.change,2)}٪</strong><span class="muted small">مشاهده ←</span>`;el.addEventListener('click',()=>openChart(row.item.symbol));root.appendChild(el)}}
