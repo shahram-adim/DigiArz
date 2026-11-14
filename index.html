@@ -996,11 +996,25 @@ async function refreshMarketTickersUnlocked(){
 function refreshMarketTickers(force=false){if(marketTickerRefreshPromise)return marketTickerRefreshPromise;if(!force&&marketTickerMap.size&&Date.now()-marketTickerLastFetchedAt<15000)return Promise.resolve();marketTickerRefreshPromise=refreshMarketTickersUnlocked().then(result=>{marketTickerLastFetchedAt=Date.now();return result}).finally(()=>{marketTickerRefreshPromise=null});return marketTickerRefreshPromise}
 function renderCategoryButtons(){const root=$('marketCategories');if(!root)return;root.innerHTML=marketCategories.map(c=>`<button type="button" class="category-btn ${activeMarketCategory===c.id?'active':''}" data-category="${c.id}" aria-label="${c.label}" aria-pressed="${activeMarketCategory===c.id?'true':'false'}" title="نمایش ${c.label}"><span class="category-icon" aria-hidden="true"><i data-lucide="${c.icon}"></i></span><span class="category-label">${c.label}</span></button>`).join('');if(!root.dataset.categoryEventsBound){root.addEventListener('click',event=>{const button=event.target.closest('button[data-category]');if(!button||!root.contains(button))return;const next=button.dataset.category;if(!marketCategories.some(c=>c.id===next))return;activeMarketCategory=next;marketDisplayLimit=80;root.querySelectorAll('[data-category]').forEach(item=>{const active=item.dataset.category===next;item.classList.toggle('active',active);item.setAttribute('aria-pressed',active?'true':'false')});renderMarkets()});root.dataset.categoryEventsBound='true'}renderLucideIcons()}
 let marketDisplayLimit=80;
+function isMarketTimestampFresh(value,maxAge=120000){
+ const time=typeof value==='number'?value:new Date(value||0).getTime(),age=Date.now()-time;
+ return Number.isFinite(time)&&time>0&&age>=-60000&&age<=maxAge;
+}
+function getFreshMarketTicker(item){
+ const fetchedAt=Number(marketTickerLastFetchedAt)||0;
+ return isMarketTimestampFresh(fetchedAt)?marketTickerMap.get(item.symbol)||null:null;
+}
+function getTrustedMarketPrice(item){
+ const ticker=getFreshMarketTicker(item),live=Number(ticker?.last);
+ if(Number.isFinite(live)&&live>0)return live;
+ const stored=Number(item?.price);
+ return isMarketTimestampFresh(item?.updated_at)&&Number.isFinite(stored)&&stored>0?stored:null;
+}
 function renderMarkets(){
  const list=$('marketList');if(!list)return;list.replaceChildren();
  const q=String($('marketSearch')?.value||'').trim().toUpperCase(),sort=$('marketSort')?.value||'symbol';
  const changeCache=new Map();
- const changeOf=item=>{if(changeCache.has(item.symbol))return changeCache.get(item.symbol);const raw=marketTickerMap.get(item.symbol)?.change;const live=raw===null||raw===undefined||raw===''?NaN:Number(raw);const fallback=item.change===null||item.change===undefined||item.change===''?NaN:Number(item.change);const value=Number.isFinite(live)?live:Number.isFinite(fallback)?fallback:null;changeCache.set(item.symbol,value);return value};
+ const changeOf=item=>{if(changeCache.has(item.symbol))return changeCache.get(item.symbol);const raw=getFreshMarketTicker(item)?.change;const live=raw===null||raw===undefined||raw===''?NaN:Number(raw);const fallback=isMarketTimestampFresh(item.updated_at)&&item.change!==null&&item.change!==undefined&&item.change!==''?Number(item.change):NaN;const value=Number.isFinite(live)?live:Number.isFinite(fallback)?fallback:null;changeCache.set(item.symbol,value);return value};
  const sourceRows=activeMarketCategory==='new'?featuredMarketRows:marketRows;let rows=sourceRows.filter(x=>{const symbol=String(x.symbol||'').toUpperCase(),base=symbol.replace(/USDT$/i,''),english=String(coinInfo[base]?.name||x.name||'').toUpperCase(),persian=String(persianCoinName(symbol)||'').toUpperCase();return !q||symbol.includes(q)||base.includes(q)||english.includes(q)||persian.includes(q)});
  if(activeMarketCategory==='gainers')rows=rows.filter(x=>changeOf(x)!==null&&changeOf(x)>0);
  else if(activeMarketCategory==='losers')rows=rows.filter(x=>changeOf(x)!==null&&changeOf(x)<0);
@@ -1008,7 +1022,7 @@ function renderMarkets(){
  else if(activeMarketCategory==='favorites')rows=rows.filter(x=>favoriteSymbols.includes(x.symbol));
  else if(['defi','meme','metaverse','stable','ai','gaming'].includes(activeMarketCategory)){const set=categorySymbols[activeMarketCategory]||[];rows=rows.filter(x=>set.includes(String(x.symbol).replace(/USDT$/i,'')))}
  else if(activeMarketCategory==='top'||activeMarketCategory==='selected')rows=rows.filter(x=>['BTCUSDT','ETHUSDT','BNBUSDT','SOLUSDT','XRPUSDT','ADAUSDT','DOGEUSDT'].includes(x.symbol));
- if(activeMarketCategory==='volume')rows.sort((a,b)=>(marketTickerMap.get(b.symbol)?.quoteVolume??b.quoteVolume??-Infinity)-(marketTickerMap.get(a.symbol)?.quoteVolume??a.quoteVolume??-Infinity));
+ if(activeMarketCategory==='volume')rows.sort((a,b)=>(getFreshMarketTicker(b)?.quoteVolume??(isMarketTimestampFresh(b.updated_at)?b.quoteVolume:null)??-Infinity)-(getFreshMarketTicker(a)?.quoteVolume??(isMarketTimestampFresh(a.updated_at)?a.quoteVolume:null)??-Infinity));
  else if(activeMarketCategory==='gainers'||sort==='change-desc')rows.sort((a,b)=>(changeOf(b)??-Infinity)-(changeOf(a)??-Infinity));
  else if(activeMarketCategory==='losers'||sort==='change-asc')rows.sort((a,b)=>(changeOf(a)??Infinity)-(changeOf(b)??Infinity));
  else if(activeMarketCategory==='cheapest'||sort==='price-asc')rows.sort((a,b)=>Number(a.price)-Number(b.price));
@@ -1018,17 +1032,18 @@ function renderMarkets(){
  const fragment=document.createDocumentFragment();
  const totalRows=rows.length,visibleRows=rows.slice(0,marketDisplayLimit);
  for(const item of visibleRows){
-  const ticker=marketTickerMap.get(item.symbol),liveUsd=Number(ticker?.last),storedUsd=Number(item.price),usd=Number.isFinite(liveUsd)&&liveUsd>0?liveUsd:storedUsd,valid=Number.isFinite(usd)&&usd>0,toman=valid&&currentFxIsValid?usd*currentFxRate:null,div=document.createElement('div');
+  const ticker=getFreshMarketTicker(item),trustedPrice=getTrustedMarketPrice(item),usd=trustedPrice===null?NaN:trustedPrice,valid=Number.isFinite(usd)&&usd>0,toman=valid&&currentFxIsValid?usd*currentFxRate:null,div=document.createElement('div');
   div.className='coin'+(item.symbol===selectedSymbol?' selected':'');
   const fullSymbol=String(item.symbol).toUpperCase(),base=fullSymbol.replace(/USDT$/i,'');
   const change=changeOf(item),isFavorite=favoriteSymbols.includes(item.symbol);
   div.setAttribute('role','group');div.setAttribute('tabindex','0');div.setAttribute('aria-label',`اطلاعات ${persianCoinName(item.symbol)} (${base})`);
   const usdMarkup=`<div class="price-usd"><strong>${valid?'$ '+formatNum(usd,10):'—'}</strong></div>`;
   const tomanMarkup=`<div class="price-toman"><strong>${toman!==null?formatNum(toman,0)+' تومان':'نرخ تومان ناموجود'}</strong></div>`;
-  const priceMarkup=usdMarkup+tomanMarkup;
+  const freshnessMarkup=valid?'<small class="coin-source fresh">قیمت تازه · زمان منبع حداکثر ۲ دقیقه</small>':'<small class="coin-source stale">قیمت قدیمی یا ناموجود · برای معامله قابل اتکا نیست</small>';
+  const priceMarkup=usdMarkup+tomanMarkup+freshnessMarkup;
   const changeMarkup=change===null?'<small class="coin-change-label">تغییر ۲۴س</small><span class="coin-change">داده موجود نیست</span>':'<small class="coin-change-label">تغییر ۲۴س</small>'+ `<span class="coin-change ${change>0?'pos':change<0?'neg':''}" aria-label="درصد تغییر ۲۴ ساعته">${change>0?'+':change<0?'−':''}${formatNum(Math.abs(change),2)}٪</span>`;
   const tickerMeta=ticker&&Number.isFinite(ticker.high)&&Number.isFinite(ticker.low)?` · سقف/کف ۲۴س: ${formatNum(ticker.high,8)} / ${formatNum(ticker.low,8)}`:'';
-  const volume= ticker?.quoteVolume??item.quoteVolume;
+  const volume= ticker?.quoteVolume??(isMarketTimestampFresh(item.updated_at)?item.quoteVolume:null);
   const volumeMarkup=activeMarketCategory==='new'?(item.catalogStale?'<small class="coin-volume" style="color:var(--red)">داده قیمت قدیمی · قیمت نمایش داده نمی‌شود</small>':item.catalogOnly?'<small class="coin-volume">فقط نمایش · معامله هنوز فعال نیست</small>':'<small class="coin-volume" style="color:var(--green)">خریدوفروش آزمایشی فعال</small>'):Number.isFinite(Number(volume))&&volume!==null?`<small class="coin-volume">حجم ۲۴س: ${formatNum(volume,0)} USDT${tickerMeta}</small>`:'';
   const star=document.createElement('button');star.type='button';star.className='favorite-btn'+(isFavorite?' is-favorite':'');star.dataset.favorite=item.symbol;star.setAttribute('aria-label',isFavorite?'حذف از علاقه‌مندی‌ها':'افزودن به علاقه‌مندی‌ها');star.setAttribute('aria-pressed',isFavorite?'true':'false');star.title=isFavorite?'حذف از علاقه‌مندی‌ها':'افزودن به علاقه‌مندی‌ها';star.innerHTML='<i data-lucide="star" aria-hidden="true"></i>';
   star.addEventListener('click',event=>{event.stopPropagation();favoriteSymbols=favoriteSymbols.includes(item.symbol)?favoriteSymbols.filter(x=>x!==item.symbol):[...favoriteSymbols,item.symbol];try{localStorage.setItem('digiArzFavorites',JSON.stringify(favoriteSymbols))}catch(storageError){console.warn('Favorite preference could not be saved on this device:',storageError)}renderMarkets()});
@@ -1413,7 +1428,7 @@ async function loadAdminUsers(){if(!isSuperAdmin)return;const host=$('adminUsers
 async function submitAdminAdjustment(card,button){if(!isSuperAdmin||!card)return;const userId=card.dataset.userId,currency=card.querySelector('.admin-currency').value,direction=card.querySelector('.admin-direction').value,amount=Number(card.querySelector('.admin-amount').value),reason=card.querySelector('.admin-reason').value.trim();if(!Number.isFinite(amount)||amount<=0){showMessage($('adminUsersMsg'),'مقدار باید عددی بزرگ‌تر از صفر باشد.','err');return}if(reason.length<5){showMessage($('adminUsersMsg'),'دلیل تغییر اعتبار باید حداقل ۵ نویسه داشته باشد.','err');return}const label=direction==='credit'?'افزایش':'کاهش';if(!confirm(label+' '+formatNum(amount,8)+' '+currency+' برای '+(card.querySelector('strong')?.textContent||'این کاربر')+' ثبت شود؟ این عملیات در سوابق مالی ثبت می‌شود.'))return;button.disabled=true;hideMessage($('adminUsersMsg'));try{const {data,error}=await supabaseClient.rpc('admin_adjust_wallet',{p_user_id:userId,p_currency:currency,p_direction:direction,p_amount:amount,p_reason:reason});if(error)throw error;if(!data?.success)throw new Error('تغییر اعتبار تأیید نشد.');showMessage($('adminUsersMsg'),'تغییر اعتبار با موفقیت ثبت شد. موجودی جدید: '+formatNum(data.balance_after,8)+' '+currency,'ok');await loadAdminUsers();const {data:userData}=await supabaseClient.auth.getUser();if(userData?.user?.id===userId)await loadWallet()}catch(e){showMessage($('adminUsersMsg'),'ثبت تغییر اعتبار انجام نشد: '+(e.message||String(e)),'err');button.disabled=false}}
 function renderDashboardMarketPreview(){
  const root=$('dashboardMarketPreview'),stamp=$('dashboardMarketPreviewUpdated');if(!root)return;
- const rows=(marketRows||[]).map(item=>({item,t:marketTickerMap.get(item.symbol)})).filter(x=>x.t&&Number.isFinite(x.t.last)&&x.t.last>0).sort((a,b)=>(b.t.quoteVolume||0)-(a.t.quoteVolume||0)).slice(0,6);
+ const rows=(marketRows||[]).map(item=>({item,t:getFreshMarketTicker(item)})).filter(x=>x.t&&Number.isFinite(x.t.last)&&x.t.last>0).sort((a,b)=>(b.t.quoteVolume||0)-(a.t.quoteVolume||0)).slice(0,6);
  root.replaceChildren();
  if(!rows.length){const empty=document.createElement('div');empty.className='muted small';empty.textContent='قیمت زنده شاخص‌ها هنوز دریافت نشده است؛ بخش بازار را تازه‌سازی کنید.';root.append(empty);if(stamp)stamp.textContent='اطلاعات قیمت در دسترس نیست.';return}
  const fragment=document.createDocumentFragment();
@@ -1433,7 +1448,7 @@ function renderDashboardMarketPreview(){
   stamp.style.color=freshness==='داده تازه'?'var(--green)':'var(--muted)';
  }
 }
-function renderDashboardSummary(){renderDashboardMarketPreview();const count=$('dashboardMarketCount'),fx=$('dashboardFxRate'),prices=$('dashboardPriceCount'),note=$('dashboardMarketNote');if(count)count.textContent=formatNum(marketRows.length,0);if(fx)fx.textContent=currentFxIsValid?formatNum(currentFxRate,0)+' تومان':'نامعتبر / ناموجود';let validPriceCount=0;for(const item of marketRows){const price=Number(item.price);if(Number.isFinite(price)&&price>0)validPriceCount++}if(prices)prices.textContent=formatNum(validPriceCount,0);if(note)note.textContent=currentFxIsValid?'نرخ تبدیل تومان معتبر است؛ قیمت‌ها از فهرست فعال بازار خوانده می‌شوند.':'نرخ تبدیل تومان در حال حاضر معتبر نیست؛ ارزش تومانی دارایی‌ها نمایش داده نمی‌شود.'}
+function renderDashboardSummary(){renderDashboardMarketPreview();const count=$('dashboardMarketCount'),fx=$('dashboardFxRate'),prices=$('dashboardPriceCount'),note=$('dashboardMarketNote');if(count)count.textContent=formatNum(marketRows.length,0);if(fx)fx.textContent=currentFxIsValid?formatNum(currentFxRate,0)+' تومان':'نامعتبر / ناموجود';let validPriceCount=0;for(const item of marketRows){if(getTrustedMarketPrice(item)!==null)validPriceCount++}if(prices)prices.textContent=formatNum(validPriceCount,0);if(note)note.textContent=currentFxIsValid?'نرخ تبدیل تومان معتبر است؛ قیمت‌ها از فهرست فعال بازار خوانده می‌شوند.':'نرخ تبدیل تومان در حال حاضر معتبر نیست؛ ارزش تومانی دارایی‌ها نمایش داده نمی‌شود.'}
 function renderDashboardActivity(){
  const open=[],activeStatuses=new Set(['pending','partially_filled','triggered']);let partialCountValue=0;
  for(const order of allOrderRows){if(activeStatuses.has(order.status))open.push(order);if(order.status==='partially_filled')partialCountValue++}
@@ -1455,9 +1470,9 @@ function renderDashboardActivity(){
  if(alerts){alerts.replaceChildren();const messages=[];
   for(const failure of dashboardLoadErrors)messages.push(['warn','بارگذاری بخش '+failure.section+' ناموفق بود: '+failure.message]);
   if(!currentFxIsValid)messages.push(['warn','نرخ تبدیل USD/IRT معتبر نیست؛ ارزش تومانی قابل اتکا نیست.']);
-  const missing=marketRows.filter(x=>!(Number(x.price)>0&&Number.isFinite(Number(x.price)))).length;
+  const missing=marketRows.filter(x=>getTrustedMarketPrice(x)===null).length;
   if(missing)messages.push(['warn',formatNum(missing,0)+' جفت‌ارز بدون قیمت معتبر در فهرست فعال وجود دارد.']);
-  const stale=marketRows.filter(x=>{const age=x.updated_at?Date.now()-new Date(x.updated_at).getTime():Infinity;return !Number.isFinite(age)||age< -60000||age>120000}).length;
+  const stale=marketRows.filter(x=>getTrustedMarketPrice(x)===null).length;
   if(stale)messages.push(['warn',formatNum(stale,0)+' قیمت بازار قدیمی یا خارج از بازه تازگی است.']);
   if(open.some(o=>o.status==='triggered'))messages.push(['info','یک یا چند سفارش شرطی فعال شده و سفارش اجرایی آن در انتظار تکمیل است.']);
   if(!messages.length)messages.push(['ok','هشدار مهمی بر اساس اطلاعات بارگذاری‌شده حساب و بازار شناسایی نشد.']);
