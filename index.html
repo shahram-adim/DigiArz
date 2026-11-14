@@ -1338,13 +1338,15 @@ async function loadOpenOrders(){
   title.textContent=o.symbol+' · '+(o.side==='buy'?'خرید':'فروش')+' Limit';
   const meta=document.createElement('small');
   meta.textContent='قیمت هدف: '+formatNum(o.price,10)+' USDT · کل: '+formatNum(o.amount,10)+' · انجام‌شده: '+formatNum(o.filled_amount,10)+' · باقی‌مانده: '+formatNum(o.remaining_amount,10)+' · وضعیت: '+(orderStatusFa[o.status]||o.status);
-  const reserveLine=document.createElement('small');
-  if(reservation){
-   const free=Math.max(0,Number(reservation.reserved_amount||0)-Number(reservation.consumed_amount||0)-Number(reservation.released_amount||0));
-   reserveLine.textContent='رزرو باقیمانده: '+formatNum(free,10)+' '+reservation.asset+' · وضعیت رزرو: '+reservation.status;
+  const reserveLine=document.createElement('small');reserveLine.className='small muted';
+  if(reservationResult.error){
+   reserveLine.textContent='وضعیت رزرو از دیتابیس قابل خواندن نیست؛ رزرو تأیید نشده است.';
+  }else if(!reservation){
+   reserveLine.textContent='هشدار: رزرو متناظر این سفارش پیدا نشد؛ نیازمند بررسی سرور.';
   }else{
-   reserveLine.textContent=reservationResult.error?'وضعیت رزرو از دیتابیس قابل خواندن نیست.':'هشدار: رزرو متناظر این سفارش پیدا نشد؛ نیازمند بررسی سرور.';
-   reserveLine.className='small muted';
+   const reserved=Number(reservation.reserved_amount),consumed=Number(reservation.consumed_amount||0),released=Number(reservation.released_amount||0),free=reserved-consumed-released;
+   const valid=reservation.status==='reserved'&&Number.isFinite(reserved)&&Number.isFinite(consumed)&&Number.isFinite(released)&&reserved>0&&consumed>=0&&released>=0&&consumed+released<=reserved&&free>0;
+   reserveLine.textContent=valid?'رزرو باقیمانده: '+formatNum(free,10)+' '+String(reservation.asset||'')+' · وضعیت رزرو: '+reservation.status:'رزرو آزاد، نامعتبر یا بدون مانده است؛ سفارش نیازمند بررسی است.';
   }
   const reason=document.createElement('small');
   const age=market?.updated_at?Date.now()-new Date(market.updated_at).getTime():Infinity;
