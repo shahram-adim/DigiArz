@@ -727,6 +727,64 @@ body:not(.light-theme) .dashboard-shortcuts button{background:linear-gradient(14
  .dashboard-stats .stat .value{font-size:15px}
 }
 
+
+
+/* DigiArz refinement v4: authentication, wallet, orders and history */
+#authView.auth{max-width:1080px;min-height:610px;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:24px;box-shadow:0 24px 70px rgba(0,0,0,.16)}
+#authView .auth-visual{padding:clamp(26px,4vw,48px);border:0;position:relative;isolation:isolate;overflow:hidden;background:radial-gradient(ellipse at 12% 12%,rgba(244,190,36,.22),transparent 42%),radial-gradient(ellipse at 90% 90%,rgba(42,111,201,.22),transparent 42%),linear-gradient(145deg,#151c2a,#111722 58%,#171b24)}
+#authView .auth-visual:before{content:"";position:absolute;z-index:-1;inset:14%;border:1px solid rgba(245,195,66,.12);border-radius:32px;transform:rotate(-13deg);box-shadow:0 0 0 25px rgba(245,195,66,.025),0 0 0 55px rgba(245,195,66,.018)}
+#authView .auth-brand{font-size:36px;letter-spacing:-1.2px}
+#authView .auth-kicker{font-weight:800;font-size:10px;letter-spacing:1.6px}
+#authView .auth-headline{font-size:clamp(25px,3vw,34px);line-height:1.75;max-width:420px}
+#authView .auth-copy{font-size:13px;max-width:390px;line-height:2.35}
+#authView .auth-benefits{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#authView .auth-benefit{padding:11px 10px;border:1px solid rgba(255,255,255,.09);border-radius:13px;background:rgba(255,255,255,.035);font-size:11px}
+#authView .auth-benefit i{width:32px;height:32px;flex:0 0 32px;background:rgba(244,190,36,.08)}
+#authView .auth-form{padding:clamp(24px,4vw,48px);background:var(--panel)}
+#authView .auth-form h2{font-size:25px;letter-spacing:-.5px;margin-top:7px}
+#authView .auth-intro{font-size:12px;line-height:2.2;margin-bottom:18px}
+#authView .auth-form .field{margin:12px 0}
+#authView .auth-form input{min-height:51px;border-radius:13px;padding-inline:14px}
+#authView .auth-actions{grid-template-columns:1fr;gap:9px;margin-top:17px}
+#authView .auth-actions button{min-height:49px;border-radius:12px;font-weight:800}
+#authView #forgotBtn{min-height:43px;border-radius:11px;background:transparent;border-color:var(--line);color:var(--muted)}
+#authView .auth-security{padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);font-size:10px}
+#authView #recoveryPanel{padding:15px;margin-top:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel2)}
+#tab-assets,#tab-orders,#tab-history{min-height:360px}
+#tab-assets .asset-summary-grid .stat,#tab-orders .stat{border-radius:14px}
+#tab-orders .market-tools,#tab-history .market-tools{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
+#tab-orders #allOrdersList,#tab-assets #assetList{gap:9px}
+#tab-history .table-wrap{border:1px solid var(--line);border-radius:15px;overflow:auto}
+#tab-history table{min-width:560px}
+#tab-history th{font-size:11px;font-weight:800}
+#tab-history td{font-variant-numeric:tabular-nums}
+#tab-history .chart-caption,#tab-orders .chart-caption{line-height:2}
+body.light-theme #authView.auth{box-shadow:0 22px 60px rgba(31,55,86,.11);border-color:#e3eaf3}
+body.light-theme #authView .auth-visual{background:radial-gradient(ellipse at 12% 12%,rgba(244,190,36,.2),transparent 42%),radial-gradient(ellipse at 90% 90%,rgba(42,111,201,.2),transparent 42%),linear-gradient(145deg,#17253a,#172033 58%,#1d2636)}
+body.light-theme #authView .auth-form{background:linear-gradient(145deg,#fff,#f9fbff)}
+body.light-theme #authView .auth-security{background:#f5f8fc;border-color:#e5ebf3}
+body:not(.light-theme) #authView.auth{background:#151a23;border-color:#303845}
+body:not(.light-theme) #authView .auth-form{background:linear-gradient(145deg,#171d28,#131821)}
+body:not(.light-theme) #authView .auth-security{background:#1c2430}
+@media(max-width:760px){
+ #authView.auth{grid-template-columns:1fr;min-height:0;margin:16px auto;border-radius:18px}
+ #authView .auth-visual{min-height:270px;padding:23px}
+ #authView .auth-brand{font-size:30px}
+ #authView .auth-headline{font-size:24px;margin:10px 0}
+ #authView .auth-copy{font-size:11px;line-height:2}
+ #authView .auth-benefits{margin-top:17px;gap:7px}
+ #authView .auth-benefit{padding:8px;font-size:10px}
+ #authView .auth-benefit i{width:28px;height:28px;flex-basis:28px}
+ #authView .auth-form{padding:23px 18px}
+ #authView .auth-form h2{font-size:21px}
+ #tab-orders .market-tools,#tab-history .market-tools{grid-template-columns:1fr}
+}
+@media(max-width:370px){
+ #authView .auth-visual{padding:18px}
+ #authView .auth-benefits{grid-template-columns:1fr}
+ #authView .auth-form{padding:19px 14px}
+}
+
 </style>
 </head>
 <body>
