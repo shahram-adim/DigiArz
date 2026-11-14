@@ -1293,6 +1293,16 @@ body.light-theme .mobile-bottom-nav button.active{color:#1769ff;background:#eaf2
 }
 @media(max-width:390px){.hero-title{font-size:22px}.dashboard-stats{grid-template-columns:1fr 1fr}.market-categories{grid-template-columns:repeat(4,minmax(0,1fr))}.category-btn{min-height:68px;font-size:9px}}
 
+
+/* Integrated trading workspace: chart and public order book side by side */
+#tab-trade .trade-market-grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(270px,1fr);gap:14px;align-items:start;margin-top:14px}
+#tab-trade .trade-market-grid>#chartSection,#tab-trade .trade-market-grid>.detail-section{min-width:0;margin:0;height:100%}
+#tab-trade #priceChart{height:360px;min-height:300px}
+#tab-trade #volumeChart{height:130px}
+#tab-trade .trade-market-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 0 0;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+#tab-trade .trade-grid{align-items:start}
+@media(max-width:900px){#tab-trade .trade-market-grid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){#tab-trade #priceChart{height:290px;min-height:260px}#tab-trade #volumeChart{height:110px}#tab-trade .trade-market-heading{padding:10px;align-items:flex-start}}
 </style>
 </head>
 <body>
@@ -1381,7 +1391,8 @@ body.light-theme .mobile-bottom-nav button.active{color:#1769ff;background:#eaf2
 
  <section id="tab-trade" class="card hidden"><div class="section-title"><h2>پنل معامله</h2><span class="live">معاملات مجازی</span></div><div class="notice">قیمت معامله توسط تابع امن سمت سرور بررسی می‌شود. هیچ پول واقعی جابه‌جا نمی‌شود.</div>
   <div class="trade-market-heading"><div><strong>بازار و نمودار جفت‌ارز</strong><div class="chart-caption">نمودار زنده و حجم معاملات · قیمت مرجع بازار</div></div><span id="tradePairBadge" class="tag">BTCUSDT</span></div>
-  <div class="detail-section" id="chartSection"><div class="section-title"><h2>نمودار قیمت</h2><div class="row"><span class="live">داده بازار</span><button type="button" class="secondary" id="chartFullscreenBtn" aria-label="نمایش تمام‌صفحه نمودار">تمام‌صفحه</button></div></div>
+  <div class="trade-market-grid">
+<div class="detail-section" id="chartSection"><div class="section-title"><h2>نمودار قیمت</h2><div class="row"><span class="live">داده بازار</span><button type="button" class="secondary" id="chartFullscreenBtn" aria-label="نمایش تمام‌صفحه نمودار">تمام‌صفحه</button></div></div>
   <div class="chart-types" id="chartTypes"><button class="active" data-chart-type="candle">شمعی</button><button data-chart-type="line">خطی</button><button data-chart-type="area">ناحیه‌ای</button></div>
   <div class="timeframes" id="timeframes"><button data-interval="1m">۱ دقیقه</button><button data-interval="5m">۵ دقیقه</button><button data-interval="15m">۱۵ دقیقه</button><button data-interval="30m">۳۰ دقیقه</button><button data-interval="1h" class="active">۱ ساعت</button><button data-interval="4h">۴ ساعت</button><button data-interval="1d">روزانه</button><button data-interval="1w">هفتگی</button><button data-interval="1M">ماهانه</button><button data-interval="3M">۳ ماه</button><button data-interval="6M">۶ ماه</button><button data-interval="1y">یک سال</button><button data-interval="all">از ابتدا</button></div>
   <div id="priceChart"></div><div class="section-title" style="margin-top:12px"><h3>حجم معاملات</h3><span class="muted small">حجم هر کندل · واحد ارز پایه</span></div><div id="volumeChart"></div><div id="chartMessage" class="chart-caption">در حال دریافت کندل‌ها…</div>
@@ -1391,7 +1402,8 @@ body.light-theme .mobile-bottom-nav button.active{color:#1769ff;background:#eaf2
   <div class="chart-caption">منبع کندل‌ها: API عمومی Binance. نمودار برای تحلیل است؛ قیمت اجرای معامله از سرور DigiArz گرفته می‌شود.</div></div>
   
   <div class="detail-section"><div class="section-title"><h2>دفتر سفارشات زنده</h2><button id="refreshOrderBookBtn" class="secondary" type="button">به‌روزرسانی</button></div><div class="orderbook-grid"><div class="orderbook-side buy-side"><h4>خریدها (Bids)</h4><div class="orderbook-head"><span>قیمت</span><span>مقدار</span><span>تجمعی</span></div><div id="orderBookBids"><div class="muted small" style="padding:10px">در حال دریافت…</div></div></div><div class="orderbook-side sell-side"><h4>فروش‌ها (Asks)</h4><div class="orderbook-head"><span>قیمت</span><span>مقدار</span><span>تجمعی</span></div><div id="orderBookAsks"><div class="muted small" style="padding:10px">در حال دریافت…</div></div></div></div><div id="orderBookMid" class="orderbook-mid">قیمت میانی: —</div><div id="orderBookStatus" class="orderbook-status">دفتر سفارشات عمومی بازار؛ اجرای معاملات DigiArz همچنان فقط با قیمت و موتور سرور انجام می‌شود.</div></div>
-  <div class="detail-section"><div class="section-title"><h2>معاملات اخیر بازار</h2><button id="refreshRecentTradesBtn" type="button" class="secondary">به‌روزرسانی</button></div><div class="table-wrap"><table style="min-width:360px"><thead><tr><th>قیمت (USDT)</th><th>مقدار</th><th>نوع معامله</th><th>زمان</th></tr></thead><tbody id="recentMarketTrades"><tr><td colspan="4" class="muted">در حال دریافت معاملات اخیر…</td></tr></tbody></table></div><div id="recentTradesStatus" class="chart-caption">معاملات عمومی Binance · صرفاً جهت مشاهده بازار</div></div>
+  </div>
+<div class="detail-section"><div class="section-title"><h2>معاملات اخیر بازار</h2><button id="refreshRecentTradesBtn" type="button" class="secondary">به‌روزرسانی</button></div><div class="table-wrap"><table style="min-width:360px"><thead><tr><th>قیمت (USDT)</th><th>مقدار</th><th>نوع معامله</th><th>زمان</th></tr></thead><tbody id="recentMarketTrades"><tr><td colspan="4" class="muted">در حال دریافت معاملات اخیر…</td></tr></tbody></table></div><div id="recentTradesStatus" class="chart-caption">معاملات عمومی Binance · صرفاً جهت مشاهده بازار</div></div>
   <div class="trade-grid"><div class="trade-box"><h3 style="color:var(--green)">خرید رمزارز</h3><div class="field"><label>نماد معاملاتی</label><input id="buySymbol" value="BTCUSDT" dir="ltr"><div id="buyAssetPreview" class="trade-asset-preview"></div></div><div class="field"><label>مقدار دارایی</label><input id="buyAmount" type="number" min="0" step="any" placeholder="0.001" dir="ltr"></div><button id="buyBtn" class="buy" style="width:100%">ثبت خرید آزمایشی</button></div>
   <div class="trade-box"><h3 style="color:var(--red)">فروش رمزارز</h3><div class="field"><label>نماد معاملاتی</label><input id="sellSymbol" value="BTCUSDT" dir="ltr"><div id="sellAssetPreview" class="trade-asset-preview"></div></div><div class="field"><label>مقدار دارایی</label><input id="sellAmount" type="number" min="0" step="any" placeholder="0.001" dir="ltr"></div><button id="sellBtn" class="sell" style="width:100%">ثبت فروش آزمایشی</button></div></div><div id="tradeMsg" class="notice hidden"></div>
 
