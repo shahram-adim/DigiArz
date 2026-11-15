@@ -2620,7 +2620,7 @@ async function loadAssets(){const {data:userData,error:userError}=await supabase
 function renderHistory(){const body=$('historyBody'),query=String($('historySearch')?.value||'').trim().toUpperCase(),side=$('historySideFilter')?.value||'all';const rows=historyRows.filter(item=>(side==='all'||item.side===side)&&(!query||String(item.symbol||'').toUpperCase().includes(query)));body.innerHTML='';const count=$('historyResultCount');if(count)count.textContent=`نمایش ${formatNum(rows.length,0)} از ${formatNum(historyRows.length,0)} معامله اخیر`;if(!rows.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=5;td.className='muted';td.textContent=historyRows.length?'با فیلترهای انتخاب‌شده معامله‌ای پیدا نشد.':'هنوز معامله‌ای ثبت نشده است.';tr.appendChild(td);body.appendChild(tr);return}for(const item of rows){const tr=document.createElement('tr'),time=document.createElement('td'),symbol=document.createElement('td'),sideCell=document.createElement('td'),amount=document.createElement('td'),price=document.createElement('td');time.textContent=new Date(item.created_at).toLocaleString('fa-IR');const wrap=document.createElement('span');wrap.className='history-asset';const logo=document.createElement('span');logo.innerHTML=coinLogo(String(item.symbol).replace(/USDT$/i,''),'asset-logo');const label=document.createElement('b');label.dir='ltr';label.textContent=String(item.symbol||'');wrap.append(logo,label);symbol.appendChild(wrap);sideCell.textContent=item.side==='buy'?'خرید':item.side==='sell'?'فروش':String(item.side||'—');amount.textContent=formatNum(item.amount,18);price.textContent=formatNum(item.price,18);tr.append(time,symbol,sideCell,amount,price);body.appendChild(tr)}}
 async function loadHistory(){const {data:userData,error:userError}=await supabaseClient.auth.getUser();if(userError||!userData.user)throw userError||new Error('برای مشاهده تاریخچه وارد حساب شوید.');const {data,error}=await supabaseClient.from('trades').select('symbol,side,amount,price,created_at').eq('user_id',userData.user.id).order('created_at',{ascending:false}).limit(50);if(error)throw error;historyRows=Array.isArray(data)?data:[];renderHistory();renderDashboardActivity()}
 async function trade(side){
- const buy=side==='buy',symbol=$(buy?'buySymbol':'sellSymbol').value.trim().toUpperCase(),amountRaw=$(buy?'buyAmount':'sellAmount').value,btn=$(buy?'buyBtn':'sellBtn');
+ const buy=side==='buy',symbol=$(buy?'buySymbol':'sellSymbol').value.trim().toUpperCase(),btn=$(buy?'buyBtn':'sellBtn');
  btn.disabled=true;hideMessage(tradeMsg);
  try{
   const amount=readExactInput(buy?'buyAmount':'sellAmount','مقدار معامله');
@@ -2716,7 +2716,8 @@ async function placeLimitOrder(){
   await Promise.all([loadDashboard(),loadOpenOrders()]);
  }catch(e){showMessage($('limitOrderMsg'),'ثبت سفارش ناموفق بود: '+(e.message||String(e)),'err')}
  finally{btn.disabled=false}
-}async function placeConditionalExitOrder(){
+}
+async function placeConditionalExitOrder(){
  const btn=$('placeConditionalBtn'),symbol=$('conditionalSymbol').value.trim().toUpperCase(),kind=$('conditionalKind').value;
  btn.disabled=true;hideMessage($('conditionalOrderMsg'));
  try{
@@ -2731,7 +2732,8 @@ async function placeLimitOrder(){
   await Promise.all([loadDashboard(),loadOpenOrders()]);
  }catch(e){showMessage($('conditionalOrderMsg'),'ثبت سفارش شرطی ناموفق بود: '+(e.message||String(e)),'err')}
  finally{btn.disabled=false}
-}async function loadConditionalOrders(){
+}
+async function loadConditionalOrders(){
  const root=$('conditionalOrdersList');if(!root||!supabaseClient)return;
  const {data:userData,error:userError}=await supabaseClient.auth.getUser();
  if(userError||!userData.user)throw userError||new Error('برای مشاهده سفارش‌ها وارد حساب شوید.');
@@ -2761,7 +2763,7 @@ async function placeLimitOrder(){
    reserveLine.textContent='رزرو متناظر این سفارش پیدا نشد؛ نیازمند بررسی سرور.';
   }else{
    const reserved=String(reservation.reserved_amount??'0'),consumed=String(reservation.consumed_amount??'0'),released=String(reservation.released_amount??'0'),remaining=DigiDecimal.subtractDecimal(DigiDecimal.subtractDecimal(reserved,consumed,18),released,18);
-   const valid=reservation.status==='reserved'&&Number.isFinite(reserved)&&Number.isFinite(consumed)&&Number.isFinite(released)&&reserved>0&&consumed>=0&&released>=0&&consumed+released<=reserved&&remaining>0;
+   const valid=reservation.status==='reserved'&&DigiDecimal.compareDecimal(reserved,'0')>0&&DigiDecimal.compareDecimal(consumed,'0')>=0&&DigiDecimal.compareDecimal(released,'0')>=0&&DigiDecimal.compareDecimal(DigiDecimal.addDecimal(consumed,released,18),reserved)<=0&&DigiDecimal.compareDecimal(remaining,'0')>0;
    reserveLine.textContent=valid?'رزرو باقیمانده: '+formatNum(remaining,18)+' '+String(reservation.asset||'')+' · وضعیت: '+reservation.status:'رزرو آزاد، نامعتبر یا بدون مانده است؛ سفارش نیازمند بررسی است.';
   }
   const note=document.createElement('small');note.className='small muted';note.textContent=o.order_kind==='take_profit'?'شرط اجرا: قیمت بازار مساوی یا بالاتر از هدف':'شرط اجرا: قیمت بازار مساوی یا پایین‌تر از هدف';
@@ -2769,7 +2771,7 @@ async function placeLimitOrder(){
   const market=prices.find(p=>p.symbol===o.symbol),age=market?.updated_at?Date.now()-new Date(market.updated_at).getTime():Infinity;
   if(!priceResult.error&&market&&Number.isFinite(age)&&age>=0&&age<=60000&&DigiDecimal.compareDecimal(String(market.price),'0')>0){
    const met=o.order_kind==='take_profit'?DigiDecimal.compareDecimal(String(market.price),String(o.trigger_price))>=0:DigiDecimal.compareDecimal(String(market.price),String(o.trigger_price))<=0;
-   marketLine.textContent='قیمت فعلی بازار: '+formatNum(market.price,10)+' USDT · '+(met?'شرط قیمت برقرار است؛ منتظر چرخه اجرای سرور.':'علت انتظار: قیمت هنوز به حد فعال‌سازی نرسیده است.');
+   marketLine.textContent='قیمت فعلی بازار: '+formatNum(market.price,18)+' USDT · '+(met?'شرط قیمت برقرار است؛ منتظر چرخه اجرای سرور.':'علت انتظار: قیمت هنوز به حد فعال‌سازی نرسیده است.');
   }else if(priceResult.error){marketLine.textContent='علت انتظار مشخص نیست؛ دریافت قیمت بازار با خطا روبه‌رو شد.'}
   else if(market&&age>60000){marketLine.textContent='علت انتظار: قیمت بازار قدیمی‌تر از ۶۰ ثانیه است؛ سفارش با قیمت تازه بررسی می‌شود.'}
   else{marketLine.textContent='قیمت تازه بازار در دسترس نیست؛ سفارش تا دریافت قیمت معتبر اجرا نمی‌شود.'}
@@ -2804,7 +2806,8 @@ async function placeStopLimitOrder(){
   await Promise.all([loadDashboard(),loadOpenOrders()]);
  }catch(e){showMessage($('stopLimitMsg'),'ثبت سفارش Stop-Limit ناموفق بود: '+(e.message||String(e)),'err')}
  finally{btn.disabled=false}
-}async function loadStopLimitOrders(){
+}
+async function loadStopLimitOrders(){
  const root=$('stopLimitOrdersList');if(!root||!supabaseClient)return;
  const {data:userData,error:userError}=await supabaseClient.auth.getUser();
  if(userError||!userData.user)throw userError||new Error('برای مشاهده سفارش‌ها وارد حساب شوید.');
@@ -2830,7 +2833,7 @@ async function placeStopLimitOrder(){
   const details=document.createElement('div');details.className='open-order-details';
   const title=document.createElement('strong');title.textContent=o.symbol+' · '+(o.side==='buy'?'خرید':'فروش')+' Stop-Limit';
   const parent=parentOrders.get(o.order_id);
-  const meta=document.createElement('small');meta.textContent='Stop: '+formatNum(o.trigger_price,18)+' USDT · Limit: '+formatNum(o.limit_price,18)+' USDT · کل: '+formatNum(o.amount,18)+' · انجام‌شده: '+formatNum(parent?.filled_amount||0,10)+' · باقی‌مانده: '+formatNum(parent?.remaining_amount??o.amount,10);
+  const meta=document.createElement('small');meta.textContent='Stop: '+formatNum(o.trigger_price,18)+' USDT · Limit: '+formatNum(o.limit_price,18)+' USDT · کل: '+formatNum(o.amount,18)+' · انجام‌شده: '+formatNum(parent?.filled_amount||0,18)+' · باقی‌مانده: '+formatNum(parent?.remaining_amount??o.amount,18);
   const state=document.createElement('small');state.className='small muted';
   if(o.status==='pending'){
    const reservation=reservations.find(r=>r.order_id===o.order_id);
@@ -2840,7 +2843,7 @@ async function placeStopLimitOrder(){
     state.textContent='وضعیت: رزرو این سفارش پیدا نشد؛ سفارش نیازمند بررسی است.';
    }else{
     const reserved=String(reservation.reserved_amount??'0'),consumed=String(reservation.consumed_amount??'0'),released=String(reservation.released_amount??'0'),remaining=DigiDecimal.subtractDecimal(DigiDecimal.subtractDecimal(reserved,consumed,18),released,18);
-    const reservationValid=reservation.status==='reserved'&&Number.isFinite(reserved)&&Number.isFinite(consumed)&&Number.isFinite(released)&&reserved>0&&consumed>=0&&released>=0&&consumed+released<=reserved&&remaining>0;
+    const reservationValid=reservation.status==='reserved'&&DigiDecimal.compareDecimal(reserved,'0')>0&&DigiDecimal.compareDecimal(consumed,'0')>=0&&DigiDecimal.compareDecimal(released,'0')>=0&&DigiDecimal.compareDecimal(DigiDecimal.addDecimal(consumed,released,18),reserved)<=0&&DigiDecimal.compareDecimal(remaining,'0')>0;
     state.textContent=reservationValid?'وضعیت: منتظر رسیدن قیمت به Stop؛ رزرو باقی‌مانده: '+formatNum(remaining,18)+' '+String(reservation.asset||'')+'.':'وضعیت: رزرو آزاد، نامعتبر یا بدون مانده است؛ سفارش نیازمند بررسی است.';
    }
    const marketLine=document.createElement('small');marketLine.className='small muted';
@@ -2848,7 +2851,7 @@ async function placeStopLimitOrder(){
    if(priceResult.error){marketLine.textContent='علت انتظار مشخص نیست؛ دریافت قیمت بازار با خطا روبه‌رو شد.'}
    else if(market&&Number.isFinite(age)&&age>=0&&age<=60000&&Number(market.price)>0){
     const met=o.side==='buy'?DigiDecimal.compareDecimal(String(market.price),String(o.trigger_price))>=0:DigiDecimal.compareDecimal(String(market.price),String(o.trigger_price))<=0;
-    marketLine.textContent='قیمت فعلی بازار: '+formatNum(market.price,10)+' USDT · '+(met?'شرط Stop برقرار است؛ منتظر پردازش سرور.':'علت انتظار: قیمت هنوز به Stop نرسیده است.');
+    marketLine.textContent='قیمت فعلی بازار: '+formatNum(market.price,18)+' USDT · '+(met?'شرط Stop برقرار است؛ منتظر پردازش سرور.':'علت انتظار: قیمت هنوز به Stop نرسیده است.');
    }else if(market&&age>60000){marketLine.textContent='علت انتظار: قیمت بازار قدیمی‌تر از ۶۰ ثانیه است؛ پردازشگر قیمت تازه می‌خواهد.'}
    else{marketLine.textContent='قیمت تازه بازار در دسترس نیست؛ سفارش تا دریافت قیمت معتبر فعال نمی‌شود.'}
    details.append(title,meta,state,marketLine);
