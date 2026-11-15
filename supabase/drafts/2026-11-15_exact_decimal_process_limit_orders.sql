@@ -194,6 +194,10 @@ BEGIN
         IF v_order.side = 'buy' THEN
             v_total := v_gross + v_fee;
             v_net := 0;
+            IF v_total > 9999999999999999.99999999::numeric THEN
+                v_skipped := v_skipped + 1;
+                CONTINUE;
+            END IF;
 
             IF v_reservation.asset <> 'USDT'
                OR v_reservation.consumed_amount
@@ -226,6 +230,10 @@ BEGIN
         ELSE
             v_total := 0;
             v_net := v_gross - v_fee;
+            IF v_net <= 0 OR v_net > 9999999999999999.99999999::numeric THEN
+                v_skipped := v_skipped + 1;
+                CONTINUE;
+            END IF;
 
             IF v_reservation.asset <> v_base_asset
                OR v_reservation.consumed_amount
