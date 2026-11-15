@@ -48,6 +48,7 @@ test('entrypoint candidates enforce exact scale and quote-ledger rounding', () =
   assert.match(entrypoints, /round\(p_amount \* p_limit_price, 8\) <= 0/);
   assert.match(entrypoints, /Limit order notional rounds to zero USDT/);
   assert.match(entrypoints, /Stop-Limit order notional rounds to zero USDT/);
+  assert.match(entrypoints, /Conditional exit notional rounds to zero USDT/);
 });
 
 test('schema candidate widens base precision but retains 8-place quote ledgers', () => {
