@@ -1742,6 +1742,60 @@ img,svg,video,canvas,iframe{max-width:100%}
  #authView .auth-visual{padding:18px 12px}
 }
 
+
+
+/* AUTH VIEW FIX — target the actual element (#authView.auth), not a descendant */
+#authView.auth{
+ display:grid!important;
+ grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+ width:100%!important;
+ max-width:980px!important;
+ min-width:0!important;
+ margin:18px auto!important;
+ padding:0!important;
+ box-sizing:border-box!important;
+}
+#authView.auth>.auth-visual,
+#authView.auth>.auth-form{
+ width:100%!important;
+ min-width:0!important;
+ max-width:100%!important;
+ box-sizing:border-box!important;
+}
+#authView.auth>.auth-visual{overflow:hidden;overflow-wrap:anywhere}
+#authView.auth>.auth-form{overflow-wrap:anywhere}
+#authView.auth input,
+#authView.auth button{max-width:100%;min-width:0;box-sizing:border-box}
+@media(max-width:760px){
+ #authView.auth{
+  display:flex!important;
+  flex-direction:column!important;
+  width:100%!important;
+  max-width:100%!important;
+  margin:10px 0!important;
+  min-height:0!important;
+  border-radius:16px!important;
+ }
+ #authView.auth>.auth-visual,
+ #authView.auth>.auth-form{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  padding:18px 14px!important;
+ }
+ #authView.auth>.auth-visual{min-height:0!important}
+ #authView.auth .auth-benefits{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #authView.auth .auth-actions{display:grid!important;grid-template-columns:minmax(0,1fr)!important}
+ #authView.auth h2,
+ #authView.auth .auth-intro,
+ #authView.auth label{overflow-wrap:anywhere}
+}
+@media(max-width:370px){
+ #authView.auth .auth-benefits{grid-template-columns:minmax(0,1fr)!important}
+ #authView.auth>.auth-visual,
+ #authView.auth>.auth-form{padding:15px 11px!important}
+}
+
 </style>
 </head>
 <body>
