@@ -33,7 +33,8 @@ Scope: Demo trading only. This document defines safe verification; it does not a
 | Stale/missing market price | No valid price updated within one minute | Worker skips; no trigger | Isolated test DB |
 | Trigger reservation | Valid pending Stop-Limit reaches trigger | Parent reservation released and child Limit reservation created atomically | Isolated test DB |
 | Child creation failure | Force child Limit RPC failure | Parent remains pending; original reservation restored; attempt recorded | Isolated test DB |
-| Retry exhaustion | Ten failed trigger attempts | Parent/conditional rejected and remaining reservation released | Isolated test DB |
+| Retry exhaustion (child creation failure) | Ten failed child Limit creation attempts with a valid reservation | Parent/conditional rejected; only a reservation whose ownership and arithmetic validate may be released atomically | Isolated test DB |
+| Invalid reservation retry exhaustion | Ten missing/released/inconsistent/wrong-asset reservation validations | Parent/conditional rejected; invalid reservation is not automatically modified and requires manual reconciliation | Isolated test DB |
 | Duplicate worker invocation | Two workers overlap | Advisory lock prevents overlapping processing | Isolated test DB |
 | Partial child fill | Child Limit partially fills | Parent filled/remaining amounts mirror child | Isolated test DB |
 | Full child fill | Child Limit fills | Parent and conditional become filled | Isolated test DB |
