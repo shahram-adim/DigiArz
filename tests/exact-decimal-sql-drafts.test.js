@@ -41,6 +41,8 @@ test('entrypoint candidates enforce exact scale and quote-ledger rounding', () =
   assert.match(entrypoints, /pg_catalog\.scale\(p_limit_price\) > 18/);
   assert.match(entrypoints, /pg_catalog\.scale\(p_stop_price\) > 18/);
   assert.match(entrypoints, /pg_catalog\.scale\(p_trigger_price\) > 18/);
+  assert.match(entrypoints, /pg_catalog\.scale\(v_price\) > 18/);
+  assert.match(entrypoints, /v_price >= 10000000000000000::numeric/);
   assert.match(entrypoints, /round\(p_amount \* p_limit_price \* \(1 \+ v_fee_rate\), 8\)/);
   assert.match(entrypoints, /Trade notional rounds to zero USDT/);
   assert.match(entrypoints, /round\(p_amount \* p_limit_price, 8\) <= 0/);
