@@ -105,7 +105,116 @@ jobs:
           fi
           wait "$LOCK_PID"
           psql -h localhost -U postgres -d digiarz_type_widening_lock_test -v ON_ERROR_STOP=1 \
-            -f supabase/tests/exact_decimal_type_widening_lock_verify.sql
+name: Exact decimal tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  exact-decimal:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: digiarz_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d digiarz_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run exact decimal and browser integration tests
+        run: node --test tests/*.test.js
+      - name: Run PostgreSQL arithmetic regression tests
+        env:
+          PGPASSWORD: postgres
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          psql -h localhost -U postgres -d digiarz_test -v ON_ERROR_STOP=1 -f supabase/tests/exact_decimal_arithmetic.sql
+      - name: Rehearse exact-decimal schema widening in disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_type_widening_test;"
+          psql -h localhost -U postgres -d digiarz_type_widening_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_setup.sql \
+            -f supabase/drafts/2026-11-15_exact_decimal_type_widening.sql \
+            -f supabase/tests/exact_decimal_type_widening_integration.sql \
+            -f supabase/tests/exact_decimal_type_widening_schema_verify.sql
+      - name: Verify widening preflight rejects invalid data atomically
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_type_widening_negative_test;"
+          psql -h localhost -U postgres -d digiarz_type_widening_negative_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_setup.sql \
+            -f supabase/tests/exact_decimal_type_widening_negative.sql
+          if psql -h localhost -U postgres -d digiarz_type_widening_negative_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-15_exact_decimal_type_widening.sql; then
+            echo "Expected widening preflight rejection, but migration succeeded."
+            exit 1
+          fi
+          psql -h localhost -U postgres -d digiarz_type_widening_negative_test -v ON_ERROR_STOP=1 \
+            -c "DO \$\$ BEGIN IF (SELECT format_type(a.atttypid,a.atttypmod) FROM pg_attribute a WHERE a.attrelid='public.orders'::regclass AND a.attname='amount') <> 'numeric(24,8)' THEN RAISE EXCEPTION 'failed preflight changed schema'; END IF; END \$\$;"
+      - name: Verify widening migration honors lock timeout atomically
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_type_widening_lock_test;"
+          psql -h localhost -U postgres -d digiarz_type_widening_lock_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_setup.sql
+          PGAPPNAME=digiarz_widening_lock_blocker psql -h localhost -U postgres -d digiarz_type_widening_lock_test \
+            -v ON_ERROR_STOP=1 -c "BEGIN; LOCK TABLE public.orders IN ACCESS SHARE MODE; SELECT pg_sleep(12); COMMIT;" \
+            > /tmp/digiarz-lock-blocker.log 2>&1 &
+          LOCK_PID=$!
+          LOCK_READY=0
+          for attempt in $(seq 1 40); do
+            ACTIVE=$(psql -h localhost -U postgres -d digiarz_type_widening_lock_test -At \
+              -c "SELECT count(*) FROM pg_stat_activity WHERE application_name='digiarz_widening_lock_blocker' AND state='active' AND query LIKE '%pg_sleep(12)%';")
+            if [ "$ACTIVE" = "1" ]; then
+              LOCK_READY=1
+              break
+            fi
+            sleep 0.25
+          done
+          if [ "$LOCK_READY" != "1" ]; then
+            cat /tmp/digiarz-lock-blocker.log
+            kill "$LOCK_PID" || true
+            echo "Timed out waiting for the blocker to acquire ACCESS SHARE on orders."
+            exit 1
+          fi
+          if psql -h localhost -U postgres -d digiarz_type_widening_lock_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-15_exact_decimal_type_widening.sql \
+            > /tmp/digiarz-lock-migration.log 2>&1; then
+            cat /tmp/digiarz-lock-migration.log
+            wait "$LOCK_PID"
+            echo "Expected lock_timeout rejection, but migration succeeded."
+            exit 1
+          fi
+          cat /tmp/digiarz-lock-migration.log
+          if ! grep -Eiq 'lock timeout|canceling statement due to lock timeout' /tmp/digiarz-lock-migration.log; then
+            wait "$LOCK_PID"
+            echo "Migration failed for a reason other than the expected lock timeout."
+            exit 1
+          fi
+          wait "$LOCK_PID"
+          psql -h localhost -U postgres -d digiarz_type_widening_lock_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_lock_verify.sql \
+            -f supabase/tests/exact_decimal_type_widening_schema_verify.sql \
+            -f supabase/tests/exact_decimal_type_widening_schema_verify.sql
       - name: Verify widening DDL transaction rolls back after mid-migration failure
         env:
           PGPASSWORD: postgres
