@@ -148,7 +148,7 @@ USING (auth.uid() = user_id AND current_account_is_active());
 CREATE POLICY "Users can view own order reservations" ON public.order_reservations FOR SELECT TO authenticated
 USING (auth.uid() = user_id);
 CREATE POLICY conditional_orders_select_own ON public.conditional_orders FOR SELECT TO authenticated
-USING ((SELECT auth.uid()) = user_id);
+USING (( SELECT auth.uid() AS uid) = user_id);
 
 GRANT SELECT ON public.orders,public.trades,public.asset_balances TO authenticated;
 GRANT SELECT ON public.conditional_orders TO anon,authenticated;
