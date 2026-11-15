@@ -67,6 +67,7 @@ Make demo trading preserve tiny asset quantities and micro-prices end-to-end. Ma
 - For each non-final Limit fill, compute the nominal quarter-fill and quantize it explicitly: `v_chunk := round(v_order.amount * 0.25, 18)`; then `v_qty := LEAST(v_remaining, v_chunk)`.
 - If that rounded chunk is zero for a valid positive remaining quantity, use exactly one minimum quantum: `v_qty := LEAST(v_remaining, 0.000000000000000001)`. This prevents a valid smallest-quantity order from becoming permanently unfillable. It is the sole exception to the 25%-per-cycle target and can occur only where a quarter is below half of one 18-place quantum.
 - When the order is final (the chosen quantity equals the remaining quantity), consume the exact remaining quantity, never a separately recomputed or rounded fraction.
+- Because quarter-fill rounding can leave a one-quantum residual after four slices, allow a fifth and final cycle for that exact residual; never force the four rounded slices to absorb it.
 - Validate that every submitted amount is at least one quantum and has no more than 18 fractional digits before it is stored. Reject values that would round to zero; do not silently round user input.
 - Apply the exact same `v_qty` to trade amount, asset-balance delta, order filled/remaining values, and base-asset reservation consumption.
 - This policy is deterministic for positive numeric values because PostgreSQL `round(numeric, 18)` rounds half away from zero. It must be covered by isolated PostgreSQL tests before any worker replacement or release.
