@@ -119,3 +119,15 @@ Full lifecycle testing remains blocked until an isolated Supabase test project w
 - [x] Re-read the live function after migration and confirmed the bounded retry branch is present.
 - [x] Read-only aggregate check confirmed there are currently zero Stop-Limit conditional rows, zero conditional parent orders, and zero active conditional reservations. No order, reservation, wallet, balance, trade, or financial-history row was created or changed.
 - [ ] Full lifecycle, cancellation/trigger race, and deactivation-after-trigger tests remain blocked until an isolated test project with disposable users is available. This correction does not constitute end-to-end QA.
+
+
+## Cancellation and permission review — 2026-11-15
+
+### Read-only inspection
+- [x] `cancel_stop_limit_order(uuid)` derives the caller from `auth.uid()` and filters the conditional and parent order by that user ID.
+- [x] The cancellation RPC locks the conditional row and parent order before deciding whether the order is pending or triggered.
+- [x] Pending cancellation validates the active reservation arithmetic, releases only `reserved_amount - consumed_amount`, then changes parent and conditional states in the same transaction.
+- [x] Triggered cancellation verifies the child belongs to the same user and is a Limit order, delegates open/partially-filled child cancellation to `cancel_limit_order`, then synchronizes parent/conditional status and fill quantities.
+- [x] Live privilege inspection: `place_stop_limit_order` and `cancel_stop_limit_order` are executable by `authenticated`, not `anon`; `process_stop_limit_orders` is executable by `service_role` only.
+- [x] Front-end Stop-Limit placement calls the authenticated RPC; the active-order list is user-scoped and offers cancellation for pending and triggered orders.
+- [ ] Cancellation-versus-trigger concurrency and partial-fill cancellation still require isolated end-to-end tests. Static function review is not proof of race-free behavior.
