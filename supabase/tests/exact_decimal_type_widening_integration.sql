@@ -41,6 +41,15 @@ BEGIN
   FROM pg_attribute a WHERE a.attrelid='public.transactions'::regclass AND a.attname='amount';
   IF v_type <> 'numeric(24,8)' THEN RAISE EXCEPTION 'transactions.amount unexpectedly changed: %',v_type; END IF;
 
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='orders_amount_accounting_chk')
+     OR NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='orders_price_positive')
+     OR NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='trades_amount_check')
+     OR NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='asset_balances_balance_check')
+     OR NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='order_reservations_consumed_amount_check')
+     OR NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='conditional_orders_stop_limit_fields_chk') THEN
+    RAISE EXCEPTION 'A production-style numeric constraint was lost during widening';
+  END IF;
+
   RAISE NOTICE 'Exact-decimal type-widening rehearsal: PASS';
 END
 $test$;
