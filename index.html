@@ -1713,6 +1713,35 @@ body.light-theme #priceChart,body.light-theme #volumeChart{background:#fff;borde
  #tab-markets .coin .price-usd,#tab-markets .coin .price-toman{font-size:9px!important}
 }
 
+
+
+/* DIGIARZ MOBILE FRAME RECOVERY — keep every view inside the device viewport */
+html,body{width:100%;max-width:100%;min-width:0;overflow-x:hidden}
+body{position:relative}
+*,*::before,*::after{box-sizing:border-box}
+.wrap,#authView,.auth,main,section,.card,.dashboard-panel{min-width:0;max-width:100%}
+#authView{width:100%;max-width:980px;margin-inline:auto;padding-inline:clamp(8px,2.5vw,15px)}
+#authView .auth{width:100%;max-width:100%;min-width:0;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr)}
+#authView .auth>*{min-width:0;max-width:100%}
+#authView .auth-form{min-width:0;width:100%;max-width:100%;padding:clamp(16px,3.5vw,38px)}
+#authView .auth-form input,#authView .auth-form select,#authView .auth-form button,#authView .auth-form .field,#authView .auth-form .auth-actions{min-width:0;max-width:100%}
+#authView .auth-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+img,svg,video,canvas,iframe{max-width:100%}
+@media(max-width:700px){
+ #authView{padding-inline:8px}
+ #authView .auth{width:100%;margin:12px auto;grid-template-columns:minmax(0,1fr);min-height:0}
+ #authView .auth-visual{min-width:0;width:100%;padding:20px 16px;min-height:0}
+ #authView .auth-form{padding:20px 16px}
+ #authView .auth-actions{grid-template-columns:minmax(0,1fr)}
+ .wrap{width:100%;max-width:100%;min-width:0}
+ .top,.top-actions,.row,.grid,.quick,.dashboard-shortcuts{min-width:0;max-width:100%}
+}
+@media(max-width:380px){
+ #authView{padding-inline:5px}
+ #authView .auth-form{padding:16px 12px}
+ #authView .auth-visual{padding:18px 12px}
+}
+
 </style>
 </head>
 <body>
