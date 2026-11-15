@@ -2714,7 +2714,8 @@ async function placeLimitOrder(){
   await Promise.all([loadDashboard(),loadOpenOrders()]);
  }catch(e){showMessage($('limitOrderMsg'),'ثبت سفارش ناموفق بود: '+(e.message||String(e)),'err')}
  finally{btn.disabled=false}
-}async function placeConditionalExitOrder(){
+}
+async function placeConditionalExitOrder(){
  const btn=$('placeConditionalBtn'),symbol=$('conditionalSymbol').value.trim().toUpperCase(),kind=$('conditionalKind').value;
  btn.disabled=true;hideMessage($('conditionalOrderMsg'));
  try{
@@ -2730,7 +2731,8 @@ async function placeLimitOrder(){
   await Promise.all([loadDashboard(),loadOpenOrders()]);
  }catch(e){showMessage($('conditionalOrderMsg'),'ثبت سفارش شرطی ناموفق بود: '+(e.message||String(e)),'err')}
  finally{btn.disabled=false}
-}async function loadConditionalOrders(){
+}
+async function loadConditionalOrders(){
  const root=$('conditionalOrdersList');if(!root||!supabaseClient)return;
  const {data:userData,error:userError}=await supabaseClient.auth.getUser();
  if(userError||!userData.user)throw userError||new Error('برای مشاهده سفارش‌ها وارد حساب شوید.');
@@ -2805,7 +2807,8 @@ async function placeStopLimitOrder(){
   await Promise.all([loadDashboard(),loadOpenOrders()]);
  }catch(e){showMessage($('stopLimitMsg'),'ثبت سفارش Stop-Limit ناموفق بود: '+(e.message||String(e)),'err')}
  finally{btn.disabled=false}
-}async function loadStopLimitOrders(){
+}
+async function loadStopLimitOrders(){
  const root=$('stopLimitOrdersList');if(!root||!supabaseClient)return;
  const {data:userData,error:userError}=await supabaseClient.auth.getUser();
  if(userError||!userData.user)throw userError||new Error('برای مشاهده سفارش‌ها وارد حساب شوید.');
