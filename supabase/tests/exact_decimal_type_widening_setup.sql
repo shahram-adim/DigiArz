@@ -33,6 +33,7 @@ CREATE TABLE public.conditional_orders (
   trigger_price numeric NOT NULL CHECK (trigger_price > 0),
   limit_price numeric,
   executed_price numeric,
+  created_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT conditional_orders_executed_price_check CHECK (executed_price IS NULL OR executed_price > 0),
   CONSTRAINT conditional_orders_stop_limit_fields_chk CHECK (
     (order_kind='stop_limit' AND limit_price IS NOT NULL AND limit_price > 0)
