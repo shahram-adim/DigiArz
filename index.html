@@ -2080,7 +2080,7 @@ const SUPABASE_URL='https://gfoaubfilhttnwjykaox.supabase.co';
 const SUPABASE_ANON_KEY='sb_publishable_4rXQLoakyaY9GrfbLOlKAw_YNp3Riwi';
 const $=id=>document.getElementById(id);
 const authView=$('authView'),appView=$('appView'),authMsg=$('authMsg'),tradeMsg=$('tradeMsg');
-let supabaseClient=null,isRecoveryMode=false,appLoadPromise=null,currentFxRate=null,currentFxIsValid=false,currentWalletUsdt=0,marketRows=[],marketTickerMap=new Map(),assetRows=[],historyRows=[],selectedSymbol='BTCUSDT',chart=null,candleSeries=null,lineSeries=null,areaSeries=null,volumeChart=null,volumeSeries=null,chartType='candle',chartInterval='24h',chartResizeObserver=null,activeMarketCategory='all',performanceRequestId=0,marketTickerRefreshPromise=null,marketTickerLastFetchedAt=0,dashboardLoadErrors=[],favoriteSymbols=loadFavoriteSymbols(),tomanAssetNames=new Map();
+let supabaseClient=null,isRecoveryMode=false,appLoadPromise=null,currentFxRate=null,currentFxIsValid=false,currentWalletUsdt=0,currentWalletUsdtExact='0',marketRows=[],marketTickerMap=new Map(),assetRows=[],historyRows=[],selectedSymbol='BTCUSDT',chart=null,candleSeries=null,lineSeries=null,areaSeries=null,volumeChart=null,volumeSeries=null,chartType='candle',chartInterval='24h',chartResizeObserver=null,activeMarketCategory='all',performanceRequestId=0,marketTickerRefreshPromise=null,marketTickerLastFetchedAt=0,dashboardLoadErrors=[],favoriteSymbols=loadFavoriteSymbols(),tomanAssetNames=new Map();
 let displayCurrencyMode='both',isSuperAdmin=false,featuredMarketRows=[];
 function initCurrencyMode(){try{const saved=localStorage.getItem('digiArzCurrencyMode');if(['usd','toman','both'].includes(saved))displayCurrencyMode=saved}catch(_){}const el=$('marketCurrencyMode');if(el)el.value=displayCurrencyMode}
 function setCurrencyMode(value){displayCurrencyMode=['usd','toman','both'].includes(value)?value:'both';try{localStorage.setItem('digiArzCurrencyMode',displayCurrencyMode)}catch(_){}renderMarkets();}
@@ -2168,9 +2168,8 @@ let quickTradeReservedByAsset=new Map(),quickTradeReservationState='unknown';
 async function getMyOrderReservations(orderIds){
  const ids=[...new Set((orderIds||[]).filter(Boolean))],rows=[];
  for(let i=0;i<ids.length;i+=100){
-  const {data,error}=await supabaseClient.rpc('get_my_order_reservations',{p_order_ids:ids.slice(i,i+100)});
-  if(error)throw error;
-  rows.push(...(data||[]));
+  const {data,error}=await supabaseClient.rpc('get_my_order_reservations_exact',{p_order_ids:ids.slice(i,i+100)});
+  if(error)throw error;rows.push(...(data||[]));
  }
  return rows;
 }
@@ -2183,21 +2182,35 @@ async function loadQuickTradeReservations(){
  ]);
  if(ordersResult.error)throw ordersResult.error;if(conditionalResult.error)throw conditionalResult.error;
  const ids=[...new Set([...(ordersResult.data||[]).map(x=>x.id),...(conditionalResult.data||[]).map(x=>x.order_id)].filter(Boolean))];
- if(ids.length){const reservations=await getMyOrderReservations(ids);
-  for(const r of reservations){const reserved=Number(r.reserved_amount),consumed=Number(r.consumed_amount||0),released=Number(r.released_amount||0),remaining=reserved-consumed-released,asset=String(r.asset||'').toUpperCase();
-   if(r.status==='reserved'&&asset&&Number.isFinite(reserved)&&Number.isFinite(consumed)&&Number.isFinite(released)&&reserved>0&&consumed>=0&&released>=0&&consumed+released<=reserved&&remaining>0)quickTradeReservedByAsset.set(asset,(quickTradeReservedByAsset.get(asset)||0)+remaining);
+ if(ids.length){
+  const reservations=await getMyOrderReservations(ids),D=window.DigiArzDecimal;
+  for(const r of reservations){
+   try{
+    const reserved=D.parseDecimal(r.reserved_amount_text),consumed=D.parseDecimal(r.consumed_amount_text||'0'),released=D.parseDecimal(r.released_amount_text||'0'),asset=String(r.asset||'').toUpperCase();
+    const accounted=D.addDecimal(consumed,released),remaining=D.subtractDecimal(reserved,accounted);
+    if(r.status==='reserved'&&asset&&D.compareDecimal(reserved,'0')>0&&D.compareDecimal(consumed,'0')>=0&&D.compareDecimal(released,'0')>=0&&D.compareDecimal(accounted,reserved)<=0&&D.compareDecimal(remaining,'0')>0){
+     quickTradeReservedByAsset.set(asset,D.addDecimal(quickTradeReservedByAsset.get(asset)||'0',remaining));
+    }
+   }catch(error){console.warn('Ignoring malformed exact reservation value:',error)}
   }
  }
  quickTradeReservationState='ok';
 }
 async function loadDashboard(){const labels=['کیف پول','بازار','تاریخچه معاملات','سفارش‌ها','دارایی‌ها'],tasks=[loadWallet(),loadMarkets(),loadHistory(),loadAllOrders(),loadAssets()],results=await Promise.allSettled(tasks);try{await loadQuickTradeReservations()}catch(e){quickTradeReservationState='error';console.warn('Could not load order reservations',e)}dashboardLoadErrors=results.map((result,index)=>result.status==='rejected'?{section:labels[index],message:String(result.reason?.message||result.reason||'خطای نامشخص')}:null).filter(Boolean);if(dashboardLoadErrors.length)console.warn('Dashboard sections failed:',dashboardLoadErrors);renderAssets();renderMarkets();renderDashboardSummary();renderDashboardActivity()}
-async function loadWallet(){const {data:userData,error:userError}=await supabaseClient.auth.getUser();if(userError||!userData.user)throw userError||new Error('کاربر وارد نشده است.');const {data,error}=await supabaseClient.from('wallets').select('balance_usdt').eq('user_id',userData.user.id).maybeSingle();if(error)throw error;if(!data){currentWalletUsdt=0;$('usdtBalance').textContent='ساخته نشده';return}currentWalletUsdt=Math.max(0,Number(data.balance_usdt)||0);$('usdtBalance').textContent=formatNum(currentWalletUsdt,2)+' USDT'}
+async function loadWallet(){
+ const {data:userData,error:userError}=await supabaseClient.auth.getUser();if(userError||!userData.user)throw userError||new Error('کاربر وارد نشده است.');
+ const {data,error}=await supabaseClient.from('wallets').select('balance_usdt,balance_usdt_text:balance_usdt::text').eq('user_id',userData.user.id).maybeSingle();
+ if(error)throw error;
+ if(!data){currentWalletUsdt=0;currentWalletUsdtExact='0';$('usdtBalance').textContent='ساخته نشده';return}
+ currentWalletUsdt=Math.max(0,Number(data.balance_usdt)||0);currentWalletUsdtExact=data.balance_usdt_text||'0';
+ $('usdtBalance').textContent=formatExactNum(currentWalletUsdtExact,8)+' USDT';
+}
 async function fetchAllSupabaseRows(queryFactory,pageSize=1000){
  const all=[];let offset=0;
  while(true){const {data,error}=await queryFactory().range(offset,offset+pageSize-1);if(error)throw error;const page=data||[];all.push(...page);if(page.length<pageSize)break;offset+=pageSize;}
  return all;
 }
-async function loadMarkets(forceTickerRefresh=false){const [marketData,pairData,fr]=await Promise.all([fetchAllSupabaseRows(()=>supabaseClient.from('market_prices').select('symbol,price,source,updated_at').order('symbol')),fetchAllSupabaseRows(()=>supabaseClient.from('demo_trading_pairs').select('pair_symbol,is_enabled').eq('is_enabled',true)),supabaseClient.from('market_fx_rates').select('price_toman,source,source_updated_at,is_stale').eq('symbol','USD_IRT').maybeSingle()]);const fx=fr.data;currentFxRate=null;currentFxIsValid=false;if(!fr.error&&fx){const rate=Number(fx.price_toman),updated=fx.source_updated_at?new Date(fx.source_updated_at).getTime():0,age=Date.now()-updated;if(Number.isFinite(rate)&&rate>0&&fx.is_stale===false&&updated>0&&age>=-120000&&age<=1200000){currentFxRate=rate;currentFxIsValid=true;$('fxRate').textContent=formatNum(rate,0)+' تومان';$('fxUpdated').textContent='منبع: '+safeText(fx.source||'نامشخص')+' · زمان منبع: '+new Date(fx.source_updated_at).toLocaleString('fa-IR')}else{$('fxRate').textContent='نرخ دلار قدیمی است';$('fxUpdated').textContent='منبع: '+safeText(fx.source||'نامشخص')+' · آخرین زمان منبع: '+(fx.source_updated_at?new Date(fx.source_updated_at).toLocaleString('fa-IR'):'نامشخص')+' · نرخ برای ارزش‌گذاری قابل اتکا نیست.'}}else{$('fxRate').textContent='نرخ دلار دریافت نشد';$('fxUpdated').textContent=fr.error?'خطا در دریافت نرخ دلار':'نرخ ثبت نشده است'}const enabledSymbols=new Set((pairData||[]).map(x=>x.pair_symbol));marketRows=(marketData||[]).filter(x=>enabledSymbols.has(x.symbol));renderMarketPriceFreshness();renderCategoryButtons();renderMarkets();renderDashboardSummary();refreshMarketTickers(forceTickerRefresh).catch(e=>console.warn('Market ticker refresh:',e))}
+async function loadMarkets(forceTickerRefresh=false){const [marketData,pairData,fr]=await Promise.all([fetchAllSupabaseRows(()=>supabaseClient.from('market_prices').select('symbol,price,price_text:price::text,source,updated_at').order('symbol')),fetchAllSupabaseRows(()=>supabaseClient.from('demo_trading_pairs').select('pair_symbol,is_enabled').eq('is_enabled',true)),supabaseClient.from('market_fx_rates').select('price_toman,source,source_updated_at,is_stale').eq('symbol','USD_IRT').maybeSingle()]);const fx=fr.data;currentFxRate=null;currentFxIsValid=false;if(!fr.error&&fx){const rate=Number(fx.price_toman),updated=fx.source_updated_at?new Date(fx.source_updated_at).getTime():0,age=Date.now()-updated;if(Number.isFinite(rate)&&rate>0&&fx.is_stale===false&&updated>0&&age>=-120000&&age<=1200000){currentFxRate=rate;currentFxIsValid=true;$('fxRate').textContent=formatNum(rate,0)+' تومان';$('fxUpdated').textContent='منبع: '+safeText(fx.source||'نامشخص')+' · زمان منبع: '+new Date(fx.source_updated_at).toLocaleString('fa-IR')}else{$('fxRate').textContent='نرخ دلار قدیمی است';$('fxUpdated').textContent='منبع: '+safeText(fx.source||'نامشخص')+' · آخرین زمان منبع: '+(fx.source_updated_at?new Date(fx.source_updated_at).toLocaleString('fa-IR'):'نامشخص')+' · نرخ برای ارزش‌گذاری قابل اتکا نیست.'}}else{$('fxRate').textContent='نرخ دلار دریافت نشد';$('fxUpdated').textContent=fr.error?'خطا در دریافت نرخ دلار':'نرخ ثبت نشده است'}const enabledSymbols=new Set((pairData||[]).map(x=>x.pair_symbol));marketRows=(marketData||[]).filter(x=>enabledSymbols.has(x.symbol));renderMarketPriceFreshness();renderCategoryButtons();renderMarkets();renderDashboardSummary();refreshMarketTickers(forceTickerRefresh).catch(e=>console.warn('Market ticker refresh:',e))}
 let marketExtrasLoaded=false,marketExtrasPromise=null;
 async function loadMarketExtras(force=false){if(marketExtrasLoaded&&!force)return;if(marketExtrasPromise)return marketExtrasPromise;marketExtrasPromise=(async()=>{await Promise.allSettled([loadFeaturedMarketAssets(),refreshAutoMarkets()]);await refreshMarketTickers();marketExtrasLoaded=true;renderCategoryButtons();renderMarkets();renderDashboardSummary()})();try{return await marketExtrasPromise}finally{marketExtrasPromise=null}}
 async function loadFeaturedMarketAssets(){
@@ -2434,7 +2447,23 @@ function updateQuickTradeEstimate(side){
  const total=amount*price,toman=currentFxIsValid?total*currentFxRate:null;
  root.innerHTML='<span>قیمت مرجع: <b dir="ltr">'+formatNum(price,8)+' USDT</b></span><span>ارزش ناخالص تقریبی: <b dir="ltr">'+formatNum(total,4)+' USDT</b></span><span>'+safeText(balanceText)+'</span><span>'+(toman!==null?'معادل تقریبی '+formatNum(toman,0)+' تومان':'نرخ تومان فعلاً موجود نیست')+'</span><small>این برآورد نمایشی است؛ قیمت نهایی و کنترل موجودی را موتور امن سرور تعیین می‌کند.</small>';
 }
-function setQuickTradePercent(side,percent){const symbol=String($(side+'Symbol')?.value||'').trim().toUpperCase(),base=symbol.replace(/USDT$/,''),item=marketRows.find(x=>String(x.symbol).toUpperCase()===symbol),price=item?getTrustedMarketPrice(item):null,ticker=item?getFreshMarketTicker(item):null;if(!base||!Number.isFinite(price)||price<=0||!ticker){showMessage(tradeMsg,'قیمت تازه و معتبر در دسترس نیست؛ درصد موجودی قابل محاسبه نیست.','err');return}if(quickTradeReservationState!=='ok'){showMessage(tradeMsg,'وضعیت رزرو سفارش‌ها مشخص نیست؛ برای جلوگیری از مصرف دوباره دارایی، انتخاب درصدی غیرفعال است.','err');return}const asset=side==='buy'?'USDT':base,gross=side==='buy'?Number(currentWalletUsdt||0):Number(assetRows.find(x=>String(x.asset).toUpperCase()===base)?.balance||0),reserved=quickTradeReservedByAsset.get(asset)||0,available=Math.max(0,gross-reserved);if(!Number.isFinite(gross)||gross<0||!Number.isFinite(reserved)||reserved<0){showMessage(tradeMsg,'موجودی یا رزرو معتبر نیست؛ مقدار سفارش تغییر نکرد.','err');return}const fraction=Math.max(0,Math.min(100,Number(percent)))/100,amount=side==='buy'?(available*fraction)/price:available*fraction;if(!Number.isFinite(amount)||amount<=0){showMessage(tradeMsg,'موجودی قابل استفاده برای این سفارش کافی نیست.','err');return}const input=$(side+'Amount');input.value=Number(amount.toPrecision(12)).toString();input.dispatchEvent(new Event('input',{bubbles:true}));hideMessage(tradeMsg)}
+function setQuickTradePercent(side,percent){
+ const symbol=String($(side+'Symbol')?.value||'').trim().toUpperCase(),base=symbol.replace(/USDT$/,''),item=marketRows.find(x=>String(x.symbol).toUpperCase()===symbol);
+ if(!base||!item?.price_text||!item.updated_at){showMessage(tradeMsg,'قیمت مرجع دقیق و معتبر در دسترس نیست؛ درصد موجودی قابل محاسبه نیست.','err');return}
+ const age=Date.now()-new Date(item.updated_at).getTime();
+ if(!Number.isFinite(age)||age< -60000||age>60000){showMessage(tradeMsg,'قیمت مرجع قدیمی است؛ ابتدا بازار را به‌روزرسانی کنید.','err');return}
+ if(quickTradeReservationState!=='ok'){showMessage(tradeMsg,'وضعیت رزرو سفارش‌ها مشخص نیست؛ برای جلوگیری از مصرف دوباره دارایی، انتخاب درصدی غیرفعال است.','err');return}
+ try{
+  const D=window.DigiArzDecimal,asset=side==='buy'?'USDT':base,gross=side==='buy'?currentWalletUsdtExact:(assetRows.find(x=>String(x.asset).toUpperCase()===base)?.balance_text||'0'),reserved=quickTradeReservedByAsset.get(asset)||'0';
+  const available=D.subtractDecimal(gross,reserved);
+  if(D.compareDecimal(available,'0')<=0)throw new Error('موجودی قابل استفاده برای این سفارش کافی نیست.');
+  const fraction=D.divideDecimal(String(percent),'100',18,'down');
+  let amount=D.multiplyDecimal(available,fraction,18,'down');
+  if(side==='buy')amount=D.divideDecimal(amount,parseOrderDecimal(item.price_text,'قیمت بازار'),18,'down');
+  if(D.compareDecimal(amount,'0')<=0)throw new Error('مقدار قابل سفارش از کوچک‌ترین واحد مجاز کمتر است.');
+  const input=$(side+'Amount');input.value=amount;input.dispatchEvent(new Event('input',{bubbles:true}));hideMessage(tradeMsg);
+ }catch(error){showMessage(tradeMsg,error.message||'محاسبه مقدار سفارش ناموفق بود.','err')}
+}
 function updateTradeAssetPreview(side){const input=$(side+'Symbol'),root=$(side+'AssetPreview');if(!input||!root)return;const symbol=String(input.value||'').trim().toUpperCase(),base=cleanCoinSymbol(symbol);root.innerHTML=base?`${coinLogo(base,'asset-logo')}<b dir="ltr">${safeText(symbol)}</b>`:'<span>نماد ارز را وارد کنید</span>'}
 function applyTheme(theme){const light=theme==='light';document.body.classList.toggle('light-theme',light);document.documentElement.style.colorScheme=light?'light':'dark';const label=light?'حالت تیره':'حالت روشن';const btn=$('themeToggle');if(btn)btn.textContent=label;const topBtn=$('themeToggleTop');if(topBtn){topBtn.setAttribute('aria-label',label);topBtn.setAttribute('title',label);const icon=topBtn.querySelector('.theme-switch-icon');const text=topBtn.querySelector('.theme-switch-label');if(icon)icon.textContent=light?'☾':'☀';if(text)text.textContent=light?'تیره':'روشن'}const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=light?'#f4f7fb':'#080d1b';if(chart){chart.applyOptions({layout:{background:{color:light?'#ffffff':'#101318'},textColor:light?'#263244':'#c7cbd1'},grid:{vertLines:{color:light?'#edf0f4':'#202630'},horzLines:{color:light?'#edf0f4':'#202630'}},rightPriceScale:{borderColor:light?'#dce1e8':'#30343d'},timeScale:{borderColor:light?'#dce1e8':'#30343d'}})}if(volumeChart){volumeChart.applyOptions({layout:{background:{color:light?'#ffffff':'#101318'},textColor:light?'#263244':'#c7cbd1'},grid:{vertLines:{color:light?'#edf0f4':'#202630'},horzLines:{color:light?'#edf0f4':'#202630'}},rightPriceScale:{borderColor:light?'#dce1e8':'#30343d'},timeScale:{borderColor:light?'#dce1e8':'#30343d'}})}try{localStorage.setItem('digiArzTheme',light?'light':'dark')}catch(_){} }
 function initTheme(){let saved='dark';try{if(localStorage.getItem('digiArzVisualSystem')!=='premium-graphite-gold-v2'){localStorage.setItem('digiArzTheme','dark');localStorage.setItem('digiArzVisualSystem','premium-graphite-gold-v2')}saved=localStorage.getItem('digiArzTheme')||'dark'}catch(_){}applyTheme(saved)}
