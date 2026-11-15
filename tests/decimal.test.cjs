@@ -68,3 +68,10 @@ test('parse/format and add/subtract invariants hold for exact decimal strings', 
     assert.equal(D.compareDecimal(value, value), 0);
   }
 });
+
+
+test('arithmetic rejects results outside numeric(38,18) integer capacity', () => {
+  const max = '99999999999999999999';
+  assert.throws(() => D.addDecimal(max, '1'), /integer range/);
+  assert.throws(() => D.multiplyDecimal(max, '10', 18), /integer range/);
+});
