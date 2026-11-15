@@ -2020,7 +2020,10 @@ let supabaseClient=null,isRecoveryMode=false,appLoadPromise=null,currentFxRate=n
 let displayCurrencyMode='both',isSuperAdmin=false,featuredMarketRows=[];
 function initCurrencyMode(){try{const saved=localStorage.getItem('digiArzCurrencyMode');if(['usd','toman','both'].includes(saved))displayCurrencyMode=saved}catch(_){}const el=$('marketCurrencyMode');if(el)el.value=displayCurrencyMode}
 function setCurrencyMode(value){displayCurrencyMode=['usd','toman','both'].includes(value)?value:'both';try{localStorage.setItem('digiArzCurrencyMode',displayCurrencyMode)}catch(_){}renderMarkets();}
-function loadFavoriteSymbols(){try{const value=JSON.parse(localStorage.getItem('digiArzFavorites')||'[]');return Array.isArray(value)?value.filter(x=>typeof x==='string'):[]}catch(_){return []}}
+function favoriteAssetKey(symbol){return String(symbol||'').trim().toUpperCase().replace(/USDT$/i,'')}
+function loadFavoriteSymbols(){try{const value=JSON.parse(localStorage.getItem('digiArzFavorites')||'[]');return Array.isArray(value)?[...new Set(value.filter(x=>typeof x==='string').map(favoriteAssetKey).filter(Boolean))]:[]}catch(_){return []}}
+function isFavoriteSymbol(symbol){const key=favoriteAssetKey(symbol);return !!key&&favoriteSymbols.includes(key)}
+function toggleFavoriteSymbol(symbol){const key=favoriteAssetKey(symbol);if(!key)return false;favoriteSymbols=isFavoriteSymbol(key)?favoriteSymbols.filter(x=>x!==key):[...favoriteSymbols,key];try{localStorage.setItem('digiArzFavorites',JSON.stringify(favoriteSymbols))}catch(error){console.warn('Favorite preference could not be saved on this device:',error)}return isFavoriteSymbol(key)}
 function renderLucideIcons(){if(window.lucide?.createIcons){window.lucide.createIcons();return}const glyphs={'chart-candlestick':'▥','wallet':'▱','shield-check':'✓','newspaper':'▤','lock-keyhole':'🔒','chart-no-axes-combined':'▥','refresh-cw':'↻','layout-dashboard':'▦','layout-grid':'▦','landmark':'▤','clipboard-list':'☷','history':'◷','settings':'⚙','house':'⌂','arrow-left-right':'↔','user-round':'●','trending-up':'↗','trending-down':'↘','arrow-left':'←','star':'☆','badge-plus':'＋','bar-chart-3':'▤','trophy':'♜','badge-check':'✓','smile':'☺','globe-2':'◎','brain-circuit':'◉','gamepad-2':'▣'};document.querySelectorAll('i[data-lucide]').forEach(el=>{el.classList.add('icon-fallback');el.textContent=glyphs[el.getAttribute('data-lucide')]||'•'})}
 function showMessage(el,message,type=''){el.textContent=message;el.className='notice'+(type?' '+type:'');el.classList.remove('hidden')}
 function hideMessage(el){el.classList.add('hidden')}
@@ -2436,7 +2439,7 @@ function renderMarkets(){
  if(activeMarketCategory==='gainers')rows=rows.filter(x=>changeOf(x)!==null&&changeOf(x)>0);
  else if(activeMarketCategory==='losers')rows=rows.filter(x=>changeOf(x)!==null&&changeOf(x)<0);
  if(activeMarketCategory==='mine'){const owned=new Set(assetRows.filter(a=>Number(a.balance)>0).map(a=>String(a.asset).toUpperCase()));rows=rows.filter(x=>owned.has(String(x.symbol).replace(/USDT$/i,'')))}
- else if(activeMarketCategory==='favorites')rows=rows.filter(x=>favoriteSymbols.includes(x.symbol));
+ else if(activeMarketCategory==='favorites')rows=rows.filter(x=>isFavoriteSymbol(x.symbol));
  else if(['defi','meme','metaverse','stable','ai','gaming'].includes(activeMarketCategory)){const set=categorySymbols[activeMarketCategory]||[];rows=rows.filter(x=>set.includes(String(x.symbol).replace(/USDT$/i,'')))}
  else if(activeMarketCategory==='top'||activeMarketCategory==='selected')rows=rows.filter(x=>['BTCUSDT','ETHUSDT','BNBUSDT','SOLUSDT','XRPUSDT','ADAUSDT','DOGEUSDT'].includes(x.symbol));
  if(activeMarketCategory==='volume'||sort==='volume-desc')rows.sort((a,b)=>(getFreshMarketTicker(b)?.quoteVolume??(isMarketTimestampFresh(b.updated_at)?b.quoteVolume:null)??-Infinity)-(getFreshMarketTicker(a)?.quoteVolume??(isMarketTimestampFresh(a.updated_at)?a.quoteVolume:null)??-Infinity));
@@ -2452,7 +2455,7 @@ function renderMarkets(){
   const ticker=getFreshMarketTicker(item),trustedPrice=getTrustedMarketPrice(item),usd=trustedPrice===null?NaN:trustedPrice,valid=Number.isFinite(usd)&&usd>0,toman=valid&&currentFxIsValid?usd*currentFxRate:null,div=document.createElement('div');
   div.className='coin'+(item.symbol===selectedSymbol?' selected':'');
   const fullSymbol=String(item.symbol).toUpperCase(),base=fullSymbol.replace(/USDT$/i,'');
-  const change=changeOf(item),isFavorite=favoriteSymbols.includes(item.symbol);
+  const change=changeOf(item),isFavorite=isFavoriteSymbol(item.symbol);
   div.setAttribute('role','group');div.setAttribute('tabindex','0');div.setAttribute('aria-label',`اطلاعات ${persianCoinName(item.symbol)} (${base})`);
   const usdMarkup=`<div class="price-usd"><strong>${valid?'$ '+formatNum(usd,10):'—'}</strong></div>`;
   const tomanMarkup=`<div class="price-toman"><strong>${toman!==null?formatNum(toman,0)+' تومان':'نرخ تومان ناموجود'}</strong></div>`;
@@ -2463,7 +2466,7 @@ function renderMarkets(){
   const volume= ticker?.quoteVolume??(isMarketTimestampFresh(item.updated_at)?item.quoteVolume:null);
   const volumeMarkup=activeMarketCategory==='new'?(item.catalogStale?'<small class="coin-volume" style="color:var(--red)">داده قیمت قدیمی · قیمت نمایش داده نمی‌شود</small>':item.catalogOnly?'<small class="coin-volume">فقط نمایش · معامله هنوز فعال نیست</small>':'<small class="coin-volume" style="color:var(--green)">خریدوفروش آزمایشی فعال</small>'):Number.isFinite(Number(volume))&&volume!==null?`<small class="coin-volume">حجم ۲۴س: ${formatNum(volume,0)} USDT${tickerMeta}</small>`:'';
   const star=document.createElement('button');star.type='button';star.className='favorite-btn'+(isFavorite?' is-favorite':'');star.dataset.favorite=item.symbol;star.setAttribute('aria-label',isFavorite?'حذف از علاقه‌مندی‌ها':'افزودن به علاقه‌مندی‌ها');star.setAttribute('aria-pressed',isFavorite?'true':'false');star.title=isFavorite?'حذف از علاقه‌مندی‌ها':'افزودن به علاقه‌مندی‌ها';star.innerHTML='<i data-lucide="star" aria-hidden="true"></i>';
-  star.addEventListener('click',event=>{event.stopPropagation();favoriteSymbols=favoriteSymbols.includes(item.symbol)?favoriteSymbols.filter(x=>x!==item.symbol):[...favoriteSymbols,item.symbol];try{localStorage.setItem('digiArzFavorites',JSON.stringify(favoriteSymbols))}catch(storageError){console.warn('Favorite preference could not be saved on this device:',storageError)}renderMarkets()});
+  star.addEventListener('click',event=>{event.stopPropagation();toggleFavoriteSymbol(item.symbol);renderMarkets();renderDashboardMarketPreview()});
   const identity=document.createElement('div');identity.className='coin-identity';identity.innerHTML=coinLogo(base)+'<span><b>'+safeText(persianCoinName(item.symbol))+'</b><small class="coin-en">'+safeText(base)+'</small></span>';
   const changeWrap=document.createElement('div');changeWrap.className='coin-change-wrap';changeWrap.innerHTML=changeMarkup+volumeMarkup;
   const price=document.createElement('div');price.className='price-stack';price.innerHTML=priceMarkup;
@@ -2880,7 +2883,7 @@ function renderDashboardMarketPreview(){
  if(dashboardMarketFilter==='gainers')rows=rows.filter(x=>x.change!==null&&x.change>0);
  else if(dashboardMarketFilter==='losers')rows=rows.filter(x=>x.change!==null&&x.change<0);
  else if(dashboardMarketFilter==='volume')rows=rows.filter(x=>x.volume>0);
- else if(dashboardMarketFilter==='favorites')rows=rows.filter(x=>favoriteSymbols.includes(String(x.item.symbol||'').toUpperCase())||favoriteSymbols.includes(String(x.item.symbol||'').replace(/USDT$/i,'')));
+ else if(dashboardMarketFilter==='favorites')rows=rows.filter(x=>isFavoriteSymbol(x.item.symbol));
  else if(dashboardMarketFilter==='mine'){const owned=new Set((assetRows||[]).filter(x=>Number(x.balance)>0).map(x=>String(x.asset||'').toUpperCase()));rows=rows.filter(x=>owned.has(String(x.item.symbol||'').replace(/USDT$/i,'')))}
  rows.sort((a,b)=>{if(sortMode==='change-up')return (b.change??-Infinity)-(a.change??-Infinity);if(sortMode==='change-down')return (a.change??Infinity)-(b.change??Infinity);if(sortMode==='price-high')return b.price-a.price;if(sortMode==='price-low')return a.price-b.price;if(sortMode==='name')return String(persianCoinName(a.item.symbol)||a.item.symbol).localeCompare(String(persianCoinName(b.item.symbol)||b.item.symbol),'fa');return b.volume-a.volume});
  const total=rows.length,visible=rows.slice(0,dashboardMarketLimit);root.replaceChildren();
@@ -2893,7 +2896,7 @@ function renderDashboardMarketPreview(){
   const identity=document.createElement('button');identity.type='button';identity.className='da-market-identity';identity.setAttribute('aria-label','نمایش نمودار '+base);identity.addEventListener('click',()=>openChart(symbol));
   const logo=document.createElement('span');logo.className='da-market-logo';logo.innerHTML=coinLogo(base,'da-market-logo-inner');
   const nameWrap=document.createElement('span');nameWrap.className='da-market-name-wrap';const name=document.createElement('b');name.textContent=persianCoinName(symbol)||base;const ticker=document.createElement('small');ticker.textContent=base+'/USDT';nameWrap.append(name,ticker);identity.append(logo,nameWrap);
-  const fav=document.createElement('button');fav.type='button';fav.className='da-market-favorite';const isFav=favoriteSymbols.includes(symbol)||favoriteSymbols.includes(base);fav.textContent=isFav?'★':'☆';fav.setAttribute('aria-label',isFav?'حذف از علاقه‌مندی‌ها':'افزودن به علاقه‌مندی‌ها');fav.setAttribute('aria-pressed',isFav?'true':'false');fav.addEventListener('click',()=>{const key=base;favoriteSymbols=favoriteSymbols.includes(key)?favoriteSymbols.filter(x=>x!==key):[...favoriteSymbols,key];try{localStorage.setItem('digiArzFavorites',JSON.stringify(favoriteSymbols))}catch(_){}renderDashboardMarketPreview()});
+  const fav=document.createElement('button');fav.type='button';fav.className='da-market-favorite';const isFav=isFavoriteSymbol(symbol);fav.textContent=isFav?'★':'☆';fav.setAttribute('aria-label',isFav?'حذف از علاقه‌مندی‌ها':'افزودن به علاقه‌مندی‌ها');fav.setAttribute('aria-pressed',isFav?'true':'false');fav.addEventListener('click',()=>{toggleFavoriteSymbol(symbol);renderDashboardMarketPreview();renderMarkets()});
   top.append(fav,identity);
   const price=document.createElement('strong');price.className='da-market-price';price.textContent='$'+formatNum(row.price,10);
   const toman=document.createElement('small');toman.className='da-market-toman';toman.textContent=currentFxIsValid?formatNum(row.price*currentFxRate,0)+' تومان':'نرخ تومان ناموجود';toman.style.color='var(--green)';
