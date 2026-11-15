@@ -2672,12 +2672,12 @@ async function trade(side){
   if(!marketEntry)throw new Error('این جفت‌ارز هنوز توسط مدیر در فهرست مجاز معاملات آزمایشی فعال نشده است.');
   if(marketEntry.auto_discovered)throw new Error('این جفت‌ارز تازه شناسایی شده است؛ تا زمانی که در فهرست مجاز معاملات آزمایشی سرور ثبت نشود، خریدوفروش آن فعال نیست.');
   if(!/^[A-Z0-9]{2,20}USDT$/.test(symbol))throw new Error('نماد باید مانند BTCUSDT باشد.');
-  const {data:row,error:pe}=await supabaseClient.from('market_prices').select('updated_at').eq('symbol',symbol).maybeSingle();
+  const {data:row,error:pe}=await supabaseClient.from('market_prices').select('price_text:price::text,updated_at').eq('symbol',symbol).maybeSingle();
   if(pe)throw pe;if(!row)throw new Error('قیمت این نماد در بازار موجود نیست.');
   const age=Date.now()-new Date(row.updated_at).getTime();
   if(!Number.isFinite(age)||age>60000||age< -60000)throw new Error('قیمت بازار قدیمی است؛ ابتدا بازار را به‌روزرسانی کنید.');
   // The server reads and validates the authoritative market price. p_price is a legacy, unused argument.
-  const {data,error}=await supabaseClient.rpc('execute_demo_trade',{p_symbol:symbol,p_side:side,p_amount:amount,p_price:'0'});
+  const {data,error}=await supabaseClient.rpc('execute_demo_trade',{p_symbol:symbol,p_side:side,p_amount:amount,p_price:parseOrderDecimal(row.price_text,'قیمت بازار')});
   if(error)throw error;if(data&&data.success===false)throw new Error(data.message||data.error||'معامله رد شد.');
   showMessage(tradeMsg,'درخواست معامله به سرور ارسال شد. پاسخ: '+JSON.stringify(data),'ok');
   await loadDashboard();try{await loadOpenOrders()}catch(refreshError){console.warn('Trade succeeded but open-order panel refresh failed:',refreshError)}
