@@ -22,6 +22,8 @@ test('Limit worker preserves concurrency and account safeguards', () => {
   assert.match(worker, /FOR UPDATE/);
   assert.match(worker, /p\.is_active IS TRUE/);
   assert.match(worker, /v_order\.amount \* 0\.25/);
+  assert.match(worker, /v_order\.filled_amount IS NULL/);
+  assert.match(worker, /v_order\.filled_amount > v_order\.amount/);
   assert.match(worker, /round\(v_order\.amount \* 0\.25, 18\)/);
   assert.match(worker, /LEAST\(v_remaining, 0\.000000000000000001::numeric\)/);
   assert.match(worker, /round\(v_qty \* v_market_price, 8\)/);
@@ -40,7 +42,9 @@ test('entrypoint candidates enforce exact scale and quote-ledger rounding', () =
   assert.match(entrypoints, /pg_catalog\.scale\(p_trigger_price\) > 18/);
   assert.match(entrypoints, /round\(p_amount \* p_limit_price \* \(1 \+ v_fee_rate\), 8\)/);
   assert.match(entrypoints, /Trade notional rounds to zero USDT/);
-  assert.match(entrypoints, /Stop-Limit buy notional rounds to zero USDT/);
+  assert.match(entrypoints, /round\(p_amount \* p_limit_price, 8\) <= 0/);
+  assert.match(entrypoints, /Limit order notional rounds to zero USDT/);
+  assert.match(entrypoints, /Stop-Limit order notional rounds to zero USDT/);
 });
 
 test('schema candidate widens base precision but retains 8-place quote ledgers', () => {
