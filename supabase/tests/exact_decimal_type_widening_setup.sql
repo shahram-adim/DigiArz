@@ -12,6 +12,7 @@ $roles$;
 CREATE SCHEMA auth;
 CREATE SCHEMA private;
 CREATE TABLE auth.users (id uuid PRIMARY KEY);
+INSERT INTO auth.users(id) VALUES ('20000000-0000-4000-8000-000000000001');
 CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS
 $$ SELECT NULLIF(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
 CREATE FUNCTION public.current_account_is_active() RETURNS boolean
