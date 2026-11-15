@@ -139,3 +139,19 @@
 - The connected Supabase account currently exposes only the Production DigiArz project. Full database lifecycle tests cannot be run there. Do not create another Supabase project or use Production rows as fixtures; use an approved isolated test environment if one becomes available, otherwise keep database integration and release blocked.
 - The plan does not authorize any Production migration, deployment, order placement, balance mutation, or pair activation.
 - If preflight finds values that do not fit the proposed numeric typmods, stop and revise the target types before writing the migration.
+
+
+---
+
+## Execution checkpoint — 2026-11-15
+
+- [x] Task 1 read-only inventory completed for stored numeric ranges, all seven trading/worker RPC definitions, grants, browser RPC call sites, accounting constraints, and numeric-column index dependencies. Proposed targets preserve existing integer capacities; see \`docs/superpowers/reports/2026-11-15-exact-decimal-implementation-checkpoint.md\`.
+- [x] Task 2 decimal-string utility implemented in \`src/decimal.js\`; seven unit tests pass locally.
+- [x] Task 3 core Market, Limit, Stop-Limit, and conditional-exit payloads now use canonical decimal strings. Reservation calculations, trigger comparisons, and relevant balance/order displays use exact decimal operations where the source values are strings.
+- [x] Added an 8-fractional-digit browser input guard while Production columns remain scale 8. This is an intentional compatibility gate, not completion of the 18-place release.
+- [x] Added PWA precaching for \`src/decimal.js\` and a Node test workflow for inline-script parsing and RPC payload checks.
+- [ ] Task 3 Android viewport/keyboard testing and CI result are not yet verified.
+- [ ] Tasks 4–5 remain blocked: no isolated Supabase/PostgreSQL test environment is connected. No schema or RPC migration has been written/applied against Production.
+- [ ] Task 6 remains NO-GO until isolated migration/RPC/concurrency tests pass, lock/rollback assessment is complete, and separate Production rollout approval is obtained.
+
+**Important:** Do not raise \`ORDER_INPUT_MAX_FRACTION_DIGITS\` above 8 until the coordinated schema and RPC migrations are rehearsed in an isolated database and explicitly approved for rollout.
