@@ -76,9 +76,34 @@ BEGIN
     RAISE EXCEPTION 'reservation conservation regression';
   END IF;
 
-  -- Explicitly surface the sub-quantum case; policy must not be implicit.
-  IF round(0.000000000000000001 * 0.25, 18) <> 0 THEN
-    RAISE EXCEPTION 'unexpected sub-quantum rounding behavior';
+  -- Pinned partial-fill policy: quantize the 25% slice to 18 places.
+  -- If it rounds to zero, make one-quantum progress (bounded by remaining).
+  v_remaining := 0.000000000000000001;
+  v_qty := LEAST(v_remaining, round(v_remaining * 0.25, 18));
+  IF v_qty = 0 THEN
+    v_qty := LEAST(v_remaining, 0.000000000000000001);
+  END IF;
+  IF v_qty <> 0.000000000000000001 THEN
+    RAISE EXCEPTION 'minimum-quantum order must make progress';
+  END IF;
+
+  v_remaining := 0.000000000000000005;
+  v_qty := LEAST(v_remaining, round(v_remaining * 0.25, 18));
+  IF v_qty = 0 THEN
+    v_qty := LEAST(v_remaining, 0.000000000000000001);
+  END IF;
+  IF v_qty <> 0.000000000000000001 THEN
+    RAISE EXCEPTION 'sub-quantum quarter must advance by one quantum';
+  END IF;
+
+  -- Never let the fallback exceed a smaller remaining residual.
+  v_remaining := 0.0000000000000000005;
+  v_qty := LEAST(v_remaining, round(v_remaining * 0.25, 18));
+  IF v_qty = 0 THEN
+    v_qty := LEAST(v_remaining, 0.000000000000000001);
+  END IF;
+  IF v_qty <> v_remaining THEN
+    RAISE EXCEPTION 'minimum-quantum fallback must be bounded by residual';
   END IF;
 
   RAISE NOTICE 'DigiArz exact-decimal arithmetic checks passed';
