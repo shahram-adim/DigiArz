@@ -55,6 +55,15 @@ jobs:
             -f supabase/tests/exact_decimal_stop_limit_setup.sql \
             -f supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql \
             -f supabase/tests/exact_decimal_market_limit_entrypoints.sql
+      - name: Compile and run isolated Stop-Limit and TP-SL placement entrypoints
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_conditional_entrypoints_test;"
+          psql -h localhost -U postgres -d digiarz_conditional_entrypoints_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_stop_limit_setup.sql \
+            -f supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql \
+            -f supabase/tests/exact_decimal_conditional_entrypoints.sql
       - name: Compile and run isolated exact-decimal Limit worker integration
         env:
           PGPASSWORD: postgres
