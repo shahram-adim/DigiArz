@@ -147,3 +147,34 @@
 - Quantize quote-currency values exactly once at scale 8 with PostgreSQL `round(value,8)`. Reuse those same quantized values for required USDT reservation, per-fill gross/fee/net, wallet delta, transaction amount, reservation consumption, and remaining reserve/release. Current Limit code does not consistently do this, so the change is an accounting correctness requirement, not just a type widening.
 - The live Production schema has no current reservation or conditional-order rows; lifecycle coverage must therefore come from isolated fixtures, never Production transactions.
 - Repository search found no established JS test runner. Before adding dependencies, inspect CI runner availability and use built-in `node:test` for the pure decimal module if supported.
+
+
+## Implementation progress — 2026-11-15
+
+Work is isolated on branch `work/exact-decimal-preflight`; nothing from this branch has been merged to `main` or deployed to GitHub Pages.
+
+### Completed on the isolated branch
+
+- Added `src/decimal.js`: dependency-free BigInt decimal parser, comparison, addition, subtraction, multiplication, division, formatting, explicit scale/rounding, and `numeric(38,18)`-compatible range checks.
+- Added `tests/decimal.test.cjs`: 11 tests covering 18-digit precision, canonicalization, malformed inputs, integer/fraction limits, exact arithmetic, half-up boundaries, and arithmetic overflow.
+- Loaded the decimal utility before the app's main inline script.
+- Updated Market, Limit, conditional-exit, and Stop-Limit order forms to validate exact decimal strings and send string RPC arguments rather than JavaScript Number values.
+- Updated quick-percentage amount calculation to use exact wallet, asset, reservation, and market-price text values.
+- Updated trade history, asset quantity, open-order, conditional-order, Stop-Limit, reservation, and dashboard activity displays to use PostgREST `::text` projections and exact formatting/comparison.
+- Added migration `20261115150000_add_exact_order_reservation_read_rpc.sql` for an authenticated, caller-scoped reservation RPC returning exact text values. This migration is authored only; it has not been applied to Production.
+
+### Verification performed
+
+- Node.js v22.16.0: 11/11 decimal utility tests passed.
+- Browser-global UMD smoke test passed.
+- All three inline JavaScript blocks in the modified `index.html` passed syntax compilation with `new Function`.
+- GitHub read-back confirmed the new utility, tests, migration, and updated page on the isolated branch.
+
+### Still blocked / not done
+
+- Core PostgreSQL type-widening and Market/Limit/Stop-Limit/conditional-exit accounting migration is not yet authored or applied.
+- No isolated Supabase/PostgreSQL test database is available in the connected project set. Do not use Production for transaction tests.
+- PostgREST `::text` projections and the new reservation RPC must be exercised in an isolated environment before merge.
+- Actual Android browser viewport/input QA has not yet been performed.
+- Third-party/non-browser RPC callers still need confirmation.
+- Production migration, merge to `main`, and Pages deployment remain blocked pending isolated database tests and a separate rollout authorization.
