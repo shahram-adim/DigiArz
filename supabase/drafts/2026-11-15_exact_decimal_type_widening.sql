@@ -17,11 +17,12 @@ BEGIN
   IF EXISTS (
     SELECT 1 FROM public.orders
     WHERE amount IS NULL OR amount <= 0 OR amount > 1000000
-       OR scale(amount) > 18 OR abs(price) >= 10000000000000000::numeric
-       OR scale(price) > 18 OR abs(filled_amount) >= 10000000000000000::numeric
-       OR scale(filled_amount) > 18
-       OR abs(remaining_amount) >= 10000000000000000::numeric
-       OR scale(remaining_amount) > 18
+       OR scale(amount) > 18 OR price IS NULL OR price <= 0
+       OR price >= 10000000000000000::numeric OR scale(price) > 18
+       OR filled_amount IS NULL OR filled_amount < 0
+       OR abs(filled_amount) >= 10000000000000000::numeric OR scale(filled_amount) > 18
+       OR remaining_amount IS NULL OR remaining_amount < 0
+       OR abs(remaining_amount) >= 10000000000000000::numeric OR scale(remaining_amount) > 18
   ) THEN
     RAISE EXCEPTION 'orders contains values outside numeric(34,18) contract';
   END IF;
