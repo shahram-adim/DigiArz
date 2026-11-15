@@ -1552,6 +1552,61 @@ body.light-theme .orders-center-v36{background:radial-gradient(circle at 8% 20%,
  #dashboardMarketPreview.dashboard-market-preview.da-v2-market-list{scroll-behavior:auto}
 }
 
+
+/* DIGIARZ-DASHBOARD-VERTICAL-MARKET-LIST */
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list{
+ display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+ grid-auto-flow:row!important;gap:9px!important;direction:rtl;
+ width:100%;max-width:100%;overflow:visible!important;
+ padding:2px 1px 4px;margin:0;scroll-snap-type:none;
+}
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card{
+ position:relative;display:grid!important;flex:none!important;
+ width:100%!important;max-width:none!important;min-width:0;
+ grid-template-columns:minmax(0,1fr) minmax(105px,auto) auto;
+ grid-template-areas:"identity price change" "identity toman action";
+ align-items:center;column-gap:12px;row-gap:3px;padding:12px 13px!important;
+ border-radius:15px;scroll-snap-align:none;
+}
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card .da-market-card-top,
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card .da-market-card-foot{display:contents}
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card .da-market-identity{
+ grid-area:identity;min-width:0;align-self:center;gap:9px;padding-left:22px;
+}
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card .da-market-favorite{
+ position:absolute;top:8px;left:8px;width:25px;height:25px;flex-basis:25px;
+ font-size:15px;z-index:1;
+}
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card .da-market-price{
+ grid-area:price;align-self:end;text-align:left;font-size:13px;white-space:nowrap;
+}
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card .da-market-toman{
+ grid-area:toman;align-self:start;text-align:left;margin-top:0;font-size:9px;
+}
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card .da-market-change{
+ grid-area:change;justify-self:end;align-self:end;font-size:10px;
+}
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card .da-market-chart-btn{
+ grid-area:action;justify-self:end;align-self:start;padding:5px 8px;font-size:9px;
+}
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-empty,
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.muted{grid-column:1/-1}
+@media(max-width:520px){
+ #dashboardMarketPreview.dashboard-market-preview.da-v2-market-list{gap:8px!important}
+ #dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card{
+  grid-template-columns:minmax(0,1fr) minmax(92px,auto) auto;
+  column-gap:7px;row-gap:4px;padding:11px 9px!important;
+ }
+ #dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card .da-market-logo,
+ #dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card .da-market-logo-inner{
+  width:40px!important;height:40px!important;flex-basis:40px!important;
+ }
+ #dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card .da-market-name-wrap b{font-size:10px}
+ #dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card .da-market-price{font-size:11px}
+ #dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card .da-market-change{font-size:9px}
+ #dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card .da-market-chart-btn{font-size:8px;padding:5px 6px}
+}
+
 </style>
 </head>
 <body>
