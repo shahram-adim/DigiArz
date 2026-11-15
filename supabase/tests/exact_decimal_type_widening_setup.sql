@@ -27,10 +27,10 @@ CREATE TABLE public.order_reservations (
 );
 CREATE TABLE public.conditional_orders (
   order_kind text NOT NULL,
-  amount numeric(24,8) NOT NULL CHECK (amount > 0),
-  trigger_price numeric(24,8) NOT NULL CHECK (trigger_price > 0),
-  limit_price numeric(24,8),
-  executed_price numeric(24,8),
+  amount numeric NOT NULL CHECK (amount > 0),
+  trigger_price numeric NOT NULL CHECK (trigger_price > 0),
+  limit_price numeric,
+  executed_price numeric,
   CONSTRAINT conditional_orders_executed_price_check CHECK (executed_price IS NULL OR executed_price > 0),
   CONSTRAINT conditional_orders_stop_limit_fields_chk CHECK (
     (order_kind='stop_limit' AND limit_price IS NOT NULL AND limit_price > 0)
