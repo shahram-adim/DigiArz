@@ -1258,3 +1258,13 @@
 - [x] پردازش مجدد تابع بدون دریافت درخواست جدید انجام شد؛ رکورد KISHU اکنون به `kishu-inu` / `Kishu Inu` با وضعیت `matched` وصل است.
 - [x] وضعیت فعلی Kifpool: ۱٬۰۷۵ matched، ۳۰ ambiguous، ۱۲۱ pending و ۴۲ unmatched از ۱٬۲۶۸ دارایی.
 - [x] هیچ جفت‌ارز، سفارش، معامله، رزرو، کیف پول یا موجودی کاربر تغییر نکرد؛ این تغییر صرفاً تطبیق داده بازار است.
+
+
+## تطبیق دقیق CFG قدیمی و Jupiter Project در Kifpool — ۱۵ نوامبر ۲۰۲۶
+- [x] CFG در Kifpool دارای CoinGecko ID برابر `centrifuge` و نماد CFG است؛ این شناسه به رکورد `Centrifuge [OLD]` اشاره دارد، نه دارایی جدید `centrifuge-2`. مستندات رسمی Centrifuge مهاجرت قرارداد توکن را در ۲۰۲۵ و پایان دوره مهاجرت در ۲۰۲۶ تأیید می‌کنند. بنابراین تطبیق به رکورد قدیمی با همان ID انجام شد و به توکن جدید منتقل نشد.
+- [x] JUP در Kifpool دارای CoinGecko ID برابر `jupiter` و نماد JUP است؛ این شناسه مربوط به `Jupiter Project` است و CoinGecko صریحاً آن را از Jupiter DEX روی Solana متمایز می‌کند. به همین دلیل به `jupiter-exchange-solana` وصل نشد.
+- [x] دو alias محدود فقط با تطبیق هم‌زمان CoinGecko ID دقیق، نماد دقیق و نام‌های نرمال‌شدهٔ مشخص اضافه شدند: `centrifuge` → `centrifugeold` و `jupiter` → `jupiterproject`.
+- [x] Migration `20261115143000_allow_verified_kifpool_cfg_jup_exact_id_aliases` روی Supabase اعمال و در مخزن ثبت شد.
+- [x] پس از اجرای مجدد تابع پردازش، CFG به `centrifuge` / `Centrifuge [OLD]` و JUP به `jupiter` / `Jupiter Project` با وضعیت matched رسیدند.
+- [x] وضعیت فعلی Kifpool: ۱٬۰۷۷ matched، ۲۸ ambiguous، ۱۲۱ pending و ۴۲ unmatched از ۱٬۲۶۸ دارایی.
+- [x] تعداد جفت‌ارزهای فعال همچنان ۱۲ است؛ هیچ سفارش، معامله، رزرو، کیف پول یا موجودی کاربری تغییر نکرد.
