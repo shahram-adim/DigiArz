@@ -61,3 +61,13 @@ Rationale: the order/trade price columns currently allow 16 integer digits; nume
 ## Go / no-go
 
 **NO-GO for 18-decimal Production release.** The browser-side exact-decimal foundation and safe compatibility gate are in place, but the database/RPC accounting migration cannot be safely completed or validated without an isolated database. The next safe step is to run the committed CI checks, then obtain an isolated Supabase/PostgreSQL test environment for schema/RPC rehearsal. Production rollout remains a separate approval gate.
+
+## Verification update — 2026-11-15 22:36 (+03:30)
+
+- [x] GitHub Actions workflow `Exact decimal tests` completed successfully for commit `d4b2b4737be3d3c1ca2d83928aa298e6261b2c46` (run `43749642323`, attempt 1).
+- [x] The job step `Run exact decimal and browser integration tests` completed with conclusion `success`; this confirms the committed `node --test tests/*.test.js` suite, including the inline-script/RPC integration checks, passed in GitHub Actions.
+- [x] GitHub Pages build and deployment for the same commit completed with conclusion `success` (run `43749642302`).
+- [x] Re-read the Supabase migration history: latest applied migration remains `20261115143827_bound_stop_limit_invalid_reservation_retries`; no exact-decimal schema/RPC migration is applied.
+- [x] Re-read Supabase development branches: none exist. No paid branch was created; no Production test data or schema was changed during this continuation.
+- [ ] Backend precision migration and accounting RPC changes remain unimplemented and untested. Keep the 8-fractional-digit UI gate in place.
+- [ ] 18-decimal Production release remains NO-GO until isolated database tests validate settlement quantization, partial/final fills, reservations, fees, Stop-Limit handoff, cancellation, and worker concurrency.
