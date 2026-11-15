@@ -1285,3 +1285,9 @@
 - [x] ۹ تطبیق قطعی اضافه شد: ACS→`acryptos-2`، ALICE→`my-neighbor-alice`، BELIEVE→`ben-pasternak`، CYBER→`cyberconnect`، DEGEN→`degen-base`، MANYU→`manyu-2`، SPACE→`spacecoin-2`، TURBO→`turbo` و WIN→`wink`.
 - [x] آمار فعلی Kifpool: ۱٬۰۸۶ matched، ۱۹ ambiguous، ۱۲۱ pending و ۴۲ unmatched از ۱٬۲۶۸ دارایی.
 - [x] جفت‌ارزهای فعال ۱۲ عدد باقی ماندند؛ هیچ دادهٔ مالی کاربر تغییر نکرد.
+
+
+## وضعیت ۱۹ مورد مبهم باقی‌ماندهٔ Kifpool — ۱۵ نوامبر ۲۰۲۶
+- [x] پس از اولویت نام دقیق، ۱۹ مورد مبهم باقی مانده‌اند: در ۱۴ مورد بیش از یک دارایی با نام دقیق یکسان وجود دارد؛ در ۵ مورد (CHIRP، CROWN، GENIUS، MAGIC و SMART) نام دقیق یکتایی وجود ندارد و فقط کاندیداهای مشابه/زیررشته‌ای دیده می‌شوند.
+- [x] این موارد بدون شناسهٔ دقیق CoinGecko یا آدرس قرارداد/شبکهٔ قابل اتکا باقی می‌مانند؛ تطبیق حدسی انجام نشد.
+- [x] وضعیت نهایی این مرحله: ۱٬۰۸۶ matched، ۱۹ ambiguous، ۱۲۱ pending و ۴۲ unmatched؛ تعداد جفت‌ارزهای فعال ۱۲.
