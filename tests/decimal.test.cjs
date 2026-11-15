@@ -45,3 +45,26 @@ test('formatDecimal groups integer digits and trims only requested display zeros
   assert.equal(D.formatDecimal('1.230000', { maxFractionDigits: 6 }), '1.23');
   assert.equal(D.formatDecimal('0.000000000000000001', { minFractionDigits: 2, maxFractionDigits: 18 }), '0.000000000000000001');
 });
+
+
+test('rounding boundaries are explicit and deterministic', () => {
+  assert.equal(D.multiplyDecimal('1.0000000049', '1', 8, 'half-up'), '1');
+  assert.equal(D.multiplyDecimal('1.000000005', '1', 8, 'half-up'), '1.00000001');
+  assert.equal(D.multiplyDecimal('1.0000000051', '1', 8, 'half-up'), '1.00000001');
+  assert.equal(D.divideDecimal('1', '6', 2, 'down'), '0.16');
+  assert.equal(D.divideDecimal('1', '6', 2, 'half-up'), '0.17');
+});
+
+test('precision limits cannot be widened by caller options', () => {
+  assert.throws(() => D.parseDecimal('1', { maxFractionDigits: 19 }), /fractional precision limit/);
+  assert.throws(() => D.parseDecimal('1', { maxIntegerDigits: 21 }), /integer precision limit/);
+});
+
+test('parse/format and add/subtract invariants hold for exact decimal strings', () => {
+  for (let i = 1; i <= 100; i++) {
+    const value = `0.${String(i).padStart(3, '0')}123456789012345`;
+    assert.equal(D.parseDecimal(D.formatDecimal(value, { maxFractionDigits: 18 })), D.parseDecimal(value));
+    assert.equal(D.subtractDecimal(D.addDecimal(value, '0.000000000000000001'), '0.000000000000000001'), D.parseDecimal(value));
+    assert.equal(D.compareDecimal(value, value), 0);
+  }
+});
