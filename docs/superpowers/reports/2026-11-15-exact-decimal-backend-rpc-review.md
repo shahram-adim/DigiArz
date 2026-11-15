@@ -159,3 +159,21 @@ The zero-rounded quote-notional edge case is now explicit: a positive base quant
 A new PostgreSQL regression assertion initially used a test price too small to produce a positive 8-place gross, and CI correctly failed. The test value was corrected. The follow-up exact-decimal workflow run `43752093609` completed successfully, including Node/browser tests and PostgreSQL 17 arithmetic tests. Newer commits contain only the SQL draft artifacts and preflight tightening; their CI runs are queued/in progress at the time of this report update.
 
 All artifacts remain drafts. No Production schema, RPC, financial row, or balance was modified.
+
+
+## Isolated Limit-worker integration and follow-up safeguards
+
+The GitHub Actions PostgreSQL 17 job now installs a minimal disposable schema, compiles the actual candidate `process_limit_orders()` PL/pgSQL function, and runs it against buy, sell, 18-place, and zero-notional fixtures. Run `43752820615` completed successfully: Node/browser tests, PostgreSQL arithmetic tests, and the end-to-end Limit-worker integration all passed.
+
+That integration exercises:
+- Exact 18-place base quantity across repeated partial fills.
+- Matching aggregate trade quantity and base-asset balance delta for both buy and sell.
+- 8-place quote wallet settlement and transaction/reservation accounting.
+- Final dust handling where a residual would independently round to zero USDT.
+- A zero-gross order being skipped without changing its order, wallet, or trade history.
+
+Review also identified two additional cases and updated the drafts:
+- A positive Limit or Stop-Limit sell quantity can still have a full notional that rounds to zero USDT. Both buy and sell order placement candidates now reject zero-notional orders.
+- Market execution now checks the authoritative market price against the same 16-integer-digit / 18-fractional-digit contract as the other entrypoints. The Limit worker also validates the stored filled quantity before processing.
+
+The latest commit `884dc72993c27a17702a911e1588515b1ab5cb6e` has a fresh CI run in progress to verify these final validation additions. The earlier passing integration run was against commit `8d04b07423e3b371a1da22674df48d6dede756bc`, before the latest market-price static assertion. All SQL candidates remain under `supabase/drafts/`; no Production schema, RPC, order, trade, reservation, wallet, or balance has been modified.
