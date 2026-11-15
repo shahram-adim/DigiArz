@@ -186,3 +186,33 @@ Run the complete reserve/fill/partial-fill/cancel and Stop-Limit parent-child li
 
 ### Scope
 Static inspection and read-only aggregate checks only. No test trade, balance change, or order was performed on production.
+
+
+## Cross-engine numeric precision review — 2026-11-15
+
+### Confirmed storage precision
+- `market_prices.price`: numeric(38,18).
+- `orders.amount`, `orders.price`: numeric(24,8).
+- `trades.amount`, `trades.price`: numeric(24,8).
+- `asset_balances.balance`: numeric(28,8).
+- `wallets.balance_usdt` and `transactions.amount`: numeric(24,8).
+- `orders.filled_amount`, `orders.remaining_amount`, `conditional_orders` numeric fields and reservation amount fields are unconstrained numeric.
+
+### Additional confirmed issues
+- `process_limit_orders()` fills at most 25% of the original amount per cycle. Example: amount 0.12345678 produces an exact first fill of 0.0308641950, but a numeric(24,8) trade amount stores 0.03086420 (delta +0.0000000050). The engine increments the order's unconstrained filled_amount using the exact quantity, while trade and asset balance columns round to 8 places. This can create a ledger/history mismatch and a small balance drift.
+- `process_limit_orders()` computes quote gross, fee and net without explicit 8-place rounding, then writes wallet and transaction amounts to numeric(24,8) while reservation consumed_amount remains unconstrained numeric. Explicit settlement rounding is needed so wallet debit/credit, transaction ledger and reservation consumption use the same USDT amount.
+- `execute_demo_trade()` rounds gross and fee to 8 places, but the amount is accepted at arbitrary numeric precision while order/trade/asset balance columns are scale 8. Validate or support greater base-asset precision consistently.
+- `place_limit_order()`, `place_stop_limit_order()`, and `place_conditional_exit_order()` accept numeric amount/price values without enforcing a storage precision policy. The first two store order values in scale-8 columns; conditional metadata uses unconstrained numeric fields.
+- Market prices can carry 18 decimal places but the order/trade price columns retain only 8. Current enabled pairs happen to round to positive 8-place prices; this is not a safe general rule for future micro-price pairs.
+
+### Scope checked
+- Reviewed definitions of Market execution, Limit placement/processing/cancellation, Stop-Limit placement/processing/cancellation, and conditional exit placement.
+- Production currently has 0 active Limit orders and 0 active conditional orders. No live partial-fill sample exists to validate the lifecycle.
+- No production data was changed and no simulated trade was executed.
+
+### Recommended coordinated fix (not yet applied)
+1. Widen base-asset quantity storage to 18 places in `orders.amount`, `orders.filled_amount`, `orders.remaining_amount`, `trades.amount`, and `asset_balances.balance`; widen `orders.price` and `trades.price` to 18 places to preserve the 18-place market price.
+2. Keep USDT wallet and transaction settlement at 8 places for now, but explicitly round Limit gross/fee/net/consumed quote amounts to 8 places before mutating wallet, transaction, or reservation ledger. Keep Market's existing 8-place quote settlement semantics consistent.
+3. Add consistent server-side input range/precision validation for Market, Limit, Stop-Limit, and conditional-exit RPCs after the storage policy is agreed.
+4. Add isolated test coverage for repeated 25% partial fills, very small asset quantities/prices, buy/sell settlement, and reservation reconciliation before applying schema changes to production.
+5. Review all dependent functions, UI formatters, exports and constraints before generating/applying the migration. This recommendation is not an authorization to change production schema.
