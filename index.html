@@ -2109,8 +2109,8 @@ function getExactReservationRemaining(reservation){
   const remaining=D.subtractDecimal(reserved,accounted);
   return D.compareDecimal(remaining,'0')>0?remaining:null;
  }catch(_){return null}
-function compareExactDecimal(a,b){try{return window.DigiArzDecimal.compareDecimal(String(a),String(b))}catch(_){return null}}
 }
+function compareExactDecimal(a,b){try{return window.DigiArzDecimal.compareDecimal(String(a),String(b))}catch(_){return null}}
 function safeText(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function initClient(){if(!window.supabase?.createClient)throw new Error('کتابخانه اتصال بارگذاری نشد؛ اینترنت را بررسی کنید.');supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})}
 async function signup(){const btn=$('signupBtn');btn.disabled=true;hideMessage(authMsg);try{const name=$('fullName').value.trim(),email=$('email').value.trim().toLowerCase(),password=$('password').value;if(!email||!email.includes('@'))throw new Error('آدرس ایمیل معتبر وارد کنید.');if(password.length<6)throw new Error('رمز عبور باید حداقل ۶ کاراکتر باشد.');const {data,error}=await supabaseClient.auth.signUp({email,password,options:{data:{full_name:name},emailRedirectTo:location.href}});if(error)throw error;if(data.session){showMessage(authMsg,'ثبت‌نام موفق بود.','ok');await showApp(data.session)}else showMessage(authMsg,'ثبت‌نام انجام شد. لینک تأیید را از ایمیل باز کنید و سپس وارد شوید.','ok')}catch(e){showMessage(authMsg,'ثبت‌نام انجام نشد: '+(e.message||String(e)),'err')}finally{btn.disabled=false}}
