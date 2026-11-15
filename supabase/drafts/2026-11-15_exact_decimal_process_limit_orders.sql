@@ -71,6 +71,10 @@ BEGIN
            OR v_order.amount <= 0
            OR v_order.amount > 1000000
            OR pg_catalog.scale(v_order.amount) > 18
+           OR v_order.filled_amount IS NULL
+           OR v_order.filled_amount < 0
+           OR v_order.filled_amount > v_order.amount
+           OR pg_catalog.scale(v_order.filled_amount) > 18
            OR v_order.price IS NULL
            OR v_order.price <= 0
            OR v_order.price >= 10000000000000000::numeric
