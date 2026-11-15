@@ -146,11 +146,11 @@ BEGIN
     id, user_id, symbol, side, order_type, amount, price,
     filled_amount, remaining_amount, status
   ) VALUES
-  ('d4000000-0000-0000-0000-000000000004',
+  ('64000000-0000-0000-0000-000000000064',
    '40000000-0000-0000-0000-000000000004',
    'BTCUSDT', 'buy', 'limit', 1000000, 9999999999999999,
    0, 1000000, 'pending'),
-  ('e5000000-0000-0000-0000-000000000005',
+  ('65000000-0000-0000-0000-000000000065',
    '50000000-0000-0000-0000-000000000005',
    'BTCUSDT', 'sell', 'limit', 1000000, 9999999999999999,
    0, 1000000, 'pending');
@@ -159,27 +159,27 @@ BEGIN
     id, order_id, user_id, asset, reserved_amount, consumed_amount,
     released_amount, status
   ) VALUES
-  ('d4000000-0000-0000-0000-000000000044',
-   'd4000000-0000-0000-0000-000000000004',
+  ('64000000-0000-0000-0000-000000000644',
+   '64000000-0000-0000-0000-000000000064',
    '40000000-0000-0000-0000-000000000004',
    'USDT', 90000000000000000000, 0, 0, 'reserved'),
-  ('e5000000-0000-0000-0000-000000000055',
-   'e5000000-0000-0000-0000-000000000005',
+  ('65000000-0000-0000-0000-000000000655',
+   '65000000-0000-0000-0000-000000000065',
    '50000000-0000-0000-0000-000000000005',
    'BTC', 1000000, 0, 0, 'reserved');
 
   v_result := public.process_limit_orders();
 
   IF (SELECT status FROM public.orders
-      WHERE id='d4000000-0000-0000-0000-000000000004') <> 'pending'
+      WHERE id='64000000-0000-0000-0000-000000000064') <> 'pending'
      OR (SELECT status FROM public.orders
-         WHERE id='e5000000-0000-0000-0000-000000000005') <> 'pending' THEN
+         WHERE id='65000000-0000-0000-0000-000000000065') <> 'pending' THEN
     RAISE EXCEPTION 'Oversized settlement orders must remain pending';
   END IF;
   IF EXISTS (SELECT 1 FROM public.trades
              WHERE order_id IN (
-               'd4000000-0000-0000-0000-000000000004',
-               'e5000000-0000-0000-0000-000000000005'
+               '64000000-0000-0000-0000-000000000064',
+               '65000000-0000-0000-0000-000000000065'
              )) THEN
     RAISE EXCEPTION 'Oversized settlement unexpectedly created a trade';
   END IF;
@@ -198,8 +198,8 @@ BEGIN
   IF EXISTS (
     SELECT 1 FROM public.order_reservations
     WHERE order_id IN (
-      'd4000000-0000-0000-0000-000000000004',
-      'e5000000-0000-0000-0000-000000000005'
+      '64000000-0000-0000-0000-000000000064',
+      '65000000-0000-0000-0000-000000000065'
     )
     AND (consumed_amount <> 0 OR released_amount <> 0 OR status <> 'reserved')
   ) THEN
