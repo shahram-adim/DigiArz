@@ -4,7 +4,8 @@ DECLARE
   v_type text;
 BEGIN
   IF (SELECT amount FROM public.orders WHERE price IS NOT NULL) <> 1.25::numeric
-     OR (SELECT price FROM public.orders WHERE price IS NOT NULL) <> 10.5::numeric\n     OR (SELECT count(*) FROM public.orders WHERE price IS NULL) <> 1
+     OR (SELECT price FROM public.orders WHERE price IS NOT NULL) <> 10.5::numeric
+     OR (SELECT count(*) FROM public.orders WHERE price IS NULL) <> 1
      OR (SELECT balance FROM public.asset_balances) <> 1.25::numeric
      OR (SELECT reserved_amount FROM public.order_reservations) <> 10.5::numeric
      OR (SELECT amount FROM public.conditional_orders) <> 0.5::numeric THEN
@@ -13,7 +14,13 @@ BEGIN
 
   SELECT format_type(a.atttypid, a.atttypmod) INTO v_type
   FROM pg_attribute a WHERE a.attrelid='public.orders'::regclass AND a.attname='amount';
-  IF v_type <> 'numeric(34,18)' THEN RAISE EXCEPTION 'orders.amount type: %',v_type; END IF;\n  SELECT format_type(a.atttypid, a.atttypmod) INTO v_type\n  FROM pg_attribute a WHERE a.attrelid='public.orders'::regclass AND a.attname='price';\n  IF v_type <> 'numeric(34,18)' THEN RAISE EXCEPTION 'orders.price type: %',v_type; END IF;\n  IF EXISTS (SELECT 1 FROM public.orders WHERE amount=0.5 AND price IS NOT NULL) THEN\n    RAISE EXCEPTION 'nullable market order price was not preserved';\n  END IF;
+  IF v_type <> 'numeric(34,18)' THEN RAISE EXCEPTION 'orders.amount type: %',v_type; END IF;
+  SELECT format_type(a.atttypid, a.atttypmod) INTO v_type
+  FROM pg_attribute a WHERE a.attrelid='public.orders'::regclass AND a.attname='price';
+  IF v_type <> 'numeric(34,18)' THEN RAISE EXCEPTION 'orders.price type: %',v_type; END IF;
+  IF EXISTS (SELECT 1 FROM public.orders WHERE amount=0.5 AND price IS NOT NULL) THEN
+    RAISE EXCEPTION 'nullable market order price was not preserved';
+  END IF;
   SELECT format_type(a.atttypid, a.atttypmod) INTO v_type
   FROM pg_attribute a WHERE a.attrelid='public.trades'::regclass AND a.attname='price';
   IF v_type <> 'numeric(34,18)' THEN RAISE EXCEPTION 'trades.price type: %',v_type; END IF;
