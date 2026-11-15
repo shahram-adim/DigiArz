@@ -46,6 +46,21 @@ jobs:
             -f supabase/tests/exact_decimal_type_widening_setup.sql \
             -f supabase/drafts/2026-11-15_exact_decimal_type_widening.sql \
             -f supabase/tests/exact_decimal_type_widening_integration.sql
+      - name: Verify widening preflight rejects invalid data atomically
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_type_widening_negative_test;"
+          psql -h localhost -U postgres -d digiarz_type_widening_negative_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_setup.sql \
+            -f supabase/tests/exact_decimal_type_widening_negative.sql
+          if psql -h localhost -U postgres -d digiarz_type_widening_negative_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-15_exact_decimal_type_widening.sql; then
+            echo "Expected widening preflight rejection, but migration succeeded."
+            exit 1
+          fi
+          psql -h localhost -U postgres -d digiarz_type_widening_negative_test -v ON_ERROR_STOP=1 \
+            -c "DO \$\$ BEGIN IF (SELECT format_type(a.atttypid,a.atttypmod) FROM pg_attribute a WHERE a.attrelid='public.orders'::regclass AND a.attname='amount') <> 'numeric(24,8)' THEN RAISE EXCEPTION 'failed preflight changed schema'; END IF; END \$\$;"
       - name: Compile and run isolated Market and Limit entrypoint integration
         env:
           PGPASSWORD: postgres
