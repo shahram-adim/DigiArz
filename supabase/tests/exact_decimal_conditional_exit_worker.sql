@@ -101,6 +101,7 @@ BEGIN
       v_processed:=v_processed+1;
       v_triggered:=v_triggered+1;
     EXCEPTION WHEN OTHERS THEN
+      RAISE NOTICE 'conditional execution exception id=% kind=% error=% state=%',v_cond.id,v_cond.order_kind,SQLERRM,SQLSTATE;
       PERFORM pg_catalog.set_config('request.jwt.claim.sub','',true);
       PERFORM pg_catalog.set_config('request.jwt.claims','',true);
       UPDATE public.conditional_orders
