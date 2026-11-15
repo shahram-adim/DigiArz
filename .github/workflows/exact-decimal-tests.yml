@@ -45,3 +45,10 @@ jobs:
             -f supabase/tests/exact_decimal_limit_worker_setup.sql \
             -f supabase/drafts/2026-11-15_exact_decimal_process_limit_orders.sql \
             -f supabase/tests/exact_decimal_limit_worker_integration.sql
+      - name: Compile and run isolated Limit cancellation lifecycle integration
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_cancel_setup.sql \
+            -f supabase/tests/exact_decimal_cancel_integration.sql
