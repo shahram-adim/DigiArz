@@ -260,3 +260,21 @@ Read-only inventory of Production PostgreSQL dependencies for `orders`, `trades`
 - This inventory is not a complete substitute for isolated migration rehearsal. Function bodies, RPC return JSON contracts, edge functions, export/report consumers, and all UI call sites still require a final cross-reference review.
 
 Production schema was not changed. No orders, balances, reservations, or transactions were created or modified.
+
+
+## Limit engine exact-decimal execution path — 2026-11-15
+
+The current Production `process_limit_orders()` definition was read directly (read-only). It confirms the precision mismatch occurs in the settlement path, not only at column storage:
+- `v_qty := LEAST(v_remaining, v_order.amount * 0.25)` retains an exact numeric quarter-fill. There is no explicit quantization at the engine boundary.
+- The same `v_qty` updates `orders.filled_amount`, `orders.remaining_amount`, the asset balance, reservation consumption (for sells), and `trades.amount`. The latter two destination table columns currently have 8 decimal places for asset quantity, so they can round while the order accounting retains the higher-precision quantity.
+- Buy-side quote `v_total = gross + fee` and sell-side `v_net = gross - fee` currently have no explicit 8-decimal rounding before wallet/transaction writes. Reservation `consumed_amount` is updated from the same unrounded `v_total`; this can diverge from the amount actually stored in the 8-decimal wallet/transaction columns.
+- The remaining buy reservation target is recalculated as `v_new_remaining * v_order.price * (1 + fee_rate)` without an explicit quote-currency 8-decimal rounding policy.
+
+### Required engine behavior after the precision migration
+1. Base-asset quantity and execution price must remain at the agreed 18-decimal scale across order, trade, and asset-balance records.
+2. Quote-currency settlement must be quantized once, explicitly, to 8 decimals; the exact same quantized quote amount must feed wallet delta, transaction amount, reservation consumption, and remaining-reserve arithmetic.
+3. Partial fills must preserve `filled_amount + remaining_amount = amount` exactly at the storage scale, including the final residual fill. Do not round each quarter-fill independently in a way that accumulates or creates dust.
+4. Apply the same policy consistently to Market, Limit, Stop-Limit child Limit orders, and conditional exits; validate the raw decimal string at the RPC boundary before any lossy conversion.
+5. Before deployment, test repeated partial fills, final dust/residual fills, buy/sell fee settlement, reservation release, cancellation, and trigger-to-child-order handoff using isolated fixtures only.
+
+No Production function or data was changed by this review.
