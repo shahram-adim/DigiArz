@@ -205,13 +205,13 @@ FROM information_schema.role_table_grants
 WHERE table_schema='public' AND table_name IN ('orders','trades','asset_balances','order_reservations','conditional_orders')
 UNION ALL
 SELECT 'policy',c.relname||'.'||p.polname,
-  p.polcmd||'|'||p.polpermissive||'|'||p.polroles::text||'|'||
+  p.polcmd::text||'|'||p.polpermissive::text||'|'||p.polroles::text||'|'||
   COALESCE(pg_get_expr(p.polqual,p.polrelid),'')||'|'||
   COALESCE(pg_get_expr(p.polwithcheck,p.polrelid),'')
 FROM pg_policy p JOIN pg_class c ON c.oid=p.polrelid
 JOIN pg_namespace n ON n.oid=c.relnamespace
 WHERE n.nspname='public' AND c.relname IN ('orders','trades','asset_balances','order_reservations','conditional_orders')
 UNION ALL
-SELECT 'rls',c.relname,c.relrowsecurity||'|'||c.relforcerowsecurity
+SELECT 'rls',c.relname,c.relrowsecurity::text||'|'||c.relforcerowsecurity::text
 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
 WHERE n.nspname='public' AND c.relname IN ('orders','trades','asset_balances','order_reservations','conditional_orders');
