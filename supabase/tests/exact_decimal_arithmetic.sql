@@ -60,7 +60,7 @@ BEGIN
   IF round(0.000000000000000001::numeric * 0.000000000000000001::numeric, 8) <> 0 THEN
     RAISE EXCEPTION 'sub-quantum notional rounding regression';
   END IF;
-  IF round(0.000000000000000001::numeric * 1000000000::numeric, 8) <= 0 THEN
+  IF round(0.000000000000000001::numeric * 100000000000::numeric, 8) <= 0 THEN
     RAISE EXCEPTION 'positive quantized quote notional incorrectly rejected';
   END IF;
 
