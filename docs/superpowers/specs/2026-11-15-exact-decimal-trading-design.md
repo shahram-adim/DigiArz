@@ -111,3 +111,5 @@ Make demo trading preserve tiny asset quantities and micro-prices end-to-end. Ma
 - Every resulting fill must still pass the positive rounded-gross guard. If the whole selected fill rounds to zero USDT, skip it without changing balances, orders, trades, transactions, or reservations.
 - Limit and Stop-Limit placement must reject both buy and sell orders whose full notional rounds to zero USDT; the worker guard remains as defense in depth for legacy or malformed rows.
 - The isolated PostgreSQL worker integration now exercises 18-place buy and sell accounting, dust absorption, quote settlement, reservation consumption, and zero-notional skip behavior. It runs only in the disposable GitHub Actions PostgreSQL service; Production remains read-only.
+
+- Conditional-exit placement also rejects a trigger notional that rounds to zero USDT. The conditional worker retries execution failures transactionally and eventually releases/rejects after its existing bounded retry policy; the placement guard avoids creating predictable zero-notional cases.
