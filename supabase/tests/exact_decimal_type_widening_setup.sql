@@ -86,6 +86,9 @@ CREATE TABLE public.order_reservations (
   CONSTRAINT order_reservations_status_check CHECK (status = ANY (ARRAY['reserved','released','consumed']))
 );
 CREATE UNIQUE INDEX order_reservations_order_unique ON public.order_reservations(order_id);
+CREATE TABLE public.wallets (balance_usdt numeric(24,8) NOT NULL);
+CREATE TABLE public.transactions (amount numeric(24,8) NOT NULL);
+
 CREATE TABLE public.conditional_orders (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id uuid NOT NULL UNIQUE REFERENCES public.orders(id) ON DELETE CASCADE,
