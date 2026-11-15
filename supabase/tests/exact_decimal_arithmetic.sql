@@ -18,6 +18,33 @@ DECLARE
   v_initial numeric;
   v_cycles integer;
 BEGIN
+  -- RPC input contract: strict scale <= 18 and at most 16 integer digits.
+  IF scale(0.000000000000000001::numeric) > 18
+     OR scale(999999.999999999999999999::numeric) > 18 THEN
+    RAISE EXCEPTION 'valid 18-place input rejected by scale contract';
+  END IF;
+  IF scale(0.0000000000000000001::numeric) <= 18 THEN
+    RAISE EXCEPTION '19-place input was not detected';
+  END IF;
+  IF 1000000.000000000000000000::numeric > 1000000 THEN
+    RAISE EXCEPTION 'amount cap arithmetic regression';
+  END IF;
+  IF abs(9999999999999999.999999999999999999::numeric) >= 10000000000000000::numeric THEN
+    RAISE EXCEPTION 'maximum 16-integer-digit input incorrectly exceeds range';
+  END IF;
+  IF abs(10000000000000000::numeric) < 10000000000000000::numeric THEN
+    RAISE EXCEPTION '17-integer-digit input incorrectly passes range';
+  END IF;
+
+  -- Proposed column typmods must preserve the intended 18-place values.
+  IF 0.123456789123456789::numeric(34,18) <> 0.123456789123456789::numeric THEN
+    RAISE EXCEPTION 'numeric(34,18) does not preserve 18-place precision';
+  END IF;
+  IF 12345678901234567890.123456789123456789::numeric(38,18)
+       <> 12345678901234567890.123456789123456789::numeric THEN
+    RAISE EXCEPTION 'numeric(38,18) does not preserve 20 integer digits and 18 decimals';
+  END IF;
+
   -- PostgreSQL numeric round is half away from zero at the selected scale.
   IF round(1.234567895, 8) <> 1.23456790 THEN
     RAISE EXCEPTION 'quote half-up rounding regression';
