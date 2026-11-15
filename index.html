@@ -2109,6 +2109,7 @@ function getExactReservationRemaining(reservation){
   const remaining=D.subtractDecimal(reserved,accounted);
   return D.compareDecimal(remaining,'0')>0?remaining:null;
  }catch(_){return null}
+function compareExactDecimal(a,b){try{return window.DigiArzDecimal.compareDecimal(String(a),String(b))}catch(_){return null}}
 }
 function safeText(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function initClient(){if(!window.supabase?.createClient)throw new Error('کتابخانه اتصال بارگذاری نشد؛ اینترنت را بررسی کنید.');supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})}
@@ -2804,10 +2805,10 @@ async function loadConditionalOrders(){
   }
   const note=document.createElement('small');note.className='small muted';note.textContent=o.order_kind==='take_profit'?'شرط اجرا: قیمت بازار مساوی یا بالاتر از هدف':'شرط اجرا: قیمت بازار مساوی یا پایین‌تر از هدف';
   const marketLine=document.createElement('small');marketLine.className='small muted';
-  const market=prices.find(p=>p.symbol===o.symbol),age=market?.updated_at?Date.now()-new Date(market.updated_at).getTime():Infinity;
-  if(!priceResult.error&&market&&Number.isFinite(age)&&age>=0&&age<=60000&&Number(market.price)>0){
-   const met=o.order_kind==='take_profit'?Number(market.price)>=Number(o.trigger_price):Number(market.price)<=Number(o.trigger_price);
-   marketLine.textContent='قیمت فعلی بازار: '+formatNum(market.price,10)+' USDT · '+(met?'شرط قیمت برقرار است؛ منتظر چرخه اجرای سرور.':'علت انتظار: قیمت هنوز به حد فعال‌سازی نرسیده است.');
+   const marketCompare=market?compareExactDecimal(market.price_text,o.trigger_price_text):null;
+   if(!priceResult.error&&market&&Number.isFinite(age)&&age>=0&&age<=60000&&marketCompare!==null&&compareExactDecimal(market.price_text,'0')>0){
+    const met=o.order_kind==='take_profit'?marketCompare>=0:marketCompare<=0;
+    marketLine.textContent='قیمت فعلی بازار: '+formatExactNum(market.price_text,18)+' USDT · '+(met?'شرط قیمت برقرار است؛ منتظر چرخه اجرای سرور.':'علت انتظار: قیمت هنوز به حد فعال‌سازی نرسیده است.');
   }else if(priceResult.error){marketLine.textContent='علت انتظار مشخص نیست؛ دریافت قیمت بازار با خطا روبه‌رو شد.'}
   else if(market&&age>60000){marketLine.textContent='علت انتظار: قیمت بازار قدیمی‌تر از ۶۰ ثانیه است؛ سفارش با قیمت تازه بررسی می‌شود.'}
   else{marketLine.textContent='قیمت تازه بازار در دسترس نیست؛ سفارش تا دریافت قیمت معتبر اجرا نمی‌شود.'}
@@ -2887,9 +2888,9 @@ async function loadStopLimitOrders(){
    const marketLine=document.createElement('small');marketLine.className='small muted';
    const market=prices.find(p=>p.symbol===o.symbol),age=market?.updated_at?Date.now()-new Date(market.updated_at).getTime():Infinity;
    if(priceResult.error){marketLine.textContent='علت انتظار مشخص نیست؛ دریافت قیمت بازار با خطا روبه‌رو شد.'}
-   else if(market&&Number.isFinite(age)&&age>=0&&age<=60000&&Number(market.price)>0){
-    const met=o.side==='buy'?Number(market.price)>=Number(o.trigger_price):Number(market.price)<=Number(o.trigger_price);
-    marketLine.textContent='قیمت فعلی بازار: '+formatNum(market.price,10)+' USDT · '+(met?'شرط Stop برقرار است؛ منتظر پردازش سرور.':'علت انتظار: قیمت هنوز به Stop نرسیده است.');
+    else if(market&&Number.isFinite(age)&&age>=0&&age<=60000&&compareExactDecimal(market.price_text,'0')>0){
+     const marketCompare=compareExactDecimal(market.price_text,o.trigger_price_text),met=marketCompare!==null&&(o.side==='buy'?marketCompare>=0:marketCompare<=0);
+     marketLine.textContent='قیمت فعلی بازار: '+formatExactNum(market.price_text,18)+' USDT · '+(met?'شرط Stop برقرار است؛ منتظر پردازش سرور.':'علت انتظار: قیمت هنوز به Stop نرسیده است.');
    }else if(market&&age>60000){marketLine.textContent='علت انتظار: قیمت بازار قدیمی‌تر از ۶۰ ثانیه است؛ پردازشگر قیمت تازه می‌خواهد.'}
    else{marketLine.textContent='قیمت تازه بازار در دسترس نیست؛ سفارش تا دریافت قیمت معتبر فعال نمی‌شود.'}
    details.append(title,meta,state,marketLine);
@@ -2951,10 +2952,10 @@ async function loadOpenOrders(){
   const reason=document.createElement('small');
   const age=market?.updated_at?Date.now()-new Date(market.updated_at).getTime():Infinity;
   let why='قیمت بازار در دسترس نیست؛ سفارش با قیمت نامعتبر اجرا نمی‌شود.';
-  if(!priceResult.error&&market&&Number.isFinite(age)&&age>=0&&age<=60000&&Number(market.price)>0){
-   if(o.side==='buy'&&Number(market.price)>Number(o.price))why='علت انتظار: قیمت بازار هنوز به قیمت خرید هدف نرسیده است.';
-   else if(o.side==='sell'&&Number(market.price)<Number(o.price))why='علت انتظار: قیمت بازار هنوز به قیمت فروش هدف نرسیده است.';
-   else why='شرط قیمت برقرار است؛ اجرای سفارش به نقدشوندگی و چرخه پردازش سرور وابسته است.';
+   if(!priceResult.error&&market&&Number.isFinite(age)&&age>=0&&age<=60000&&compareExactDecimal(market.price_text,'0')>0){
+    const marketCompare=compareExactDecimal(market.price_text,o.price_text);
+    if(o.side==='buy'&&marketCompare!==null&&marketCompare>0)why='علت انتظار: قیمت بازار هنوز به قیمت خرید هدف نرسیده است.';
+    else if(o.side==='sell'&&marketCompare!==null&&marketCompare<0)why='علت انتظار: قیمت بازار هنوز به قیمت فروش هدف نرسیده است.';
   }else if(priceResult.error)why='علت انتظار نامشخص است؛ دریافت قیمت بازار با خطا روبه‌رو شد.';
   else if(market&&age>60000)why='علت انتظار: قیمت بازار قدیمی‌تر از ۶۰ ثانیه است.';
   reason.textContent=why;reason.className='small muted';
