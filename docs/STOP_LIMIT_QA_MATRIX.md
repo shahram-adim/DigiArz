@@ -107,3 +107,14 @@ Full lifecycle testing remains blocked until an isolated Supabase test project w
 - [x] Added `getMyOrderReservations()` to split unique IDs into sequential batches of at most 100 and aggregate the read-only results. Code commit: `2efce841a5abb12b86d202104363be16e606a6ed`.
 - [x] Static verification after the change: all 3 inline scripts parse, all 208 HTML IDs are unique, and a mocked 250-ID test produced RPC batch sizes `100, 100, 50` and 250 aggregated rows. The mock did not call production Supabase.
 - [ ] The full reservation lifecycle and worker interaction still require the isolated test project described above. The RPC's owner filter and grants were inspected read-only in production; no production order, reservation, wallet, balance, or financial-history row was created or changed.
+
+
+## Backend retry-safety correction — 2026-11-15
+
+- [x] Reproduced the previously identified gap by inspecting the live `process_stop_limit_orders()` definition: invalid/missing/released/inconsistent reservation validation incremented `attempt_count` but did not terminate the parent order after repeated failures.
+- [x] Applied migration `20261115153000_bound_stop_limit_invalid_reservation_retries` to production and committed the matching SQL file.
+- [x] After ten reservation-validation failures, the worker now marks the parent order and conditional row `rejected`, records `Reservation validation failed; manual review required`, and stops retrying.
+- [x] Fail-closed policy: the worker deliberately does **not** release or modify an invalid reservation. Any potentially stuck reservation requires manual reconciliation of ownership and arithmetic before recovery.
+- [x] Re-read the live function after migration and confirmed the bounded retry branch is present.
+- [x] Read-only aggregate check confirmed there are currently zero Stop-Limit conditional rows, zero conditional parent orders, and zero active conditional reservations. No order, reservation, wallet, balance, trade, or financial-history row was created or changed.
+- [ ] Full lifecycle, cancellation/trigger race, and deactivation-after-trigger tests remain blocked until an isolated test project with disposable users is available. This correction does not constitute end-to-end QA.
