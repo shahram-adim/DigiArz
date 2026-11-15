@@ -1300,3 +1300,17 @@
 - [x] نمونهٔ مهم: Kifpool برای Atlas Navi شناسهٔ `atlas-navi-navi` و نماد `ANAVI` می‌دهد، درحالی‌که فهرست زندهٔ CoinGecko شناسهٔ `atlas-navi` و نماد `NAVI` را نشان می‌دهد؛ این دو را بدون قرارداد/شبکه یکی نکردیم.
 - [x] payload ذخیره‌شدهٔ Kifpool برای این موارد آدرس قرارداد و شبکهٔ قابل اتکا ارائه نمی‌کند؛ بنابراین هیچ‌کدام از ۴۲ مورد به‌صورت حدسی به دارایی دیگری وصل نشدند.
 - [x] این مرحله فقط ممیزی و مستندسازی بود؛ هیچ Migration دیتابیسی، تغییر فهرست بازار یا تغییر جفت‌ارزی انجام نشد. آمار: ۱٬۰۸۶ matched، ۱۹ ambiguous، ۱۲۱ pending، ۴۲ unmatched؛ جفت‌ارز فعال ۱۲.
+
+
+## تأیید ۵ تغییرنام رسمی در تطبیق Kifpool — ۱۵ نوامبر ۲۰۲۶
+- [x] پنج مورد pending دارای CoinGecko ID دقیق و نماد یکسان بودند؛ نام Kifpool نام قدیمی پروژه بود و نام فعلی CoinGecko تغییر کرده بود:
+  - APR: aPriori → Capricorn، ID `apriori`
+  - AVNT: Avantis → Veranta، ID `avantis`
+  - ASM: Assemble Protocol → Assemble AI، ID `assemble-protocol`
+  - CTK: CertiK → Shentu، ID `certik`
+  - DOME: Everdome → Hum(AI)n Web3، ID `everdome`
+- [x] این پنج alias فقط با تطبیق هم‌زمان CoinGecko ID دقیق، نماد دقیق و دو نام نرمال‌شدهٔ مشخص مجاز شدند؛ هیچ تطبیق نمادی عمومی اضافه نشد.
+- [x] Migration `20261115145000_allow_verified_kifpool_rebrand_aliases` روی Supabase اعمال شد و فایل آن در GitHub ثبت شد.
+- [x] تابع پردازش اجرا و هر پنج مورد به وضعیت matched رسیدند.
+- [x] آمار جدید Kifpool: ۱٬۰۹۱ matched، ۱۹ ambiguous، ۱۱۶ pending، ۴۲ unmatched؛ جمع ۱٬۲۶۸.
+- [x] تعداد جفت‌ارزهای فعال همچنان ۱۲ است؛ هیچ دارایی جدیدی به بازار یا جفت‌ارزها اضافه نشد و هیچ عملیات مالی/کاربری انجام نشد.
