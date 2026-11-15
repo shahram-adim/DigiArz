@@ -15,6 +15,8 @@ DECLARE
   v_reserved numeric;
   v_consumed numeric;
   v_released numeric;
+  v_initial numeric;
+  v_cycles integer;
 BEGIN
   -- PostgreSQL numeric round is half away from zero at the selected scale.
   IF round(1.234567895, 8) <> 1.23456790 THEN
@@ -105,6 +107,40 @@ BEGIN
   IF v_qty <> 0.000000000000000001 OR v_qty > v_remaining THEN
     RAISE EXCEPTION 'minimum-quantum fallback must be bounded by residual';
   END IF;
+
+  -- Property-style fill conservation over representative 18-place quantities.
+  FOREACH v_initial IN ARRAY ARRAY[
+    0.000000000000000001::numeric,
+    0.000000000000000002::numeric,
+    0.000000000000000003::numeric,
+    0.000000000000000006::numeric,
+    0.000000000000000010::numeric,
+    0.000000000000000019::numeric,
+    0.000000000000001001::numeric,
+    0.123456789123456789::numeric,
+    1.000000000000000001::numeric,
+    999999.999999999999::numeric
+  ] LOOP
+    v_remaining := v_initial;
+    v_filled := 0;
+    v_cycles := 0;
+    WHILE v_remaining > 0 AND v_cycles < 4 LOOP
+      v_qty := LEAST(v_remaining, round(v_initial * 0.25, 18));
+      IF v_qty = 0 THEN
+        v_qty := LEAST(v_remaining, 0.000000000000000001);
+      END IF;
+      IF v_qty <= 0 OR v_qty > v_remaining THEN
+        RAISE EXCEPTION 'invalid partial fill for initial amount %', v_initial;
+      END IF;
+      v_filled := v_filled + v_qty;
+      v_remaining := v_initial - v_filled;
+      v_cycles := v_cycles + 1;
+    END LOOP;
+    IF v_remaining <> 0 OR v_filled <> v_initial OR v_cycles > 4 THEN
+      RAISE EXCEPTION 'partial fill did not conserve amount %, residual %, cycles %',
+        v_initial, v_remaining, v_cycles;
+    END IF;
+  END LOOP;
 
   RAISE NOTICE 'DigiArz exact-decimal arithmetic checks passed';
 END
