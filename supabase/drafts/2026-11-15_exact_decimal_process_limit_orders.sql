@@ -106,7 +106,9 @@ BEGIN
         WHERE mp.symbol = v_order.symbol
           AND mp.updated_at >= now() - interval '1 minute';
 
-        IF NOT FOUND OR v_market_price IS NULL OR v_market_price <= 0 THEN
+        IF NOT FOUND OR v_market_price IS NULL OR v_market_price <= 0
+           OR v_market_price >= 10000000000000000::numeric
+           OR pg_catalog.scale(v_market_price) > 18 THEN
             v_skipped := v_skipped + 1;
             CONTINUE;
         END IF;
