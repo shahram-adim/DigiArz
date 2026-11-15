@@ -1744,6 +1744,12 @@ img,svg,video,canvas,iframe{max-width:100%}
 
 
 
+
+/* Logged-out mobile view: do not reserve space for the app's hidden bottom navigation. */
+@media(max-width:700px){
+ body:has(#authView:not(.hidden)) .wrap{padding-bottom:env(safe-area-inset-bottom)!important}
+}
+
 /* AUTH VIEW FIX — target the actual element (#authView.auth), not a descendant */
 #authView.auth{
  display:grid!important;
