@@ -86,3 +86,12 @@ This is a proposal, not approval. A 1,000,000 maximum amount check does not by i
 ## Gate
 
 **NO-GO for 18-decimal database or Production trading release.** The current Limit worker has an unquantized multi-ledger accounting path that must be corrected and tested before enabling the new precision. This review made no Production changes.
+
+
+## Follow-up artifacts — 2026-11-15
+
+- Added `supabase/tests/exact_decimal_arithmetic.sql`, a pure PostgreSQL numeric regression script. It creates no tables and performs no data writes. It checks PostgreSQL 8-place rounding boundaries, 18-place micro-quantity arithmetic, a representative four-cycle partial-fill plus exact residual, quote-ledger arithmetic, reservation conservation, and explicitly exposes the sub-quantum quarter-fill case.
+- The SQL script has been committed but has **not** been executed yet: this environment has no local PostgreSQL client/server, and Production is not an acceptable test target. Do not claim this SQL script has passed.
+- The new report and SQL test file were read back from GitHub after commit.
+- Latest Production migration remains `20261115143827_bound_stop_limit_invalid_reservation_retries`; no exact-decimal migration is applied. Supabase still exposes no development branches.
+- The next unresolved design choice is the 18-place partial-fill progress rule for quantities whose 25% slice rounds to zero. This must be decided and tested before replacing the Limit worker.
