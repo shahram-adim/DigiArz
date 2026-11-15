@@ -278,3 +278,17 @@ The current Production `process_limit_orders()` definition was read directly (re
 5. Before deployment, test repeated partial fills, final dust/residual fills, buy/sell fee settlement, reservation release, cancellation, and trigger-to-child-order handoff using isolated fixtures only.
 
 No Production function or data was changed by this review.
+
+
+## Exact-decimal frontend follow-up — 2026-11-15
+
+- [x] The browser now has a shared BigInt decimal-string utility at \`src/decimal.js\`.
+- [x] Market, Limit, Stop-Limit, and conditional-exit RPC arguments are sent as canonical decimal strings. The four order-entry functions no longer convert submitted amount/price values through JavaScript Number, parseFloat, or toFixed.
+- [x] Reservation remaining amounts and Limit/Stop/conditional trigger comparisons in the order panels use exact decimal arithmetic.
+- [x] The utility supports 18 fractional digits; unit tests pass locally.
+- [x] The utility is part of the PWA shell cache (v47).
+- [!] The live browser input cap remains 8 fractional digits because Production order/trade/balance columns are still scale 8. Do not remove this guard until schema and RPC migrations have passed isolated tests and are approved for rollout.
+- [ ] Backend exact-decimal migrations, shared 8-place USDT quantization, repeated partial-fill/final-residual tests, and concurrency tests remain blocked by the absence of an isolated database.
+- [ ] Inline-script syntax/flow tests are committed in GitHub Actions, but no completed workflow result was confirmed at this checkpoint.
+
+See \`docs/superpowers/reports/2026-11-15-exact-decimal-implementation-checkpoint.md\` for the full implementation status and release gate.
