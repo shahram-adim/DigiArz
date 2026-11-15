@@ -164,3 +164,25 @@ This review is static/read-only. It does not certify matching-engine economics, 
 
 ### Next QA requirement
 Run the complete reserve/fill/partial-fill/cancel and Stop-Limit parent-child lifecycle against an isolated test database with disposable users and balances. Do not create test orders or alter balances in production.
+
+
+## Market execution engine review — 2026-11-15
+
+### Read-only findings
+- [x] `execute_demo_trade` requires `auth.uid()`, an active account, a syntactically valid symbol, positive bounded amount, and an enabled USDT pair.
+- [x] The function reads the authoritative server-side market price and rejects missing, non-positive, or older-than-60-second prices. The client-supplied `p_price` is not trusted for settlement.
+- [x] The function locks the user's wallet before balance mutations; it includes outstanding reservations in available-balance calculations for both USDT buys and base-asset sells.
+- [x] Buy/sell settlement, fee calculation, order, trade, and transaction history writes occur in the same database transaction.
+- [x] Function privilege check: `anon` cannot execute; `authenticated` can execute. The function itself still requires a real authenticated UID and active account.
+- [x] Current enabled-pair snapshot: 12 pairs; every current price rounds to a positive value at the current 8-decimal trade/order price precision.
+- [x] Existing production Market rows (3) were checked: each order amount and price exactly matches its linked trade; each has a corresponding USDT transaction of the expected side. No discrepancy was found.
+- [x] No production data was changed.
+
+### Precision issue to resolve before widening asset coverage
+- [!] `execute_demo_trade` accepts arbitrary numeric `p_amount`, calculates gross/fees from that original value, but persists order/trade/asset balance amounts in columns with scale 8. An amount with more than 8 decimal places can therefore be rounded when stored after settlement was calculated from the unrounded input. The same class of mismatch needs to be checked across Limit and conditional placement functions.
+- [!] `market_prices.price` supports 18 decimal places, while `orders.price` and `trades.price` are scale 8. This is harmless for the current 12 enabled pairs (all 12 round to positive values at 8 decimals), but future micro-price pairs could be recorded at a rounded or zero trade price even while settlement uses the higher-precision market price.
+- [ ] Before enabling additional pairs or accepting higher-precision quantity inputs, align order/trade price and amount precision with market and asset requirements, or explicitly validate/reject unsupported precision at the server boundary. Do not silently round user inputs.
+- [ ] Isolated end-to-end tests are still required for insufficient balance under concurrent requests, fee accounting, buy/sell round trips, and order/history atomicity.
+
+### Scope
+Static inspection and read-only aggregate checks only. No test trade, balance change, or order was performed on production.
