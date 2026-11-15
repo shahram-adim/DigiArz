@@ -68,3 +68,48 @@ FOR EACH ROW EXECUTE FUNCTION public.widening_fixture_guard();
 GRANT SELECT ON public.orders, public.trades, public.asset_balances, public.conditional_orders TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.orders, public.trades, public.asset_balances,
   public.order_reservations, public.conditional_orders TO service_role;
+
+-- Catalog snapshot used to prove the type changes preserve all fixture schema objects.
+CREATE TABLE public.widening_schema_snapshot (
+  object_kind text NOT NULL,
+  object_name text NOT NULL,
+  definition text NOT NULL,
+  PRIMARY KEY (object_kind, object_name)
+);
+INSERT INTO public.widening_schema_snapshot
+SELECT 'constraint', c.relname || '.' || con.conname, pg_get_constraintdef(con.oid)
+FROM pg_constraint con
+JOIN pg_class c ON c.oid=con.conrelid
+JOIN pg_namespace n ON n.oid=c.relnamespace
+WHERE n.nspname='public'
+  AND c.relname IN ('orders','trades','asset_balances','order_reservations','conditional_orders')
+UNION ALL
+SELECT 'index', t.relname || '.' || i.relname, pg_get_indexdef(i.oid)
+FROM pg_index x
+JOIN pg_class t ON t.oid=x.indrelid
+JOIN pg_class i ON i.oid=x.indexrelid
+JOIN pg_namespace n ON n.oid=t.relnamespace
+WHERE n.nspname='public'
+  AND t.relname IN ('orders','trades','asset_balances','order_reservations','conditional_orders')
+UNION ALL
+SELECT 'trigger', c.relname || '.' || tr.tgname, pg_get_triggerdef(tr.oid,true)
+FROM pg_trigger tr
+JOIN pg_class c ON c.oid=tr.tgrelid
+JOIN pg_namespace n ON n.oid=c.relnamespace
+WHERE n.nspname='public'
+  AND c.relname IN ('orders','trades','asset_balances','order_reservations','conditional_orders')
+  AND NOT tr.tgisinternal
+UNION ALL
+SELECT 'default', c.relname || '.' || a.attname, pg_get_expr(d.adbin,d.adrelid)
+FROM pg_attrdef d
+JOIN pg_class c ON c.oid=d.adrelid
+JOIN pg_namespace n ON n.oid=c.relnamespace
+JOIN pg_attribute a ON a.attrelid=c.oid AND a.attnum=d.adnum
+WHERE n.nspname='public'
+  AND c.relname IN ('orders','trades','asset_balances','order_reservations','conditional_orders')
+UNION ALL
+SELECT 'grant', table_name || '.' || grantee || '.' || privilege_type,
+       is_grantable
+FROM information_schema.role_table_grants
+WHERE table_schema='public'
+  AND table_name IN ('orders','trades','asset_balances','order_reservations','conditional_orders');
