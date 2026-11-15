@@ -1,10 +1,12 @@
 -- Disposable PostgreSQL CI fixture mirroring production constraints on widened columns.
 -- Never run against Supabase Production.
+DO $roles$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN CREATE ROLE authenticated; END IF; IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='service_role') THEN CREATE ROLE service_role; END IF; END $roles$;
+
 CREATE TABLE public.orders (
   order_type text NOT NULL,
   amount numeric(24,8) NOT NULL,
   price numeric(24,8),
-  filled_amount numeric NOT NULL,
+  filled_amount numeric NOT NULL DEFAULT 0,
   remaining_amount numeric NOT NULL,
   CONSTRAINT orders_amount_accounting_chk CHECK (filled_amount + remaining_amount = amount),
   CONSTRAINT orders_amount_positive CHECK (amount > 0),
@@ -18,12 +20,12 @@ CREATE TABLE public.trades (
   price numeric(24,8) NOT NULL CHECK (price > 0)
 );
 CREATE TABLE public.asset_balances (
-  balance numeric(28,8) NOT NULL CHECK (balance >= 0)
+  balance numeric(28,8) NOT NULL DEFAULT 0 CHECK (balance >= 0)
 );
 CREATE TABLE public.order_reservations (
   reserved_amount numeric NOT NULL CHECK (reserved_amount > 0),
-  released_amount numeric NOT NULL CHECK (released_amount >= 0 AND released_amount <= reserved_amount),
-  consumed_amount numeric NOT NULL CHECK (consumed_amount >= 0 AND consumed_amount + released_amount <= reserved_amount)
+  released_amount numeric NOT NULL DEFAULT 0 CHECK (released_amount >= 0 AND released_amount <= reserved_amount),
+  consumed_amount numeric NOT NULL DEFAULT 0 CHECK (consumed_amount >= 0 AND consumed_amount + released_amount <= reserved_amount)
 );
 CREATE TABLE public.conditional_orders (
   order_kind text NOT NULL,
@@ -49,3 +51,19 @@ INSERT INTO public.conditional_orders(order_kind,amount,trigger_price,limit_pric
 VALUES ('take_profit',0.5,12.25,NULL,NULL);
 INSERT INTO public.wallets VALUES (200);
 INSERT INTO public.transactions VALUES (10.5);
+
+-- Representative production-like indexes, trigger, defaults, and grants.
+CREATE UNIQUE INDEX orders_widening_fixture_idx ON public.orders(order_type, amount);
+CREATE INDEX trades_widening_fixture_idx ON public.trades(amount, price);
+CREATE INDEX asset_balances_widening_fixture_idx ON public.asset_balances(balance);
+CREATE INDEX order_reservations_widening_fixture_idx ON public.order_reservations(reserved_amount);
+CREATE INDEX conditional_orders_widening_fixture_idx ON public.conditional_orders(created_at);
+
+CREATE FUNCTION public.widening_fixture_guard() RETURNS trigger
+LANGUAGE plpgsql AS $fn$ BEGIN RETURN NEW; END $fn$;
+CREATE TRIGGER orders_widening_fixture_trigger BEFORE INSERT ON public.orders
+FOR EACH ROW EXECUTE FUNCTION public.widening_fixture_guard();
+
+GRANT SELECT ON public.orders, public.trades, public.asset_balances, public.conditional_orders TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.orders, public.trades, public.asset_balances,
+  public.order_reservations, public.conditional_orders TO service_role;
