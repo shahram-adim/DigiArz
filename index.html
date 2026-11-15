@@ -2254,10 +2254,9 @@ async function refreshMarketTickersUnlocked(){
    let recovered=0;
    for(const row of fallback.rows){
     const current=marketTickerMap.get(row.symbol);
-    if(current&&current.change===null&&Number.isFinite(Number(row.change))){current.change=Number(row.change);recovered++}
+    if(current&&current.change===null&&row.change!==null&&row.change!==undefined&&row.change!==''&&Number.isFinite(Number(row.change))){current.change=Number(row.change);recovered++}
    }
    if(recovered)provider='Binance + '+[...new Set(fallback.rows.filter(x=>Number.isFinite(Number(x.change))).map(x=>x.source.split(' · ')[0]))].join('، ');
-   if(btc&&btc.change===null&&Number.isFinite(Number(marketTickerMap.get('BTCUSDT')?.change)))btc.change=Number(marketTickerMap.get('BTCUSDT').change);
    if(!btc||btc.change===null)failure='درصد تغییر BTC از Binance و منابع جایگزین دریافت نشد';
   }
  }catch(primaryError){
