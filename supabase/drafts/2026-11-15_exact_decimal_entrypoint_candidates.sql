@@ -76,8 +76,10 @@ BEGIN
       AND mp.updated_at >= now() - interval '1 minute'
     FOR SHARE;
 
-    IF NOT FOUND OR v_price IS NULL OR v_price <= 0 THEN
-        RAISE EXCEPTION 'Market price unavailable or outdated';
+    IF NOT FOUND OR v_price IS NULL OR v_price <= 0
+       OR v_price >= 10000000000000000::numeric
+       OR pg_catalog.scale(v_price) > 18 THEN
+        RAISE EXCEPTION 'Market price unavailable, outdated, or outside supported precision';
     END IF;
 
     v_fee_rate := public.get_demo_trading_fee_rate('USDT', 'taker');
