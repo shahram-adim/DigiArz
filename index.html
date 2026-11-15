@@ -1523,6 +1523,35 @@ body.light-theme .orders-center-v36{background:radial-gradient(circle at 8% 20%,
 @media(max-width:520px){.da-market-glass{padding:10px;border-radius:17px}.da-market-toolbar{grid-template-columns:1fr}.da-market-sort{height:39px}.dashboard-market-preview.da-v2-market-list{gap:8px}.da-market-coin-card{padding:10px}.da-market-logo,.da-market-logo-inner{width:40px!important;height:40px!important;flex-basis:40px!important}.da-market-price{font-size:13px}.da-market-card-foot{align-items:flex-start;flex-direction:column}.da-market-chart-btn{width:100%}}
 @media(prefers-reduced-motion:reduce){.da-market-coin-card{transition:none}}
 
+
+/* DIGIARZ-DASHBOARD-HORIZONTAL-MARKET-RAIL */
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list{
+ display:flex!important;flex-flow:row nowrap!important;align-items:stretch;gap:12px;
+ direction:rtl;width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;
+ padding:3px 2px 13px;margin:0;scrollbar-width:thin;
+ scrollbar-color:rgba(227,183,91,.48) rgba(255,255,255,.045);
+ overscroll-behavior-inline:contain;scroll-snap-type:x mandatory;
+ -webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;
+}
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card{
+ display:flex;flex:0 0 clamp(218px,27vw,260px);width:clamp(218px,27vw,260px);
+ min-width:0;max-width:82vw;flex-direction:column;scroll-snap-align:start;
+}
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-empty,
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.muted{flex:0 0 100%;width:100%}
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list::-webkit-scrollbar{height:5px}
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list::-webkit-scrollbar-track{background:rgba(255,255,255,.045);border-radius:10px}
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list::-webkit-scrollbar-thumb{background:rgba(227,183,91,.45);border-radius:10px}
+@media(max-width:520px){
+ #dashboardMarketPreview.dashboard-market-preview.da-v2-market-list{gap:9px;padding-bottom:11px}
+ #dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card{flex-basis:224px;width:224px;max-width:78vw;padding:11px}
+ #dashboardMarketPreview.dashboard-market-preview.da-v2-market-list .da-market-card-foot{align-items:center;flex-direction:row}
+ #dashboardMarketPreview.dashboard-market-preview.da-v2-market-list .da-market-chart-btn{width:auto;flex:0 0 auto}
+}
+@media(prefers-reduced-motion:reduce){
+ #dashboardMarketPreview.dashboard-market-preview.da-v2-market-list{scroll-behavior:auto}
+}
+
 </style>
 </head>
 <body>
