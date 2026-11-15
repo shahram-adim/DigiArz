@@ -1208,3 +1208,19 @@
 - [x] ۱۳ نماد قبلاً بدون قیمت تازه اکنون قیمت دارند: 0G، VFY، ZAMA، ZBCN، ZBT، ZEC، ZEREBRO، ZEST، ZETA، ZIL، ZK، ZORA و ZTC.
 - [x] migration تولید `20261115130430_fetch_coin_gecko_market_price_overflow_ids` به مخزن افزوده شد: `supabase/migrations/20261115130430_fetch_coin_gecko_market_price_overflow_ids.sql`.
 - [x] تعداد جفت‌ارزهای فعال همچنان ۱۲ است؛ هیچ معامله، سفارش، رزرو، کیف پول یا موجودی کاربر تغییر نکرد.
+
+
+## اتصال Kifpool به همگام‌سازی زمان‌بندی‌شده — ۱۵ نوامبر ۲۰۲۶
+- [x] درخواست واقعی GraphQL سایت Kifpool با persisted query به نام `headerCoins` استخراج شد؛ introspection عمومی بسته است اما عملیات بازار مجاز است.
+- [x] پاسخ زنده API با HTTP 200 و ۱٬۲۷۶ ارز دریافت شد؛ ۱٬۲۶۸ نماد معتبر مطابق قاعده نرمال‌سازی وارد مشاهدات شدند و نمادهای تک‌حرفی الفبایی نیز حفظ شدند.
+- [x] تابع زمان‌بندی `request_iran_exchange_asset_sync()` به Kifpool گسترش یافت؛ Cron درخواست هر ۳۰ دقیقه و پردازش هر ۲ دقیقه فعال باقی ماند.
+- [x] پردازش Kifpool فقط در `exchange_asset_observations` انجام می‌شود؛ تطبیق CoinGecko وضعیت را به matched/ambiguous/pending/unmatched می‌برد و به‌خودی‌خود جفت‌ارز جدیدی فعال نمی‌کند.
+- [x] پس از مشاهده timeout در اجرای پردازش سراسری، علت در trigger فهرست‌سازی خودکار مشخص شد: بررسی تکراری دارایی‌های از قبل matched در هر upsert. تابع trigger اصلاح شد تا فقط هنگام درج یا تغییر واقعی وضعیت تطبیق/فعال‌بودن، فهرست‌سازی را بررسی کند.
+- [x] اجرای مجدد پردازش موفق شد و ۳٬۳۴۱ ردیف از پاسخ‌های منابع دریافت‌شده upsert شدند.
+- [x] نتیجه Kifpool در جدول مشاهدات: ۱٬۲۶۸ دارایی؛ ۱٬۰۱۲ matched، ۶۹ ambiguous، ۱۲۷ pending و ۶۰ unmatched.
+- [x] مجموع مشاهدات اکنون ۴٬۹۶۰ ردیف از ۸ منبع است.
+- [x] تعداد جفت‌ارزهای فعال بدون تغییر، ۱۲ باقی ماند.
+- [x] نسخه ۶ Edge Function در مسیر `supabase/functions/sync-iran-exchange-assets/index.ts` ثبت شده است؛ مسیر زمان‌بندی production از توابع SQL موجود استفاده می‌کند.
+- [x] migrationهای `20261115134500_add_kifpool_to_scheduled_exchange_asset_sync.sql` و `20261115134600_avoid_relisting_unchanged_exchange_asset_matches.sql` در مخزن ثبت و روی Supabase اعمال شدند.
+- [ ] تطبیق‌های ambiguous/pending و ۶۰ unmatched نیازمند بررسی کیفیت داده و نگاشت‌های تکمیلی هستند؛ تا زمان تأیید، جفت‌ارز جدید فعال نمی‌شود.
+- نکته مالی: هیچ سفارش، معامله، رزرو، کیف پول یا موجودی کاربر تغییر نکرد.
