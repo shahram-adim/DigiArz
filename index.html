@@ -1818,6 +1818,58 @@ body.dashboard-page-active #appView{display:block}
  body.dashboard-page-active .wrap{padding-bottom:calc(105px + env(safe-area-inset-bottom))}
 }
 
+
+/* DIGIARZ AUTH LANDSCAPE LAYOUT: keep the login card side-by-side on phones */
+@media(max-width:760px){
+ body.auth-page-active #authView.auth{
+  display:grid!important;
+  grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr)!important;
+  grid-template-rows:minmax(0,1fr)!important;
+  align-items:stretch!important;
+  width:calc(100% - 16px)!important;
+  max-width:980px!important;
+  min-height:0!important;
+  margin:8px auto!important;
+  overflow:hidden!important;
+ }
+ body.auth-page-active #authView.auth>.auth-visual{
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:space-between!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:100%!important;
+  padding:14px 9px!important;
+ }
+ body.auth-page-active #authView.auth>.auth-form{
+  display:block!important;
+  width:100%!important;
+  min-width:0!important;
+  padding:15px 10px!important;
+ }
+ body.auth-page-active #authView .auth-brand{font-size:25px!important}
+ body.auth-page-active #authView .auth-headline{font-size:15px!important;line-height:1.8!important}
+ body.auth-page-active #authView .auth-copy{font-size:10px!important;line-height:1.9!important}
+ body.auth-page-active #authView .auth-benefits{grid-template-columns:minmax(0,1fr)!important;gap:5px!important;margin-top:12px!important}
+ body.auth-page-active #authView .auth-benefit{padding:6px 5px!important;font-size:9px!important;gap:5px!important}
+ body.auth-page-active #authView .auth-benefit i{width:22px!important;height:22px!important;flex-basis:22px!important}
+ body.auth-page-active #authView .auth-form h2{font-size:17px!important;line-height:1.6!important}
+ body.auth-page-active #authView .auth-intro{font-size:10px!important;line-height:1.8!important;margin-bottom:10px!important}
+ body.auth-page-active #authView .auth-form .field{margin:8px 0!important}
+ body.auth-page-active #authView .auth-form label{font-size:10px!important}
+ body.auth-page-active #authView .auth-form input{min-height:40px!important;padding:8px!important;font-size:12px!important}
+ body.auth-page-active #authView .auth-actions{grid-template-columns:minmax(0,1fr)!important;gap:6px!important;margin-top:10px!important}
+ body.auth-page-active #authView .auth-actions button{min-height:39px!important;padding:8px 5px!important;font-size:11px!important}
+ body.auth-page-active #authView #forgotBtn{min-height:35px!important;margin-top:6px!important;font-size:10px!important}
+ body.auth-page-active #authView .auth-security{font-size:8px!important;line-height:1.7!important;padding:7px!important;margin-top:9px!important}
+}
+@media(max-width:370px){
+ body.auth-page-active #authView.auth{grid-template-columns:minmax(0,.72fr) minmax(0,1.28fr)!important}
+ body.auth-page-active #authView.auth>.auth-visual{padding:11px 7px!important}
+ body.auth-page-active #authView.auth>.auth-form{padding:12px 8px!important}
+ body.auth-page-active #authView .auth-benefit{font-size:8px!important}
+}
+
 </style>
 </head>
 <body>
