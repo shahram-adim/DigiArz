@@ -1820,6 +1820,30 @@ body.dashboard-page-active #appView{display:block}
 
 
 
+
+/* Restore yesterday's original DigiArz login card proportions */
+body.auth-page-active #authView.auth{
+ max-width:980px!important;
+ min-height:570px!important;
+ grid-template-columns:minmax(0,1fr) minmax(0,1.05fr)!important;
+}
+@media(max-width:760px){
+ body.auth-page-active #authView.auth{
+  grid-template-columns:minmax(0,1fr)!important;
+  min-height:0!important;
+  margin:16px auto!important;
+ }
+ body.auth-page-active #authView.auth>.auth-visual{
+  min-height:270px!important;
+  padding:23px!important;
+ }
+ body.auth-page-active #authView.auth>.auth-form{padding:23px 18px!important}
+}
+@media(max-width:370px){
+ body.auth-page-active #authView.auth>.auth-visual{padding:18px!important}
+ body.auth-page-active #authView.auth>.auth-form{padding:19px 14px!important}
+}
+
 </style>
 </head>
 <body>
