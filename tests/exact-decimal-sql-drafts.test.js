@@ -29,6 +29,7 @@ test('Limit worker preserves concurrency and account safeguards', () => {
   assert.match(worker, /round\(v_qty \* v_market_price, 8\)/);
   assert.match(worker, /round\(v_fee_rate \* v_gross, 8\)|round\(v_gross \* v_fee_rate, 8\)/);
   assert.match(worker, /v_gross <= 0/);
+  assert.match(worker, /round\(\(v_remaining - v_qty\) \* v_market_price, 8\) <= 0/);
   assert.match(worker, /round\(v_new_remaining \* v_order\.price \* \(1 \+ v_fee_rate\), 8\)/);
 });
 
