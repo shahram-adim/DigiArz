@@ -147,3 +147,20 @@ Full lifecycle testing remains blocked until an isolated Supabase test project w
 
 ### Scope note
 This review is static/read-only. It does not certify matching-engine economics, race behavior under load, or full transaction correctness; those remain explicit QA items.
+
+
+## Wallet, asset-balance and reservation consistency snapshot — 2026-11-15
+
+### Read-only production snapshot
+- [x] Checked for negative USDT/IRR wallet balances and negative asset balances: zero findings.
+- [x] Checked reservation arithmetic for negative values or consumed + released exceeding reserved: zero findings.
+- [x] Checked active orders for missing/duplicate reservations, invalid active reservation state, and amount = filled + remaining mismatches: zero findings.
+- [x] Checked terminal orders retaining an active reservation: zero findings.
+- [x] Checked trades with missing orders or user ownership mismatch: zero findings.
+- [x] Checked conditional parent/child links for missing rows or user ownership mismatch: zero findings.
+- [x] Production row counts at inspection: 3 orders (all `market:filled`), 0 order reservations, 3 trades, 3 transactions, 1 wallet, 1 asset-balance row, 0 conditional orders.
+- [ ] Important limitation: there are currently no Limit or Stop-Limit orders and no reservation rows in production. Therefore the reservation and Limit lifecycle checks are structurally clean but do not exercise those paths; they are not evidence of successful Limit/Stop-Limit fills, partial fills, or cancellation.
+- [x] No production row was inserted, updated, or deleted during this review.
+
+### Next QA requirement
+Run the complete reserve/fill/partial-fill/cancel and Stop-Limit parent-child lifecycle against an isolated test database with disposable users and balances. Do not create test orders or alter balances in production.
