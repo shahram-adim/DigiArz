@@ -1667,6 +1667,52 @@ body.light-theme #priceChart,body.light-theme #volumeChart{background:#fff;borde
  border:0!important;
 }
 
+
+/* FINAL MARKET ROW OVERRIDE — keep favorite star before logo */
+#tab-markets .coin{
+ direction:rtl!important;
+ display:grid!important;
+ grid-template-columns:30px minmax(0,1fr) minmax(64px,auto) minmax(86px,auto)!important;
+ grid-template-areas:"favorite identity change price"!important;
+ align-items:center!important;
+ gap:6px!important;
+}
+#tab-markets .coin>.favorite-btn{
+ grid-area:favorite!important;grid-column:auto!important;grid-row:auto!important;
+ justify-self:center!important;align-self:center!important;
+}
+#tab-markets .coin>.coin-identity{
+ grid-area:identity!important;grid-column:auto!important;grid-row:auto!important;
+ min-width:0!important;direction:rtl!important;flex-direction:row!important;
+}
+#tab-markets .coin>.coin-change-wrap{
+ grid-area:change!important;grid-column:auto!important;grid-row:auto!important;
+ min-width:0!important;
+}
+#tab-markets .coin>.price-stack{
+ grid-area:price!important;grid-column:auto!important;grid-row:auto!important;
+ min-width:0!important;align-items:flex-end!important;
+}
+@media(max-width:700px){
+ #tab-markets .coin{
+  grid-template-columns:28px minmax(0,1fr) minmax(58px,auto) minmax(74px,auto)!important;
+  gap:5px!important;padding:10px 7px!important;
+ }
+ #tab-markets .coin>.favorite-btn{width:27px!important;height:27px!important;padding:3px!important}
+ #tab-markets .coin .coin-change{min-width:0!important;font-size:9px!important;padding:4px 3px!important}
+ #tab-markets .coin .price-usd{font-size:10px!important}
+ #tab-markets .coin .price-toman{font-size:10px!important}
+}
+@media(max-width:380px){
+ #tab-markets .coin{
+  grid-template-columns:25px minmax(0,1fr) minmax(52px,auto) minmax(66px,auto)!important;
+  gap:3px!important;padding:9px 5px!important;
+ }
+ #tab-markets .coin .coin-en{font-size:8px!important}
+ #tab-markets .coin .coin-change{font-size:8px!important}
+ #tab-markets .coin .price-usd,#tab-markets .coin .price-toman{font-size:9px!important}
+}
+
 </style>
 </head>
 <body>
