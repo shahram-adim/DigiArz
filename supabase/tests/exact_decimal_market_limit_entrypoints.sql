@@ -83,6 +83,37 @@ BEGIN
     IF SQLERRM = 'Expected >18-place Limit amount to be rejected' THEN RAISE; END IF;
   END;
 
+  -- Reject Market buy settlement above numeric(24,8) capacity before any ledger write.
+  UPDATE public.market_prices SET price=9999999999999999,updated_at=now()
+  WHERE symbol='BTCUSDT';
+  BEGIN
+    PERFORM public.execute_demo_trade('BTCUSDT','buy',1000000,0);
+    RAISE EXCEPTION 'Expected oversized Market settlement to be rejected';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Expected oversized Market settlement to be rejected' THEN RAISE; END IF;
+    IF SQLERRM NOT LIKE '%numeric(24,8) USDT capacity%' THEN RAISE; END IF;
+  END;
+  SELECT balance_usdt INTO v_wallet FROM public.wallets WHERE user_id=v_uid;
+  IF v_wallet <> 192.987 THEN
+    RAISE EXCEPTION 'Rejected oversized Market trade changed wallet: %',v_wallet;
+  END IF;
+
+  -- Reject Limit buy reservation above numeric(24,8) capacity.
+  BEGIN
+    PERFORM public.place_limit_order(
+      'BTCUSDT','buy',1000000,9999999999999999
+    );
+    RAISE EXCEPTION 'Expected oversized Limit reservation to be rejected';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Expected oversized Limit reservation to be rejected' THEN RAISE; END IF;
+    IF SQLERRM NOT LIKE '%numeric(24,8) USDT capacity%' THEN RAISE; END IF;
+  END;
+  SELECT count(*) INTO v_count FROM public.orders
+  WHERE user_id=v_uid AND order_type='limit';
+  IF v_count <> 2 THEN
+    RAISE EXCEPTION 'Rejected oversized Limit order was persisted';
+  END IF;
+
   RAISE NOTICE 'Market execution and Limit placement integration: PASS';
 END
 $test$;
