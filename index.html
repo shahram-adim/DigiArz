@@ -2900,7 +2900,7 @@ async function loadOpenOrders(){
   const title=document.createElement('strong');
   title.textContent=o.symbol+' · '+(o.side==='buy'?'خرید':'فروش')+' Limit';
   const meta=document.createElement('small');
-  meta.textContent='قیمت هدف: '+formatExactNum(o.price_text,18)+' USDT · کل: '+formatNum(o.amount,10)+' · انجام‌شده: '+formatExactNum(o.filled_amount_text,18)+' · باقی‌مانده: '+formatExactNum(o.remaining_amount_text,18)+' · وضعیت: '+(orderStatusFa[o.status]||o.status);
+  meta.textContent='قیمت هدف: '+formatExactNum(o.price_text,18)+' USDT · کل: '+formatExactNum(o.amount_text,18)+' · انجام‌شده: '+formatExactNum(o.filled_amount_text,18)+' · باقی‌مانده: '+formatExactNum(o.remaining_amount_text,18)+' · وضعیت: '+(orderStatusFa[o.status]||o.status);
   const reserveLine=document.createElement('small');reserveLine.className='small muted';
   if(reservationResult.error){
    reserveLine.textContent='وضعیت رزرو از دیتابیس قابل خواندن نیست؛ رزرو تأیید نشده است.';
@@ -3127,7 +3127,7 @@ function renderDashboardActivity(){
  const orderRoot=$('dashboardRecentOrders');
  if(orderRoot){orderRoot.replaceChildren();const rows=open.slice(0,5);
   if(!rows.length){const empty=document.createElement('div');empty.className='muted small';empty.textContent='در حال حاضر سفارش بازی در فهرست ۲۰۰ سفارش اخیر دیده نمی‌شود.';orderRoot.append(empty)}
-  for(const o of rows){const row=document.createElement('div');row.className='dashboard-activity-row';const main=document.createElement('div');const title=document.createElement('strong');title.textContent=o.symbol+' · '+(o.side==='buy'?'خرید':'فروش')+' · '+(o.order_type==='limit'?'Limit':o.order_type==='conditional'?(o.conditional_detail?.order_kind==='stop_limit'?'Stop-Limit':'سفارش شرطی'):'Market');const meta=document.createElement('small');meta.textContent='باقی‌مانده: '+formatNum(o.remaining_amount,10)+' · '+(orderStatusFa[o.status]||o.status);main.append(title,meta);const time=document.createElement('small');time.className='muted';time.textContent=o.created_at?new Date(o.created_at).toLocaleDateString('fa-IR'):'—';row.append(main,time);orderRoot.append(row)}
+  for(const o of rows){const row=document.createElement('div');row.className='dashboard-activity-row';const main=document.createElement('div');const title=document.createElement('strong');title.textContent=o.symbol+' · '+(o.side==='buy'?'خرید':'فروش')+' · '+(o.order_type==='limit'?'Limit':o.order_type==='conditional'?(o.conditional_detail?.order_kind==='stop_limit'?'Stop-Limit':'سفارش شرطی'):'Market');const meta=document.createElement('small');meta.textContent='باقی‌مانده: '+formatExactNum(o.remaining_amount_text,18)+' · '+(orderStatusFa[o.status]||o.status);main.append(title,meta);const time=document.createElement('small');time.className='muted';time.textContent=o.created_at?new Date(o.created_at).toLocaleDateString('fa-IR'):'—';row.append(main,time);orderRoot.append(row)}
  }
  const tradeRoot=$('dashboardRecentTrades');
  if(tradeRoot){tradeRoot.replaceChildren();const rows=historyRows.slice(0,5);
