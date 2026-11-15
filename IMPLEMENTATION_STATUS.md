@@ -1336,3 +1336,13 @@
 - [x] هر ۲۱ مورد به matched تغییر وضعیت دادند.
 - [x] آمار Kifpool: ۱٬۱۱۶ matched، ۱۹ ambiguous، ۹۱ pending، ۴۲ unmatched؛ مجموع ۱٬۲۶۸.
 - [x] تعداد جفت‌ارزهای فعال در `public.demo_trading_pairs` برابر ۱۲ باقی ماند؛ هیچ فهرست بازار/جفت‌ارز یا داده مالی کاربر تغییر نکرد.
+
+
+## اصلاح شناسهٔ قدیمی ARPA در تطبیق Kifpool — ۱۵ نوامبر ۲۰۲۶
+- [x] در payload Kifpool، نماد ARPA با نام قدیمی «ARPA Chain» و شناسهٔ `arpa-chain` ثبت شده بود؛ کاتالوگ جاری CoinGecko دارایی ARPA را با شناسهٔ `arpa` و نام ARPA نگه می‌دارد.
+- [x] گزارش پژوهشی SEC تغییر شناسهٔ CoinGecko از `arpa-chain` به `arpa` را مستند می‌کند؛ صفحهٔ جاری CoinGecko نیز API ID برابر `arpa` و نام قبلی ARPA Chain را نشان می‌دهد.
+- [x] تطبیق محدودِ چهارشرطی فقط برای همین انتقال شناسه اضافه شد: source ID قدیمی `arpa-chain`، catalog ID جاری `arpa`، نماد ARPA و جفت نام نرمال‌شدهٔ ARPA Chain → ARPA. منطق منابع دیگر و aliasهای قبلی تغییر نکرد.
+- [x] Migration `20261115143450_allow_verified_kifpool_legacy_coin_id_transition` روی Supabase اعمال و فایل آن در GitHub ثبت شد.
+- [x] پردازش مجدد انجام شد؛ ARPA اکنون به `arpa` با وضعیت matched وصل است. آمار Kifpool: ۱٬۱۱۷ matched، ۱۹ ambiguous، ۹۰ pending و ۴۲ unmatched از ۱٬۲۶۸.
+- [x] جفت‌ارزهای فعال همچنان ۱۲ عدد است؛ هیچ جفت‌ارز جدید، سفارش، معامله، رزرو، کیف پول یا موجودی کاربر تغییر نکرد.
+- منابع بررسی: [SEC research on crypto data identifiers](https://www.sec.gov/files/cryptodata-sec-102525.pdf) و [CoinGecko ARPA](https://www.coingecko.com/en/coins/arpa).
