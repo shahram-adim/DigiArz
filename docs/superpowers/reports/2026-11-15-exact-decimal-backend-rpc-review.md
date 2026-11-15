@@ -177,3 +177,11 @@ Review also identified two additional cases and updated the drafts:
 - Market execution now checks the authoritative market price against the same 16-integer-digit / 18-fractional-digit contract as the other entrypoints. The Limit worker also validates the stored filled quantity before processing.
 
 The latest commit `884dc72993c27a17702a911e1588515b1ab5cb6e` has a fresh CI run in progress to verify these final validation additions. The earlier passing integration run was against commit `8d04b07423e3b371a1da22674df48d6dede756bc`, before the latest market-price static assertion. All SQL candidates remain under `supabase/drafts/`; no Production schema, RPC, order, trade, reservation, wallet, or balance has been modified.
+
+
+## Latest verification — 2026-11-15
+
+- Workflow run `43753001195` completed successfully on commit `96477df939d24fbcfd86fab64245e1b365bd4758`. Node/browser checks, PostgreSQL arithmetic tests, and the isolated PostgreSQL 17 Limit-worker integration all passed.
+- The entrypoint draft now rejects zero-rounded notional for Market execution, both sides of Limit and Stop-Limit placement, and conditional-exit placement. Market execution also enforces the shared market-price range.
+- A read-only Production recheck confirmed: orders 0, trades 0, reservations 0, conditional orders 0, transactions 0, asset balances 0, wallets 1. The existing demo wallet remains at 200 USDT and 1,000,000,000 IRR.
+- No Production DDL, RPC replacement, order, trade, reservation, transaction, asset balance, or wallet change was made. The remaining work is broader isolated lifecycle coverage for placement/cancellation and Stop-Limit/conditional parent-child synchronization, followed by a full release review. Exact 18-place input remains gated in the UI until the coordinated database release is explicitly approved.
