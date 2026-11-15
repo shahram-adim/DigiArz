@@ -216,3 +216,23 @@ Static inspection and read-only aggregate checks only. No test trade, balance ch
 3. Add consistent server-side input range/precision validation for Market, Limit, Stop-Limit, and conditional-exit RPCs after the storage policy is agreed.
 4. Add isolated test coverage for repeated 25% partial fills, very small asset quantities/prices, buy/sell settlement, and reservation reconciliation before applying schema changes to production.
 5. Review all dependent functions, UI formatters, exports and constraints before generating/applying the migration. This recommendation is not an authorization to change production schema.
+
+
+## Frontend precision dependency review — 2026-11-15
+
+### Confirmed UI dependencies
+- The four order-entry flows (Market, Limit, Stop-Limit, conditional exit) currently convert numeric input strings with JavaScript `Number(...)` before sending Supabase RPC arguments. This conversion is not safe for arbitrary 18-decimal quantities/prices and may lose decimal precision before PostgreSQL receives the value.
+- `formatNum()` converts all values through JavaScript `Number`; increasing database scale alone would not preserve/display 18-place values exactly.
+- Quick-trade estimate and available-balance precheck also use JavaScript Number arithmetic. These are client-side convenience checks only; server validation remains authoritative, but the UI can show a rounded estimate.
+- Order book display currently formats prices at 8 decimals; recent public-market trades use 10 decimals. These are not aligned with the 18-place market-price storage.
+- Open-order, conditional-order, Stop-Limit and order-history panels request and display values with up to 10 fractional digits, so they will need a consistent exact-decimal display policy if the schema is widened to 18.
+
+### Required coordinated frontend changes before enabling 18-place input
+1. Preserve raw input strings for amount and price RPC arguments; validate decimal syntax, maximum integer digits, and maximum fractional digits without converting the submitted value to Number.
+2. Use an exact-decimal strategy for client-side estimates and formatting (or explicitly label estimates as approximate); do not use binary floating-point for authoritative settlement.
+3. Update order-book and order-history formatters to display meaningful precision without truncating micro-prices or quantities.
+4. Keep the server-side PostgreSQL functions authoritative for balance, reservation, fee and settlement arithmetic.
+5. Test representative micro-price symbols and 18-decimal amounts in an isolated environment, including Android browser input behavior.
+
+### Dependency conclusion
+The database widening migration must not be applied alone. The UI's Number conversions and formatters are direct dependencies. Production schema remains unchanged; this is a dependency assessment only.
