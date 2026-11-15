@@ -34,6 +34,7 @@ BEGIN
     IF v_cond.symbol IS NULL OR v_cond.symbol !~ '^[A-Z0-9]{2,15}USDT$'
        OR v_cond.amount IS NULL OR v_cond.amount<=0
        OR v_cond.trigger_price IS NULL OR v_cond.trigger_price<=0 THEN
+      RAISE NOTICE 'conditional skip invalid params id=% kind=% symbol=% amount=% trigger=%',v_cond.id,v_cond.order_kind,v_cond.symbol,v_cond.amount,v_cond.trigger_price;
       v_skipped:=v_skipped+1; CONTINUE;
     END IF;
     SELECT mp.price INTO v_market_price
@@ -42,10 +43,12 @@ BEGIN
       AND mp.updated_at>=now()-interval '1 minute'
     FOR SHARE;
     IF NOT FOUND OR v_market_price IS NULL OR v_market_price<=0 THEN
+      RAISE NOTICE 'conditional skip market id=% found=% price=%',v_cond.id,FOUND,v_market_price;
       v_skipped:=v_skipped+1; CONTINUE;
     END IF;
     IF (v_cond.order_kind='take_profit' AND v_market_price<v_cond.trigger_price)
        OR (v_cond.order_kind='stop_loss' AND v_market_price>v_cond.trigger_price) THEN
+      RAISE NOTICE 'conditional skip trigger id=% kind=% market=% trigger=%',v_cond.id,v_cond.order_kind,v_market_price,v_cond.trigger_price;
       v_skipped:=v_skipped+1; CONTINUE;
     END IF;
     SELECT * INTO v_res
@@ -57,6 +60,7 @@ BEGIN
        OR v_res.reserved_amount<v_cond.amount
        OR v_res.consumed_amount<0
        OR v_res.consumed_amount+v_res.released_amount>v_res.reserved_amount THEN
+      RAISE NOTICE 'conditional skip reservation id=% found=% status=% asset=% expected=% reserved=% amount=% consumed=% released=%',v_cond.id,FOUND,v_res.status,v_res.asset,left(v_cond.symbol,length(v_cond.symbol)-4),v_res.reserved_amount,v_cond.amount,v_res.consumed_amount,v_res.released_amount;
       UPDATE public.conditional_orders
       SET attempt_count=attempt_count+1,last_error='Reservation validation failed',updated_at=now()
       WHERE id=v_cond.id;
