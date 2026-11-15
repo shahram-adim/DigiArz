@@ -107,3 +107,18 @@ The 18-place partial-fill progress rule is now pinned in the design spec and cov
 - Reject submitted quantities that would be below the supported 18-place quantum; never silently round input.
 
 This is a design/test specification only. The SQL regression file has not been executed in PostgreSQL. The live worker has not been replaced. Production remains unchanged and 18-decimal release remains NO-GO.
+
+
+## Additional live RPC findings — 2026-11-15
+
+Read-only inspection of the current Production function definitions found:
+
+- `place_limit_order` and `place_stop_limit_order` validate positivity and the existing amount ceiling, but do not reject input with more than 18 fractional digits or enforce an 18-place price scale. Buy-side reserve is currently calculated as an unquantized `amount * limit_price * (1 + fee_rate)`.
+- `execute_demo_trade` uses the fresh `market_prices.price` value for execution and ignores the supplied `p_price` argument. Gross and fee are rounded to 8 places; the same calculated total/net is reused for wallet and transaction, but the function currently accepts amounts without an explicit 18-place scale gate.
+- `process_stop_limit_orders` hands triggered orders to `place_limit_order`, so its precision and reserve behavior inherit the Limit placement implementation. The parent/child synchronization path also copies child fill and residual values.
+- `process_conditional_orders` hands conditional exits to `execute_demo_trade`; its reservation reconciliation and execution therefore inherit the Market engine's amount validation and settlement behavior.
+- Existing cancellation functions were inspected; they update order/reservation status but are not the place to introduce numeric scale conversion. Their lock ordering and account checks need to be preserved during the coordinated migration.
+
+The GitHub Actions workflow now provisions an ephemeral PostgreSQL 17 service and runs the pure arithmetic SQL regression file after the Node/browser tests. This service is CI-only; it is not a Supabase branch and does not touch Production. The first run for this workflow revision is still pending/in progress at the time of this report update.
+
+These findings reinforce that the eventual migration must update the complete RPC call chain together: Market execution, Limit placement/worker, Stop-Limit placement/trigger worker, and conditional exit execution. No Production function has been replaced.
