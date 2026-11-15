@@ -1326,3 +1326,13 @@
 - [x] Migration `20261115145500_allow_verified_kifpool_additional_name_aliases` اعمال و فایل آن ثبت شد؛ هر چهار مورد matched شدند.
 - [x] آمار Kifpool: ۱٬۰۹۵ matched، ۱۹ ambiguous، ۱۱۲ pending، ۴۲ unmatched؛ مجموع ۱٬۲۶۸.
 - [x] جفت‌ارزهای فعال همچنان ۱۲ عدد است؛ فهرست بازار و هیچ داده مالی کاربر تغییر نکرد.
+
+
+## تأیید ۲۱ مورد pending با شناسه و نماد دقیق Kifpool — ۱۵ نوامبر ۲۰۲۶
+- [x] ۲۱ observation دارای CoinGecko ID یکسان با رکورد محلی و نماد یکسان بودند؛ اختلاف فقط در نام منبع و نام کاتالوگ بود.
+- [x] برای هر مورد alias محدود اضافه شد؛ شرط تطبیق همچنان ID دقیق + symbol دقیق + نام قدیمی و نام فعلی دقیقاً مشخص‌شده است:
+  BUSY، DTEC، DUSK، FAR، FTT، GME، GMEE، GMT، MX، NC، NEAR، NFT، NOOT، OGN، ONDO، SQD، TKO، USDC، VPR، ZIG و ZRX.
+- [x] Migration `20261115150000_allow_verified_kifpool_exact_id_name_aliases_batch` روی Supabase اعمال شد؛ فایل Migration و این گزارش در GitHub ثبت شدند.
+- [x] هر ۲۱ مورد به matched تغییر وضعیت دادند.
+- [x] آمار Kifpool: ۱٬۱۱۶ matched، ۱۹ ambiguous، ۹۱ pending، ۴۲ unmatched؛ مجموع ۱٬۲۶۸.
+- [x] تعداد جفت‌ارزهای فعال در `public.demo_trading_pairs` برابر ۱۲ باقی ماند؛ هیچ فهرست بازار/جفت‌ارز یا داده مالی کاربر تغییر نکرد.
