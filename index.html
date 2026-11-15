@@ -2967,7 +2967,7 @@ async function loadExchangeAssetSyncReport(){
  try{
   const {data,error}=await supabaseClient.rpc('admin_exchange_asset_sync_report');if(error)throw error;
   const s=data?.summary||{};
-  const cards=[['مشاهده‌های ثبت‌شده',s.observations],['منابع دارای داده',s.exchanges],['نمادهای متفاوت',s.symbols],['تطبیق معتبر',s.matched],['مبهم',s.ambiguous],['در انتظار تطبیق',s.pending],['بدون تطبیق',s.unmatched],['ارزهای فهرست بازار',s.listed]];
+  const cards=[['مشاهده‌های ثبت‌شده',s.observations],['منابع دارای داده',s.exchanges],['نمادهای متفاوت',s.symbols],['رکوردهای تطبیق معتبر',s.matched],['مبهم',s.ambiguous],['در انتظار تطبیق',s.pending],['بدون تطبیق',s.unmatched],['ارزهای فهرست بازار',s.listed]];
   stats.replaceChildren();for(const [label,value] of cards){const el=document.createElement('div');el.className='stat';const l=document.createElement('div');l.className='muted small';l.textContent=label;const v=document.createElement('div');v.className='value';v.textContent=formatNum(Number(value)||0,0);el.append(l,v);stats.append(el)}
   sources.replaceChildren();
   for(const item of data.sources||[]){
