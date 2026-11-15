@@ -116,6 +116,9 @@ BEGIN
 
         v_available := v_balance - v_reserved;
         v_total := v_gross + v_fee;
+        IF v_total > 9999999999999999.99999999::numeric THEN
+            RAISE EXCEPTION 'Buy settlement exceeds numeric(24,8) USDT capacity';
+        END IF;
 
         IF v_available < v_total THEN
             RAISE EXCEPTION 'Insufficient available USDT balance';
@@ -162,6 +165,9 @@ BEGIN
         END IF;
 
         v_total := v_gross - v_fee;
+        IF v_total <= 0 OR v_total > 9999999999999999.99999999::numeric THEN
+            RAISE EXCEPTION 'Sell settlement is outside numeric(24,8) USDT capacity';
+        END IF;
 
         UPDATE public.asset_balances
         SET balance = balance - p_amount,
