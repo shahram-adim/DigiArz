@@ -84,9 +84,9 @@ BEGIN
         AND consumed_amount=0 AND released_amount=reserved_amount;
       GET DIAGNOSTICS v_rows=ROW_COUNT;
       IF v_rows<>1 THEN RAISE EXCEPTION 'Conditional reservation consumption update failed'; END IF;
-      UPDATE public.orders
-      SET status='filled',filled_amount=amount,remaining_amount=0
-      WHERE id=v_cond.order_id AND user_id=v_cond.user_id AND status='pending';
+      UPDATE public.orders AS o
+      SET status='filled',filled_amount=o.amount,remaining_amount=0
+      WHERE o.id=v_cond.order_id AND o.user_id=v_cond.user_id AND o.status='pending';
       GET DIAGNOSTICS v_rows=ROW_COUNT;
       IF v_rows<>1 THEN RAISE EXCEPTION 'Conditional parent order update failed'; END IF;
       UPDATE public.conditional_orders
@@ -116,8 +116,8 @@ BEGIN
         UPDATE public.order_reservations
         SET released_amount=reserved_amount-consumed_amount,status='released',updated_at=now()
         WHERE id=v_res.id;
-        UPDATE public.orders SET status='rejected',remaining_amount=amount-filled_amount
-        WHERE id=v_cond.order_id AND user_id=v_cond.user_id AND status='pending';
+        UPDATE public.orders AS o SET status='rejected',remaining_amount=o.amount-o.filled_amount
+        WHERE o.id=v_cond.order_id AND o.user_id=v_cond.user_id AND o.status='pending';
         UPDATE public.conditional_orders SET status='rejected',updated_at=now()
         WHERE id=v_cond.id AND status='pending';
         v_rejected:=v_rejected+1;
