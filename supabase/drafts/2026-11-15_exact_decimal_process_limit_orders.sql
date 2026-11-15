@@ -174,6 +174,13 @@ BEGIN
             CONTINUE;
         END IF;
 
+        -- Avoid leaving a dust remainder whose quote value rounds to zero.
+        -- If the remainder cannot settle independently, include it in this fill.
+        IF v_remaining > v_qty
+           AND round((v_remaining - v_qty) * v_market_price, 8) <= 0 THEN
+            v_qty := v_remaining;
+        END IF;
+
         v_gross := round(v_qty * v_market_price, 8);
         -- Do not create or destroy base units when the 8-place USDT ledger
         -- cannot represent a positive quote amount.
