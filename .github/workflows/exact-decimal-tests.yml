@@ -45,7 +45,8 @@ jobs:
           psql -h localhost -U postgres -d digiarz_type_widening_test -v ON_ERROR_STOP=1 \
             -f supabase/tests/exact_decimal_type_widening_setup.sql \
             -f supabase/drafts/2026-11-15_exact_decimal_type_widening.sql \
-            -f supabase/tests/exact_decimal_type_widening_integration.sql
+            -f supabase/tests/exact_decimal_type_widening_integration.sql \
+            -f supabase/tests/exact_decimal_type_widening_schema_verify.sql
       - name: Verify widening preflight rejects invalid data atomically
         env:
           PGPASSWORD: postgres
