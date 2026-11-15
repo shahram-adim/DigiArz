@@ -1387,3 +1387,12 @@
 
 **گام بعدی:** نتیجهٔ workflow `Exact decimal tests` برای commit این تغییر بررسی شود؛ در صورت موفقیت، بازبینی زنجیره کامل RPCهای Market/Limit/Stop-Limit و رفتار ۸ رقم اعشار تسویه USDT در برابر ۱۸ رقم اعشار دارایی پایه ادامه یابد.
 
+## تطبیق تاریخچه Migration مربوط به retry در Stop-Limit — ۱۶ نوامبر ۲۰۲۶
+- [x] بررسی تازهٔ Supabase `list_migrations` نشان داد نسخهٔ ثبت‌شده برای `bound_stop_limit_invalid_reservation_retries` برابر `20261115143827` است.
+- [x] در فهرست جاری `supabase/migrations` مخزن، فایل متناظر با پیشوند `20261115143827` وجود ندارد؛ فایل موجود با همان نام منطقی، `20261115153000_bound_stop_limit_invalid_reservation_retries.sql` است. بنابراین version ثبت‌شده در Production با پیشوند فایل GitHub هم‌خوان نیست.
+- [x] بررسی فقط‌خواندنی تابع زندهٔ `public.process_stop_limit_orders()` تأیید کرد منطق bounded retry واقعاً موجود است: ثبت `manual review required`، افزایش `attempt_count`، شرط `v_attempt >= 10` و شمارندهٔ `v_rejected`.
+- [ ] این اختلاف پیش از هر استفاده از `supabase db push` باید با تاریخچهٔ migration تطبیق داده شود؛ اجرای دوبارهٔ فایل فعلی روی تابعی که قبلاً تغییر کرده ممکن است به‌علت پیدا نکردن متن قدیمی متوقف شود. هیچ rename، حذف یا اصلاح تاریخچه‌ای در این نوبت انجام نشد.
+- [x] بررسی فقط‌خواندنی بود؛ هیچ SQL تغییردهنده، migration یا عملیات مالی روی Production اجرا نشد.
+
+**کامیت‌های تکمیل پوشش آزمون دقت اعشاری:** `19eb075a8faa3d4b6886e8f589add8cabc274534` و `568cc71113fb071a7dfdd539e9f44980c109b2b5`. گزارش آزمون در `3f72dea432ef6b3c5b51df32d9bd59b20a83c9f5` ثبت شده است.
+
