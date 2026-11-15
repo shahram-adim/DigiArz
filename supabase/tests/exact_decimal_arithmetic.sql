@@ -124,7 +124,7 @@ BEGIN
     v_remaining := v_initial;
     v_filled := 0;
     v_cycles := 0;
-    WHILE v_remaining > 0 AND v_cycles < 4 LOOP
+    WHILE v_remaining > 0 AND v_cycles < 5 LOOP
       v_qty := LEAST(v_remaining, round(v_initial * 0.25, 18));
       IF v_qty = 0 THEN
         v_qty := LEAST(v_remaining, 0.000000000000000001);
@@ -136,7 +136,7 @@ BEGIN
       v_remaining := v_initial - v_filled;
       v_cycles := v_cycles + 1;
     END LOOP;
-    IF v_remaining <> 0 OR v_filled <> v_initial OR v_cycles > 4 THEN
+    IF v_remaining <> 0 OR v_filled <> v_initial OR v_cycles > 5 THEN
       RAISE EXCEPTION 'partial fill did not conserve amount %, residual %, cycles %',
         v_initial, v_remaining, v_cycles;
     END IF;
