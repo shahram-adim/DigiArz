@@ -2102,6 +2102,14 @@ function parseOrderDecimal(value,label){
 function formatExactNum(value,max=18){
  try{return window.DigiArzDecimal.formatDecimal(String(value),{maxFractionDigits:max})}catch(_){return '—'}
 }
+function getExactReservationRemaining(reservation){
+ try{
+  const D=window.DigiArzDecimal,reserved=D.parseDecimal(reservation.reserved_amount_text),consumed=D.parseDecimal(reservation.consumed_amount_text||'0'),released=D.parseDecimal(reservation.released_amount_text||'0'),accounted=D.addDecimal(consumed,released);
+  if(reservation.status!=='reserved'||D.compareDecimal(reserved,'0')<=0||D.compareDecimal(consumed,'0')<0||D.compareDecimal(released,'0')<0||D.compareDecimal(accounted,reserved)>0)return null;
+  const remaining=D.subtractDecimal(reserved,accounted);
+  return D.compareDecimal(remaining,'0')>0?remaining:null;
+ }catch(_){return null}
+}
 function safeText(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function initClient(){if(!window.supabase?.createClient)throw new Error('کتابخانه اتصال بارگذاری نشد؛ اینترنت را بررسی کنید.');supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})}
 async function signup(){const btn=$('signupBtn');btn.disabled=true;hideMessage(authMsg);try{const name=$('fullName').value.trim(),email=$('email').value.trim().toLowerCase(),password=$('password').value;if(!email||!email.includes('@'))throw new Error('آدرس ایمیل معتبر وارد کنید.');if(password.length<6)throw new Error('رمز عبور باید حداقل ۶ کاراکتر باشد.');const {data,error}=await supabaseClient.auth.signUp({email,password,options:{data:{full_name:name},emailRedirectTo:location.href}});if(error)throw error;if(data.session){showMessage(authMsg,'ثبت‌نام موفق بود.','ok');await showApp(data.session)}else showMessage(authMsg,'ثبت‌نام انجام شد. لینک تأیید را از ایمیل باز کنید و سپس وارد شوید.','ok')}catch(e){showMessage(authMsg,'ثبت‌نام انجام نشد: '+(e.message||String(e)),'err')}finally{btn.disabled=false}}
@@ -2773,7 +2781,7 @@ async function loadConditionalOrders(){
  if(!data?.length){const empty=document.createElement('div');empty.className='muted small';empty.textContent='سفارش شرطی بازی وجود ندارد.';root.append(empty);return}
  const symbols=[...new Set(data.map(o=>o.symbol))],orderIds=data.map(o=>o.order_id).filter(Boolean);
  const [priceResult,reservationResult]=await Promise.all([
-  supabaseClient.from('market_prices').select('symbol,price,updated_at').in('symbol',symbols),
+  supabaseClient.from('market_prices').select('symbol,price,price_text:price::text,updated_at').in('symbol',symbols),
   orderIds.length?supabaseClient.rpc('get_my_order_reservations',{p_order_ids:orderIds}):Promise.resolve({data:[],error:null})
  ]);
  const prices=priceResult.error?[]:(priceResult.data||[]);
@@ -2790,9 +2798,9 @@ async function loadConditionalOrders(){
   }else if(!reservation){
    reserveLine.textContent='رزرو متناظر این سفارش پیدا نشد؛ نیازمند بررسی سرور.';
   }else{
-   const reserved=Number(reservation.reserved_amount),consumed=Number(reservation.consumed_amount||0),released=Number(reservation.released_amount||0),remaining=reserved-consumed-released;
-   const valid=reservation.status==='reserved'&&Number.isFinite(reserved)&&Number.isFinite(consumed)&&Number.isFinite(released)&&reserved>0&&consumed>=0&&released>=0&&consumed+released<=reserved&&remaining>0;
-   reserveLine.textContent=valid?'رزرو باقیمانده: '+formatNum(remaining,10)+' '+String(reservation.asset||'')+' · وضعیت: '+reservation.status:'رزرو آزاد، نامعتبر یا بدون مانده است؛ سفارش نیازمند بررسی است.';
+   const remaining=getExactReservationRemaining(reservation);
+   const valid=remaining!==null;
+   reserveLine.textContent=valid?'رزرو باقیمانده: '+formatExactNum(remaining,18)+' '+String(reservation.asset||'')+' · وضعیت: '+reservation.status:'رزرو آزاد، نامعتبر یا بدون مانده است؛ سفارش نیازمند بررسی است.';
   }
   const note=document.createElement('small');note.className='small muted';note.textContent=o.order_kind==='take_profit'?'شرط اجرا: قیمت بازار مساوی یا بالاتر از هدف':'شرط اجرا: قیمت بازار مساوی یا پایین‌تر از هدف';
   const marketLine=document.createElement('small');marketLine.className='small muted';
@@ -2850,7 +2858,7 @@ async function loadStopLimitOrders(){
  if(!data?.length){const empty=document.createElement('div');empty.className='muted small';empty.textContent='سفارش Stop-Limit بازی وجود ندارد.';root.append(empty);return}
  const pending=data.filter(o=>o.status==='pending'),symbols=[...new Set(pending.map(o=>o.symbol))],parentIds=[...new Set(data.map(o=>o.order_id).filter(Boolean))];
  const [priceResult,reservationResult,parentResult]=await Promise.all([
-  symbols.length?supabaseClient.from('market_prices').select('symbol,price,updated_at').in('symbol',symbols):Promise.resolve({data:[],error:null}),
+  symbols.length?supabaseClient.from('market_prices').select('symbol,price,price_text:price::text,updated_at').in('symbol',symbols):Promise.resolve({data:[],error:null}),
   pending.length?supabaseClient.rpc('get_my_order_reservations',{p_order_ids:pending.map(o=>o.order_id)}):Promise.resolve({data:[],error:null}),
   parentIds.length?supabaseClient.from('orders').select('id,filled_amount_text:filled_amount::text,remaining_amount_text:remaining_amount::text,status').eq('user_id',userData.user.id).in('id',parentIds):Promise.resolve({data:[],error:null})
  ]);
@@ -2872,9 +2880,9 @@ async function loadStopLimitOrders(){
    }else if(!reservation){
     state.textContent='وضعیت: رزرو این سفارش پیدا نشد؛ سفارش نیازمند بررسی است.';
    }else{
-    const reserved=Number(reservation.reserved_amount),consumed=Number(reservation.consumed_amount||0),released=Number(reservation.released_amount||0),remaining=reserved-consumed-released;
-    const reservationValid=reservation.status==='reserved'&&Number.isFinite(reserved)&&Number.isFinite(consumed)&&Number.isFinite(released)&&reserved>0&&consumed>=0&&released>=0&&consumed+released<=reserved&&remaining>0;
-    state.textContent=reservationValid?'وضعیت: منتظر رسیدن قیمت به Stop؛ رزرو باقی‌مانده: '+formatNum(remaining,10)+' '+String(reservation.asset||'')+'.':'وضعیت: رزرو آزاد، نامعتبر یا بدون مانده است؛ سفارش نیازمند بررسی است.';
+    const remaining=getExactReservationRemaining(reservation);
+    const reservationValid=remaining!==null;
+    state.textContent=reservationValid?'وضعیت: منتظر رسیدن قیمت به Stop؛ رزرو باقی‌مانده: '+formatExactNum(remaining,18)+' '+String(reservation.asset||'')+'.':'وضعیت: رزرو آزاد، نامعتبر یا بدون مانده است؛ سفارش نیازمند بررسی است.';
    }
    const marketLine=document.createElement('small');marketLine.className='small muted';
    const market=prices.find(p=>p.symbol===o.symbol),age=market?.updated_at?Date.now()-new Date(market.updated_at).getTime():Infinity;
@@ -2917,7 +2925,7 @@ async function loadOpenOrders(){
  const ids=data.map(o=>o.id),symbols=[...new Set(data.map(o=>o.symbol))];
  const [reservationResult,priceResult]=await Promise.all([
   supabaseClient.rpc('get_my_order_reservations',{p_order_ids:ids}),
-  supabaseClient.from('market_prices').select('symbol,price,updated_at').in('symbol',symbols)
+  supabaseClient.from('market_prices').select('symbol,price,price_text:price::text,updated_at').in('symbol',symbols)
  ]);
  const reservations=reservationResult.error?[]:(reservationResult.data||[]);
  const prices=priceResult.error?[]:(priceResult.data||[]);
@@ -2936,9 +2944,9 @@ async function loadOpenOrders(){
   }else if(!reservation){
    reserveLine.textContent='هشدار: رزرو متناظر این سفارش پیدا نشد؛ نیازمند بررسی سرور.';
   }else{
-   const reserved=Number(reservation.reserved_amount),consumed=Number(reservation.consumed_amount||0),released=Number(reservation.released_amount||0),free=reserved-consumed-released;
-   const valid=reservation.status==='reserved'&&Number.isFinite(reserved)&&Number.isFinite(consumed)&&Number.isFinite(released)&&reserved>0&&consumed>=0&&released>=0&&consumed+released<=reserved&&free>0;
-   reserveLine.textContent=valid?'رزرو باقیمانده: '+formatNum(free,10)+' '+String(reservation.asset||'')+' · وضعیت رزرو: '+reservation.status:'رزرو آزاد، نامعتبر یا بدون مانده است؛ سفارش نیازمند بررسی است.';
+   const free=getExactReservationRemaining(reservation);
+   const valid=free!==null;
+   reserveLine.textContent=valid?'رزرو باقیمانده: '+formatExactNum(free,18)+' '+String(reservation.asset||'')+' · وضعیت رزرو: '+reservation.status:'رزرو آزاد، نامعتبر یا بدون مانده است؛ سفارش نیازمند بررسی است.';
   }
   const reason=document.createElement('small');
   const age=market?.updated_at?Date.now()-new Date(market.updated_at).getTime():Infinity;
