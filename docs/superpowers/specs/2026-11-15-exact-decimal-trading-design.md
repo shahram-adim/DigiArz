@@ -14,6 +14,7 @@ Make demo trading preserve tiny asset quantities and micro-prices end-to-end. Ma
 - Keep submitted decimal values exact from browser input through RPC validation; do not convert authoritative values to JavaScript binary floating point.
 - Preserve `filled_amount + remaining_amount = amount` exactly at the stored scale through repeated partial fills and final residual fills.
 - Quantize USDT gross, fee, net, wallet deltas, transaction amounts, and reservation consumption consistently to 8 decimal places using one documented rounding policy.
+- Never execute a trade whose rounded 8-place USDT gross is zero. A positive 18-place base quantity multiplied by a micro-price can round to zero USDT; executing it would create base units for no quote debit (or destroy sell units for no quote credit). Market execution and the Limit worker must fail closed/skip such fills; conditional exits inherit the Market guard. A buy Limit reservation must also be rounded to 8 places and rejected if it becomes zero.
 - Apply the same precision and validation rules to Market, Limit, Stop-Limit parent/child orders, and conditional exits.
 - Retain current authentication, account-state checks, reservation rules, RLS, locking order, and atomic transaction behavior.
 
