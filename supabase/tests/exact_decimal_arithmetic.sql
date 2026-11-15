@@ -56,6 +56,14 @@ BEGIN
     RAISE EXCEPTION 'quote above-half rounding regression';
   END IF;
 
+  -- A positive base quantity must never execute for zero rounded USDT gross.
+  IF round(0.000000000000000001::numeric * 0.000000000000000001::numeric, 8) <> 0 THEN
+    RAISE EXCEPTION 'sub-quantum notional rounding regression';
+  END IF;
+  IF round(0.000000000000000001::numeric * 1000000000::numeric, 8) <= 0 THEN
+    RAISE EXCEPTION 'positive quantized quote notional incorrectly rejected';
+  END IF;
+
   -- A micro-asset fill retains 18 places while quote settlement stays at 8.
   v_qty := 0.007716048750000000;
   v_gross := round(v_qty * 0.000012345678901234, 8);
