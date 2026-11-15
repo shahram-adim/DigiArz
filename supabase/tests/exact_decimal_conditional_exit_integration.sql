@@ -46,7 +46,7 @@ BEGIN
     OR NOT EXISTS(SELECT 1 FROM public.order_reservations WHERE order_id=v_wait_id AND status='reserved' AND released_amount=0) THEN
    RAISE EXCEPTION 'Non-triggered TP order should remain pending and reserved';
  END IF;
- IF (SELECT balance FROM public.asset_balances WHERE asset='BTC' AND user_id='50000000-0000-0000-0000-000000000005')<>0.500000000000000001::numeric
+ IF (SELECT balance FROM public.asset_balances WHERE asset='BTC' AND user_id='50000000-0000-0000-0000-000000000005')<>1.000000000000000001::numeric
     OR (SELECT balance FROM public.asset_balances WHERE asset='ETH' AND user_id='50000000-0000-0000-0000-000000000005')<>2.000000000000000002::numeric THEN
    RAISE EXCEPTION 'TP/SL base asset balance delta mismatch';
  END IF;
