@@ -1802,6 +1802,22 @@ img,svg,video,canvas,iframe{max-width:100%}
  #authView.auth>.auth-form{padding:15px 11px!important}
 }
 
+
+/* DIGIARZ PAGE SEPARATION: standalone authentication screen and independent app shell */
+body.auth-page-active{min-height:100svh;overflow-x:hidden}
+body.auth-page-active .wrap{width:100%;max-width:none;min-height:100svh;margin:0;padding:0!important;display:flex;flex-direction:column;align-items:center;justify-content:center}
+body.auth-page-active .wrap>.top{display:none!important}
+body.auth-page-active #authView{display:grid!important;width:min(100% - 24px,980px)!important;margin:16px auto!important;flex:0 0 auto}
+body.auth-page-active #appView{display:none!important}
+body.dashboard-page-active .wrap{width:100%;max-width:1200px;margin-inline:auto}
+body.dashboard-page-active #authView{display:none!important}
+body.dashboard-page-active #appView{display:block}
+@media(max-width:760px){
+ body.auth-page-active .wrap{justify-content:flex-start;padding:12px 0!important}
+ body.auth-page-active #authView{width:calc(100% - 16px)!important;margin:0 auto!important}
+ body.dashboard-page-active .wrap{padding-bottom:calc(105px + env(safe-area-inset-bottom))}
+}
+
 </style>
 </head>
 <body>
@@ -1989,6 +2005,7 @@ async function signup(){const btn=$('signupBtn');btn.disabled=true;hideMessage(a
 async function login(){const btn=$('loginBtn');btn.disabled=true;showMessage(authMsg,'در حال بررسی اطلاعات ورود…','warn');try{if(!supabaseClient)throw new Error('اتصال سامانه آماده نیست؛ صفحه را تازه‌سازی کنید.');const email=$('email').value.trim().toLowerCase(),password=$('password').value;if(!email||!password)throw new Error('ایمیل و رمز عبور را وارد کنید.');const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});if(error)throw error;if(!data.session)throw new Error('ورود انجام نشد؛ نشست معتبر از سرور دریافت نشد.');showMessage(authMsg,'ورود تأیید شد؛ در حال بارگذاری حساب…','ok');await showApp(data.session)}catch(e){console.error('DigiArz login failed:',e);showMessage(authMsg,'ورود انجام نشد: '+(e?.message||String(e)||'خطای نامشخص'),'err')}finally{btn.disabled=false}}
 async function forgotPassword(){hideMessage(authMsg);try{const email=$('email').value.trim().toLowerCase();if(!email||!email.includes('@'))throw new Error('ابتدا ایمیل خود را وارد کنید.');const redirectTo=location.origin+location.pathname;const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo});if(error)throw error;showMessage(authMsg,'اگر این ایمیل در DigiArz ثبت شده باشد، لینک بازیابی برای آن ارسال می‌شود. صندوق ورودی و پوشه هرزنامه را بررسی کنید.','ok')}catch(e){showMessage(authMsg,'ارسال لینک بازیابی ناموفق بود: '+(e.message||String(e)),'err')}}
 function showRecoveryForm(){
+ document.body.classList.add('auth-page-active');document.body.classList.remove('dashboard-page-active');
  isRecoveryMode=true;
  authView.classList.remove('hidden');
  appView.classList.add('hidden');appView.classList.remove('app-view-active');
@@ -2039,11 +2056,11 @@ async function saveNewPassword(){
   showMessage(authMsg,'تغییر رمز عبور انجام نشد: '+(e.message||String(e)),'err');
  }finally{btn.disabled=false}
 }
-async function showApp(session){if(isRecoveryMode||!session?.user?.id)return;if(appLoadPromise)return appLoadPromise;appLoadPromise=(async()=>{const {data:profile,error}=await supabaseClient.from('profiles').select('is_active,deactivated_at').eq('id',session.user.id).maybeSingle();if(error)throw error;const active=!!profile&&profile.is_active!==false;isSuperAdmin=false;if(active){const roleResult=await supabaseClient.rpc('is_current_user_super_admin');if(!roleResult.error)isSuperAdmin=roleResult.data===true;}authView.classList.add('hidden');appView.classList.remove('hidden');appView.classList.add('app-view-active');$('logoutBtn').classList.remove('hidden');$('userEmail').textContent=session.user.email||'کاربر واردشده';$('adminTabBtn').style.display=active&&isSuperAdmin?'':'none';setAccountMode(active);if(active)await loadDashboard();else{document.querySelector('[data-tab="settings"]')?.click();showMessage($('accountStatusBox'),'حساب شما غیرفعال است. اطلاعات هویتی و سوابق مالی محفوظ‌اند. برای بازگشت، رمز عبور را دوباره وارد و احراز هویت کنید.','warn')}})();try{return await appLoadPromise}finally{appLoadPromise=null}}
+async function showApp(session){if(isRecoveryMode||!session?.user?.id)return;document.body.classList.remove('auth-page-active');document.body.classList.add('dashboard-page-active');if(appLoadPromise)return appLoadPromise;appLoadPromise=(async()=>{const {data:profile,error}=await supabaseClient.from('profiles').select('is_active,deactivated_at').eq('id',session.user.id).maybeSingle();if(error)throw error;const active=!!profile&&profile.is_active!==false;isSuperAdmin=false;if(active){const roleResult=await supabaseClient.rpc('is_current_user_super_admin');if(!roleResult.error)isSuperAdmin=roleResult.data===true;}authView.classList.add('hidden');appView.classList.remove('hidden');appView.classList.add('app-view-active');$('logoutBtn').classList.remove('hidden');$('userEmail').textContent=session.user.email||'کاربر واردشده';$('adminTabBtn').style.display=active&&isSuperAdmin?'':'none';setAccountMode(active);if(active)await loadDashboard();else{document.querySelector('[data-tab="settings"]')?.click();showMessage($('accountStatusBox'),'حساب شما غیرفعال است. اطلاعات هویتی و سوابق مالی محفوظ‌اند. برای بازگشت، رمز عبور را دوباره وارد و احراز هویت کنید.','warn')}})();try{return await appLoadPromise}finally{appLoadPromise=null}}
 function setAccountMode(active){document.querySelectorAll('.tabs [data-tab],.mobile-bottom-nav [data-tab]').forEach(b=>{b.style.display=active?'':'none'});$('adminTabBtn').style.display=active&&isSuperAdmin?'':'none';document.querySelectorAll('main#appView > section[id^="tab-"]').forEach(el=>{if(!active&&el.id!=='tab-settings')el.classList.add('hidden');else if(active&&el.id!=='tab-settings')el.classList.toggle('hidden',el.id!=='tab-dashboard')});$('tab-settings').classList.toggle('hidden',active);$('deactivateAccountPanel').classList.toggle('hidden',!active);$('reactivateAccountPanel').classList.toggle('hidden',active);$('accountStatusBox').classList.toggle('hidden',active);document.querySelectorAll('.tabs [data-tab],.mobile-bottom-nav [data-tab]').forEach(b=>b.classList.toggle('active',active?b.dataset.tab==='dashboard':b.dataset.tab==='settings'))}
 async function deactivateMyAccount(){const btn=$('deactivateAccountBtn');if(!confirm('حساب غیرفعال شود؟ اطلاعات هویتی، موجودی و سوابق مالی حذف نمی‌شوند؛ سفارش‌های Limit باز لغو و رزروهای آن‌ها آزاد می‌شوند.'))return;btn.disabled=true;hideMessage($('accountActionMsg'));try{const {data,error}=await supabaseClient.rpc('deactivate_my_account');if(error)throw error;if(!data?.success)throw new Error('غیرفعال‌سازی تأیید نشد.');showMessage($('accountActionMsg'),'حساب غیرفعال شد. اطلاعات و سوابق مالی حفظ شدند. برای فعال‌سازی دوباره، دوباره وارد شوید.','ok');await supabaseClient.auth.signOut()}catch(e){showMessage($('accountActionMsg'),'غیرفعال‌سازی انجام نشد: '+(e.message||String(e)),'err')}finally{btn.disabled=false}}
 async function reactivateMyAccount(){const btn=$('reactivateAccountBtn');btn.disabled=true;hideMessage($('accountActionMsg'));try{const password=$('reactivatePassword').value;if(!password)throw new Error('رمز عبور فعلی را وارد کنید.');const {data:userData,error:userError}=await supabaseClient.auth.getUser();if(userError||!userData.user)throw userError||new Error('نشست ورود معتبر نیست.');const {data:authData,error:authError}=await supabaseClient.auth.signInWithPassword({email:userData.user.email,password});if(authError)throw new Error('احراز هویت مجدد ناموفق بود: '+authError.message);if(!authData.session)throw new Error('نشست احراز هویت تازه ایجاد نشد.');const {data,error}=await supabaseClient.rpc('reactivate_my_account');if(error)throw error;if(!data?.success)throw new Error('فعال‌سازی تأیید نشد.');$('reactivatePassword').value='';showMessage($('accountActionMsg'),'حساب با احراز هویت مجدد فعال شد. سوابق و موجودی قبلی حفظ شده‌اند.','ok');setAccountMode(true);await loadDashboard()}catch(e){showMessage($('accountActionMsg'),'فعال‌سازی انجام نشد: '+(e.message||String(e)),'err')}finally{btn.disabled=false}}
-async function signOut(){try{const {error}=await supabaseClient.auth.signOut();if(error)throw error;appView.classList.add('hidden');appView.classList.remove('app-view-active');$('logoutBtn').classList.add('hidden');authView.classList.remove('hidden');$('password').value='';hideMessage(authMsg)}catch(e){showMessage(authMsg,'خروج انجام نشد: '+e.message,'err')}}
+async function signOut(){try{const {error}=await supabaseClient.auth.signOut();document.body.classList.add('auth-page-active');document.body.classList.remove('dashboard-page-active');if(error)throw error;appView.classList.add('hidden');appView.classList.remove('app-view-active');$('logoutBtn').classList.add('hidden');authView.classList.remove('hidden');$('password').value='';hideMessage(authMsg)}catch(e){showMessage(authMsg,'خروج انجام نشد: '+e.message,'err')}}
 let quickTradeReservedByAsset=new Map(),quickTradeReservationState='unknown';
 async function loadQuickTradeReservations(){
  quickTradeReservedByAsset=new Map();quickTradeReservationState='unknown';
@@ -3008,12 +3025,14 @@ async function start(){
    return;
   }
   if(event==='SIGNED_OUT'){
+   document.body.classList.add('auth-page-active');document.body.classList.remove('dashboard-page-active');
    isRecoveryMode=false;
    appView.classList.add('hidden');appView.classList.remove('app-view-active');
    $('logoutBtn').classList.add('hidden');
    authView.classList.remove('hidden');
    hideRecoveryForm();
   }else if(event==='SIGNED_IN'&&session&&!isRecoveryMode){
+   document.body.classList.add('auth-page-active');document.body.classList.remove('dashboard-page-active');
    setTimeout(()=>{showApp(session).catch(error=>{console.error('DigiArz account loading failed:',error);if(!authView.classList.contains('hidden'))showMessage(authMsg,'ورود انجام شد، اما بارگذاری حساب کامل نشد: '+(error?.message||String(error)),'err')})},0);
   }
  });
