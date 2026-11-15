@@ -2849,7 +2849,7 @@ async function loadStopLimitOrders(){
    const marketLine=document.createElement('small');marketLine.className='small muted';
    const market=prices.find(p=>p.symbol===o.symbol),age=market?.updated_at?Date.now()-new Date(market.updated_at).getTime():Infinity;
    if(priceResult.error){marketLine.textContent='علت انتظار مشخص نیست؛ دریافت قیمت بازار با خطا روبه‌رو شد.'}
-   else if(market&&Number.isFinite(age)&&age>=0&&age<=60000&&Number(market.price)>0){
+   else if(market&&Number.isFinite(age)&&age>=0&&age<=60000&&DigiDecimal.compareDecimal(String(market.price),'0')>0){
     const met=o.side==='buy'?DigiDecimal.compareDecimal(String(market.price),String(o.trigger_price))>=0:DigiDecimal.compareDecimal(String(market.price),String(o.trigger_price))<=0;
     marketLine.textContent='قیمت فعلی بازار: '+formatNum(market.price,18)+' USDT · '+(met?'شرط Stop برقرار است؛ منتظر پردازش سرور.':'علت انتظار: قیمت هنوز به Stop نرسیده است.');
    }else if(market&&age>60000){marketLine.textContent='علت انتظار: قیمت بازار قدیمی‌تر از ۶۰ ثانیه است؛ پردازشگر قیمت تازه می‌خواهد.'}
@@ -2906,8 +2906,8 @@ async function loadOpenOrders(){
   }else if(!reservation){
    reserveLine.textContent='هشدار: رزرو متناظر این سفارش پیدا نشد؛ نیازمند بررسی سرور.';
   }else{
-   const reserved=Number(reservation.reserved_amount),consumed=Number(reservation.consumed_amount||0),released=Number(reservation.released_amount||0),free=reserved-consumed-released;
-   const valid=reservation.status==='reserved'&&Number.isFinite(reserved)&&Number.isFinite(consumed)&&Number.isFinite(released)&&reserved>0&&consumed>=0&&released>=0&&consumed+released<=reserved&&free>0;
+   const reserved=String(reservation.reserved_amount??'0'),consumed=String(reservation.consumed_amount??'0'),released=String(reservation.released_amount??'0'),free=DigiDecimal.subtractDecimal(DigiDecimal.subtractDecimal(reserved,consumed,18),released,18);
+   const valid=reservation.status==='reserved'&&DigiDecimal.compareDecimal(reserved,'0')>0&&DigiDecimal.compareDecimal(consumed,'0')>=0&&DigiDecimal.compareDecimal(released,'0')>=0&&DigiDecimal.compareDecimal(DigiDecimal.addDecimal(consumed,released,18),reserved)<=0&&DigiDecimal.compareDecimal(free,'0')>0;
    reserveLine.textContent=valid?'رزرو باقیمانده: '+formatNum(free,18)+' '+String(reservation.asset||'')+' · وضعیت رزرو: '+reservation.status:'رزرو آزاد، نامعتبر یا بدون مانده است؛ سفارش نیازمند بررسی است.';
   }
   const reason=document.createElement('small');
