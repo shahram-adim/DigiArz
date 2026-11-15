@@ -122,3 +122,19 @@ Read-only inspection of the current Production function definitions found:
 The GitHub Actions workflow now provisions an ephemeral PostgreSQL 17 service and runs the pure arithmetic SQL regression file after the Node/browser tests. This service is CI-only; it is not a Supabase branch and does not touch Production. The first run for this workflow revision is still pending/in progress at the time of this report update.
 
 These findings reinforce that the eventual migration must update the complete RPC call chain together: Market execution, Limit placement/worker, Stop-Limit placement/trigger worker, and conditional exit execution. No Production function has been replaced.
+
+
+## CI validation result — 2026-11-15
+
+The PostgreSQL 17 service-backed workflow completed successfully on both:
+- `b1ef4e6bfbfc894d563aba8514daff5b57a551ce` — run `43751224268`
+- `e997fee827aec1b6bf207a18b29b872ec18986db` — run `43751243861`
+
+For both runs, the Node/browser exact-decimal tests and the PostgreSQL arithmetic regression step completed with success. This validates the arithmetic harness in an isolated ephemeral PostgreSQL instance; it does not validate the live trading RPC replacement or authorize Production DDL.
+
+## Read-only numeric range snapshot — 2026-11-15
+
+- Current `market_prices.price` maximum observed: `65419.000000000000000000`.
+- The order, trade, asset-balance, reservation, and conditional-order numeric columns returned NULL maxima because the earlier authorized cleanup left no rows in those financial/test tables.
+- Confirmed current typmods: `orders.amount/price numeric(24,8)`; `trades.amount/price numeric(24,8)`; `asset_balances.balance numeric(28,8)`; `wallets.balance_usdt` and `transactions.amount numeric(24,8)`. Order fill/residual, reservation, and conditional numeric fields are unconstrained numeric.
+- This snapshot supports retaining an 8-place USDT ledger and moving base quantity/price fields to 18 places, but it does not alone establish final maximum integer caps or safe Production lock/rewrite cost. No migration has been applied.
