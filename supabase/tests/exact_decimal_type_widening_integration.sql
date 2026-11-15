@@ -48,7 +48,7 @@ BEGIN
      OR (SELECT count(*) FROM pg_constraint WHERE conrelid='public.trades'::regclass AND contype='c') <> 2
      OR (SELECT count(*) FROM pg_constraint WHERE conrelid='public.asset_balances'::regclass AND contype='c') <> 1
      OR (SELECT count(*) FROM pg_constraint WHERE conrelid='public.order_reservations'::regclass AND contype='c') <> 3
-     OR (SELECT count(*) FROM pg_constraint WHERE conrelid='public.conditional_orders'::regclass AND contype='c') <> 2 THEN
+     OR (SELECT count(*) FROM pg_constraint WHERE conrelid='public.conditional_orders'::regclass AND contype='c') <> 4 THEN
     RAISE EXCEPTION 'A production-style check constraint was lost during widening; inspect pg_constraint for each fixture table';
   END IF;
 
