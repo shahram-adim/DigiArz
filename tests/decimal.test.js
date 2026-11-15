@@ -14,6 +14,7 @@ test('rejects malformed, exponent, whitespace, negative and excessive precision 
   assert.throws(() => D.parseDecimal('-1'));
   assert.throws(() => D.parseDecimal('0.1234567890123456789'));
   assert.throws(() => D.parseDecimal('10000000000000000'));
+  assert.throws(() => D.parseDecimal('0.123456789', { maxFractionDigits: 8 }));
   assert.equal(D.toString(D.parseDecimal('-1.25', { allowNegative: true })), '-1.25');
 });
 test('compares, adds and subtracts exactly at 18 places', () => {
@@ -40,4 +41,13 @@ test('property-style arithmetic invariants hold for a deterministic value set', 
     assert.equal(D.compareDecimal(a, b) + D.compareDecimal(b, a), 0);
     assert.equal(D.subtractDecimal(D.addDecimal(a, b, 18), b, 18), D.formatDecimal(a, { maxFractionDigits: 18, grouping: false }));
   }
+});
+test('canonical RPC arguments remain decimal strings and obey the current 8-place database gate', () => {
+  const amount = D.toString(D.parseDecimal('0001.23000000', { maxFractionDigits: 8, maxIntegerDigits: 16 }));
+  const price = D.toString(D.parseDecimal('0.00000001', { maxFractionDigits: 8, maxIntegerDigits: 16 }));
+  const payload = JSON.parse(JSON.stringify({ p_amount: amount, p_limit_price: price }));
+  assert.equal(payload.p_amount, '1.23');
+  assert.equal(payload.p_limit_price, '0.00000001');
+  assert.equal(typeof payload.p_amount, 'string');
+  assert.equal(typeof payload.p_limit_price, 'string');
 });
