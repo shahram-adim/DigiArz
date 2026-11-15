@@ -139,3 +139,11 @@
 - The connected Supabase account currently exposes only the Production DigiArz project. Full database lifecycle tests cannot be run there. Do not create another Supabase project or use Production rows as fixtures; use an approved isolated test environment if one becomes available, otherwise keep database integration and release blocked.
 - The plan does not authorize any Production migration, deployment, order placement, balance mutation, or pair activation.
 - If preflight finds values that do not fit the proposed numeric typmods, stop and revise the target types before writing the migration.
+
+
+## Second-pass findings and required algorithm details
+
+- `process_limit_orders()` uses `LEAST(remaining_amount, amount * 0.25)`. Multiplication by 0.25 can produce 20 fractional digits from an 18-digit amount. Do not allow implicit rounding. Explicitly quantize each non-final fill down to 18 fractional digits; if that slice becomes zero, close the remaining dust as a terminal fill. Prove with tests that the final fill is exact and `filled_amount + remaining_amount = amount` after every cycle.
+- Quantize quote-currency values exactly once at scale 8 with PostgreSQL `round(value,8)`. Reuse those same quantized values for required USDT reservation, per-fill gross/fee/net, wallet delta, transaction amount, reservation consumption, and remaining reserve/release. Current Limit code does not consistently do this, so the change is an accounting correctness requirement, not just a type widening.
+- The live Production schema has no current reservation or conditional-order rows; lifecycle coverage must therefore come from isolated fixtures, never Production transactions.
+- Repository search found no established JS test runner. Before adding dependencies, inspect CI runner availability and use built-in `node:test` for the pure decimal module if supported.
