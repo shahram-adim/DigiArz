@@ -105,6 +105,27 @@ jobs:
           wait "$LOCK_PID"
           psql -h localhost -U postgres -d digiarz_type_widening_lock_test -v ON_ERROR_STOP=1 \
             -f supabase/tests/exact_decimal_type_widening_lock_verify.sql
+      - name: Verify widening DDL transaction rolls back after mid-migration failure
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_type_widening_atomic_test;"
+          psql -h localhost -U postgres -d digiarz_type_widening_atomic_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_setup.sql
+          if psql -h localhost -U postgres -d digiarz_type_widening_atomic_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_atomic_failure.sql \
+            > /tmp/digiarz-atomic-migration.log 2>&1; then
+            cat /tmp/digiarz-atomic-migration.log
+            echo "Expected intentional mid-transaction DDL failure, but script succeeded."
+            exit 1
+          fi
+          cat /tmp/digiarz-atomic-migration.log
+          if ! grep -Eiq 'does not exist|undefined table' /tmp/digiarz-atomic-migration.log; then
+            echo "DDL rehearsal failed for a reason other than the intentional missing table."
+            exit 1
+          fi
+          psql -h localhost -U postgres -d digiarz_type_widening_atomic_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_lock_verify.sql
       - name: Compile and run isolated Market and Limit entrypoint integration
         env:
           PGPASSWORD: postgres
