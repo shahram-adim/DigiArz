@@ -542,6 +542,9 @@ BEGIN
      OR pg_catalog.scale(p_trigger_price) > 18 THEN
     RAISE EXCEPTION 'Invalid trigger price';
   END IF;
+  IF round(p_amount * p_trigger_price, 8) <= 0 THEN
+    RAISE EXCEPTION 'Conditional exit notional rounds to zero USDT';
+  END IF;
   v_base := left(v_symbol,length(v_symbol)-4);
   IF v_base IS NULL OR v_base='' OR v_base='USDT' THEN RAISE EXCEPTION 'Invalid base asset'; END IF;
   IF NOT EXISTS (
