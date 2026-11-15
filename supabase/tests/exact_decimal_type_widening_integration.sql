@@ -44,11 +44,11 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid='public.orders'::regclass AND conname='orders_amount_accounting_chk')
      OR NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid='public.orders'::regclass AND conname='orders_price_positive')
      OR NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid='public.conditional_orders'::regclass AND conname='conditional_orders_stop_limit_fields_chk')
-     OR (SELECT count(*) FROM pg_constraint WHERE conrelid='public.orders'::regclass AND contype='c') <> 6
-     OR (SELECT count(*) FROM pg_constraint WHERE conrelid='public.trades'::regclass AND contype='c') <> 2
-     OR (SELECT count(*) FROM pg_constraint WHERE conrelid='public.asset_balances'::regclass AND contype='c') <> 1
+     OR (SELECT count(*) FROM pg_constraint WHERE conrelid='public.orders'::regclass AND contype='c') <> 9
+     OR (SELECT count(*) FROM pg_constraint WHERE conrelid='public.trades'::regclass AND contype='c') <> 3
+     OR (SELECT count(*) FROM pg_constraint WHERE conrelid='public.asset_balances'::regclass AND contype='c') <> 2
      OR (SELECT count(*) FROM pg_constraint WHERE conrelid='public.order_reservations'::regclass AND contype='c') <> 3
-     OR (SELECT count(*) FROM pg_constraint WHERE conrelid='public.conditional_orders'::regclass AND contype='c') <> 4 THEN
+     OR (SELECT count(*) FROM pg_constraint WHERE conrelid='public.conditional_orders'::regclass AND contype='c') <> 9 THEN
     RAISE EXCEPTION 'A production-style check constraint was lost during widening; inspect pg_constraint for each fixture table';
   END IF;
 
