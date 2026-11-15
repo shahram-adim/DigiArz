@@ -71,8 +71,15 @@ function extract(exchange: typeof EXCHANGES[number], payload: unknown) {
       market = base ?? market;
     }
     if (exchange.kind === "kifpool") {
-      base = norm(get(o, ["symbol"]));
-      market = base;
+      const rawSymbol = get(o, ["symbol"]);
+      const symbol = typeof rawSymbol === "string" ? rawSymbol.trim().toUpperCase() : "";
+      if (/^[A-Z][A-Z0-9]{0,19}$/.test(symbol)) {
+        base = symbol;
+        market = symbol;
+      } else {
+        base = null;
+        market = null;
+      }
       quote = "IRT";
     }
     if (!base && market) {
@@ -81,16 +88,17 @@ function extract(exchange: typeof EXCHANGES[number], payload: unknown) {
       if (q) { base = norm(m.slice(0, -q.length)); quote = q; }
     }
     if (!base || !market || market.length > 40) continue;
-    if (!/^[A-Z0-9_-]{2,40}$/.test(market)) continue;
+    const validMarket = exchange.kind === "kifpool"
+      ? /^[A-Z][A-Z0-9_-]{0,39}$/.test(market)
+      : /^[A-Z0-9_-]{2,40}$/.test(market);
+    if (!validMarket) continue;
     const activeRaw = get(o, ["is_active","active","enabled","isEnabled","status","state"]);
     const inactive = activeRaw === false || activeRaw === 0 || ["inactive","disabled","delisted","closed","false"].includes(String(activeRaw).toLowerCase());
     const name = get(o, ["faName","name","title","fullName","full_name"]);
-    const price = exchange.kind === "kifpool" ? get(o, ["priceSellIRT"]) : null;
     out.set(market, {
       exchange: exchange.id, market_symbol: market, base_symbol: base,
       quote_symbol: quote, asset_name: typeof name === "string" ? name.slice(0,120) : null,
       source_url: exchange.url, source_payload: o, is_active: !inactive,
-      ...(price !== null ? { source_price_toman: price } : {}),
     });
   }
   return [...out.values()];
