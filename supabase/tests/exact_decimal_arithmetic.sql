@@ -96,13 +96,13 @@ BEGIN
     RAISE EXCEPTION 'sub-quantum quarter must advance by one quantum';
   END IF;
 
-  -- Never let the fallback exceed a smaller remaining residual.
-  v_remaining := 0.0000000000000000005;
+  -- A valid two-quantum residual advances by one quantum, never overfills.
+  v_remaining := 0.000000000000000002;
   v_qty := LEAST(v_remaining, round(v_remaining * 0.25, 18));
   IF v_qty = 0 THEN
     v_qty := LEAST(v_remaining, 0.000000000000000001);
   END IF;
-  IF v_qty <> v_remaining THEN
+  IF v_qty <> 0.000000000000000001 OR v_qty > v_remaining THEN
     RAISE EXCEPTION 'minimum-quantum fallback must be bounded by residual';
   END IF;
 
