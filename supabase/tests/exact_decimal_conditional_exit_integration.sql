@@ -2,7 +2,8 @@
 INSERT INTO public.profiles VALUES('50000000-0000-0000-0000-000000000005',true);
 INSERT INTO public.demo_trading_pairs VALUES('BTCUSDT','USDT',true),('ETHUSDT','USDT',true);
 INSERT INTO public.market_prices VALUES('BTCUSDT',12,now()),('ETHUSDT',8,now());
-INSERT INTO public.wallets VALUES('50000000-0000-0000-0000-000000000005',0);
+-- Explicit zero starting balance for deterministic settlement assertions.
+INSERT INTO public.wallets(user_id,balance_usdt) VALUES('50000000-0000-0000-0000-000000000005',0);
 INSERT INTO public.asset_balances(user_id,asset,balance) VALUES
  ('50000000-0000-0000-0000-000000000005','BTC',2.000000000000000002),
  ('50000000-0000-0000-0000-000000000005','ETH',3.000000000000000003);
