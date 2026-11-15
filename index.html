@@ -2060,7 +2060,7 @@ body.auth-page-active #authView.auth{
  <section id="tab-admin" class="card hidden"><div class="section-title"><h2>مدیریت DigiArz</h2><span class="tag">فقط مدیر ارشد</span></div><div class="notice">تغییرات این بخش فقط با کنترل سمت سرور و دسترسی مدیر ارشد انجام می‌شوند.</div>
 <div class="detail-section" id="exchangeAssetSyncPanel">
  <div class="section-title"><h3>پایش همگام‌سازی صرافی‌های ایرانی</h3><div class="market-tools"><button type="button" class="secondary" id="exchangeSyncRefreshBtn">به‌روزرسانی گزارش</button><button type="button" id="exchangeSyncRunBtn">دریافت فوری از صرافی‌ها</button></div></div>
- <div class="notice">گزارش دریافت فهرست دارایی‌ها از ۷ منبع قابل‌دسترسی. اجرای دریافت فوری فقط داده‌های فهرست را تازه می‌کند؛ هیچ جفت‌ارزی را فعال و هیچ موجودی یا معامله‌ای را تغییر نمی‌دهد.</div>
+ <div class="notice">گزارش ۷ منبع زمان‌بندی‌شده. «کیف پول من» در کد Edge Function تعریف شده، اما هنوز در worker و گزارش زمان‌بندی‌شده فعلی نیست و با دکمه دریافت فوری این پنل همگام نمی‌شود. وضعیت «داده تازه» بر اساس مشاهده کمتر از ۴۵ دقیقه است. دریافت فوری فقط فهرست دارایی‌ها را تازه می‌کند؛ هیچ جفت‌ارزی را فعال و هیچ موجودی یا معامله‌ای را تغییر نمی‌دهد.</div>
  <div id="exchangeSyncMsg" class="notice hidden" role="status"></div>
  <div id="exchangeSyncStats" class="grid"><div class="muted small">برای دریافت گزارش، این بخش را باز کنید.</div></div>
  <h4>وضعیت منابع</h4><div id="exchangeSyncSources" class="market-list"><div class="muted small">در انتظار دریافت گزارش…</div></div>
@@ -2960,7 +2960,22 @@ async function refreshTomanMarket(){
  finally{btn.disabled=false}
 }
 function formatExchangeSyncDate(value){if(!value)return 'ثبت نشده';const d=new Date(value);return Number.isNaN(d.getTime())?'نامشخص':d.toLocaleString('fa-IR')}
-function exchangeSyncSourceName(key){return ({nobitex:'نوبیتکس',wallex:'والکس',tabdeal:'تبدیل',ompfinex:'او‌ام‌پی فینکس',exir:'اکسیر',abantether:'آبان‌تتر',bit24:'بیت‌۲۴'})[key]||key}
+function exchangeSyncSourceName(key){return ({nobitex:'نوبیتکس',wallex:'والکس',tabdeal:'تبدیل',ompfinex:'او‌ام‌پی فینکس',exir:'اکسیر',abantether:'آبان‌تتر',bit24:'بیت‌۲۴',kifpool:'کیف پول من'})[key]||key}
+function exchangeSyncHealth(item,now=Date.now()){
+ if(item.notScheduled)return {label:'زمان‌بندی نشده',tone:'warn',detail:'در کد Edge Function تعریف شده؛ اما worker زمان‌بندی‌شده و گزارش فعلی آن را پوشش نمی‌دهند.'};
+ const hasHttp=item.http_status!==null&&item.http_status!==undefined&&item.http_status!=='';
+ const http=hasHttp?Number(item.http_status):null;
+ if(hasHttp&&(!Number.isFinite(http)||http<200||http>=300))return {label:'خطای دریافت',tone:'err',detail:'آخرین پاسخ HTTP موفق نبوده است.'};
+ if(item.error_message)return {label:'خطای پردازش',tone:'err',detail:String(item.error_message)};
+ const seen=Date.parse(item.last_seen_at||''),requested=Date.parse(item.last_requested_at||''),processed=Date.parse(item.last_processed_at||'');
+ const pending=Number.isFinite(requested)&&(!Number.isFinite(processed)||requested>processed+300000)&&now-requested>300000;
+ if(!Number.isFinite(seen))return pending?{label:'در انتظار پردازش',tone:'warn',detail:'درخواست ثبت شده اما هنوز مشاهده‌ای ثبت نشده است.'}:{label:'بدون داده',tone:'warn',detail:'هنوز مشاهده‌ای از این منبع ثبت نشده است.'};
+ const age=now-seen;
+ if(age < -300000)return {label:'زمان نامعتبر',tone:'err',detail:'زمان آخرین مشاهده در آینده ثبت شده است.'};
+ if(age>45*60000)return {label:'داده قدیمی',tone:'err',detail:'آخرین مشاهده بیش از ۴۵ دقیقه قبل بوده است.'};
+ if(pending)return {label:'در انتظار پردازش',tone:'warn',detail:'درخواست جدیدتر از آخرین پردازش است.'};
+ return {label:'داده تازه',tone:'ok',detail:'آخرین مشاهده '+Math.floor(Math.max(0,age)/60000)+' دقیقه پیش'};
+}
 async function loadExchangeAssetSyncReport(){
  if(!isSuperAdmin)return;const refresh=$('exchangeSyncRefreshBtn');if(refresh)refresh.disabled=true;
  const stats=$('exchangeSyncStats'),sources=$('exchangeSyncSources'),issues=$('exchangeSyncIssues');
@@ -2970,7 +2985,9 @@ async function loadExchangeAssetSyncReport(){
   const cards=[['مشاهده‌های ثبت‌شده',s.observations],['منابع دارای داده',s.exchanges],['نمادهای متفاوت',s.symbols],['رکوردهای تطبیق معتبر',s.matched],['مبهم',s.ambiguous],['در انتظار تطبیق',s.pending],['بدون تطبیق',s.unmatched],['ارزهای فهرست بازار',s.listed]];
   stats.replaceChildren();for(const [label,value] of cards){const el=document.createElement('div');el.className='stat';const l=document.createElement('div');l.className='muted small';l.textContent=label;const v=document.createElement('div');v.className='value';v.textContent=formatNum(Number(value)||0,0);el.append(l,v);stats.append(el)}
   sources.replaceChildren();
-  for(const item of data.sources||[]){
+  const sourceItems=[...(data.sources||[])];
+  if(!sourceItems.some(item=>item.exchange==='kifpool'))sourceItems.push({exchange:'kifpool',active_markets:0,last_seen_at:null,last_requested_at:null,last_processed_at:null,http_status:null,error_message:null,notScheduled:true});
+  for(const item of sourceItems){
    const row=document.createElement('article');row.className='asset-row';
    const info=document.createElement('div');info.className='asset-symbol';
    const name=document.createElement('strong');name.textContent=exchangeSyncSourceName(item.exchange);
@@ -2978,9 +2995,12 @@ async function loadExchangeAssetSyncReport(){
    const req=document.createElement('small');req.textContent='آخرین درخواست: '+formatExchangeSyncDate(item.last_requested_at)+' · پردازش: '+formatExchangeSyncDate(item.last_processed_at);
    info.append(name,detail,req);
    const status=document.createElement('div');status.className='price-stack';
-   const http=document.createElement('strong');http.textContent=item.http_status?'HTTP '+item.http_status:'بدون پاسخ ثبت‌شده';
-   const err=document.createElement('small');err.textContent=item.error_message|| (item.http_status>=200&&item.http_status<300?'پاسخ HTTP موفق':'وضعیت نیازمند بررسی');
-   status.append(http,err);row.append(info,status);sources.append(row);
+   const health=exchangeSyncHealth(item);
+   const badge=document.createElement('span');badge.className='tag';badge.textContent=health.label;badge.style.display='inline-block';badge.style.margin='0 0 5px 0';badge.style.alignSelf='flex-start';
+   const toneColor=health.tone==='ok'?'var(--green)':health.tone==='err'?'var(--red)':'var(--yellow)';badge.style.color=toneColor;badge.style.borderColor=toneColor;
+   const http=document.createElement('strong');http.textContent=item.notScheduled?'بدون درخواست زمان‌بندی‌شده':item.http_status?'HTTP '+item.http_status:'بدون پاسخ ثبت‌شده';
+   const err=document.createElement('small');err.textContent=item.notScheduled?health.detail:(item.error_message||health.detail);
+   status.append(badge,http,err);row.append(info,status);sources.append(row);
   }
   if(!(data.sources||[]).length)sources.textContent='اطلاعات منبعی ثبت نشده است.';
   issues.replaceChildren();
