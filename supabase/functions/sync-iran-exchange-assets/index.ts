@@ -94,7 +94,7 @@ function extract(exchange: typeof EXCHANGES[number], payload: unknown) {
     if (!validMarket) continue;
     const activeRaw = get(o, ["is_active","active","enabled","isEnabled","status","state"]);
     const inactive = activeRaw === false || activeRaw === 0 || ["inactive","disabled","delisted","closed","false"].includes(String(activeRaw).toLowerCase());
-    const name = get(o, ["faName","name","title","fullName","full_name"]);
+    const name = get(o, ["name","title","fullName","full_name"]);
     out.set(market, {
       exchange: exchange.id, market_symbol: market, base_symbol: base,
       quote_symbol: quote, asset_name: typeof name === "string" ? name.slice(0,120) : null,
