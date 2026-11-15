@@ -3,7 +3,7 @@ CREATE SCHEMA IF NOT EXISTS auth;
 CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE SET search_path TO '' AS $f$ SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $f$;
 CREATE TABLE public.profiles(id uuid PRIMARY KEY,is_active boolean NOT NULL);
 CREATE FUNCTION public.current_account_is_active() RETURNS boolean LANGUAGE sql STABLE SET search_path TO '' AS $f$ SELECT EXISTS(SELECT 1 FROM public.profiles WHERE id=auth.uid() AND is_active IS TRUE) $f$;
-CREATE TABLE public.orders(id uuid PRIMARY KEY,user_id uuid NOT NULL,symbol text NOT NULL,side text NOT NULL,order_type text NOT NULL,amount numeric(34,18) NOT NULL,price numeric(34,18) NOT NULL,filled_amount numeric(34,18) NOT NULL,remaining_amount numeric(34,18) NOT NULL,status text NOT NULL,created_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE public.orders(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),user_id uuid NOT NULL,symbol text NOT NULL,side text NOT NULL,order_type text NOT NULL,amount numeric(34,18) NOT NULL,price numeric(34,18) NOT NULL,filled_amount numeric(34,18) NOT NULL,remaining_amount numeric(34,18) NOT NULL,status text NOT NULL,created_at timestamptz NOT NULL DEFAULT now());
 CREATE TABLE public.demo_trading_pairs(pair_symbol text PRIMARY KEY,quote_asset text NOT NULL,is_enabled boolean NOT NULL);
 CREATE TABLE public.market_prices(symbol text PRIMARY KEY,price numeric(38,18) NOT NULL,updated_at timestamptz NOT NULL);
 CREATE TABLE public.order_reservations(id uuid PRIMARY KEY,order_id uuid NOT NULL UNIQUE,user_id uuid NOT NULL,asset text NOT NULL,reserved_amount numeric(38,18) NOT NULL,consumed_amount numeric(38,18) NOT NULL,released_amount numeric(38,18) NOT NULL,status text NOT NULL,updated_at timestamptz NOT NULL DEFAULT now());
