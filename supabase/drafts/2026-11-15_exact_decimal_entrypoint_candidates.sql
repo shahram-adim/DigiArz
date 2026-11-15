@@ -289,6 +289,10 @@ BEGIN
         RAISE EXCEPTION 'User wallet not found';
     END IF;
 
+    IF round(p_amount * p_limit_price, 8) <= 0 THEN
+        RAISE EXCEPTION 'Limit order notional rounds to zero USDT';
+    END IF;
+
     v_fee_rate := public.get_demo_trading_fee_rate('USDT', 'maker');
     IF v_side = 'buy' THEN
         v_asset := 'USDT';
@@ -432,6 +436,10 @@ BEGIN
   IF (v_side='buy' AND p_limit_price < p_stop_price)
      OR (v_side='sell' AND p_limit_price > p_stop_price) THEN
     RAISE EXCEPTION 'Invalid stop-limit price relationship';
+  END IF;
+
+  IF round(p_amount * p_limit_price, 8) <= 0 THEN
+    RAISE EXCEPTION 'Stop-Limit order notional rounds to zero USDT';
   END IF;
 
   v_base := left(v_symbol,length(v_symbol)-4);
