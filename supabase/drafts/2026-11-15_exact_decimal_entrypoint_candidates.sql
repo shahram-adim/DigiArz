@@ -305,6 +305,9 @@ BEGIN
     IF v_side = 'buy' THEN
         v_asset := 'USDT';
         v_required_amount := round(p_amount * p_limit_price * (1 + v_fee_rate), 8);
+        IF v_required_amount > 9999999999999999.99999999::numeric THEN
+            RAISE EXCEPTION 'Buy reservation exceeds numeric(24,8) USDT capacity';
+        END IF;
         IF v_required_amount <= 0 THEN
             RAISE EXCEPTION 'Buy order notional rounds to zero USDT';
         END IF;
@@ -467,6 +470,9 @@ BEGIN
   IF v_side='buy' THEN
     v_reserve_asset := 'USDT';
     v_required := round(p_amount*p_limit_price*(1+v_fee_rate),8);
+    IF v_required > 9999999999999999.99999999::numeric THEN
+      RAISE EXCEPTION 'Stop-Limit buy reservation exceeds numeric(24,8) USDT capacity';
+    END IF;
     IF v_required <= 0 THEN
       RAISE EXCEPTION 'Stop-Limit buy notional rounds to zero USDT';
     END IF;
