@@ -2152,6 +2152,15 @@ async function deactivateMyAccount(){const btn=$('deactivateAccountBtn');if(!con
 async function reactivateMyAccount(){const btn=$('reactivateAccountBtn');btn.disabled=true;hideMessage($('accountActionMsg'));try{const password=$('reactivatePassword').value;if(!password)throw new Error('رمز عبور فعلی را وارد کنید.');const {data:userData,error:userError}=await supabaseClient.auth.getUser();if(userError||!userData.user)throw userError||new Error('نشست ورود معتبر نیست.');const {data:authData,error:authError}=await supabaseClient.auth.signInWithPassword({email:userData.user.email,password});if(authError)throw new Error('احراز هویت مجدد ناموفق بود: '+authError.message);if(!authData.session)throw new Error('نشست احراز هویت تازه ایجاد نشد.');const {data,error}=await supabaseClient.rpc('reactivate_my_account');if(error)throw error;if(!data?.success)throw new Error('فعال‌سازی تأیید نشد.');$('reactivatePassword').value='';showMessage($('accountActionMsg'),'حساب با احراز هویت مجدد فعال شد. سوابق و موجودی قبلی حفظ شده‌اند.','ok');setAccountMode(true);await loadDashboard()}catch(e){showMessage($('accountActionMsg'),'فعال‌سازی انجام نشد: '+(e.message||String(e)),'err')}finally{btn.disabled=false}}
 async function signOut(){try{const {error}=await supabaseClient.auth.signOut();document.body.classList.add('auth-page-active');document.body.classList.remove('dashboard-page-active');if(error)throw error;appView.classList.add('hidden');appView.classList.remove('app-view-active');$('logoutBtn').classList.add('hidden');authView.classList.remove('hidden');$('password').value='';hideMessage(authMsg)}catch(e){showMessage(authMsg,'خروج انجام نشد: '+e.message,'err')}}
 let quickTradeReservedByAsset=new Map(),quickTradeReservationState='unknown';
+async function getMyOrderReservations(orderIds){
+ const ids=[...new Set((orderIds||[]).filter(Boolean))],rows=[];
+ for(let i=0;i<ids.length;i+=100){
+  const {data,error}=await supabaseClient.rpc('get_my_order_reservations',{p_order_ids:ids.slice(i,i+100)});
+  if(error)throw error;
+  rows.push(...(data||[]));
+ }
+ return rows;
+}
 async function loadQuickTradeReservations(){
  quickTradeReservedByAsset=new Map();quickTradeReservationState='unknown';
  const {data:userData,error:userError}=await supabaseClient.auth.getUser();if(userError||!userData.user)throw userError||new Error('ورود لازم است');
@@ -2161,8 +2170,8 @@ async function loadQuickTradeReservations(){
  ]);
  if(ordersResult.error)throw ordersResult.error;if(conditionalResult.error)throw conditionalResult.error;
  const ids=[...new Set([...(ordersResult.data||[]).map(x=>x.id),...(conditionalResult.data||[]).map(x=>x.order_id)].filter(Boolean))];
- if(ids.length){const {data,error}=await supabaseClient.rpc('get_my_order_reservations',{p_order_ids:ids});if(error)throw error;
-  for(const r of data||[]){const reserved=Number(r.reserved_amount),consumed=Number(r.consumed_amount||0),released=Number(r.released_amount||0),remaining=reserved-consumed-released,asset=String(r.asset||'').toUpperCase();
+ if(ids.length){const reservations=await getMyOrderReservations(ids);
+  for(const r of reservations){const reserved=Number(r.reserved_amount),consumed=Number(r.consumed_amount||0),released=Number(r.released_amount||0),remaining=reserved-consumed-released,asset=String(r.asset||'').toUpperCase();
    if(r.status==='reserved'&&asset&&Number.isFinite(reserved)&&Number.isFinite(consumed)&&Number.isFinite(released)&&reserved>0&&consumed>=0&&released>=0&&consumed+released<=reserved&&remaining>0)quickTradeReservedByAsset.set(asset,(quickTradeReservedByAsset.get(asset)||0)+remaining);
   }
  }
