@@ -51,7 +51,9 @@ Make demo trading preserve tiny asset quantities and micro-prices end-to-end. Ma
 - Update order book, open-order, history, and dashboard formatters so precision is not silently truncated.
 
 ### PostgreSQL
-- Widen base-asset quantity columns in `orders`, `trades`, and `asset_balances` to 18 fractional digits; widen order/trade prices to 18 fractional digits. Exact target typmods and integer ranges must be confirmed against current data and constraints before migration.
+- Proposed and now pinned target typmods, subject to isolated migration rehearsal: `orders.amount/price/filled_amount/remaining_amount numeric(34,18)`; `trades.amount/price numeric(34,18)`; `asset_balances.balance numeric(38,18)`; `order_reservations.reserved_amount/released_amount/consumed_amount numeric(38,18)`; `conditional_orders.amount/trigger_price/limit_price/executed_price numeric(34,18)`. Keep `market_prices.price numeric(38,18)`, and keep `wallets.balance_usdt` plus `transactions.amount numeric(24,8)`.
+- The 16-integer-digit cap for order amounts/prices matches the existing exact browser parser (`maxIntegerDigits: 16`); order amount remains additionally capped at 1,000,000 by the RPCs. The 20-integer-digit asset/reservation types provide headroom for balances and reservation accounting, while actual USDT settlement remains constrained by the 16-integer-digit wallet/transaction ledger.
+- Read-only Production snapshot: maximum observed `market_prices.price` was 65,419; financial/order/conditional/reservation tables had no rows after the user's authorized test-data cleanup, so no historical values need widening. This does not replace the required migration lock/rewrite rehearsal.
 - Add server-side validation for supported scale/range at every public trading RPC boundary.
 - Keep quote-currency wallet and transaction columns at 8 decimals for this phase.
 - In each execution function, quantize quote gross/fee/net once to 8 decimals, then reuse the exact same quantized values for wallet, transaction, reservation consumption, and remaining-reserve calculations.
