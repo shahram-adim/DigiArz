@@ -86,3 +86,12 @@ Make demo trading preserve tiny asset quantities and micro-prices end-to-end. Ma
 - Confirm a single quote rounding policy (recommended PostgreSQL `round(value, 8)`, with test cases at half-way boundaries).
 - Confirm exact target numeric precision/integer-digit caps after a read-only scan of maximum existing values and all RPC/UI callers.
 - Confirm whether any non-UI integrations call the trading RPCs and need a compatibility window.
+
+
+## Implementation clarification from live-function preflight
+
+The live Limit worker calculates a 25% slice by multiplying the original amount by 0.25. With an 18-fractional-digit stored amount, that intermediate may have 20 fractional digits. The implementation must not rely on implicit column-scale rounding. Recommended rule for validation in isolated tests: quantize each non-final slice downward to 18 fractional digits; when the quantized slice is zero, settle the exact remaining dust as a terminal fill. Preserve the invariant `filled_amount + remaining_amount = amount` exactly.
+
+The live Limit placement/worker paths also calculate quote reservations and fill gross/fee/net without a uniform 8-digit quantization. The implementation must quantize each USDT quote value once using PostgreSQL `round(value,8)` and reuse that value for the reservation, wallet, transaction, and release/consumption ledger. Base-asset quantities and prices must not inherit the quote rounding.
+
+This clarification does not authorize a Production migration or transaction. It is part of the design acceptance criteria and must pass isolated tests before rollout.
