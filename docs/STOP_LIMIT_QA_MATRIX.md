@@ -96,8 +96,14 @@ Scope: Demo trading only. This document defines safe verification; it does not a
 Full lifecycle testing remains blocked until an isolated Supabase test project with disposable users and balances is provisioned. The production project was used only for SELECT/read-only inspection in this review. Cron success is not being reported as Stop-Limit end-to-end QA success.
 
 
-### Additional access-control finding — reservation read path
-- [x] The RLS policy `Users can view own order reservations` exists for `authenticated` with predicate `auth.uid() = user_id`.
-- [x] The table ACL does not grant SELECT to `authenticated` or `anon`; `relacl` contains only `postgres` and `service_role`, and `has_table_privilege('authenticated', 'public.order_reservations', 'SELECT')` is false.
-- [x] Therefore the RLS policy alone does not make the browser query readable. The current Limit and Stop-Limit UI must show an unverified-reservation message rather than infer a reservation.
-- [ ] Do not solve this by granting broad direct table access without review. Preferred design: an owner-scoped SECURITY DEFINER read RPC that returns only order_id, asset, reserved_amount, consumed_amount, released_amount, and status for `auth.uid()`, with empty search_path and authenticated-only EXECUTE. This requires an isolated test and a separately reviewed migration before production application.
+### Reservation read path — production verification update (2026-11-15)
+
+- [x] Direct table SELECT remains intentionally unavailable to `authenticated` and `anon`; do not grant broad table access merely to support the UI.
+- [x] The repository migration `supabase/migrations/20261114143035_get_my_order_reservations_rpc.sql` is present and the matching migration is recorded as applied in the production project.
+- [x] Read-only inspection of the live function confirmed `public.get_my_order_reservations(uuid[])` is `STABLE SECURITY DEFINER`, has an empty `search_path`, filters every row by `r.user_id = auth.uid()`, returns only order/reservation display fields, and rejects null/empty or more than 100 order IDs.
+- [x] Live privilege inspection confirmed EXECUTE is granted to `authenticated`, not to `anon`; no direct SELECT grant was added to the reservation table.
+- [x] The Limit, Stop-Limit, and conditional-order UI paths call the owner-scoped RPC rather than reading the reservation table directly.
+- [x] A further client-side boundary mismatch was found in `loadQuickTradeReservations()`: it can collect up to 500 order IDs plus 500 conditional order IDs, while the RPC accepts at most 100 IDs per call.
+- [x] Added `getMyOrderReservations()` to split unique IDs into sequential batches of at most 100 and aggregate the read-only results. Code commit: `2efce841a5abb12b86d202104363be16e606a6ed`.
+- [x] Static verification after the change: all 3 inline scripts parse, all 208 HTML IDs are unique, and a mocked 250-ID test produced RPC batch sizes `100, 100, 50` and 250 aggregated rows. The mock did not call production Supabase.
+- [ ] The full reservation lifecycle and worker interaction still require the isolated test project described above. The RPC's owner filter and grants were inspected read-only in production; no production order, reservation, wallet, balance, or financial-history row was created or changed.
