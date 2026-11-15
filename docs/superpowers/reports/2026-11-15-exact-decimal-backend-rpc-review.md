@@ -138,3 +138,10 @@ For both runs, the Node/browser exact-decimal tests and the PostgreSQL arithmeti
 - The order, trade, asset-balance, reservation, and conditional-order numeric columns returned NULL maxima because the earlier authorized cleanup left no rows in those financial/test tables.
 - Confirmed current typmods: `orders.amount/price numeric(24,8)`; `trades.amount/price numeric(24,8)`; `asset_balances.balance numeric(28,8)`; `wallets.balance_usdt` and `transactions.amount numeric(24,8)`. Order fill/residual, reservation, and conditional numeric fields are unconstrained numeric.
 - This snapshot supports retaining an 8-place USDT ledger and moving base quantity/price fields to 18 places, but it does not alone establish final maximum integer caps or safe Production lock/rewrite cost. No migration has been applied.
+
+
+## Expanded fill-conservation test and policy refinement — 2026-11-15
+
+The new property-style PostgreSQL test set includes tiny quantities through the existing 1,000,000 order ceiling. The first CI attempt failed in the PostgreSQL arithmetic step (Node/browser tests passed). Reviewing the test cases exposed an important boundary: rounding a quarter slice down can leave a one-quantum residual after four slices (for example, `1.000000000000000001`). The policy and harness now explicitly permit a fifth, final residual fill. This is not a larger partial slice; it is the exact remaining amount.
+
+The corrected PostgreSQL run is in progress. The earlier CI pass validates the initial arithmetic harness, but the expanded property-style suite is not yet confirmed. No Production RPC or schema changes have been made.
