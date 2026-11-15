@@ -145,3 +145,17 @@ For both runs, the Node/browser exact-decimal tests and the PostgreSQL arithmeti
 The new property-style PostgreSQL test set includes tiny quantities through the existing 1,000,000 order ceiling. The first CI attempt failed in the PostgreSQL arithmetic step (Node/browser tests passed). Reviewing the test cases exposed an important boundary: rounding a quarter slice down can leave a one-quantum residual after four slices (for example, `1.000000000000000001`). The policy and harness now explicitly permit a fifth, final residual fill. This is not a larger partial slice; it is the exact remaining amount.
 
 The corrected PostgreSQL run is in progress. The earlier CI pass validates the initial arithmetic harness, but the expanded property-style suite is not yet confirmed. No Production RPC or schema changes have been made.
+
+
+## Candidate implementation artifacts — 2026-11-15
+
+Prepared three review-only SQL drafts under `supabase/drafts/` (not migrations and not applied):
+- `2026-11-15_exact_decimal_process_limit_orders.sql`: preserves the live worker's lock/order/ownership checks while adding explicit 18-place partial-fill quantization, one-quantum progress, exact residual accounting, 8-place quote gross/fee/reserve values, and a fail-closed guard for zero-rounded USDT gross.
+- `2026-11-15_exact_decimal_entrypoint_candidates.sql`: candidate input-scale/range validation for Market, Limit, Stop-Limit, and conditional-exit entry RPCs; rounds buy reservations to 8 places and rejects zero-rounded buy notional.
+- `2026-11-15_exact_decimal_type_widening.sql`: transaction-scoped type widening with preflight guards and short lock/statement timeouts. USDT wallet/transaction types and market_prices precision remain unchanged.
+
+The zero-rounded quote-notional edge case is now explicit: a positive base quantity at a sufficiently small price must not create base units for zero USDT debit or remove base units for zero USDT credit. The Market engine and Limit worker candidates reject/skip such executions; conditional exits inherit the Market guard.
+
+A new PostgreSQL regression assertion initially used a test price too small to produce a positive 8-place gross, and CI correctly failed. The test value was corrected. The follow-up exact-decimal workflow run `43752093609` completed successfully, including Node/browser tests and PostgreSQL 17 arithmetic tests. Newer commits contain only the SQL draft artifacts and preflight tightening; their CI runs are queued/in progress at the time of this report update.
+
+All artifacts remain drafts. No Production schema, RPC, financial row, or balance was modified.
