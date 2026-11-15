@@ -101,3 +101,13 @@ Make demo trading preserve tiny asset quantities and micro-prices end-to-end. Ma
 - Confirm a single quote rounding policy (recommended PostgreSQL `round(value, 8)`, with test cases at half-way boundaries).
 - Confirm exact target numeric precision/integer-digit caps after a read-only scan of maximum existing values and all RPC/UI callers.
 - Confirm whether any non-UI integrations call the trading RPCs and need a compatibility window.
+
+
+### Dust-remainder settlement refinement (2026-11-15)
+
+- A final remainder is executable only if its own quote notional remains positive after 8-place USDT rounding.
+- After calculating the normal 18-place quarter chunk, if the leftover remainder would round to zero USDT at the current market price, include that untradeable dust in the current fill. This avoids a permanently pending order whose final base units cannot be represented by the quote ledger.
+- If the leftover remainder still has a positive 8-place quote notional, leave it for the next worker cycle; a fifth final cycle remains permitted where quarter rounding requires it.
+- Every resulting fill must still pass the positive rounded-gross guard. If the whole selected fill rounds to zero USDT, skip it without changing balances, orders, trades, transactions, or reservations.
+- Limit and Stop-Limit placement must reject both buy and sell orders whose full notional rounds to zero USDT; the worker guard remains as defense in depth for legacy or malformed rows.
+- The isolated PostgreSQL worker integration now exercises 18-place buy and sell accounting, dust absorption, quote settlement, reservation consumption, and zero-notional skip behavior. It runs only in the disposable GitHub Actions PostgreSQL service; Production remains read-only.
