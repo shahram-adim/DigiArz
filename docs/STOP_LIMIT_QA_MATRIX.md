@@ -236,3 +236,27 @@ Static inspection and read-only aggregate checks only. No test trade, balance ch
 
 ### Dependency conclusion
 The database widening migration must not be applied alone. The UI's Number conversions and formatters are direct dependencies. Production schema remains unchanged; this is a dependency assessment only.
+
+
+## Production schema dependency inventory — 2026-11-15
+
+Read-only inventory of Production PostgreSQL dependencies for `orders`, `trades`, `asset_balances`, and `order_reservations`:
+
+### Indexes and constraints
+- No index on these four tables currently keys or includes the numeric amount/price/balance columns. Existing indexes cover primary/unique identifiers, user/asset, reservation status, order creation time, and trade order/time access paths.
+- `orders` has accounting invariants `filled_amount + remaining_amount = amount`, filled/remaining range checks, positive amount, and positive-or-null price. These checks must remain valid at the higher scale; the equality check is especially relevant to partial-fill rounding.
+- `asset_balances.balance` has a nonnegative check; `trades.amount` and `trades.price` have positive checks.
+- Reservation accounting checks enforce nonnegative consumed/released amounts and `consumed_amount + released_amount <= reserved_amount`.
+
+### Foreign keys, triggers, policies
+- Tables referencing `orders` by foreign key are `conditional_orders` (parent and execution order IDs), `order_reservations` (order/user pair), and `trades` (order ID). These foreign keys reference identifiers, not the numeric precision columns.
+- Existing non-internal triggers on the target tables are account-guard triggers on `orders` and `trades`; none were found on `asset_balances` or `order_reservations`.
+- Existing RLS policies on the four tables are user/account-scoped and do not reference the numeric columns.
+- The catalog dependency query found no view rewrite dependency on these four target relations. No generated numeric columns were identified in the inspected column inventory.
+
+### Migration implications
+- Widening numeric typmods does not require dropping the listed identifier foreign keys or current indexes based on the inspected definitions; however, PostgreSQL may still take strong table locks and rewrite/rebuild storage/index structures for type changes. Migration timing, lock duration, table size, and rollback cost must be assessed before any Production DDL.
+- Do not weaken or remove accounting constraints. The migration and engine changes must preserve exact order accounting and reservation reconciliation.
+- This inventory is not a complete substitute for isolated migration rehearsal. Function bodies, RPC return JSON contracts, edge functions, export/report consumers, and all UI call sites still require a final cross-reference review.
+
+Production schema was not changed. No orders, balances, reservations, or transactions were created or modified.
