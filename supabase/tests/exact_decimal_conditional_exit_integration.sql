@@ -34,8 +34,8 @@ BEGIN
     OR (SELECT filled_amount FROM public.orders WHERE id=v_sl_id)<>1.000000000000000001::numeric THEN
    RAISE EXCEPTION 'TP/SL exact quantity precision mismatch';
  END IF;
- IF (SELECT sum(amount) FROM public.trades t JOIN public.orders o ON o.id=t.order_id WHERE o.id=v_tp_id)<>1.000000000000000001::numeric
-    OR (SELECT sum(amount) FROM public.trades t JOIN public.orders o ON o.id=t.order_id WHERE o.id=v_sl_id)<>1.000000000000000001::numeric THEN
+ IF (SELECT sum(t.amount) FROM public.trades t JOIN public.orders o ON o.id=t.order_id WHERE o.id=v_tp_id)<>1.000000000000000001::numeric
+    OR (SELECT sum(t.amount) FROM public.trades t JOIN public.orders o ON o.id=t.order_id WHERE o.id=v_sl_id)<>1.000000000000000001::numeric THEN
    RAISE EXCEPTION 'TP/SL trade amount mismatch';
  END IF;
  IF NOT EXISTS(SELECT 1 FROM public.order_reservations WHERE order_id=v_tp_id AND consumed_amount=1.000000000000000001 AND released_amount=0 AND status='consumed')
