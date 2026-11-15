@@ -1,4 +1,5 @@
 -- Disposable PostgreSQL 17 CI integration for Market execution and Limit placement.
+ALTER TABLE public.wallets ALTER COLUMN balance_usdt SET DEFAULT 200;
 -- Never run against Supabase Production.
 DO $test$
 DECLARE
