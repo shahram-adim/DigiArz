@@ -1844,6 +1844,59 @@ body.auth-page-active #authView.auth{
  body.auth-page-active #authView.auth>.auth-form{padding:19px 14px!important}
 }
 
+
+/* DigiArz market rows: approved horizontal layout with a three-line coin identity */
+.market-board-v34 .coin{
+ direction:ltr!important;
+ display:grid!important;
+ grid-template-columns:24px minmax(145px,1fr) 56px 82px minmax(145px,auto)!important;
+ align-items:center!important;
+ gap:9px!important;
+ min-width:0!important;
+}
+.market-board-v34 .coin>.favorite-btn{grid-column:1!important;grid-row:1!important;justify-self:center!important}
+.market-board-v34 .coin>.coin-identity{grid-column:2!important;grid-row:1!important;display:flex!important;flex-direction:row!important;direction:ltr!important;align-items:center!important;justify-content:flex-start!important;gap:7px!important;min-width:0!important}
+.market-board-v34 .coin-identity .coin-icon{width:34px!important;height:34px!important;flex:0 0 34px!important;margin:0!important}
+.market-board-v34 .coin-identity .coin-icon img{width:100%!important;height:100%!important;object-fit:contain!important}
+.market-board-v34 .coin-name-stack{display:grid!important;grid-template-rows:repeat(3,auto)!important;gap:2px!important;min-width:0!important;direction:rtl!important;text-align:right!important}
+.market-board-v34 .coin-name-stack .coin-name-fa,
+.market-board-v34 .coin-name-stack .coin-symbol,
+.market-board-v34 .coin-name-stack .coin-en{display:block!important;font-size:11px!important;font-weight:600!important;line-height:1.3!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;letter-spacing:0!important}
+.market-board-v34 .coin-name-stack .coin-name-fa{color:var(--text)!important}
+.market-board-v34 .coin-name-stack .coin-symbol{color:#1687ff!important}
+.market-board-v34 .coin-name-stack .coin-en{color:var(--muted)!important;direction:ltr!important;text-align:right!important}
+.market-board-v34 .coin-sparkline{grid-column:3!important;grid-row:1!important;display:flex!important;align-items:center!important;justify-content:center!important;width:56px!important;height:26px!important;color:var(--muted)!important;font-size:10px!important}
+.market-board-v34 .coin-sparkline svg{display:block!important;width:100%!important;height:100%!important;overflow:visible!important}
+.market-board-v34 .coin-change-wrap{grid-column:4!important;grid-row:1!important;min-width:0!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;text-align:center!important}
+.market-board-v34 .coin .price-stack{grid-column:5!important;grid-row:1!important;min-width:0!important;align-items:flex-end!important;text-align:right!important;direction:rtl!important}
+.market-board-v34 .coin .price-usd{font-size:12px!important;color:var(--text)!important;direction:ltr!important;text-align:right!important}
+.market-board-v34 .coin .price-toman{font-size:14px!important;color:#1687ff!important;font-weight:900!important;white-space:nowrap!important}
+.market-board-v34 .coin .coin-source{font-size:8px!important;line-height:1.4!important;white-space:normal!important;text-align:right!important}
+@media(max-width:700px){
+ .market-board-v34 .coin{grid-template-columns:20px minmax(86px,1fr) 34px 54px minmax(100px,auto)!important;gap:5px!important;padding:9px 6px!important}
+ .market-board-v34 .coin-identity{gap:5px!important}
+ .market-board-v34 .coin-identity .coin-icon{width:27px!important;height:27px!important;flex-basis:27px!important}
+ .market-board-v34 .coin-name-stack .coin-name-fa,
+ .market-board-v34 .coin-name-stack .coin-symbol,
+ .market-board-v34 .coin-name-stack .coin-en{font-size:9px!important;line-height:1.35!important}
+ .market-board-v34 .coin-sparkline{width:34px!important;height:22px!important}
+ .market-board-v34 .coin-change{min-width:48px!important;padding:5px 3px!important;font-size:9px!important}
+ .market-board-v34 .coin-volume{font-size:8px!important;white-space:normal!important;overflow-wrap:anywhere!important}
+ .market-board-v34 .coin .price-usd{font-size:10px!important}
+ .market-board-v34 .coin .price-toman{font-size:10px!important}
+ .market-board-v34 .coin .coin-source{font-size:7px!important}
+}
+@media(max-width:370px){
+ .market-board-v34 .coin{grid-template-columns:18px minmax(76px,1fr) 28px 48px minmax(90px,auto)!important;gap:4px!important;padding:8px 5px!important}
+ .market-board-v34 .coin-identity .coin-icon{width:24px!important;height:24px!important;flex-basis:24px!important}
+ .market-board-v34 .coin-name-stack .coin-name-fa,
+ .market-board-v34 .coin-name-stack .coin-symbol,
+ .market-board-v34 .coin-name-stack .coin-en{font-size:8px!important}
+ .market-board-v34 .coin-sparkline{width:28px!important}
+ .market-board-v34 .coin-change{min-width:44px!important;font-size:8px!important}
+ .market-board-v34 .coin .price-usd,.market-board-v34 .coin .price-toman{font-size:9px!important}
+}
+
 </style>
 </head>
 <body>
@@ -2430,6 +2483,36 @@ function getTrustedMarketPrice(item){
  const stored=Number(item?.price);
  return isMarketTimestampFresh(item?.updated_at)&&Number.isFinite(stored)&&stored>0?stored:null;
 }
+let marketSparklineObserver=null;
+const marketSparklineCache=new Map();
+const marketSparklinePending=new Set();
+async function loadMarketSparkline(symbol,node){
+ const cached=marketSparklineCache.get(symbol),now=Date.now();
+ if(cached&&now-cached.at<300000){if(node?.isConnected)node.innerHTML=cached.svg;return}
+ if(marketSparklinePending.has(symbol))return;
+ marketSparklinePending.add(symbol);
+ try{
+  const rows=await fetchBinanceKlines(symbol,'1h',24);
+  const closes=rows.map(row=>Number(row[4])).filter(value=>Number.isFinite(value)&&value>0);
+  if(closes.length<3)throw new Error('Insufficient sparkline history');
+  const low=Math.min(...closes),high=Math.max(...closes),range=high-low||Math.max(high*.0001,1e-12);
+  const points=closes.map((value,index)=>{const x=2+index*60/(closes.length-1),y=20-((value-low)/range)*16;return x.toFixed(1)+','+y.toFixed(1)}).join(' ');
+  const stroke=closes[closes.length-1]>=closes[0]?'#0ecb81':'#f6465d';
+  const svg='<svg viewBox="0 0 64 24" aria-hidden="true" focusable="false"><polyline points="'+points+'" fill="none" stroke="'+stroke+'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  marketSparklineCache.set(symbol,{at:now,svg});
+  if(node?.isConnected)node.innerHTML=svg;
+ }catch(error){if(node?.isConnected){node.textContent='—';node.title='سابقه نمودار کوتاه‌مدت در دسترس نیست'}}
+ finally{marketSparklinePending.delete(symbol)}
+}
+function observeMarketSparklines(list){
+ if(marketSparklineObserver)marketSparklineObserver.disconnect();
+ const nodes=[...list.querySelectorAll('.coin-sparkline')];
+ if(typeof IntersectionObserver==='undefined'){nodes.slice(0,12).forEach(node=>loadMarketSparkline(node.dataset.symbol,node));return}
+ marketSparklineObserver=new IntersectionObserver(entries=>{
+  for(const entry of entries){if(!entry.isIntersecting)continue;const node=entry.target;marketSparklineObserver.unobserve(node);loadMarketSparkline(node.dataset.symbol,node)}
+ },{root:null,rootMargin:'140px 0px',threshold:0.01});
+ nodes.forEach(node=>{const cached=marketSparklineCache.get(node.dataset.symbol);if(cached&&Date.now()-cached.at<300000)node.innerHTML=cached.svg;else marketSparklineObserver.observe(node)});
+}
 function renderMarkets(){
  const list=$('marketList');if(!list)return;list.replaceChildren();
  const q=String($('marketSearch')?.value||'').trim().toUpperCase(),sort=$('marketSort')?.value||'symbol';
@@ -2467,15 +2550,20 @@ function renderMarkets(){
   const volumeMarkup=activeMarketCategory==='new'?(item.catalogStale?'<small class="coin-volume" style="color:var(--red)">داده قیمت قدیمی · قیمت نمایش داده نمی‌شود</small>':item.catalogOnly?'<small class="coin-volume">فقط نمایش · معامله هنوز فعال نیست</small>':'<small class="coin-volume" style="color:var(--green)">خریدوفروش آزمایشی فعال</small>'):Number.isFinite(Number(volume))&&volume!==null?`<small class="coin-volume">حجم ۲۴س: ${formatNum(volume,0)} USDT${tickerMeta}</small>`:'';
   const star=document.createElement('button');star.type='button';star.className='favorite-btn'+(isFavorite?' is-favorite':'');star.dataset.favorite=item.symbol;star.setAttribute('aria-label',isFavorite?'حذف از علاقه‌مندی‌ها':'افزودن به علاقه‌مندی‌ها');star.setAttribute('aria-pressed',isFavorite?'true':'false');star.title=isFavorite?'حذف از علاقه‌مندی‌ها':'افزودن به علاقه‌مندی‌ها';star.innerHTML='<i data-lucide="star" aria-hidden="true"></i>';
   star.addEventListener('click',event=>{event.stopPropagation();toggleFavoriteSymbol(item.symbol);renderMarkets();renderDashboardMarketPreview()});
-  const identity=document.createElement('div');identity.className='coin-identity';identity.innerHTML=coinLogo(base)+'<span><b>'+safeText(persianCoinName(item.symbol))+'</b><small class="coin-en">'+safeText(base)+'</small></span>';
+  const identity=document.createElement('div');identity.className='coin-identity';
+  const englishName=String(coinInfo[base]?.name||item.name||base);
+  identity.innerHTML=coinLogo(base)+'<span class="coin-name-stack"><b class="coin-name-fa">'+safeText(persianCoinName(item.symbol))+'</b><small class="coin-symbol">'+safeText(base)+'</small><small class="coin-en">'+safeText(englishName)+'</small></span>';
+  identity.title=persianCoinName(item.symbol)+' · '+base+' · '+englishName;
+  const sparkline=document.createElement('span');sparkline.className='coin-sparkline';sparkline.setAttribute('role','img');sparkline.setAttribute('aria-label','نمودار تغییرات قیمت ۲۴ ساعت گذشته');sparkline.textContent='—';sparkline.dataset.symbol=fullSymbol;
   const changeWrap=document.createElement('div');changeWrap.className='coin-change-wrap';changeWrap.innerHTML=changeMarkup+volumeMarkup;
   const price=document.createElement('div');price.className='price-stack';price.innerHTML=priceMarkup;
-  div.append(star,identity,changeWrap,price);
+  div.append(star,identity,sparkline,changeWrap,price);
   div.addEventListener('click',()=>openChart(item.symbol));
   div.addEventListener('keydown',event=>{if(event.target!==div||event.target.closest('button,a,input,select,textarea,[role="button"]'))return;if(event.key==='Enter'||event.key===' '){event.preventDefault();openChart(item.symbol)}});
   fragment.appendChild(div);
  }
  list.appendChild(fragment);
+ observeMarketSparklines(list);
  if(totalRows>visibleRows.length){
   const more=document.createElement('button');more.type='button';more.className='secondary';more.style.width='100%';more.style.marginTop='10px';
   more.textContent='نمایش '+formatNum(Math.min(marketDisplayLimit,totalRows),0)+' از '+formatNum(totalRows,0)+' ارز · نمایش بیشتر';
