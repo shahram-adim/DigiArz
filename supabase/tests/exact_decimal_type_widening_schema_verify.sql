@@ -1,56 +1,61 @@
--- Assert representative schema objects survive the widening rehearsal unchanged.
+-- Compare the full fixture catalog snapshot before/after widening.
 DO $verify$
 DECLARE
-  v_missing text;
+  v_diff text;
 BEGIN
-  SELECT string_agg(required_object, ', ')
-    INTO v_missing
-  FROM (VALUES
-    ('constraint:orders_amount_accounting_chk'),
-    ('constraint:orders_amount_positive'),
-    ('constraint:trades_amount_check'),
-    ('constraint:asset_balances_balance_check'),
-    ('constraint:conditional_orders_amount_check'),
-    ('index:orders_widening_fixture_idx'),
-    ('index:trades_widening_fixture_idx'),
-    ('index:asset_balances_widening_fixture_idx'),
-    ('index:order_reservations_widening_fixture_idx'),
-    ('index:conditional_orders_widening_fixture_idx'),
-    ('trigger:orders_widening_fixture_trigger')
-  ) AS expected(required_object)
-  WHERE CASE
-    WHEN required_object LIKE 'constraint:%' THEN NOT EXISTS (
-      SELECT 1 FROM pg_constraint
-      WHERE conname = split_part(required_object,':',2)
-    )
-    WHEN required_object LIKE 'index:%' THEN to_regclass('public.' || split_part(required_object,':',2)) IS NULL
-    WHEN required_object LIKE 'trigger:%' THEN NOT EXISTS (
-      SELECT 1 FROM pg_trigger
-      WHERE tgname = split_part(required_object,':',2)
-        AND tgrelid = 'public.orders'::regclass AND NOT tgisinternal
-    )
-    ELSE true
-  END;
+  WITH current_objects AS (
+    SELECT 'constraint'::text AS object_kind, c.relname || '.' || con.conname AS object_name,
+           pg_get_constraintdef(con.oid) AS definition
+    FROM pg_constraint con
+    JOIN pg_class c ON c.oid=con.conrelid
+    JOIN pg_namespace n ON n.oid=c.relnamespace
+    WHERE n.nspname='public'
+      AND c.relname IN ('orders','trades','asset_balances','order_reservations','conditional_orders')
+    UNION ALL
+    SELECT 'index', t.relname || '.' || i.relname, pg_get_indexdef(i.oid)
+    FROM pg_index x
+    JOIN pg_class t ON t.oid=x.indrelid
+    JOIN pg_class i ON i.oid=x.indexrelid
+    JOIN pg_namespace n ON n.oid=t.relnamespace
+    WHERE n.nspname='public'
+      AND t.relname IN ('orders','trades','asset_balances','order_reservations','conditional_orders')
+    UNION ALL
+    SELECT 'trigger', c.relname || '.' || tr.tgname, pg_get_triggerdef(tr.oid,true)
+    FROM pg_trigger tr
+    JOIN pg_class c ON c.oid=tr.tgrelid
+    JOIN pg_namespace n ON n.oid=c.relnamespace
+    WHERE n.nspname='public'
+      AND c.relname IN ('orders','trades','asset_balances','order_reservations','conditional_orders')
+      AND NOT tr.tgisinternal
+    UNION ALL
+    SELECT 'default', c.relname || '.' || a.attname, pg_get_expr(d.adbin,d.adrelid)
+    FROM pg_attrdef d
+    JOIN pg_class c ON c.oid=d.adrelid
+    JOIN pg_namespace n ON n.oid=c.relnamespace
+    JOIN pg_attribute a ON a.attrelid=c.oid AND a.attnum=d.adnum
+    WHERE n.nspname='public'
+      AND c.relname IN ('orders','trades','asset_balances','order_reservations','conditional_orders')
+    UNION ALL
+    SELECT 'grant', table_name || '.' || grantee || '.' || privilege_type, is_grantable
+    FROM information_schema.role_table_grants
+    WHERE table_schema='public'
+      AND table_name IN ('orders','trades','asset_balances','order_reservations','conditional_orders')
+  ),
+  differences AS (
+    (SELECT object_kind,object_name,definition FROM public.widening_schema_snapshot
+     EXCEPT
+     SELECT object_kind,object_name,definition FROM current_objects)
+    UNION ALL
+    (SELECT object_kind,object_name,definition FROM current_objects
+     EXCEPT
+     SELECT object_kind,object_name,definition FROM public.widening_schema_snapshot)
+  )
+  SELECT string_agg(object_kind || ':' || object_name || ' => ' || definition, '; ')
+    INTO v_diff
+  FROM differences;
 
-  IF v_missing IS NOT NULL THEN
-    RAISE EXCEPTION 'widening lost schema objects: %', v_missing;
-  END IF;
-
-  IF NOT has_table_privilege('authenticated','public.orders','SELECT')
-     OR NOT has_table_privilege('service_role','public.orders','INSERT')
-     OR NOT has_table_privilege('service_role','public.order_reservations','UPDATE') THEN
-    RAISE EXCEPTION 'widening changed expected table grants';
-  END IF;
-
-  IF (SELECT pg_get_expr(d.adbin,d.adrelid) FROM pg_attrdef d
-      WHERE d.adrelid='public.orders'::regclass
-        AND d.adnum=(SELECT attnum FROM pg_attribute WHERE attrelid='public.orders'::regclass AND attname='filled_amount')) <> '0' THEN
-    RAISE EXCEPTION 'orders.filled_amount default changed';
-  END IF;
-  IF (SELECT pg_get_expr(d.adbin,d.adrelid) FROM pg_attrdef d
-      WHERE d.adrelid='public.asset_balances'::regclass
-        AND d.adnum=(SELECT attnum FROM pg_attribute WHERE attrelid='public.asset_balances'::regclass AND attname='balance')) <> '0' THEN
-    RAISE EXCEPTION 'asset_balances.balance default changed';
+  IF v_diff IS NOT NULL THEN
+    RAISE EXCEPTION 'schema objects changed during widening: %', v_diff;
   END IF;
 END
 $verify$;
