@@ -126,6 +126,85 @@ BEGIN
       WHERE user_id='30000000-0000-0000-0000-000000000003') <> 100 THEN
     RAISE EXCEPTION 'Zero-notional order changed wallet balance';
   END IF;
+
+  -- Oversized quote settlements must be skipped before touching either ledger.
+  INSERT INTO public.profiles (id, is_active) VALUES
+    ('40000000-0000-0000-0000-000000000004', true),
+    ('50000000-0000-0000-0000-000000000005', true);
+  INSERT INTO public.wallets (user_id, balance_usdt) VALUES
+    ('40000000-0000-0000-0000-000000000004', 200),
+    ('50000000-0000-0000-0000-000000000005', 100);
+  INSERT INTO public.asset_balances (user_id, asset, balance) VALUES
+    ('40000000-0000-0000-0000-000000000004', 'BTC', 0),
+    ('50000000-0000-0000-0000-000000000005', 'BTC', 1000000);
+
+  UPDATE public.market_prices
+  SET price = 9999999999999999, updated_at = now()
+  WHERE symbol = 'BTCUSDT';
+
+  INSERT INTO public.orders (
+    id, user_id, symbol, side, order_type, amount, price,
+    filled_amount, remaining_amount, status
+  ) VALUES
+  ('d4000000-0000-0000-0000-000000000004',
+   '40000000-0000-0000-0000-000000000004',
+   'BTCUSDT', 'buy', 'limit', 1000000, 9999999999999999,
+   0, 1000000, 'pending'),
+  ('e5000000-0000-0000-0000-000000000005',
+   '50000000-0000-0000-0000-000000000005',
+   'BTCUSDT', 'sell', 'limit', 1000000, 9999999999999999,
+   0, 1000000, 'pending');
+
+  INSERT INTO public.order_reservations (
+    id, order_id, user_id, asset, reserved_amount, consumed_amount,
+    released_amount, status
+  ) VALUES
+  ('d4000000-0000-0000-0000-000000000044',
+   'd4000000-0000-0000-0000-000000000004',
+   '40000000-0000-0000-0000-000000000004',
+   'USDT', 90000000000000000000, 0, 0, 'reserved'),
+  ('e5000000-0000-0000-0000-000000000055',
+   'e5000000-0000-0000-0000-000000000005',
+   '50000000-0000-0000-0000-000000000005',
+   'BTC', 1000000, 0, 0, 'reserved');
+
+  v_result := public.process_limit_orders();
+
+  IF (SELECT status FROM public.orders
+      WHERE id='d4000000-0000-0000-0000-000000000004') <> 'pending'
+     OR (SELECT status FROM public.orders
+         WHERE id='e5000000-0000-0000-0000-000000000005') <> 'pending' THEN
+    RAISE EXCEPTION 'Oversized settlement orders must remain pending';
+  END IF;
+  IF EXISTS (SELECT 1 FROM public.trades
+             WHERE order_id IN (
+               'd4000000-0000-0000-0000-000000000004',
+               'e5000000-0000-0000-0000-000000000005'
+             )) THEN
+    RAISE EXCEPTION 'Oversized settlement unexpectedly created a trade';
+  END IF;
+  IF (SELECT balance_usdt FROM public.wallets
+      WHERE user_id='40000000-0000-0000-0000-000000000004') <> 200
+     OR (SELECT balance_usdt FROM public.wallets
+         WHERE user_id='50000000-0000-0000-0000-000000000005') <> 100 THEN
+    RAISE EXCEPTION 'Oversized settlement changed a USDT wallet';
+  END IF;
+  IF (SELECT balance FROM public.asset_balances
+      WHERE user_id='40000000-0000-0000-0000-000000000004' AND asset='BTC') <> 0
+     OR (SELECT balance FROM public.asset_balances
+         WHERE user_id='50000000-0000-0000-0000-000000000005' AND asset='BTC') <> 1000000 THEN
+    RAISE EXCEPTION 'Oversized settlement changed a base-asset balance';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.order_reservations
+    WHERE order_id IN (
+      'd4000000-0000-0000-0000-000000000004',
+      'e5000000-0000-0000-0000-000000000005'
+    )
+    AND (consumed_amount <> 0 OR released_amount <> 0 OR status <> 'reserved')
+  ) THEN
+    RAISE EXCEPTION 'Oversized settlement changed reservation accounting';
+  END IF;
 END
 $test$;
 
