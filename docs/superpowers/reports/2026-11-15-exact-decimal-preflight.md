@@ -141,3 +141,33 @@ This target is a schema recommendation, not an applied migration. It must be tes
 The coordinated `numeric(38,18)` approach is technically consistent with the existing market-price column and is safe for the currently observed values. The most important implementation work is not merely widening columns: it is keeping exact decimal strings in the browser, applying uniform validation at every RPC boundary, and reusing one quantized 8-decimal USDT settlement amount throughout the atomic accounting writes.
 
 **No Production changes were made.**
+
+
+## Additional preflight findings — second pass (2026-11-15)
+
+### Limit partial-fill precision
+
+The live `process_limit_orders()` computes each cycle quantity as:
+
+```sql
+v_qty := LEAST(v_remaining, v_order.amount * 0.25);
+```
+
+An amount stored at 18 fractional digits can produce a 20-digit intermediate when multiplied by 0.25. This must not be silently rounded by a later `numeric(...,18)` assignment. The implementation must explicitly define and test a fill-quantization rule. Recommended rule: floor each non-final 25%-of-original fill to 18 fractional digits; if the quantized slice is zero, consume the exact remaining dust as the terminal fill. For a normal amount, the final fill must consume the exact remainder so that `filled_amount + remaining_amount = amount` at every step. This rule preserves the existing 25%-per-cycle behavior for ordinary quantities and prevents sub-quantum orders from getting stuck. This is a proposed algorithm to validate in isolated tests, not a Production change.
+
+### Quote reservation and settlement precision
+
+The live Limit placement and worker functions currently calculate buy-side required reserve, gross, fee, net, and remaining reserve without consistently applying an 8-decimal quantization before all writes. The worker writes wallet and transaction columns with 8-decimal scale while reservation fields are unconstrained. Consequently, the same logical USDT amount can be stored at different effective precision across wallet, transaction, and reservation ledger entries.
+
+The implementation must calculate the 8-decimal quote values once, then reuse the same values for:
+- buy-side reserve requirement;
+- each fill's gross and fee;
+- wallet debit/credit;
+- transaction amount;
+- reservation consumed amount and remaining reserve/release.
+
+Use PostgreSQL `round(value,8)` for the quote policy and include below-half, exact-half, and above-half tests. Do not apply this quote quantization to base-asset quantities or prices.
+
+### No test harness discovered
+
+Repository code search found no existing `package.json`, Vitest, Jest, or Playwright test harness. Before adding a dependency, inspect the repository workflow and prefer Node's built-in `node:test` for a standalone pure-JavaScript decimal utility test if supported by the available CI runner. Keep browser integration test strategy documented; do not introduce a paid service or a runtime dependency solely for tests.
