@@ -95,3 +95,15 @@ This is a proposal, not approval. A 1,000,000 maximum amount check does not by i
 - The new report and SQL test file were read back from GitHub after commit.
 - Latest Production migration remains `20261115143827_bound_stop_limit_invalid_reservation_retries`; no exact-decimal migration is applied. Supabase still exposes no development branches.
 - The next unresolved design choice is the 18-place partial-fill progress rule for quantities whose 25% slice rounds to zero. This must be decided and tested before replacing the Limit worker.
+
+
+## Partial-fill policy decision — 2026-11-15
+
+The 18-place partial-fill progress rule is now pinned in the design spec and covered by additional pure-SQL regression assertions:
+
+- Quantize the nominal 25% slice explicitly with PostgreSQL `round(..., 18)`.
+- If that slice is zero for a valid positive order, advance by one base-asset quantum (`0.000000000000000001`), bounded by the remaining amount.
+- Use the exact remaining amount for the final fill.
+- Reject submitted quantities that would be below the supported 18-place quantum; never silently round input.
+
+This is a design/test specification only. The SQL regression file has not been executed in PostgreSQL. The live worker has not been replaced. Production remains unchanged and 18-decimal release remains NO-GO.
