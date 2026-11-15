@@ -150,7 +150,7 @@ USING (auth.uid() = user_id);
 CREATE POLICY conditional_orders_select_own ON public.conditional_orders FOR SELECT TO authenticated
 USING ((SELECT auth.uid()) = user_id);
 
-GRANT SELECT ON public.orders,public.trades,public.asset_balances,public.order_reservations TO authenticated;
+GRANT SELECT ON public.orders,public.trades,public.asset_balances TO authenticated;
 GRANT SELECT ON public.conditional_orders TO anon,authenticated;
 GRANT ALL PRIVILEGES ON public.orders,public.trades,public.asset_balances,public.order_reservations,public.conditional_orders TO service_role;
 
