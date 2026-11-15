@@ -77,6 +77,12 @@
     };
   }
 
+  function checkedString(parts) {
+    const value = partsToString(parts);
+    parseParts(value);
+    return value;
+  }
+
   function parseDecimal(value, options) { return partsToString(parseParts(value, options)); }
 
   function compareDecimal(a, b) {
@@ -87,7 +93,7 @@
   function addDecimal(a, b, scale) {
     const p = align(parseParts(a), parseParts(b));
     const result = { coefficient: p.a + p.b, scale: p.scale };
-    return partsToString(scale === undefined ? result : rescale(result, scale, 'down'));
+    return checkedString(scale === undefined ? result : rescale(result, scale, 'down'));
   }
 
   function subtractDecimal(a, b, scale) {
@@ -99,7 +105,7 @@
   function multiplyDecimal(a, b, scale, rounding) {
     if (scale === undefined) scale = 18;
     const x = parseParts(a), y = parseParts(b);
-    return partsToString(rescale({ coefficient: x.coefficient * y.coefficient, scale: x.scale + y.scale }, scale, rounding || 'down'));
+    return checkedString(rescale({ coefficient: x.coefficient * y.coefficient, scale: x.scale + y.scale }, scale, rounding || 'down'));
   }
 
   function divideDecimal(a, b, scale, rounding) {
@@ -113,7 +119,7 @@
     const rem = numerator % denominator;
     if (rounding === 'half-up' && (rem < 0n ? -rem : rem) * 2n >= (denominator < 0n ? -denominator : denominator)) q += (numerator < 0n) !== (denominator < 0n) ? -1n : 1n;
     else if (rounding !== undefined && rounding !== 'down' && rounding !== 'half-up') throw new TypeError('unsupported rounding mode');
-    return partsToString({ coefficient: q, scale });
+    return checkedString({ coefficient: q, scale });
   }
 
   function formatDecimal(value, options) {
@@ -125,7 +131,7 @@
       throw new RangeError('invalid display precision');
     }
     const parts = rescale(parseParts(value), maxFractionDigits, opts.rounding || 'down');
-    let s = partsToString(parts);
+    let s = checkedString(parts);
     let [integer, fraction = ''] = s.split('.');
     const negative = integer[0] === '-';
     const absInteger = negative ? integer.slice(1) : integer;
