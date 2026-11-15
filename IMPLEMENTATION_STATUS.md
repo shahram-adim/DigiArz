@@ -1314,3 +1314,15 @@
 - [x] تابع پردازش اجرا و هر پنج مورد به وضعیت matched رسیدند.
 - [x] آمار جدید Kifpool: ۱٬۰۹۱ matched، ۱۹ ambiguous، ۱۱۶ pending، ۴۲ unmatched؛ جمع ۱٬۲۶۸.
 - [x] تعداد جفت‌ارزهای فعال همچنان ۱۲ است؛ هیچ دارایی جدیدی به بازار یا جفت‌ارزها اضافه نشد و هیچ عملیات مالی/کاربری انجام نشد.
+
+
+## تأیید ۴ نام کوتاه/قدیمی دیگر در Kifpool — ۱۵ نوامبر ۲۰۲۶
+- [x] چهار مورد دیگر با CoinGecko ID و نماد دقیق یکسان و نام متفاوت تأیید شدند:
+  - ANKR: Ankr → Ankr Network
+  - BAND: Band Protocol → Band
+  - BNB: Binance Coin → BNB
+  - SUPER: SuperFarm → SuperVerse
+- [x] شواهد CoinGecko برای شناسه‌ها و تغییرنام Band و SuperVerse بررسی شد؛ aliasها همچنان محدود به ID دقیق، نماد دقیق و دو نام نرمال‌شدهٔ صریح هستند.
+- [x] Migration `20261115145500_allow_verified_kifpool_additional_name_aliases` اعمال و فایل آن ثبت شد؛ هر چهار مورد matched شدند.
+- [x] آمار Kifpool: ۱٬۰۹۵ matched، ۱۹ ambiguous، ۱۱۲ pending، ۴۲ unmatched؛ مجموع ۱٬۲۶۸.
+- [x] جفت‌ارزهای فعال همچنان ۱۲ عدد است؛ فهرست بازار و هیچ داده مالی کاربر تغییر نکرد.
