@@ -131,3 +131,19 @@ Full lifecycle testing remains blocked until an isolated Supabase test project w
 - [x] Live privilege inspection: `place_stop_limit_order` and `cancel_stop_limit_order` are executable by `authenticated`, not `anon`; `process_stop_limit_orders` is executable by `service_role` only.
 - [x] Front-end Stop-Limit placement calls the authenticated RPC; the active-order list is user-scoped and offers cancellation for pending and triggered orders.
 - [ ] Cancellation-versus-trigger concurrency and partial-fill cancellation still require isolated end-to-end tests. Static function review is not proof of race-free behavior.
+
+
+## Limit engine integration review — 2026-11-15
+
+### Read-only checks
+- [x] `place_limit_order` derives the user from `auth.uid()`, rejects inactive accounts, validates the enabled USDT pair, locks the wallet, accounts for existing active reservations, and inserts the order and reservation in one transaction.
+- [x] `process_limit_orders` uses a transaction-scoped advisory lock and `FOR UPDATE SKIP LOCKED` to prevent overlapping workers from processing the same order.
+- [x] The processor requires a fresh positive market price (at most 60 seconds old), enforces the side-specific limit-price condition, and validates reservation owner/status/arithmetic and expected reserve asset before applying a fill.
+- [x] Partial fills are capped at 25% of the original order amount per processing pass; wallet/asset balances, order fill totals, reservation consumption/release, trade and transaction records are updated transactionally.
+- [x] `cancel_limit_order` locks the user-owned order, permits only pending/partially-filled Limit orders, requires exactly one valid active reservation, and updates order cancellation and reservation release atomically.
+- [x] Unique indexes enforce one reservation per order and one conditional order per parent order.
+- [x] Stop-Limit child creation calls the same `place_limit_order` engine inside the trigger transaction after releasing the parent reservation; the child order therefore follows the ordinary Limit execution path.
+- [ ] Production transaction tests remain intentionally unrun. Fill, partial-fill, cancel-vs-worker concurrency, and child/parent state reconciliation require an isolated test database and test-only balances.
+
+### Scope note
+This review is static/read-only. It does not certify matching-engine economics, race behavior under load, or full transaction correctness; those remain explicit QA items.
