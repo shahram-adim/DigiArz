@@ -1980,6 +1980,7 @@ function renderMarketPriceFreshness(){
 const marketCategories=[
  {id:'all',label:'همه بازار',icon:'layout-grid'},
  {id:'mine',label:'ارزهای من',icon:'wallet'},
+ {id:'trending',label:'ارزهای ترند',icon:'trending-up'},
  {id:'new',label:'ارزهای جدید',icon:'badge-plus'},
  {id:'favorites',label:'محبوب من',icon:'star'},
  {id:'gainers',label:'بیشترین افزایش',icon:'trending-up'},
@@ -2211,14 +2212,16 @@ function renderMarkets(){
  const q=String($('marketSearch')?.value||'').trim().toUpperCase(),sort=$('marketSort')?.value||'symbol';
  const changeCache=new Map();
  const changeOf=item=>{if(changeCache.has(item.symbol))return changeCache.get(item.symbol);const raw=getFreshMarketTicker(item)?.change;const live=raw===null||raw===undefined||raw===''?NaN:Number(raw);const fallback=isMarketTimestampFresh(item.updated_at)&&item.change!==null&&item.change!==undefined&&item.change!==''?Number(item.change):NaN;const value=Number.isFinite(live)?live:Number.isFinite(fallback)?fallback:null;changeCache.set(item.symbol,value);return value};
+ const volumeOf=item=>{const live=getFreshMarketTicker(item)?.quoteVolume,stored=isMarketTimestampFresh(item.updated_at)?item.quoteVolume:null,value=live??stored;return value===null||value===undefined||!Number.isFinite(Number(value))?null:Number(value)};
  const sourceRows=activeMarketCategory==='new'?featuredMarketRows:marketRows;let rows=sourceRows.filter(x=>{const symbol=String(x.symbol||'').toUpperCase(),base=symbol.replace(/USDT$/i,''),english=String(coinInfo[base]?.name||x.name||'').toUpperCase(),persian=String(persianCoinName(symbol)||'').toUpperCase();return !q||symbol.includes(q)||base.includes(q)||english.includes(q)||persian.includes(q)});
  if(activeMarketCategory==='gainers')rows=rows.filter(x=>changeOf(x)!==null&&changeOf(x)>0);
  else if(activeMarketCategory==='losers')rows=rows.filter(x=>changeOf(x)!==null&&changeOf(x)<0);
+ else if(activeMarketCategory==='trending')rows=rows.filter(x=>volumeOf(x)!==null&&volumeOf(x)>0);
  if(activeMarketCategory==='mine'){const owned=new Set(assetRows.filter(a=>Number(a.balance)>0).map(a=>String(a.asset).toUpperCase()));rows=rows.filter(x=>owned.has(String(x.symbol).replace(/USDT$/i,'')))}
  else if(activeMarketCategory==='favorites')rows=rows.filter(x=>isFavoriteSymbol(x.symbol));
  else if(['defi','meme','metaverse','stable','ai','gaming'].includes(activeMarketCategory)){const set=categorySymbols[activeMarketCategory]||[];rows=rows.filter(x=>set.includes(String(x.symbol).replace(/USDT$/i,'')))}
  else if(activeMarketCategory==='top'||activeMarketCategory==='selected')rows=rows.filter(x=>['BTCUSDT','ETHUSDT','BNBUSDT','SOLUSDT','XRPUSDT','ADAUSDT','DOGEUSDT'].includes(x.symbol));
- if(activeMarketCategory==='volume'||sort==='volume-desc')rows.sort((a,b)=>(getFreshMarketTicker(b)?.quoteVolume??(isMarketTimestampFresh(b.updated_at)?b.quoteVolume:null)??-Infinity)-(getFreshMarketTicker(a)?.quoteVolume??(isMarketTimestampFresh(a.updated_at)?a.quoteVolume:null)??-Infinity));
+ if(activeMarketCategory==='volume'||activeMarketCategory==='trending'||sort==='volume-desc')rows.sort((a,b)=>(volumeOf(b)??-Infinity)-(volumeOf(a)??-Infinity));
  else if(activeMarketCategory==='gainers'||sort==='change-desc')rows.sort((a,b)=>(changeOf(b)??-Infinity)-(changeOf(a)??-Infinity));
  else if(activeMarketCategory==='losers'||sort==='change-asc')rows.sort((a,b)=>(changeOf(a)??Infinity)-(changeOf(b)??Infinity));
  else if(activeMarketCategory==='cheapest'||sort==='price-asc')rows.sort((a,b)=>(getTrustedMarketPrice(a)??Infinity)-(getTrustedMarketPrice(b)??Infinity));
