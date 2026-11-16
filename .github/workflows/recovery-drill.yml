@@ -84,6 +84,20 @@ jobs:
           grep -q 'SCHEMA - private' /tmp/digiarz-restore-list.txt
           grep -q 'TABLE DATA public.' /tmp/digiarz-restore-list.txt
           grep -q 'TABLE DATA private admin_users' /tmp/digiarz-restore-list.txt
+          # Supabase Auth data is intentionally outside this logical backup.
+          # Keep private.admin_users and its rows, but omit only the FK that points
+          # to auth.users so the isolated app-schema restore can be validated honestly.
+          python3 - <<'PY'
+          from pathlib import Path
+          lines = Path("/tmp/digiarz-restore-list.txt").read_text().splitlines()
+          matches = [i for i, line in enumerate(lines)
+                     if "FK CONSTRAINT" in line and "admin_users_granted_by_fkey" in line]
+          if len(matches) != 1:
+              raise SystemExit(f"Expected exactly one Auth-dependent FK, found {len(matches)}.")
+          lines[matches[0]] = ";" + lines[matches[0]]
+          Path("/tmp/digiarz-restore-list-app-only.txt").write_text("\\n".join(lines) + "\\n")
+          print("Prepared restore list: retained admin_users data; skipped only its Auth-dependent granted_by FK.")
+          PY
           echo "Archive decrypted and required public/private entries verified."
 
       - name: Restore into DigiArz-Recovery-Test only
@@ -119,11 +133,12 @@ jobs:
               "-v", "/tmp:/backup:ro", "postgres:17",
               "pg_restore", "--no-owner", "--no-acl",
               "--exit-on-error", "--single-transaction",
+              "--use-list=/backup/digiarz-restore-list-app-only.txt",
               "--dbname=postgres", "/backup/digiarz-database.dump"
           ]
           # Restore without --clean: the isolated target schemas were cleared above.
           subprocess.run(args, env=env, check=True)
-          print("Restore command completed successfully on the isolated target.")
+          print("Application-schema restore completed. Auth users are excluded from this backup, so the admin_users.granted_by FK was intentionally not restored.")
           PY
 
       - name: Verify restored application schemas
