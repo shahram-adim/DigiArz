@@ -293,7 +293,9 @@ BEGIN
         IF v_order.side = 'buy' THEN
             v_consumed := v_reservation.consumed_amount + v_total;
             v_target_remaining_reserve :=
-                round(v_new_remaining * v_order.price * (1 + v_fee_rate), 8);
+                round(v_new_remaining * v_order.price, 8)
+                + round(round(v_new_remaining * v_order.price, 8) * v_fee_rate, 8)
+                + CASE WHEN v_new_remaining > 0 THEN 0.0000001::numeric ELSE 0 END;
         ELSE
             v_consumed := v_reservation.consumed_amount + v_qty;
             v_target_remaining_reserve := v_new_remaining;
