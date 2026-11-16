@@ -14,7 +14,7 @@ test('all inline JavaScript blocks in index.html parse successfully', () => {
     try {
       new vm.Script(body, { filename });
     } catch (error) {
-      throw new Error(filename + ': ' + error.message, { cause: error });
+      throw new Error(filename + ': ' + (error.stack || error.message), { cause: error });
     }
   });
 });
