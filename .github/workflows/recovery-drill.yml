@@ -95,7 +95,7 @@ jobs:
           if len(matches) != 1:
               raise SystemExit(f"Expected exactly one Auth-dependent FK, found {len(matches)}.")
           lines[matches[0]] = ";" + lines[matches[0]]
-          Path("/tmp/digiarz-restore-list-app-only.txt").write_text("\\n".join(lines) + "\\n")
+          Path("/tmp/digiarz-restore-list-app-only.txt").write_text("\n".join(lines) + "\n")
           print("Prepared restore list: retained admin_users data; skipped only its Auth-dependent granted_by FK.")
           PY
           echo "Archive decrypted and required public/private entries verified."
