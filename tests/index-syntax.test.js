@@ -46,7 +46,7 @@ test('trade history CSV export respects filters and preserves exact decimal stri
   const end = html.indexOf('\nasync function trade(side)', start);
   assert.ok(start >= 0 && end > start, 'CSV export function boundaries found');
   const body = html.slice(start, end);
-  assert.ok(body.includes('historyRows.filter'), 'current history filters are applied');
+  assert.ok(body.includes('getFilteredHistoryRows()'), 'the CSV uses the shared current history filters');
   assert.ok(body.includes("String(item.amount??'')"), 'amount stays an exact string');
   assert.ok(body.includes("String(item.price??'')"), 'price stays an exact string');
   assert.ok(body.includes("const csv='\\uFEFF'"), 'UTF-8 BOM is included');
@@ -71,4 +71,21 @@ test('trade history loads older pages without losing exact values or changing re
   assert.ok(body.includes('historyLoadingMore'), 'duplicate load requests are guarded');
   assert.ok(body.includes('historyRequestId'), 'stale page responses are ignored after refresh');
   assert.ok(html.includes("DigiArz-trades-'+rows.length+'-loaded-"), 'CSV filename reflects all loaded rows');
+});
+
+test('trade history date filters apply consistently to the table and CSV export', () => {
+  for (const id of ['historyDateFrom', 'historyDateTo', 'clearHistoryFiltersBtn']) {
+    assert.match(html, new RegExp('id="' + id + '"'));
+  }
+  const start = html.indexOf('function getFilteredHistoryRows(){');
+  const end = html.indexOf('function renderHistory(){', start);
+  assert.ok(start >= 0 && end > start, 'shared history filter helper boundaries found');
+  const body = html.slice(start, end);
+  assert.ok(body.includes("new Date(fromDate+'T00:00:00')"), 'start date includes the full local day');
+  assert.ok(body.includes("new Date(toDate+'T23:59:59.999')"), 'end date includes the full local day');
+  assert.ok(body.includes('fromTime') && body.includes('toTime'));
+  const exportStart = html.indexOf('function exportHistoryCsv(){');
+  const exportEnd = html.indexOf('\\nasync function trade(side)', exportStart);
+  assert.ok(html.slice(exportStart, exportEnd).includes('getFilteredHistoryRows()'), 'CSV uses the same filters as the table');
+  assert.ok(html.includes("clearHistoryFiltersBtn')?.addEventListener('click'"), 'clear action is wired');
 });
