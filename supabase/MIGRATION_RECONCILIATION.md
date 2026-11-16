@@ -1,14 +1,17 @@
 # Supabase migration history reconciliation
 
-Checked on 2026-11-16 against project `gfoaubfilhttnwjykaox` and the current `main` branch.
+Checked on **2026-11-17 02:14 Asia/Tehran** against project `gfoaubfilhttnwjykaox` and the current `main` branch.
 
-## Current state
+## Current inventory
 
-- Supabase migration history contains **46 applied entries**.
-- `supabase/migrations/` in GitHub contains **33 SQL files**.
-- Thirteen applied migrations have no corresponding SQL file in the current repository.
-- Nineteen local files have a timestamp prefix that differs from the applied version in Supabase, even though their descriptive suffix maps to the same migration name.
-- The migration history table is not to be edited manually as a shortcut.
+- Supabase migration history contains **52 applied entries**.
+- `supabase/migrations/` in GitHub contains **40 SQL files**.
+- **14 applied migrations** have no corresponding SQL source file in the current repository.
+- **20 local files** have timestamp prefixes that differ from the applied versions, although their descriptive suffixes map to the same applied migration names.
+- **2 local files are not recorded as applied** in Supabase.
+- Only **4 local files** match an applied version exactly.
+- A GitHub commit-history lookup for the exact canonical paths of the 14 missing files returned no path history. This does not prove that no copy exists elsewhere; it means no authoritative source was recovered by this check.
+- The migration-history table has not been edited.
 
 ## Applied migrations with no local SQL source
 
@@ -27,6 +30,7 @@ Checked on 2026-11-16 against project `gfoaubfilhttnwjykaox` and the current `ma
 | 20261115103507 | schedule_bit24_exchange_asset_sync |
 | 20261115105721 | admin_exchange_asset_sync_monitoring |
 | 20261115105956 | restrict_exchange_sync_worker_execution |
+| 20261116201639 | auto_activate_verified_exchange_pairs |
 
 ## Local filename prefixes that do not match applied versions
 
@@ -51,13 +55,45 @@ Checked on 2026-11-16 against project `gfoaubfilhttnwjykaox` and the current `ma
 | 20261115145000 | 20261115143015 | allow_verified_kifpool_rebrand_aliases |
 | 20261115145500 | 20261115143050 | allow_verified_kifpool_additional_name_aliases |
 | 20261115150000 | 20261115143223 | allow_verified_kifpool_exact_id_name_aliases_batch |
+| 20261117130000 | 20261116205451 | stagger_market_price_overflow_and_refresh_exchange_discovery |
+
+## Local files not recorded as applied
+
+| Local version | Migration name |
+|---|---|
+| 20261116203000 | add_kucoin_to_scheduled_market_price_refresh |
+| 20261116203100 | add_gateio_to_scheduled_market_price_refresh |
+
+### Confirmed regression hazard
+
+Both local-only migrations replace `public.refresh_market_prices()` with older function definitions:
+
+- `20261116203000_add_kucoin_to_scheduled_market_price_refresh.sql` adds CoinGecko and KuCoin but does not include Gate.io or the 515-ID primary CoinGecko cap.
+- `20261116203100_add_gateio_to_scheduled_market_price_refresh.sql` adds Gate.io but still has no 515-ID cap.
+- The already-applied migration `20261116203709_limit_primary_coingecko_batch_to_515_ids` installs the later capped implementation. Because that version is already recorded remotely, a normal push would not replay it after the two pending older migrations.
+
+A read-only check of the live function confirmed that Production currently contains the 515-ID cap and CoinGecko, KuCoin, and Gate.io branches. Therefore applying the two local-only files in timestamp order would regress the live function and remove the cap unless the migration set is reconciled first.
+
+## Live schedule verification
+
+The current Production cron rows were read without modification:
+
+| Job ID | Active schedule | Command |
+|---|---|---|
+| 13 | `*/10 * * * *` | `request_iran_exchange_asset_sync()` |
+| 14 | `* * * * *` | `process_iran_exchange_asset_sync()` |
+| 17 | `5-59/10 * * * *` | `private.request_market_price_overflow()` |
+
+These schedules match the SQL body in the local `20261117130000_stagger_market_price_overflow_and_refresh_exchange_discovery.sql` file, while the applied version recorded by Supabase is `20261116205451`. This is a timestamp mismatch, not a reason to re-run the schedule change.
 
 ## Transfer safeguards
 
-1. **Do not run `supabase db push` yet.** The local migration set would be interpreted as containing pending versions and the missing source files prevent a reproducible clean replay.
-2. Do not rename or repair history rows based only on similar suffixes. First recover or reconstruct the thirteen missing SQL files from authoritative source/commit evidence, then verify the nineteen timestamp mappings and file contents.
-3. The next financial migration must be applied as one reviewed, atomic, explicitly named migration after the preflight, schema rehearsal, function/grant checks, and rollback rehearsal pass.
-4. Keep the production database unchanged until the user explicitly issues the database-transfer instruction.
-5. After reconciliation, verify local and remote migration lists before any normal CLI push workflow is re-enabled.
+1. **Do not run `supabase db push`.** The current local migration set is not a safe replay set; it contains 20 timestamp-mismatched files and two older local-only function replacements.
+2. Do not apply either local-only KuCoin/Gate.io migration as-is. Preserve them as evidence until a reviewed reconciliation plan determines whether to archive them outside `supabase/migrations/` or replace them with a documented no-op/superseded record.
+3. Recover the 14 missing SQL sources from an authoritative backup, deployment record, or trusted source. The exact canonical GitHub paths did not yield commit history in this check.
+4. For each of the 20 timestamp mismatches, compare the full SQL content with the applied version before any filename repair. Similar suffixes alone are insufficient evidence.
+5. Do not rename or repair Supabase migration-history rows manually.
+6. Keep Production schema, functions, jobs, and financial data unchanged until the migration inventory is reproducible and the user explicitly authorizes a database transfer.
+7. Before any future deployment, rehearse the reconciled migration set against a disposable PostgreSQL 17 database and verify the final `refresh_market_prices()` definition and cron schedules.
 
-This report is an inventory only. It changes no database object or migration-history row.
+This report is an inventory and safety analysis only. It changes no database object, cron job, migration-history row, order, wallet, balance, or financial record.
