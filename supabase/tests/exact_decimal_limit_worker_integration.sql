@@ -8,7 +8,7 @@ INSERT INTO public.profiles (id, is_active) VALUES
 INSERT INTO public.demo_trading_pairs (pair_symbol, quote_asset, is_enabled)
 VALUES ('BTCUSDT', 'USDT', true);
 INSERT INTO public.market_prices (symbol, price, updated_at)
-VALUES ('BTCUSDT', 10, now());
+VALUES ('BTCUSDT', 10.000000000000000001, now());
 
 INSERT INTO public.wallets (user_id, balance_usdt) VALUES
 ('10000000-0000-0000-0000-000000000001', 1000),
@@ -26,11 +26,11 @@ INSERT INTO public.orders (
 ) VALUES
 ('a1000000-0000-0000-0000-000000000001',
  '10000000-0000-0000-0000-000000000001',
- 'BTCUSDT', 'buy', 'limit', 1.000000000000000001, 10, 0,
+ 'BTCUSDT', 'buy', 'limit', 1.000000000000000001, 10.000000000000000001, 0,
  1.000000000000000001, 'pending'),
 ('b2000000-0000-0000-0000-000000000002',
  '20000000-0000-0000-0000-000000000002',
- 'BTCUSDT', 'sell', 'limit', 1.000000000000000001, 10, 0,
+ 'BTCUSDT', 'sell', 'limit', 1.000000000000000001, 10.000000000000000001, 0,
  1.000000000000000001, 'pending'),
 ('c3000000-0000-0000-0000-000000000003',
  '30000000-0000-0000-0000-000000000003',
@@ -89,6 +89,24 @@ BEGIN
     RAISE EXCEPTION 'Buy reservation consumption mismatch: %', v_value;
   END IF;
 
+  -- Quote transactions must reconcile to the 8-place USDT settlement,
+  -- while the individual trade rows retain the 18-place market price.
+  SELECT sum(amount) INTO v_value FROM public.transactions
+  WHERE user_id='10000000-0000-0000-0000-000000000001'
+    AND currency='USDT' AND transaction_type='limit_buy';
+  IF v_value <> 10.01::numeric THEN
+    RAISE EXCEPTION 'Buy transaction ledger mismatch: %', v_value;
+  END IF;
+  IF (SELECT count(*) FROM public.trades
+      WHERE order_id='a1000000-0000-0000-0000-000000000001') <> 4
+     OR EXISTS (
+       SELECT 1 FROM public.trades
+       WHERE order_id='a1000000-0000-0000-0000-000000000001'
+         AND price <> 10.000000000000000001::numeric
+     ) THEN
+    RAISE EXCEPTION 'Buy trade price did not retain 18-place precision';
+  END IF;
+
   IF (SELECT status FROM public.orders
       WHERE id='b2000000-0000-0000-0000-000000000002') <> 'filled' THEN
     RAISE EXCEPTION '18-place sell order did not finish in four cycles';
@@ -112,6 +130,22 @@ BEGIN
   WHERE order_id='b2000000-0000-0000-0000-000000000002';
   IF v_value <> 1.000000000000000001::numeric THEN
     RAISE EXCEPTION 'Sell reservation consumption mismatch: %', v_value;
+  END IF;
+
+  SELECT sum(amount) INTO v_value FROM public.transactions
+  WHERE user_id='20000000-0000-0000-0000-000000000002'
+    AND currency='USDT' AND transaction_type='limit_sell';
+  IF v_value <> 9.99::numeric THEN
+    RAISE EXCEPTION 'Sell transaction ledger mismatch: %', v_value;
+  END IF;
+  IF (SELECT count(*) FROM public.trades
+      WHERE order_id='b2000000-0000-0000-0000-000000000002') <> 4
+     OR EXISTS (
+       SELECT 1 FROM public.trades
+       WHERE order_id='b2000000-0000-0000-0000-000000000002'
+         AND price <> 10.000000000000000001::numeric
+     ) THEN
+    RAISE EXCEPTION 'Sell trade price did not retain 18-place precision';
   END IF;
 
   IF (SELECT status FROM public.orders
