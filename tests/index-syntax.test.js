@@ -103,4 +103,6 @@ test('trade history provides accessible local-date quick presets', () => {
   assert.ok(body.includes("range==='all'"), 'all-history preset clears only date boundaries');
   assert.ok(body.includes("setAttribute('aria-pressed',String(active))"), 'preset state is exposed accessibly');
   assert.ok(html.includes("historyDatePresets')?.addEventListener('click'"), 'preset buttons are wired');
+  assert.ok(html.includes("clearHistoryFiltersBtn')?.addEventListener('click',()=>{['historySearch','historyDateFrom','historyDateTo'].forEach"), 'clear button is wired');
+  assert.ok(html.includes("setHistoryDatePreset('all')"), 'clear action resets the selected preset');
 });
