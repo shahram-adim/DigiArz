@@ -188,6 +188,7 @@ jobs:
           psql -h localhost -U postgres -d digiarz_stop_limit_race_test -v ON_ERROR_STOP=1 \
             -f supabase/tests/exact_decimal_stop_limit_setup.sql \
             -f supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql \
+            -f supabase/tests/exact_decimal_stop_limit_worker.sql \
             -f supabase/drafts/2026-11-15_exact_decimal_process_limit_orders.sql \
             -f supabase/tests/exact_decimal_stop_limit_cancel_race_setup.sql
           bash supabase/tests/exact_decimal_stop_limit_cancel_race.sh
