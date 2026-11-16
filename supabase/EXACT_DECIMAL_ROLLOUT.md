@@ -53,3 +53,16 @@ Status as of 2026-11-16: **candidate assembled and rehearsed in disposable Postg
 ## Migration-history caveat
 
 `supabase/MIGRATION_RECONCILIATION.md` records 46 remote applied migrations, 33 local files, 13 missing source files, and 19 local filename prefixes that differ from the applied versions. This blocks a normal full `db push`, but does not require reapplying old migrations when the next release is executed as one explicit `apply_migration` operation. Do not edit remote history rows to hide the drift.
+
+
+## Final handoff checkpoint — 2026-11-16 05:52 UTC
+
+- Latest full exact-decimal CI run `43811668020`: **success** on commit `9e74074507a5075d6c5c875bdf620596b0a85872`.
+- Latest Pages deployment run `43811667755`: **success** on the same commit.
+- Supabase project status: `ACTIVE_HEALTHY`; PostgreSQL `17.11.0.018`, region `us-west-2`.
+- Fresh read-only production preflight: all five target tables have 0 rows; all five invalid-row counters are 0; all six target function signatures exist; migration name `atomic_exact_decimal_rollout` is unused; no transaction older than 30 seconds was found.
+- Fresh function privilege check: Market/Limit/Stop-Limit/conditional entry points are SECURITY DEFINER with empty search_path, executable by `authenticated` and `service_role`, not `anon`; both workers are executable only by `service_role`. The candidate explicitly preserves this matrix.
+- Migration inventory remains 46 remote applied entries; the local-history drift report remains in force. Do not use `supabase db push`.
+- Advisors snapshot: 1 existing anon-callable SECURITY DEFINER function (`get_admin_market_listings()`, public market-list use must be confirmed); 22 authenticated-callable SECURITY DEFINER functions; leaked-password protection warning; 9 unindexed foreign keys and 11 RLS init-plan performance findings. These are existing project-level findings outside this precision migration's scope; no blanket permission changes are included.
+- **Backup/PITR availability is not exposed by the connected project-inspection tool**, so it has not been verified. Immediately before transfer, confirm a recent restorable backup/PITR point in Supabase Dashboard; if unavailable, export a backup first. This is the sole operational release gate not yet independently verified here.
+- Production remains unchanged.
