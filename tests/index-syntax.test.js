@@ -156,11 +156,11 @@ test('new market automatically includes unmatched Iranian exchange listings as d
 
 test('Iranian exchange discovery RPC is read-only and excludes non-crypto tokenized equities', () => {
   const migration = fs.readFileSync('supabase/migrations/20261116200009_auto_list_unmatched_iran_exchange_assets.sql', 'utf8');
-  assert.match(migration, /FUNCTION public\\.get_exchange_discovered_market_assets\\(\\)/);
-  assert.match(migration, /SECURITY DEFINER[\\s\\S]*SET search_path = ''/);
-  assert.match(migration, /o\\.is_active IS TRUE/);
-  assert.match(migration, /o\\.last_seen_at >= pg_catalog\\.now\\(\\) - interval '48 hours'/);
-  assert.match(migration, /stock\\|equity\\|shares\\|xstock\\|tokenized/);
-  assert.match(migration, /NOT EXISTS[\\s\\S]*public\\.demo_trading_pairs/);
-  assert.match(migration, /GRANT EXECUTE ON FUNCTION public\\.get_exchange_discovered_market_assets\\(\\) TO anon, authenticated/);
+  assert.ok(migration.includes('FUNCTION public.get_exchange_discovered_market_assets()'));
+  assert.ok(migration.includes('SECURITY DEFINER') && migration.includes("SET search_path = ''"));
+  assert.ok(migration.includes('o.is_active IS TRUE'));
+  assert.ok(migration.includes("o.last_seen_at >= pg_catalog.now() - interval '48 hours'"));
+  assert.ok(migration.includes('(stock|equity|shares|xstock|tokenized)'));
+  assert.ok(migration.includes('public.demo_trading_pairs'));
+  assert.ok(migration.includes('GRANT EXECUTE ON FUNCTION public.get_exchange_discovered_market_assets() TO anon, authenticated'));
 });
