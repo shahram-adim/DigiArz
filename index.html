@@ -2556,23 +2556,10 @@ const extraPersianNames={
 
 function persianCoinName(symbol){const base=String(symbol||'').toUpperCase().replace(/USDT$/,'');return tomanAssetNames.get(base)||coinInfo[base]?.fa||extraPersianNames[base]||base}
 async function discoverMultiExchangeMarkets(){
-  const now=new Date().toISOString(), found=new Map(), errors=[];
-  const add=(symbol,price,source,base,change=null,quoteVolume=null)=>{
-    symbol=String(symbol||'').toUpperCase();price=Number(price);
-    if(!/^[A-Z0-9]{2,20}USDT$/.test(symbol)||!Number.isFinite(price)||price<=0)return;
-    const old=found.get(symbol);
-    const changeValue=change===null||change===undefined||change===''?null:Number(change);
-    const volumeValue=quoteVolume===null||quoteVolume===undefined||quoteVolume===''?null:Number(quoteVolume);
-    if(!old)found.set(symbol,{symbol,price,source,updated_at:now,auto_discovered:true,baseAsset:base||symbol.slice(0,-4),change:Number.isFinite(changeValue)?changeValue:null,quoteVolume:Number.isFinite(volumeValue)?volumeValue:null});
-    else {old.source+=' · '+source;if(old.change===null&&Number.isFinite(changeValue))old.change=changeValue;if(old.quoteVolume===null&&Number.isFinite(volumeValue))old.quoteVolume=volumeValue;}
-  };
-  const jobs=[
-    (async()=>{const [ir,pr]=await Promise.all([fetch('https://api.binance.com/api/v3/exchangeInfo',{cache:'no-store'}),fetch('https://api.binance.com/api/v3/ticker/24hr',{cache:'no-store'})]);if(!ir.ok||!pr.ok)throw new Error('Binance HTTP');const [info,tickers]=await Promise.all([ir.json(),pr.json()]);const tm=new Map((Array.isArray(tickers)?tickers:[]).map(x=>[x.symbol,x]));for(const p of info.symbols||[]){if(p.status!=='TRADING'||p.isSpotTradingAllowed===false||p.quoteAsset!=='USDT')continue;const t=tm.get(p.symbol);if(t)add(p.symbol,t.lastPrice,'Binance',p.baseAsset,t.priceChangePercent,t.quoteVolume)}})(),
-    (async()=>{const [ir,tr]=await Promise.all([fetch('https://api.bybit.com/v5/market/instruments-info?category=spot',{cache:'no-store'}),fetch('https://api.bybit.com/v5/market/tickers?category=spot',{cache:'no-store'})]);if(!ir.ok||!tr.ok)throw new Error('Bybit HTTP');const [info,tickers]=await Promise.all([ir.json(),tr.json()]);if(info.retCode!==0||tickers.retCode!==0)throw new Error('Bybit response');const tm=new Map((tickers.result?.list||[]).map(x=>[x.symbol,x]));for(const p of info.result?.list||[]){if(p.status!=='Trading'||p.quoteCoin!=='USDT')continue;const t=tm.get(p.symbol);if(t)add(p.symbol,t.lastPrice,'Bybit',p.baseCoin,t.price24hPcnt===null||t.price24hPcnt===undefined||t.price24hPcnt===''?null:Number(t.price24hPcnt)*100,t.turnover24h)}})(),
-    (async()=>{const [ir,tr]=await Promise.all([fetch('https://www.okx.com/api/v5/public/instruments?instType=SPOT',{cache:'no-store'}),fetch('https://www.okx.com/api/v5/market/tickers?instType=SPOT',{cache:'no-store'})]);if(!ir.ok||!tr.ok)throw new Error('OKX HTTP');const [info,tickers]=await Promise.all([ir.json(),tr.json()]);if(info.code!=='0'||tickers.code!=='0')throw new Error('OKX response');const tm=new Map((tickers.data||[]).map(x=>[x.instId,x]));for(const p of info.data||[]){if(p.state!=='live'||p.quoteCcy!=='USDT')continue;const t=tm.get(p.instId);if(t)add(String(p.instId).replace('-',''),'last' in (t||{})?t.last:null,'OKX',p.baseCcy,null,t.volCcy24h)}})()
-  ];
-  const settled=await Promise.allSettled(jobs);settled.forEach((x,i)=>{if(x.status==='rejected')errors.push(['Binance','Bybit','OKX'][i]+': '+String(x.reason?.message||x.reason))});
-  return {rows:[...found.values()].sort((a,b)=>a.symbol.localeCompare(b.symbol)),errors};
+  const {data,error}=await supabaseClient.functions.invoke('market-data',{body:{action:'discover'}});
+  if(error)throw error;
+  if(!data?.success||!Array.isArray(data.rows))throw new Error(data?.error||'دریافت فهرست بازارها از سرور ناموفق بود');
+  return {rows:data.rows,errors:Array.isArray(data.errors)?data.errors:[]};
 }
 async function refreshAutoMarkets(){
   const status=$('autoMarketStatus');if(status)status.textContent='در حال شناسایی خودکار جفت‌ارزهای اسپات USDT از Binance، Bybit و OKX…';
@@ -2646,36 +2633,19 @@ function renderTopGainers(){const root=$('topGainersList');if(!root)return;const
 function renderTopLosers(){const root=$('topLosersList');if(!root)return;const rows=[...marketRows].map(x=>({item:x,t:getFreshMarketTicker(x)})).filter(x=>x.t&&Number.isFinite(x.t.change)&&x.t.change<0).sort((a,b)=>a.t.change-b.t.change).slice(0,5);if(!rows.length){root.innerHTML='<div class="muted small">اطلاعات کاهش ۲۴ ساعته هنوز در دسترس نیست.</div>';return}root.innerHTML='';for(const row of rows){const base=String(row.item.symbol).replace(/USDT$/i,'');const el=document.createElement('button');el.type='button';el.className='gainer-card loser-card';el.innerHTML=`${coinLogo(base)}<span><b>${safeText(persianCoinName(row.item.symbol))}</b><small>${safeText(base)}</small></span><strong>${formatNum(row.t.change,2)}٪</strong><span class="muted small">مشاهده ←</span>`;el.addEventListener('click',()=>openChart(row.item.symbol));root.appendChild(el)}}
 function renderTopAssets(){const root=$('topAssetsList');if(!root)return;const rows=[...marketRows].map(item=>({item,t:getFreshMarketTicker(item)})).filter(x=>x.t&&Number.isFinite(x.t.quoteVolume)&&x.t.quoteVolume>0).sort((a,b)=>b.t.quoteVolume-a.t.quoteVolume).slice(0,10);if(!rows.length){root.innerHTML='<div class="muted small">اطلاعات حجم معاملات برای رتبه‌بندی در دسترس نیست.</div>';return}root.innerHTML='';for(const row of rows){const symbol=String(row.item.symbol),base=symbol.replace(/USDT$/i,''),liveUsd=Number(row.t.last),storedUsd=Number(row.item.price),usd=Number.isFinite(liveUsd)&&liveUsd>0?liveUsd:storedUsd,toman=Number.isFinite(usd)&&usd>0&&currentFxIsValid?usd*currentFxRate:null,rawChange=row.t.change,hasChange=rawChange!==null&&rawChange!==undefined&&!(typeof rawChange==='string'&&rawChange.trim()==='')&&Number.isFinite(Number(rawChange)),change=hasChange?Number(rawChange):null;const el=document.createElement('button');el.type='button';el.className='top-asset-card';el.innerHTML=`${coinLogo(base)}<b>${safeText(persianCoinName(symbol))}</b><small>${safeText(base)}</small><span class="top-usd">${Number.isFinite(usd)&&usd>0?formatNum(usd,8)+' $':'—'}</span><span class="top-toman">${toman!==null?formatNum(toman,0)+' تومان':'نرخ تومان ناموجود'}</span><strong class="top-change ${hasChange?(change>0?'pos':change<0?'neg':''):''}">${hasChange?(change>0?'+':change<0?'−':'')+formatNum(Math.abs(change),2)+'٪':'—'}</strong><small style="direction:ltr">حجم: ${formatNum(row.t.quoteVolume,0)} USDT</small>`;el.addEventListener('click',()=>openChart(symbol));root.appendChild(el)}}
 async function fetchBinance24hrTickerRows(){
- let serverError=null;
- try{
   if(!supabaseClient)throw new Error('اتصال امن سرور بازار آماده نیست');
   const symbols=[...new Set(marketRows.map(item=>String(item.symbol||'').toUpperCase()).filter(symbol=>/^[A-Z0-9]{2,20}USDT$/.test(symbol)))];
   if(!symbols.length)throw new Error('فهرست نمادهای بازار خالی است');
   const batches=[];for(let i=0;i<symbols.length;i+=120)batches.push(symbols.slice(i,i+120));
   const responses=await Promise.all(batches.map(async batch=>{
-   const {data,error}=await supabaseClient.functions.invoke('market-ticker-stats',{body:{symbols:batch}});
-   if(error)throw error;
-   if(!data?.success||!Array.isArray(data.tickers))throw new Error(data?.error||'پاسخ سرویس امن درصد نوسان معتبر نیست');
-   return data.tickers;
+    const {data,error}=await supabaseClient.functions.invoke('market-data',{body:{action:'ticker24',symbols:batch}});
+    if(error)throw error;
+    if(!data?.success||!Array.isArray(data.tickers))throw new Error(data?.error||'دریافت اطلاعات بازار از سرور ناموفق بود');
+    return data.tickers;
   }));
   const rows=responses.flat();
-  if(!rows.length)throw new Error('سرور برای نمادهای فعال داده ۲۴ ساعته برنگرداند');
+  if(!rows.length)throw new Error('سرور هیچ اطلاعات ۲۴ ساعته‌ای برای نمادهای فعال برنگرداند');
   return rows;
- }catch(error){
-  serverError=error;
-  console.warn('DigiArz server-side 24h ticker unavailable; trying direct market API:',error);
- }
- let lastError=null;
- for(const host of ['api.binance.com','api1.binance.com','api2.binance.com','api3.binance.com']){
-  try{
-   const response=await fetch('https://'+host+'/api/v3/ticker/24hr',{cache:'no-store'});
-   if(!response.ok)throw new Error(host+' HTTP '+response.status);
-   const rows=await response.json();
-   if(!Array.isArray(rows)||!rows.length)throw new Error(host+' پاسخ معتبر ۲۴ساعته ندارد');
-   return rows;
-  }catch(error){lastError=error}
- }
- throw new Error('دریافت اطلاعات ۲۴ ساعته از سرور و Binance ناموفق بود: '+String(serverError?.message||serverError||lastError?.message||lastError));
 }
 async function refreshMarketTickersUnlocked(){
  const stamp=$('marketTickerUpdated');let provider='Binance',failure='';
@@ -2896,7 +2866,7 @@ async function loadOrderBook(symbolOverride=''){
  if(!/^[A-Z0-9]{2,20}$/.test(symbol)){status.textContent='نماد معتبر برای دفتر سفارشات وارد کنید.';return}
  status.textContent='در حال دریافت دفتر سفارشات '+symbol+' از بازار عمومی…';
  try{
-  const response=await fetch('https://api.binance.com/api/v3/depth?symbol='+encodeURIComponent(symbol)+'&limit=10',{cache:'no-store'});
+  const response=await fetchBinanceResponse('/api/v3/depth?symbol='+encodeURIComponent(symbol)+'&limit=10');
   if(!response.ok)throw new Error('HTTP '+response.status);
   const data=await response.json();
   if(request!==orderBookRequest)return;
@@ -2915,7 +2885,7 @@ async function loadOrderBook(symbolOverride=''){
   render(bidsRoot,data.bids,true);render(asksRoot,data.asks,false);
   const bid=Number(data.bids?.[0]?.[0]),ask=Number(data.asks?.[0]?.[0]);
   $('orderBookMid').textContent=Number.isFinite(bid)&&Number.isFinite(ask)?'قیمت میانی: '+formatNum((bid+ask)/2,8)+' USDT':'قیمت میانی: —';
-  status.textContent='نماد '+symbol+' · ۱۰ سطح خرید و فروش · منبع: Binance · دریافت '+new Date().toLocaleTimeString('fa-IR');
+  status.textContent='نماد '+symbol+' · ۱۰ سطح خرید و فروش · منبع: '​${dataSource||"بازار چندمنبعی"} · دریافت '+new Date().toLocaleTimeString('fa-IR');
  }catch(e){if(request!==orderBookRequest)return;bidsRoot.textContent='دریافت ناموفق';asksRoot.textContent='دریافت ناموفق';status.textContent='دفتر سفارشات فعلاً در دسترس نیست: '+(e.message||String(e))+' · این داده صرفاً نمای بازار است.'}
 }
 async function loadRecentMarketTrades(symbolOverride=''){
@@ -2924,7 +2894,7 @@ async function loadRecentMarketTrades(symbolOverride=''){
  if(!/^[A-Z0-9]{2,20}$/.test(symbol)){status.textContent='نماد معاملاتی معتبر نیست.';return}
  const request=++recentTradesRequest;status.textContent='در حال دریافت معاملات اخیر '+symbol+'…';
  try{
-  const response=await fetch('https://api.binance.com/api/v3/trades?symbol='+encodeURIComponent(symbol)+'&limit=12',{cache:'no-store'});
+  const response=await fetchBinanceResponse('/api/v3/trades?symbol='+encodeURIComponent(symbol)+'&limit=12');
   if(!response.ok)throw new Error('HTTP '+response.status);
   const rows=await response.json();if(request!==recentTradesRequest)return;
   root.replaceChildren();
@@ -2936,7 +2906,7 @@ async function loadRecentMarketTrades(symbolOverride=''){
    time.textContent=Number.isFinite(Number(item.time))?new Date(Number(item.time)).toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}):'—';
    tr.append(price,qty,side,time);root.append(tr)
   }
-  status.textContent='نماد '+symbol+' · '+(Array.isArray(rows)?rows.length:0)+' معامله اخیر · منبع: Binance · دریافت '+new Date().toLocaleTimeString('fa-IR');
+  status.textContent='نماد '+symbol+' · '+(Array.isArray(rows)?rows.length:0)+' معامله اخیر · منبع: '​${dataSource||"بازار چندمنبعی"} · دریافت '+new Date().toLocaleTimeString('fa-IR');
  }catch(e){if(request!==recentTradesRequest)return;root.replaceChildren();const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=4;td.textContent='دریافت معاملات اخیر ناموفق بود.';tr.append(td);root.append(tr);status.textContent='داده معاملات اخیر فعلاً در دسترس نیست: '+(e.message||String(e))}
 }
 async function placeLimitOrder(){
@@ -3386,8 +3356,23 @@ function switchTab(name){if(name==='admin'&&!isSuperAdmin)return;if(name==='trad
 function ensureChart(){if(chart||!window.LightweightCharts)return;const el=$('priceChart'),volEl=$('volumeChart');const options={layout:{background:{color:'#101318'},textColor:'#c7cbd1'},grid:{vertLines:{color:'#202630'},horzLines:{color:'#202630'}},rightPriceScale:{borderColor:'#30343d'},timeScale:{borderColor:'#30343d',timeVisible:true,secondsVisible:false},crosshair:{mode:1}};chart=LightweightCharts.createChart(el,{...options,width:el.clientWidth,height:el.clientHeight});candleSeries=chart.addCandlestickSeries({upColor:'#0ecb81',downColor:'#f6465d',borderUpColor:'#0ecb81',borderDownColor:'#f6465d',wickUpColor:'#0ecb81',wickDownColor:'#f6465d'});lineSeries=chart.addLineSeries({color:'#f0b90b',lineWidth:2,visible:false});areaSeries=chart.addAreaSeries({lineColor:'#f0b90b',topColor:'rgba(240,185,11,.35)',bottomColor:'rgba(240,185,11,.02)',visible:false});volumeChart=LightweightCharts.createChart(volEl,{...options,width:volEl.clientWidth,height:volEl.clientHeight,rightPriceScale:{borderColor:'#30343d',scaleMargins:{top:.08,bottom:.02}},timeScale:{borderColor:'#30343d',timeVisible:true,secondsVisible:false}});volumeSeries=volumeChart.addHistogramSeries({priceFormat:{type:'volume'},priceScaleId:'',scaleMargins:{top:.08,bottom:.02}});volumeChart.priceScale('').applyOptions({scaleMargins:{top:.08,bottom:.02}});if(window.ResizeObserver){chartResizeObserver=new ResizeObserver(resizeChart);chartResizeObserver.observe(el);chartResizeObserver.observe(volEl)}}
 function resizeChart(){if(chart){const el=$('priceChart');chart.applyOptions({width:el.clientWidth,height:el.clientHeight})}if(volumeChart){const el=$('volumeChart');volumeChart.applyOptions({width:el.clientWidth,height:el.clientHeight})}}
 async function openChart(symbol){selectedSymbol=symbol;const base=currentBase(),info=coinInfo[base]||{name:base,fa:base,description:`${base} یکی از دارایی‌های دیجیتال بازار است. پیش از معامله، کاربرد پروژه، تیم، فناوری، نقدشوندگی و ریسک‌های آن را از منابع مستقل بررسی کنید.`};$('chartSymbol').textContent=symbol;$('tradeDetailSymbol').textContent=symbol;$('detailName').textContent=info.fa+' · '+info.name;$('detailDescription').textContent=info.description;$('detailLogo').style.display='';$('detailLogo').dataset.symbol=cleanCoinSymbol(base);$('detailLogo').dataset.fallbackIndex='0';$('detailLogo').src=logoUrl(base);$('detailLogo').onerror=function(){handleCoinLogoError(this)};$('buySymbol').value=symbol;$('sellSymbol').value=symbol;['limitSymbol','conditionalSymbol','stopLimitSymbol'].forEach(id=>{const field=$(id);if(field)field.value=symbol});updateTradeAssetPreview('buy');updateTradeAssetPreview('sell');updateQuickTradeEstimate('buy');updateQuickTradeEstimate('sell');const pairEnabled=marketRows.some(x=>x.symbol===symbol&&!x.auto_discovered);$('detailBuyBtn').disabled=!pairEnabled;$('detailSellBtn').disabled=!pairEnabled;$('detailBuyBtn').title=pairEnabled?'':'ابتدا مدیر باید جفت‌ارز را فعال کند';$('detailSellBtn').title=pairEnabled?'':'ابتدا مدیر باید جفت‌ارز را فعال کند';const pairBadge=$('tradePairBadge');if(pairBadge)pairBadge.textContent=symbol;switchTab('trade');$('chartMessage').textContent='در حال دریافت داده‌های کندلی…';$('timeframes').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.interval===chartInterval));hideMessage($('detailTradeMsg'));$('detailBuyAmount').value='';$('detailSellAmount').value='';await Promise.all([loadCandles(),loadPerformance(),loadReviews(),loadCoinNews()])}
-async function fetchBinanceResponse(urlOrPath){const raw=String(urlOrPath),path=raw.replace(/^https:\/\/api(?:-gcp|[1-4])?\.binance\.com/i,'')||'/';const hosts=['data-api.binance.vision','api.binance.com','api-gcp.binance.com','api1.binance.com','api2.binance.com','api3.binance.com','api4.binance.com'];let lastError=null;for(const host of hosts){try{const response=await fetch('https://'+host+path,{cache:'no-store'});if(!response.ok){lastError=new Error(host+' HTTP '+response.status);continue}return response}catch(error){lastError=error}}throw new Error('تمام مسیرهای دریافت داده بازار ناموفق بودند: '+(lastError?.message||String(lastError)))}
-async function fetchBinanceKlines(symbol,interval,limit){const response=await fetchBinanceResponse(`/api/v3/klines?symbol=${encodeURIComponent(symbol)}&interval=${encodeURIComponent(interval)}&limit=${encodeURIComponent(limit)}`);const rows=await response.json();if(!Array.isArray(rows)||!rows.length)throw new Error('برای این نماد کندل معتبر از Binance دریافت نشد.');return rows}
+async function fetchBinanceResponse(urlOrPath){
+  if(!supabaseClient)throw new Error('اتصال امن سرور بازار آماده نیست');
+  const raw=String(urlOrPath),path=raw.startsWith('http')?(new URL(raw)).pathname+(new URL(raw)).search:raw;
+  const parsed=new URL(path,'https://market-data.local'),p=parsed.searchParams;
+  let body={};
+  if(parsed.pathname.endsWith('/klines'))body={action:'candles',symbol:p.get('symbol'),interval:p.get('interval')||'1h',limit:Number(p.get('limit')||300),startTime:Number(p.get('startTime')||0)};
+  else if(parsed.pathname.endsWith('/ticker/24hr'))body={action:'ticker24',symbols:[p.get('symbol')].filter(Boolean)};
+  else if(parsed.pathname.endsWith('/depth'))body={action:'depth',symbol:p.get('symbol'),limit:Number(p.get('limit')||10)};
+  else if(parsed.pathname.endsWith('/trades'))body={action:'trades',symbol:p.get('symbol'),limit:Number(p.get('limit')||12)};
+  else throw new Error('درخواست بازار پشتیبانی نمی‌شود: '+parsed.pathname);
+  const {data,error}=await supabaseClient.functions.invoke('market-data',{body});
+  if(error)throw error;
+  if(!data?.success)throw new Error(data?.error||'سرویس مرکزی بازار پاسخ معتبر نداد');
+  const payload=body.action==='candles'?data.rows:body.action==='ticker24'?(data.tickers||[])[0]:body.action==='trades'?data.rows:data;
+  return {ok:true,status:200,json:async()=>payload,source:data.source||'DigiArz Market Gateway'};
+}
+async function fetchBinanceKlines(symbol,interval,limit){const response=await fetchBinanceResponse(`/api/v3/klines?symbol=${encodeURIComponent(symbol)}&interval=${encodeURIComponent(interval)}&limit=${encodeURIComponent(limit)}`);const rows=await response.json();if(!Array.isArray(rows)||!rows.length)throw new Error('برای این نماد کندل معتبر از منابع بازار دریافت نشد.');return rows}
 function candleFromKline(k){return {time:Math.floor(Number(k[0])/1000),open:Number(k[1]),high:Number(k[2]),low:Number(k[3]),close:Number(k[4]),volume:Number(k[5]||0),quoteVolume:Number(k[7]||0)}}
 function calculateRsi(values,period=14){if(values.length<=period)return null;let gain=0,loss=0;for(let i=1;i<=period;i++){const d=values[i]-values[i-1];if(d>0)gain+=d;else loss-=d}let avgGain=gain/period,avgLoss=loss/period;for(let i=period+1;i<values.length;i++){const d=values[i]-values[i-1];avgGain=(avgGain*(period-1)+Math.max(d,0))/period;avgLoss=(avgLoss*(period-1)+Math.max(-d,0))/period}if(avgLoss===0)return avgGain===0?50:100;return 100-(100/(1+avgGain/avgLoss))}
 function emaSeries(values,period){if(values.length<period)return [];const out=Array(values.length).fill(null),k=2/(period+1);let ema=values.slice(0,period).reduce((a,b)=>a+b,0)/period;out[period-1]=ema;for(let i=period;i<values.length;i++){ema=values[i]*k+ema*(1-k);out[i]=ema}return out}
