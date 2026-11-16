@@ -1897,6 +1897,64 @@ body.auth-page-active #authView.auth{
  .market-board-v34 .coin .price-usd,.market-board-v34 .coin .price-toman{font-size:9px!important}
 }
 
+
+
+/* DigiArz approved market-row layout — identity right, 24h change centered,
+   price left, favorite isolated at the far edge; volume gets its own line. */
+.market-board-v34 .coin{
+ direction:rtl!important;
+ display:grid!important;
+ grid-template-columns:minmax(0,1.5fr) minmax(96px,.9fr) minmax(118px,1fr) 30px!important;
+ grid-template-areas:"identity change price favorite" "identity volume price favorite"!important;
+ align-items:center!important;
+ column-gap:10px!important;
+ row-gap:3px!important;
+ min-width:0!important;
+}
+.market-board-v34 .coin>.favorite-btn{grid-area:favorite!important;justify-self:center!important;align-self:center!important}
+.market-board-v34 .coin>.coin-identity{
+ grid-area:identity!important;direction:rtl!important;flex-direction:row!important;
+ justify-content:flex-start!important;min-width:0!important;gap:8px!important;
+}
+.market-board-v34 .coin>.coin-identity .coin-icon{
+ order:0!important;flex:0 0 36px!important;width:36px!important;height:36px!important;
+}
+.market-board-v34 .coin-name-stack{min-width:0!important;text-align:right!important;direction:rtl!important}
+.market-board-v34 .coin-name-stack>*{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.market-board-v34 .coin>.coin-sparkline{display:none!important}
+.market-board-v34 .coin>.coin-change-wrap{display:contents!important}
+.market-board-v34 .coin .coin-change-label{grid-area:change!important;justify-self:center!important;align-self:end!important}
+.market-board-v34 .coin .coin-change{grid-area:change!important;justify-self:center!important;align-self:end!important;font-size:13px!important;font-weight:900!important;white-space:nowrap!important}
+.market-board-v34 .coin .coin-volume{grid-area:volume!important;justify-self:center!important;align-self:start!important;text-align:center!important;font-size:9px!important;line-height:1.5!important;white-space:normal!important}
+.market-board-v34 .coin>.price-stack{grid-area:price!important;align-items:flex-start!important;min-width:0!important;text-align:left!important}
+.market-board-v34 .coin .price-usd,.market-board-v34 .coin .price-toman{white-space:nowrap!important}
+@media(max-width:700px){
+ .market-board-v34 .coin{
+  grid-template-columns:minmax(0,1.25fr) minmax(82px,.85fr) minmax(96px,1fr) 27px!important;
+  grid-template-areas:"identity change price favorite" "identity volume price favorite"!important;
+  column-gap:6px!important;row-gap:3px!important;padding:10px 7px!important;
+ }
+ .market-board-v34 .coin>.coin-identity{gap:6px!important}
+ .market-board-v34 .coin>.coin-identity .coin-icon{width:30px!important;height:30px!important;flex-basis:30px!important}
+ .market-board-v34 .coin .coin-name-fa{font-size:11px!important}
+ .market-board-v34 .coin .coin-symbol{font-size:9px!important}
+ .market-board-v34 .coin .coin-en{font-size:8px!important}
+ .market-board-v34 .coin .coin-change{font-size:11px!important}
+ .market-board-v34 .coin .coin-change-label{font-size:8px!important}
+ .market-board-v34 .coin .price-usd{font-size:10px!important}
+ .market-board-v34 .coin .price-toman{font-size:9px!important}
+ .market-board-v34 .coin .coin-volume{font-size:8px!important}
+ .market-board-v34 .coin>.favorite-btn{width:26px!important;height:26px!important;padding:3px!important}
+}
+@media(max-width:380px){
+ .market-board-v34 .coin{
+  grid-template-columns:minmax(0,1.1fr) minmax(72px,.8fr) minmax(82px,.95fr) 24px!important;
+  column-gap:4px!important;padding:9px 5px!important;
+ }
+ .market-board-v34 .coin>.coin-identity .coin-icon{width:27px!important;height:27px!important;flex-basis:27px!important}
+ .market-board-v34 .coin .coin-change{font-size:10px!important}
+ .market-board-v34 .coin .price-usd,.market-board-v34 .coin .price-toman{font-size:9px!important}
+}
 </style>
 </head>
 <body>
