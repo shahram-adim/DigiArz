@@ -104,7 +104,7 @@ jobs:
               "-v", "/tmp:/backup:ro", "postgres:17",
               "pg_restore", "--clean", "--if-exists", "--no-owner", "--no-acl",
               "--exit-on-error", "--single-transaction",
-              "/backup/digiarz-database.dump"
+              "--dbname=postgres", "/backup/digiarz-database.dump"
           ]
           # Connection settings are passed only through the container environment.
           subprocess.run(args, env=env, check=True)
