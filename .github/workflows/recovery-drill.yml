@@ -86,7 +86,7 @@ jobs:
           grep -q 'TABLE DATA private admin_users' /tmp/digiarz-restore-list.txt
           # Auth rows are not part of this logical backup. Detect every FK in the
           # archive that references auth.users, then omit only those constraints.
-          docker run --rm --volume /tmp:/backup:ro postgres:17 \
+          docker run --rm --volume /tmp:/backup:rw postgres:17 \
             pg_restore --schema-only --file=/backup/digiarz-schema.sql /backup/digiarz-database.dump
           python3 - <<'PY'
           from pathlib import Path
