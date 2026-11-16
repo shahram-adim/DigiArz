@@ -1,3 +1,6 @@
+-- DRAFT ONLY — DO NOT APPLY TO PRODUCTION.
+-- Candidate Stop-Limit worker with child-row locking during parent synchronization.
+-- Rehearse with Limit execution and Stop-Limit cancellation before rollout.
 CREATE OR REPLACE FUNCTION public.process_stop_limit_orders()
  RETURNS jsonb
  LANGUAGE plpgsql
