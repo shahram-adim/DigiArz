@@ -138,6 +138,16 @@ jobs:
             -f supabase/tests/exact_decimal_stop_limit_setup.sql \
             -f supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql \
             -f supabase/tests/exact_decimal_market_limit_entrypoints.sql
+      - name: Verify cumulative per-fill USDT rounding reserves
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_rounding_buffer_test;"
+          psql -h localhost -U postgres -d digiarz_rounding_buffer_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_stop_limit_setup.sql \
+            -f supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql \
+            -f supabase/drafts/2026-11-15_exact_decimal_process_limit_orders.sql \
+            -f supabase/tests/exact_decimal_limit_rounding_buffer.sql
       - name: Compile and run isolated Stop-Limit and TP-SL placement entrypoints
         env:
           PGPASSWORD: postgres
