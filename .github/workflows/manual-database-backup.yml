@@ -59,22 +59,30 @@ jobs:
           host = parsed.hostname.lower()
           username = unquote(parsed.username)
           database = unquote(parsed.path.lstrip("/"))
+          port = parsed.port or 5432
           placeholder_markers = ("region", "project_ref", "your-project", "placeholder", "example")
           if "aws-0-region" in host or any(marker in username.lower() for marker in placeholder_markers):
               raise SystemExit("SUPABASE_DB_URL still contains example placeholder values; copy the actual connection string from Supabase Connect")
           if any(marker in host for marker in ("your-project", "placeholder", "example")):
               raise SystemExit("SUPABASE_DB_URL host contains an example placeholder")
 
+          # Supabase shared pooler usernames include the project ref.
+          if host.endswith(".pooler.supabase.com") and username == "postgres":
+              username = "postgres.gfoaubfilhttnwjykaox"
+              print("Normalized the Supabase shared pooler username with the DigiArz project ref.")
+          if host.endswith(".pooler.supabase.com") and port != 5432:
+              raise SystemExit("Use the Supabase Session pooler on port 5432 for pg_dump backups.")
+
           child_env = os.environ.copy()
           child_env.update({
               "PGHOST": host,
-              "PGPORT": str(parsed.port or 5432),
+              "PGPORT": str(port),
               "PGUSER": username,
               "PGPASSWORD": unquote(parsed.password),
               "PGDATABASE": database,
               "PGSSLMODE": "require",
           })
-          subprocess.run([
+          result = subprocess.run([
               "docker", "run", "--rm",
               "--env", "PGHOST", "--env", "PGPORT", "--env", "PGUSER",
               "--env", "PGPASSWORD", "--env", "PGDATABASE", "--env", "PGSSLMODE",
@@ -82,7 +90,18 @@ jobs:
               "postgres:17",
               "sh", "-ceu",
               'pg_dump --host="$PGHOST" --port="$PGPORT" --username="$PGUSER" --dbname="$PGDATABASE" --schema=public --format=custom --no-owner --file=/backup/digiarz-public.dump'
-          ], env=child_env, check=True)
+          ], env=child_env, capture_output=True, text=True)
+          if result.returncode:
+              diagnostic = (result.stderr or "").lower()
+              if "password authentication failed" in diagnostic:
+                  message = "PostgreSQL rejected the credentials. Verify the database password in the GitHub SUPABASE_DB_URL secret."
+              elif "could not translate host name" in diagnostic or "name or service not known" in diagnostic:
+                  message = "The database host could not be resolved. Verify the exact Session pooler host copied from Supabase Connect."
+              elif "tenant or user not found" in diagnostic:
+                  message = "Supabase pooler could not match the project and role. Verify the Session pooler host and username."
+              else:
+                  message = "PostgreSQL backup command failed. Verify the Supabase Session pooler connection settings."
+              raise SystemExit(message)
           print("Database archive created; connection values were not written to GitHub environment files.")
           PY
 
