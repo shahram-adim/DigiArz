@@ -46,7 +46,7 @@ test('trade history CSV export respects filters and preserves exact decimal stri
   const end = html.indexOf('\nasync function trade(side)', start);
   assert.ok(start >= 0 && end > start, 'CSV export function boundaries found');
   const body = html.slice(start, end);
-  assert.ok(body.includes('historyRows.filter'), 'current history filters are applied');
+  assert.ok(body.includes('getFilteredHistoryRows()'), 'the CSV uses the shared current history filters');
   assert.ok(body.includes("String(item.amount??'')"), 'amount stays an exact string');
   assert.ok(body.includes("String(item.price??'')"), 'price stays an exact string');
   assert.ok(body.includes("const csv='\\uFEFF'"), 'UTF-8 BOM is included');
