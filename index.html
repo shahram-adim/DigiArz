@@ -1955,6 +1955,25 @@ body.auth-page-active #authView.auth{
  .market-board-v34 .coin .coin-change{font-size:10px!important}
  .market-board-v34 .coin .price-usd,.market-board-v34 .coin .price-toman{font-size:9px!important}
 }
+
+
+/* Market row: keep the 24h label, percentage and volume on distinct lines. */
+.market-board-v34 .coin{
+ grid-template-areas:"identity change-label price favorite" "identity change price favorite" "identity volume price favorite"!important;
+}
+.market-board-v34 .coin .coin-change-label{grid-area:change-label!important;align-self:end!important}
+.market-board-v34 .coin .coin-change{grid-area:change!important;align-self:center!important}
+.market-board-v34 .coin .coin-volume{grid-area:volume!important;align-self:start!important}
+@media(max-width:700px){
+ .market-board-v34 .coin{
+  grid-template-areas:"identity change-label price favorite" "identity change price favorite" "identity volume price favorite"!important;
+ }
+}
+@media(max-width:380px){
+ .market-board-v34 .coin{
+  grid-template-areas:"identity change-label price favorite" "identity change price favorite" "identity volume price favorite"!important;
+ }
+}
 </style>
 </head>
 <body>
