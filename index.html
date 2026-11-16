@@ -1957,22 +1957,27 @@ body.auth-page-active #authView.auth{
 }
 
 
-/* Market row: keep the 24h label, percentage and volume on distinct lines. */
-.market-board-v34 .coin{
+/* FINAL FIX: ID-level specificity overrides the earlier #tab-markets .coin grid. */
+#tab-markets .market-board-v34 .coin{
+ direction:rtl!important;
+ grid-template-columns:minmax(0,1.25fr) minmax(76px,.9fr) minmax(88px,1fr) 27px!important;
  grid-template-areas:"identity change-label price favorite" "identity change price favorite" "identity volume price favorite"!important;
+ align-items:center!important;
+ column-gap:6px!important;
+ row-gap:3px!important;
 }
-.market-board-v34 .coin .coin-change-label{grid-area:change-label!important;align-self:end!important}
-.market-board-v34 .coin .coin-change{grid-area:change!important;align-self:center!important}
-.market-board-v34 .coin .coin-volume{grid-area:volume!important;align-self:start!important}
+#tab-markets .market-board-v34 .coin>.favorite-btn{grid-area:favorite!important}
+#tab-markets .market-board-v34 .coin>.coin-identity{grid-area:identity!important;min-width:0!important}
+#tab-markets .market-board-v34 .coin>.coin-change-wrap{display:contents!important}
+#tab-markets .market-board-v34 .coin .coin-change-label{grid-area:change-label!important;align-self:end!important;justify-self:center!important}
+#tab-markets .market-board-v34 .coin .coin-change{grid-area:change!important;align-self:center!important;justify-self:center!important}
+#tab-markets .market-board-v34 .coin .coin-volume{grid-area:volume!important;align-self:start!important;justify-self:center!important}
+#tab-markets .market-board-v34 .coin>.price-stack{grid-area:price!important;min-width:0!important}
 @media(max-width:700px){
- .market-board-v34 .coin{
-  grid-template-areas:"identity change-label price favorite" "identity change price favorite" "identity volume price favorite"!important;
- }
-}
-@media(max-width:380px){
- .market-board-v34 .coin{
-  grid-template-areas:"identity change-label price favorite" "identity change price favorite" "identity volume price favorite"!important;
- }
+ #tab-markets .market-board-v34 .coin{grid-template-columns:minmax(0,1.15fr) minmax(70px,.85fr) minmax(80px,.95fr) 24px!important;column-gap:4px!important;padding:9px 5px!important}
+ #tab-markets .market-board-v34 .coin .coin-change{font-size:10px!important}
+ #tab-markets .market-board-v34 .coin .coin-change-label{font-size:8px!important}
+ #tab-markets .market-board-v34 .coin .coin-volume{font-size:8px!important}
 }
 </style>
 </head>
@@ -2538,15 +2543,22 @@ async function refreshMarketTickersUnlocked(){
   if(!next.size)throw new Error('Binance داده جفت‌ارزهای USDT برنگرداند');
   marketTickerMap=next;
   const btc=marketTickerMap.get('BTCUSDT');
-  if(!btc||btc.change===null){
+  const validPrimaryCount=marketRows.filter(item=>{const value=marketTickerMap.get(item.symbol)?.change;return value!==null&&value!==undefined&&value!==''&&Number.isFinite(Number(value))}).length;
+  const coverageThreshold=Math.max(3,Math.ceil(Math.min(marketRows.length,12)*0.75));
+  if(!btc||btc.change===null||validPrimaryCount<coverageThreshold){
    const fallback=await discoverMultiExchangeMarkets();
    let recovered=0;
    for(const row of fallback.rows){
     const current=marketTickerMap.get(row.symbol);
-    if(current&&current.change===null&&row.change!==null&&row.change!==undefined&&row.change!==''&&Number.isFinite(Number(row.change))){current.change=Number(row.change);recovered++}
+    if((!current||current.change===null||current.change===undefined||current.change==='')&&row.change!==null&&row.change!==undefined&&row.change!==''&&Number.isFinite(Number(row.change))){
+     marketTickerMap.set(row.symbol,{...(current||{}),change:Number(row.change),last:Number(current?.last)>0?current.last:row.price,quoteVolume:current?.quoteVolume??row.quoteVolume,high:current?.high??null,low:current?.low??null,source:row.source});
+     recovered++;
+    }
    }
    if(recovered)provider='Binance + '+[...new Set(fallback.rows.filter(x=>Number.isFinite(Number(x.change))).map(x=>x.source.split(' · ')[0]))].join('، ');
-   if(!btc||btc.change===null)failure='درصد تغییر BTC از Binance و منابع جایگزین دریافت نشد';
+   const validAfterFallback=marketRows.filter(item=>Number.isFinite(Number(marketTickerMap.get(item.symbol)?.change))).length;
+   if(validAfterFallback===0)failure='درصد تغییر از Binance و منابع جایگزین دریافت نشد';
+   else if(validAfterFallback<marketRows.length)failure='درصد تغییر برای '+validAfterFallback+' از '+marketRows.length+' ارز دریافت شد';
   }
  }catch(primaryError){
   failure=String(primaryError?.message||primaryError);
