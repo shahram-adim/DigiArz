@@ -69,5 +69,6 @@ test('trade history loads older pages without losing exact values or changing re
   assert.ok(body.includes('historyRows.push'), 'older rows append instead of replacing current rows');
   assert.ok(body.includes('historyHasMore=next.length===historyPageSize'), 'has-more state follows page size');
   assert.ok(body.includes('historyLoadingMore'), 'duplicate load requests are guarded');
+  assert.ok(body.includes('historyRequestId'), 'stale page responses are ignored after refresh');
   assert.match(html, /DigiArz-trades-'+rows\.length\+'-loaded-/);
 });
