@@ -240,7 +240,8 @@ Deno.serve(async (req: Request) => {
     let cleanupWarning: string | null = null;
     try {
       const cleanupUrl = new URL(supabaseUrl + "/rest/v1/market_toman_prices");
-      cleanupUrl.searchParams.set("exchange", "in.(nobitex,wallex,bitpin)");
+      const refreshedExchanges = [...new Set(rows.map(row => row.exchange))];
+      cleanupUrl.searchParams.set("exchange", "in.(" + refreshedExchanges.join(",") + ")");
       cleanupUrl.searchParams.set("fetched_at", "lt." + fetchedAt);
       const cleanupResponse = await fetch(cleanupUrl.toString(), {
         method: "DELETE",
