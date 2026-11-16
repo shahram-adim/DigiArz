@@ -2095,6 +2095,16 @@ body.auth-page-active #authView.auth{
  #tab-markets .coin .price-toman{font-size:13px!important}
 }
 
+
+/* Make each market asset logo and identity an explicit, touch-friendly chart control */
+#tab-markets .coin-identity{cursor:pointer!important;touch-action:manipulation;position:relative}
+#tab-markets .coin-identity:focus-visible{outline:2px solid var(--yellow);outline-offset:3px;border-radius:9px}
+#tab-markets .coin-identity .coin-icon,
+#tab-markets .coin-identity .coin-icon img{cursor:pointer!important;pointer-events:auto!important}
+#tab-markets .coin-identity .coin-name-stack{cursor:pointer!important}
+#tab-markets .coin>.favorite-btn{cursor:pointer!important;touch-action:manipulation}
+#tab-markets .coin>.favorite-btn svg{pointer-events:none!important}
+
 </style>
 </head>
 <body>
@@ -2803,6 +2813,9 @@ function renderMarkets(){
   const englishName=String(coinInfo[base]?.name||item.name||base);
   identity.innerHTML=coinLogo(base)+'<span class="coin-name-stack"><b class="coin-name-fa">'+safeText(persianCoinName(item.symbol))+'</b><small class="coin-symbol-en" dir="ltr">'+safeText(base)+'</small><small class="coin-english-name" dir="ltr">'+safeText(englishName)+'</small></span>';
   identity.title=persianCoinName(item.symbol)+' · '+base+' · '+englishName;
+  identity.setAttribute('role','button');identity.setAttribute('tabindex','0');identity.setAttribute('aria-label','باز کردن جزئیات و نمودار '+base);
+  identity.addEventListener('click',event=>{event.stopPropagation();openChart(item.symbol)});
+  identity.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();openChart(item.symbol)}});
   const sparkline=document.createElement('span');sparkline.className='coin-sparkline';sparkline.setAttribute('role','img');sparkline.setAttribute('aria-label','نمودار تغییرات قیمت ۲۴ ساعت گذشته');sparkline.textContent='—';sparkline.dataset.symbol=fullSymbol;
   const changeWrap=document.createElement('div');changeWrap.className='coin-change-wrap';changeWrap.innerHTML=changeMarkup+volumeMarkup;
   const price=document.createElement('div');price.className='price-stack';price.innerHTML=priceMarkup;
