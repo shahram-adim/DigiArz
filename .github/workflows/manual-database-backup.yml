@@ -1,0 +1,80 @@
+name: DigiArz manual database backup
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: digiarz-manual-db-backup
+  cancel-in-progress: false
+
+jobs:
+  backup-public-schema:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Validate required secrets
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_ENCRYPTION_PASSWORD: ${{ secrets.BACKUP_ENCRYPTION_PASSWORD }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "::error::Missing repository secret SUPABASE_DB_URL"
+            exit 1
+          fi
+          if [ -z "$BACKUP_ENCRYPTION_PASSWORD" ]; then
+            echo "::error::Missing repository secret BACKUP_ENCRYPTION_PASSWORD"
+            exit 1
+          fi
+
+      - name: Create encrypted PostgreSQL 17 archive (public schema)
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_ENCRYPTION_PASSWORD: ${{ secrets.BACKUP_ENCRYPTION_PASSWORD }}
+        run: |
+          set -euo pipefail
+          mkdir -p backup
+          docker run --rm \
+            --env SUPABASE_DB_URL \
+            --volume "$PWD/backup:/backup" \
+            postgres:17 \
+            sh -ceu 'pg_dump --dbname="$SUPABASE_DB_URL" --schema=public --format=custom --no-owner --file=/backup/digiarz-public.dump'
+
+          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 600000 \
+            -pass env:BACKUP_ENCRYPTION_PASSWORD \
+            -in backup/digiarz-public.dump \
+            -out backup/digiarz-public.dump.enc
+
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 \
+            -pass env:BACKUP_ENCRYPTION_PASSWORD \
+            -in backup/digiarz-public.dump.enc \
+            -out /tmp/digiarz-public-verify.dump
+
+          cmp backup/digiarz-public.dump /tmp/digiarz-public-verify.dump
+          docker run --rm \
+            --volume "$PWD/backup:/backup:ro" \
+            postgres:17 \
+            pg_restore --list /backup/digiarz-public.dump >/tmp/digiarz-archive-list.txt
+
+          {
+            echo "Created (UTC): $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "Database client: $(docker run --rm postgres:17 pg_dump --version)"
+            echo "Scope: PostgreSQL public schema (schema objects, functions, policies, and table data)"
+            echo "Format: PostgreSQL custom archive, encrypted with AES-256-CBC + PBKDF2"
+            echo "Integrity: encryption/decryption comparison and pg_restore archive-list checks passed"
+            sha256sum backup/digiarz-public.dump.enc
+          } > backup/README-backup.txt
+
+          rm -f backup/digiarz-public.dump /tmp/digiarz-public-verify.dump
+          test -s backup/digiarz-public.dump.enc
+          test ! -e backup/digiarz-public.dump
+
+      - name: Upload encrypted backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DigiArz-public-database-backup
+          path: backup/
+          if-no-files-found: error
+          retention-days: 7
