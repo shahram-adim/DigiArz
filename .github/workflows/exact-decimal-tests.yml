@@ -138,6 +138,30 @@ jobs:
             -f supabase/tests/exact_decimal_stop_limit_setup.sql \
             -f supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql \
             -f supabase/tests/exact_decimal_market_limit_entrypoints.sql
+      - name: Rehearse the combined atomic exact-decimal rollout candidate
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_rollout_rounding_test;"
+          psql -h localhost -U postgres -d digiarz_rollout_rounding_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_stop_limit_setup.sql \
+            -f supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql \
+            -f supabase/tests/exact_decimal_limit_rounding_buffer.sql
+
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_rollout_stop_race_test;"
+          psql -h localhost -U postgres -d digiarz_rollout_stop_race_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_stop_limit_setup.sql \
+            -f supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql \
+            -f supabase/tests/exact_decimal_stop_limit_cancel_race_setup.sql
+          DB_NAME=digiarz_rollout_stop_race_test bash supabase/tests/exact_decimal_stop_limit_cancel_race.sh
+
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_rollout_conditional_race_test;"
+          psql -h localhost -U postgres -d digiarz_rollout_conditional_race_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_conditional_exit_setup.sql \
+            -f supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql \
+            -f supabase/tests/exact_decimal_conditional_exit_worker.sql \
+            -f supabase/tests/exact_decimal_conditional_cancel_race_setup.sql
+          DB_NAME=digiarz_rollout_conditional_race_test bash supabase/tests/exact_decimal_conditional_cancel_race.sh
       - name: Verify cumulative per-fill USDT rounding reserves
         env:
           PGPASSWORD: postgres
