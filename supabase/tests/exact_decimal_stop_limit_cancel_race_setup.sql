@@ -27,6 +27,23 @@ INSERT INTO public.order_reservations(id,order_id,user_id,asset,reserved_amount,
  ('74000000-0000-0000-0000-000000000224','74000000-0000-0000-0000-000000000024','74000000-0000-0000-0000-000000000004','USDT',10.01,0,10.01,'released'),
  ('74000000-0000-0000-0000-000000000225','74000000-0000-0000-0000-000000000025','74000000-0000-0000-0000-000000000004','USDT',10.01,0,0,'reserved');
 
+-- Third account tests parent synchronization while the child worker owns its row.
+INSERT INTO public.profiles(id,is_active) VALUES ('77000000-0000-0000-0000-000000000007',false);
+INSERT INTO public.wallets(user_id,balance_usdt) VALUES ('77000000-0000-0000-0000-000000000007',97.4975);
+INSERT INTO public.asset_balances(user_id,asset,balance) VALUES ('77000000-0000-0000-0000-000000000007','BTC',0.25);
+INSERT INTO public.orders(id,user_id,symbol,side,order_type,amount,price,filled_amount,remaining_amount,status) VALUES
+ ('77000000-0000-0000-0000-000000000033','77000000-0000-0000-0000-000000000007','BTCUSDT','buy','conditional',1,10.000000000000000001,0,1,'triggered'),
+ ('77000000-0000-0000-0000-000000000034','77000000-0000-0000-0000-000000000007','BTCUSDT','buy','limit',1,10.000000000000000001,0.25,0.75,'partially_filled');
+INSERT INTO public.conditional_orders(id,order_id,user_id,symbol,side,order_kind,trigger_price,limit_price,amount,status,execution_order_id) VALUES
+ ('77000000-0000-0000-0000-000000000133','77000000-0000-0000-0000-000000000033','77000000-0000-0000-0000-000000000007','BTCUSDT','buy','stop_limit',9.5,10.000000000000000001,1,'triggered','77000000-0000-0000-0000-000000000034');
+INSERT INTO public.order_reservations(id,order_id,user_id,asset,reserved_amount,consumed_amount,released_amount,status) VALUES
+ ('77000000-0000-0000-0000-000000000233','77000000-0000-0000-0000-000000000033','77000000-0000-0000-0000-000000000007','USDT',10.01,0,10.01,'released'),
+ ('77000000-0000-0000-0000-000000000234','77000000-0000-0000-0000-000000000007','77000000-0000-0000-0000-000000000034','USDT',10.01,2.5025,0,'reserved');
+INSERT INTO public.trades(order_id,user_id,symbol,side,amount,price) VALUES
+ ('77000000-0000-0000-0000-000000000034','77000000-0000-0000-0000-000000000007','BTCUSDT','buy',0.25,10.000000000000000001);
+INSERT INTO public.transactions(user_id,currency,amount,transaction_type,description) VALUES
+ ('77000000-0000-0000-0000-000000000007','USDT',2.5025,'limit_buy','Seeded prior partial Stop-Limit fill');
+
 CREATE OR REPLACE FUNCTION public.cancel_limit_order(p_order_id uuid)
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO ''
 AS $cancel_limit$
@@ -104,7 +121,7 @@ CREATE OR REPLACE FUNCTION public.digiarz_delay_stop_child_trade()
 RETURNS trigger LANGUAGE plpgsql SET search_path TO ''
 AS $delay$
 BEGIN
- IF NEW.order_id='73000000-0000-0000-0000-000000000014'::uuid THEN
+ IF NEW.order_id IN ('73000000-0000-0000-0000-000000000014'::uuid,'77000000-0000-0000-0000-000000000034'::uuid) THEN
    PERFORM pg_catalog.pg_sleep(2);
  END IF;
  RETURN NEW;
