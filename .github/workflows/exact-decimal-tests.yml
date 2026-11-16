@@ -162,6 +162,13 @@ jobs:
           psql -h localhost -U postgres -d digiarz_test -v ON_ERROR_STOP=1 \
             -f supabase/tests/exact_decimal_cancel_setup.sql \
             -f supabase/tests/exact_decimal_cancel_integration.sql
+      - name: Run real two-session Limit worker and cancellation race tests
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_cancel_race_setup.sql
+          bash supabase/tests/exact_decimal_cancel_race.sh
       - name: Compile and run isolated Stop-Limit parent-child lifecycle integration
         env:
           PGPASSWORD: postgres
