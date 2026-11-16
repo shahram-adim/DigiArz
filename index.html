@@ -1524,6 +1524,8 @@ body.light-theme .orders-center-v36{background:radial-gradient(circle at 8% 20%,
 @media(prefers-reduced-motion:reduce){.da-market-coin-card{transition:none}}
 
 
+#dashboardMarketPreview .da-market-sparkline{grid-column:3!important;grid-row:1!important;display:flex!important;align-items:center!important;justify-content:center!important;width:56px!important;height:26px!important;min-width:0!important;color:var(--muted)!important;font-size:9px!important}
+#dashboardMarketPreview .da-market-sparkline svg{display:block!important;width:100%!important;height:100%!important;overflow:visible!important}
 /* DIGIARZ-DASHBOARD-VERTICAL-ROW-RESTORE */
 #dashboardMarketPreview.dashboard-market-preview.da-v2-market-list{
  display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;
@@ -2770,9 +2772,11 @@ function renderDashboardMarketPreview(){
   const toman=document.createElement('small');toman.className='da-market-toman';toman.textContent=currentFxIsValid?formatNum(row.price*currentFxRate,0)+' تومان':'نرخ تومان ناموجود';toman.style.color='var(--green)';
   const foot=document.createElement('div');foot.className='da-market-card-foot';const change=document.createElement('span');change.className='da-market-change '+(row.change===null?'':row.change>0?'pos':row.change<0?'neg':'');change.textContent=(row.change===null?'→ ':row.change>0?'▲ ':row.change<0?'▼ ':'→ ')+(row.change===null?'تغییر ۲۴ساعته ناموجود':(row.change>0?'+':'')+formatNum(row.change,2)+'٪ · ۲۴ ساعت');
   foot.append(change);
-  card.append(top,price,toman,foot);fragment.append(card);
+  const spark=document.createElement('span');spark.className='coin-sparkline da-market-sparkline';spark.dataset.symbol=symbol;spark.setAttribute('aria-label','نمودار تغییرات ۲۴ ساعته');
+  card.append(top,spark,price,toman,foot);fragment.append(card);
  }
  root.append(fragment);
+ observeMarketSparklines(root);
  if(more){more.hidden=total<=visible.length;more.innerHTML='نمایش '+Math.min(8,total-visible.length).toLocaleString('fa-IR')+' ارز دیگر <i data-lucide="chevron-down"></i>'}
  if(stamp){const liveRows=visible.filter(x=>x.live),fetchedAt=Number(marketTickerLastFetchedAt)||0,age=fetchedAt?Math.max(0,Date.now()-fetchedAt):Infinity,fresh=Number.isFinite(age)&&age<=120000;stamp.textContent=liveRows.length+' قیمت زنده از '+visible.length+' ارز نمایش‌داده‌شده · '+(fresh?'به‌روزرسانی فید: '+new Date(fetchedAt).toLocaleTimeString('fa-IR'):'زمان تازگی فید تأیید نشده')+' · قیمت نمایش داده‌شده تضمین اجرای سفارش نیست.';stamp.style.color=fresh?'var(--green)':'var(--muted)'}
  renderLucideIcons();
