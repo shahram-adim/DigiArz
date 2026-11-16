@@ -12,6 +12,12 @@ BEGIN;
 SET LOCAL lock_timeout = '5s';
 SET LOCAL statement_timeout = '30s';
 
+-- Freeze the target relations before validation so no concurrent writer can
+-- insert an out-of-contract row between the preflight and ALTER TABLE steps.
+LOCK TABLE public.orders, public.trades, public.asset_balances,
+           public.order_reservations, public.conditional_orders
+  IN ACCESS EXCLUSIVE MODE;
+
 DO $preflight$
 BEGIN
   IF EXISTS (
@@ -24,6 +30,7 @@ BEGIN
        OR abs(filled_amount) >= 10000000000000000::numeric OR scale(filled_amount) > 18
        OR remaining_amount IS NULL OR remaining_amount < 0
        OR abs(remaining_amount) >= 10000000000000000::numeric OR scale(remaining_amount) > 18
+       OR filled_amount + remaining_amount <> amount
   ) THEN
     RAISE EXCEPTION 'orders contains values outside numeric(34,18) contract';
   END IF;
