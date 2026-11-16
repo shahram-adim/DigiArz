@@ -60,11 +60,13 @@ jobs:
           username = unquote(parsed.username)
           database = unquote(parsed.path.lstrip("/"))
           port = parsed.port or 5432
-          placeholder_markers = ("region", "project_ref", "your-project", "placeholder", "example")
-          if "aws-0-region" in host or any(marker in username.lower() for marker in placeholder_markers):
-              raise SystemExit("SUPABASE_DB_URL still contains example placeholder values; copy the actual connection string from Supabase Connect")
+          username_placeholder_markers = ("region", "project_ref", "your-project", "placeholder", "example")
+          if "aws-0-region" in host:
+              raise SystemExit("The SUPABASE_DB_URL host is still the example aws-0-region pooler placeholder. Replace only the host with the exact Session pooler host shown in Supabase Connect.")
           if any(marker in host for marker in ("your-project", "placeholder", "example")):
-              raise SystemExit("SUPABASE_DB_URL host contains an example placeholder")
+              raise SystemExit("The SUPABASE_DB_URL host contains an example placeholder. Copy the exact Session pooler host from Supabase Connect.")
+          if any(marker in username.lower() for marker in username_placeholder_markers):
+              raise SystemExit("The SUPABASE_DB_URL username contains an example placeholder. Use the database username shown in Supabase Connect.")
 
           # Supabase shared pooler usernames include the project ref.
           if host.endswith(".pooler.supabase.com") and username == "postgres":
