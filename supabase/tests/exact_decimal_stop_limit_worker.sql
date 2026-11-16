@@ -32,7 +32,7 @@ BEGIN
     JOIN public.orders child ON child.id=c.execution_order_id AND child.user_id=c.user_id
     WHERE c.order_kind='stop_limit' AND c.status='triggered'
     ORDER BY c.updated_at
-    FOR UPDATE OF c,parent SKIP LOCKED
+    FOR UPDATE OF c,parent,child SKIP LOCKED
   LOOP
     IF v_cond.child_status IN ('filled','cancelled','rejected') THEN
       UPDATE public.orders
