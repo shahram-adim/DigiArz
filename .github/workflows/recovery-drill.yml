@@ -1,0 +1,141 @@
+name: DigiArz isolated recovery drill
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: digiarz-recovery-drill
+  cancel-in-progress: false
+
+jobs:
+  restore-to-isolated-project:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      RECOVERY_TEST_DB_URL: ${{ secrets.RECOVERY_TEST_DB_URL }}
+      BACKUP_ENCRYPTION_PASSWORD: ${{ secrets.BACKUP_ENCRYPTION_PASSWORD }}
+    steps:
+      - name: Validate secrets and target project
+        run: |
+          set -euo pipefail
+          if [ -z "$RECOVERY_TEST_DB_URL" ]; then
+            echo "::error::Missing repository secret RECOVERY_TEST_DB_URL"
+            exit 1
+          fi
+          if [ -z "$BACKUP_ENCRYPTION_PASSWORD" ]; then
+            echo "::error::Missing repository secret BACKUP_ENCRYPTION_PASSWORD"
+            exit 1
+          fi
+          python3 - <<'PY'
+          import os
+          from urllib.parse import urlsplit
+          raw = os.environ["RECOVERY_TEST_DB_URL"]
+          p = urlsplit(raw)
+          if p.scheme not in ("postgres", "postgresql") or not p.hostname or not p.username or p.password is None:
+              raise SystemExit("RECOVERY_TEST_DB_URL must be a complete PostgreSQL connection URI.")
+          if p.path.lstrip("/") != "postgres":
+              raise SystemExit("The target database must be named postgres.")
+          host = p.hostname.lower()
+          user = p.username
+          test_ref = "zrriqwyolcjhbappocuw"
+          production_ref = "gfoaubfilhttnwjykaox"
+          if production_ref in raw.lower() or production_ref in host or production_ref in user:
+              raise SystemExit("Safety stop: production DigiArz connection details are not allowed.")
+          direct_ok = host == f"db.{test_ref}.supabase.co" and user == "postgres"
+          pooler_ok = host.endswith(".pooler.supabase.com") and user == f"postgres.{test_ref}"
+          if not (direct_ok or pooler_ok):
+              raise SystemExit("Safety stop: use the exact connection URI for DigiArz-Recovery-Test. For a pooler URI, its username must be postgres.zrriqwyolcjhbappocuw.")
+          if p.port not in (None, 5432):
+              raise SystemExit("Use port 5432 for the target connection.")
+          print("Target connection validated for the isolated recovery project.")
+          PY
+
+      - name: Download the known-good encrypted backup
+        uses: actions/download-artifact@v4
+        with:
+          name: DigiArz-database-backup
+          repository: ${{ github.repository }}
+          run-id: 43848835281
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: backup
+
+      - name: Decrypt and inspect archive
+        run: |
+          set -euo pipefail
+          test -s backup/digiarz-database.dump.enc
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 \
+            -pass env:BACKUP_ENCRYPTION_PASSWORD \
+            -in backup/digiarz-database.dump.enc \
+            -out /tmp/digiarz-database.dump
+          docker run --rm \
+            --volume /tmp:/backup:ro \
+            postgres:17 \
+            pg_restore --list /backup/digiarz-database.dump >/tmp/digiarz-restore-list.txt
+          grep -q 'SCHEMA - public' /tmp/digiarz-restore-list.txt
+          grep -q 'SCHEMA - private' /tmp/digiarz-restore-list.txt
+          grep -q 'TABLE DATA public.' /tmp/digiarz-restore-list.txt
+          grep -q 'TABLE DATA private admin_users' /tmp/digiarz-restore-list.txt
+          echo "Archive decrypted and required public/private entries verified."
+
+      - name: Restore into DigiArz-Recovery-Test only
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os, subprocess
+          from urllib.parse import urlsplit, unquote
+          p = urlsplit(os.environ["RECOVERY_TEST_DB_URL"])
+          env = os.environ.copy()
+          env.update({
+              "PGHOST": p.hostname,
+              "PGPORT": str(p.port or 5432),
+              "PGUSER": unquote(p.username),
+              "PGPASSWORD": unquote(p.password),
+              "PGDATABASE": p.path.lstrip("/"),
+              "PGSSLMODE": "require",
+          })
+          args = [
+              "docker", "run", "--rm",
+              "-e", "PGHOST", "-e", "PGPORT", "-e", "PGUSER",
+              "-e", "PGPASSWORD", "-e", "PGDATABASE", "-e", "PGSSLMODE",
+              "-v", "/tmp:/backup:ro", "postgres:17",
+              "pg_restore", "--clean", "--if-exists", "--no-owner", "--no-acl",
+              "--exit-on-error", "--single-transaction",
+              "--dbname=postgresql://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE",
+              "/backup/digiarz-database.dump"
+          ]
+          # Avoid a shell and keep credentials out of logs/process arguments on the runner.
+          args[-2] = "--dbname=" + os.environ["RECOVERY_TEST_DB_URL"]
+          subprocess.run(args, env=env, check=True)
+          print("Restore command completed successfully on the isolated target.")
+          PY
+
+      - name: Verify restored application schemas
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os, subprocess
+          from urllib.parse import urlsplit, unquote
+          p = urlsplit(os.environ["RECOVERY_TEST_DB_URL"])
+          env = os.environ.copy()
+          env.update({
+              "PGHOST": p.hostname, "PGPORT": str(p.port or 5432),
+              "PGUSER": unquote(p.username), "PGPASSWORD": unquote(p.password),
+              "PGDATABASE": p.path.lstrip("/"), "PGSSLMODE": "require",
+          })
+          sql = "SELECT schemaname, count(*) FROM pg_tables WHERE schemaname IN ('public','private') GROUP BY schemaname ORDER BY schemaname;"
+          result = subprocess.run([
+              "docker", "run", "--rm", "-e", "PGHOST", "-e", "PGPORT",
+              "-e", "PGUSER", "-e", "PGPASSWORD", "-e", "PGDATABASE",
+              "-e", "PGSSLMODE", "postgres:17", "psql", "-X", "-v",
+              "ON_ERROR_STOP=1", "-At", "-c", sql,
+              "--dbname=" + os.environ["RECOVERY_TEST_DB_URL"]
+          ], env=env, check=True, capture_output=True, text=True)
+          print("Restored table counts by schema:")
+          print(result.stdout.strip() or "(no tables found)")
+          if "public|" not in result.stdout or "private|" not in result.stdout:
+              raise SystemExit("Verification failed: both public and private tables were not found.")
+          PY
