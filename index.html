@@ -2520,6 +2520,25 @@ function renderTopGainers(){const root=$('topGainersList');if(!root)return;const
 function renderTopLosers(){const root=$('topLosersList');if(!root)return;const rows=[...marketRows].map(x=>({item:x,t:getFreshMarketTicker(x)})).filter(x=>x.t&&Number.isFinite(x.t.change)&&x.t.change<0).sort((a,b)=>a.t.change-b.t.change).slice(0,5);if(!rows.length){root.innerHTML='<div class="muted small">اطلاعات کاهش ۲۴ ساعته هنوز در دسترس نیست.</div>';return}root.innerHTML='';for(const row of rows){const base=String(row.item.symbol).replace(/USDT$/i,'');const el=document.createElement('button');el.type='button';el.className='gainer-card loser-card';el.innerHTML=`${coinLogo(base)}<span><b>${safeText(persianCoinName(row.item.symbol))}</b><small>${safeText(base)}</small></span><strong>${formatNum(row.t.change,2)}٪</strong><span class="muted small">مشاهده ←</span>`;el.addEventListener('click',()=>openChart(row.item.symbol));root.appendChild(el)}}
 function renderTopAssets(){const root=$('topAssetsList');if(!root)return;const rows=[...marketRows].map(item=>({item,t:getFreshMarketTicker(item)})).filter(x=>x.t&&Number.isFinite(x.t.quoteVolume)&&x.t.quoteVolume>0).sort((a,b)=>b.t.quoteVolume-a.t.quoteVolume).slice(0,10);if(!rows.length){root.innerHTML='<div class="muted small">اطلاعات حجم معاملات برای رتبه‌بندی در دسترس نیست.</div>';return}root.innerHTML='';for(const row of rows){const symbol=String(row.item.symbol),base=symbol.replace(/USDT$/i,''),liveUsd=Number(row.t.last),storedUsd=Number(row.item.price),usd=Number.isFinite(liveUsd)&&liveUsd>0?liveUsd:storedUsd,toman=Number.isFinite(usd)&&usd>0&&currentFxIsValid?usd*currentFxRate:null,rawChange=row.t.change,hasChange=rawChange!==null&&rawChange!==undefined&&!(typeof rawChange==='string'&&rawChange.trim()==='')&&Number.isFinite(Number(rawChange)),change=hasChange?Number(rawChange):null;const el=document.createElement('button');el.type='button';el.className='top-asset-card';el.innerHTML=`${coinLogo(base)}<b>${safeText(persianCoinName(symbol))}</b><small>${safeText(base)}</small><span class="top-usd">${Number.isFinite(usd)&&usd>0?formatNum(usd,8)+' $':'—'}</span><span class="top-toman">${toman!==null?formatNum(toman,0)+' تومان':'نرخ تومان ناموجود'}</span><strong class="top-change ${hasChange?(change>0?'pos':change<0?'neg':''):''}">${hasChange?(change>0?'+':change<0?'−':'')+formatNum(Math.abs(change),2)+'٪':'—'}</strong><small style="direction:ltr">حجم: ${formatNum(row.t.quoteVolume,0)} USDT</small>`;el.addEventListener('click',()=>openChart(symbol));root.appendChild(el)}}
 async function fetchBinance24hrTickerRows(){
+ let serverError=null;
+ try{
+  if(!supabaseClient)throw new Error('اتصال امن سرور بازار آماده نیست');
+  const symbols=[...new Set(marketRows.map(item=>String(item.symbol||'').toUpperCase()).filter(symbol=>/^[A-Z0-9]{2,20}USDT$/.test(symbol)))];
+  if(!symbols.length)throw new Error('فهرست نمادهای بازار خالی است');
+  const batches=[];for(let i=0;i<symbols.length;i+=120)batches.push(symbols.slice(i,i+120));
+  const responses=await Promise.all(batches.map(async batch=>{
+   const {data,error}=await supabaseClient.functions.invoke('market-ticker-stats',{body:{symbols:batch}});
+   if(error)throw error;
+   if(!data?.success||!Array.isArray(data.tickers))throw new Error(data?.error||'پاسخ سرویس امن درصد نوسان معتبر نیست');
+   return data.tickers;
+  }));
+  const rows=responses.flat();
+  if(!rows.length)throw new Error('سرور برای نمادهای فعال داده ۲۴ ساعته برنگرداند');
+  return rows;
+ }catch(error){
+  serverError=error;
+  console.warn('DigiArz server-side 24h ticker unavailable; trying direct market API:',error);
+ }
  let lastError=null;
  for(const host of ['api.binance.com','api1.binance.com','api2.binance.com','api3.binance.com']){
   try{
@@ -2530,7 +2549,7 @@ async function fetchBinance24hrTickerRows(){
    return rows;
   }catch(error){lastError=error}
  }
- throw lastError||new Error('تمام میزبان‌های Binance ناموفق بودند');
+ throw new Error('دریافت اطلاعات ۲۴ ساعته از سرور و Binance ناموفق بود: '+String(serverError?.message||serverError||lastError?.message||lastError));
 }
 async function refreshMarketTickersUnlocked(){
  const stamp=$('marketTickerUpdated');let provider='Binance',failure='';
