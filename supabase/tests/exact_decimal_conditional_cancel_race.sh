@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
-DB_ARGS=(-h localhost -U postgres -d digiarz_conditional_race_test -v ON_ERROR_STOP=1)
+DB_NAME="${DB_NAME:-digiarz_conditional_race_test}"
+DB_ARGS=(-h localhost -U postgres -d "$DB_NAME" -v ON_ERROR_STOP=1)
 wait_for() {
  local sql="$1"; local label="$2"
  for attempt in $(seq 1 100); do
