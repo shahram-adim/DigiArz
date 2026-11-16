@@ -59,6 +59,23 @@ BEGIN
  IF (SELECT count(*) FROM public.trades WHERE order_id='74000000-0000-0000-0000-000000000025')<>0 THEN
    RAISE EXCEPTION 'Cancel-first child trade duplicate check failed';
  END IF;
+
+ IF (SELECT status FROM public.orders WHERE id='77000000-0000-0000-0000-000000000033')<>'triggered'
+    OR (SELECT filled_amount FROM public.orders WHERE id='77000000-0000-0000-0000-000000000033')<>0.5
+    OR (SELECT remaining_amount FROM public.orders WHERE id='77000000-0000-0000-0000-000000000033')<>0.5 THEN
+   RAISE EXCEPTION 'Stop-Limit parent sync did not catch up to the child second fill';
+ END IF;
+ IF (SELECT filled_amount FROM public.orders WHERE id='77000000-0000-0000-0000-000000000034')<>0.5
+    OR (SELECT remaining_amount FROM public.orders WHERE id='77000000-0000-0000-0000-000000000034')<>0.5 THEN
+   RAISE EXCEPTION 'Stop-Limit child second fill mismatch';
+ END IF;
+ IF (SELECT count(*) FROM public.trades WHERE order_id='77000000-0000-0000-0000-000000000034')<>2
+    OR (SELECT sum(amount) FROM public.trades WHERE order_id='77000000-0000-0000-0000-000000000034')<>0.5 THEN
+   RAISE EXCEPTION 'Stop-Limit child sync race duplicated or lost a trade';
+ END IF;
+ IF (SELECT consumed_amount FROM public.order_reservations WHERE order_id='77000000-0000-0000-0000-000000000034')<>5.005 THEN
+   RAISE EXCEPTION 'Stop-Limit child sync race reservation mismatch';
+ END IF;
 END
 $verify$;
 DROP TRIGGER digiarz_delay_stop_child_trade ON public.trades;
