@@ -66,3 +66,14 @@ Status as of 2026-11-16: **candidate assembled and rehearsed in disposable Postg
 - Advisors snapshot: 1 existing anon-callable SECURITY DEFINER function (`get_admin_market_listings()`, public market-list use must be confirmed); 22 authenticated-callable SECURITY DEFINER functions; leaked-password protection warning; 9 unindexed foreign keys and 11 RLS init-plan performance findings. These are existing project-level findings outside this precision migration's scope; no blanket permission changes are included.
 - **Backup/PITR availability is not exposed by the connected project-inspection tool**, so it has not been verified. Immediately before transfer, confirm a recent restorable backup/PITR point in Supabase Dashboard; if unavailable, export a backup first. This is the sole operational release gate not yet independently verified here.
 - Production remains unchanged.
+
+
+## Final candidate hardening — 2026-11-16
+
+- The migration now takes `ACCESS EXCLUSIVE` locks on all five target tables before its internal preflight, preventing a concurrent writer from inserting out-of-contract rows between validation and the type changes. It fails closed after a 5-second lock timeout.
+- Internal preflight also enforces `orders.filled_amount + remaining_amount = amount` and `order_reservations.consumed_amount + released_amount <= reserved_amount`, plus positive reservation amounts and numeric range/scale limits.
+- Postflight verifies all 14 widened columns individually and explicitly confirms the two USDT settlement columns remain `numeric(24,8)`.
+- Final hardened candidate commit: `36c16b588fbce373e4d281da54c53841bab9973d`.
+- Final full CI: [run 43813355851](https://github.com/shahram-adim/DigiArz/actions/runs/43813355851) — **success**.
+- Final Pages deployment: [run 43813355394](https://github.com/shahram-adim/DigiArz/actions/runs/43813355394) — **success**.
+- No Production database changes have been made. Backup/PITR verification remains a required operational gate immediately before execution.
