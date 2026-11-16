@@ -94,7 +94,7 @@ jobs:
           toc = Path("/tmp/digiarz-restore-list.txt").read_text().splitlines()
           schema = Path("/tmp/digiarz-schema.sql").read_text()
           pattern = re.compile(
-              r'ADD CONSTRAINT\\s+"?([^"\\s]+)"?\\s+FOREIGN KEY.*?REFERENCES\\s+auth\\.users',
+              r'ADD CONSTRAINT\s+"?([^"\s]+)"?\s+FOREIGN KEY.*?REFERENCES\s+auth\.users',
               re.IGNORECASE | re.DOTALL,
           )
           auth_fk_names = set(pattern.findall(schema))
@@ -107,7 +107,7 @@ jobs:
               raise SystemExit(f"Could not map every Auth-dependent FK to the archive TOC: {sorted(auth_fk_names - found_names)}")
           for index in matches:
               toc[index] = ";" + toc[index]
-          Path("/tmp/digiarz-restore-list-app-only.txt").write_text("\\n".join(toc) + "\\n")
+          Path("/tmp/digiarz-restore-list-app-only.txt").write_text("\n".join(toc) + "\n")
           print(f"Prepared restore list: retained all table data; skipped {len(auth_fk_names)} FK constraints referencing auth.users: {sorted(auth_fk_names)}")
           PY
           echo "Archive decrypted and required public/private entries verified."
