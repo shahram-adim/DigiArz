@@ -1,4 +1,7 @@
 -- Disposable PostgreSQL-only fixtures for real two-session worker/cancel races.
+UPDATE public.orders SET status='cancelled' WHERE status IN ('pending','partially_filled')
+  AND id NOT IN ('71000000-0000-0000-0000-000000000011','72000000-0000-0000-0000-000000000022');
+
 UPDATE public.market_prices
 SET price = 10.000000000000000001, updated_at = now()
 WHERE symbol = 'BTCUSDT';
