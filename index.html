@@ -2341,7 +2341,7 @@ async function loadOrderBook(symbolOverride=''){
   render(bidsRoot,data.bids,true);render(asksRoot,data.asks,false);
   const bid=Number(data.bids?.[0]?.[0]),ask=Number(data.asks?.[0]?.[0]);
   $('orderBookMid').textContent=Number.isFinite(bid)&&Number.isFinite(ask)?'قیمت میانی: '+formatNum((bid+ask)/2,8)+' USDT':'قیمت میانی: —';
-  status.textContent='نماد '+symbol+' · ۱۰ سطح خرید و فروش · منبع: '​${dataSource||"بازار چندمنبعی"} · دریافت '+new Date().toLocaleTimeString('fa-IR');
+  status.textContent='نماد '+symbol+' · ۱۰ سطح خرید و فروش · منبع: '+(response.source||'بازار چندمنبعی')+' · دریافت '+new Date().toLocaleTimeString('fa-IR');
  }catch(e){if(request!==orderBookRequest)return;bidsRoot.textContent='دریافت ناموفق';asksRoot.textContent='دریافت ناموفق';status.textContent='دفتر سفارشات فعلاً در دسترس نیست: '+(e.message||String(e))+' · این داده صرفاً نمای بازار است.'}
 }
 async function loadRecentMarketTrades(symbolOverride=''){
@@ -2362,7 +2362,7 @@ async function loadRecentMarketTrades(symbolOverride=''){
    time.textContent=Number.isFinite(Number(item.time))?new Date(Number(item.time)).toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}):'—';
    tr.append(price,qty,side,time);root.append(tr)
   }
-  status.textContent='نماد '+symbol+' · '+(Array.isArray(rows)?rows.length:0)+' معامله اخیر · منبع: '​${dataSource||"بازار چندمنبعی"} · دریافت '+new Date().toLocaleTimeString('fa-IR');
+  status.textContent='نماد '+symbol+' · '+(Array.isArray(rows)?rows.length:0)+' معامله اخیر · منبع: '+(response.source||'بازار چندمنبعی')+' · دریافت '+new Date().toLocaleTimeString('fa-IR');
  }catch(e){if(request!==recentTradesRequest)return;root.replaceChildren();const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=4;td.textContent='دریافت معاملات اخیر ناموفق بود.';tr.append(td);root.append(tr);status.textContent='داده معاملات اخیر فعلاً در دسترس نیست: '+(e.message||String(e))}
 }
 async function placeLimitOrder(){
