@@ -22,7 +22,7 @@ test('candidate SQL remains explicitly draft-only and outside migrations', () =>
   assert.match(rollout, /SET LOCAL statement_timeout = '30s'/);
   assert.match(rollout, /REVOKE ALL ON FUNCTION public\.process_limit_orders/);
   assert.match(rollout, /FOR UPDATE OF c,parent,child SKIP LOCKED/);
-  assert.doesNotMatch(livePreflight, /\\b(INSERT|UPDATE|DELETE|ALTER|DROP|CREATE|TRUNCATE|CALL)\\b/i);
+  assert.doesNotMatch(livePreflight, /\b(INSERT|UPDATE|DELETE|ALTER|DROP|CREATE|TRUNCATE|CALL)\b/i);
 });
 
 test('Limit worker preserves concurrency and account safeguards', () => {
