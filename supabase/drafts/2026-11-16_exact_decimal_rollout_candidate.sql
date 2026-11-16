@@ -2,9 +2,8 @@
 -- Atomic DigiArz exact-decimal rollout candidate.
 -- Prerequisite: migration history reconciliation, full PostgreSQL 17 CI success,
 -- fresh production preflight, backup/rollback plan, and explicit release approval.
--- This migration widens base-asset quantity/price precision to 18 places while
--- preserving 8-place USDT settlement, and replaces the reviewed RPC/worker chain.
--- lock_timeout intentionally fails closed if active traffic holds a conflicting lock.
+-- Base-asset quantity/price precision becomes 18 places; USDT settlement remains 8.
+-- A 5-second lock timeout intentionally aborts instead of waiting behind live traffic.
 BEGIN;
 SET LOCAL lock_timeout = '5s';
 SET LOCAL statement_timeout = '30s';
@@ -1290,7 +1289,7 @@ BEGIN
   RETURN jsonb_build_object('success',true,'processed',v_processed,
     'triggered',v_triggered,'synced',v_synced,'rejected',v_rejected,'skipped',v_skipped);
 END;
-$function$
+$function$;
 
 
 
@@ -1313,20 +1312,20 @@ GRANT EXECUTE ON FUNCTION public.process_stop_limit_orders() TO service_role;
 DO $postflight$
 DECLARE v_type text;
 BEGIN
- SELECT format_type(a.atttypid,a.atttypmod) INTO v_type
- FROM pg_attribute a WHERE a.attrelid='public.orders'::regclass AND a.attname='amount' AND NOT a.attisdropped;
+ SELECT format_type(a.atttypid,a.atttypmod) INTO v_type FROM pg_attribute a
+ WHERE a.attrelid='public.orders'::regclass AND a.attname='amount' AND NOT a.attisdropped;
  IF v_type<>'numeric(34,18)' THEN RAISE EXCEPTION 'orders.amount postflight type mismatch: %',v_type; END IF;
- SELECT format_type(a.atttypid,a.atttypmod) INTO v_type
- FROM pg_attribute a WHERE a.attrelid='public.trades'::regclass AND a.attname='price' AND NOT a.attisdropped;
+ SELECT format_type(a.atttypid,a.atttypmod) INTO v_type FROM pg_attribute a
+ WHERE a.attrelid='public.trades'::regclass AND a.attname='price' AND NOT a.attisdropped;
  IF v_type<>'numeric(34,18)' THEN RAISE EXCEPTION 'trades.price postflight type mismatch: %',v_type; END IF;
- SELECT format_type(a.atttypid,a.atttypmod) INTO v_type
- FROM pg_attribute a WHERE a.attrelid='public.asset_balances'::regclass AND a.attname='balance' AND NOT a.attisdropped;
+ SELECT format_type(a.atttypid,a.atttypmod) INTO v_type FROM pg_attribute a
+ WHERE a.attrelid='public.asset_balances'::regclass AND a.attname='balance' AND NOT a.attisdropped;
  IF v_type<>'numeric(38,18)' THEN RAISE EXCEPTION 'asset_balances.balance postflight type mismatch: %',v_type; END IF;
- SELECT format_type(a.atttypid,a.atttypmod) INTO v_type
- FROM pg_attribute a WHERE a.attrelid='public.wallets'::regclass AND a.attname='balance_usdt' AND NOT a.attisdropped;
+ SELECT format_type(a.atttypid,a.atttypmod) INTO v_type FROM pg_attribute a
+ WHERE a.attrelid='public.wallets'::regclass AND a.attname='balance_usdt' AND NOT a.attisdropped;
  IF v_type<>'numeric(24,8)' THEN RAISE EXCEPTION 'wallets.balance_usdt must remain numeric(24,8): %',v_type; END IF;
- SELECT format_type(a.atttypid,a.atttypmod) INTO v_type
- FROM pg_attribute a WHERE a.attrelid='public.transactions'::regclass AND a.attname='amount' AND NOT a.attisdropped;
+ SELECT format_type(a.atttypid,a.atttypmod) INTO v_type FROM pg_attribute a
+ WHERE a.attrelid='public.transactions'::regclass AND a.attname='amount' AND NOT a.attisdropped;
  IF v_type<>'numeric(24,8)' THEN RAISE EXCEPTION 'transactions.amount must remain numeric(24,8): %',v_type; END IF;
 END
 $postflight$;
