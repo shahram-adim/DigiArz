@@ -121,3 +121,17 @@ test('dashboard exposes recent account activity and account alerts', () => {
   const compatibility = html.slice(end);
   assert.doesNotMatch(compatibility, /id="dashboard(?:RecentOrders|RecentTrades|AccountAlerts)"/, 'activity roots are not duplicated in hidden compatibility markup');
 });
+
+test('market exposes a live-volume trending category and keeps new listings admin-curated', () => {
+  assert.match(html, /\{id:'trending',label:'ارزهای ترند',icon:'trending-up'\}/);
+  assert.match(html, /\{id:'new',label:'ارزهای جدید',icon:'badge-plus'\}/);
+  const start = html.indexOf('function renderMarkets(){');
+  const end = html.indexOf('function renderDashboardPortfolio(', start);
+  assert.ok(start >= 0 && end > start, 'market renderer boundaries found');
+  const body = html.slice(start, end);
+  assert.ok(body.includes('const volumeOf=item=>'), 'volume uses the current ticker or fresh stored market data');
+  assert.ok(body.includes("activeMarketCategory==='trending')rows=rows.filter(x=>volumeOf(x)!==null&&volumeOf(x)>0)"), 'trending excludes assets without valid volume data');
+  assert.ok(body.includes("activeMarketCategory==='trending'||sort==='volume-desc'"), 'trending sorts by descending 24-hour quote volume');
+  assert.ok(body.includes("activeMarketCategory==='new'?featuredMarketRows:marketRows"), 'new assets remain sourced from the admin-curated listings');
+  assert.ok(body.includes('item.catalogOnly') && body.includes('item.catalogStale'), 'new listings distinguish display-only and stale assets from enabled pairs');
+});
