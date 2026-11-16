@@ -30,6 +30,8 @@ Status as of 2026-11-16: **candidate assembled and rehearsed in disposable Postg
 
 ## Production transfer sequence
 
+- Read-only SQL checklist: `supabase/drafts/2026-11-16_exact_decimal_live_preflight.sql` (SELECT-only; execute immediately before the migration).
+
 1. Re-read Supabase migration history and confirm the chosen new migration name is unused.
 2. Take/confirm a recoverable database backup or point-in-time recovery window before applying financial schema/function changes.
 3. Re-run live preflight immediately before the migration:
