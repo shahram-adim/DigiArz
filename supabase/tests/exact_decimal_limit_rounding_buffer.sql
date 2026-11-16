@@ -17,6 +17,7 @@ DECLARE
  v_expected numeric;
  v_order uuid;
  v_result jsonb;
+ v_res_status text;
  v_cycle integer;
  v_reserved numeric;
  v_consumed numeric;
@@ -48,11 +49,11 @@ BEGIN
  SELECT sum(amount) INTO v_ledger FROM public.transactions
  WHERE user_id='80000000-0000-0000-0000-000000000008'
    AND currency='USDT' AND transaction_type='limit_buy';
- SELECT consumed_amount,released_amount,status INTO v_consumed,v_released,v_result
+ SELECT consumed_amount,released_amount,status INTO v_consumed,v_released,v_res_status
  FROM public.order_reservations WHERE order_id=v_order;
- IF v_consumed<>v_ledger OR v_consumed+v_released<>v_reserved OR v_result->>'status'<>'released' THEN
+ IF v_consumed<>v_ledger OR v_consumed+v_released<>v_reserved OR v_res_status<>'released' THEN
    RAISE EXCEPTION 'Per-fill settlement/reservation mismatch: consumed %, ledger %, released %, reserved %, status %',
-     v_consumed,v_ledger,v_released,v_reserved,v_result->>'status';
+     v_consumed,v_ledger,v_released,v_reserved,v_res_status;
  END IF;
  SELECT balance_usdt INTO v_wallet FROM public.wallets
  WHERE user_id='80000000-0000-0000-0000-000000000008';
