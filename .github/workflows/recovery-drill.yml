@@ -102,16 +102,26 @@ jobs:
               "PGDATABASE": p.path.lstrip("/"),
               "PGSSLMODE": "require",
           })
+          # This workflow is hard-pinned to the isolated recovery project above.
+          # Clear only its application schemas so the archive can recreate them cleanly.
+          cleanup_sql = "DROP SCHEMA IF EXISTS public CASCADE; DROP SCHEMA IF EXISTS private CASCADE;"
+          cleanup = [
+              "docker", "run", "--rm",
+              "-e", "PGHOST", "-e", "PGPORT", "-e", "PGUSER",
+              "-e", "PGPASSWORD", "-e", "PGDATABASE", "-e", "PGSSLMODE",
+              "postgres:17", "psql", "-X", "-v", "ON_ERROR_STOP=1", "-c", cleanup_sql
+          ]
+          subprocess.run(cleanup, env=env, check=True)
           args = [
               "docker", "run", "--rm",
               "-e", "PGHOST", "-e", "PGPORT", "-e", "PGUSER",
               "-e", "PGPASSWORD", "-e", "PGDATABASE", "-e", "PGSSLMODE",
               "-v", "/tmp:/backup:ro", "postgres:17",
-              "pg_restore", "--clean", "--if-exists", "--no-owner", "--no-acl",
+              "pg_restore", "--no-owner", "--no-acl",
               "--exit-on-error", "--single-transaction",
               "--dbname=postgres", "/backup/digiarz-database.dump"
           ]
-          # Connection settings are passed only through the container environment.
+          # Restore without --clean: the isolated target schemas were cleared above.
           subprocess.run(args, env=env, check=True)
           print("Restore command completed successfully on the isolated target.")
           PY
