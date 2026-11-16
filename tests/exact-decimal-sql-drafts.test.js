@@ -7,9 +7,10 @@ const read = (name) => fs.readFileSync(name, 'utf8');
 const worker = read('supabase/drafts/2026-11-15_exact_decimal_process_limit_orders.sql');
 const entrypoints = read('supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql');
 const widening = read('supabase/drafts/2026-11-15_exact_decimal_type_widening.sql');
+const stopLimitSync = read('supabase/drafts/2026-11-16_exact_decimal_process_stop_limit_orders.sql');
 
 test('candidate SQL remains explicitly draft-only and outside migrations', () => {
-  for (const sql of [worker, entrypoints, widening]) {
+  for (const sql of [worker, entrypoints, widening, stopLimitSync]) {
     assert.match(sql, /DRAFT ONLY — DO NOT APPLY TO PRODUCTION/);
   }
   assert.ok(fs.existsSync('supabase/drafts/2026-11-15_exact_decimal_process_limit_orders.sql'));
@@ -30,7 +31,7 @@ test('Limit worker preserves concurrency and account safeguards', () => {
   assert.match(worker, /round\(v_fee_rate \* v_gross, 8\)|round\(v_gross \* v_fee_rate, 8\)/);
   assert.match(worker, /v_gross <= 0/);
   assert.match(worker, /round\(\(v_remaining - v_qty\) \* v_market_price, 8\) <= 0/);
-  assert.match(worker, /round\(v_new_remaining \* v_order\.price \* \(1 \+ v_fee_rate\), 8\)/);
+  assert.match(worker, /round\(v_new_remaining \* v_order\.price, 8\)[\s\S]*0\.0000001::numeric/);
 });
 
 test('entrypoint candidates enforce exact scale and quote-ledger rounding', () => {
@@ -43,7 +44,7 @@ test('entrypoint candidates enforce exact scale and quote-ledger rounding', () =
   assert.match(entrypoints, /pg_catalog\.scale\(p_trigger_price\) > 18/);
   assert.match(entrypoints, /pg_catalog\.scale\(v_price\) > 18/);
   assert.match(entrypoints, /v_price >= 10000000000000000::numeric/);
-  assert.match(entrypoints, /round\(p_amount \* p_limit_price \* \(1 \+ v_fee_rate\), 8\)/);
+  assert.match(entrypoints, /round\(p_amount \* p_limit_price, 8\)[\s\S]*0\.0000001::numeric/);
   assert.match(entrypoints, /Trade notional rounds to zero USDT/);
   assert.match(entrypoints, /round\(p_amount \* p_limit_price, 8\) <= 0/);
   assert.match(entrypoints, /Limit order notional rounds to zero USDT/);
