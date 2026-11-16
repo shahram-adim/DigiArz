@@ -54,3 +54,21 @@ test('trade history CSV export respects filters and preserves exact decimal stri
   assert.ok(body.includes('createObjectURL') && body.includes('revokeObjectURL'));
   assert.ok(body.includes('safeCell'), 'CSV cells are protected against formula injection');
 });
+
+test('trade history loads older pages without losing exact values or changing records', () => {
+  assert.match(html, /id="loadMoreHistoryBtn"/);
+  assert.match(html, /historyPageSize=50/);
+  const start = html.indexOf('async function loadHistory(){');
+  const end = html.indexOf('function exportHistoryCsv(){', start);
+  assert.ok(start >= 0 && end > start, 'history loading function boundaries found');
+  const body = html.slice(start, end);
+  assert.ok(body.includes('.range(0,historyPageSize-1)'), 'first page uses a bounded range');
+  assert.ok(body.includes('async function loadMoreHistory()'), 'older page loader exists');
+  assert.ok(body.includes('.range(offset,offset+historyPageSize-1)'), 'older pages use stable offsets');
+  assert.ok(body.includes("order('id',{ascending:false})"), 'pagination uses a deterministic tie-breaker');
+  assert.ok(body.includes('historyRows.push'), 'older rows append instead of replacing current rows');
+  assert.ok(body.includes('historyHasMore=next.length===historyPageSize'), 'has-more state follows page size');
+  assert.ok(body.includes('historyLoadingMore'), 'duplicate load requests are guarded');
+  assert.ok(body.includes('historyRequestId'), 'stale page responses are ignored after refresh');
+  assert.ok(html.includes("DigiArz-trades-'+rows.length+'-loaded-"), 'CSV filename reflects all loaded rows');
+});
