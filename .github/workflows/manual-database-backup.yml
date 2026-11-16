@@ -29,18 +29,50 @@ jobs:
             exit 1
           fi
 
-      - name: Create encrypted PostgreSQL 17 archive (public schema)
+      - name: Parse database URL safely
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          python3 - <<'PY'
+          import os
+          from urllib.parse import urlsplit, unquote
+          from pathlib import Path
+
+          raw = os.environ["SUPABASE_DB_URL"]
+          parsed = urlsplit(raw)
+          if parsed.scheme not in ("postgres", "postgresql"):
+              raise SystemExit("SUPABASE_DB_URL must start with postgresql://")
+          if not parsed.hostname or not parsed.username or parsed.password is None:
+              raise SystemExit("SUPABASE_DB_URL is missing host, username, or password")
+          if not parsed.path or parsed.path == "/":
+              raise SystemExit("SUPABASE_DB_URL is missing database name")
+          values = {
+              "PGHOST": parsed.hostname,
+              "PGPORT": str(parsed.port or 5432),
+              "PGUSER": unquote(parsed.username),
+              "PGPASSWORD": unquote(parsed.password),
+              "PGDATABASE": unquote(parsed.path.lstrip("/")),
+              "PGSSLMODE": "require",
+          }
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as f:
+              for key, value in values.items():
+                  if "\n" in value or "\r" in value:
+                      raise SystemExit("Invalid newline in database connection setting")
+                  f.write(f"{key}={value}\n")
+          print("Database URL parsed; connection values are masked by GitHub.")
+          PY
+
+      - name: Create encrypted PostgreSQL 17 archive (public schema)
+        env:
           BACKUP_ENCRYPTION_PASSWORD: ${{ secrets.BACKUP_ENCRYPTION_PASSWORD }}
         run: |
           set -euo pipefail
           mkdir -p backup
           docker run --rm \
-            --env SUPABASE_DB_URL \
+            --env PGHOST --env PGPORT --env PGUSER --env PGPASSWORD --env PGDATABASE --env PGSSLMODE \
             --volume "$PWD/backup:/backup" \
             postgres:17 \
-            sh -ceu 'pg_dump --dbname="$SUPABASE_DB_URL" --schema=public --format=custom --no-owner --file=/backup/digiarz-public.dump'
+            sh -ceu 'pg_dump --host="$PGHOST" --port="$PGPORT" --username="$PGUSER" --dbname="$PGDATABASE" --schema=public --format=custom --no-owner --file=/backup/digiarz-public.dump'
 
           openssl enc -aes-256-cbc -salt -pbkdf2 -iter 600000 \
             -pass env:BACKUP_ENCRYPTION_PASSWORD \
