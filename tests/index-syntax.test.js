@@ -10,7 +10,12 @@ test('all inline JavaScript blocks in index.html parse successfully', () => {
     .filter(([, attrs, body]) => !/\bsrc\s*=/.test(attrs) && !/application\/(?:ld\+)?json/i.test(attrs) && body.trim());
   assert.ok(scripts.length > 0, 'expected inline JavaScript');
   scripts.forEach(([, attrs, body], index) => {
-    new vm.Script(body, { filename: 'index.html:inline-script-' + (index + 1) });
+    const filename = 'index.html:inline-script-' + (index + 1);
+    try {
+      new vm.Script(body, { filename });
+    } catch (error) {
+      throw new Error(filename + ': ' + error.message, { cause: error });
+    }
   });
 });
 
