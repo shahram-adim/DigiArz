@@ -2076,6 +2076,25 @@ body.auth-page-active #authView.auth{
  #tab-markets .market-board-v34 .coin .price-toman{font-size:8px!important}
 }
 
+
+/* DigiArz market polish: readable three-line identity, Toman-first clarity and crisp current logos */
+#tab-markets .coin-name-stack{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;gap:1px!important;min-width:0!important;line-height:1.35!important}
+#tab-markets .coin-name-stack .coin-name-fa,
+#tab-markets .coin-name-stack .coin-symbol-en,
+#tab-markets .coin-name-stack .coin-english-name{display:block!important;font-size:11px!important;font-weight:800!important;line-height:1.4!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;max-width:100%!important}
+#tab-markets .coin-name-stack .coin-symbol-en{color:#9fb4d0!important;letter-spacing:.35px}
+#tab-markets .coin-name-stack .coin-english-name{color:var(--muted)!important;font-weight:600!important}
+#tab-markets .coin .price-toman{color:#3b82f6!important;font-size:15px!important;font-weight:950!important;line-height:1.5!important;white-space:nowrap!important}
+#tab-markets .coin .price-usd{font-size:12px!important;line-height:1.5!important}
+#tab-markets .coin .price-stack{gap:3px!important}
+#tab-markets .coin-icon img{object-fit:contain!important;padding:2px!important}
+@media(max-width:700px){
+ #tab-markets .coin-name-stack .coin-name-fa,
+ #tab-markets .coin-name-stack .coin-symbol-en,
+ #tab-markets .coin-name-stack .coin-english-name{font-size:10px!important}
+ #tab-markets .coin .price-toman{font-size:13px!important}
+}
+
 </style>
 </head>
 <body>
@@ -2593,8 +2612,8 @@ async function loadReviews(){
 }
 async function submitReview(){const btn=$('submitReviewBtn'),msg=$('reviewMsg'),comment=$('reviewComment').value.trim(),rating=Number($('reviewRating').value);msg.classList.remove('hidden','err','ok');msg.textContent='';btn.disabled=true;try{if(comment.length<5||comment.length>1000)throw new Error('متن نظر باید بین ۵ تا ۱۰۰۰ نویسه باشد.');if(!Number.isInteger(rating)||rating<1||rating>5)throw new Error('امتیاز معتبر نیست.');const {data:{user},error:ue}=await supabaseClient.auth.getUser();if(ue)throw ue;if(!user)throw new Error('برای ثبت نظر ابتدا وارد حساب شوید.');const {error}=await supabaseClient.from('coin_reviews').insert({user_id:user.id,symbol:selectedSymbol,rating,comment});if(error)throw error;$('reviewComment').value='';msg.textContent='نظر شما با موفقیت ثبت شد.';msg.classList.add('ok');await loadReviews()}catch(e){msg.textContent=e.message||'ثبت نظر انجام نشد.';msg.classList.add('err')}finally{btn.disabled=false}}
 const cleanCoinSymbol=symbol=>String(symbol||'').replace(/USDT$/i,'').replace(/[^a-z0-9]/gi,'').toUpperCase();
-const logoUrl=symbol=>`https://assets.coincap.io/assets/icons/${cleanCoinSymbol(symbol).toLowerCase()}@2x.png`;
-function handleCoinLogoError(img){const symbol=cleanCoinSymbol(img.dataset.symbol||'');const fallbacks=[`https://cryptoicons.org/api/icon/${symbol.toLowerCase()}/200`,`https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${symbol.toLowerCase()}.png`];const index=Number(img.dataset.fallbackIndex||0);if(index<fallbacks.length){img.dataset.fallbackIndex=String(index+1);img.src=fallbacks[index];return}const holder=img.parentElement;if(img.classList.contains('asset-logo')&&holder?.classList.contains('asset-detail-head')){const fallback=document.createElement('span');fallback.className='asset-logo coin-logo-fallback';fallback.textContent=symbol.slice(0,1)||'؟';fallback.setAttribute('aria-label',`نماد ${symbol}`);img.replaceWith(fallback);return}img.style.display='none';if(holder){holder.classList.add('coin-logo-fallback');holder.textContent=symbol.slice(0,1)||'؟';holder.setAttribute('aria-label',`نماد ${symbol}`)}}
+const logoUrl=symbol=>`https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/${cleanCoinSymbol(symbol).toLowerCase()}.png`;
+function handleCoinLogoError(img){const symbol=cleanCoinSymbol(img.dataset.symbol||'');const fallbacks=[`https://assets.coincap.io/assets/icons/${symbol.toLowerCase()}@2x.png`,`https://cryptoicons.org/api/icon/${symbol.toLowerCase()}/200`];const index=Number(img.dataset.fallbackIndex||0);if(index<fallbacks.length){img.dataset.fallbackIndex=String(index+1);img.src=fallbacks[index];return}const holder=img.parentElement;if(img.classList.contains('asset-logo')&&holder?.classList.contains('asset-detail-head')){const fallback=document.createElement('span');fallback.className='asset-logo coin-logo-fallback';fallback.textContent=symbol.slice(0,1)||'؟';fallback.setAttribute('aria-label',`نماد ${symbol}`);img.replaceWith(fallback);return}img.style.display='none';if(holder){holder.classList.add('coin-logo-fallback');holder.textContent=symbol.slice(0,1)||'؟';holder.setAttribute('aria-label',`نماد ${symbol}`)}}
 function coinLogo(symbol,sizeClass='coin-icon'){const clean=cleanCoinSymbol(symbol);return `<span class="${sizeClass}" aria-label="لوگوی ${safeText(clean)}"><img src="${logoUrl(clean)}" data-symbol="${safeText(clean)}" data-fallback-index="0" alt="${safeText(clean)}" loading="lazy" decoding="async" onerror="handleCoinLogoError(this)"></span>`}
 function updateQuickTradeEstimate(side){
  const symbol=String($(side+'Symbol')?.value||'').trim().toUpperCase(),amount=Number($(side+'Amount')?.value),root=$(side+'Estimate');if(!root)return;
@@ -2658,6 +2677,7 @@ async function refreshMarketTickersUnlocked(){
   }));
   if(!next.size)throw new Error('Binance داده جفت‌ارزهای USDT برنگرداند');
   marketTickerMap=next;
+  marketTickerLastFetchedAt=Date.now();
   const btc=marketTickerMap.get('BTCUSDT');
   const validPrimaryCount=marketRows.filter(item=>{const value=marketTickerMap.get(item.symbol)?.change;return value!==null&&value!==undefined&&value!==''&&Number.isFinite(Number(value))}).length;
   const coverageThreshold=Math.max(3,Math.ceil(Math.min(marketRows.length,12)*0.75));
@@ -2681,7 +2701,7 @@ async function refreshMarketTickersUnlocked(){
   const fallback=await discoverMultiExchangeMarkets();
   const next=new Map(fallback.rows.map(x=>[x.symbol,{change:x.change,last:x.price,quoteVolume:x.quoteVolume,baseVolume:null,high:null,low:null,open:null,closeTime:null,trades:null,source:x.source}]));
   if(!next.size)throw new Error('Binance و منابع جایگزین داده‌ای ندادند. '+failure+(fallback.errors.length?' · '+fallback.errors.join('؛ '):''));
-  marketTickerMap=next;provider=[...new Set(fallback.rows.map(x=>x.source.split(' · ')[0]))].join('، ')||'منابع جایگزین';
+  marketTickerMap=next;marketTickerLastFetchedAt=Date.now();provider=[...new Set(fallback.rows.map(x=>x.source.split(' · ')[0]))].join('، ')||'منابع جایگزین';
  }
  renderDashboardMarketPreview();renderTopGainers();renderTopLosers();renderTopAssets();
  renderMarkets();
@@ -2781,7 +2801,7 @@ function renderMarkets(){
   star.addEventListener('click',event=>{event.stopPropagation();toggleFavoriteSymbol(item.symbol);renderMarkets();renderDashboardMarketPreview()});
   const identity=document.createElement('div');identity.className='coin-identity';
   const englishName=String(coinInfo[base]?.name||item.name||base);
-  identity.innerHTML=coinLogo(base)+'<span class="coin-name-stack"><b class="coin-name-fa">'+safeText(persianCoinName(item.symbol))+'</b><small class="coin-symbol-en"><b>'+safeText(base)+'</b><span> · </span><span>'+safeText(englishName)+'</span></small></span>';
+  identity.innerHTML=coinLogo(base)+'<span class="coin-name-stack"><b class="coin-name-fa">'+safeText(persianCoinName(item.symbol))+'</b><small class="coin-symbol-en" dir="ltr">'+safeText(base)+'</small><small class="coin-english-name" dir="ltr">'+safeText(englishName)+'</small></span>';
   identity.title=persianCoinName(item.symbol)+' · '+base+' · '+englishName;
   const sparkline=document.createElement('span');sparkline.className='coin-sparkline';sparkline.setAttribute('role','img');sparkline.setAttribute('aria-label','نمودار تغییرات قیمت ۲۴ ساعت گذشته');sparkline.textContent='—';sparkline.dataset.symbol=fullSymbol;
   const changeWrap=document.createElement('div');changeWrap.className='coin-change-wrap';changeWrap.innerHTML=changeMarkup+volumeMarkup;
