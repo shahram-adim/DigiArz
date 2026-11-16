@@ -2287,7 +2287,7 @@ function exportHistoryCsv(){
  const query=String($('historySearch')?.value||'').trim().toUpperCase(),side=$('historySideFilter')?.value||'all';
  const rows=historyRows.filter(item=>(side==='all'||item.side===side)&&(!query||String(item.symbol||'').toUpperCase().includes(query)));
  if(!rows.length)return;
- const safeCell=value=>{let text=String(value??'');if(/^[=+\\-@\t\r]/.test(text))text="'"+text;return '"'+text.replace(/"/g,'""')+'"';};
+ const safeCell=value=>{let text=String(value??'');if(/^[-=+@\t\r]/.test(text))text="'"+text;return '"'+text.replace(/"/g,'""')+'"';};
  const headers=['زمان','نماد','نوع معامله','مقدار','قیمت (USDT)'];
  const records=rows.map(item=>[
   new Date(item.created_at).toISOString(),
