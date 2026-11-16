@@ -55,12 +55,13 @@ BEGIN
 
   IF EXISTS (
     SELECT 1 FROM public.order_reservations
-    WHERE reserved_amount IS NULL OR reserved_amount < 0 OR scale(reserved_amount) > 18
+    WHERE reserved_amount IS NULL OR reserved_amount <= 0 OR scale(reserved_amount) > 18
        OR abs(reserved_amount) >= 100000000000000000000::numeric
        OR released_amount IS NULL OR released_amount < 0 OR scale(released_amount) > 18
        OR abs(released_amount) >= 100000000000000000000::numeric
        OR consumed_amount IS NULL OR consumed_amount < 0 OR scale(consumed_amount) > 18
        OR abs(consumed_amount) >= 100000000000000000000::numeric
+       OR consumed_amount + released_amount > reserved_amount
   ) THEN
     RAISE EXCEPTION 'order_reservations contains values outside numeric(38,18) contract';
   END IF;
