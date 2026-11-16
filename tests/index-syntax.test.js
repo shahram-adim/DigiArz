@@ -89,3 +89,20 @@ test('trade history date filters apply consistently to the table and CSV export'
   assert.ok(html.slice(exportStart, exportEnd).includes('getFilteredHistoryRows()'), 'CSV uses the same filters as the table');
   assert.ok(html.includes("clearHistoryFiltersBtn')?.addEventListener('click'"), 'clear action is wired');
 });
+
+test('trade history provides accessible local-date quick presets', () => {
+  for (const range of ['0', '7', '30', 'all']) {
+    assert.match(html, new RegExp('data-history-range="' + range + '"'));
+  }
+  const start = html.indexOf('function setHistoryDatePreset(range){');
+  const end = html.indexOf('function renderHistory(){', start);
+  assert.ok(start >= 0 && end > start, 'date preset helper boundaries found');
+  const body = html.slice(start, end);
+  assert.ok(body.includes('getFullYear()') && body.includes('getMonth()') && body.includes('getDate()'), 'preset dates use local calendar fields');
+  assert.ok(body.includes("start.setDate(start.getDate()-(days-1))"), '7 and 30 day ranges include today');
+  assert.ok(body.includes("range==='all'"), 'all-history preset clears only date boundaries');
+  assert.ok(body.includes("setAttribute('aria-pressed',String(active))"), 'preset state is exposed accessibly');
+  assert.ok(html.includes("historyDatePresets')?.addEventListener('click'"), 'preset buttons are wired');
+  assert.ok(html.includes("clearHistoryFiltersBtn')?.addEventListener('click',()=>{['historySearch','historyDateFrom','historyDateTo'].forEach"), 'clear button is wired');
+  assert.ok(html.includes("setHistoryDatePreset('all')"), 'clear action resets the selected preset');
+});
