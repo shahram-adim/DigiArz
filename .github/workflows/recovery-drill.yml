@@ -94,7 +94,7 @@ jobs:
           toc = Path("/tmp/digiarz-restore-list.txt").read_text().splitlines()
           schema = Path("/tmp/digiarz-schema.sql").read_text()
           pattern = re.compile(
-              r'ADD CONSTRAINT\s+"?([^"\s]+)"?\s+FOREIGN KEY.*?REFERENCES\s+auth\.users',
+              r'ADD CONSTRAINT\s+"?([^"\s]+)"?\s+FOREIGN KEY[^;]*?REFERENCES\s+auth\.users',
               re.IGNORECASE | re.DOTALL,
           )
           auth_fk_names = set(pattern.findall(schema))
