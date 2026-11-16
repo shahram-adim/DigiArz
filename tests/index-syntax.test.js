@@ -109,7 +109,7 @@ test('trade history provides accessible local-date quick presets', () => {
 
 test('dashboard exposes recent account activity and account alerts', () => {
   const start = html.indexOf('<div class="dashboard-activity-center"');
-  const end = html.indexOf('</div>\\n <div class="da-v2-compat hidden"', start);
+  const end = html.indexOf('<div class="da-v2-compat hidden"', start);
   assert.ok(start >= 0 && end > start, 'visible dashboard activity center boundaries found');
   const section = html.slice(start, end);
   for (const id of ['dashboardRecentOrders', 'dashboardRecentTrades', 'dashboardAccountAlerts']) {
