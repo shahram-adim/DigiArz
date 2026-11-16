@@ -43,7 +43,9 @@ BEGIN
   SELECT reserved_amount,asset INTO v_reserved,v_asset
   FROM public.order_reservations WHERE order_id=v_order_id;
   IF v_asset <> 'USDT'
-     OR v_reserved <> round(0.123456789012345678 * 11.000000000000000001 * 1.001,8) THEN
+     OR v_reserved <> round(0.123456789012345678 * 11.000000000000000001,8)
+       + round(round(0.123456789012345678 * 11.000000000000000001,8) * 0.001,8)
+       + 0.0000001 THEN
     RAISE EXCEPTION 'Stop-Limit buy reservation mismatch: asset %, amount %',v_asset,v_reserved;
   END IF;
 
