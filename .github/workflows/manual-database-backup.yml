@@ -91,7 +91,7 @@ jobs:
               "--volume", f"{os.getcwd()}/backup:/backup",
               "postgres:17",
               "sh", "-ceu",
-              'pg_dump --host="$PGHOST" --port="$PGPORT" --username="$PGUSER" --dbname="$PGDATABASE" --schema=public --schema=private --exclude-table-data=private.crypto_assets_sync_requests --exclude-table-data=private.market_fx_sync_requests --exclude-table-data=private.market_price_sync_requests --format=custom --no-owner --file=/backup/digiarz-public.dump'
+              'pg_dump --host="$PGHOST" --port="$PGPORT" --username="$PGUSER" --dbname="$PGDATABASE" --schema=public --schema=private --exclude-table-data=private.crypto_assets_sync_requests --exclude-table-data=private.market_fx_sync_requests --exclude-table-data=private.market_price_sync_requests --format=custom --no-owner --file=/backup/digiarz-database.dump'
           ], env=child_env, capture_output=True, text=True)
           if result.returncode:
               diagnostic = (result.stderr or "").lower()
@@ -109,25 +109,25 @@ jobs:
 
           openssl enc -aes-256-cbc -salt -pbkdf2 -iter 600000 \
             -pass env:BACKUP_ENCRYPTION_PASSWORD \
-            -in backup/digiarz-public.dump \
-            -out backup/digiarz-public.dump.enc
+            -in backup/digiarz-database.dump \
+            -out backup/digiarz-database.dump.enc
 
           openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 \
             -pass env:BACKUP_ENCRYPTION_PASSWORD \
-            -in backup/digiarz-public.dump.enc \
-            -out /tmp/digiarz-public-verify.dump
+            -in backup/digiarz-database.dump.enc \
+            -out /tmp/digiarz-database-verify.dump
 
-          cmp backup/digiarz-public.dump /tmp/digiarz-public-verify.dump
+          cmp backup/digiarz-database.dump /tmp/digiarz-database-verify.dump
           docker run --rm \
             --volume "$PWD/backup:/backup:ro" \
             postgres:17 \
-            pg_restore --list /backup/digiarz-public.dump >/tmp/digiarz-archive-list.txt
+            pg_restore --list /backup/digiarz-database.dump >/tmp/digiarz-archive-list.txt
 
           grep -q 'SCHEMA - public' /tmp/digiarz-archive-list.txt
           grep -q 'SCHEMA - private' /tmp/digiarz-archive-list.txt
           grep -q 'TABLE DATA public.' /tmp/digiarz-archive-list.txt
-          grep -q 'TABLE private.admin_users' /tmp/digiarz-archive-list.txt
-          grep -q 'TABLE DATA private.admin_users' /tmp/digiarz-archive-list.txt
+          grep -q 'TABLE private admin_users' /tmp/digiarz-archive-list.txt
+          grep -q 'TABLE DATA private admin_users' /tmp/digiarz-archive-list.txt
           ! grep -q 'TABLE DATA private.crypto_assets_sync_requests' /tmp/digiarz-archive-list.txt
           ! grep -q 'TABLE DATA private.market_fx_sync_requests' /tmp/digiarz-archive-list.txt
           ! grep -q 'TABLE DATA private.market_price_sync_requests' /tmp/digiarz-archive-list.txt
@@ -138,12 +138,12 @@ jobs:
             echo "Scope: PostgreSQL public + private schemas. Private request-queue table structures are included; transient queue rows are intentionally excluded. Private admin, audit, and control/state table data are included."
             echo "Format: PostgreSQL custom archive, encrypted with AES-256-CBC + PBKDF2"
             echo "Integrity: encryption/decryption byte comparison and pg_restore archive-list checks passed. This is archive integrity validation, not a live restore drill."
-            sha256sum backup/digiarz-public.dump.enc
+            sha256sum backup/digiarz-database.dump.enc
           } > backup/README-backup.txt
 
-          rm -f backup/digiarz-public.dump /tmp/digiarz-public-verify.dump
-          test -s backup/digiarz-public.dump.enc
-          test ! -e backup/digiarz-public.dump
+          rm -f backup/digiarz-database.dump /tmp/digiarz-database-verify.dump
+          test -s backup/digiarz-database.dump.enc
+          test ! -e backup/digiarz-database.dump
 
       - name: Upload encrypted backup artifact
         uses: actions/upload-artifact@v4
