@@ -1,12 +1,17 @@
 -- DRAFT ONLY — DO NOT APPLY TO PRODUCTION.
 -- Atomic DigiArz exact-decimal rollout candidate.
--- Prerequisite: migration history reconciliation, full PostgreSQL 17 CI success,
--- fresh production preflight, backup/rollback plan, and explicit release approval.
+-- Prerequisite: fresh production preflight, confirmed restorable backup/PITR,
+-- migration-history check, and explicit release approval.
 -- Base-asset quantity/price precision becomes 18 places; USDT settlement remains 8.
+-- All target relations are locked before preflight to prevent concurrent-write gaps.
 -- A 5-second lock timeout intentionally aborts instead of waiting behind live traffic.
 BEGIN;
 SET LOCAL lock_timeout = '5s';
 SET LOCAL statement_timeout = '30s';
+
+LOCK TABLE public.orders, public.trades, public.asset_balances,
+           public.order_reservations, public.conditional_orders
+  IN ACCESS EXCLUSIVE MODE;
 
 DO $preflight$
 BEGIN
@@ -20,6 +25,7 @@ BEGIN
        OR abs(filled_amount) >= 10000000000000000::numeric OR scale(filled_amount) > 18
        OR remaining_amount IS NULL OR remaining_amount < 0
        OR abs(remaining_amount) >= 10000000000000000::numeric OR scale(remaining_amount) > 18
+       OR filled_amount + remaining_amount <> amount
   ) THEN
     RAISE EXCEPTION 'orders contains values outside numeric(34,18) contract';
   END IF;
@@ -1293,7 +1299,7 @@ $function$;
 
 
 
--- Match the already-verified Production execution model explicitly.
+-- Preserve the verified Production execution model.
 REVOKE ALL ON FUNCTION public.execute_demo_trade(text,text,numeric,numeric) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.execute_demo_trade(text,text,numeric,numeric) TO authenticated, service_role;
 REVOKE ALL ON FUNCTION public.place_limit_order(text,text,numeric,numeric) FROM PUBLIC, anon;
@@ -1310,23 +1316,39 @@ GRANT EXECUTE ON FUNCTION public.process_stop_limit_orders() TO service_role;
 
 
 DO $postflight$
-DECLARE v_type text;
+DECLARE
+  r record;
+  v_type text;
 BEGIN
- SELECT format_type(a.atttypid,a.atttypmod) INTO v_type FROM pg_attribute a
- WHERE a.attrelid='public.orders'::regclass AND a.attname='amount' AND NOT a.attisdropped;
- IF v_type<>'numeric(34,18)' THEN RAISE EXCEPTION 'orders.amount postflight type mismatch: %',v_type; END IF;
- SELECT format_type(a.atttypid,a.atttypmod) INTO v_type FROM pg_attribute a
- WHERE a.attrelid='public.trades'::regclass AND a.attname='price' AND NOT a.attisdropped;
- IF v_type<>'numeric(34,18)' THEN RAISE EXCEPTION 'trades.price postflight type mismatch: %',v_type; END IF;
- SELECT format_type(a.atttypid,a.atttypmod) INTO v_type FROM pg_attribute a
- WHERE a.attrelid='public.asset_balances'::regclass AND a.attname='balance' AND NOT a.attisdropped;
- IF v_type<>'numeric(38,18)' THEN RAISE EXCEPTION 'asset_balances.balance postflight type mismatch: %',v_type; END IF;
- SELECT format_type(a.atttypid,a.atttypmod) INTO v_type FROM pg_attribute a
- WHERE a.attrelid='public.wallets'::regclass AND a.attname='balance_usdt' AND NOT a.attisdropped;
- IF v_type<>'numeric(24,8)' THEN RAISE EXCEPTION 'wallets.balance_usdt must remain numeric(24,8): %',v_type; END IF;
- SELECT format_type(a.atttypid,a.atttypmod) INTO v_type FROM pg_attribute a
- WHERE a.attrelid='public.transactions'::regclass AND a.attname='amount' AND NOT a.attisdropped;
- IF v_type<>'numeric(24,8)' THEN RAISE EXCEPTION 'transactions.amount must remain numeric(24,8): %',v_type; END IF;
+  FOR r IN
+    SELECT * FROM (VALUES
+      ('orders','amount','numeric(34,18)'),
+      ('orders','price','numeric(34,18)'),
+      ('orders','filled_amount','numeric(34,18)'),
+      ('orders','remaining_amount','numeric(34,18)'),
+      ('trades','amount','numeric(34,18)'),
+      ('trades','price','numeric(34,18)'),
+      ('asset_balances','balance','numeric(38,18)'),
+      ('order_reservations','reserved_amount','numeric(38,18)'),
+      ('order_reservations','released_amount','numeric(38,18)'),
+      ('order_reservations','consumed_amount','numeric(38,18)'),
+      ('conditional_orders','amount','numeric(34,18)'),
+      ('conditional_orders','trigger_price','numeric(34,18)'),
+      ('conditional_orders','limit_price','numeric(34,18)'),
+      ('conditional_orders','executed_price','numeric(34,18)'),
+      ('wallets','balance_usdt','numeric(24,8)'),
+      ('transactions','amount','numeric(24,8)')
+    ) AS expected(table_name,column_name,expected_type)
+  LOOP
+    SELECT format_type(a.atttypid,a.atttypmod) INTO v_type
+    FROM pg_attribute a
+    WHERE a.attrelid=to_regclass('public.'||r.table_name)
+      AND a.attname=r.column_name AND NOT a.attisdropped;
+    IF v_type IS DISTINCT FROM r.expected_type THEN
+      RAISE EXCEPTION 'postflight type mismatch for %.%: expected %, got %',
+        r.table_name,r.column_name,r.expected_type,v_type;
+    END IF;
+  END LOOP;
 END
 $postflight$;
 
