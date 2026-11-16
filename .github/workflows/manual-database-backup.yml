@@ -128,9 +128,9 @@ jobs:
           grep -q 'TABLE DATA public.' /tmp/digiarz-archive-list.txt
           grep -q 'TABLE private admin_users' /tmp/digiarz-archive-list.txt
           grep -q 'TABLE DATA private admin_users' /tmp/digiarz-archive-list.txt
-          ! grep -q 'TABLE DATA private.crypto_assets_sync_requests' /tmp/digiarz-archive-list.txt
-          ! grep -q 'TABLE DATA private.market_fx_sync_requests' /tmp/digiarz-archive-list.txt
-          ! grep -q 'TABLE DATA private.market_price_sync_requests' /tmp/digiarz-archive-list.txt
+          ! grep -q 'TABLE DATA private crypto_assets_sync_requests' /tmp/digiarz-archive-list.txt
+          ! grep -q 'TABLE DATA private market_fx_sync_requests' /tmp/digiarz-archive-list.txt
+          ! grep -q 'TABLE DATA private market_price_sync_requests' /tmp/digiarz-archive-list.txt
 
           {
             echo "Created (UTC): $(date -u +%Y-%m-%dT%H:%M:%SZ)"
