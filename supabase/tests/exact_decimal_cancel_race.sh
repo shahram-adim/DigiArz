@@ -26,6 +26,9 @@ wait_for "SELECT CASE WHEN count(*)=1 THEN 1 ELSE 0 END FROM pg_stat_activity WH
 wait "$WORKER_PID"
 wait "$CANCEL_PID"
 
+# Enable the second fixture only after race 1 has fully completed.
+psql "${DB_ARGS[@]}" -c "UPDATE public.profiles SET is_active=true WHERE id='72000000-0000-0000-0000-000000000002';"
+
 # Race 2: cancellation owns the order lock; SKIP LOCKED must leave it untouched.
 PGAPPNAME=digiarz_cancel_first psql "${DB_ARGS[@]}" \
   -c "BEGIN; SELECT set_config('request.jwt.claim.sub','72000000-0000-0000-0000-000000000002',false); SELECT public.cancel_limit_order('72000000-0000-0000-0000-000000000022'); SELECT pg_sleep(2); COMMIT;" \
