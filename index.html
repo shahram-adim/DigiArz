@@ -1867,8 +1867,16 @@ async function loadMarkets(forceTickerRefresh=false){const [marketData,pairData,
 let marketExtrasLoaded=false,marketExtrasPromise=null;
 async function loadMarketExtras(force=false){if(marketExtrasLoaded&&!force)return;if(marketExtrasPromise)return marketExtrasPromise;marketExtrasPromise=(async()=>{await Promise.allSettled([loadFeaturedMarketAssets(),refreshAutoMarkets()]);await refreshMarketTickers();marketExtrasLoaded=true;renderCategoryButtons();renderMarkets();renderDashboardSummary()})();try{return await marketExtrasPromise}finally{marketExtrasPromise=null}}
 async function loadFeaturedMarketAssets(){
- const {data,error}=await supabaseClient.rpc('get_admin_market_listings');if(error)throw error;
- featuredMarketRows=(data||[]).map(x=>{const symbol=String(x.symbol||'').toUpperCase()+'USDT',age=x.last_updated?Date.now()-new Date(x.last_updated).getTime():Infinity,fresh=Number(x.current_price_usd)>0&&age>=0&&age<=120000,enabled=marketRows.some(m=>m.symbol===symbol&&!m.auto_discovered);return {symbol,price:fresh?Number(x.current_price_usd):null,source:'CoinGecko',updated_at:x.last_updated,change:Number(x.price_change_percentage_24h),quoteVolume:Number(x.total_volume_usd),auto_discovered:false,catalogOnly:!enabled,catalogStale:!fresh,coingecko_id:x.coingecko_id,image_url:x.image_url,name:x.name}});
+ const [{data,error},{data:discovered,error:discoveredError}]=await Promise.all([
+  supabaseClient.rpc('get_admin_market_listings'),
+  supabaseClient.rpc('get_exchange_discovered_market_assets')
+ ]);
+ if(error)throw error;if(discoveredError)throw discoveredError;
+ const listed=(data||[]).map(x=>{const symbol=String(x.symbol||'').toUpperCase()+'USDT',age=x.last_updated?Date.now()-new Date(x.last_updated).getTime():Infinity,fresh=Number(x.current_price_usd)>0&&age>=0&&age<=120000,enabled=marketRows.some(m=>m.symbol===symbol&&!m.auto_discovered);return {symbol,price:fresh?Number(x.current_price_usd):null,source:'CoinGecko',updated_at:x.last_updated,change:Number(x.price_change_percentage_24h),quoteVolume:Number(x.total_volume_usd),auto_discovered:false,catalogOnly:!enabled,catalogStale:!fresh,coingecko_id:x.coingecko_id,image_url:x.image_url,name:x.name}});
+ const seen=new Set(listed.map(x=>x.symbol));
+ const exchangeNames={nobitex:'نوبیتکس',wallex:'والکس',bitpin:'بیت‌پین',ramzinex:'رمزینکس',tabdeal:'تبدیل',ompfinex:'او‌ام‌پی فینکس',exir:'اکسیر',bit24:'بیت۲۴',balinex:'بالینکس',abantether:'آبان‌تتر',okex:'اوکی‌اکس',tetherland:'تترلند',kifpool:'کیف‌پول'};
+ const discoveredRows=(discovered||[]).map(x=>{const symbol=String(x.symbol||'').toUpperCase()+'USDT',price=Number(x.current_price_usd),age=x.last_updated?Date.now()-new Date(x.last_updated).getTime():Infinity,fresh=Number.isFinite(price)&&price>0&&age>=0&&age<=120000,sources=String(x.exchange_sources||'').split(',').map(key=>exchangeNames[key.trim()]||key.trim()).filter(Boolean).join('، ');return {symbol,price:fresh?price:null,source:'Iranian exchange discovery',updated_at:x.last_updated,change:null,quoteVolume:null,auto_discovered:false,catalogOnly:true,catalogStale:!fresh,coingecko_id:null,image_url:null,name:x.name,exchangeSources:sources,observed_at:x.observed_at,matchStatus:x.match_status}});
+ featuredMarketRows=listed.concat(discoveredRows.filter(x=>!seen.has(x.symbol)));
  if(activeMarketCategory==='new')renderMarkets();
 }
 async function searchAdminAssets(){
@@ -2226,6 +2234,7 @@ function renderMarkets(){
  else if(activeMarketCategory==='losers'||sort==='change-asc')rows.sort((a,b)=>(changeOf(a)??Infinity)-(changeOf(b)??Infinity));
  else if(activeMarketCategory==='cheapest'||sort==='price-asc')rows.sort((a,b)=>(getTrustedMarketPrice(a)??Infinity)-(getTrustedMarketPrice(b)??Infinity));
  else if(activeMarketCategory==='expensive'||sort==='price-desc')rows.sort((a,b)=>(getTrustedMarketPrice(b)??-Infinity)-(getTrustedMarketPrice(a)??-Infinity));
+ else if(activeMarketCategory==='new')rows.sort((a,b)=>new Date(b.observed_at||b.updated_at||0).getTime()-new Date(a.observed_at||a.updated_at||0).getTime());
  else rows.sort((a,b)=>a.symbol.localeCompare(b.symbol));
  if(!rows.length){const empty=document.createElement('div');empty.className='notice warn';empty.textContent=activeMarketCategory==='favorites'?'هنوز ارزی به علاقه‌مندی‌ها اضافه نکرده‌اید.':'در این بخش ارزی برای نمایش پیدا نشد یا هنوز داده معتبر در دسترس نیست.';list.append(empty);return}
  const fragment=document.createDocumentFragment();
@@ -2243,7 +2252,7 @@ function renderMarkets(){
   const changeMarkup=change===null?'<small class="coin-change-label">تغییر ۲۴س</small><span class="coin-change">→ داده موجود نیست</span>':'<small class="coin-change-label">تغییر ۲۴س</small>'+ `<span class="coin-change ${change>0?'pos':change<0?'neg':''}" aria-label="درصد تغییر ۲۴ ساعته">${change>0?'▲ ':change<0?'▼ ':'→ '}${change>0?'+':change<0?'−':''}${formatNum(Math.abs(change),2)}٪</span>`;
   const tickerMeta=ticker&&Number.isFinite(ticker.high)&&Number.isFinite(ticker.low)?` · سقف/کف ۲۴س: ${formatNum(ticker.high,8)} / ${formatNum(ticker.low,8)}`:'';
   const volume= ticker?.quoteVolume??(isMarketTimestampFresh(item.updated_at)?item.quoteVolume:null);
-  const volumeMarkup=activeMarketCategory==='new'?(item.catalogStale?'<small class="coin-volume" style="color:var(--red)">داده قیمت قدیمی · قیمت نمایش داده نمی‌شود</small>':item.catalogOnly?'<small class="coin-volume">فقط نمایش · معامله هنوز فعال نیست</small>':'<small class="coin-volume" style="color:var(--green)">خریدوفروش آزمایشی فعال</small>'):Number.isFinite(Number(volume))&&volume!==null?`<small class="coin-volume">حجم ۲۴س: ${formatNum(volume,0)} USDT${tickerMeta}</small>`:'';
+  const volumeMarkup=activeMarketCategory==='new'?(item.exchangeSources?'<small class="coin-volume">شناسایی خودکار در '+safeText(item.exchangeSources)+' · فقط نمایش؛ معامله هنوز فعال نیست</small>':item.catalogStale?'<small class="coin-volume" style="color:var(--red)">داده قیمت قدیمی · قیمت نمایش داده نمی‌شود</small>':item.catalogOnly?'<small class="coin-volume">فقط نمایش · معامله هنوز فعال نیست</small>':'<small class="coin-volume" style="color:var(--green)">خریدوفروش آزمایشی فعال</small>'):Number.isFinite(Number(volume))&&volume!==null?`<small class="coin-volume">حجم ۲۴س: ${formatNum(volume,0)} USDT${tickerMeta}</small>`:'';
   const star=document.createElement('button');star.type='button';star.className='favorite-btn'+(isFavorite?' is-favorite':'');star.dataset.favorite=item.symbol;star.setAttribute('aria-label',isFavorite?'حذف از علاقه‌مندی‌ها':'افزودن به علاقه‌مندی‌ها');star.setAttribute('aria-pressed',isFavorite?'true':'false');star.title=isFavorite?'حذف از علاقه‌مندی‌ها':'افزودن به علاقه‌مندی‌ها';star.innerHTML='<i data-lucide="star" aria-hidden="true"></i>';
   star.addEventListener('click',event=>{event.stopPropagation();toggleFavoriteSymbol(item.symbol);renderMarkets();renderDashboardMarketPreview()});
   const identity=document.createElement('button');identity.type='button';identity.className='coin-identity market-coin-open';
