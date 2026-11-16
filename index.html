@@ -1746,7 +1746,7 @@ const $=id=>document.getElementById(id);
 const DigiDecimal=window.DigiDecimal;
 if(!DigiDecimal)throw new Error('ابزار محاسبات دقیق بارگذاری نشد؛ صفحه را تازه‌سازی کنید.');
 const authView=$('authView'),appView=$('appView'),authMsg=$('authMsg'),tradeMsg=$('tradeMsg');
-let supabaseClient=null,isRecoveryMode=false,appLoadPromise=null,currentFxRate=null,currentFxIsValid=false,currentWalletUsdt=0,marketRows=[],marketTickerMap=new Map(),assetRows=[],historyRows=[],historyHasMore=true,historyPageSize=50,historyLoadingMore=false,selectedSymbol='BTCUSDT',chart=null,candleSeries=null,lineSeries=null,areaSeries=null,volumeChart=null,volumeSeries=null,chartType='candle',chartInterval='24h',chartResizeObserver=null,activeMarketCategory='all',performanceRequestId=0,marketTickerRefreshPromise=null,marketTickerLastFetchedAt=0,dashboardLoadErrors=[],favoriteSymbols=loadFavoriteSymbols(),tomanAssetNames=new Map(),tomanMarketAutoTimer=null,tomanMarketHasFreshRows=false;
+let supabaseClient=null,isRecoveryMode=false,appLoadPromise=null,currentFxRate=null,currentFxIsValid=false,currentWalletUsdt=0,marketRows=[],marketTickerMap=new Map(),assetRows=[],historyRows=[],historyHasMore=true,historyPageSize=50,historyLoadingMore=false,historyRequestId=0,selectedSymbol='BTCUSDT',chart=null,candleSeries=null,lineSeries=null,areaSeries=null,volumeChart=null,volumeSeries=null,chartType='candle',chartInterval='24h',chartResizeObserver=null,activeMarketCategory='all',performanceRequestId=0,marketTickerRefreshPromise=null,marketTickerLastFetchedAt=0,dashboardLoadErrors=[],favoriteSymbols=loadFavoriteSymbols(),tomanAssetNames=new Map(),tomanMarketAutoTimer=null,tomanMarketHasFreshRows=false;
 let displayCurrencyMode='both',isSuperAdmin=false,featuredMarketRows=[];
 function initCurrencyMode(){try{const saved=localStorage.getItem('digiArzCurrencyMode');if(['usd','toman','both'].includes(saved))displayCurrencyMode=saved}catch(_){}const el=$('marketCurrencyMode');if(el)el.value=displayCurrencyMode}
 function setCurrencyMode(value){displayCurrencyMode=['usd','toman','both'].includes(value)?value:'both';try{localStorage.setItem('digiArzCurrencyMode',displayCurrencyMode)}catch(_){}renderMarkets();}
@@ -2283,18 +2283,19 @@ function renderAssets(){const list=$('assetList'),search=String($('assetSearch')
 async function loadAssets(){const {data:userData,error:userError}=await supabaseClient.auth.getUser();if(userError||!userData.user)throw userError||new Error('برای مشاهده دارایی‌ها وارد حساب شوید.');assetRows=await fetchAllSupabaseRows(()=>supabaseClient.from('asset_balances').select('asset,balance').eq('user_id',userData.user.id).order('asset'));$('assetCount').textContent=String(assetRows.filter(x=>Number(x.balance)>0).length);renderAssets()}
 function renderHistory(){const body=$('historyBody'),query=String($('historySearch')?.value||'').trim().toUpperCase(),side=$('historySideFilter')?.value||'all';const rows=historyRows.filter(item=>(side==='all'||item.side===side)&&(!query||String(item.symbol||'').toUpperCase().includes(query)));body.innerHTML='';const count=$('historyResultCount');if(count)count.textContent=`نمایش ${formatNum(rows.length,0)} نتیجه از ${formatNum(historyRows.length,0)} معامله بارگذاری‌شده`;const exportBtn=$('exportHistoryCsvBtn');if(exportBtn)exportBtn.disabled=rows.length===0;const moreBtn=$('loadMoreHistoryBtn');if(moreBtn){moreBtn.classList.toggle('hidden',!historyHasMore);moreBtn.disabled=historyLoadingMore;}if(!rows.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=5;td.className='muted';td.textContent=historyRows.length?'با فیلترهای انتخاب‌شده معامله‌ای پیدا نشد.':'هنوز معامله‌ای ثبت نشده است.';tr.appendChild(td);body.appendChild(tr);return}for(const item of rows){const tr=document.createElement('tr'),time=document.createElement('td'),symbol=document.createElement('td'),sideCell=document.createElement('td'),amount=document.createElement('td'),price=document.createElement('td');time.textContent=new Date(item.created_at).toLocaleString('fa-IR');const wrap=document.createElement('span');wrap.className='history-asset';const logo=document.createElement('span');logo.innerHTML=coinLogo(String(item.symbol).replace(/USDT$/i,''),'asset-logo');const label=document.createElement('b');label.dir='ltr';label.textContent=String(item.symbol||'');wrap.append(logo,label);symbol.appendChild(wrap);sideCell.textContent=item.side==='buy'?'خرید':item.side==='sell'?'فروش':String(item.side||'—');amount.textContent=formatNum(item.amount,18);price.textContent=formatNum(item.price,18);tr.append(time,symbol,sideCell,amount,price);body.appendChild(tr)}}
 async function loadHistory(){
- historyRows=[];historyHasMore=true;
+ const requestId=++historyRequestId;historyRows=[];historyHasMore=true;historyLoadingMore=false;
  const {data:userData,error:userError}=await supabaseClient.auth.getUser();
  if(userError||!userData.user)throw userError||new Error('برای مشاهده تاریخچه وارد حساب شوید.');
  const {data,error}=await supabaseClient.from('trades').select('id,symbol,side,amount,price,created_at').eq('user_id',userData.user.id).order('created_at',{ascending:false}).order('id',{ascending:false}).range(0,historyPageSize-1);
  if(error)throw error;
+ if(requestId!==historyRequestId)return;
  historyRows=Array.isArray(data)?data:[];
  historyHasMore=historyRows.length===historyPageSize;
  renderHistory();renderDashboardActivity();
 }
 async function loadMoreHistory(){
  if(historyLoadingMore||!historyHasMore)return;
- const button=$('loadMoreHistoryBtn'),message=$('historyLoadMsg');
+ const requestId=historyRequestId,button=$('loadMoreHistoryBtn'),message=$('historyLoadMsg');
  historyLoadingMore=true;if(button){button.disabled=true;button.textContent='در حال دریافت…'}if(message){message.classList.add('hidden');message.textContent=''}
  try{
   const {data:userData,error:userError}=await supabaseClient.auth.getUser();
@@ -2302,6 +2303,7 @@ async function loadMoreHistory(){
   const offset=historyRows.length;
   const {data,error}=await supabaseClient.from('trades').select('id,symbol,side,amount,price,created_at').eq('user_id',userData.user.id).order('created_at',{ascending:false}).order('id',{ascending:false}).range(offset,offset+historyPageSize-1);
   if(error)throw error;
+  if(requestId!==historyRequestId)return;
   const next=Array.isArray(data)?data:[];
   const known=new Set(historyRows.map(row=>row.id).filter(Boolean));
   historyRows.push(...next.filter(row=>!row.id||!known.has(row.id)));
@@ -2311,9 +2313,7 @@ async function loadMoreHistory(){
   if(message){message.textContent='دریافت معاملات قدیمی‌تر ناموفق بود: '+(error?.message||String(error));message.classList.remove('hidden')}
   throw error;
  }finally{
-  historyLoadingMore=false;
-  if(button){button.disabled=false;button.textContent='نمایش معاملات قدیمی‌تر'}
-  renderHistory();
+  if(requestId===historyRequestId){historyLoadingMore=false;if(button){button.disabled=false;button.textContent='نمایش معاملات قدیمی‌تر'}renderHistory();}
  }
 }
 function exportHistoryCsv(){
