@@ -304,7 +304,9 @@ BEGIN
     v_fee_rate := public.get_demo_trading_fee_rate('USDT', 'maker');
     IF v_side = 'buy' THEN
         v_asset := 'USDT';
-        v_required_amount := round(p_amount * p_limit_price * (1 + v_fee_rate), 8);
+        v_required_amount := round(p_amount * p_limit_price, 8)
+            + round(round(p_amount * p_limit_price, 8) * v_fee_rate, 8)
+            + 0.0000001::numeric;
         IF v_required_amount > 9999999999999999.99999999::numeric THEN
             RAISE EXCEPTION 'Buy reservation exceeds numeric(24,8) USDT capacity';
         END IF;
@@ -469,7 +471,9 @@ BEGIN
   v_fee_rate := public.get_demo_trading_fee_rate('USDT','maker');
   IF v_side='buy' THEN
     v_reserve_asset := 'USDT';
-    v_required := round(p_amount*p_limit_price*(1+v_fee_rate),8);
+    v_required := round(p_amount*p_limit_price,8)
+      + round(round(p_amount*p_limit_price,8)*v_fee_rate,8)
+      + 0.0000001::numeric;
     IF v_required > 9999999999999999.99999999::numeric THEN
       RAISE EXCEPTION 'Stop-Limit buy reservation exceeds numeric(24,8) USDT capacity';
     END IF;
