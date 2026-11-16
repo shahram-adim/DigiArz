@@ -3,7 +3,9 @@
 -- and isolated end-to-end tests of placement, reservations, cancellation,
 -- Stop-Limit child synchronization, and conditional exits before approval.
 -- Preserves the live worker's advisory lock, SKIP LOCKED, account/pair/price
--- checks, wallet-first lock order, reservation lifecycle, and transaction model.
+-- checks, reservation lifecycle, and transaction model. Lock order is
+-- order row -> reservation row -> wallet row, matching cancellation's
+-- order row -> reservation row sequence.
 -- Adds 18-place base fills, 8-place USDT settlement, and blocks zero-gross fills.
 -- CREATE OR REPLACE preserves existing function grants; still verify grants
 -- and worker callers during release rehearsal.
@@ -152,7 +154,9 @@ BEGIN
             CONTINUE;
         END IF;
 
-        -- Keep the same wallet-first lock order as trade placement.
+        -- Lock order here is order row -> reservation row -> wallet row.
+        -- cancel_limit_order locks order row -> reservation row, so the
+        -- shared prefix prevents worker/cancel lock-order inversion.
         PERFORM 1
         FROM public.wallets AS w
         WHERE w.user_id = v_order.user_id
