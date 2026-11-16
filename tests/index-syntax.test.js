@@ -135,3 +135,32 @@ test('market exposes a live-volume trending category and keeps new listings admi
   assert.ok(body.includes("activeMarketCategory==='new'?featuredMarketRows:marketRows"), 'new assets remain sourced from the admin-curated listings');
   assert.ok(body.includes('item.catalogOnly') && body.includes('item.catalogStale'), 'new listings distinguish display-only and stale assets from enabled pairs');
 });
+
+test('new market automatically includes unmatched Iranian exchange listings as display-only assets', () => {
+  const start = html.indexOf('async function loadFeaturedMarketAssets(){');
+  const end = html.indexOf('async function searchAdminAssets()', start);
+  assert.ok(start >= 0 && end > start, 'featured market loader boundaries found');
+  const body = html.slice(start, end);
+  assert.ok(body.includes("rpc('get_admin_market_listings')"), 'verified curated assets remain available');
+  assert.ok(body.includes("rpc('get_exchange_discovered_market_assets')"), 'unmatched exchange observations are fetched automatically');
+  assert.ok(body.includes('Promise.all(['), 'both sources load together');
+  assert.ok(body.includes('exchangeNames={nobitex:') && body.includes("kifpool:'کیف‌پول'"), 'Iranian exchange names are localized');
+  assert.ok(body.includes('catalogOnly:true') && body.includes('exchangeSources:sources'), 'unmatched assets are marked display-only with their exchange sources');
+  assert.ok(body.includes('featuredMarketRows=listed.concat(discoveredRows.filter(x=>!seen.has(x.symbol)))'), 'duplicate symbols already in the curated list are excluded');
+  const marketStart = html.indexOf('function renderMarkets(){');
+  const marketEnd = html.indexOf('function renderDashboardPortfolio(', marketStart);
+  const marketBody = html.slice(marketStart, marketEnd);
+  assert.ok(marketBody.includes('item.exchangeSources'), 'the market explains which Iranian exchanges reported the asset');
+  assert.ok(marketBody.includes('معامله هنوز فعال نیست'), 'newly discovered assets are not presented as trade-enabled');
+});
+
+test('Iranian exchange discovery RPC is read-only and excludes non-crypto tokenized equities', () => {
+  const migration = fs.readFileSync('supabase/migrations/20261116200009_auto_list_unmatched_iran_exchange_assets.sql', 'utf8');
+  assert.ok(migration.includes('FUNCTION public.get_exchange_discovered_market_assets()'));
+  assert.ok(migration.includes('SECURITY DEFINER') && migration.includes("SET search_path = ''"));
+  assert.ok(migration.includes('o.is_active IS TRUE'));
+  assert.ok(migration.includes("o.last_seen_at >= pg_catalog.now() - interval '48 hours'"));
+  assert.ok(migration.includes('(stock|equity|shares|xstock|tokenized)'));
+  assert.ok(migration.includes('public.demo_trading_pairs'));
+  assert.ok(migration.includes('GRANT EXECUTE ON FUNCTION public.get_exchange_discovered_market_assets() TO anon, authenticated'));
+});
