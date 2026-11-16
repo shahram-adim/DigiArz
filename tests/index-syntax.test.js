@@ -138,7 +138,7 @@ test('market exposes a live-volume trending category and keeps new listings admi
 
 test('new market automatically includes unmatched Iranian exchange listings as display-only assets', () => {
   const start = html.indexOf('async function loadFeaturedMarketAssets(){');
-  const end = html.indexOf('\\nasync function searchAdminAssets()', start);
+  const end = html.indexOf('async function searchAdminAssets()', start);
   assert.ok(start >= 0 && end > start, 'featured market loader boundaries found');
   const body = html.slice(start, end);
   assert.ok(body.includes("rpc('get_admin_market_listings')"), 'verified curated assets remain available');
