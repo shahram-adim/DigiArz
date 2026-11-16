@@ -2,6 +2,11 @@ name: DigiArz isolated recovery drill
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/recovery-drill.yml
 
 permissions:
   actions: read
