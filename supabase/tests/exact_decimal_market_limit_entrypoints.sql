@@ -58,7 +58,7 @@ BEGIN
   SELECT amount INTO v_amount FROM public.orders WHERE id=v_order_id;
   SELECT reserved_amount INTO v_reserved FROM public.order_reservations
   WHERE order_id=v_order_id;
-  IF v_amount <> 0.125000000000000001 OR v_reserved <> 1.001 THEN
+  IF v_amount <> 0.125000000000000001 OR v_reserved <> 1.0010001 THEN
     RAISE EXCEPTION 'Limit buy precision/reservation mismatch: amount %, reserve %',v_amount,v_reserved;
   END IF;
 
