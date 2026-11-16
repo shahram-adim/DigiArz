@@ -40,3 +40,18 @@ test('the current production schema compatibility gate stays at 8 fractional dig
   assert.match(html, /const ORDER_INPUT_MAX_FRACTION_DIGITS=8/);
   assert.match(fs.readFileSync('sw.js', 'utf8'), /'\.\/src\/decimal\.js'/);
 });
+test('trade history CSV export respects filters and preserves exact decimal strings', () => {
+  assert.match(html, /id="exportHistoryCsvBtn"/);
+  const start = html.indexOf('function exportHistoryCsv(){');
+  const end = html.indexOf('\\nasync function trade(side)', start);
+  assert.ok(start >= 0 && end > start, 'CSV export function boundaries found');
+  const body = html.slice(start, end);
+  assert.match(body, /historyRows\\.filter/);
+  assert.match(body, /String\\(item\\.amount\\?\\?''\\)/);
+  assert.match(body, /String\\(item\\.price\\?\\?''\\)/);
+  assert.ok(body.includes("const csv='\\\\uFEFF'"), 'UTF-8 BOM is included');
+  assert.ok(body.includes("join('\\\\r\\\\n')"), 'CSV uses CRLF line endings');
+  assert.match(body, /createObjectURL/);
+  assert.match(body, /revokeObjectURL/);
+  assert.match(body, /safeCell/);
+});
