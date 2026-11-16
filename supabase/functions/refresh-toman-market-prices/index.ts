@@ -236,6 +236,22 @@ Deno.serve(async (req: Request) => {
       throw new Error("Toman market write failed: " + writeResponse.status + " " + (await writeResponse.text()).slice(0, 220));
     }
 
+    // Keep the current-price table compact; long-term snapshots live in the history table.
+    let cleanupWarning: string | null = null;
+    try {
+      const cleanupUrl = new URL(supabaseUrl + "/rest/v1/market_toman_prices");
+      cleanupUrl.searchParams.set("exchange", "in.(nobitex,wallex,bitpin)");
+      cleanupUrl.searchParams.set("fetched_at", "lt." + fetchedAt);
+      const cleanupResponse = await fetch(cleanupUrl.toString(), {
+        method: "DELETE",
+        headers: { ...serviceHeaders, Prefer: "return=minimal" },
+        signal: AbortSignal.timeout(10000),
+      });
+      if (!cleanupResponse.ok) throw new Error("Current-price cleanup failed: " + cleanupResponse.status);
+    } catch (error) {
+      cleanupWarning = String(error).slice(0, 180);
+    }
+
     let historySaved = 0;
     let historyWarning: string | null = null;
     try {
@@ -275,6 +291,7 @@ Deno.serve(async (req: Request) => {
       success: true, saved: rows.length, history_saved: historySaved,
       updated_at: fetchedAt, sources,
       ...(historyWarning ? { history_warning: historyWarning } : {}),
+      ...(cleanupWarning ? { cleanup_warning: cleanupWarning } : {}),
       note: "Prices are read-only market references in Toman. They are not used to execute demo trades.",
     });
   } catch (error) {
