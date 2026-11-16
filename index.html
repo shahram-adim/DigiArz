@@ -1650,7 +1650,7 @@ body.light-theme .orders-center-v36{background:radial-gradient(circle at 8% 20%,
 
  <section id="tab-toman" class="card hidden">
   <div class="section-title"><h2>بازارهای تومانی صرافی‌های ایرانی</h2><span class="live">قیمت‌های عمومی و فقط‌خواندنی</span></div>
-  <div class="notice">قیمت‌ها از فیدهای عمومی نوبیتکس، والکس، بیت‌۲۴ و کیف پول من دریافت می‌شوند. این صفحه فعلاً برای مقایسه قیمت است؛ خریدوفروش تومانی تا زمان پیاده‌سازی و تأیید موتور امن سمت سرور غیرفعال می‌ماند. فهرست‌شدن ارز به معنی مجازبودن معامله نیست.</div>
+  <div class="notice">قیمت‌ها از فیدهای عمومی نوبیتکس، والکس و بیت‌پین دریافت می‌شوند. این صفحه فعلاً برای مقایسه قیمت است؛ خریدوفروش تومانی تا زمان پیاده‌سازی و تأیید موتور امن سمت سرور غیرفعال می‌ماند. فهرست‌شدن ارز به معنی مجازبودن معامله نیست.</div>
   <div class="toman-toolbar"><input id="tomanSearch" type="search" placeholder="جست‌وجوی نماد؛ مثل BTC، ETH یا USDT" dir="auto"><button id="tomanRefreshBtn"><span class="icon-tab"><i data-lucide="refresh-cw"></i>دریافت قیمت‌های تازه</span></button></div>
   <div id="tomanMarketStatus" class="market-note" aria-live="polite">برای دریافت داده، دکمه به‌روزرسانی را بزنید. ابتدا migration و تابع سرور باید نصب شده باشند.</div>
   <div class="toman-table-wrap"><table class="toman-table"><thead><tr><th>قیمت (تومان)</th><th>نماد و لوگو</th><th>نام فارسی</th><th>منبع</th><th>بهترین خرید</th><th>بهترین فروش</th><th>۲۴ ساعت</th><th>۷ روز</th><th>۳۰ روز</th><th>۹۰ روز</th><th>۱ سال</th><th>حجم ۲۴ساعته</th><th>تازگی</th></tr></thead><tbody id="tomanMarketBody"><tr><td colspan="13" class="muted">هنوز داده‌ای بارگذاری نشده است.</td></tr></tbody></table></div>
@@ -2622,7 +2622,7 @@ async function cancelLimitOrder(orderId,button){
 
 async function tradeDetail(side){const buy=side==='buy',amount=Number($(buy?'detailBuyAmount':'detailSellAmount').value),input=$(buy?'buySymbol':'sellSymbol');input.value=selectedSymbol;$(buy?'buyAmount':'sellAmount').value=String(amount);await trade(side);const source=tradeMsg.textContent;showMessage($('detailTradeMsg'),source,tradeMsg.classList.contains('err')?'err':'ok')}
 async function refreshAll(){const btn=$('refreshBtn');btn.disabled=true;hideMessage(tradeMsg);try{const {data,error}=await supabaseClient.rpc('request_market_price_refresh');if(error)throw error;if(!data||data.success!==true)throw new Error('سرور درخواست به‌روزرسانی را تأیید نکرد.');await loadDashboard();await refreshMarketTickers();renderMarkets();showMessage(tradeMsg,'درخواست دریافت قیمت‌های زنده ثبت شد؛ با تکمیل پاسخ CoinGecko، قیمت‌ها در چرخه بعدی نمایش داده می‌شوند.','ok')}catch(e){showMessage(tradeMsg,'درخواست به‌روزرسانی ناموفق بود: '+(e.message||String(e)),'err')}finally{btn.disabled=false}}
-const tomanExchangeNames={nobitex:'نوبیتکس',wallex:'والکس',bit24:'بیت‌۲۴',kifpool:'کیف پول من',iran_market:'مرجع رایگان بازار ایران'};
+const tomanExchangeNames={nobitex:'نوبیتکس',wallex:'والکس',bitpin:'بیت‌پین',bit24:'بیت‌۲۴',kifpool:'کیف پول من',iran_market:'مرجع رایگان بازار ایران'};
 function showTomanStatus(message,type=''){const el=$('tomanMarketStatus');if(!el)return;el.textContent=message;el.className='market-note'+(type==='err'?' err':type==='ok'?' ok':'')}
 function percentCell(value){if(value===null||value===undefined||!Number.isFinite(Number(value)))return '—';const n=Number(value);return `<span style="color:${n>0?'var(--green)':n<0?'var(--red)':'var(--muted)'}">${n>0?'+':''}${formatNum(n,2)}%</span>`}
 async function loadTomanMarket(){
@@ -2636,7 +2636,7 @@ async function loadTomanMarket(){
  for(const r of rows){
    const symbol=String(r.asset_symbol||'').toUpperCase(),name=String(r.asset_name_fa||'').trim();
    if(!symbol||!name)continue;
-   const priority=r.exchange==='kifpool'?3:r.exchange==='iran_market'?2:1;
+   const priority=r.exchange==='bitpin'?3:r.exchange==='wallex'?2:1;
    const previous=nameCandidates.get(symbol);
    if(!previous||priority>previous.priority)nameCandidates.set(symbol,{name,priority});
  }
@@ -2653,7 +2653,7 @@ async function loadTomanMarket(){
  showTomanStatus(`${filtered.length.toLocaleString('fa-IR')} ردیف قیمت تومانی از ${Object.keys(tomanExchangeNames).length} منبع پشتیبانی‌شده خوانده شد. زمان خواندن: ${new Date().toLocaleTimeString('fa-IR')}.`, 'ok');
 }
 async function refreshTomanMarket(){
- const btn=$('tomanRefreshBtn');btn.disabled=true;showTomanStatus('در حال دریافت قیمت از نوبیتکس، والکس، بیت‌۲۴، کیف پول من و Iran Market Data…');
+ const btn=$('tomanRefreshBtn');btn.disabled=true;showTomanStatus('در حال دریافت قیمت از نوبیتکس، والکس و بیت‌پین…');
  try{
    const {data:s,error:se}=await supabaseClient.auth.getSession();if(se)throw se;
    if(!s.session?.access_token)throw new Error('برای به‌روزرسانی باید وارد حساب شوید.');
