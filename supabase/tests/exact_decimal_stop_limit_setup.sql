@@ -1,5 +1,12 @@
 -- Disposable PostgreSQL CI fixture only. Never run against Production.
 CREATE SCHEMA IF NOT EXISTS auth;
+DO $roles$
+BEGIN
+ IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN CREATE ROLE anon NOLOGIN; END IF;
+ IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN CREATE ROLE authenticated NOLOGIN; END IF;
+ IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='service_role') THEN CREATE ROLE service_role NOLOGIN; END IF;
+END
+$roles$;
 CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE SET search_path TO '' AS $f$ SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $f$;
 CREATE TABLE public.profiles(id uuid PRIMARY KEY,is_active boolean NOT NULL);
 CREATE FUNCTION public.current_account_is_active() RETURNS boolean LANGUAGE sql STABLE SET search_path TO '' AS $f$ SELECT EXISTS(SELECT 1 FROM public.profiles WHERE id=auth.uid() AND is_active IS TRUE) $f$;
