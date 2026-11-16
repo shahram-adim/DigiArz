@@ -8,13 +8,21 @@ const worker = read('supabase/drafts/2026-11-15_exact_decimal_process_limit_orde
 const entrypoints = read('supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql');
 const widening = read('supabase/drafts/2026-11-15_exact_decimal_type_widening.sql');
 const stopLimitSync = read('supabase/drafts/2026-11-16_exact_decimal_process_stop_limit_orders.sql');
+const rollout = read('supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql');
+const livePreflight = read('supabase/drafts/2026-11-16_exact_decimal_live_preflight.sql');
 
 test('candidate SQL remains explicitly draft-only and outside migrations', () => {
-  for (const sql of [worker, entrypoints, widening, stopLimitSync]) {
+  for (const sql of [worker, entrypoints, widening, stopLimitSync, rollout]) {
     assert.match(sql, /DRAFT ONLY — DO NOT APPLY TO PRODUCTION/);
   }
   assert.ok(fs.existsSync('supabase/drafts/2026-11-15_exact_decimal_process_limit_orders.sql'));
   assert.ok(!fs.existsSync('supabase/migrations/20261115_exact_decimal_process_limit_orders.sql'));
+  assert.ok(!fs.existsSync('supabase/migrations/20261116_exact_decimal_rollout_candidate.sql'));
+  assert.match(rollout, /SET LOCAL lock_timeout = '5s'/);
+  assert.match(rollout, /SET LOCAL statement_timeout = '30s'/);
+  assert.match(rollout, /REVOKE ALL ON FUNCTION public\.process_limit_orders/);
+  assert.match(rollout, /FOR UPDATE OF c,parent,child SKIP LOCKED/);
+  assert.doesNotMatch(livePreflight, /\\b(INSERT|UPDATE|DELETE|ALTER|DROP|CREATE|TRUNCATE|CALL)\\b/i);
 });
 
 test('Limit worker preserves concurrency and account safeguards', () => {
