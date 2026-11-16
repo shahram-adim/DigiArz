@@ -197,4 +197,4 @@ BEGIN
   RETURN jsonb_build_object('success',true,'processed',v_processed,
     'triggered',v_triggered,'synced',v_synced,'rejected',v_rejected,'skipped',v_skipped);
 END;
-$function$
+$function$;
