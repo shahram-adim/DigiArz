@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  backup-public-schema:
+  backup-database-schemas:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -34,7 +34,7 @@ jobs:
             exit 1
           fi
 
-      - name: Create encrypted PostgreSQL 17 archive (public schema)
+      - name: Create encrypted PostgreSQL 17 archive (public + private schemas)
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
           BACKUP_ENCRYPTION_PASSWORD: ${{ secrets.BACKUP_ENCRYPTION_PASSWORD }}
@@ -91,7 +91,7 @@ jobs:
               "--volume", f"{os.getcwd()}/backup:/backup",
               "postgres:17",
               "sh", "-ceu",
-              'pg_dump --host="$PGHOST" --port="$PGPORT" --username="$PGUSER" --dbname="$PGDATABASE" --schema=public --format=custom --no-owner --file=/backup/digiarz-public.dump'
+              'pg_dump --host="$PGHOST" --port="$PGPORT" --username="$PGUSER" --dbname="$PGDATABASE" --schema=public --schema=private --exclude-table-data=private.crypto_assets_sync_requests --exclude-table-data=private.market_fx_sync_requests --exclude-table-data=private.market_price_sync_requests --format=custom --no-owner --file=/backup/digiarz-public.dump'
           ], env=child_env, capture_output=True, text=True)
           if result.returncode:
               diagnostic = (result.stderr or "").lower()
@@ -123,12 +123,21 @@ jobs:
             postgres:17 \
             pg_restore --list /backup/digiarz-public.dump >/tmp/digiarz-archive-list.txt
 
+          grep -q 'SCHEMA - public' /tmp/digiarz-archive-list.txt
+          grep -q 'SCHEMA - private' /tmp/digiarz-archive-list.txt
+          grep -q 'TABLE DATA public.' /tmp/digiarz-archive-list.txt
+          grep -q 'TABLE private.admin_users' /tmp/digiarz-archive-list.txt
+          grep -q 'TABLE DATA private.admin_users' /tmp/digiarz-archive-list.txt
+          ! grep -q 'TABLE DATA private.crypto_assets_sync_requests' /tmp/digiarz-archive-list.txt
+          ! grep -q 'TABLE DATA private.market_fx_sync_requests' /tmp/digiarz-archive-list.txt
+          ! grep -q 'TABLE DATA private.market_price_sync_requests' /tmp/digiarz-archive-list.txt
+
           {
             echo "Created (UTC): $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo "Database client: $(docker run --rm postgres:17 pg_dump --version)"
-            echo "Scope: PostgreSQL public schema (schema objects, functions, policies, and table data)"
+            echo "Scope: PostgreSQL public + private schemas. Private request-queue table structures are included; transient queue rows are intentionally excluded. Private admin, audit, and control/state table data are included."
             echo "Format: PostgreSQL custom archive, encrypted with AES-256-CBC + PBKDF2"
-            echo "Integrity: encryption/decryption comparison and pg_restore archive-list checks passed"
+            echo "Integrity: encryption/decryption byte comparison and pg_restore archive-list checks passed. This is archive integrity validation, not a live restore drill."
             sha256sum backup/digiarz-public.dump.enc
           } > backup/README-backup.txt
 
@@ -139,7 +148,7 @@ jobs:
       - name: Upload encrypted backup artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DigiArz-public-database-backup
+          name: DigiArz-database-backup
           path: backup/
           if-no-files-found: error
           retention-days: 7
