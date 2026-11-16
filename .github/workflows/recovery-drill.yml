@@ -90,13 +90,18 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           lines = Path("/tmp/digiarz-restore-list.txt").read_text().splitlines()
+          auth_fk_names = {
+              "admin_users_granted_by_fkey",
+              "admin_users_user_id_fkey",
+          }
           matches = [i for i, line in enumerate(lines)
-                     if "FK CONSTRAINT" in line and "admin_users_granted_by_fkey" in line]
-          if len(matches) != 1:
-              raise SystemExit(f"Expected exactly one Auth-dependent FK, found {len(matches)}.")
-          lines[matches[0]] = ";" + lines[matches[0]]
+                     if "FK CONSTRAINT" in line and any(name in line for name in auth_fk_names)]
+          if len(matches) != len(auth_fk_names):
+              raise SystemExit(f"Expected {len(auth_fk_names)} Auth-dependent admin_users FKs, found {len(matches)}.")
+          for index in matches:
+              lines[index] = ";" + lines[index]
           Path("/tmp/digiarz-restore-list-app-only.txt").write_text("\n".join(lines) + "\n")
-          print("Prepared restore list: retained admin_users data; skipped only its Auth-dependent granted_by FK.")
+          print("Prepared restore list: retained admin_users data; skipped its two Auth-dependent foreign keys.")
           PY
           echo "Archive decrypted and required public/private entries verified."
 
@@ -138,7 +143,7 @@ jobs:
           ]
           # Restore without --clean: the isolated target schemas were cleared above.
           subprocess.run(args, env=env, check=True)
-          print("Application-schema restore completed. Auth users are excluded from this backup, so the admin_users.granted_by FK was intentionally not restored.")
+          print("Application-schema restore completed. Auth users are excluded from this backup, so the two admin_users foreign keys to auth.users were intentionally not restored.")
           PY
 
       - name: Verify restored application schemas
