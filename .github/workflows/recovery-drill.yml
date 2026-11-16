@@ -104,11 +104,9 @@ jobs:
               "-v", "/tmp:/backup:ro", "postgres:17",
               "pg_restore", "--clean", "--if-exists", "--no-owner", "--no-acl",
               "--exit-on-error", "--single-transaction",
-              "--dbname=postgresql://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE",
               "/backup/digiarz-database.dump"
           ]
-          # Avoid a shell and keep credentials out of logs/process arguments on the runner.
-          args[-2] = "--dbname=" + os.environ["RECOVERY_TEST_DB_URL"]
+          # Connection settings are passed only through the container environment.
           subprocess.run(args, env=env, check=True)
           print("Restore command completed successfully on the isolated target.")
           PY
@@ -131,8 +129,7 @@ jobs:
               "docker", "run", "--rm", "-e", "PGHOST", "-e", "PGPORT",
               "-e", "PGUSER", "-e", "PGPASSWORD", "-e", "PGDATABASE",
               "-e", "PGSSLMODE", "postgres:17", "psql", "-X", "-v",
-              "ON_ERROR_STOP=1", "-At", "-c", sql,
-              "--dbname=" + os.environ["RECOVERY_TEST_DB_URL"]
+              "ON_ERROR_STOP=1", "-At", "-c", sql
           ], env=env, check=True, capture_output=True, text=True)
           print("Restored table counts by schema:")
           print(result.stdout.strip() or "(no tables found)")
