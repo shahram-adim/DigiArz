@@ -230,12 +230,12 @@
 - index.html — 68e9c6d86a2a7c7f57e70fd9655e34560b16d29a
 - sw.js — 05197c1ae2f955e3aa1d53d570513022e80c338a
 - tests/service-worker.test.js — 3f9358fbb07fb57621c1774a0187581d933bc6d1
-- tests/pwa-install.test.js — c2da5b3a0a2f96dd5fb991bbf2f9a198aa40cd9a
-- Commit فعلی پیش از ثبت این یادداشت: c2da5b3a0a2f96dd5fb991bbf2f9a198aa40cd9a
+- tests/pwa-install.test.js — b7ad171c2f1a038d21040bfe63043deb140533b2
+- Commit کد و آزمون کنترل نصب: b7ad171c2f1a038d21040bfe63043deb140533b2
 
 ### آزمون‌ها
-- [x] اجرای محلی Node 22 با دستور node --test tests/*.test.js: تعداد ۱۱ از ۱۱ موفق (۴ آزمون کنترل نصب و ۷ آزمون Service Worker).
-- [x] بازخوانی GitHub پس از commitها: وجود نوار نصب، دکمه، اسکریپت defer و قانون واکنش‌گرا تأیید شد.
+- [x] اجرای محلی Node 22 با دستور node --test tests/*.test.js: تعداد ۱۲ از ۱۲ موفق (۵ آزمون کنترل نصب و ۷ آزمون Service Worker).
+- [x] بازخوانی GitHub پس از commitها: وجود نوار نصب، دکمه، اسکریپت defer و قانون واکنش‌گرا تأیید شد؛ مسیر خطای prompt نیز در آزمون جداگانه پوشش داده شد.
 - [x] بازخوانی Service Worker: نسخه v55 و precache فایل src/pwa-install.js تأیید شد.
 - [ ] اجرای GitHub Actions برای HEAD جدید از ابزار خواندن workflow در این اجرا قابل تأیید نبود؛ CI را موفق اعلام نکن.
 - [ ] نصب واقعی APK/PWA، نمایش prompt و اجرای آفلاین روی گوشی Android هنوز تست فیزیکی نشده است.
