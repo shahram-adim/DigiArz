@@ -33,17 +33,19 @@
     const pnl=mul(q,move);
     return side==='long'?pnl:sub('0',pnl);
   }
+  function validateFeeRate(value){const rate=dec(value);if(D.compareDecimal(rate,'0')<0||D.compareDecimal(rate,'1')>=0)throw new RangeError('Invalid close fee rate');return rate}
   function positionEquity(side,quantity,entryPrice,markPrice,isolatedMargin,closeFeeRate){
     const margin=positive(isolatedMargin,'isolated margin');
+    const feeRate=validateFeeRate(closeFeeRate);
     const pnl=unrealizedPnl(side,quantity,entryPrice,markPrice);
-    const closeFee=mul(notional(quantity,markPrice),dec(closeFeeRate));
+    const closeFee=mul(notional(quantity,markPrice),feeRate);
     return sub(add(margin,pnl),closeFee);
   }
   function isolatedLiquidationPrice(side,quantity,entryPrice,isolatedMargin,maintenanceRate,closeFeeRate){
     if(side!=='long'&&side!=='short')throw new TypeError('side must be long or short');
     const q=positive(quantity,'quantity'),entry=positive(entryPrice,'entry price'),margin=positive(isolatedMargin,'isolated margin');
-    const mmr=dec(maintenanceRate),fee=dec(closeFeeRate);
-    if(D.compareDecimal(mmr,'0')<0||D.compareDecimal(fee,'0')<0||D.compareDecimal(add(mmr,fee),'1')>=0)throw new RangeError('Invalid maintenance or fee rate');
+    const mmr=positive(maintenanceRate,'maintenance rate'),fee=validateFeeRate(closeFeeRate);
+    if(D.compareDecimal(mmr,'1')>=0||D.compareDecimal(add(mmr,fee),'1')>=0)throw new RangeError('Invalid maintenance or fee rate');
     const qEntry=mul(q,entry);
     const qMargin=div(margin,q);
     if(side==='long'){
