@@ -39,6 +39,15 @@ jobs:
             -f supabase/tests/iran_exchange_sync_race_setup.sql \
             -f supabase/drafts/2026-11-17_process_iran_exchange_asset_sync_race_fix.sql \
             -f supabase/tests/iran_exchange_sync_race_integration.sql
+      - name: Run real two-session Iran exchange sync response race
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_iran_sync_two_session_test;"
+          psql -h localhost -U postgres -d digiarz_iran_sync_two_session_test -v ON_ERROR_STOP=1 \\
+            -f supabase/tests/iran_exchange_sync_race_setup.sql \\
+            -f supabase/drafts/2026-11-17_process_iran_exchange_asset_sync_race_fix.sql
+          PGDATABASE=digiarz_iran_sync_two_session_test bash supabase/tests/iran_exchange_sync_two_session_race.sh
       - name: Run PostgreSQL arithmetic regression tests
         env:
           PGPASSWORD: postgres
