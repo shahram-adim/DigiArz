@@ -138,3 +138,17 @@ It exercises:
 - a disposable PostgreSQL two-session contention test using independent `dblink` connections: worker A holds two row locks while worker B claims the next two rows; assertions verify disjoint claims and full four-row coverage. Both worker transactions are rolled back after the assertion.
 
 **Important limits:** this is a deliberately minimal synthetic schema, not a production-schema reconstruction. The original applied table-creation migration is missing from the repository. The fixture's verified-alias table includes all 39 legacy-name tuples and the separate ARPA source-ID transition from the current main-branch matcher. The two-session test proves PostgreSQL row-lock/skip-locked behavior for a simple claim query; it does not exercise the production dirty-worker function, lease expiry/recovery, HTTP response ingestion/acknowledgement, production triggers, grants, ownership, catalog-change reconciliation, or production query plans. A passing fixture therefore validates only the isolated behaviors listed above. It does not authorize a production migration or establish full matcher parity.
+
+
+## Isolated HTTP response queue fixture (2026-11-17)
+
+A second disposable PostgreSQL fixture, `supabase/tests/iran_exchange_response_queue_fixture.sql`, now models bounded response claiming separately from the matcher fixture. It uses synthetic request/response tables and a claim function with a bounded limit, `FOR UPDATE SKIP LOCKED`, claim tokens, lease expiry, and attempt counts. It also exercises idempotent response ingestion, acknowledgement in the same transaction, invalid-JSON terminal handling, and a response inserted after an earlier batch.
+
+The fixture includes:
+- rollback of an uncommitted claim to model a worker crash before claim commit;
+- expiry and reclaim of a previously leased batch;
+- valid JSON ingestion with a unique response key, so retry cannot duplicate the fixture's ingest record;
+- explicit terminal reason for invalid JSON and HTTP failures;
+- two independent dblink sessions holding transactions concurrently, asserting two disjoint claims each and four total claimed rows, then rolling both transactions back.
+
+**Scope limits:** all queue tables and functions are synthetic test objects, not the production `exchange_asset_sync_requests` or `net._http_response` definitions. The test proves a bounded claim/lease pattern and transaction-level behavior in the fixture only. It does not establish that Production has the required columns, indexes, constraints, pg_net retention behavior, privileges, or compatible cron scheduling. It does not yet test lease-heartbeat extension, maximum-attempt/dead-letter policy, worker termination after external HTTP effects, or end-to-end atomicity against the actual production ingestion function. PR #8 remains untouched and Draft; no Production SQL or cron changes were made.
