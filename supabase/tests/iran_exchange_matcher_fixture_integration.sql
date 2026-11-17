@@ -128,6 +128,8 @@ CREATE TEMP TABLE worker_a_claim(observation_id bigint PRIMARY KEY);
 INSERT INTO worker_a_claim
 SELECT observation_id
 FROM dblink_get_result('matcher_worker_a') AS claimed(observation_id bigint);
+-- Drain the terminal empty result so the asynchronous dblink command is fully complete.
+SELECT * FROM dblink_get_result('matcher_worker_a') AS drained(observation_id bigint);
 
 SELECT dblink_exec('matcher_worker_b', 'BEGIN');
 SELECT dblink_send_query(
@@ -139,6 +141,7 @@ CREATE TEMP TABLE worker_b_claim(observation_id bigint PRIMARY KEY);
 INSERT INTO worker_b_claim
 SELECT observation_id
 FROM dblink_get_result('matcher_worker_b') AS claimed(observation_id bigint);
+SELECT * FROM dblink_get_result('matcher_worker_b') AS drained(observation_id bigint);
 
 CREATE TEMP TABLE concurrency_assertions(ok boolean CHECK (ok));
 INSERT INTO concurrency_assertions
