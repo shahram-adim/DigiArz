@@ -116,6 +116,14 @@ CREATE OR REPLACE FUNCTION private.match_iran_exchange_observations(p_ids bigint
 RETURNS integer LANGUAGE plpgsql SET search_path TO '' AS $$
 DECLARE v_count integer;
 BEGIN
+  -- Re-evaluate scoped active observations from a clean match state so removed
+  -- catalog/alias rules cannot leave a stale coingecko_id behind.
+  UPDATE public.exchange_asset_observations o
+  SET coingecko_id=NULL,match_status='pending'
+  WHERE o.is_active IS TRUE AND o.asset_name IS NOT NULL
+    AND (p_ids IS NULL OR o.id=ANY(p_ids))
+    AND (o.coingecko_id IS NOT NULL OR o.match_status<>'pending');
+
   WITH kifpool_exact AS (
     SELECT o.id, ca.coingecko_id
     FROM public.exchange_asset_observations o
