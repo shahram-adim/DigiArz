@@ -300,3 +300,22 @@ DO $$ BEGIN
 END $$;
 
 SELECT 'Kifpool alias-change reconciliation fixture tests passed' AS result;
+
+
+-- Removing a verified alias must not leave the old Kifpool match stale.
+DELETE FROM private.test_verified_kifpool_aliases
+WHERE coingecko_id='adex' AND legacy_name='adex-new' AND current_name='heyaura';
+DO $$
+BEGIN
+  WHILE EXISTS (SELECT 1 FROM private.iran_catalog_reconcile_jobs WHERE completed_at IS NULL) LOOP
+    PERFORM private.process_iran_catalog_reconcile_batch(2);
+  END LOOP;
+END $$;
+SELECT private.process_iran_match_dirty_batch(1000);
+DO $$ BEGIN
+  IF (SELECT coingecko_id FROM public.exchange_asset_observations WHERE market_symbol='ALIAS_ADEX_NEW') IS NOT NULL
+     OR (SELECT match_status FROM public.exchange_asset_observations WHERE market_symbol='ALIAS_ADEX_NEW') <> 'pending'
+  THEN RAISE EXCEPTION 'Removing Kifpool alias left a stale match'; END IF;
+END $$;
+
+SELECT 'Kifpool alias-removal stale-match test passed' AS result;
