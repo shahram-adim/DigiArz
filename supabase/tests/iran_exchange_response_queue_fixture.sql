@@ -69,7 +69,7 @@ BEGIN
     AND q.lease_until >= clock_timestamp()
     AND r.status_code = 200
     AND r.content IS NOT NULL
-    AND jsonb_typeof(r.content::jsonb) IS NOT NULL
+    AND private.test_is_json(r.content)
   ON CONFLICT(response_id) DO NOTHING;
 
   UPDATE public.test_sync_requests q
@@ -166,12 +166,16 @@ SELECT 2000 + n, 200, '{"n":'||n||'}' FROM generate_series(1,4) n;
 INSERT INTO public.test_sync_requests(response_id)
 SELECT id FROM public.test_http_responses ORDER BY id;
 
+CREATE TEMP TABLE worker_a_claims(response_id bigint);
+CREATE TEMP TABLE worker_b_claims(response_id bigint);
 SELECT dblink_connect('queue_worker_a',
  'host=localhost port=5432 dbname=digiarz_matcher_test user=postgres password=postgres');
 SELECT dblink_connect('queue_worker_b',
  'host=localhost port=5432 dbname=digiarz_matcher_test user=postgres password=postgres');
-SELECT dblink_send_query('queue_worker_a', $q$
- BEGIN;
+SELECT dblink_exec('queue_worker_a','BEGIN');
+SELECT dblink_exec('queue_worker_b','BEGIN');
+INSERT INTO worker_a_claims
+SELECT response_id FROM dblink('queue_worker_a', $q$
  WITH picked AS (
    SELECT id FROM public.test_sync_requests WHERE processed_at IS NULL
    ORDER BY id FOR UPDATE SKIP LOCKED LIMIT 2
@@ -181,10 +185,9 @@ SELECT dblink_send_query('queue_worker_a', $q$
      lease_until=clock_timestamp()+interval '5 minutes', attempts=attempts+1
  FROM picked p WHERE q.id=p.id
  RETURNING q.response_id
-$q$);
-SELECT * FROM dblink_get_result('queue_worker_a') AS t(response_id bigint);
-SELECT dblink_send_query('queue_worker_b', $q$
- BEGIN;
+$q$) AS t(response_id bigint);
+INSERT INTO worker_b_claims
+SELECT response_id FROM dblink('queue_worker_b', $q$
  WITH picked AS (
    SELECT id FROM public.test_sync_requests WHERE processed_at IS NULL
      AND claim_token IS NULL
@@ -195,20 +198,14 @@ SELECT dblink_send_query('queue_worker_b', $q$
      lease_until=clock_timestamp()+interval '5 minutes', attempts=attempts+1
  FROM picked p WHERE q.id=p.id
  RETURNING q.response_id
-$q$);
-SELECT * FROM dblink_get_result('queue_worker_b') AS t(response_id bigint);
--- Drain terminal results before issuing transaction control on async connections.
-SELECT * FROM dblink_get_result('queue_worker_a') AS t(response_id bigint);
-SELECT * FROM dblink_get_result('queue_worker_b') AS t(response_id bigint);
+$q$) AS t(response_id bigint);
 DO $$
 DECLARE a bigint[]; b bigint[];
 BEGIN
- SELECT array_agg(response_id ORDER BY response_id) INTO a
- FROM public.test_sync_requests WHERE claim_token='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
- SELECT array_agg(response_id ORDER BY response_id) INTO b
- FROM public.test_sync_requests WHERE claim_token='ffffffff-ffff-4fff-8fff-ffffffffffff';
+ SELECT array_agg(response_id ORDER BY response_id) INTO a FROM worker_a_claims;
+ SELECT array_agg(response_id ORDER BY response_id) INTO b FROM worker_b_claims;
  IF cardinality(a) <> 2 OR cardinality(b) <> 2 OR a && b OR
-    (SELECT count(*) FROM public.test_sync_requests WHERE claim_token IS NOT NULL) <> 4 THEN
+    (SELECT count(*) FROM worker_a_claims) + (SELECT count(*) FROM worker_b_claims) <> 4 THEN
    RAISE EXCEPTION 'concurrent claims were not disjoint and complete: %, %',a,b;
  END IF;
 END $$;
