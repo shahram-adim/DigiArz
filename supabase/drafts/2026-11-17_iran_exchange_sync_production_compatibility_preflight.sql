@@ -68,7 +68,7 @@ select
   min(r.created) as oldest_matched_response_created,
   max(r.created) as newest_matched_response_created
 from public.exchange_asset_sync_requests q
-join net._http_response r on r.id = q.http_response_id
+join net._http_response r on r.id = q.request_id
 where q.processed_at is null;
 
 -- 6) Inspect the live cron entries that invoke the request and processing
