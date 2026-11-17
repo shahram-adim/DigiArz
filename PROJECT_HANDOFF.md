@@ -117,3 +117,15 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Current Production bottleneck remains the one-minute sync function: targeted logs showed 236 SQLSTATE 57014 cancellation events during 2026-11-17 08:31–20:49 UTC. The function's line 4 bulk observation upsert and line 44 matching/update statement both appear in recent cancellation contexts. The exact root cause is not yet established.
 
 **Refined next action:** do not create a Production index or rewrite the worker from the simplified EXPLAIN alone. First add a test-only PostgreSQL 17 plan/scale experiment that compares the existing lower(symbol) index with a candidate upper(symbol) expression index under representative catalog/observation cardinalities, then record whether the candidate changes the plan and actual fixture timings. Keep all changes isolated to PR #11 or a dedicated test branch; no Production DDL, cron, function, or data change.
+
+
+### Work started from the 2026-11-18 priority decision
+- Rechecked PR #11 fixture before editing. Catalog insert/rematch, symbol rename/stale-match clearing, deactivation, multi-page cursor convergence, and Kifpool alias add/remove tests were already present. These were not recreated.
+- Read-only Production plan evidence and current table/index stats are recorded in the PR #11 design document.
+- Added a separate disposable PostgreSQL 17 scale/plan experiment at supabase/tests/iran_exchange_matcher_plan_fixture.sql. It compares a lower(symbol)-only baseline with a candidate upper(symbol) expression index for both a 100-row dirty batch and a full 4,960-observation join, using 18,874 synthetic catalog rows. It records EXPLAIN ANALYZE timings, buffers, and plan shape. The candidate index exists only on temporary fixture tables.
+- Wired the experiment into .github/workflows/iran-exchange-matcher-tests.yml and documented its limits in docs/IRAN_EXCHANGE_MATCHER_INCREMENTAL_DESIGN_2026-11-17.md.
+- PR #11 latest head: 79a172dcec406e43be4c900dfd348cef8251f330 (still Draft).
+- CI runs on latest head are queued/in progress at last check: matcher fixture 44182523044; exact-decimal 44182523061. Earlier workflow runs on the preceding head 9d722131c9d74d928742f822aab539d94779bb61 were also in progress. Do not claim the new experiment passed until the latest-head matcher run completes successfully and its output is inspected.
+- No Production index, DDL, function, cron, migration history, orders, balances, or data were changed.
+
+**Next action:** inspect the latest-head matcher workflow result and its plan output. If the experiment fails, fix only the test fixture and rerun; if it passes, record the observed plan/timing comparison and decide whether further synthetic testing is warranted. Do not create any Production index from this experiment alone.
