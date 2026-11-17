@@ -59,10 +59,27 @@ jobs:
           chmod +x gradlew
           ./gradlew --no-daemon assembleDebug
 
+      - name: Record APK build provenance
+        run: |
+          APK="android/app/build/outputs/apk/debug/app-debug.apk"
+          VERSION="$(node -p "require('./package.json').version || 'unspecified'")"
+          {
+            echo "app=DigiArz"
+            echo "package_version=$VERSION"
+            echo "git_commit=$GITHUB_SHA"
+            echo "git_ref=$GITHUB_REF"
+            echo "workflow_run_id=$GITHUB_RUN_ID"
+            echo "built_at_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "apk_sha256=$(sha256sum "$APK" | cut -d ' ' -f 1)"
+          } > android/app/build/outputs/apk/debug/BUILD-INFO.txt
+          cat android/app/build/outputs/apk/debug/BUILD-INFO.txt
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: DigiArz-Android-debug-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: |
+            android/app/build/outputs/apk/debug/app-debug.apk
+            android/app/build/outputs/apk/debug/BUILD-INFO.txt
           if-no-files-found: error
           retention-days: 14
