@@ -287,3 +287,16 @@
 - [x] مقایسهٔ شاخه پس از commit مستنداتی: ۲۹ commit جلوتر و صفر commit عقب‌تر از `main`؛ PR شمارهٔ ۸ باز، Draft، mergeable و ادغام‌نشده است.
 - [!] بدنهٔ کامل تابع زنده و ACL به علت timeoutهای مکرر Supabase همچنان دریافت/تطبیق نشده‌اند؛ CI ایزوله این gate را نمی‌بندد.
 - [!] هیچ Migration، Merge، تغییر تابع/مجوز، Cron یا دادهٔ Production انجام نشد.
+
+
+
+### ادامه بررسی و تثبیت وضعیت انتشار — ۱۷ نوامبر ۲۰۲۶
+- [x] اجرای GitHub Actions شمارهٔ ۳۲۱، run ID `44065615104`، روی آخرین commit شاخه `64cfc6dcc06b2ff1833f6fb1324b2e72617cddb2` با نتیجهٔ `success` پایان یافت؛ هر ۲۳ مرحلهٔ اصلی workflow موفق شدند.
+- [x] آزمون PostgreSQL race integration، آزمون واقعی دو نشست مستقل برای پاسخ دیررس صرافی، exact-decimal/browser، arithmetic regression، rehearsalهای schema widening، Market/Limit، Stop-Limit، TP-SL و چرخه‌های cancellation/concurrency همگی موفق شدند.
+- [x] توضیحات PR شمارهٔ ۸ با نتیجهٔ CI شمارهٔ ۳۲۱، SHA دقیق و وضعیت gateهای باز به‌روز شد.
+- [x] مقایسهٔ شاخه تأیید کرد: ۳۰ commit جلوتر و صفر commit عقب‌تر از `main`؛ PR شمارهٔ ۸ باز، Draft، قابل ادغام از نظر Git و هنوز ادغام‌نشده است.
+- [x] بازبینی تطبیقی draft صف صرافی‌ها با آخرین migration موجود در مخزن نشان داد بخش ingest و matching از نسخهٔ deduplicate شدهٔ ثبت‌شده در migration `20261116195814` مشتق شده و تغییر اصلی race fix محدود به capture شناسه‌های پاسخ و استفاده از همان مجموعه در ingest/processed marking است.
+- [!] دریافت کامل بدنهٔ تابع زنده و ACL از مسیر Supabase قبلاً چند بار timeout شده است؛ سازگاری کامل Production هنوز اثبات نشده و از retry تکراری همان مسیر خودداری می‌شود.
+- [!] بازبینی سند `supabase/MIGRATION_RECONCILIATION.md` نشان می‌دهد ۱۴ migration اعمال‌شده منبع محلی ندارند، ۲۰ فایل timestamp متفاوت دارند و دو migration محلی KuCoin/Gate.io هنوز در Production ثبت نشده‌اند. این دو فایل قدیمی‌تر از پیاده‌سازی زندهٔ `refresh_market_prices()` هستند و اجرای `supabase db push` می‌تواند سقف ۵۱۵ شناسهٔ CoinGecko را حذف کند؛ بنابراین تا reconciliation کامل، `db push` ممنوع است.
+- [!] هیچ Migration، Merge، تغییر تابع/مجوز، Cron، Edge Function یا دادهٔ Production انجام نشد. PR در حالت Draft باقی ماند.
+- [ ] اولویت بعدی: تکمیل reconciliation امن migrationها و تهیهٔ منبع معتبر برای ۱۴ فایل مفقود؛ سپس بستن Production compatibility gate صف صرافی‌ها و فقط پس از آن آماده‌سازی انتشار کنترل‌شده.
