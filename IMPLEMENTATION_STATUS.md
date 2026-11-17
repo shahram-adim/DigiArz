@@ -265,3 +265,10 @@
 - [x] اجرای CI شماره ۳۱۷، run ID `44062785493`، روی تغییرات جدید با نتیجهٔ `success` پایان یافت؛ تمام ۲۳ مرحله اصلی از جمله PostgreSQL race integration و تست واقعی دو نشست موفق شدند.
 - [!] فایل preflight هنوز روی Supabase Production اجرا نشده است؛ نوع واقعی شناسه و تطبیق نهایی تابع/مجوزها همچنان gate باز هستند.
 - [!] هیچ SQL، Migration، تابع، Cron یا داده‌ای در Production تغییر نکرده است. PR شماره ۸ همچنان Draft و باز است و نباید Merge یا Ready شود.
+
+
+### تأیید نوع شناسهٔ پاسخ در Supabase Production — ۱۷ نوامبر ۲۰۲۶
+- [x] اتصال فقط‌خواندنی به پروژهٔ `gfoaubfilhttnwjykaox` برقرار شد و پرس‌وجوی کم‌حجم catalog نوع ستون `net._http_response.id` را `bigint` و نوع `array_agg(id)` را `bigint[]` تأیید کرد؛ بنابراین نوع آرایهٔ کاندید race fix با ستون زنده سازگار است.
+- [x] همان پرس‌وجو وضعیت تابع زنده را نیز تأیید کرد: `SECURITY DEFINER = true` و تنظیم `search_path` خالی است.
+- [!] پرس‌وجوی جداگانه برای دریافت کامل `pg_get_functiondef` و ACL در این نوبت به connection timeout خورد؛ تطبیق کامل بدنه و مجوزها هنوز باز است و نباید از نتیجهٔ نوع ستون به‌عنوان تأیید کل تابع برداشت شود.
+- [x] هیچ تغییری در Production انجام نشد؛ فقط SELECT روی catalog اجرا شد.
