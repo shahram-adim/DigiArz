@@ -257,3 +257,11 @@
 - [!] PR شمارهٔ ۸ همچنان Draft و باز است؛ هیچ review یا review thread ثبت نشده و merge انجام نشده است.
 - [!] Production compatibility gate هنوز باز است: نوع واقعی `net._http_response.id`، تطبیق کامل تابع زنده با draft و grants باید با اتصال پایدار Supabase تأیید شوند. نوع bigint در fixture آزمایشی، اثبات نوع ستون Production نیست.
 - [!] هیچ SQL، داده، cron، Edge Function یا migration در Production تغییر نکرده است؛ هیچ replay تاریخی انجام نشده است.
+
+
+### پیش‌بررسی سازگاری Production و CI نهایی — ۱۷ نوامبر ۲۰۲۶
+- [x] فایل فقط‌خواندنی `supabase/drafts/2026-11-17_iran_exchange_sync_production_compatibility_preflight.sql` به شاخه آزمایشی افزوده شد؛ خروجی موردنیاز شامل نوع واقعی `net._http_response.id`، نسخه و schema افزونه pg_net، تعریف و ACL تابع زنده، نوع آرایهٔ تجمیع شناسه‌ها، اندازه صف پاسخ‌های متناظر و Cronهای مربوط است.
+- [x] در کوئری شمارش پاسخ‌های متناظر، کلید join با قرارداد واقعی کد صف یعنی `q.request_id` تطبیق داده شد؛ هیچ نام ستون فرضی `http_response_id` باقی نمانده است.
+- [x] اجرای CI شماره ۳۱۷، run ID `44062785493`، روی تغییرات جدید با نتیجهٔ `success` پایان یافت؛ تمام ۲۳ مرحله اصلی از جمله PostgreSQL race integration و تست واقعی دو نشست موفق شدند.
+- [!] فایل preflight هنوز روی Supabase Production اجرا نشده است؛ نوع واقعی شناسه و تطبیق نهایی تابع/مجوزها همچنان gate باز هستند.
+- [!] هیچ SQL، Migration، تابع، Cron یا داده‌ای در Production تغییر نکرده است. PR شماره ۸ همچنان Draft و باز است و نباید Merge یا Ready شود.
