@@ -24,8 +24,8 @@ test('computes maintenance margin and position equity including close fee reserv
   assert.equal(M.positionEquity('long','0.5','40000','41000','1000','0.0004'),'1491.8');
 });
 test('calculates isolated long and short liquidation estimates',()=>{
-  assert.equal(M.isolatedLiquidationPrice('long','1','100','10','0.005','0.0004'),'90.488638648702995');
-  assert.equal(M.isolatedLiquidationPrice('short','1','100','10','0.005','0.0004'),'109.40919037199124');
+  assert.equal(M.isolatedLiquidationPrice('long','1','100','10','0.005','0.0004'),'90.488638648702996179');
+  assert.equal(M.isolatedLiquidationPrice('short','1','100','10','0.005','0.0004'),'109.409190371991247265');
   assert.equal(M.isolatedLiquidationPrice('long','1','100','120','0.005','0.0004'),null);
 });
 test('cross margin does not present a misleading per-position liquidation price',()=>{
