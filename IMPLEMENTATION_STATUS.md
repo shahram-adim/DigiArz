@@ -285,3 +285,42 @@
 - [x] PR شماره ۸ همچنان open، Draft، ادغام‌نشده و دارای head `82bf2cc70643a5c747f4ff097c8d4a7444995032` است. فقط متن توضیحات PR برای ثبت عدد ۱۶ به‌روزرسانی شد؛ شاخه، کد و وضعیت Draft دست‌نخورده ماند.
 - [!] تا زمانی که run تازه و artifact دارای `BUILD-INFO.txt` بررسی نشده‌اند، APK جدید تأییدشده نیست. نصب و تست آفلاین واقعی روی گوشی نیز همچنان انجام‌نشده است.
 - [x] هیچ Migration، SQL، داده، تابع، ACL، cron، سفارش یا دارایی Production تغییر نکرد؛ هیچ merge، rebase یا force-push انجام نشد.
+
+
+## آغاز توسعه معاملات مشتقه مجازی — ۱۸ نوامبر ۲۰۲۶
+
+### تصمیم محصول
+- [x] کاربر تأیید کرد تمام انواع معامله به‌صورت مجازی اضافه شوند: Spot، Futures، Margin و Leverage.
+- [x] قیمت بازار می‌تواند زنده باشد؛ تمام موجودی وثیقه، وام، سود و زیان، کارمزد، Funding، بهره، لیکوییدیشن و تسویه صرفاً مجازی است.
+- [x] بخش مشتقه باید از موتور Spot جدا بماند؛ جدول‌ها و RPCهای فعلی سفارش و معامله Spot نباید برای پوزیشن مشتقه بازاستفاده شوند.
+
+### مخزن و شاخه
+- [x] مخزن صحیح `shahram-adim/DigiArz` و شاخه اصلی `main` بررسی شد.
+- [x] HEAD مبنای main در شروع کار: `1514668bc76dc697fa26b22edb2ebfd80b2199b8`.
+- [x] شاخه اختصاصی `feat/demo-derivatives-trading` ایجاد شد.
+- [x] مشخصات طراحی در `docs/superpowers/specs/2026-11-18-demo-derivatives-trading-design.md` ثبت شد.
+- [x] برنامه مرحله‌ای در `docs/superpowers/plans/2026-11-18-demo-derivatives-trading.md` ثبت شد.
+- [x] ماژول محاسبات دقیق اولیه `src/derivatives-math.js` و تست‌های `tests/derivatives-math.test.js` اضافه شدند.
+- [x] PR شماره ۱۲ به‌صورت Draft ایجاد شد: `https://github.com/shahram-adim/DigiArz/pull/12`.
+- [ ] CI مربوط به PR #12 هنوز در حال اجراست؛ نتیجه نهایی تا مشاهده پایان run اعلام نمی‌شود.
+
+### ممیزی فقط‌خواندنی Supabase
+- [x] پروژه `gfoaubfilhttnwjykaox` در وضعیت `ACTIVE_HEALTHY` و PostgreSQL `17.11` است.
+- [x] فهرست جداول public بررسی شد؛ جدول مشتقه/فیوچرز/مارجین/پوزیشن یا تابعی با این نام‌ها وجود ندارد.
+- [x] جداول فعلی Spot شامل `wallets`, `orders`, `trades`, `asset_balances`, `order_reservations`, `market_prices`, `demo_trading_pairs` و `conditional_orders` هستند.
+- [x] توابع فعلی Spot از جمله `execute_demo_trade`, `place_limit_order`, `place_conditional_exit_order`, `cancel_limit_order`, `cancel_stop_limit_order` و Workerهای مربوط بررسی اولیه شدند.
+- [x] Cronهای فعال خوانده شدند؛ Workerهای فعلی برای Limit، TP/SL، Stop-Limit و همگام‌سازی بازار فعال‌اند. هیچ Cron جدیدی ایجاد نشد.
+- [x] هیچ شیء، Migration، تابع، Grant، RLS، Cron، سفارش، کیف پول، موجودی یا داده Production تغییر نکرد.
+
+### مانع حیاتی قبل از هر DDL
+- [!] تاریخچه Production شامل ۵۲ Migration اعمال‌شده است، اما مخزن فقط ۴۰ فایل Migration دارد.
+- [!] گزارش reconciliation موجود: ۱۴ Migration اعمال‌شده منبع SQL محلی ندارند؛ ۲۰ فایل محلی timestamp متفاوت با نسخه اعمال‌شده دارند؛ ۲ فایل محلی اصلاً در تاریخچه Production ثبت نشده‌اند.
+- [!] دو Migration محلی KuCoin/Gate.io نسخه قدیمی تابع `refresh_market_prices()` را جایگزین می‌کنند و اجرای کورکورانه آن‌ها می‌تواند نسخه زنده دارای سقف ۵۱۵ شناسه و منابع Gate.io/KuCoin را تنزل دهد.
+- [!] شاخه توسعه Supabase در دسترس نیست؛ بنابراین هیچ محیط ایزوله Supabase برای اجرای Migration مشتقه وجود ندارد.
+- [x] تصمیم ایمنی: تا زمان بازیابی schema/function/grant/RLS/cron و تطبیق Migrationها، هیچ DDL یا Migration در Production اعمال نمی‌شود؛ `supabase db push` ممنوع باقی می‌ماند.
+
+### گام بعدی
+1. تکمیل بررسی فقط‌خواندنی تعریف کامل توابع Spot، ACLها، RLS policyها و جزئیات دقیق جداول مرتبط.
+2. ساخت fixture مستقل PostgreSQL 17 برای فرمول‌ها و چرخه‌های Futures/Margin.
+3. توسعه backend مشتقه در شاخه GitHub و افزودن تست‌های تراکنش، idempotency، رقابت هم‌زمان، RLS و بازیابی.
+4. سپس رابط کاربری فارسی RTL؛ تا آماده شدن backend امن، هیچ دکمه ثبت سفارش مشتقه به کاربر نمایش داده نشود.
