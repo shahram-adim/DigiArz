@@ -138,3 +138,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - To avoid over-relying on one run, the fixture was refined in commit b19273edc94a98c603b3e10529f86c88499c680d to warm each scenario and collect five warm-cache runs, reporting median/min/max plus representative plan. This is a test-only change on PR #11 branch.
 - New-head CI runs 44182855849 (matcher fixture) and 44182856169 (exact-decimal) were in progress at the last check. Do not report the repeated-run experiment as passing until run 44182855849 completes successfully and its output is inspected.
 - PR #11 remains Draft. Production DDL/index/function/cron/data are unchanged.
+
+
+### Repeated matcher plan experiment — completed — 2026-11-18
+- PR #11 plan fixture was upgraded from one timing per case to one warm-up plus five measured warm-cache runs per case; commit b19273edc94a98c603b3e10529f86c88499c680d.
+- Latest matcher CI on that commit passed: run 44182855849 (PostgreSQL 17.12).
+- Five-run medians (synthetic fixture): dirty batch 100 rows, lower(symbol)-only 6.188 ms vs candidate upper(symbol) 0.170 ms; full 4,960-row join 10.549 ms vs 7.422 ms. Dirty-batch plan changes from catalog Seq Scan/Hash Join to catalog upper(symbol) Index Scan/Merge Join. Full scan improves less.
+- The repeated measurements are warm-cache and use unique synthetic symbols, simplified SQL, and only the current 18,874/4,960 row cardinalities. No duplicates/ambiguous symbols, alias resolution, source priority, concurrent writes, index maintenance, or Production hardware behavior is represented. Evidence supports further test-only exploration of incremental batches; it is **not** sufficient to recommend or deploy a Production index.
+- Results and limitations are recorded in docs/IRAN_EXCHANGE_MATCHER_INCREMENTAL_DESIGN_2026-11-17.md on PR #11 branch.
+- Exact-decimal workflow on the same PR head b19273edc94a98c603b3e10529f86c88499c680d, run 44182856169, was still in progress at last check. Do not treat the full PR checks as green until it completes.
+- PR #11 remains Draft; Production remains unchanged.
