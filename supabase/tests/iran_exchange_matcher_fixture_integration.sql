@@ -275,3 +275,28 @@ DO $$ BEGIN
 END $$;
 
 SELECT 'Catalog-change reconciliation fixture tests passed' AS result;
+
+
+-- Adding a verified legacy alias must reconsider only the matching Kifpool source/name.
+INSERT INTO public.exchange_asset_observations(exchange,market_symbol,base_symbol,asset_name,source_payload,is_active)
+VALUES ('kifpool','ALIAS_ADEX_NEW','ALIAS','adex-new','{"nameId":"adex"}',true);
+SELECT private.match_iran_exchange_observations(NULL);
+DO $$ BEGIN
+  IF (SELECT match_status FROM public.exchange_asset_observations WHERE market_symbol='ALIAS_ADEX_NEW')='matched'
+  THEN RAISE EXCEPTION 'Unregistered Kifpool alias unexpectedly matched'; END IF;
+END $$;
+INSERT INTO private.test_verified_kifpool_aliases(coingecko_id,legacy_name,current_name)
+VALUES ('adex','adex-new','heyaura');
+DO $$
+BEGIN
+  WHILE EXISTS (SELECT 1 FROM private.iran_catalog_reconcile_jobs WHERE completed_at IS NULL) LOOP
+    PERFORM private.process_iran_catalog_reconcile_batch(2);
+  END LOOP;
+END $$;
+SELECT private.process_iran_match_dirty_batch(1000);
+DO $$ BEGIN
+  IF (SELECT coingecko_id FROM public.exchange_asset_observations WHERE market_symbol='ALIAS_ADEX_NEW') <> 'adex'
+  THEN RAISE EXCEPTION 'Kifpool alias insertion did not rematch its observation'; END IF;
+END $$;
+
+SELECT 'Kifpool alias-change reconciliation fixture tests passed' AS result;
