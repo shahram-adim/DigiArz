@@ -279,3 +279,11 @@
 - [x] وضعیت PR شمارهٔ ۸ و مقایسهٔ شاخه دوباره تأیید شد: PR باز و Draft، `merged=false`، شاخه ۲۸ commit جلو و صفر عقب از `main`.
 - [!] تلاش جداگانه و کم‌حجم برای خواندن ACL تابع زنده نیز به connection timeout خورد؛ با توجه به timeoutهای تکراری، retry بیشتر از همان مسیر متوقف شد. بدنهٔ کامل تابع و ACL همچنان دریافت و تطبیق نشده‌اند.
 - [!] نتیجهٔ CI فقط اعتبار تست‌های ایزوله را ثابت می‌کند؛ Production compatibility gate باز می‌ماند. هیچ Migration، Merge، تغییر تابع/مجوز، Cron یا دادهٔ Production انجام نشد.
+
+
+### تکمیل CI شمارهٔ ۳۲۰ — ۱۷ نوامبر ۲۰۲۶
+- [x] اجرای GitHub Actions شمارهٔ ۳۲۰، run ID `44065058504`، روی commit مستنداتی `2d7276ea5bbecc2c0789872e49e87fdd64fd158e` با نتیجهٔ `success` پایان یافت؛ هر ۲۳ مرحلهٔ اصلی workflow موفق شدند.
+- [x] آزمون واقعی دو نشست صف صرافی‌ها، PostgreSQL race integration، تست‌های دقت اعشاری، Market/Limit، Stop-Limit، TP-SL و رقابت‌های لغو/اجرا همگی موفق شدند.
+- [x] مقایسهٔ شاخه پس از commit مستنداتی: ۲۹ commit جلوتر و صفر commit عقب‌تر از `main`؛ PR شمارهٔ ۸ باز، Draft، mergeable و ادغام‌نشده است.
+- [!] بدنهٔ کامل تابع زنده و ACL به علت timeoutهای مکرر Supabase همچنان دریافت/تطبیق نشده‌اند؛ CI ایزوله این gate را نمی‌بندد.
+- [!] هیچ Migration، Merge، تغییر تابع/مجوز، Cron یا دادهٔ Production انجام نشد.
