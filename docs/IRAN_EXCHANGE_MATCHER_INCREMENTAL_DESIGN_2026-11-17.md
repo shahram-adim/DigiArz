@@ -123,3 +123,17 @@ The repository's checked-in migration history does not contain the original tabl
 ## CI result for the design-only PR
 
 GitHub Actions run [44161434376](https://github.com/shahram-adim/DigiArz/actions/runs/44161434376) completed successfully (all 21 workflow steps passed). This is the repository's existing exact-decimal/browser and trading lifecycle/race suite. It does **not** execute an Iran exchange matcher test and must not be described as validation of the proposed matcher design.
+
+
+## Isolated fixture added (2026-11-17)
+
+A test-only PostgreSQL 17 fixture now exists under `supabase/tests/iran_exchange_matcher_fixture_*.sql`, with its own workflow `.github/workflows/iran-exchange-matcher-tests.yml`.
+
+It exercises:
+- full-scan versus dirty-queue result equivalence for a controlled seed set;
+- exact ordinary matching, ambiguous symbol candidates, pending short-name behavior, unmatched symbols, inactive observations, and one verified Kifpool legacy alias (Kishu);
+- a heartbeat-only `last_seen_at` update that must not enqueue work;
+- an actual match-input change (`asset_name`) that must enqueue exactly one observation and produce the same result as the full-scan baseline;
+- bounded dirty-queue processing with `FOR UPDATE SKIP LOCKED`.
+
+**Important limits:** this is a deliberately minimal synthetic schema, not a production-schema reconstruction. The original applied table-creation migration is missing from the repository. The fixture's verified-alias table includes only the Kishu example, not the full production alias set; it does not exercise the HTTP response ingestion/acknowledgement queue, production triggers, grants, ownership, catalog-change reconciliation, multi-session races, or production query plans. A passing fixture therefore validates only the isolated behaviors listed above. It does not authorize a production migration or establish full matcher parity. Expand the alias matrix and add real two-session worker tests only after recovering the authoritative schema and reviewing the full alias source.
