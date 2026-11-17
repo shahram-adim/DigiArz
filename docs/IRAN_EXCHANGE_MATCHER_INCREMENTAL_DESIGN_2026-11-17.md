@@ -159,3 +159,17 @@ The fixture includes:
 The synthetic HTTP response queue fixture now also models transient worker failures with a configurable maximum-attempt policy (default test value: 3). A failed claimed item is released for retry while below the cap; once the claim attempt count reaches the cap, the fixture records a distinct `dead_lettered_at` timestamp and terminal reason. Dead-lettered rows are excluded from subsequent claims and remain distinct from successfully processed rows. The test verifies two retry releases, terminal dead-lettering on attempt three, and that a later claim cannot pick the terminal row.
 
 This remains test-only behavior. It does not define the Production retry cap, error classification, alerting/administrative replay process, or actual queue schema. Production policy must be selected from measured upstream failure behavior and operational requirements before implementation.
+
+
+## CI validation update (2026-11-18)
+
+The isolated matcher and response-queue workflow passed on commit `58a2b5dfa22c9d5b61bc107cfa0b197ff42c65e3`:
+- [Iran exchange matcher fixture tests](https://github.com/shahram-adim/DigiArz/actions/runs/44174085683) — success.
+
+The separate exact-decimal workflow for the same commit was still running at the time of this update; do not infer its result from the matcher workflow.
+
+The response-queue fixture now covers bounded claims, lease expiry/reclaim, stale-token rejection, idempotent ingestion, terminal invalid-JSON handling, retry release, dead-lettering at the configured test cap, and two-session disjoint claims. This remains synthetic PostgreSQL-only evidence, not production compatibility or deployment approval.
+
+### Operational replay requirement
+
+Before any production dead-letter policy is implemented, specify a controlled replay path: authorization limited to operators, explicit selection of a dead-lettered request, recorded reason/operator/time, bounded replay rate, idempotent re-ingestion, and a clear rule for whether attempts are reset or retained. Replay must not silently clear terminal history or permit stale claim tokens to acknowledge a newer lease. This is an unresolved operational design item, not implemented by the fixture.
