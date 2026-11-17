@@ -54,8 +54,6 @@ BEGIN
   RETURNING q.id, q.response_id, q.claim_token, q.lease_until;
 END $$;
 
--- Ingestion and acknowledgement deliberately share one transaction.
--- Invalid/non-JSON bodies are recorded as a terminal skip with an explicit reason.
 CREATE OR REPLACE FUNCTION private.ingest_and_ack_test_batch(p_token uuid)
 RETURNS integer LANGUAGE plpgsql AS $$
 DECLARE v_count integer;
@@ -109,7 +107,6 @@ INSERT INTO public.test_http_responses(id,status_code,content,error_msg) VALUES
 INSERT INTO public.test_sync_requests(response_id)
 SELECT id FROM public.test_http_responses ORDER BY id;
 
--- A claim is bounded; rollback simulates a worker crash before commit.
 BEGIN;
 SELECT count(*) AS claimed FROM private.claim_test_sync_requests(2, interval '5 minutes',
  'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
@@ -121,7 +118,6 @@ BEGIN
  END IF;
 END $$;
 
--- Worker B claims two rows, then its lease expires before acknowledgement.
 SELECT * FROM private.claim_test_sync_requests(2, interval '5 minutes',
  'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb');
 UPDATE public.test_sync_requests
@@ -129,23 +125,20 @@ SET lease_until = clock_timestamp() - interval '1 second'
 WHERE claim_token='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
   AND processed_at IS NULL;
 
--- Worker C recovers those exact rows. The stale worker B token must no longer ack them.
 SELECT * FROM private.claim_test_sync_requests(2, interval '5 minutes',
  'cccccccc-cccc-4ccc-8ccc-cccccccccccc');
-DO $
+DO $$
 BEGIN
  IF private.ingest_and_ack_test_batch('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb') <> 0 THEN
    RAISE EXCEPTION 'expired worker unexpectedly acknowledged reclaimed rows';
  END IF;
-END $;
+END $$;
 SELECT private.ingest_and_ack_test_batch('cccccccc-cccc-4ccc-8ccc-cccccccccccc');
 
--- The next bounded pass handles the remaining responses.
 SELECT * FROM private.claim_test_sync_requests(2, interval '5 minutes',
  'abababab-abab-4aba-8aba-abababababab');
 SELECT private.ingest_and_ack_test_batch('abababab-abab-4aba-8aba-abababababab');
 
--- A request arriving after a batch snapshot remains claimable on the next pass.
 INSERT INTO public.test_http_responses(id,status_code,content) VALUES
  (1006,200,'{"assets":[{"symbol":"ADA"}]}');
 INSERT INTO public.test_sync_requests(response_id) VALUES (1006);
@@ -170,7 +163,6 @@ BEGIN
  END IF;
 END $$;
 
--- Two independent sessions claim disjoint rows while the first holds its locks.
 TRUNCATE public.test_ingested_responses, public.test_sync_requests, public.test_http_responses RESTART IDENTITY CASCADE;
 INSERT INTO public.test_http_responses(id,status_code,content)
 SELECT 2000 + n, 200, '{"n":'||n||'}' FROM generate_series(1,4) n;
