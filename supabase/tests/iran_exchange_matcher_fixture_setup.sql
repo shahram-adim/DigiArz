@@ -24,8 +24,8 @@ CREATE TABLE private.iran_exchange_match_dirty (
   observation_id bigint PRIMARY KEY REFERENCES public.exchange_asset_observations(id) ON DELETE CASCADE,
   queued_at timestamptz NOT NULL DEFAULT now()
 );
--- This fixture contains one verified alias from the production matcher history.
--- The full alias catalog still requires an exhaustive regression matrix.
+-- Complete verified Kifpool alias tuple list copied from the current main-branch matcher.
+-- These are normalized name triples; symbol equality and active-state checks still apply.
 CREATE TABLE private.test_verified_kifpool_aliases (
   coingecko_id text NOT NULL,
   legacy_name text NOT NULL,
@@ -33,7 +33,56 @@ CREATE TABLE private.test_verified_kifpool_aliases (
   PRIMARY KEY(coingecko_id, legacy_name, current_name)
 );
 INSERT INTO private.test_verified_kifpool_aliases VALUES
- ('kishu-inu','kishu','kishuinu');
+ ('adex','adex','heyaura'),
+ ('crypto-com-chain','cryptocomcoin','cronos'),
+ ('elrond-erd-2','elrond','multiversx'),
+ ('blockstack','blockstack','stacks'),
+ ('the-open-network','gram','gramprevtoncoin'),
+ ('frax','frax','legacyfraxdollar'),
+ ('kishu-inu','kishu','kishuinu'),
+ ('centrifuge','centrifuge','centrifugeold'),
+ ('jupiter','jupiter','jupiterproject'),
+ ('apriori','apriori','capricorn'),
+ ('avantis','avantis','veranta'),
+ ('assemble-protocol','assembleprotocol','assembleai'),
+ ('certik','certik','shentu'),
+ ('everdome','everdome','humainweb3'),
+ ('ankr','ankr','ankrnetwork'),
+ ('band-protocol','bandprotocol','band'),
+ ('binancecoin','binancecoin','bnb'),
+ ('superfarm','superfarm','superverse'),
+ ('busy-dao','busydao','busy'),
+ ('dtec-token','dtec','dtectoken'),
+ ('dusk-network','dusknetwork','dusk'),
+ ('farcana','farcana','farlabs'),
+ ('ftx-token','ftxtoken','ftx'),
+ ('gme','gmeonsol','gme'),
+ ('gamee','gmee','gamee'),
+ ('stepn','stepn','gmt'),
+ ('mx-token','mxtoken','mx'),
+ ('nodecoin','nodecoin','nodepay'),
+ ('near','near','nearprotocol'),
+ ('apenft','apenft','ainft'),
+ ('noot-noot','noot','nootnoot'),
+ ('origin-protocol','originprotocol','origintoken'),
+ ('ondo-finance','ondofinance','ondo'),
+ ('subsquid','subsquid','sqd'),
+ ('tokocrypto','tokotoken','tokocrypto'),
+ ('usd-coin','usdcoin','usdc'),
+ ('vapor-wallet','vaporwallet','vaporfund'),
+ ('zignaly','zignaly','zigfinance'),
+ ('0x','0x','0xprotocol');
+
+-- The production matcher also has a distinct source-ID transition for ARPA.
+CREATE TABLE private.test_verified_kifpool_legacy_ids (
+  source_id text NOT NULL,
+  coingecko_id text NOT NULL,
+  legacy_name text NOT NULL,
+  current_name text NOT NULL,
+  PRIMARY KEY(source_id, coingecko_id)
+);
+INSERT INTO private.test_verified_kifpool_legacy_ids VALUES
+ ('arpa-chain','arpa','arpachain','arpa');
 
 CREATE OR REPLACE FUNCTION private.mark_iran_observation_match_dirty()
 RETURNS trigger LANGUAGE plpgsql SET search_path TO '' AS $$
@@ -84,6 +133,13 @@ BEGIN
               AND a.current_name=regexp_replace(lower(ca.name),'[^a-z0-9]','','g')
           )
         ))
+       OR EXISTS (
+         SELECT 1 FROM private.test_verified_kifpool_legacy_ids l
+         WHERE l.source_id=o.source_payload->>'nameId'
+           AND l.coingecko_id=ca.coingecko_id
+           AND l.legacy_name=regexp_replace(lower(o.asset_name),'[^a-z0-9]','','g')
+           AND l.current_name=regexp_replace(lower(ca.name),'[^a-z0-9]','','g')
+       )
      )
     WHERE o.exchange='kifpool' AND o.is_active IS TRUE
       AND o.asset_name IS NOT NULL AND nullif(o.source_payload->>'nameId','') IS NOT NULL
