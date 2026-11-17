@@ -12,6 +12,7 @@ on:
     branches: [main]
     paths:
       - 'supabase/tests/iran_exchange_matcher_*.sql'
+      - 'supabase/tests/iran_exchange_response_queue_fixture.sql'
       - '.github/workflows/iran-exchange-matcher-tests.yml'
 
 jobs:
