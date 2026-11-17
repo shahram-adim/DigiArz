@@ -1,4 +1,5 @@
 \set ON_ERROR_STOP on
+TRUNCATE private.iran_catalog_reconcile_jobs;
 INSERT INTO public.crypto_assets(coingecko_id,symbol,name,is_active) VALUES
  ('bitcoin','BTC','Bitcoin',true),
  ('wrapped-bitcoin','BTC','Wrapped Bitcoin',true),
@@ -173,3 +174,104 @@ SELECT 'Two-session SKIP LOCKED test passed' AS result;
 
 
 SELECT 'Iran exchange matcher fixture tests passed' AS result;
+
+
+-- Catalog reconciliation: a newly listed asset must rematch a prior unmatched row.
+INSERT INTO public.exchange_asset_observations(exchange,market_symbol,base_symbol,asset_name,source_payload,is_active)
+VALUES ('wallex','NEW_XRP','XRP','Ripple','{}',true);
+SELECT private.match_iran_exchange_observations(NULL);
+DO $$ BEGIN
+  IF (SELECT match_status FROM public.exchange_asset_observations WHERE market_symbol='NEW_XRP') <> 'unmatched'
+  THEN RAISE EXCEPTION 'New-asset fixture row should start unmatched'; END IF;
+END $$;
+
+INSERT INTO public.crypto_assets(coingecko_id,symbol,name,is_active)
+VALUES ('ripple','XRP','Ripple',true);
+DO $$
+BEGIN
+  WHILE EXISTS (SELECT 1 FROM private.iran_catalog_reconcile_jobs WHERE completed_at IS NULL) LOOP
+    PERFORM private.process_iran_catalog_reconcile_batch(2);
+  END LOOP;
+END $$;
+SELECT private.process_iran_match_dirty_batch(1000);
+DO $$ BEGIN
+  IF (SELECT coingecko_id FROM public.exchange_asset_observations WHERE market_symbol='NEW_XRP') <> 'ripple'
+  THEN RAISE EXCEPTION 'Catalog insert did not rematch the previously unmatched observation'; END IF;
+END $$;
+
+-- A symbol rename must revisit the old symbol and clear a now-stale match.
+UPDATE public.crypto_assets SET symbol='XLM' WHERE coingecko_id='ripple';
+DO $$
+BEGIN
+  WHILE EXISTS (SELECT 1 FROM private.iran_catalog_reconcile_jobs WHERE completed_at IS NULL) LOOP
+    PERFORM private.process_iran_catalog_reconcile_batch(2);
+  END LOOP;
+END $$;
+SELECT private.process_iran_match_dirty_batch(1000);
+DO $$ BEGIN
+  IF (SELECT match_status FROM public.exchange_asset_observations WHERE market_symbol='NEW_XRP') <> 'unmatched'
+     OR (SELECT coingecko_id FROM public.exchange_asset_observations WHERE market_symbol='NEW_XRP') IS NOT NULL
+  THEN RAISE EXCEPTION 'Catalog symbol rename did not clear the stale match'; END IF;
+END $$;
+
+-- Deactivation must also invalidate an existing match through the old asset ID.
+INSERT INTO public.exchange_asset_observations(exchange,market_symbol,base_symbol,asset_name,source_payload,is_active)
+VALUES ('wallex','NEW_YYY','YYY','Ypsilon Coin','{}',true);
+INSERT INTO public.crypto_assets(coingecko_id,symbol,name,is_active)
+VALUES ('ypsilon-coin','YYY','Ypsilon Coin',true);
+DO $$
+BEGIN
+  WHILE EXISTS (SELECT 1 FROM private.iran_catalog_reconcile_jobs WHERE completed_at IS NULL) LOOP
+    PERFORM private.process_iran_catalog_reconcile_batch(2);
+  END LOOP;
+END $$;
+SELECT private.process_iran_match_dirty_batch(1000);
+DO $$ BEGIN
+  IF (SELECT coingecko_id FROM public.exchange_asset_observations WHERE market_symbol='NEW_YYY') <> 'ypsilon-coin'
+  THEN RAISE EXCEPTION 'Ypsilon setup match failed'; END IF;
+END $$;
+UPDATE public.crypto_assets SET is_active=false WHERE coingecko_id='ypsilon-coin';
+DO $$
+BEGIN
+  WHILE EXISTS (SELECT 1 FROM private.iran_catalog_reconcile_jobs WHERE completed_at IS NULL) LOOP
+    PERFORM private.process_iran_catalog_reconcile_batch(2);
+  END LOOP;
+END $$;
+SELECT private.process_iran_match_dirty_batch(1000);
+DO $$ BEGIN
+  IF (SELECT match_status FROM public.exchange_asset_observations WHERE market_symbol='NEW_YYY') <> 'unmatched'
+     OR (SELECT coingecko_id FROM public.exchange_asset_observations WHERE market_symbol='NEW_YYY') IS NOT NULL
+  THEN RAISE EXCEPTION 'Catalog deactivation did not invalidate the stale match'; END IF;
+END $$;
+
+-- More observations than one scan page: the persisted cursor must advance
+-- over successive bounded calls until all three affected observations are queued.
+INSERT INTO public.exchange_asset_observations(exchange,market_symbol,base_symbol,asset_name,source_payload,is_active) VALUES
+ ('wallex','BATCH_1','BATCH','Batch Coin','{}',true),
+ ('wallex','BATCH_2','BATCH','Batch Coin','{}',true),
+ ('wallex','BATCH_3','BATCH','Batch Coin','{}',true);
+INSERT INTO public.crypto_assets(coingecko_id,symbol,name,is_active)
+VALUES ('batch-coin','BATCH','Batch Coin',true);
+DO $$
+DECLARE v_job bigint; v_first_cursor bigint; v_calls integer:=0;
+BEGIN
+  SELECT max(id) INTO v_job FROM private.iran_catalog_reconcile_jobs WHERE asset_id='batch-coin';
+  PERFORM private.process_iran_catalog_reconcile_batch(2);
+  SELECT cursor_id INTO v_first_cursor FROM private.iran_catalog_reconcile_jobs WHERE id=v_job;
+  IF v_first_cursor<=0 OR (SELECT completed_at FROM private.iran_catalog_reconcile_jobs WHERE id=v_job) IS NOT NULL
+  THEN RAISE EXCEPTION 'Catalog reconciliation cursor did not retain a partial page'; END IF;
+  WHILE EXISTS (SELECT 1 FROM private.iran_catalog_reconcile_jobs WHERE id=v_job AND completed_at IS NULL) LOOP
+    PERFORM private.process_iran_catalog_reconcile_batch(2);
+    v_calls:=v_calls+1;
+    IF v_calls>100 THEN RAISE EXCEPTION 'Catalog reconciliation cursor failed to converge'; END IF;
+  END LOOP;
+END $$;
+SELECT private.process_iran_match_dirty_batch(1000);
+DO $$ BEGIN
+  IF (SELECT count(*) FROM public.exchange_asset_observations
+      WHERE market_symbol IN ('BATCH_1','BATCH_2','BATCH_3')
+        AND coingecko_id='batch-coin' AND match_status='matched')<>3
+  THEN RAISE EXCEPTION 'Bounded catalog reconciliation did not process all pages'; END IF;
+END $$;
+
+SELECT 'Catalog-change reconciliation fixture tests passed' AS result;
