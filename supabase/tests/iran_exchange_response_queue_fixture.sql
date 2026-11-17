@@ -17,7 +17,8 @@ CREATE TABLE public.test_sync_requests (
   claim_token uuid,
   lease_until timestamptz,
   attempts integer NOT NULL DEFAULT 0,
-  last_error text
+  last_error text,
+  dead_lettered_at timestamptz
 );
 CREATE TABLE public.test_ingested_responses (
   response_id bigint PRIMARY KEY REFERENCES public.test_http_responses(id),
@@ -40,6 +41,7 @@ BEGIN
     SELECT q.id
     FROM public.test_sync_requests q
     WHERE q.processed_at IS NULL
+      AND q.dead_lettered_at IS NULL
       AND (q.claim_token IS NULL OR q.lease_until < clock_timestamp())
     ORDER BY q.id
     FOR UPDATE SKIP LOCKED
@@ -88,6 +90,32 @@ BEGIN
   GET DIAGNOSTICS v_count = ROW_COUNT;
   RETURN v_count;
 END $$;
+
+CREATE OR REPLACE FUNCTION private.release_test_sync_claim(
+  p_token uuid,
+  p_error text,
+  p_max_attempts integer DEFAULT 3
+) RETURNS integer LANGUAGE plpgsql AS $
+DECLARE v_count integer;
+BEGIN
+  IF p_max_attempts < 1 OR p_error IS NULL OR length(trim(p_error)) = 0 THEN
+    RAISE EXCEPTION 'invalid retry policy';
+  END IF;
+  UPDATE public.test_sync_requests q
+  SET dead_lettered_at = CASE WHEN q.attempts >= p_max_attempts
+                              THEN clock_timestamp() ELSE NULL END,
+      last_error = CASE WHEN q.attempts >= p_max_attempts
+                        THEN 'Dead-lettered after ' || q.attempts || ' attempts: ' || p_error
+                        ELSE p_error END,
+      claim_token = NULL,
+      lease_until = NULL
+  WHERE q.claim_token = p_token
+    AND q.processed_at IS NULL
+    AND q.dead_lettered_at IS NULL
+    AND q.lease_until >= clock_timestamp();
+  GET DIAGNOSTICS v_count = ROW_COUNT;
+  RETURN v_count;
+END $;
 
 CREATE OR REPLACE FUNCTION private.test_is_json(p_text text)
 RETURNS boolean LANGUAGE plpgsql IMMUTABLE AS $$
@@ -148,8 +176,9 @@ SELECT private.ingest_and_ack_test_batch('dddddddd-dddd-4ddd-8ddd-dddddddddddd')
 
 DO $$
 BEGIN
- IF EXISTS (SELECT 1 FROM public.test_sync_requests WHERE processed_at IS NULL) THEN
-   RAISE EXCEPTION 'fixture left requests unprocessed';
+ IF EXISTS (SELECT 1 FROM public.test_sync_requests
+            WHERE processed_at IS NULL AND dead_lettered_at IS NULL) THEN
+   RAISE EXCEPTION 'fixture left requests neither processed nor dead-lettered';
  END IF;
  IF (SELECT count(*) FROM public.test_ingested_responses) <> 4 THEN
    RAISE EXCEPTION 'expected four valid JSON responses ingested exactly once';
@@ -162,6 +191,48 @@ BEGIN
    RAISE EXCEPTION 'idempotent ingestion failed';
  END IF;
 END $$;
+
+-- Transient worker failures are retried, then dead-lettered at the attempt cap.
+INSERT INTO public.test_http_responses(id,status_code,content)
+VALUES (1007,200,'{"assets":[{"symbol":"SOL"}]}');
+INSERT INTO public.test_sync_requests(response_id) VALUES (1007);
+SELECT * FROM private.claim_test_sync_requests(1, interval '5 minutes',
+ '11111111-1111-4111-8111-111111111111');
+DO $
+BEGIN
+ IF private.release_test_sync_claim('11111111-1111-4111-8111-111111111111',
+      'simulated transient worker failure',3) <> 1 THEN
+   RAISE EXCEPTION 'first transient failure was not released for retry';
+ END IF;
+END $;
+SELECT * FROM private.claim_test_sync_requests(1, interval '5 minutes',
+ '22222222-2222-4222-8222-222222222222');
+DO $
+BEGIN
+ IF private.release_test_sync_claim('22222222-2222-4222-8222-222222222222',
+      'simulated transient worker failure',3) <> 1 THEN
+   RAISE EXCEPTION 'second transient failure was not released for retry';
+ END IF;
+END $;
+SELECT * FROM private.claim_test_sync_requests(1, interval '5 minutes',
+ '33333333-3333-4333-8333-333333333333');
+DO $
+BEGIN
+ IF private.release_test_sync_claim('33333333-3333-4333-8333-333333333333',
+      'simulated transient worker failure',3) <> 1 THEN
+   RAISE EXCEPTION 'third transient failure was not dead-lettered';
+ END IF;
+ IF NOT EXISTS (SELECT 1 FROM public.test_sync_requests
+                WHERE response_id=1007 AND attempts=3
+                  AND dead_lettered_at IS NOT NULL
+                  AND last_error LIKE 'Dead-lettered after 3 attempts:%') THEN
+   RAISE EXCEPTION 'dead-letter metadata missing at attempt cap';
+ END IF;
+ IF EXISTS (SELECT 1 FROM private.claim_test_sync_requests(1, interval '5 minutes',
+      '44444444-4444-4444-8444-444444444444')) THEN
+   RAISE EXCEPTION 'dead-lettered request was claimed again';
+ END IF;
+END $;
 
 TRUNCATE public.test_ingested_responses, public.test_sync_requests, public.test_http_responses RESTART IDENTITY CASCADE;
 INSERT INTO public.test_http_responses(id,status_code,content)
