@@ -65,7 +65,7 @@ begin
  on conflict(exchange,market_symbol) do update set base_symbol=excluded.base_symbol,quote_symbol=excluded.quote_symbol,
  asset_name=coalesce(excluded.asset_name,public.exchange_asset_observations.asset_name),source_payload=excluded.source_payload,is_active=excluded.is_active,last_seen_at=now();
  get diagnostics v_ingested=row_count;
- update public.exchange_asset_sync_requests q set processed_at=now(),http_status=r.status_code,error_message=case when r.status_code=200 and private.try_parse_jsonb(r.content) is null then 'Invalid JSON response; skipped safely and will retry on next scheduled sync' else left(r.error_msg,500) end
+ update public.exchange_asset_sync_requests q set processed_at=now(),http_status=r.status_code,error_message=case when r.status_code=200 and private.try_parse_jsonb(r.content) is null then 'Invalid JSON response; skipped safely; request marked processed' else left(r.error_msg,500) end
  from net._http_response r where r.id=q.request_id and r.id = any(v_response_ids) and q.processed_at is null;
  get diagnostics v_processed=row_count;
  with kifpool_exact as (
