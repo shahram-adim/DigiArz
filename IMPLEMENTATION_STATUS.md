@@ -246,3 +246,14 @@
 - [x] آخرین commit شاخه `71cb3e443dd6411db0189cf8db8114ebf1588964` است. شاخه نسبت به main پانزده commit جلو و صفر commit عقب است.
 - [!] PR شمارهٔ ۸ همچنان Draft است و review ثبت‌شده ندارد. موفقیت آزمون، جایگزین بازبینی مستقل تغییر تابع نیست.
 - [!] Production همچنان نسخهٔ قبلی تابع را اجرا می‌کند؛ هیچ SQL، داده، cron یا Edge Function در Production تغییر نکرده است. هیچ replay تاریخی انجام نشده است.
+
+
+### تأیید CI نهایی و تست race اصلاح‌شده — ۱۷ نوامبر ۲۰۲۶
+- [x] اجرای کامل GitHub Actions با شناسهٔ `44059391852` روی commit `62a581007fa8641c1efcbcf4df3a117b2da76d1c` با نتیجهٔ success پایان یافت.
+- [x] هر ۲۳ مرحلهٔ اصلی workflow موفق شدند؛ از جمله آزمون مستقل PostgreSQL، آزمون واقعی دو نشست صف صرافی‌ها، arithmetic regression، rehearsalهای schema widening، Market/Limit، Stop-Limit، TP-SL و چرخه‌های cancellation/concurrency.
+- [x] سناریوی دو نشست اصلاح شد تا request شمارهٔ 2002 پیش از شروع worker اول در صف وجود داشته باشد و فقط HTTP response آن در نشست دوم، پس از snapshot شناسه‌های worker اول، commit شود.
+- [x] آزمون ثابت کرد worker اول پاسخ دیررس را نه ingest می‌کند و نه processed علامت می‌زند؛ worker دوم همان پاسخ را با موفقیت پردازش می‌کند.
+- [x] متن PR شمارهٔ ۸ با نتیجهٔ قطعی CI و SHA دقیق به‌روزرسانی شد.
+- [!] PR شمارهٔ ۸ همچنان Draft و باز است؛ هیچ review یا review thread ثبت نشده و merge انجام نشده است.
+- [!] Production compatibility gate هنوز باز است: نوع واقعی `net._http_response.id`، تطبیق کامل تابع زنده با draft و grants باید با اتصال پایدار Supabase تأیید شوند. نوع bigint در fixture آزمایشی، اثبات نوع ستون Production نیست.
+- [!] هیچ SQL، داده، cron، Edge Function یا migration در Production تغییر نکرده است؛ هیچ replay تاریخی انجام نشده است.
