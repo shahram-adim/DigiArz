@@ -204,3 +204,22 @@ The integration fixture verifies:
 The synthetic matcher now clears the prior match state for scoped active observations before recalculating candidates. This is necessary for the alias-removal test: otherwise a previously matched row could retain an obsolete match when the old symbol still exists for unrelated assets. This behavior is a proposed invariant in the fixture and must be explicitly compared with the current Production function before any rollout; it is not evidence that Production already has this stale-match protection.
 
 **Limits:** this queue scans the observation ID space in bounded pages for each event. It is a correctness prototype, not a measured production-optimal query plan. Alias coverage here targets the verified legacy-name tuple table; the separate ARPA legacy source-ID mapping remains covered by the matcher regression test but is not yet wired to a catalog-change trigger. Lease/retry behavior for catalog events, queue retention/cleanup, indexes, function ACLs, and production schema compatibility remain open.
+
+
+## Production plan evidence and isolated scale experiment — 2026-11-18
+
+A read-only Production review found:
+- crypto_assets: 18,874 live rows; existing symbol index is on lower(symbol).
+- exchange_asset_observations: 4,960 live rows; existing symbol index is on upper(base_symbol).
+- The live matcher join compares upper(ca.symbol)=upper(o.base_symbol).
+- A plan-only EXPLAIN of the simplified join chose a Hash Join with a sequential scan of all 18,874 crypto_assets rows; the observation side used its upper(base_symbol) index. This shows the existing lower(symbol) index does not match the catalog-side expression in that simplified query. It does not establish that an upper(symbol) index will improve the complete matcher or that this alone caused the observed timeouts.
+
+A new disposable PostgreSQL 17 experiment, supabase/tests/iran_exchange_matcher_plan_fixture.sql, is wired into the matcher workflow. It seeds 18,874 synthetic catalog rows and 4,960 synthetic observations, then records EXPLAIN ANALYZE plans, execution times, and buffer counts for:
+1. a 100-row dirty batch with only the existing lower(symbol) index shape;
+2. a full scan with only that index;
+3. the same dirty batch with a candidate upper(symbol) expression index;
+4. the same full scan with the candidate index.
+
+The candidate index exists only on temporary fixture tables. This experiment does not create or recommend a Production index. CI results must be inspected before deciding whether the expression index is useful for bounded incremental batches; full-scan and dirty-batch behavior may differ. The fixture is a plan/scale comparison, not a complete replay of the Production matcher SQL and not a substitute for Production query-plan validation.
+
+Production safety remains unchanged: no DDL, index, function, cron, migration-history, or data change was made. Do not run supabase db push while migration reconciliation remains open.
