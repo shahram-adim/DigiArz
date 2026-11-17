@@ -298,7 +298,7 @@ FOR EACH ROW EXECUTE FUNCTION private.enqueue_iran_catalog_reconcile();
 
 -- Alias-map changes enqueue a targeted Kifpool reconciliation event too.
 CREATE OR REPLACE FUNCTION private.enqueue_iran_kifpool_alias_reconcile()
-RETURNS trigger LANGUAGE plpgsql SET search_path TO '' AS $
+RETURNS trigger LANGUAGE plpgsql SET search_path TO '' AS $$
 BEGIN
   IF TG_OP='INSERT' THEN
     INSERT INTO private.iran_catalog_reconcile_jobs
@@ -320,7 +320,7 @@ BEGIN
     RETURN NEW;
   END IF;
 END;
-$;
+$$;
 
 CREATE TRIGGER iran_kifpool_alias_reconcile
 AFTER INSERT OR UPDATE OR DELETE
