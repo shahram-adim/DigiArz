@@ -183,3 +183,24 @@ The response-queue fixture now covers bounded claims, lease expiry/reclaim, stal
 ### Operational replay requirement
 
 Before any production dead-letter policy is implemented, specify a controlled replay path: authorization limited to operators, explicit selection of a dead-lettered request, recorded reason/operator/time, bounded replay rate, idempotent re-ingestion, and a clear rule for whether attempts are reset or retained. Replay must not silently clear terminal history or permit stale claim tokens to acknowledge a newer lease. This is an unresolved operational design item, not implemented by the fixture.
+
+
+## Synthetic catalog and alias reconciliation fixture (2026-11-18)
+
+The matcher fixture now includes a durable catalog-event queue with:
+- asset insert/update/delete events retaining old and new symbol/name/active values;
+- Kifpool verified-alias insert/update/delete events retaining old/new legacy names and the CoinGecko source ID;
+- a bounded observation-ID scan cursor (test bound 1–1000), with event cursor progress and dirty-row enqueueing committed in the same transaction;
+- independent events so a later catalog change does not reset an earlier event's cursor.
+
+The integration fixture verifies:
+- adding an asset rematches a previously unmatched observation;
+- renaming a symbol revisits the old match and clears it;
+- deactivating an asset clears its old match;
+- more affected observations than one scan page are eventually processed;
+- adding a verified Kifpool alias rematches the targeted observation;
+- removing that alias re-evaluates the observation and does not leave a stale match identifier.
+
+The synthetic matcher now clears the prior match state for scoped active observations before recalculating candidates. This is necessary for the alias-removal test: otherwise a previously matched row could retain an obsolete match when the old symbol still exists for unrelated assets. This behavior is a proposed invariant in the fixture and must be explicitly compared with the current Production function before any rollout; it is not evidence that Production already has this stale-match protection.
+
+**Limits:** this queue scans the observation ID space in bounded pages for each event. It is a correctness prototype, not a measured production-optimal query plan. Alias coverage here targets the verified legacy-name tuple table; the separate ARPA legacy source-ID mapping remains covered by the matcher regression test but is not yet wired to a catalog-change trigger. Lease/retry behavior for catalog events, queue retention/cleanup, indexes, function ACLs, and production schema compatibility remain open.
