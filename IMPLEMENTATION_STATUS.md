@@ -218,3 +218,12 @@
 - [x] تصمیم ایمن: اصلاح worker باعث می‌شود درخواست‌های زمان‌بندی‌شدهٔ بعدی با پاسخ تازه پردازش شوند. هر بازیابی تاریخی احتمالی باید last_seen_at را از زمان واقعی net._http_response.created بگیرد و از auto-activation جلوگیری کند؛ این مسیر هنوز ساخته نشده.
 - [x] CI نهایی روی commit d3f873a450073ee352a42dc574b99986017eed04 با موفقیت کامل شد؛ مرحلهٔ اختصاصی PostgreSQL race integration و همهٔ تست‌های exact-decimal/market/limit/stop-limit/TP-SL موفق بودند.
 - [!] PR شماره ۸ همچنان Draft است؛ Production دست‌نخورده مانده است.
+
+
+### بازبینی عمیق‌تر PR اصلاح صف صرافی‌ها — ۱۷ نوامبر ۲۰۲۶
+- [x] تعریف زندهٔ Production فقط‌خواندنی دوباره بررسی شد: امضای تابع بدون آرگومان و خروجی jsonb؛ owner برابر postgres؛ SECURITY DEFINER فعال؛ search_path خالی؛ اجرای anon و authenticated غیرفعال و service_role فعال. شروط cutoff پیشنهادی هنوز در Production وجود ندارند.
+- [x] مشخص شد PostgreSQL در سطح پیش‌فرض READ COMMITTED برای هر statement snapshot جداگانه می‌گیرد؛ دو statement متوالی در یک transaction می‌توانند commitهای جدید بین خود را ببینند. مرجع: https://www.postgresql.org/docs/17/transaction-iso.html
+- [!] بنابراین شرط transaction_timestamp() به‌تنهایی race را کامل نمی‌بندد: ممکن است ردیف پاسخ HTTP در زمان INSERT/ingest هنوز commit نشده باشد، اما قبل از UPDATE بعدی commit شود؛ UPDATE آن را ببیند و processed_at را پر کند، درحالی‌که CTE قبلی آن پاسخ را ingest نکرده است.
+- [!] تست integration فعلی با timestampهای آینده، حالت پاسخ دیررسِ قابل‌مشاهده را می‌سنجد، اما رقابت واقعی commit بین دو statement را با دو نشست مستقل بازسازی نمی‌کند.
+- [!] PR شماره ۸ برای rollout مسدود باقی می‌ماند. راه اصلاح باید ingest و processed marking را بر یک مجموعهٔ واحد از responseهای قابل‌مشاهده در یک statement/یک snapshot متکی کند، یا راهکار هم‌ارز با اثبات concurrency داشته باشد؛ صرفاً افزودن تأخیر زمانی به cutoff کافی نیست.
+- [x] هیچ تغییری در Production، cronها، داده‌ها یا وضعیت Draft/Review/merge مربوط به PR انجام نشد.
