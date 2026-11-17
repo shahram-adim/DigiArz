@@ -105,3 +105,21 @@ Do not introduce a public SECURITY DEFINER entry point merely to make cron calls
 5. What observability fields/counters are needed to detect queue age, retry starvation, and matcher backlog?
 
 These decisions must be resolved against the actual schema and disposable PostgreSQL tests before writing the production migration.
+
+
+## Repository review findings (2026-11-17)
+
+The current `main` implementation confirms that the observation upsert assigns `last_seen_at = now()` on every conflict update, while also replacing `source_payload` and refreshing `is_active`. Therefore, using the upsert's affected-row count or an unconditional `RETURNING id` as the dirty set would rematch rows on every sync. The implementation must compare the actual match-relevant fields (including Kifpool `nameId`) or use a separately maintained fingerprint/version.
+
+The current matcher has three broad-table phases after ingestion:
+- Kifpool exact-ID/name/verified-alias candidate matching;
+- ordinary symbol/name candidate matching with per-observation candidate counts;
+- fallback to `unmatched` when no active asset has the observation's symbol, with a Kifpool exception.
+
+The verified Kifpool alias rules are embedded in the current SQL and include legacy-name transitions plus the special `arpa-chain` source-ID mapping. They must be extracted/reused without changing their conditions; do not replace them with a generic fuzzy match.
+
+The repository's checked-in migration history does not contain the original table-creation migration for `public.exchange_asset_observations` or its base constraints. The table is assumed by later migrations. The live catalog has not been safely re-read in this work because prior Supabase SQL connections repeatedly timed out. Consequently, do not write a production migration or assume column defaults, identity behavior, constraints, indexes, trigger definitions, or grants from the function's column references alone. First obtain the authoritative table/trigger/index/function metadata or construct a fully explicit disposable fixture from a verified schema snapshot.
+
+## CI result for the design-only PR
+
+GitHub Actions run [44161434376](https://github.com/shahram-adim/DigiArz/actions/runs/44161434376) completed successfully (all 21 workflow steps passed). This is the repository's existing exact-decimal/browser and trading lifecycle/race suite. It does **not** execute an Iran exchange matcher test and must not be described as validation of the proposed matcher design.
