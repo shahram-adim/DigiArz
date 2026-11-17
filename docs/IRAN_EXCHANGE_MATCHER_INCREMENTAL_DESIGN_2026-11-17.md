@@ -223,3 +223,21 @@ A new disposable PostgreSQL 17 experiment, supabase/tests/iran_exchange_matcher_
 The candidate index exists only on temporary fixture tables. This experiment does not create or recommend a Production index. CI results must be inspected before deciding whether the expression index is useful for bounded incremental batches; full-scan and dirty-batch behavior may differ. The fixture is a plan/scale comparison, not a complete replay of the Production matcher SQL and not a substitute for Production query-plan validation.
 
 Production safety remains unchanged: no DDL, index, function, cron, migration-history, or data change was made. Do not run supabase db push while migration reconciliation remains open.
+
+
+### Repeated warm-cache experiment results — 2026-11-18
+
+The five-run fixture refinement passed on commit b19273edc94a98c603b3e10529f86c88499c680d (GitHub Actions run 44182855849, PostgreSQL 17.12). Each scenario was warmed once, then measured five times.
+
+| Scenario | Median | Min–max |
+|---|---:|---:|
+| 100-row dirty batch, lower(symbol) only | 6.188 ms | 6.169–6.314 ms |
+| 100-row dirty batch, candidate upper(symbol) | 0.170 ms | 0.170–0.189 ms |
+| Full 4,960-row scan, lower(symbol) only | 10.549 ms | 10.518–10.591 ms |
+| Full 4,960-row scan, candidate upper(symbol) | 7.422 ms | 7.340–7.730 ms |
+
+In this synthetic fixture, the candidate changed the dirty-batch catalog side from a full sequential scan/Hash Join to an upper(symbol) index scan/Merge Join. The median dirty-batch time was about 36x lower; the full-scan median was about 30% lower. This is stronger evidence for the *incremental dirty-batch access pattern* than for a full-scan optimization.
+
+Limitations remain important: the fixture uses unique synthetic symbols, only 18,874 catalog rows and 4,960 observations, warm-cache measurements, and a simplified join rather than the full Production matcher function. It does not model duplicate/ambiguous symbols, alias matching, source-priority logic, concurrent writes, index maintenance cost, or actual Production hardware/cache state. It therefore supports a further test-only investigation, not a Production index decision. No Production DDL/index/function/cron/data was changed.
+
+Exact-decimal workflow on the same head was still executing at last check; matcher fixture success does not imply that separate workflow passed.
