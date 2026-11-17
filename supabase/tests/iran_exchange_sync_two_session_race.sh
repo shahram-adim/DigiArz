@@ -9,11 +9,14 @@ DB_NAME="${PGDATABASE:-digiarz_iran_sync_two_session_test}"
 
 psql_base=(psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -v ON_ERROR_STOP=1)
 
-# The eligible response causes the worker to enter the observation INSERT.
-# Hold that INSERT briefly so a second session can commit a late HTTP response.
+# Request 2002 exists before the worker starts, but its HTTP response does not.
+# This reproduces the production race: the request is old/pending while its
+# response becomes visible only after the worker has captured response IDs.
 "${psql_base[@]}" <<'SQL'
 INSERT INTO public.exchange_asset_sync_requests(exchange, request_id, requested_at)
-VALUES ('nobitex', 2001, transaction_timestamp() - interval '1 minute');
+VALUES
+ ('nobitex', 2001, transaction_timestamp() - interval '1 minute'),
+ ('nobitex', 2002, transaction_timestamp() - interval '1 minute');
 INSERT INTO net._http_response(id, created, status_code, content, error_msg)
 VALUES (2001, transaction_timestamp() - interval '1 minute', 200,
         '{"coins":[{"coin":"BTC","name":"Bitcoin"}]}', NULL);
@@ -54,10 +57,9 @@ if [[ "$ready" != "1" ]]; then
   exit 1
 fi
 
-# Session B commits a new request and response after session A captured IDs.
+# Session B commits only the late HTTP response. Its request row was already
+# pending before session A began, so the request timestamp cannot hide the race.
 "${psql_base[@]}" <<'SQL'
-INSERT INTO public.exchange_asset_sync_requests(exchange, request_id, requested_at)
-VALUES ('nobitex', 2002, transaction_timestamp());
 INSERT INTO net._http_response(id, created, status_code, content, error_msg)
 VALUES (2002, transaction_timestamp(), 200,
         '{"coins":[{"coin":"ETH","name":"Ethereum"}]}', NULL);
@@ -79,13 +81,13 @@ BEGIN
     SELECT 1 FROM public.exchange_asset_sync_requests
     WHERE request_id=2002 AND processed_at IS NOT NULL
   ) THEN
-    RAISE EXCEPTION 'late response was incorrectly marked processed in the same worker run';
+    RAISE EXCEPTION 'late response for a pre-existing request was incorrectly marked processed in the same worker run';
   END IF;
   IF EXISTS (
     SELECT 1 FROM public.exchange_asset_observations
     WHERE exchange='nobitex' AND market_symbol='ETH'
   ) THEN
-    RAISE EXCEPTION 'late response was ingested in the same worker run';
+    RAISE EXCEPTION 'late response for a pre-existing request was ingested in the same worker run';
   END IF;
 END;
 $$;
