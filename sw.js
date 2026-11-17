@@ -1,6 +1,8 @@
 'use strict';
-const CACHE_NAME = 'digiarz-shell-v53';
-const APP_SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './src/decimal.js'];
+const CACHE_NAME = 'digiarz-shell-v54';
+const APP_ROOT = new URL('./', self.location.href);
+const APP_INDEX = new URL('index.html', APP_ROOT).href;
+const APP_SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.svg', './icon-512.svg', './src/decimal.js'];
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -26,27 +28,22 @@ self.addEventListener('fetch', event => {
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === 'navigate') {
+    const isAppShellNavigation = url.pathname === APP_ROOT.pathname || url.pathname === new URL('./index.html', APP_ROOT).pathname;
     event.respondWith(
       fetch(request)
         .then(response => {
-          if (response && response.ok) {
+          if (response && response.ok && isAppShellNavigation) {
             const copy = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy));
+            return caches.open(CACHE_NAME).then(cache => cache.put(APP_INDEX, copy)).then(() => response);
           }
           return response;
         })
-        .catch(() => caches.match('./index.html'))
+        .catch(() => caches.open(CACHE_NAME).then(cache => cache.match(APP_INDEX)))
     );
     return;
   }
 
   event.respondWith(
-    caches.match(request).then(cached => cached || fetch(request).then(response => {
-      if (response && response.ok && url.origin === self.location.origin) {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
-      }
-      return response;
-    }))
+    caches.open(CACHE_NAME).then(cache => cache.match(request)).then(cached => cached || fetch(request))
   );
 });
