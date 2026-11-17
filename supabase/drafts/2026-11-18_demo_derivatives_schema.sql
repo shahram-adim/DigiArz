@@ -228,7 +228,11 @@ DECLARE
   v_transaction_id uuid;
   v_line_count integer;
 BEGIN
-  v_transaction_id := COALESCE(NEW.transaction_id,OLD.transaction_id);
+  IF TG_TABLE_NAME='demo_derivative_ledger_transactions' THEN
+    v_transaction_id := NEW.id;
+  ELSE
+    v_transaction_id := COALESCE(NEW.transaction_id,OLD.transaction_id);
+  END IF;
   SELECT count(*) INTO v_line_count
   FROM public.demo_derivative_ledger_entries
   WHERE transaction_id=v_transaction_id;
