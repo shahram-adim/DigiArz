@@ -105,4 +105,86 @@ BEGIN
  THEN RAISE EXCEPTION 'Dirty queue was not drained'; END IF;
 END $$;
 
+
+-- Two-session claim test: worker A holds row locks while worker B claims
+-- the next disjoint batch through an independent PostgreSQL connection.
+CREATE EXTENSION IF NOT EXISTS dblink;
+INSERT INTO private.iran_exchange_match_dirty(observation_id, queued_at)
+SELECT id, clock_timestamp()
+FROM public.exchange_asset_observations
+ORDER BY id
+LIMIT 4
+ON CONFLICT (observation_id) DO UPDATE SET queued_at=EXCLUDED.queued_at;
+
+SELECT dblink_connect('matcher_worker_a', 'dbname=' || current_database());
+SELECT dblink_connect('matcher_worker_b', 'dbname=' || current_database());
+SELECT dblink_exec('matcher_worker_a', 'BEGIN');
+SELECT dblink_send_query(
+  'matcher_worker_a',
+  'SELECT observation_id FROM private.iran_exchange_match_dirty ORDER BY queued_at, observation_id LIMIT 2 FOR UPDATE SKIP LOCKED'
+);
+DO $
+BEGIN
+  WHILE dblink_is_busy('matcher_worker_a') = 1 LOOP
+    PERFORM pg_sleep(0.02);
+  END LOOP;
+END $;
+CREATE TEMP TABLE worker_a_claim(observation_id bigint PRIMARY KEY);
+INSERT INTO worker_a_claim
+SELECT observation_id
+FROM dblink_get_result('matcher_worker_a') AS claimed(observation_id bigint);
+
+SELECT dblink_exec('matcher_worker_b', 'BEGIN');
+SELECT dblink_send_query(
+  'matcher_worker_b',
+  'SELECT observation_id FROM private.iran_exchange_match_dirty ORDER BY queued_at, observation_id LIMIT 2 FOR UPDATE SKIP LOCKED'
+);
+DO $
+BEGIN
+  WHILE dblink_is_busy('matcher_worker_b') = 1 LOOP
+    PERFORM pg_sleep(0.02);
+  END LOOP;
+END $;
+CREATE TEMP TABLE worker_b_claim(observation_id bigint PRIMARY KEY);
+INSERT INTO worker_b_claim
+SELECT observation_id
+FROM dblink_get_result('matcher_worker_b') AS claimed(observation_id bigint);
+
+DO $
+BEGIN
+  IF (SELECT count(*) FROM worker_a_claim) <> 2 THEN
+    RAISE EXCEPTION 'Worker A did not lock exactly two rows';
+  END IF;
+  IF (SELECT count(*) FROM worker_b_claim) <> 2 THEN
+    RAISE EXCEPTION 'Worker B did not skip A locks and claim two remaining rows';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM worker_a_claim a
+    JOIN worker_b_claim b USING (observation_id)
+  ) THEN
+    RAISE EXCEPTION 'Concurrent workers claimed overlapping observation IDs';
+  END IF;
+  IF (SELECT count(*) FROM (
+      SELECT observation_id FROM worker_a_claim
+      UNION
+      SELECT observation_id FROM worker_b_claim
+    ) claimed) <> 4 THEN
+    RAISE EXCEPTION 'Concurrent workers did not cover the four-row test batch';
+  END IF;
+END $;
+
+SELECT dblink_exec('matcher_worker_a', 'ROLLBACK');
+SELECT dblink_exec('matcher_worker_b', 'ROLLBACK');
+SELECT dblink_disconnect('matcher_worker_a');
+SELECT dblink_disconnect('matcher_worker_b');
+DELETE FROM private.iran_exchange_match_dirty
+WHERE observation_id IN (
+  SELECT observation_id FROM worker_a_claim
+  UNION
+  SELECT observation_id FROM worker_b_claim
+);
+
+SELECT 'Two-session SKIP LOCKED test passed' AS result;
+
+
 SELECT 'Iran exchange matcher fixture tests passed' AS result;
