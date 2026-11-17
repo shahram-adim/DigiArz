@@ -240,3 +240,116 @@ BEGIN
   RETURN cardinality(v_ids);
 END;
 $$;
+
+
+-- Synthetic catalog-change reconciliation queue. It records both old and new
+-- values so a bounded scan can invalidate stale matches as well as find new ones.
+CREATE TABLE private.iran_catalog_reconcile_jobs (
+  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  asset_id text NOT NULL,
+  old_symbol text,
+  new_symbol text,
+  old_name text,
+  new_name text,
+  old_is_active boolean,
+  new_is_active boolean,
+  cursor_id bigint NOT NULL DEFAULT 0,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  completed_at timestamptz
+);
+
+CREATE OR REPLACE FUNCTION private.enqueue_iran_catalog_reconcile()
+RETURNS trigger LANGUAGE plpgsql SET search_path TO '' AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    INSERT INTO private.iran_catalog_reconcile_jobs
+      (asset_id,new_symbol,new_name,new_is_active)
+    VALUES (NEW.coingecko_id,NEW.symbol,NEW.name,NEW.is_active);
+    RETURN NEW;
+  ELSIF TG_OP = 'DELETE' THEN
+    INSERT INTO private.iran_catalog_reconcile_jobs
+      (asset_id,old_symbol,old_name,old_is_active)
+    VALUES (OLD.coingecko_id,OLD.symbol,OLD.name,OLD.is_active);
+    RETURN OLD;
+  ELSE
+    IF OLD.symbol IS DISTINCT FROM NEW.symbol
+       OR OLD.name IS DISTINCT FROM NEW.name
+       OR OLD.is_active IS DISTINCT FROM NEW.is_active THEN
+      INSERT INTO private.iran_catalog_reconcile_jobs
+        (asset_id,old_symbol,new_symbol,old_name,new_name,old_is_active,new_is_active)
+      VALUES (NEW.coingecko_id,OLD.symbol,NEW.symbol,OLD.name,NEW.name,OLD.is_active,NEW.is_active);
+    END IF;
+    RETURN NEW;
+  END IF;
+END;
+$$;
+
+CREATE TRIGGER iran_catalog_reconcile
+AFTER INSERT OR UPDATE OF symbol,name,is_active OR DELETE
+ON public.crypto_assets
+FOR EACH ROW EXECUTE FUNCTION private.enqueue_iran_catalog_reconcile();
+
+-- One call scans at most p_scan_limit observation IDs for the oldest unfinished
+-- event. Cursor progress is committed with the queued dirty IDs in the same tx.
+CREATE OR REPLACE FUNCTION private.process_iran_catalog_reconcile_batch(p_scan_limit integer DEFAULT 100)
+RETURNS integer LANGUAGE plpgsql SET search_path TO '' AS $$
+DECLARE
+  v_job_id bigint;
+  v_asset_id text;
+  v_old_symbol text;
+  v_new_symbol text;
+  v_cursor bigint;
+  v_page_ids bigint[];
+  v_next_cursor bigint;
+  v_enqueued integer;
+BEGIN
+  IF p_scan_limit < 1 OR p_scan_limit > 1000 THEN
+    RAISE EXCEPTION 'p_scan_limit must be between 1 and 1000';
+  END IF;
+
+  SELECT id,asset_id,old_symbol,new_symbol,cursor_id
+    INTO v_job_id,v_asset_id,v_old_symbol,v_new_symbol,v_cursor
+  FROM private.iran_catalog_reconcile_jobs
+  WHERE completed_at IS NULL
+  ORDER BY id
+  LIMIT 1
+  FOR UPDATE SKIP LOCKED;
+
+  IF NOT FOUND THEN RETURN 0; END IF;
+
+  SELECT array_agg(page.id),max(page.id)
+    INTO v_page_ids,v_next_cursor
+  FROM (
+    SELECT o.id
+    FROM public.exchange_asset_observations o
+    WHERE o.id>v_cursor
+    ORDER BY o.id
+    LIMIT p_scan_limit
+  ) page;
+
+  IF v_page_ids IS NULL THEN
+    UPDATE private.iran_catalog_reconcile_jobs
+    SET completed_at=clock_timestamp()
+    WHERE id=v_job_id;
+    RETURN 0;
+  END IF;
+
+  INSERT INTO private.iran_exchange_match_dirty(observation_id,queued_at)
+  SELECT o.id,clock_timestamp()
+  FROM public.exchange_asset_observations o
+  WHERE o.id=ANY(v_page_ids)
+    AND (
+      o.coingecko_id=v_asset_id
+      OR (v_old_symbol IS NOT NULL AND upper(o.base_symbol)=upper(v_old_symbol))
+      OR (v_new_symbol IS NOT NULL AND upper(o.base_symbol)=upper(v_new_symbol))
+    )
+  ON CONFLICT (observation_id)
+  DO UPDATE SET queued_at=EXCLUDED.queued_at;
+
+  GET DIAGNOSTICS v_enqueued=ROW_COUNT;
+  UPDATE private.iran_catalog_reconcile_jobs
+  SET cursor_id=v_next_cursor
+  WHERE id=v_job_id;
+  RETURN cardinality(v_page_ids);
+END;
+$$;
