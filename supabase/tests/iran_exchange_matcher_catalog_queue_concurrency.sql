@@ -71,8 +71,10 @@ DO $$
 BEGIN
   IF (SELECT cursor_id FROM private.iran_catalog_reconcile_jobs
       WHERE asset_id='recovery-asset') <>
-     (SELECT min(id) FROM public.exchange_asset_observations
-      WHERE market_symbol LIKE 'RECOVERY_%') THEN
+     (SELECT max(id) FROM (
+        SELECT id FROM public.exchange_asset_observations
+        WHERE market_symbol LIKE 'RECOVERY_%' ORDER BY id LIMIT 2
+      ) first_committed_page) THEN
     RAISE EXCEPTION 'restarted worker did not resume at the first committed page';
   END IF;
 END $$;
