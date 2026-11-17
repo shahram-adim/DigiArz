@@ -54,7 +54,7 @@ BEGIN
   FROM picked p
   WHERE q.id = p.id
   RETURNING q.id, q.response_id, q.claim_token, q.lease_until;
-END $$$;
+END $$;
 
 CREATE OR REPLACE FUNCTION private.ingest_and_ack_test_batch(p_token uuid)
 RETURNS integer LANGUAGE plpgsql AS $$
@@ -89,7 +89,7 @@ BEGIN
     AND q.lease_until >= clock_timestamp();
   GET DIAGNOSTICS v_count = ROW_COUNT;
   RETURN v_count;
-END $$$;
+END $$;
 
 CREATE OR REPLACE FUNCTION private.release_test_sync_claim(
   p_token uuid,
@@ -124,7 +124,7 @@ BEGIN
   RETURN true;
 EXCEPTION WHEN others THEN
   RETURN false;
-END $$$;
+END $$;
 
 INSERT INTO public.test_http_responses(id,status_code,content,error_msg) VALUES
  (1001,200,'{"assets":[{"symbol":"BTC"}]}',NULL),
@@ -144,7 +144,7 @@ BEGIN
  IF EXISTS (SELECT 1 FROM public.test_sync_requests WHERE claim_token IS NOT NULL) THEN
    RAISE EXCEPTION 'rolled-back claim left a lease behind';
  END IF;
-END $$$;
+END $$;
 
 SELECT * FROM private.claim_test_sync_requests(2, interval '5 minutes',
  'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb');
@@ -160,7 +160,7 @@ BEGIN
  IF private.ingest_and_ack_test_batch('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb') <> 0 THEN
    RAISE EXCEPTION 'expired worker unexpectedly acknowledged reclaimed rows';
  END IF;
-END $$$;
+END $$;
 SELECT private.ingest_and_ack_test_batch('cccccccc-cccc-4ccc-8ccc-cccccccccccc');
 
 SELECT * FROM private.claim_test_sync_requests(2, interval '5 minutes',
@@ -190,7 +190,7 @@ BEGIN
  IF (SELECT count(*) FROM public.test_ingested_responses WHERE response_id=1001) <> 1 THEN
    RAISE EXCEPTION 'idempotent ingestion failed';
  END IF;
-END $$$;
+END $$;
 
 -- Transient worker failures are retried, then dead-lettered at the attempt cap.
 INSERT INTO public.test_http_responses(id,status_code,content)
@@ -282,7 +282,7 @@ BEGIN
     (SELECT count(*) FROM worker_a_claims) + (SELECT count(*) FROM worker_b_claims) <> 4 THEN
    RAISE EXCEPTION 'concurrent claims were not disjoint and complete: %, %',a,b;
  END IF;
-END $$$;
+END $$;
 SELECT dblink_exec('queue_worker_a','ROLLBACK');
 SELECT dblink_exec('queue_worker_b','ROLLBACK');
 SELECT dblink_disconnect('queue_worker_a');
@@ -293,4 +293,4 @@ BEGIN
  IF EXISTS (SELECT 1 FROM public.test_sync_requests WHERE claim_token IS NOT NULL) THEN
    RAISE EXCEPTION 'rolled-back concurrent claims left leases behind';
  END IF;
-END $$$;
+END $$;
