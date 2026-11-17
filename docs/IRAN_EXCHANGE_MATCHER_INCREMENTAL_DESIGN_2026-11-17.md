@@ -241,3 +241,21 @@ In this synthetic fixture, the candidate changed the dirty-batch catalog side fr
 Limitations remain important: the fixture uses unique synthetic symbols, only 18,874 catalog rows and 4,960 observations, warm-cache measurements, and a simplified join rather than the full Production matcher function. It does not model duplicate/ambiguous symbols, alias matching, source-priority logic, concurrent writes, index maintenance cost, or actual Production hardware/cache state. It therefore supports a further test-only investigation, not a Production index decision. No Production DDL/index/function/cron/data was changed.
 
 Exact-decimal workflow on the same head was still executing at last check; matcher fixture success does not imply that separate workflow passed.
+
+
+## Catalog queue recovery, interleaving, and concurrent workers — 2026-11-18
+
+Added focused test file supabase/tests/iran_exchange_matcher_catalog_queue_concurrency.sql and wired it into .github/workflows/iran-exchange-matcher-tests.yml. This file deliberately does not repeat existing matcher semantics, multipage convergence, alias insertion/removal, response-queue lease/retry, or response-worker SKIP LOCKED tests.
+
+New coverage:
+1. **Worker crash/recovery:** a catalog page is processed inside a transaction and rolled back. The test asserts both cursor advancement and dirty-row enqueueing roll back together. A restarted invocation then resumes from the durable cursor over separately committed pages and completes the same job.
+2. **Interleaved catalog event:** event A is advanced to a partial cursor, then event B is inserted. The test verifies A's cursor is unchanged, B starts with its own cursor, and both events eventually complete and match their respective observations.
+3. **Concurrent catalog workers:** two independent dblink PostgreSQL sessions hold transactions concurrently. Worker A locks the oldest event; worker B must skip that locked row and advance the next event. After B commits, A's uncommitted cursor remains invisible/unchanged to the main session; after A commits, the oldest event resumes. Both jobs must eventually complete and match all observations (bounded convergence guard).
+
+The first CI execution exposed an incorrect expected cursor in the test assertion (it expected the first row rather than the second row after a two-row page). The assertion was corrected to expect the maximum ID in the committed two-row page; this was a test-only correction, not a Production code change.
+
+Validation:
+- GitHub Actions matcher fixture run 44184100854 on commit d121c4cc303774ab0012acde93f7efc7ec710c73: **success**.
+- Log explicitly reports “Catalog queue recovery, interleaving, and concurrent-worker tests passed”.
+- The independent exact-decimal workflow on the same commit, run 44184100898, was still in progress at the last check. Do not infer its status from the matcher fixture.
+- No Production DDL, index, function, cron, migration, data, order, wallet, or balance changes were made. PR #11 remains Draft.
