@@ -5,7 +5,8 @@ INSERT INTO public.exchange_asset_sync_requests(exchange, request_id, requested_
 VALUES
  ('nobitex', 1001, transaction_timestamp() - interval '1 minute'),
  ('nobitex', 1002, transaction_timestamp() - interval '1 minute'),
- ('nobitex', 1003, transaction_timestamp() + interval '1 minute');
+ ('nobitex', 1003, transaction_timestamp() + interval '1 minute'),
+ ('nobitex', 1004, transaction_timestamp() - interval '1 minute');
 
 INSERT INTO net._http_response(id, created, status_code, content, error_msg)
 VALUES
@@ -14,7 +15,8 @@ VALUES
  (1002, transaction_timestamp() + interval '1 minute', 200,
   '{"coins":[{"coin":"ETH","name":"Ethereum"}]}', NULL),
  (1003, transaction_timestamp() - interval '1 minute', 200,
-  '{"coins":[{"coin":"SOL","name":"Solana"}]}', NULL);
+  '{"coins":[{"coin":"SOL","name":"Solana"}]}', NULL),
+ (1004, transaction_timestamp() - interval '1 minute', 200, '{invalid-json', NULL);
 
 SELECT public.process_iran_exchange_asset_sync();
 
@@ -32,6 +34,14 @@ BEGIN
     WHERE request_id IN (1002,1003) AND processed_at IS NOT NULL
   ) THEN
     RAISE EXCEPTION 'late HTTP response or future request was incorrectly marked processed';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM public.exchange_asset_sync_requests
+    WHERE request_id=1004 AND processed_at IS NOT NULL
+      AND error_message='Invalid JSON response; skipped safely; request marked processed'
+  ) THEN
+    RAISE EXCEPTION 'invalid JSON response was not safely marked processed with accurate status';
   END IF;
 
   IF NOT EXISTS (
