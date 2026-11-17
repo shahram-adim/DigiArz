@@ -292,3 +292,28 @@ No Production function or data was changed by this review.
 - [ ] Inline-script syntax/flow tests are committed in GitHub Actions, but no completed workflow result was confirmed at this checkpoint.
 
 See \`docs/superpowers/reports/2026-11-15-exact-decimal-implementation-checkpoint.md\` for the full implementation status and release gate.
+
+
+## Review update — 2026-11-17 (main CI and PWA cache boundary)
+
+### Main-branch isolated QA
+- [x] Re-read the current main branch HEAD: `bfc6d9b30bc9e109daf7df2a35b0d0efc33cec5c`.
+- [x] Exact-decimal workflow run `44068551988` completed with `success` on this main commit. The disposable PostgreSQL 17 job passed the Market/Limit entrypoints, Stop-Limit and TP/SL placement, Limit cancellation, two-session Limit/Stop-Limit/TP-SL cancellation races, and parent-child lifecycle integration.
+- [x] The same workflow's Node/browser test step passed, including seven new Service Worker/PWA tests.
+- [x] GitHub Pages run `44068551980` completed with `success`.
+- [x] Android APK workflow run `44068495018` completed with `success` on code commit `348ebd4a222401023549a3cb484806b1e772db65`; artifact `DigiArz-Android-debug-APK` (ID `14320943624`) was produced. This build contains the Service Worker v54 change; the subsequent main commit only added tests.
+- [!] These are disposable PostgreSQL CI tests, not a dedicated Supabase development branch. Supabase branch discovery returned no development branches. Production compatibility and a physical Android install/offline check remain separate gates.
+
+### PWA offline-cache hardening
+- [x] Review found Service Worker v53 cached every successful same-origin GET response at runtime, beyond the declared app shell. Although current Supabase calls use a different origin and bypassed the worker, this broad rule could cache future same-origin user-specific/API responses.
+- [x] Service Worker v54 now pre-caches only the declared app shell, including both manifest icons (`icon-192.svg`, `icon-512.svg`); successful root/index navigation refreshes only the canonical `index.html` cache entry.
+- [x] Unlisted same-origin GET requests are fetched but are not written to Cache Storage. External Supabase/API and non-GET requests remain outside the cache path.
+- [x] Added `tests/service-worker.test.js` with seven tests for Persian RTL standalone manifest metadata, app-shell installation, icon precaching, external/non-GET bypass, no caching of unlisted same-origin responses, navigation refresh, offline fallback, and old-cache cleanup.
+- [x] Local Node 22 test run: 7/7 passed. Main GitHub Actions run `44068551988` also passed the complete `node --test tests/*.test.js` step.
+- [!] Physical Android Chrome install, offline launch, and icon rendering have not yet been manually verified.
+
+### Supabase read-only status
+- [x] Project `gfoaubfilhttnwjykaox` reports `ACTIVE_HEALTHY` on PostgreSQL 17.11.
+- [x] Supabase development branch listing returned an empty list; no isolated Supabase branch is currently available to this connection.
+- [!] Follow-up read-only SQL/table-list calls timed out. No current row-count or live function-body claim is made from those failed calls.
+- [x] No Production SQL, migration, function, grant, cron, order, trade, reservation, wallet, balance, or financial-history row was changed in this review.
