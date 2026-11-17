@@ -148,3 +148,18 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Results and limitations are recorded in docs/IRAN_EXCHANGE_MATCHER_INCREMENTAL_DESIGN_2026-11-17.md on PR #11 branch.
 - Exact-decimal workflow on the same PR head b19273edc94a98c603b3e10529f86c88499c680d, run 44182856169, was still in progress at last check. Do not treat the full PR checks as green until it completes.
 - PR #11 remains Draft; Production remains unchanged.
+
+
+### Catalog queue recovery/interleaving/concurrency — implementation and matcher CI success — 2026-11-18
+- User authorized proceeding from the prior checkpoint without repeating completed tests.
+- Added focused test-only file supabase/tests/iran_exchange_matcher_catalog_queue_concurrency.sql; wired into matcher workflow after existing matcher/plan/response-queue fixtures. Existing matcher semantics, multipage convergence, alias insert/remove, response queue lease/retry, and response-worker concurrency tests were not recreated.
+- Coverage added:
+  1. Simulated worker crash before commit: both cursor advancement and dirty-row enqueue roll back atomically; a restarted worker resumes from durable cursor across committed pages and completes the job.
+  2. Interleaved catalog event: event A is partway through its cursor when event B arrives; A's cursor remains intact, B receives an independent cursor, and both eventually match.
+  3. Two independent dblink PostgreSQL sessions: worker A holds the oldest catalog job lock; worker B skips the locked job and advances the next job. After A commits, the oldest job resumes; bounded convergence asserts neither job starves.
+- Initial CI run found a wrong assertion in the new test (expected first rather than second ID after a two-row page). Corrected the assertion only; no Production logic changed.
+- Latest matcher fixture run 44184100854 on commit d121c4cc303774ab0012acde93f7efc7ec710c73 passed. Logs explicitly say “Catalog queue recovery, interleaving, and concurrent-worker tests passed”.
+- Exact-decimal workflow for the same commit, run 44184100898, was still in progress at last check. Prior exact-decimal run 44182856169 on commit b19273edc94a98c603b3e10529f86c88499c680d completed successfully; do not claim latest-head exact-decimal run passed until verified.
+- PR #11 remains Draft. No Production DDL/index/function/cron/migration/data/order/wallet/balance changes. No merge and no supabase db push.
+- Design/results details recorded in docs/IRAN_EXCHANGE_MATCHER_INCREMENTAL_DESIGN_2026-11-17.md on PR #11 branch.
+- Immediate next step: verify exact-decimal run 44184100898 (and current PR head/checks), then inspect remaining uncovered queue invariants only if they are not already represented in fixtures. Keep PR #11 Draft pending broader production-schema/concurrency/query-plan/migration reconciliation gates.
