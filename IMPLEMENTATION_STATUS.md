@@ -216,3 +216,44 @@
 1. آزمون نصب و حالت آفلاین APK/PWA روی Android و ثبت نتیجه واقعی.
 2. پس از بازیابی اتصال پایدار Supabase، فقط خواندن تعریف کامل تابع `process_iran_exchange_asset_sync()` و ACL برای بستن یا رد gate PR شماره ۸.
 3. ادامهٔ reconciliation مهاجرت‌ها؛ بدون `db push` و بدون تغییر Production تا رفع کامل اختلاف‌ها و اخذ مجوز لازم.
+
+## اجرای مستقل روزانه — ۱۷ نوامبر ۲۰۲۶ (دکمه نصب PWA اندروید)
+
+### اقدام ملموس روی رابط کاربری
+- [x] در index.html یک نوار نصب فارسی و واکنش‌گرا اضافه شد. نوار فقط زمانی ظاهر می‌شود که مرورگر رویداد استاندارد beforeinstallprompt را ارسال کند؛ در مرورگرهای فاقد این قابلیت، دکمهٔ غیرواقعی نمایش داده نمی‌شود.
+- [x] کنترل نصب در فایل مستقل src/pwa-install.js پیاده‌سازی شد: prompt فقط یک بار مصرف می‌شود، هنگام بازشدن prompt دکمه غیرفعال است و پس از انتخاب کاربر یا رویداد appinstalled نوار بسته می‌شود.
+- [x] Service Worker به v55 ارتقا یافت و فایل کنترل نصب به فهرست صریح app shell افزوده شد.
+- [x] workflow ساخت وب Capacitor از قبل کل پوشه src را کپی می‌کند؛ بنابراین فایل جدید در خروجی وب/APK نیز قرار می‌گیرد. ساخت APK جدید پس از این تغییر هنوز باید با CI تأیید شود.
+
+### فایل‌ها و Commitها
+- src/pwa-install.js — 23359ab6cbe54fdcdd5dfc22766cf54c54ea677c
+- index.html — 68e9c6d86a2a7c7f57e70fd9655e34560b16d29a
+- sw.js — 05197c1ae2f955e3aa1d53d570513022e80c338a
+- tests/service-worker.test.js — 3f9358fbb07fb57621c1774a0187581d933bc6d1
+- tests/pwa-install.test.js — c2da5b3a0a2f96dd5fb991bbf2f9a198aa40cd9a
+- Commit فعلی پیش از ثبت این یادداشت: c2da5b3a0a2f96dd5fb991bbf2f9a198aa40cd9a
+
+### آزمون‌ها
+- [x] اجرای محلی Node 22 با دستور node --test tests/*.test.js: تعداد ۱۱ از ۱۱ موفق (۴ آزمون کنترل نصب و ۷ آزمون Service Worker).
+- [x] بازخوانی GitHub پس از commitها: وجود نوار نصب، دکمه، اسکریپت defer و قانون واکنش‌گرا تأیید شد.
+- [x] بازخوانی Service Worker: نسخه v55 و precache فایل src/pwa-install.js تأیید شد.
+- [ ] اجرای GitHub Actions برای HEAD جدید از ابزار خواندن workflow در این اجرا قابل تأیید نبود؛ CI را موفق اعلام نکن.
+- [ ] نصب واقعی APK/PWA، نمایش prompt و اجرای آفلاین روی گوشی Android هنوز تست فیزیکی نشده است.
+
+### Supabase و مرز ایمنی
+- [x] پروژه gfoaubfilhttnwjykaox همچنان ACTIVE_HEALTHY و PostgreSQL 17.11 گزارش شد؛ یک SELECT سبک برای تأیید اتصال و زمان سرور موفق بود.
+- [!] خواندن فهرست جدول‌ها، Migrationها و یک snapshot کاتالوگ بزرگ‌تر با timeout اتصال مواجه شد؛ شمارش تازه یا تعریف زندهٔ توابع مالی از این اجرا ادعا نمی‌شود.
+- [x] فهرست Development Branchها خالی بود؛ محیط Supabase ایزوله از طریق branch در دسترس نیست.
+- [x] هیچ SQL، migration، function، grant، cron، سفارش، معامله، رزرو، کیف پول، موجودی یا سابقه مالی در Production تغییر نکرد.
+
+### وضعیت صفحات و گام بعدی
+- [x] صفحه ورود/پوسته اصلی: نوار نصب شرطی و RTL اضافه شد.
+- [x] زیرساخت PWA: کنترل نصب در app shell و Cache v55 قرار گرفت.
+- [ ] آزمون واقعی Android و تأیید APK جدید در CI باقی است.
+- [ ] Stop-Limit: آزمون‌های PostgreSQL دورریختنی CI در checkpoint قبلی سبز بوده‌اند؛ سازگاری با تابع زنده Production و branch ایزوله هنوز gate جداگانه دارد.
+- [ ] Migration drift، PR شماره ۸ و ACL تابع process_iran_exchange_asset_sync() همچنان نیازمند بازبینی فقط‌خواندنی و reconciliation هستند.
+
+### گام اجرایی بعد
+1. تأیید CI و تولید artifact جدید APK برای HEAD شامل install controller.
+2. آزمون نصب و حالت آفلاین روی گوشی Android.
+3. پس از پایداری اتصال Supabase، بازخوانی فقط‌خواندنی جدول‌ها، Migrationها، تابع sync و ACL؛ بدون db push یا تغییر Production.
