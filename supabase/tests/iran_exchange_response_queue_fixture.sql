@@ -121,18 +121,29 @@ BEGIN
  END IF;
 END $$;
 
--- Claim and commit a two-row batch.
+-- Worker B claims two rows, then its lease expires before acknowledgement.
 SELECT * FROM private.claim_test_sync_requests(2, interval '5 minutes',
  'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb');
-SELECT private.ingest_and_ack_test_batch('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb');
-
--- Force an expired lease and prove it is recoverable by a later worker.
 UPDATE public.test_sync_requests
 SET lease_until = clock_timestamp() - interval '1 second'
-WHERE processed_at IS NULL AND claim_token IS NOT NULL;
+WHERE claim_token='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
+  AND processed_at IS NULL;
+
+-- Worker C recovers those exact rows. The stale worker B token must no longer ack them.
 SELECT * FROM private.claim_test_sync_requests(2, interval '5 minutes',
  'cccccccc-cccc-4ccc-8ccc-cccccccccccc');
+DO $
+BEGIN
+ IF private.ingest_and_ack_test_batch('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb') <> 0 THEN
+   RAISE EXCEPTION 'expired worker unexpectedly acknowledged reclaimed rows';
+ END IF;
+END $;
 SELECT private.ingest_and_ack_test_batch('cccccccc-cccc-4ccc-8ccc-cccccccccccc');
+
+-- The next bounded pass handles the remaining responses.
+SELECT * FROM private.claim_test_sync_requests(2, interval '5 minutes',
+ 'abababab-abab-4aba-8aba-abababababab');
+SELECT private.ingest_and_ack_test_batch('abababab-abab-4aba-8aba-abababababab');
 
 -- A request arriving after a batch snapshot remains claimable on the next pass.
 INSERT INTO public.test_http_responses(id,status_code,content) VALUES
