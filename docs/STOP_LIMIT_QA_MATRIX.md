@@ -323,9 +323,9 @@ See \`docs/superpowers/reports/2026-11-15-exact-decimal-implementation-checkpoin
 - [x] Added a browser-native install affordance to the Persian RTL UI. The banner remains hidden unless the browser dispatches beforeinstallprompt; it does not claim the app is installable on browsers that do not expose that event.
 - [x] The install action consumes the deferred prompt once, disables the button while the prompt is active, hides the banner after the user choice, and also hides it after appinstalled.
 - [x] The controller is loaded as a deferred first-party script and added to the explicit offline app shell. Service Worker cache advanced from v54 to v55 so existing clients replace the previous shell.
-- [x] Added four isolated Node tests for prompt availability, one-shot prompt use, app-installed handling, and dismissed/failed prompt handling.
+- [x] Added five isolated Node tests for prompt availability, one-shot prompt use, app-installed handling, and dismissed/failed prompt handling.
 - [x] Updated Service Worker tests to assert that src/pwa-install.js is precached and both older shell caches are removed.
-- [x] Local Node 22 verification: node --test tests/*.test.js passed 11/11 tests (4 install-controller tests + 7 Service Worker tests).
+- [x] Local Node 22 verification: node --test tests/*.test.js passed 12/12 tests (5 install-controller tests + 7 Service Worker tests).
 - [!] GitHub Actions result for the new commits was not available through the connected workflow-run reader during this execution; do not mark CI as passed until a run for the new HEAD is independently confirmed.
 - [!] Physical Android Chrome install prompt and APK installation have not been exercised on a device. The native prompt is browser-dependent; if beforeinstallprompt is not emitted, the banner intentionally remains hidden.
 - [x] No Supabase schema, functions, permissions, migrations, financial records, or user balances were changed.
@@ -335,7 +335,9 @@ See \`docs/superpowers/reports/2026-11-15-exact-decimal-implementation-checkpoin
 - index.html — 68e9c6d86a2a7c7f57e70fd9655e34560b16d29a
 - sw.js — 05197c1ae2f955e3aa1d53d570513022e80c338a
 - tests/service-worker.test.js — 3f9358fbb07fb57621c1774a0187581d933bc6d1
-- tests/pwa-install.test.js — c2da5b3a0a2f96dd5fb991bbf2f9a198aa40cd9a
+- tests/pwa-install.test.js — b7ad171c2f1a038d21040bfe63043deb140533b2
+
+- [x] Added a separate failure-path test proving a rejected native prompt is caught, the one-shot event is not reused, and the banner closes.
 
 ### Next QA
 1. Confirm a new main-branch GitHub Actions run for the install-controller commits and verify the APK build includes the new controller.
