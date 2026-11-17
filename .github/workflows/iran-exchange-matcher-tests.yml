@@ -38,4 +38,5 @@ jobs:
         run: |
           psql -h localhost -U postgres -d digiarz_matcher_test -v ON_ERROR_STOP=1 \
             -f supabase/tests/iran_exchange_matcher_fixture_setup.sql \
-            -f supabase/tests/iran_exchange_matcher_fixture_integration.sql
+            -f supabase/tests/iran_exchange_matcher_fixture_integration.sql \
+            -f supabase/tests/iran_exchange_response_queue_fixture.sql
