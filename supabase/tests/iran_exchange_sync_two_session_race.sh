@@ -92,3 +92,25 @@ $$;
 DROP TRIGGER test_pause_observation_insert ON public.exchange_asset_observations;
 DROP FUNCTION public.test_pause_observation_insert();
 SQL
+
+# The late response must remain eligible and be consumed on the next worker pass.
+"${psql_base[@]}" -c "SELECT public.process_iran_exchange_asset_sync();"
+
+"${psql_base[@]}" <<'SQL'
+DO $
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM public.exchange_asset_sync_requests
+    WHERE request_id=2002 AND processed_at IS NOT NULL
+  ) THEN
+    RAISE EXCEPTION 'late response was not processed on the following worker run';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM public.exchange_asset_observations
+    WHERE exchange='nobitex' AND market_symbol='ETH'
+  ) THEN
+    RAISE EXCEPTION 'late response was not ingested on the following worker run';
+  END IF;
+END;
+$;
+SQL
