@@ -13,6 +13,28 @@ INSERT INTO public.exchange_asset_observations(exchange,market_symbol,base_symbo
  ('kifpool','KISHU','KISHU','Kishu','{"nameId":"kishu-inu"}',true),
  ('nobitex','INACTIVE','BTC','Bitcoin','{}',false);
 
+-- Generate one synthetic Kifpool observation for every verified alias tuple.
+INSERT INTO public.crypto_assets(coingecko_id,symbol,name,is_active)
+SELECT a.coingecko_id,
+       CASE WHEN a.coingecko_id='kishu-inu' THEN 'KISHU' ELSE 'ALIAS' END,
+       a.current_name,true
+FROM private.test_verified_kifpool_aliases a
+ON CONFLICT(coingecko_id) DO NOTHING;
+INSERT INTO public.exchange_asset_observations(exchange,market_symbol,base_symbol,asset_name,source_payload,is_active)
+SELECT 'kifpool',
+       'ALIAS_'||a.coingecko_id,
+       CASE WHEN a.coingecko_id='kishu-inu' THEN 'KISHU' ELSE 'ALIAS' END,
+       a.legacy_name,
+       jsonb_build_object('nameId',a.coingecko_id),
+       true
+FROM private.test_verified_kifpool_aliases a;
+
+-- Exercise the separate ARPA source-ID transition.
+INSERT INTO public.crypto_assets(coingecko_id,symbol,name,is_active)
+VALUES ('arpa','ARPA','arpa',true);
+INSERT INTO public.exchange_asset_observations(exchange,market_symbol,base_symbol,asset_name,source_payload,is_active)
+VALUES ('kifpool','ARPA_LEGACY','ARPA','arpachain','{"nameId":"arpa-chain"}',true);
+
 -- Full-scan baseline snapshot.
 SELECT private.match_iran_exchange_observations(NULL);
 CREATE TEMP TABLE expected_initial AS
@@ -35,8 +57,14 @@ BEGIN
  THEN RAISE EXCEPTION 'Short non-exact Doge name should remain pending'; END IF;
  IF (SELECT match_status FROM public.exchange_asset_observations WHERE market_symbol='NOPE') <> 'unmatched'
  THEN RAISE EXCEPTION 'No-symbol observation should be unmatched'; END IF;
- IF (SELECT coingecko_id FROM public.exchange_asset_observations WHERE exchange='kifpool') <> 'kishu-inu'
- THEN RAISE EXCEPTION 'Verified Kifpool legacy alias was not preserved'; END IF;
+ IF (SELECT coingecko_id FROM public.exchange_asset_observations WHERE market_symbol='ARPA_LEGACY') <> 'arpa'
+ THEN RAISE EXCEPTION 'Kifpool ARPA legacy source-ID transition was not preserved'; END IF;
+ IF (SELECT count(*) FROM public.exchange_asset_observations o
+     JOIN private.test_verified_kifpool_aliases a
+       ON o.market_symbol='ALIAS_'||a.coingecko_id
+     WHERE o.match_status='matched' AND o.coingecko_id=a.coingecko_id)
+    <> (SELECT count(*) FROM private.test_verified_kifpool_aliases)
+ THEN RAISE EXCEPTION 'One or more verified Kifpool aliases failed'; END IF;
  IF (SELECT match_status FROM public.exchange_asset_observations WHERE market_symbol='INACTIVE') <> 'pending'
  THEN RAISE EXCEPTION 'Inactive observation should not be rewritten'; END IF;
 END $$;
