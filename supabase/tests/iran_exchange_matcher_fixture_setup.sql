@@ -247,6 +247,9 @@ $$;
 CREATE TABLE private.iran_catalog_reconcile_jobs (
   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   asset_id text NOT NULL,
+  job_kind text NOT NULL DEFAULT 'asset',
+  old_alias_name text,
+  new_alias_name text,
   old_symbol text,
   new_symbol text,
   old_name text,
@@ -291,11 +294,47 @@ FOR EACH ROW EXECUTE FUNCTION private.enqueue_iran_catalog_reconcile();
 
 -- One call scans at most p_scan_limit observation IDs for the oldest unfinished
 -- event. Cursor progress is committed with the queued dirty IDs in the same tx.
+
+
+-- Alias-map changes enqueue a targeted Kifpool reconciliation event too.
+CREATE OR REPLACE FUNCTION private.enqueue_iran_kifpool_alias_reconcile()
+RETURNS trigger LANGUAGE plpgsql SET search_path TO '' AS $
+BEGIN
+  IF TG_OP='INSERT' THEN
+    INSERT INTO private.iran_catalog_reconcile_jobs
+      (asset_id,job_kind,new_alias_name)
+    VALUES (NEW.coingecko_id,'kifpool_alias',NEW.legacy_name);
+    RETURN NEW;
+  ELSIF TG_OP='DELETE' THEN
+    INSERT INTO private.iran_catalog_reconcile_jobs
+      (asset_id,job_kind,old_alias_name)
+    VALUES (OLD.coingecko_id,'kifpool_alias',OLD.legacy_name);
+    RETURN OLD;
+  ELSE
+    IF OLD.legacy_name IS DISTINCT FROM NEW.legacy_name
+       OR OLD.current_name IS DISTINCT FROM NEW.current_name THEN
+      INSERT INTO private.iran_catalog_reconcile_jobs
+        (asset_id,job_kind,old_alias_name,new_alias_name)
+      VALUES (NEW.coingecko_id,'kifpool_alias',OLD.legacy_name,NEW.legacy_name);
+    END IF;
+    RETURN NEW;
+  END IF;
+END;
+$;
+
+CREATE TRIGGER iran_kifpool_alias_reconcile
+AFTER INSERT OR UPDATE OR DELETE
+ON private.test_verified_kifpool_aliases
+FOR EACH ROW EXECUTE FUNCTION private.enqueue_iran_kifpool_alias_reconcile();
+
 CREATE OR REPLACE FUNCTION private.process_iran_catalog_reconcile_batch(p_scan_limit integer DEFAULT 100)
 RETURNS integer LANGUAGE plpgsql SET search_path TO '' AS $$
 DECLARE
   v_job_id bigint;
   v_asset_id text;
+  v_job_kind text;
+  v_old_alias_name text;
+  v_new_alias_name text;
   v_old_symbol text;
   v_new_symbol text;
   v_cursor bigint;
@@ -307,8 +346,8 @@ BEGIN
     RAISE EXCEPTION 'p_scan_limit must be between 1 and 1000';
   END IF;
 
-  SELECT id,asset_id,old_symbol,new_symbol,cursor_id
-    INTO v_job_id,v_asset_id,v_old_symbol,v_new_symbol,v_cursor
+  SELECT id,asset_id,job_kind,old_alias_name,new_alias_name,old_symbol,new_symbol,cursor_id
+    INTO v_job_id,v_asset_id,v_job_kind,v_old_alias_name,v_new_alias_name,v_old_symbol,v_new_symbol,v_cursor
   FROM private.iran_catalog_reconcile_jobs
   WHERE completed_at IS NULL
   ORDER BY id
@@ -339,9 +378,17 @@ BEGIN
   FROM public.exchange_asset_observations o
   WHERE o.id=ANY(v_page_ids)
     AND (
-      o.coingecko_id=v_asset_id
-      OR (v_old_symbol IS NOT NULL AND upper(o.base_symbol)=upper(v_old_symbol))
-      OR (v_new_symbol IS NOT NULL AND upper(o.base_symbol)=upper(v_new_symbol))
+      (v_job_kind='asset' AND (
+        o.coingecko_id=v_asset_id
+        OR (v_old_symbol IS NOT NULL AND upper(o.base_symbol)=upper(v_old_symbol))
+        OR (v_new_symbol IS NOT NULL AND upper(o.base_symbol)=upper(v_new_symbol))
+      ))
+      OR (v_job_kind='kifpool_alias' AND o.exchange='kifpool'
+        AND o.source_payload->>'nameId'=v_asset_id
+        AND regexp_replace(lower(o.asset_name),'[^a-z0-9]','','g') IN (
+          regexp_replace(lower(coalesce(v_old_alias_name,'')),'[^a-z0-9]','','g'),
+          regexp_replace(lower(coalesce(v_new_alias_name,'')),'[^a-z0-9]','','g')
+        ))
     )
   ON CONFLICT (observation_id)
   DO UPDATE SET queued_at=EXCLUDED.queued_at;
