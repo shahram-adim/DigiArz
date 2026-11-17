@@ -129,3 +129,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - No Production index, DDL, function, cron, migration history, orders, balances, or data were changed.
 
 **Next action:** inspect the latest-head matcher workflow result and its plan output. If the experiment fails, fix only the test fixture and rerun; if it passes, record the observed plan/timing comparison and decide whether further synthetic testing is warranted. Do not create any Production index from this experiment alone.
+
+
+### Matcher plan experiment — initial result and repeated-run refinement — 2026-11-18
+- First single-pass disposable PostgreSQL 17 experiment passed on PR #11 head 79a172dcec406e43be4c900dfd348cef8251f330 (run 44182523044).
+- One warm-ish fixture pass measured dirty batch (100 observations): 4.534 ms with only lower(symbol), versus 0.137 ms with candidate upper(symbol); full 4,960-observation join: 7.644 ms versus 5.384 ms. The candidate changed the dirty-batch plan from full catalog Seq Scan/Hash Join to catalog upper(symbol) Index Scan/Merge Join. Full-scan behavior used a different plan and did not show the same magnitude of benefit.
+- These are single-run synthetic fixture observations only; they are not robust benchmarks and are not proof that a Production index is appropriate. No Production change was made.
+- To avoid over-relying on one run, the fixture was refined in commit b19273edc94a98c603b3e10529f86c88499c680d to warm each scenario and collect five warm-cache runs, reporting median/min/max plus representative plan. This is a test-only change on PR #11 branch.
+- New-head CI runs 44182855849 (matcher fixture) and 44182856169 (exact-decimal) were in progress at the last check. Do not report the repeated-run experiment as passing until run 44182855849 completes successfully and its output is inspected.
+- PR #11 remains Draft. Production DDL/index/function/cron/data are unchanged.
