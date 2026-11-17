@@ -73,7 +73,7 @@ test('appinstalled event hides the install banner', () => {
   assert.equal(h.banner.classList.contains('hidden'), true);
 });
 
-test('dismissed or failed install prompt is not reused', async () => {
+test('dismissed install prompt is not reused', async () => {
   const h = createHarness();
   let promptCalls = 0;
   h.windowListeners.get('beforeinstallprompt')({
@@ -85,4 +85,24 @@ test('dismissed or failed install prompt is not reused', async () => {
   await h.buttonListeners.get('click')();
   assert.equal(promptCalls, 1);
   assert.equal(h.banner.classList.contains('hidden'), true);
+});
+
+
+test('failed browser prompt is not reused and hides the banner', async () => {
+  const h = createHarness();
+  let promptCalls = 0;
+  h.windowListeners.get('beforeinstallprompt')({
+    preventDefault() {},
+    async prompt() {
+      promptCalls += 1;
+      throw new Error('prompt unavailable');
+    },
+    userChoice: Promise.resolve({ outcome: 'dismissed' })
+  });
+  await h.buttonListeners.get('click')();
+  await h.buttonListeners.get('click')();
+  assert.equal(promptCalls, 1);
+  assert.equal(h.banner.classList.contains('hidden'), true);
+  assert.equal(h.button.disabled, false);
+  assert.equal(h.warnings.length, 1);
 });
