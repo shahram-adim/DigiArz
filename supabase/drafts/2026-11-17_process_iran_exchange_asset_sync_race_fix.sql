@@ -12,12 +12,26 @@ CREATE OR REPLACE FUNCTION public.process_iran_exchange_asset_sync()
  SECURITY DEFINER
  SET search_path TO ''
 AS $function$
-declare v_ingested integer := 0; v_processed integer := 0;
+declare
+ v_ingested integer := 0;
+ v_processed integer := 0;
+ v_response_ids bigint[];
 begin
+ -- Freeze the exact HTTP response set visible at worker start. Later statements
+ -- must use this captured set so READ COMMITTED cannot mark a newly committed
+ -- response processed when the ingest statement did not see it.
+ select coalesce(array_agg(r.id), array[]::bigint[])
+ into v_response_ids
+ from public.exchange_asset_sync_requests q
+ join net._http_response r on r.id=q.request_id
+ where q.processed_at is null
+   and q.requested_at < transaction_timestamp()
+   and r.created < transaction_timestamp();
+
  with resp as (
   select q.exchange,q.request_id,private.try_parse_jsonb(r.content) j,r.status_code,r.error_msg
   from public.exchange_asset_sync_requests q join net._http_response r on r.id=q.request_id
-  where q.processed_at is null and q.requested_at < transaction_timestamp() and r.created < transaction_timestamp() and r.status_code=200 and r.content is not null and private.try_parse_jsonb(r.content) is not null
+  where q.processed_at is null and q.requested_at < transaction_timestamp() and r.id = any(v_response_ids) and r.status_code=200 and r.content is not null and private.try_parse_jsonb(r.content) is not null
  ), rows as (
   select 'nobitex'::text exchange,upper(x->>'coin') market_symbol,upper(x->>'coin') base_symbol,null::text quote_symbol,x->>'name' asset_name,'https://apiv2.nobitex.ir/v2/options'::text source_url,x source_payload,true is_active
   from resp r cross join lateral jsonb_array_elements(r.j->'coins') x where r.exchange='nobitex' and x->>'coin' is not null
@@ -52,7 +66,7 @@ begin
  asset_name=coalesce(excluded.asset_name,public.exchange_asset_observations.asset_name),source_payload=excluded.source_payload,is_active=excluded.is_active,last_seen_at=now();
  get diagnostics v_ingested=row_count;
  update public.exchange_asset_sync_requests q set processed_at=now(),http_status=r.status_code,error_message=case when r.status_code=200 and private.try_parse_jsonb(r.content) is null then 'Invalid JSON response; skipped safely and will retry on next scheduled sync' else left(r.error_msg,500) end
- from net._http_response r where r.id=q.request_id and q.processed_at is null and q.requested_at < transaction_timestamp() and r.created < transaction_timestamp();
+ from net._http_response r where r.id=q.request_id and r.id = any(v_response_ids) and q.processed_at is null;
  get diagnostics v_processed=row_count;
  with kifpool_exact as (
   select o.id,ca.coingecko_id
