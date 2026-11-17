@@ -54,6 +54,16 @@ PR #8 contains a response-ID snapshot intended to prevent a READ COMMITTED queue
 
 A change to `crypto_assets.symbol`, `name`, `is_active`, or alias/legacy mapping data can invalidate previous decisions. Add a low-frequency bounded reconciliation mechanism for affected observations. Do not assume `last_seen_at` is a dirty marker; it is refreshed by normal exchange syncs.
 
+A candidate design for testing (not yet implemented) is a durable catalog-change work queue. Each event should retain the asset ID plus the old and new normalized symbol/name and active state, or an alias-map key when that mapping changes. A bounded worker then walks observations in primary-key order using a persisted cursor and re-evaluates rows that could be affected by either the old or new catalog values. The cursor/event must remain resumable until the scan is complete; new events must not reset or starve older work. For symbol changes and deactivation, include observations that were previously matched to the changed asset, not only currently unmatched rows, so stale matches can be cleared. Alias changes must target Kifpool observations whose source ID/name can be affected. Reprocessing must remain idempotent and must not arbitrarily resolve ambiguous candidates.
+
+Required synthetic tests before production design:
+- insert/activate an asset and rematch a previously unmatched or pending observation;
+- rename an asset and clear or update a stale previous match;
+- deactivate an asset and ensure affected observations are no longer left matched to it;
+- change a verified alias/legacy mapping and reconsider only the affected Kifpool observations;
+- use more affected observations than one batch and prove cursor progress, restart recovery, and no starvation;
+- interleave a new catalog event while a prior event is part-way through its scan.
+
 ### E. Transaction boundaries and failure isolation
 
 Evaluate separating ingestion/response acknowledgement from matching so a matcher timeout does not roll back successfully ingested observations. If separate functions are introduced, explicitly review:
@@ -101,7 +111,7 @@ Do not introduce a public SECURITY DEFINER entry point merely to make cron calls
 1. Which dirty-row mechanism best fits the actual observation table schema and current upsert semantics?
 2. What batch size and claim lease are safe under the project's current compute limits?
 3. Should matching be a separate function/cron job or a bounded phase invoked after ingestion?
-4. Which catalog update paths can enqueue affected observations, including alias-map changes?
+4. Which catalog update paths can enqueue affected observations, including alias-map changes, and can the event queue retain old and new values safely?
 5. What observability fields/counters are needed to detect queue age, retry starvation, and matcher backlog?
 
 These decisions must be resolved against the actual schema and disposable PostgreSQL tests before writing the production migration.
