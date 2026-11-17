@@ -152,3 +152,10 @@ The fixture includes:
 - two independent dblink sessions holding transactions concurrently, asserting two disjoint claims each and four total claimed rows, then rolling both transactions back.
 
 **Scope limits:** all queue tables and functions are synthetic test objects, not the production `exchange_asset_sync_requests` or `net._http_response` definitions. The test proves a bounded claim/lease pattern and transaction-level behavior in the fixture only. It does not establish that Production has the required columns, indexes, constraints, pg_net retention behavior, privileges, or compatible cron scheduling. It does not yet test lease-heartbeat extension, maximum-attempt/dead-letter policy, worker termination after external HTTP effects, or end-to-end atomicity against the actual production ingestion function. PR #8 remains untouched and Draft; no Production SQL or cron changes were made.
+
+
+## Retry cap and dead-letter fixture coverage (2026-11-17)
+
+The synthetic HTTP response queue fixture now also models transient worker failures with a configurable maximum-attempt policy (default test value: 3). A failed claimed item is released for retry while below the cap; once the claim attempt count reaches the cap, the fixture records a distinct `dead_lettered_at` timestamp and terminal reason. Dead-lettered rows are excluded from subsequent claims and remain distinct from successfully processed rows. The test verifies two retry releases, terminal dead-lettering on attempt three, and that a later claim cannot pick the terminal row.
+
+This remains test-only behavior. It does not define the Production retry cap, error classification, alerting/administrative replay process, or actual queue schema. Production policy must be selected from measured upstream failure behavior and operational requirements before implementation.
