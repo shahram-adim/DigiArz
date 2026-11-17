@@ -97,7 +97,7 @@ SQL
 "${psql_base[@]}" -c "SELECT public.process_iran_exchange_asset_sync();"
 
 "${psql_base[@]}" <<'SQL'
-DO $
+DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM public.exchange_asset_sync_requests
@@ -112,5 +112,5 @@ BEGIN
     RAISE EXCEPTION 'late response was not ingested on the following worker run';
   END IF;
 END;
-$;
+$$;
 SQL
