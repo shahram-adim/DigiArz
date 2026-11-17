@@ -185,3 +185,118 @@
 3. ۲۰ timestamp mismatch را یکی‌یکی با محتوای SQL مقایسه کن؛ هیچ تاریخچه‌ای را دستی تغییر نده.
 4. پس از reconciliation، کل مجموعه را روی PostgreSQL 17 دورریختنی replay کن و وجود سقف ۵۱۵، سه provider و cron schedule نهایی را در post-check اثبات کن.
 5. افزایش precision مالی Production همچنان منوط به دستور صریح انتقال و preflight تازه است.
+
+
+## بررسی زنده چرخه کشف دارایی و رقابت صف درخواست‌ها — ۱۷ نوامبر ۲۰۲۶
+- [x] آمار زنده Supabase: ۴٬۹۶۰ مشاهدهٔ صرافی، ۱٬۳۱۶ دارایی یکتا در آخرین گزارش، ۸۹۰ دارایی فهرست مدیر، ۳۶۷ جفت فعال، ۸۹۷ ردیف قیمت.
+- [x] هر ۸۹۰ دارایی فهرست مدیر در لحظهٔ بررسی قیمت مثبت و تازه‌تر از ۲ دقیقه داشتند؛ منبع‌های قیمت فعال: CoinGecko (۵۳۷)، Gate.io (۳۴۴)، KuCoin (۱۶).
+- [x] تابع کشف فعلی ۳۹۵ دارایی pending/ambiguous/unmatched برمی‌گرداند؛ فقط ۱ مورد در join فعلی به قیمت تازهٔ market_prices متصل می‌شد. این تابع عمداً فقط قیمت بازار برای نماد USDT را می‌خواند و source_payload قیمت‌های مستقیم صرافی را وارد market_prices نمی‌کند.
+- [x] کشف شد process_iran_exchange_asset_sync() در یک statement داده‌های درخواست‌های آماده را ingest می‌کند، اما در statement بعدی همهٔ درخواست‌های processed_at IS NULL را علامت می‌زند. اگر درخواست/پاسخ هم‌زمان با شروع worker برسد، ممکن است پاسخ در CTE اول دیده نشود ولی در UPDATE دوم علامت‌گذاری شود.
+- [x] شواهد زنده: در ۲۴ ساعت اخیر ۶۵۸ درخواست ایران ثبت شده؛ ۳۰۸ مورد processed_at < requested_at دارند. ۳۰۸ = ۴۴ چرخهٔ هم‌زمان × ۷ صرافی، با الگوی زمانی هم‌راستا با cron درخواست هر ۱۰ دقیقه و worker هر دقیقه. آخرین پاسخ‌های HTTP نمونه status 200 و payload معتبر داشتند، ولی last_seen_at مشاهدات چند صرافی قدیمی مانده بود.
+- [x] هیچ SQL، جدول، cron، تابع، Edge Function یا دادهٔ Production در این بررسی تغییر نکرد.
+- [x] شاخهٔ آزمایشی fix/iran-exchange-sync-response-race ساخته شد؛ کاندید اصلاح در supabase/drafts/2026-11-17_process_iran_exchange_asset_sync_race_fix.sql قرار گرفت. شرط cutoff هم زمان ثبت درخواست و هم زمان ایجاد پاسخ HTTP را پیش از transaction timestamp بررسی می‌کند تا درخواست یا پاسخ دیررس نه ingest و نه processed شود.
+- [x] تست نگهبان Node در tests/iran-exchange-sync-race.test.js اضافه شد.
+- [!] کاندید فقط draft است؛ هنوز روی Supabase Production اعمال نشده و داده‌های قبلیِ ازدست‌رفته دوباره‌صف‌بندی نشده‌اند.
+- [ ] پس از تأیید CI، PR باید بازبینی شود؛ سپس در انتشار جداگانه، اصلاح تابع و برنامهٔ پردازش امن پاسخ‌های جدید انجام شود. بازیابی پاسخ‌های قدیمی فقط پس از بررسی سن و تازگی هر پاسخ انجام شود.
+- [ ] پس از پایدارشدن ingestion، طراحی مرحلهٔ قیمت اولیه برای دارایی‌های تازه باید با قیمت‌های USDT معتبر و چندمنبعی انجام شود؛ قیمت IRT/IRR بدون تبدیل کنترل‌شده نباید به‌عنوان USD وارد موتور معامله شود.
+
+
+### تکمیل آزمون مستقل اصلاح صف صرافی‌ها — ۱۷ نوامبر ۲۰۲۶
+- [x] یک fixture مستقل PostgreSQL 17 برای تابع کامل process_iran_exchange_asset_sync() اضافه شد.
+- [x] تست واقعی تابع ثابت کرد پاسخ قدیمی BTC ingest و processed می‌شود.
+- [x] تست واقعی تابع ثابت کرد پاسخ HTTP دیررس ETH نه ingest می‌شود و نه processed.
+- [x] تست واقعی تابع ثابت کرد درخواست تازه SOL نه ingest می‌شود و نه processed.
+- [x] Workflow اصلی CI یک مرحلهٔ مستقل برای اجرای setup، تابع draft و integration SQL اضافه کرد.
+- [x] اجرای Workflow روی Commit bc069fb7159607458586f0898fa747feae4f2c68 با نتیجهٔ موفق پایان یافت؛ مرحلهٔ اختصاصی PostgreSQL نیز موفق بود.
+- [!] PR شماره ۸ همچنان Draft است؛ هیچ تغییری روی Production اعمال نشده و بازصف‌بندی داده‌های ازدست‌رفته هنوز انجام نشده است.
+
+
+### بررسی امکان بازیابی پاسخ‌های ازدست‌رفته — ۱۷ نوامبر ۲۰۲۶
+- [x] در بازهٔ ۷ روزهٔ موجود، ۳۱۵ درخواست الگوی processed_at < requested_at داشتند؛ ۱۵۴ مورد از آن‌ها پاسخ HTTP 200 با JSON قابل‌تجزیه داشتند که بعد از processed_at رسیده بود.
+- [x] از ۱۵۴ پاسخ دیررس، فقط ۲۸ پاسخ در یک ساعت اخیر، ۱۴ پاسخ در ۳۰ دقیقه اخیر و ۷ پاسخ در ۵ دقیقه اخیر بودند؛ قدیمی‌ترین پاسخ 02:30 UTC و جدیدترین 08:00 UTC بود.
+- [!] replay مستقیم این پاسخ‌ها ناامن است: تابع فعلی last_seen_at را با now() تنظیم می‌کند و دادهٔ قدیمی را به‌اشتباه تازه جلوه می‌دهد. هیچ پاسخ تاریخی دوباره ingest نشد.
+- [x] تصمیم ایمن: اصلاح worker باعث می‌شود درخواست‌های زمان‌بندی‌شدهٔ بعدی با پاسخ تازه پردازش شوند. هر بازیابی تاریخی احتمالی باید last_seen_at را از زمان واقعی net._http_response.created بگیرد و از auto-activation جلوگیری کند؛ این مسیر هنوز ساخته نشده.
+- [x] CI نهایی روی commit d3f873a450073ee352a42dc574b99986017eed04 با موفقیت کامل شد؛ مرحلهٔ اختصاصی PostgreSQL race integration و همهٔ تست‌های exact-decimal/market/limit/stop-limit/TP-SL موفق بودند.
+- [!] PR شماره ۸ همچنان Draft است؛ Production دست‌نخورده مانده است.
+
+
+### بازبینی عمیق‌تر PR اصلاح صف صرافی‌ها — ۱۷ نوامبر ۲۰۲۶
+- [x] تعریف زندهٔ Production فقط‌خواندنی دوباره بررسی شد: امضای تابع بدون آرگومان و خروجی jsonb؛ owner برابر postgres؛ SECURITY DEFINER فعال؛ search_path خالی؛ اجرای anon و authenticated غیرفعال و service_role فعال. شروط cutoff پیشنهادی هنوز در Production وجود ندارند.
+- [x] مشخص شد PostgreSQL در سطح پیش‌فرض READ COMMITTED برای هر statement snapshot جداگانه می‌گیرد؛ دو statement متوالی در یک transaction می‌توانند commitهای جدید بین خود را ببینند. مرجع: https://www.postgresql.org/docs/17/transaction-iso.html
+- [!] بنابراین شرط transaction_timestamp() به‌تنهایی race را کامل نمی‌بندد: ممکن است ردیف پاسخ HTTP در زمان INSERT/ingest هنوز commit نشده باشد، اما قبل از UPDATE بعدی commit شود؛ UPDATE آن را ببیند و processed_at را پر کند، درحالی‌که CTE قبلی آن پاسخ را ingest نکرده است.
+- [!] تست integration فعلی با timestampهای آینده، حالت پاسخ دیررسِ قابل‌مشاهده را می‌سنجد، اما رقابت واقعی commit بین دو statement را با دو نشست مستقل بازسازی نمی‌کند.
+- [!] PR شماره ۸ برای rollout مسدود باقی می‌ماند. راه اصلاح باید ingest و processed marking را بر یک مجموعهٔ واحد از responseهای قابل‌مشاهده در یک statement/یک snapshot متکی کند، یا راهکار هم‌ارز با اثبات concurrency داشته باشد؛ صرفاً افزودن تأخیر زمانی به cutoff کافی نیست.
+- [x] هیچ تغییری در Production، cronها، داده‌ها یا وضعیت Draft/Review/merge مربوط به PR انجام نشد.
+
+
+### بازطراحی کاندید برای بستن race بین دو statement — ۱۷ نوامبر ۲۰۲۶
+- [x] کاندید تابع اصلاح شد: در ابتدای worker شناسهٔ تمام responseهای HTTP متناظر با درخواست‌های pending و واجد cutoff در آرایهٔ `v_response_ids` ثبت می‌شود.
+- [x] مرحلهٔ ingest و مرحلهٔ UPDATE پردازش، هر دو فقط از همان مجموعهٔ شناسه‌های snapshot‌شده استفاده می‌کنند؛ بنابراین responseای که بعد از statement ثبت شناسه‌ها commit شود، حتی اگر در statement بعدی قابل‌مشاهده شود، نه ingest می‌شود و نه processed.
+- [x] آزمون Node به قرارداد جدید تغییر کرد و وجود capture شناسه‌ها و استفادهٔ مشترک در هر دو مرحله را کنترل می‌کند.
+- [!] CI برای commit کد `c495291a3239406e102ba1c7d47689141d473fc2` هنوز از ابزار در دسترس این نشست قابل تأیید نیست؛ run خالی به معنی success نیست.
+- [!] آزمون PostgreSQL فعلی همچنان سناریوهای دادهٔ دیررس را پوشش می‌دهد، اما برای اثبات commit بین snapshot capture و ingest باید تست واقعی دو نشست مستقل اضافه شود.
+- [!] کاندید همچنان Draft است و Production تغییر نکرده؛ پیش از rollout باید نوع واقعی `net._http_response.id`، حجم قابل‌قبول آرایه و رفتار concurrency با دو نشست بررسی شود.
+
+
+### آزمون هم‌زمانی واقعی دو نشست برای صف صرافی‌ها — ۱۷ نوامبر ۲۰۲۶
+- [x] اسکریپت مستقل `supabase/tests/iran_exchange_sync_two_session_race.sh` اضافه شد؛ نشست اول worker را تا مرحلهٔ ingest متوقف می‌کند و نشست دوم در همان فاصله یک request و HTTP response جدید را commit می‌کند.
+- [x] آزمون پس از پایان worker تأیید می‌کند پاسخ قدیمیِ snapshotشده پردازش شده، اما پاسخ تازه نه ingest شده و نه processed_at گرفته است.
+- [x] مرحلهٔ اختصاصی اجرای دو نشست به Workflow اصلی CI متصل شد.
+- [x] اجرای GitHub Actions شمارهٔ ۳۰۷، run ID `44045971074`، روی commit نهایی workflow با نتیجهٔ success تمام شد؛ هر ۲۳ مرحلهٔ اصلی از جمله آزمون دو نشست موفق بودند.
+- [x] آخرین commit شاخه `71cb3e443dd6411db0189cf8db8114ebf1588964` است. شاخه نسبت به main پانزده commit جلو و صفر commit عقب است.
+- [!] PR شمارهٔ ۸ همچنان Draft است و review ثبت‌شده ندارد. موفقیت آزمون، جایگزین بازبینی مستقل تغییر تابع نیست.
+- [!] Production همچنان نسخهٔ قبلی تابع را اجرا می‌کند؛ هیچ SQL، داده، cron یا Edge Function در Production تغییر نکرده است. هیچ replay تاریخی انجام نشده است.
+
+
+### تأیید CI نهایی و تست race اصلاح‌شده — ۱۷ نوامبر ۲۰۲۶
+- [x] اجرای کامل GitHub Actions با شناسهٔ `44059391852` روی commit `62a581007fa8641c1efcbcf4df3a117b2da76d1c` با نتیجهٔ success پایان یافت.
+- [x] هر ۲۳ مرحلهٔ اصلی workflow موفق شدند؛ از جمله آزمون مستقل PostgreSQL، آزمون واقعی دو نشست صف صرافی‌ها، arithmetic regression، rehearsalهای schema widening، Market/Limit، Stop-Limit، TP-SL و چرخه‌های cancellation/concurrency.
+- [x] سناریوی دو نشست اصلاح شد تا request شمارهٔ 2002 پیش از شروع worker اول در صف وجود داشته باشد و فقط HTTP response آن در نشست دوم، پس از snapshot شناسه‌های worker اول، commit شود.
+- [x] آزمون ثابت کرد worker اول پاسخ دیررس را نه ingest می‌کند و نه processed علامت می‌زند؛ worker دوم همان پاسخ را با موفقیت پردازش می‌کند.
+- [x] متن PR شمارهٔ ۸ با نتیجهٔ قطعی CI و SHA دقیق به‌روزرسانی شد.
+- [!] PR شمارهٔ ۸ همچنان Draft و باز است؛ هیچ review یا review thread ثبت نشده و merge انجام نشده است.
+- [!] Production compatibility gate هنوز باز است: نوع واقعی `net._http_response.id`، تطبیق کامل تابع زنده با draft و grants باید با اتصال پایدار Supabase تأیید شوند. نوع bigint در fixture آزمایشی، اثبات نوع ستون Production نیست.
+- [!] هیچ SQL، داده، cron، Edge Function یا migration در Production تغییر نکرده است؛ هیچ replay تاریخی انجام نشده است.
+
+
+### پیش‌بررسی سازگاری Production و CI نهایی — ۱۷ نوامبر ۲۰۲۶
+- [x] فایل فقط‌خواندنی `supabase/drafts/2026-11-17_iran_exchange_sync_production_compatibility_preflight.sql` به شاخه آزمایشی افزوده شد؛ خروجی موردنیاز شامل نوع واقعی `net._http_response.id`، نسخه و schema افزونه pg_net، تعریف و ACL تابع زنده، نوع آرایهٔ تجمیع شناسه‌ها، اندازه صف پاسخ‌های متناظر و Cronهای مربوط است.
+- [x] در کوئری شمارش پاسخ‌های متناظر، کلید join با قرارداد واقعی کد صف یعنی `q.request_id` تطبیق داده شد؛ هیچ نام ستون فرضی `http_response_id` باقی نمانده است.
+- [x] اجرای CI شماره ۳۱۷، run ID `44062785493`، روی تغییرات جدید با نتیجهٔ `success` پایان یافت؛ تمام ۲۳ مرحله اصلی از جمله PostgreSQL race integration و تست واقعی دو نشست موفق شدند.
+- [!] فایل preflight هنوز روی Supabase Production اجرا نشده است؛ نوع واقعی شناسه و تطبیق نهایی تابع/مجوزها همچنان gate باز هستند.
+- [!] هیچ SQL، Migration، تابع، Cron یا داده‌ای در Production تغییر نکرده است. PR شماره ۸ همچنان Draft و باز است و نباید Merge یا Ready شود.
+
+
+### تأیید نوع شناسهٔ پاسخ در Supabase Production — ۱۷ نوامبر ۲۰۲۶
+- [x] اتصال فقط‌خواندنی به پروژهٔ `gfoaubfilhttnwjykaox` برقرار شد و پرس‌وجوی کم‌حجم catalog نوع ستون `net._http_response.id` را `bigint` و نوع `array_agg(id)` را `bigint[]` تأیید کرد؛ بنابراین نوع آرایهٔ کاندید race fix با ستون زنده سازگار است.
+- [x] همان پرس‌وجو وضعیت تابع زنده را نیز تأیید کرد: `SECURITY DEFINER = true` و تنظیم `search_path` خالی است.
+- [!] پرس‌وجوی جداگانه برای دریافت کامل `pg_get_functiondef` و ACL در این نوبت به connection timeout خورد؛ تطبیق کامل بدنه و مجوزها هنوز باز است و نباید از نتیجهٔ نوع ستون به‌عنوان تأیید کل تابع برداشت شود.
+- [x] هیچ تغییری در Production انجام نشد؛ فقط SELECT روی catalog اجرا شد.
+
+
+### تکمیل CI و تلاش نهایی محدود برای دریافت ACL — ۱۷ نوامبر ۲۰۲۶
+- [x] اجرای GitHub Actions شمارهٔ ۳۱۹، run ID `44063499108`، روی commit `214e26c9fbe0193a042ae3b432575e6688b8f8bb` با نتیجهٔ `success` پایان یافت؛ هر ۲۳ مرحلهٔ اصلی موفق شدند، از جمله تست PostgreSQL race و تست واقعی دو نشست.
+- [x] وضعیت PR شمارهٔ ۸ و مقایسهٔ شاخه دوباره تأیید شد: PR باز و Draft، `merged=false`، شاخه ۲۸ commit جلو و صفر عقب از `main`.
+- [!] تلاش جداگانه و کم‌حجم برای خواندن ACL تابع زنده نیز به connection timeout خورد؛ با توجه به timeoutهای تکراری، retry بیشتر از همان مسیر متوقف شد. بدنهٔ کامل تابع و ACL همچنان دریافت و تطبیق نشده‌اند.
+- [!] نتیجهٔ CI فقط اعتبار تست‌های ایزوله را ثابت می‌کند؛ Production compatibility gate باز می‌ماند. هیچ Migration، Merge، تغییر تابع/مجوز، Cron یا دادهٔ Production انجام نشد.
+
+
+### تکمیل CI شمارهٔ ۳۲۰ — ۱۷ نوامبر ۲۰۲۶
+- [x] اجرای GitHub Actions شمارهٔ ۳۲۰، run ID `44065058504`، روی commit مستنداتی `2d7276ea5bbecc2c0789872e49e87fdd64fd158e` با نتیجهٔ `success` پایان یافت؛ هر ۲۳ مرحلهٔ اصلی workflow موفق شدند.
+- [x] آزمون واقعی دو نشست صف صرافی‌ها، PostgreSQL race integration، تست‌های دقت اعشاری، Market/Limit، Stop-Limit، TP-SL و رقابت‌های لغو/اجرا همگی موفق شدند.
+- [x] مقایسهٔ شاخه پس از commit مستنداتی: ۲۹ commit جلوتر و صفر commit عقب‌تر از `main`؛ PR شمارهٔ ۸ باز، Draft، mergeable و ادغام‌نشده است.
+- [!] بدنهٔ کامل تابع زنده و ACL به علت timeoutهای مکرر Supabase همچنان دریافت/تطبیق نشده‌اند؛ CI ایزوله این gate را نمی‌بندد.
+- [!] هیچ Migration، Merge، تغییر تابع/مجوز، Cron یا دادهٔ Production انجام نشد.
+
+
+
+### ادامه بررسی و تثبیت وضعیت انتشار — ۱۷ نوامبر ۲۰۲۶
+- [x] اجرای GitHub Actions شمارهٔ ۳۲۱، run ID `44065615104`، روی آخرین commit شاخه `64cfc6dcc06b2ff1833f6fb1324b2e72617cddb2` با نتیجهٔ `success` پایان یافت؛ هر ۲۳ مرحلهٔ اصلی workflow موفق شدند.
+- [x] آزمون PostgreSQL race integration، آزمون واقعی دو نشست مستقل برای پاسخ دیررس صرافی، exact-decimal/browser، arithmetic regression، rehearsalهای schema widening، Market/Limit، Stop-Limit، TP-SL و چرخه‌های cancellation/concurrency همگی موفق شدند.
+- [x] توضیحات PR شمارهٔ ۸ با نتیجهٔ CI شمارهٔ ۳۲۱، SHA دقیق و وضعیت gateهای باز به‌روز شد.
+- [x] مقایسهٔ شاخه تأیید کرد: ۳۰ commit جلوتر و صفر commit عقب‌تر از `main`؛ PR شمارهٔ ۸ باز، Draft، قابل ادغام از نظر Git و هنوز ادغام‌نشده است.
+- [x] بازبینی تطبیقی draft صف صرافی‌ها با آخرین migration موجود در مخزن نشان داد بخش ingest و matching از نسخهٔ deduplicate شدهٔ ثبت‌شده در migration `20261116195814` مشتق شده و تغییر اصلی race fix محدود به capture شناسه‌های پاسخ و استفاده از همان مجموعه در ingest/processed marking است.
+- [!] دریافت کامل بدنهٔ تابع زنده و ACL از مسیر Supabase قبلاً چند بار timeout شده است؛ سازگاری کامل Production هنوز اثبات نشده و از retry تکراری همان مسیر خودداری می‌شود.
+- [!] بازبینی سند `supabase/MIGRATION_RECONCILIATION.md` نشان می‌دهد ۱۴ migration اعمال‌شده منبع محلی ندارند، ۲۰ فایل timestamp متفاوت دارند و دو migration محلی KuCoin/Gate.io هنوز در Production ثبت نشده‌اند. این دو فایل قدیمی‌تر از پیاده‌سازی زندهٔ `refresh_market_prices()` هستند و اجرای `supabase db push` می‌تواند سقف ۵۱۵ شناسهٔ CoinGecko را حذف کند؛ بنابراین تا reconciliation کامل، `db push` ممنوع است.
+- [!] هیچ Migration، Merge، تغییر تابع/مجوز، Cron، Edge Function یا دادهٔ Production انجام نشد. PR در حالت Draft باقی ماند.
+- [ ] اولویت بعدی: تکمیل reconciliation امن migrationها و تهیهٔ منبع معتبر برای ۱۴ فایل مفقود؛ سپس بستن Production compatibility gate صف صرافی‌ها و فقط پس از آن آماده‌سازی انتشار کنترل‌شده.
