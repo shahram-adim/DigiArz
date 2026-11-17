@@ -123,12 +123,7 @@ SELECT dblink_send_query(
   'matcher_worker_a',
   'SELECT observation_id FROM private.iran_exchange_match_dirty ORDER BY queued_at, observation_id LIMIT 2 FOR UPDATE SKIP LOCKED'
 );
-DO $
-BEGIN
-  WHILE dblink_is_busy('matcher_worker_a') = 1 LOOP
-    PERFORM pg_sleep(0.02);
-  END LOOP;
-END $;
+-- dblink_get_result waits for the in-flight SELECT to finish while its transaction stays open.
 CREATE TEMP TABLE worker_a_claim(observation_id bigint PRIMARY KEY);
 INSERT INTO worker_a_claim
 SELECT observation_id
@@ -139,39 +134,26 @@ SELECT dblink_send_query(
   'matcher_worker_b',
   'SELECT observation_id FROM private.iran_exchange_match_dirty ORDER BY queued_at, observation_id LIMIT 2 FOR UPDATE SKIP LOCKED'
 );
-DO $
-BEGIN
-  WHILE dblink_is_busy('matcher_worker_b') = 1 LOOP
-    PERFORM pg_sleep(0.02);
-  END LOOP;
-END $;
+-- The second result is fetched while worker A still holds its row locks.
 CREATE TEMP TABLE worker_b_claim(observation_id bigint PRIMARY KEY);
 INSERT INTO worker_b_claim
 SELECT observation_id
 FROM dblink_get_result('matcher_worker_b') AS claimed(observation_id bigint);
 
-DO $
-BEGIN
-  IF (SELECT count(*) FROM worker_a_claim) <> 2 THEN
-    RAISE EXCEPTION 'Worker A did not lock exactly two rows';
-  END IF;
-  IF (SELECT count(*) FROM worker_b_claim) <> 2 THEN
-    RAISE EXCEPTION 'Worker B did not skip A locks and claim two remaining rows';
-  END IF;
-  IF EXISTS (
+CREATE TEMP TABLE concurrency_assertions(ok boolean CHECK (ok));
+INSERT INTO concurrency_assertions
+SELECT
+  (SELECT count(*) FROM worker_a_claim) = 2
+  AND (SELECT count(*) FROM worker_b_claim) = 2
+  AND NOT EXISTS (
     SELECT 1 FROM worker_a_claim a
     JOIN worker_b_claim b USING (observation_id)
-  ) THEN
-    RAISE EXCEPTION 'Concurrent workers claimed overlapping observation IDs';
-  END IF;
-  IF (SELECT count(*) FROM (
+  )
+  AND (SELECT count(*) FROM (
       SELECT observation_id FROM worker_a_claim
       UNION
       SELECT observation_id FROM worker_b_claim
-    ) claimed) <> 4 THEN
-    RAISE EXCEPTION 'Concurrent workers did not cover the four-row test batch';
-  END IF;
-END $;
+    ) claimed) = 4;
 
 SELECT dblink_exec('matcher_worker_a', 'ROLLBACK');
 SELECT dblink_exec('matcher_worker_b', 'ROLLBACK');
