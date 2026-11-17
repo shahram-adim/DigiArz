@@ -7,9 +7,12 @@ const sql = fs.readFileSync('supabase/drafts/2026-11-17_process_iran_exchange_as
 
 test('Iran exchange worker only ingests requests and responses present before its transaction cutoff', () => {
   assert.match(sql, /CREATE OR REPLACE FUNCTION public\.process_iran_exchange_asset_sync\(\)/);
-  assert.match(sql, /where q\.processed_at is null and q\.requested_at < transaction_timestamp\(\) and r\.created < transaction_timestamp\(\) and r\.status_code=200/);
-  assert.match(sql, /where r\.id=q\.request_id and q\.processed_at is null and q\.requested_at < transaction_timestamp\(\) and r\.created < transaction_timestamp\(\);/);
-  assert.equal((sql.match(/transaction_timestamp\(\)/g) || []).length, 4);
+  assert.match(sql, /v_response_ids bigint\[\]/);
+  assert.match(sql, /array_agg\(r\.id\)/);
+  assert.match(sql, /r\.id = any\(v_response_ids\).*r\.status_code=200/);
+  assert.match(sql, /r\.id=q\.request_id and r\.id = any\(v_response_ids\) and q\.processed_at is null/);
+  assert.match(sql, /Freeze the exact HTTP response set visible at worker start/);
+  assert.equal((sql.match(/transaction_timestamp\(\)/g) || []).length, 3);
   assert.match(sql, /DRAFT ONLY — DO NOT APPLY TO PRODUCTION/);
 });
 
