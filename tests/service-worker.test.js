@@ -12,7 +12,7 @@ function createHarness(fetchImpl = async () => ({ ok: true, clone() { return thi
   const stored = new Map();
   const added = [];
   const deleted = [];
-  const cacheNames = ['digiarz-shell-v53', 'digiarz-shell-v54'];
+  const cacheNames = ['digiarz-shell-v53', 'digiarz-shell-v54', 'digiarz-shell-v55'];
   const workerUrl = 'https://app.example/DigiArz/sw.js';
   const resolveKey = request => typeof request === 'string'
     ? new URL(request, workerUrl).href
@@ -67,9 +67,10 @@ test('install precaches the complete offline shell, including Android manifest i
   let installPromise;
   harness.listeners.get('install')({ waitUntil(value) { installPromise = Promise.resolve(value); } });
   await installPromise;
-  assert.equal(harness.added.length, 7);
+  assert.equal(harness.added.length, 8);
   assert.ok(harness.added.includes('https://app.example/DigiArz/icon-192.svg'));
   assert.ok(harness.added.includes('https://app.example/DigiArz/icon-512.svg'));
+  assert.ok(harness.added.includes('https://app.example/DigiArz/src/pwa-install.js'));
   assert.equal(harness.skipped, true);
 });
 
@@ -109,6 +110,6 @@ test('activation removes old shell caches and claims clients', async () => {
   let activatePromise;
   harness.listeners.get('activate')({ waitUntil(value) { activatePromise = Promise.resolve(value); } });
   await activatePromise;
-  assert.deepEqual(harness.deleted, ['digiarz-shell-v53']);
+  assert.deepEqual(harness.deleted, ['digiarz-shell-v53', 'digiarz-shell-v54']);
   assert.equal(harness.claimed, true);
 });
