@@ -6,7 +6,8 @@ INSERT INTO auth.users(id) VALUES
 
 INSERT INTO public.demo_derivative_accounts(id,user_id,futures_cash_usdt,margin_cash_usdt) VALUES
   ('20000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001',1000,500),
-  ('20000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000002',250,125);
+  ('20000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000002',250,125),
+  ('20000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000001',300,150);
 
 INSERT INTO public.demo_derivative_orders(
   id,user_id,account_id,product_type,symbol,position_side,order_type,
@@ -26,6 +27,11 @@ INSERT INTO public.demo_derivative_positions(
   '40000000-0000-0000-0000-000000000001',
   '10000000-0000-0000-0000-000000000001',
   '20000000-0000-0000-0000-000000000001',
+  'futures','BTCUSDT','long','isolated',5,1,100,20
+), (
+  '40000000-0000-0000-0000-000000000002',
+  '10000000-0000-0000-0000-000000000001',
+  '20000000-0000-0000-0000-000000000003',
   'futures','BTCUSDT','long','isolated',5,1,100,20
 );
 
@@ -95,6 +101,74 @@ INSERT INTO public.demo_derivative_ledger_entries(
 
 COMMIT;
 
+DO $relationship_checks$
+BEGIN
+  BEGIN
+    INSERT INTO public.demo_derivative_fills(
+      id,user_id,account_id,order_id,position_id,fill_sequence,
+      symbol,position_side,quantity,price,fee_usdt
+    ) VALUES (
+      '51000000-0000-0000-0000-000000000001',
+      '10000000-0000-0000-0000-000000000001',
+      '20000000-0000-0000-0000-000000000001',
+      '30000000-0000-0000-0000-000000000001',
+      '40000000-0000-0000-0000-000000000002',
+      2,'BTCUSDT','long',0.1,100,0.01
+    );
+    RAISE EXCEPTION 'cross-account fill unexpectedly accepted';
+  EXCEPTION WHEN foreign_key_violation THEN
+    NULL;
+  END;
+
+  BEGIN
+    INSERT INTO public.demo_margin_loans(
+      id,user_id,account_id,position_id,loan_asset,principal,collateral_mode
+    ) VALUES (
+      '61000000-0000-0000-0000-000000000001',
+      '10000000-0000-0000-0000-000000000001',
+      '20000000-0000-0000-0000-000000000001',
+      '40000000-0000-0000-0000-000000000002',
+      'USDT',1,'isolated'
+    );
+    RAISE EXCEPTION 'cross-account margin loan unexpectedly accepted';
+  EXCEPTION WHEN foreign_key_violation THEN
+    NULL;
+  END;
+
+  BEGIN
+    INSERT INTO public.demo_derivative_funding_events(
+      id,user_id,account_id,position_id,interval_start,interval_end,
+      funding_rate,mark_price,position_notional_usdt,amount_usdt
+    ) VALUES (
+      '71000000-0000-0000-0000-000000000001',
+      '10000000-0000-0000-0000-000000000001',
+      '20000000-0000-0000-0000-000000000001',
+      '40000000-0000-0000-0000-000000000002',
+      '2026-11-18 08:00:00+00','2026-11-18 16:00:00+00',
+      0.001,100,100,0.1
+    );
+    RAISE EXCEPTION 'cross-account funding event unexpectedly accepted';
+  EXCEPTION WHEN foreign_key_violation THEN
+    NULL;
+  END;
+
+  BEGIN
+    INSERT INTO public.demo_derivative_risk_events(
+      id,user_id,account_id,position_id,event_type
+    ) VALUES (
+      '81000000-0000-0000-0000-000000000001',
+      '10000000-0000-0000-0000-000000000001',
+      '20000000-0000-0000-0000-000000000001',
+      '40000000-0000-0000-0000-000000000002',
+      'margin_warning'
+    );
+    RAISE EXCEPTION 'cross-account risk event unexpectedly accepted';
+  EXCEPTION WHEN foreign_key_violation THEN
+    NULL;
+  END;
+END;
+$relationship_checks$;
+
 DO $checks$
 BEGIN
   IF (SELECT count(*) FROM public.demo_derivative_accounts) <> 2 THEN
@@ -132,6 +206,24 @@ BEGIN
 END;
 $rls_checks$;
 RESET ROLE;
+
+DO $ledger_append_checks$
+BEGIN
+  BEGIN
+    INSERT INTO public.demo_derivative_ledger_entries(
+      id,transaction_id,user_id,asset,account_bucket,debit_amount,credit_amount
+    ) VALUES (
+      '93000000-0000-0000-0000-000000000001',
+      '90000000-0000-0000-0000-000000000001',
+      '10000000-0000-0000-0000-000000000001',
+      'USDT','futures_cash',1,0
+    );
+    RAISE EXCEPTION 'late ledger append unexpectedly accepted';
+  EXCEPTION WHEN SQLSTATE '55000' THEN
+    NULL;
+  END;
+END;
+$ledger_append_checks$;
 
 DO $immutable_checks$
 BEGIN
