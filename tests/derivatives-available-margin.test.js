@@ -14,7 +14,7 @@ test('calculates account equity and Available Margin with position and open limi
     cashBalanceUsdt:'1000',
     positions:[basePosition],
     openOrders:[{
-      productType:'futures',orderType:'limit',status:'pending',symbol:'ETHUSDT',
+      productType:'futures',marginMode:'cross',orderType:'limit',status:'pending',symbol:'ETHUSDT',
       positionSide:'long',remainingQuantity:'2',limitPrice:'100',leverage:5,
       reduceOnly:false,feeRate:'0.001'
     }]
@@ -37,7 +37,7 @@ test('reserves only the remaining quantity of a partially filled limit order',()
     cashBalanceUsdt:'100',
     positions:[],
     openOrders:[{
-      productType:'futures',orderType:'limit',status:'partially_filled',
+      productType:'futures',marginMode:'cross',orderType:'limit',status:'partially_filled',
       symbol:'BTCUSDT',positionSide:'short',remainingQuantity:'1.5',
       limitPrice:'100',leverage:5,reduceOnly:false,feeRate:'0.001'
     }]
@@ -52,11 +52,11 @@ test('reduce-only orders reserve position quantity but no opening margin or extr
     cashBalanceUsdt:'100',
     positions:[basePosition],
     openOrders:[{
-      productType:'futures',orderType:'limit',status:'pending',symbol:'BTCUSDT',
+      productType:'futures',marginMode:'cross',orderType:'limit',status:'pending',symbol:'BTCUSDT',
       positionSide:'long',remainingQuantity:'0.6',limitPrice:'105',leverage:10,
       reduceOnly:true,feeRate:'0.01'
     },{
-      productType:'futures',orderType:'limit',status:'partially_filled',symbol:'BTCUSDT',
+      productType:'futures',marginMode:'cross',orderType:'limit',status:'partially_filled',symbol:'BTCUSDT',
       positionSide:'long',remainingQuantity:'0.4',limitPrice:'104',leverage:10,
       reduceOnly:true,feeRate:'0.01'
     }]
@@ -72,11 +72,11 @@ test('rejects aggregate reduce-only reservations larger than the open position',
     cashBalanceUsdt:'100',
     positions:[basePosition],
     openOrders:[{
-      productType:'futures',orderType:'limit',status:'pending',symbol:'BTCUSDT',
+      productType:'futures',marginMode:'cross',orderType:'limit',status:'pending',symbol:'BTCUSDT',
       positionSide:'long',remainingQuantity:'0.7',limitPrice:'105',leverage:10,
       reduceOnly:true,feeRate:'0.001'
     },{
-      productType:'futures',orderType:'limit',status:'pending',symbol:'BTCUSDT',
+      productType:'futures',marginMode:'cross',orderType:'limit',status:'pending',symbol:'BTCUSDT',
       positionSide:'long',remainingQuantity:'0.4',limitPrice:'105',leverage:10,
       reduceOnly:true,feeRate:'0.001'
     }]
@@ -99,11 +99,25 @@ test('rejects active market orders because they must be atomic or rejected',()=>
   assert.throws(()=>M.futuresAvailableMarginSnapshot({
     cashBalanceUsdt:'100',positions:[],
     openOrders:[{
-      productType:'futures',orderType:'market',status:'pending',symbol:'BTCUSDT',
+      productType:'futures',marginMode:'cross',orderType:'market',status:'pending',symbol:'BTCUSDT',
       positionSide:'long',remainingQuantity:'1',limitPrice:'100',leverage:5,
       reduceOnly:false,feeRate:'0.001'
     }]
   }),/market orders are forbidden/);
+});
+
+test('rejects isolated and Margin Spot orders in the cross Futures Available Margin snapshot',()=>{
+  const baseOrder={
+    productType:'futures',marginMode:'cross',orderType:'limit',status:'pending',
+    symbol:'BTCUSDT',positionSide:'long',remainingQuantity:'1',limitPrice:'100',
+    leverage:5,reduceOnly:false,feeRate:'0.001'
+  };
+  assert.throws(()=>M.futuresAvailableMarginSnapshot({
+    cashBalanceUsdt:'100',positions:[],openOrders:[{...baseOrder,marginMode:'isolated'}]
+  }),/cross Futures orders/);
+  assert.throws(()=>M.futuresAvailableMarginSnapshot({
+    cashBalanceUsdt:'100',positions:[],openOrders:[{...baseOrder,productType:'margin'}]
+  }),/Futures orders/);
 });
 
 test('subtracts only explicitly unposted liabilities from equity',()=>{
@@ -121,7 +135,7 @@ test('rounds collateral and fee reserves upward to avoid understating commitment
     cashBalanceUsdt:'1',
     positions:[],
     openOrders:[{
-      productType:'futures',orderType:'limit',status:'pending',symbol:'BTCUSDT',
+      productType:'futures',marginMode:'cross',orderType:'limit',status:'pending',symbol:'BTCUSDT',
       positionSide:'long',remainingQuantity:'0.000000000000000001',
       limitPrice:'1.000000000000000001',leverage:3,
       reduceOnly:false,feeRate:'0.1'
