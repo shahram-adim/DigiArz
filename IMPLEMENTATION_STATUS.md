@@ -1241,3 +1241,14 @@
 2. ساخت دفترکل مستقل و immutable برای insurance fund و deficit journal در PostgreSQL دورریختنی؛ سپس آزمون کامل پوشش کامل/جزئی/صفر insurance.
 3. پس از تثبیت accounting، پیاده‌سازی و آزمون isolated liquidation و سپس Cross account liquidation، همراه race با fill/cancel/reduce-only و fault-injection.
 4. تا عبور تمام gates، UI و auto-liquidation خاموش بمانند و Production دست‌نخورده بماند.
+
+
+## تکمیل طراحی مرز دفترکل بیمه و دفتر ثبت کسری — ۱۸ نوامبر ۲۰۲۶
+
+- [x] وضعیت زنده PR شماره ۱۲ بررسی شد: Open، Draft، ادغام‌نشده، بدون تعارض؛ HEAD شاخه `feat/demo-derivatives-trading` برابر `7f093b089dd6878904523f668458c84d86e1a61a` بود.
+- [x] ساختار واقعی دفترکل مشتقات بررسی شد: جدول‌های user ledger به `auth.users` وابسته‌اند و `system_clearing` فقط bucket ترازکننده در دفترکل کاربر است؛ بنابراین برای صندوق بیمه نباید user ساختگی یا موجودی منفی کاربر ایجاد شود.
+- [x] سند طراحی مستقل `docs/superpowers/specs/2026-11-18-demo-derivatives-insurance-deficit-ledger.md` اضافه شد؛ دفترکل پلتفرمی جداگانه، ثبت append-only کسری، تراز بدهکار/بستانکار، محاسبه موجودی از entries، پیوند event-based بین دو دفترکل، idempotency و ماتریس تست را مشخص می‌کند.
+- [!] این مرحله فقط طراحی است؛ هنوز SQL دفترکل بیمه/کسری، RPC، migration، پرداخت بیمه یا لیکوییدیشن ساخته/اجرا نشده است.
+- [!] سیاست seed/replenishment و سقف پرداخت بیمه، بازیابی کسری، کارمزد لیکوییدیشن، slippage، buffer و اولویت Cross هنوز تعیین نشده‌اند.
+- [ ] گام بعد: ساخت schema خصوصی دفترکل پلتفرمی و deficit journal به‌همراه invariant tests در PostgreSQL 17 دورریختنی CI؛ تا تصویب سیاست‌ها هیچ payout/recovery RPC یا liquidation worker ساخته/فعال نشود.
+- [x] هیچ تغییر Supabase Production، merge/rebase یا فعال‌سازی UI و auto-liquidation انجام نشد.
