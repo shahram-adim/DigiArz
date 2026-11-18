@@ -162,7 +162,7 @@ CREATE TRIGGER demo_derivative_maintenance_tier_guard
   FOR EACH ROW EXECUTE FUNCTION private.guard_demo_derivative_maintenance_tier();
 
 CREATE OR REPLACE FUNCTION private.demo_derivative_activate_maintenance_schedule(p_schedule_id uuid)
-RETURNS TABLE(schedule_id uuid,symbol text,schedule_version integer,activated_at timestamptz)
+RETURNS TABLE(schedule_id uuid,symbol text,schedule_version integer,effective_from timestamptz)
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path TO ''
@@ -183,7 +183,7 @@ BEGIN
   END IF;
   IF EXISTS (
     SELECT 1 FROM private.demo_derivative_maintenance_tier_schedules s
-    WHERE s.symbol=v_symbol AND s.status='retired' AND s.schedule_version>=
+    WHERE s.symbol=v_symbol AND s.status IN ('active','retired') AND s.schedule_version>=
       (SELECT x.schedule_version FROM private.demo_derivative_maintenance_tier_schedules x WHERE x.id=p_schedule_id)
   ) THEN
     RAISE EXCEPTION 'Maintenance schedule version must increase monotonically' USING ERRCODE='23514';
