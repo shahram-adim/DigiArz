@@ -1320,3 +1320,14 @@
 - [!] RPC فعلی external reduction قیمت و fee را به‌عنوان ورودی سمت سرویس می‌گیرد؛ برای لیکوییدیشن نباید بدون مسیر اعتبارسنجی evidence-ID-based دوباره استفاده شود.
 - [!] این تغییر فقط مستندات در شاخه است؛ هیچ SQL اجرایی، worker، UI یا Supabase Production تغییر نکرده است.
 - [ ] گام بعد: تصویب provider/evidence source و سقف لغزش، سپس نوشتن تست‌های disposable PostgreSQL برای شواهد stale، عمق ناکافی، مصرف مجدد evidence، تطبیق سمت Long/Short و atomic rollback.
+
+
+## تأیید CI پس از قرارداد مدرک اجرای لیکوییدیشن — ۱۸ نوامبر ۲۰۲۶
+
+- [x] اجرای GitHub Actions شماره `44361544743` روی commit `efe928d38ce2174c237abe9fae8cfb0232e72d04` با نتیجه نهایی `success` تأیید شد.
+- [x] هر ۱۰۱ step/job گزارش‌شده موفق بودند؛ از جمله اجرای تست‌های exact-decimal، integration مشتقات در PostgreSQL دورریختنی و تست‌های حسابداری بیمه/کسری.
+- [x] لاگ مرحله رقابت دو نشست صریحاً پیام `Insurance/deficit two-session races passed` را ثبت کرد: یک payout مجاز و یک recovery مجاز برنده شدند و overdraw/over-recovery به‌صورت اتمیک رد شدند.
+- [x] همان لاگ پیام `Atomic rollback fault injection passed` را ثبت کرد؛ پس از خطای عمدی پیش از commit، هر دو journal بدون تغییر باقی ماندند.
+- [!] این CI فقط در محیط PostgreSQL دورریختنی اجرا شده و تأیید استقرار یا مجوز تغییر Supabase Production نیست.
+- [!] تصمیم‌های سیاستی liquidation همچنان تصویب‌نشده‌اند؛ هیچ liquidation RPC/worker/UI یا Production change مجاز نشده است.
+- [ ] گام بعد: تکمیل تصمیم‌های سیاستی و طراحی تست‌های مربوط به evidence/slippage پس از تعیین قرارداد provider و حدود مجاز؛ تا آن زمان اجرای لیکوییدیشن پیاده‌سازی نشود.
