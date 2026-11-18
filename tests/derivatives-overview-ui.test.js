@@ -53,9 +53,9 @@ test('Derivatives workspace contains the five planned read-only terminal views',
     assert.match(workspace, new RegExp('data-deriv-tab="' + view + '"'));
     assert.match(workspace, new RegExp('data-deriv-panel="' + view + '"'));
   }
+  assert.ok(workspace.includes('قیمت Spot نمایشی، قیمت Mark/Index یا مبنای لیکوییدیشن محسوب نمی‌شود'));
   assert.match(workspace, /ثبت سفارش آزمایشی — فعلاً غیرفعال/);
   assert.match(workspace, /وام‌گیری یا بازپرداخت — غیرفعال/);
-  assert.match(workspace, /قیمت Spot نمایشی، قیمت Mark\\/Index یا مبنای لیکوییدیشن محسوب نمی‌شود/);
 });
 
 test('Derivatives UI prototype cannot write to Supabase or activate financial controls', () => {
@@ -65,5 +65,9 @@ test('Derivatives UI prototype cannot write to Supabase or activate financial co
   assert.doesNotMatch(workspace, /supabaseClient|\.rpc\s*\(|\.insert\s*\(|\.update\s*\(|\.delete\s*\(/i);
   assert.match(workspace, /<button[^>]*disabled/);
   assert.match(workspace, /<select[^>]*disabled/);
-  assert.match(workspace, /<input[^>]*disabled/);\n  assert.match(workspace, /body\\.light-theme/);\n  assert.match(workspace, /@media\\(max-width:420px\\)/);\n  assert.match(workspace, /ArrowLeft/);\n  assert.match(workspace, /aria-selected/);
+  assert.match(workspace, /<input[^>]*disabled/);
+  assert.match(workspace, /body\.light-theme/);
+  assert.match(workspace, /@media\(max-width:420px\)/);
+  assert.match(workspace, /ArrowLeft/);
+  assert.match(workspace, /aria-selected/);
 });
