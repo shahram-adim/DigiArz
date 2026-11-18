@@ -118,11 +118,31 @@ CREATE INDEX demo_derivative_price_observations_symbol_received_idx
 CREATE INDEX demo_derivative_price_snapshots_symbol_created_idx
   ON private.demo_derivative_price_snapshots(symbol,created_at DESC);
 
+CREATE OR REPLACE FUNCTION private.guard_demo_derivative_price_policy()
+RETURNS trigger LANGUAGE plpgsql SET search_path TO '' AS $function$
+BEGIN
+  IF TG_OP='DELETE' OR (to_jsonb(NEW)-'enabled') IS DISTINCT FROM (to_jsonb(OLD)-'enabled') THEN
+    RAISE EXCEPTION 'Price policy versions are immutable; only enabled state may change' USING ERRCODE='55000';
+  END IF;
+  RETURN NEW;
+END;
+$function$;
+
+CREATE TRIGGER demo_derivative_price_policy_guard
+  BEFORE UPDATE OR DELETE ON private.demo_derivative_price_policies
+  FOR EACH ROW EXECUTE FUNCTION private.guard_demo_derivative_price_policy();
+
 CREATE OR REPLACE FUNCTION private.guard_demo_derivative_price_cycle()
 RETURNS trigger LANGUAGE plpgsql SET search_path TO '' AS $function$
 DECLARE v_expected integer; v_terminal integer; v_has_snapshot boolean;
 BEGIN
+  IF TG_OP='DELETE' THEN
+    RAISE EXCEPTION 'Price cycles are immutable audit records' USING ERRCODE='55000';
+  END IF;
   IF TG_OP='INSERT' THEN
+    IF cardinality(NEW.expected_providers)<>(SELECT count(DISTINCT x.provider) FROM unnest(NEW.expected_providers) AS x(provider)) THEN
+      RAISE EXCEPTION 'Expected provider list contains duplicates' USING ERRCODE='23514';
+    END IF;
     IF NOT EXISTS (
       SELECT 1 FROM private.demo_derivative_price_policies p
       WHERE p.symbol=NEW.symbol AND p.policy_version=NEW.policy_version AND p.enabled
@@ -158,6 +178,9 @@ CREATE OR REPLACE FUNCTION private.guard_demo_derivative_price_cycle_source()
 RETURNS trigger LANGUAGE plpgsql SET search_path TO '' AS $function$
 DECLARE v_status text;
 BEGIN
+  IF TG_OP='DELETE' THEN
+    RAISE EXCEPTION 'Provider cycle results cannot be deleted' USING ERRCODE='55000';
+  END IF;
   IF TG_OP='INSERT' THEN
     IF NOT EXISTS (
       SELECT 1 FROM private.demo_derivative_price_cycles c
@@ -214,10 +237,13 @@ BEGIN
   IF v_cycle_status IS DISTINCT FROM 'collecting' THEN
     RAISE EXCEPTION 'Snapshot requires a collecting cycle' USING ERRCODE='23514';
   END IF;
-  SELECT count(*) INTO v_source_count
-  FROM unnest(NEW.source_providers) AS provider
+  IF cardinality(NEW.source_providers)<>(SELECT count(DISTINCT x.provider) FROM unnest(NEW.source_providers) AS x(provider)) THEN
+    RAISE EXCEPTION 'Snapshot source list contains duplicates' USING ERRCODE='23514';
+  END IF;
+  SELECT count(DISTINCT u.provider) INTO v_source_count
+  FROM unnest(NEW.source_providers) AS u(provider)
   JOIN private.demo_derivative_price_cycle_sources s
-    ON s.cycle_id=NEW.cycle_id AND s.provider=provider
+    ON s.cycle_id=NEW.cycle_id AND s.provider=u.provider
   WHERE s.source_status='received';
   IF v_source_count<>NEW.source_count THEN
     RAISE EXCEPTION 'Snapshot providers must match received provider responses' USING ERRCODE='23514';
@@ -236,10 +262,10 @@ END;
 $function$;
 
 CREATE TRIGGER demo_derivative_price_cycle_guard
-  BEFORE INSERT OR UPDATE ON private.demo_derivative_price_cycles
+  BEFORE INSERT OR UPDATE OR DELETE ON private.demo_derivative_price_cycles
   FOR EACH ROW EXECUTE FUNCTION private.guard_demo_derivative_price_cycle();
 CREATE TRIGGER demo_derivative_price_cycle_source_guard
-  BEFORE INSERT OR UPDATE ON private.demo_derivative_price_cycle_sources
+  BEFORE INSERT OR UPDATE OR DELETE ON private.demo_derivative_price_cycle_sources
   FOR EACH ROW EXECUTE FUNCTION private.guard_demo_derivative_price_cycle_source();
 CREATE TRIGGER demo_derivative_price_observation_guard
   BEFORE INSERT OR UPDATE OR DELETE ON private.demo_derivative_price_observations
@@ -259,11 +285,13 @@ REVOKE ALL ON private.demo_derivative_price_policies,
   private.demo_derivative_price_observations,private.demo_derivative_price_snapshots
   FROM PUBLIC,anon,authenticated,service_role;
 GRANT SELECT,INSERT ON private.demo_derivative_price_policies TO service_role;
+GRANT UPDATE(enabled) ON private.demo_derivative_price_policies TO service_role;
 GRANT SELECT,INSERT,UPDATE ON private.demo_derivative_price_cycles TO service_role;
 GRANT SELECT,INSERT,UPDATE ON private.demo_derivative_price_cycle_sources TO service_role;
 GRANT SELECT,INSERT ON private.demo_derivative_price_observations TO service_role;
 GRANT SELECT,INSERT ON private.demo_derivative_price_snapshots TO service_role;
 
+REVOKE ALL ON FUNCTION private.guard_demo_derivative_price_policy() FROM PUBLIC,anon,authenticated;
 REVOKE ALL ON FUNCTION private.guard_demo_derivative_price_cycle() FROM PUBLIC,anon,authenticated;
 REVOKE ALL ON FUNCTION private.guard_demo_derivative_price_cycle_source() FROM PUBLIC,anon,authenticated;
 REVOKE ALL ON FUNCTION private.guard_demo_derivative_price_observation() FROM PUBLIC,anon,authenticated;

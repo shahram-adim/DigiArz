@@ -104,7 +104,7 @@ BEGIN
     WHERE cycle_id=v_cycle AND provider='bybit_linear';
   INSERT INTO private.demo_derivative_price_snapshots(
     cycle_id,symbol,policy_version,snapshot_status,source_count,source_providers,rejected_details
-  ) VALUES (v_cycle,'BTCUSDT',1,'insufficient_quorum',0,ARRAY[]::text_,'[{"reason":"provider_timeout"}]'::jsonb);
+  ) VALUES (v_cycle,'BTCUSDT',1,'insufficient_quorum',0,ARRAY[]::text[],'[{"reason":"provider_timeout"}]'::jsonb);
   UPDATE private.demo_derivative_price_cycles SET cycle_status='completed' WHERE id=v_cycle;
 END;
 $rejected_cycle$;
