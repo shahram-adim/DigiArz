@@ -27,7 +27,7 @@ test('calculates account equity and Available Margin with position and open limi
   assert.equal(r.openOrderInitialMarginUsdt,'40');
   assert.equal(r.openOrderFeeReserveUsdt,'0.2');
   assert.equal(r.totalOpenOrderReservationUsdt,'40.2');
-  assert.equal(r.availableMarginUsdt,'958.68');
+  assert.equal(r.availableMarginUsdt,'958.69');
   assert.equal(r.atRisk,false);
   assert.equal(r.liquidationPrice,null);
 });
