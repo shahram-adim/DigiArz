@@ -850,3 +850,19 @@
 ### گام بعدی
 1. بررسی CI جدید روی commit اصلاح conflict؛ به‌ویژه step دو نشست Oracle.
 2. در صورت عبور، بررسی raceهای provider-result و publication و سپس طراحی collector.
+
+
+## نتیجهٔ نهایی تست‌های هم‌زمانی Oracle — ۱۸ نوامبر ۲۰۲۶
+
+- [x] CI run `44286245890` روی HEAD ثبت‌شده در وضعیت پروژه با نتیجهٔ کامل `success` تمام شد.
+- [x] مرحلهٔ ۲۹ `Run real two-session Futures price-oracle idempotency and publication races` موفق شد.
+- [x] خروجی صریح تست: دو درخواست هم‌زمان برای ساخت یک cycle به یک رکورد همگرا شدند؛ تحویل تکراری یک provider فقط یک observation ساخت؛ payloadهای متفاوت فقط یک برنده داشتند؛ publication هم‌زمان فقط یک snapshot ساخت؛ retryهای پس از commit idempotent ماندند.
+- [x] مراحل ۲۵ تا ۲۸ نیز در همان اجرا موفق بودند: storage Oracle، کنترل provenance/quorum/immutability، نصب RPCها و تست ترتیبی RPCها.
+- [x] اصلاح `ON CONFLICT DO NOTHING` روی HEAD فعلی آزمایش شد؛ خطای duplicate key قید `(id,symbol)` دیگر در race ایجاد نشد.
+- [!] این تأیید مربوط به PostgreSQL 17 موقت CI است، نه Supabase Production و نه feed زندهٔ بازار.
+- [x] PR #12 همچنان Draft است؛ Production، داده‌ها، secrets، cron و UI دست‌نخورده‌اند.
+
+### گام بعدی
+1. طراحی قرارداد collector و adapterهای HTTP برای Binance USDⓈ-M، Bybit Linear و OKX SWAP: symbol mapping، timestamp semantics، decimal parsing، timeout/retry، response hashing و health classification.
+2. پیش از انتخاب quorum نهایی، استقلال feedها و هم‌پوشانی constituentهای index بررسی شود.
+3. سپس backtest آستانه‌های freshness/deviation و بررسی مسیر fail-closed انجام شود. تا پایان این مراحل Oracle و Futures UI زنده نمی‌شوند.
