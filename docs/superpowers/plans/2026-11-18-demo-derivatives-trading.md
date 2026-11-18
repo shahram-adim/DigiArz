@@ -147,3 +147,5 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [x] Cancels the winning order and verifies the active reservation is fully released.
 - [x] Wired the script into disposable PostgreSQL CI before the partial-fill test.
 - [ ] Await and inspect a real CI run; not executed locally because no PostgreSQL client/server is available in this environment.
+
+- [x] Shell syntax of the concurrent placement test was checked with `bash -n`; database behavior remains unverified until CI executes it.
