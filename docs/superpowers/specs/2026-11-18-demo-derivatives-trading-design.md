@@ -170,3 +170,21 @@ No operational values are approved by this section. Any rates or quantities in t
 - The funding event and balanced ledger postings must commit atomically. If the simulation uses a platform clearing account to balance net payer/receiver flows, its treatment and any residual imbalance policy must be approved; never create value silently or allow a negative user balance.
 - Candidate schedule-pinning rule for trading fees: resolve and persist the active schedule version inside the transaction that creates each actual fill. This makes the fee reflect the rate active at execution and allows partial fills spanning a policy change to retain an auditable per-fill rate. Order acceptance may store an estimate only; it must not freeze the final fee rate. This is a recommendation, not yet an approved policy.
 - Funding interval, source, rate caps/floors, settlement instant/timezone, notional reference, partial-period eligibility, rounding, clearing-account treatment and policy activation remain NOT DECIDED.
+
+
+### Funding verification matrix (test design only; not executed)
+
+The disposable-PostgreSQL test suite must cover these invariants before any funding settlement code is considered:
+
+1. **Sign symmetry:** for identical eligible notional and absolute rate, positive and negative rates produce equal-magnitude opposite payer/receiver directions; test both Long and Short independently.
+2. **Exact decimal:** use values whose products have repeating or boundary decimal representations; assert the unrounded exact numeric intermediate, then assert the explicitly approved rounding boundary. Do not choose a production scale from fixtures.
+3. **Snapshot pinning:** mutate mark/reference price and position quantity after the funding snapshot is captured; settlement must use only the pinned snapshot values and policy version.
+4. **Eligibility boundary:** open, reduce, and close immediately before, exactly at, and immediately after the approved settlement instant; assert the eventual policy's precise inclusion rule.
+5. **Concurrent position mutation:** race settlement against reduce/close and assert serializable, single-boundary treatment with no double charge or missed eligible quantity.
+6. **Idempotent retry:** submit the same account/position/window/policy key sequentially and concurrently; exactly one funding event and one balanced pair/set of ledger postings may exist.
+7. **Atomic rollback:** inject a failure between payer debit and receiver/clearing credit; all event and ledger writes must roll back together.
+8. **Balance and solvency:** aggregate debits and credits must reconcile exactly under the approved clearing model; insufficient payer balance must follow an explicitly approved policy and never create a negative user balance.
+9. **Version isolation:** changing the funding policy after snapshot creation must not alter an in-flight event; retries must resolve the original policy version.
+10. **Audit trail:** each result must retain source/version, signed rate, reference snapshot, eligible quantity/notional, window, settlement timestamp, policy version, and idempotency key.
+
+The tests must be isolated from Supabase Production. Until the sign convention, eligibility instant, notional basis, rounding, clearing model and insufficient-balance policy are approved, tests may use named synthetic fixtures only and must not be represented as policy approval.
