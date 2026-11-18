@@ -1161,3 +1161,13 @@
 - [ ] سپس طراحی/تست فرمول liquidation sizing، partial/full reduction، liquidation fee، insurance fund و deficit accounting؛ تا آن زمان auto-liquidation و معاملات مشتقه در UI غیرفعال بمانند.
 - [x] PR #12 همچنان Open و Draft و merged=false است؛ هیچ merge انجام نشد.
 - [x] هیچ Supabase Production migration/RPC/schema/policy/cron/worker یا تغییر داده‌ای انجام نشد.
+## اتصال پلکان به برآورد ریسک موقعیت ایزوله — ۱۸ نوامبر ۲۰۲۶
+
+- [x] `riskSnapshot()` اکنون در صورت دریافت schedule پلکانی، Maintenance Margin را از notional و tier مربوط محاسبه می‌کند و tier index را گزارش می‌دهد؛ حالت قدیمی نرخ ثابت برای تست‌ها/سازگاری باقی مانده است.
+- [x] برآورد قیمت لیکوییدیشن ایزولهٔ tiered اضافه شد؛ حل معادله به‌صورت piecewise انجام می‌شود و tier بر اساس notional قیمت کاندید انتخاب می‌شود، نه tier قیمت ورود. برای محافظه‌کاری، قیمت Long رو به بالا و Short رو به پایین در مقیاس ۱۸ رقم گرد می‌شود.
+- [x] تست‌های Long/Short عبورکننده از مرز tier و اتصال به risk snapshot اضافه شدند.
+- [x] CI روی commit `760c240ea5bb9bff5234e9fedf54dfb873aac23d` سبز شد: run `44305853609` (push) و `44305863707` (pull_request)، هر دو ۴۳ مرحله موفق.
+- [!] این محاسبه صرفاً preview ریاضی برای موقعیت ایزوله است؛ schedule هنوز از منبع server-owned/versioned در دیتابیس بارگذاری نمی‌شود و به RPC اجرا یا liquidation worker وصل نیست.
+- [ ] گام بعد: تعریف schema draft برای maintenance-tier versioning و resolver امن server-side؛ سپس اتصال همان schedule به cross-account risk aggregation و تست SQL مرز tier/تغییر نسخه/stale oracle.
+- [ ] پس از آن طراحی و تست partial/full liquidation accounting، fees، insurance fund و deficit handling در PostgreSQL ایزوله؛ auto-liquidation همچنان غیرفعال.
+- [x] هیچ Supabase Production تغییر نکرده و PR #12 همچنان Draft و ادغام‌نشده است.
