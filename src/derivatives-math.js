@@ -46,7 +46,6 @@
     const q=positive(quantity,'quantity'),entry=positive(entryPrice,'entry price'),margin=positive(isolatedMargin,'isolated margin');
     const mmr=positive(maintenanceRate,'maintenance rate'),fee=validateFeeRate(closeFeeRate);
     if(D.compareDecimal(mmr,'1')>=0||D.compareDecimal(add(mmr,fee),'1')>=0)throw new RangeError('Invalid maintenance or fee rate');
-    const qEntry=mul(q,entry);
     const qMargin=div(margin,q);
     if(side==='long'){
       const numerator=sub(entry,qMargin);
@@ -56,20 +55,32 @@
     return div(add(entry,qMargin),add(add('1',mmr),fee));
   }
   function riskSnapshot({side,quantity,entryPrice,markPrice,isolatedMargin,maintenanceRate,closeFeeRate='0',marginMode='isolated'}){
+    if(marginMode!=='isolated'&&marginMode!=='cross')throw new TypeError('marginMode must be isolated or cross');
     const pnl=unrealizedPnl(side,quantity,entryPrice,markPrice);
-    const equity=positionEquity(side,quantity,entryPrice,markPrice,isolatedMargin,closeFeeRate);
     const maintenance=maintenanceMargin(quantity,markPrice,maintenanceRate);
-    const liquidationPrice=marginMode==='isolated'
-      ? isolatedLiquidationPrice(side,quantity,entryPrice,isolatedMargin,maintenanceRate,closeFeeRate)
-      : null;
+    if(marginMode==='cross'){
+      return Object.freeze({
+        notional:notional(quantity,markPrice),
+        unrealizedPnl:pnl,
+        equity:null,
+        maintenanceMargin:maintenance,
+        marginRatio:null,
+        liquidationPrice:null,
+        liquidationPriceMethod:'account-level-cross-risk-engine',
+        riskScope:'account',
+        atRisk:null
+      });
+    }
+    const equity=positionEquity(side,quantity,entryPrice,markPrice,isolatedMargin,closeFeeRate);
     return Object.freeze({
       notional:notional(quantity,markPrice),
       unrealizedPnl:pnl,
       equity,
       maintenanceMargin:maintenance,
       marginRatio:D.compareDecimal(maintenance,'0')===0?null:div(equity,maintenance),
-      liquidationPrice,
-      liquidationPriceMethod:marginMode==='isolated'?'isolated-position-estimate':'account-level-cross-risk-engine',
+      liquidationPrice:isolatedLiquidationPrice(side,quantity,entryPrice,isolatedMargin,maintenanceRate,closeFeeRate),
+      liquidationPriceMethod:'isolated-position-estimate',
+      riskScope:'position',
       atRisk:D.compareDecimal(equity,maintenance)<=0
     });
   }
