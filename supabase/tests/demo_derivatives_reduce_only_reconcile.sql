@@ -43,6 +43,7 @@ BEGIN
 END;
 $trusted_grants$;
 
+SET ROLE service_role;
 DO $external_reduction$
 DECLARE
   v_result jsonb;
@@ -194,5 +195,6 @@ BEGIN
   END;
 END;
 $external_reduction$;
+RESET ROLE;
 
 SELECT 'demo derivatives atomic external position reduction and reservation reconciliation passed' AS result;

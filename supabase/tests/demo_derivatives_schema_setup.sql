@@ -26,3 +26,18 @@ $function$;
 
 GRANT USAGE ON SCHEMA auth TO authenticated;
 GRANT EXECUTE ON FUNCTION auth.uid() TO authenticated;
+
+-- A pre-existing role may have been created without BYPASSRLS by a test
+-- helper. Normalize the disposable trusted-worker role explicitly.
+ALTER ROLE service_role NOLOGIN BYPASSRLS;
+
+DO $trusted_role$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_roles
+    WHERE rolname='service_role' AND rolbypassrls AND NOT rolcanlogin
+  ) THEN
+    RAISE EXCEPTION 'Disposable service_role must be NOLOGIN BYPASSRLS';
+  END IF;
+END;
+$trusted_role$;

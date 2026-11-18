@@ -715,3 +715,7 @@
 - [!] PostgreSQL run `44266662836` successfully compiled/installed the external-reduction RPC, but the end-to-end assertion's observer SELECT returned no row (`v_position_state=<NULL>`) while executing as the synthetic `service_role` in the disposable test harness.
 - [x] Adjusted the integration test observer to run as the disposable database owner (so RLS cannot hide the verification row), while separately asserting `service_role` has EXECUTE and `authenticated` does not. The actual RPC remains SECURITY DEFINER/private with service_role-only wrapper grant.
 - [ ] Re-run the full PostgreSQL workflow to determine whether the missing row was test-observer visibility or a real position-state issue. No production changes.
+- [!] CI run `44267138721` confirmed the atomic external-reduction RPC and its reconciliation assertions pass. The following existing partial-fill test then failed because its `service_role` observer could not see the order row.
+- [x] Root cause isolated to the disposable role setup: it only created `service_role BYPASSRLS` if absent, and did not normalize an already-existing role. The schema setup now explicitly enforces `NOLOGIN BYPASSRLS` and asserts the role attributes.
+- [x] Restored the external-reduction integration observer to `service_role`, so both the new RPC and existing fill test verify the actual trusted role's row visibility after setup normalization.
+- [ ] Re-run CI. Do not mark the overall workflow green until the full run, including the partial-fill/ledger tests, passes.
