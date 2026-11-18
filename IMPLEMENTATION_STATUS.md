@@ -1433,3 +1433,9 @@
 - [!] این run فقط CI ایزوله است و هیچ‌یک از draftها را روی Supabase Production اعمال نمی‌کند؛ deployment یا مجوز فعال‌سازی worker/RPC/UI ایجاد نمی‌کند.
 - [!] تست فعلی fee schedule فقط activation/immutability/resolver را پوشش می‌دهد. RPC مربوط به Reduce-only fill هنوز `p_fee_usdt` را از ورودی trusted service می‌گیرد و schedule ID/version را در هر fill ثبت/اعتبارسنجی نمی‌کند. زمان pin شدن schedule per-fill هنوز تصمیم‌گیری/تصویب نشده؛ این شکاف باید باز بماند و با fixtureهای نرخ به سیاست واقعی تبدیل نشود.
 - [x] PR #12 همچنان Open/Draft و unmerged است؛ هیچ merge/rebase و هیچ تغییر Supabase Production انجام نشد.
+
+
+## اجرای تأییدشدهٔ Futures cash projection — ۱۸ نوامبر ۲۰۲۶
+- [x] فایل `supabase/tests/demo_derivatives_schema_integration.sql` در GitHub Actions run `44368468782` (run 733، commit `a1146e1aef8d36beb49308eb574dc18e2fbc841a`) روی PostgreSQL 17 دورریختنی اجرا شد و خروجی صریح `demo derivatives schema integration passed` ثبت شد.
+- [x] لاگ نشان می‌دهد fixture انتقال مثبت به Futures cash، انتقال بخشی به isolated margin، صفر بودن projection برای حساب بدون ledger، نبود ستون‌های cash قابل‌تغییر و محدودسازی RLS view برای کاربر جاری را بررسی کرده است.
+- [!] این تأیید فقط برای disposable CI است؛ هیچ تغییری در Supabase Production انجام نشد.
