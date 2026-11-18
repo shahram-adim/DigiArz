@@ -40,8 +40,8 @@ BEGIN
   END IF;
   IF p_quantity IS NULL OR p_quantity <= 0 OR
      p_limit_price IS NULL OR p_limit_price <= 0 OR
-     p_client_request_id IS NULL OR
-     p_position_side NOT IN ('long','short') THEN
+     p_client_request_id IS NULL OR p_symbol IS NULL OR
+     p_position_side IS NULL OR p_position_side NOT IN ('long','short') THEN
     RAISE EXCEPTION 'Invalid Reduce-only Limit order arguments'
       USING ERRCODE='22023';
   END IF;
