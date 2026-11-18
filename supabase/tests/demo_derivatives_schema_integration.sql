@@ -247,6 +247,20 @@ $relationship_checks$;
 
 DO $checks$
 BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_indexes
+    WHERE schemaname='public'
+      AND indexname='demo_derivative_positions_one_open_side_uidx'
+  ) THEN
+    RAISE EXCEPTION 'unique open position index is missing';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_indexes
+    WHERE schemaname='public'
+      AND indexname='demo_derivative_orders_reduce_only_active_idx'
+  ) THEN
+    RAISE EXCEPTION 'active Reduce-only allocation index is missing';
+  END IF;
   IF (SELECT count(*) FROM public.demo_derivative_accounts) <> 2 THEN
     RAISE EXCEPTION 'account fixture count mismatch';
   END IF;
