@@ -89,3 +89,15 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [ ] Run disposable PostgreSQL 17 integration tests on this checkpoint; schema/test changes are not validated until CI completes.
 - [ ] Next: design deterministic reduce-only allocation across multiple orders for the same account/symbol/position side, then test cancel release, partial fill and concurrent placement under account-first lock.
 - No RPC or UI order path is activated; no Supabase Production changes.
+
+
+## Checkpoint — Reduce-only reservation allocation design
+- [x] Defined one open position per account/product/symbol/position side as the allocation target; a partial unique index is required before order RPCs.
+- [x] Defined placement validation using position quantity minus the sum of active Reduce-only remaining quantities, all under the account-first `FOR UPDATE` lock.
+- [x] Defined Market Reduce-only as immediate fill-or-reject against unreserved quantity; no resting Market order.
+- [x] Defined cancel/expire/reject as reservation release without a ledger cash movement.
+- [x] Defined partial fills to reduce order remaining quantity and position quantity by the same exact amount in one transaction.
+- [x] Defined deterministic reconciliation for external position reductions: cancel newest active Reduce-only orders first until reservations fit the remaining position.
+- [ ] Implement the partial unique index and SQL fixtures for duplicate open positions, reserve, cancel, partial fill, market reduce-only, over-allocation and two-session races.
+- [ ] Implement account-locked idempotent RPCs only after those SQL tests pass.
+- No UI activation or Production database changes.
