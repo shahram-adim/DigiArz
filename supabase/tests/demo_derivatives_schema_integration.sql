@@ -4,10 +4,9 @@ INSERT INTO auth.users(id) VALUES
   ('10000000-0000-0000-0000-000000000001'),
   ('10000000-0000-0000-0000-000000000002');
 
-INSERT INTO public.demo_derivative_accounts(id,user_id,futures_cash_usdt,margin_cash_usdt) VALUES
-  ('20000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001',1000,500),
-  ('20000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000002',250,125),
-  ('20000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000001',300,150);
+INSERT INTO public.demo_derivative_accounts(id,user_id) VALUES
+  ('20000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001'),
+  ('20000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000002');
 
 INSERT INTO public.demo_derivative_orders(
   id,user_id,account_id,product_type,symbol,position_side,order_type,
@@ -30,8 +29,8 @@ INSERT INTO public.demo_derivative_positions(
   'futures','BTCUSDT','long','isolated',5,1,100,20
 ), (
   '40000000-0000-0000-0000-000000000002',
-  '10000000-0000-0000-0000-000000000001',
-  '20000000-0000-0000-0000-000000000003',
+  '10000000-0000-0000-0000-000000000002',
+  '20000000-0000-0000-0000-000000000002',
   'futures','BTCUSDT','long','isolated',5,1,100,20
 );
 
@@ -171,7 +170,7 @@ $relationship_checks$;
 
 DO $checks$
 BEGIN
-  IF (SELECT count(*) FROM public.demo_derivative_accounts) <> 3 THEN
+  IF (SELECT count(*) FROM public.demo_derivative_accounts) <> 2 THEN
     RAISE EXCEPTION 'account fixture count mismatch';
   END IF;
   IF (SELECT outstanding_amount FROM public.demo_margin_loans
@@ -182,6 +181,23 @@ BEGIN
       WHERE transaction_id='90000000-0000-0000-0000-000000000001') <> 2 THEN
     RAISE EXCEPTION 'ledger entry fixture count mismatch';
   END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='demo_derivative_accounts'
+      AND column_name IN ('futures_cash_usdt','margin_cash_usdt')
+  ) THEN
+    RAISE EXCEPTION 'mutable account cash columns must not exist';
+  END IF;
+  IF (SELECT futures_cash_usdt FROM public.demo_derivative_futures_cash_balances
+      WHERE user_id='10000000-0000-0000-0000-000000000001') <> 10 THEN
+    RAISE EXCEPTION 'ledger-derived Futures cash projection mismatch';
+  END IF;
+  IF (SELECT futures_cash_usdt FROM public.demo_derivative_futures_cash_balances
+      WHERE user_id='10000000-0000-0000-0000-000000000002') <> 0 THEN
+    RAISE EXCEPTION 'empty Futures cash projection must be zero';
+  END IF;
+
 END;
 $checks$;
 
@@ -190,11 +206,15 @@ SELECT set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000001'
 
 DO $rls_checks$
 BEGIN
-  IF (SELECT count(*) FROM public.demo_derivative_accounts) <> 2 THEN
+  IF (SELECT count(*) FROM public.demo_derivative_accounts) <> 1 THEN
     RAISE EXCEPTION 'RLS did not restrict accounts to the current user';
   END IF;
   IF (SELECT count(*) FROM public.demo_derivative_orders) <> 1 THEN
     RAISE EXCEPTION 'RLS did not restrict orders to the current user';
+  END IF;
+  IF (SELECT count(*) FROM public.demo_derivative_futures_cash_balances) <> 1
+     OR (SELECT futures_cash_usdt FROM public.demo_derivative_futures_cash_balances) <> 10 THEN
+    RAISE EXCEPTION 'RLS did not restrict ledger cash projection to the current user';
   END IF;
   BEGIN
     INSERT INTO public.demo_derivative_accounts(user_id)
