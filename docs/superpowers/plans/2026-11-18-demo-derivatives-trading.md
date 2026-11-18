@@ -71,3 +71,11 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - The token was removed in commit `4020813ede6a3fbcaff1db43e92e979ae694c664`.
 - The failing run discovered 37 tests; 35 passed and two derivative test files failed to load due to the same syntax error. PostgreSQL steps were skipped after the Node step failed.
 - The correction is not yet validated. Inspect the new Actions run and its logs before proceeding to PostgreSQL reservation lifecycle fixtures or RPC implementation.
+
+
+## CI validation checkpoint (2026-11-18)
+- Fixed stray literal escape token in `src/derivatives-math.js` in commit `4020813ede6a3fbcaff1db43e92e979ae694c664`.
+- GitHub Actions completed successfully for code commit `4020813...` (run `44259730430`), status-doc commit `4e48a2d...` (run `44259762686`), and plan-doc commit `e95c055...` (run `44259768302`).
+- Verified Node TAP output: 58 tests, 58 passed, 0 failed. Disposable PostgreSQL 17 job also completed successfully, including derivative schema integration and arithmetic/regression scripts.
+- Expected ERROR lines in negative SQL tests were asserted and did not fail the workflow.
+- Remaining gap: SQL tests for Available Margin order reserve/release, cancel, partial fills, reduce-only allocation and concurrent account locking are not yet authored/verified. Do not activate derivatives UI or production RPCs.
