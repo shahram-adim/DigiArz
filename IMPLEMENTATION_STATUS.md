@@ -766,3 +766,23 @@
 - [ ] گام بعدی: طراحی RPCهای محدود ingestion و snapshot publication، با idempotency، قفل چرخه و رفتار retry/crash/concurrency؛ قبل از collector زنده باید تست شوند.
 - [!] سه venue endpoint لزوماً سه منبع underlying مستقل نیستند؛ constituent overlap و استقلال source-family هنوز نیازمند بررسی است.
 - [x] وضعیت مقایسهٔ GitHub هنگام ثبت این checkpoint: PR #12 باز و Draft؛ شاخه ۱۴۲ کامیت جلو و ۱ کامیت عقب main است. Merge/rebase انجام نشده است.
+
+
+## RPCهای امن Ingestion و انتشار Oracle قیمت — ۱۸ نوامبر ۲۰۲۶
+
+- [x] قبل از تغییر، HEAD واقعی PR #12 و فایل‌های Oracle روی شاخه feature بازخوانی شدند؛ PR همچنان Draft و شاخه از main واگراست. تغییرات قبلی بازنویسی نشدند.
+- [x] Draft ذخیره‌سازی Oracle سخت‌گیرانه‌تر شد: فهرست sourceهای snapshot اکنون باید دقیقاً با observationهای accepted منطبق باشد؛ providerهای صرفاً received/rejected نمی‌توانند به‌عنوان منبع قیمت سالم شمرده شوند.
+- [x] دسترسی مستقیم DML نقش service_role به جداول Oracle حذف شد؛ نوشتن باید از RPCهای محدود و trusted انجام شود.
+- [x] سه تابع خصوصی SECURITY DEFINER با search_path خالی اضافه شد: شروع cycle با idempotency روی cycle UUID و instrument map؛ ثبت پاسخ provider با idempotency و رد payload متفاوت؛ انتشار snapshot با قفل cycle، کنترل quorum، freshness/future skew، median دقیق numeric، انحراف per-source و mark/index و تکمیل اتمیک cycle.
+- [x] توابع فقط به service_role مجوز EXECUTE می‌دهند و داخل بدنه claim نقش service_role را کنترل می‌کنند؛ anon/authenticated دسترسی ندارند. service_role نباید در Android/browser قرار گیرد.
+- [x] تست PostgreSQL جدید برای cycle creation/idempotency، رد payload متفاوت، جلوگیری از انتشار با provider pending، ثبت و retry provider، median و snapshot publication، retry انتشار و مجوزهای نقش‌ها اضافه شد.
+- [x] workflow موجود به نصب draft RPC و اجرای تست جدید در همان PostgreSQL 17 موقت متصل شد.
+- [!] این تغییرات فقط در GitHub feature branch و تست disposable قرار دارند؛ هنوز CI روی HEAD جدید تأیید نشده است. تا دیدن نتیجه کامل PostgreSQL، موفقیت اعلام نمی‌شود.
+- [!] هنوز collector واقعی HTTP، adapterهای provider، بررسی استقلال constituentهای index، backtest آستانه‌ها و زمان‌بندی worker وجود ندارد. این RPCها خودشان به اینترنت متصل نمی‌شوند و به‌تنهایی Oracle زنده نیستند.
+- [x] هیچ migration، DDL، RPC، secret، cron، schedule، داده یا تنظیمی در Supabase Production تغییر نکرد؛ UI مشتقات خاموش است؛ merge/rebase انجام نشد.
+
+### گام بعدی
+1. بررسی CI روی HEAD جدید و اصلاح هر شکست واقعی در SQL/fixture/workflow.
+2. پس از سبز شدن CI، افزودن تست‌های race دو نشست برای duplicate cycle/provider result/publication و crash/retry مرزی.
+3. سپس طراحی collector و adapterهای واقعی Binance USDⓈ-M، Bybit Linear و OKX SWAP؛ پیش از تعیین quorum نهایی باید هم‌پوشانی constituentها و معنای index هر venue بررسی شود.
+4. فقط پس از backtest و تأیید منبع مستقل mark/index، سراغ risk tiers و maintenance/liquidation accounting برویم.
