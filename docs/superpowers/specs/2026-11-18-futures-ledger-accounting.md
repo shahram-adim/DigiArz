@@ -140,3 +140,10 @@ The account row is the serialization mutex. Every operation below takes the acco
 - **Concurrency:** account lock serializes two simultaneous Reduce-only placements, fills, cancels and liquidation. Lock affected order/position rows in stable primary-key order after the account lock. Idempotency is checked before effects; a retry returns the prior result.
 
 A reduce-only order may never increase or reverse a position. Any future netting/flip behavior requires a separate explicit product contract. All rules are server-side; the browser preview is advisory only.
+
+
+## 11. Open position identity and atomic Market lifecycle
+
+In hedge mode, at most one open position exists for each `(account_id, product_type, symbol, position_side)`. A partial unique index enforces this invariant and provides a single deterministic position row for Reduce-only reservation accounting. Long and Short remain distinct positions.
+
+Market orders are strictly atomic: the only valid terminal states are fully filled (`filled_quantity=quantity`, `remaining_quantity=0`) or rejected without any fill (`filled_quantity=0`, `remaining_quantity=quantity`). A Market order may never persist as pending or partially filled. Limit orders retain the pending/partial-fill lifecycle.
