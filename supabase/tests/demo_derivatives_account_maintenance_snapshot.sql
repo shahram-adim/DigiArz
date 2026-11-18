@@ -139,6 +139,7 @@ END;
 $risk_snapshot$;
 
 
+BEGIN;
 -- Seed accrued and ledger-settled funding. Positive amounts are payables;
 -- negative amounts are receivables. Settled funding changes cash once only.
 INSERT INTO public.demo_derivative_funding_events(id,user_id,account_id,position_id,interval_start,interval_end,funding_rate,mark_price,position_notional_usdt,amount_usdt) VALUES
@@ -152,6 +153,7 @@ INSERT INTO public.demo_derivative_ledger_entries(transaction_id,user_id,asset,a
  ('60000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','USDT','futures_cash',0,5),
  ('60000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','USDT','system_clearing',5,0);
 UPDATE public.demo_derivative_funding_events SET settled_at=clock_timestamp() WHERE id='50000000-0000-0000-0000-000000000001';
+COMMIT;
 DO $funding_guard_test$
 BEGIN
  BEGIN
@@ -223,11 +225,11 @@ BEGIN
   BEGIN
     PERFORM * FROM private.demo_derivative_account_maintenance_snapshot('20000000-0000-0000-0000-000000000001');
     RAISE EXCEPTION 'account snapshot unexpectedly used an older healthy ETH snapshot';
+  EXCEPTION WHEN object_not_in_prerequisite_state THEN NULL;
+  END;
   BEGIN
     PERFORM * FROM private.demo_derivative_account_risk_snapshot('20000000-0000-0000-0000-000000000001');
     RAISE EXCEPTION 'account risk snapshot unexpectedly used an older healthy ETH snapshot';
-  EXCEPTION WHEN object_not_in_prerequisite_state THEN NULL;
-  END;
   EXCEPTION WHEN object_not_in_prerequisite_state THEN NULL;
   END;
 END;
