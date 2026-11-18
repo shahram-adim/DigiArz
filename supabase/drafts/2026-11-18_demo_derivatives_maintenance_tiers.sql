@@ -184,6 +184,13 @@ BEGIN
   FROM private.demo_derivative_maintenance_tier_schedules s
   WHERE s.id=p_schedule_id
   FOR UPDATE;
+  IF v_status='active' THEN
+    RETURN QUERY
+    SELECT s.id,s.symbol,s.schedule_version,s.effective_from
+    FROM private.demo_derivative_maintenance_tier_schedules s
+    WHERE s.id=p_schedule_id;
+    RETURN;
+  END IF;
   IF v_status<>'draft' THEN
     RAISE EXCEPTION 'Only a draft maintenance schedule can be activated' USING ERRCODE='55000';
   END IF;
