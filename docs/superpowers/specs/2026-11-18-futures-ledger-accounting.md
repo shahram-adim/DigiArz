@@ -114,3 +114,15 @@ Every writer, including scheduled funding and liquidation workers, must obey the
 This contract is for USDT-settled Futures only. It does not define multi-asset collateral, collateral haircuts, Margin Spot cross collateral, borrowing asset conversion, or Margin Spot liquidation. Those require separate asset-by-asset accounting rules and must not be inferred from Futures math.
 
 No Supabase Production DDL, migration, RPC, cron, balance, or data changes are authorized by this design checkpoint.
+
+
+## 9. Order direction and reduce-only semantics
+
+An order stores execution direction separately from the position it affects. `position_side` identifies the Long or Short position; `side` identifies the actual buy/sell execution. The allowed combinations are:
+
+- Long increase/open: `side='buy'`, `reduce_only=false`.
+- Long reduce/close: `side='sell'`, `reduce_only=true`.
+- Short increase/open: `side='sell'`, `reduce_only=false`.
+- Short reduce/close: `side='buy'`, `reduce_only=true`.
+
+The draft schema enforces these combinations with a CHECK constraint. Fill rows persist `side` and a composite foreign key ties it to the originating order, preventing an execution record from silently reversing direction. Non-reduce orders may not implicitly close or flip an opposing position; explicit reduce-only orders are required. A future one-way/netting mode or position flip requires a separately specified state transition and must not be inferred from order direction.
