@@ -1407,3 +1407,11 @@
 - [!] آستانه هشدار، SLO، دوره نگهداری، quorum منبع و صلاحیت قیمت برای ریسک عمداً تعیین نشدند؛ هیچ سیاست مالی از fixture یا حدس استخراج نشده است.
 - [!] این مرحله فقط مستندات است؛ collector، telemetry sink، alert، cron، RPC، migration، secret عملیاتی، مسیر liquidation یا شیء Supabase Production ساخته یا فعال نشد.
 - [ ] گام بعد: پس از مجوز جداگانه، ماتریس را به تست‌های ایزوله تبدیل و instrumentation را فقط پشت طراحی trusted-service بازبینی‌شده اضافه کنیم؛ پیش از بررسی source-family و سیاست‌ها collector زنده deploy نشود.
+
+
+## تأیید CI کامل روی commit پیش از سند پایش Oracle — ۱۸ نوامبر ۲۰۲۶
+
+- [x] اجرای GitHub Actions شمارهٔ `44367314575` (run 721) روی commit `abf6ac3757135dd742d94f147b810c85d0e15e93` با نتیجهٔ workflow/job برابر `success` پایان یافت؛ هر ۵۴ گام job کامل شدند.
+- [x] لاگ واقعی، موفقیت entrypointهای Market/Limit، چرخه Stop-Limit و TP/SL، raceهای دو نشست اجرا/لغو، schema مشتقات، pin شدن نسخه maintenance tier، idempotency و rollback Oracle، حسابداری Reduce-only و rollback/race دفترکل بیمه و کسری را در PostgreSQL دورریختنی تأیید می‌کند.
+- [!] خطاهای تست منفی در لاگ‌ها، rejectionهای مورد انتظار بودند و job را ناموفق نکردند. مخزن بسته‌ها در setup پاسخ HTTP 429 داد، اما workflow با indexهای موجود ادامه یافت و job موفق شد.
+- [!] این اجرا قبل از commitهای مستندات پایش انجام شده و آن مستندات یا سرویس زنده را validate نمی‌کند. هیچ تغییر Supabase Production یا فعال‌سازی collector/liquidation رخ نداد.
