@@ -18,7 +18,7 @@ Spec: `docs/superpowers/specs/2026-11-18-demo-derivatives-trading-design.md`
 - [x] Specify and unit-test the initial USDT futures cross-risk aggregation helper (ledger-derived account cash + all cross positions + liabilities + close-fee reserve + stale-price fail-closed).\n- [ ] Specify cross risk for Margin Spot with supported collateral assets and conservative haircuts.
 - [ ] Specify and test margin borrow/repay, accrued interest, short sale proceeds and debt closeout.
 - [ ] Specify funding-rate calculation, settlement interval, caps and idempotency.
-- [ ] Add disposable PostgreSQL fixtures for exact arithmetic, rounding, negative balances, stale prices and liquidation boundaries, including the account-level cross-risk SQL projection.
+- [ ] Add disposable PostgreSQL fixtures for exact arithmetic, rounding, negative balances, stale prices and liquidation boundaries, including the ledger-derived futures cash projection and account-level cross-risk SQL projection.\n- [ ] Add exact-decimal Available Margin tests for open/partially-filled limit orders and reduce-only quantity reservations.
 - [ ] Add concurrent-session fixtures for order duplication, account locking, partial close and liquidation races.
 
 ## Phase 2 — Backend implementation (feature branch only)
