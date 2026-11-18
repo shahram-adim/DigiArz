@@ -33,7 +33,7 @@ Spec: `docs/superpowers/specs/2026-11-18-demo-derivatives-trading-design.md`
 - [ ] Test migrations against a disposable PostgreSQL 17 database before any deployment discussion.
 
 ## Phase 3 — User interface
-- [ ] Add a Derivatives area without changing existing Spot controls or RPC behavior.
+- [x] Add a read-only Derivatives overview area and navigation entry without changing existing Spot controls or RPC behavior; order entry and financial actions remain disabled pending backend/policy approval.
 - [ ] Build Futures terminal: pair, side, order type, leverage, margin mode, preview and position management.
 - [ ] Build Margin terminal: borrow/repay, long/short, collateral, debt and interest.
 - [ ] Build open positions, open derivative orders, fills, funding/interest and ledger history.
@@ -411,3 +411,11 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [!] All SQL was applied only to disposable PostgreSQL 17 CI. This does not authorize Supabase Production changes, collector deployment, liquidation execution, payout/recovery RPCs, workers, or UI activation.
 - [!] PR #12 remains Open/Draft/unmerged. At the pre-documentation checkpoint the branch was 287 commits ahead of `main`, zero behind. The documentation commits that record this run have not yet been validated by a subsequent CI run.
 - [ ] Continue only with work independent of the unapproved per-fill fee-version decision and six liquidation policy gates. Do not repeat already-green account-risk, Oracle, Reduce-only, or insurance tests without a new code change that needs them.
+
+
+## Read-only Derivatives overview UI — 2026-11-18
+- [x] Added a Persian RTL, read-only Derivatives overview panel with desktop and Android bottom-navigation entries. The panel explicitly states that order entry, leverage, borrowing, and liquidation are not active.
+- [x] Added no trading forms, RPC calls, data writes, or Supabase changes. Existing Spot tabs and RPC paths were left unchanged.
+- [x] GitHub Actions run 746 (`44370393350`) completed successfully on the immediately preceding documentation-only HEAD `223e40bd731f5ec3980167857a95cb7174337936`; Node/browser tests and all SQL steps through the maintenance-tier race completed successfully in disposable PostgreSQL 17.
+- [!] The UI commit `288ddf4d5e65ce5bb822be148c61038ffa979be4` is newer than run 746. Its own CI validation is pending and must not be described as passed until a run for that exact SHA completes.
+- [!] PR #12 remains Open/Draft/unmerged. No Supabase Production object or data was changed.
