@@ -93,6 +93,9 @@ DECLARE
   v_credits numeric(38,18);
   v_cash_debit numeric(38,18);
   v_cash_credit numeric(38,18);
+  v_equity_credit numeric(38,18);
+  v_loss_debit numeric(38,18);
+  v_recovery_credit numeric(38,18);
   v_balance numeric(38,18);
 BEGIN
   IF TG_TABLE_NAME='demo_platform_ledger_transactions' THEN
@@ -108,26 +111,35 @@ BEGIN
          COALESCE(sum(credit_amount) FILTER (WHERE account_code='insurance_cash_usdt'),0)
     INTO v_count,v_debits,v_credits,v_cash_debit,v_cash_credit
     FROM private.demo_platform_ledger_entries WHERE transaction_id=v_tx;
-  IF v_count < 2 OR v_debits <> v_credits THEN
-    RAISE EXCEPTION 'Platform ledger transaction must contain at least two balanced USDT entries'
+  IF v_count <> 2 OR v_debits <> v_credits THEN
+    RAISE EXCEPTION 'Platform ledger transaction must contain exactly two balanced USDT entries'
       USING ERRCODE='23514';
   END IF;
+  SELECT COALESCE(sum(credit_amount),0) INTO v_equity_credit
+    FROM private.demo_platform_ledger_entries
+   WHERE transaction_id=v_tx AND account_code='insurance_fund_equity_usdt';
+  SELECT COALESCE(sum(debit_amount),0) INTO v_loss_debit
+    FROM private.demo_platform_ledger_entries
+   WHERE transaction_id=v_tx AND account_code='liquidation_loss_expense_usdt';
+  SELECT COALESCE(sum(credit_amount),0) INTO v_recovery_credit
+    FROM private.demo_platform_ledger_entries
+   WHERE transaction_id=v_tx AND account_code='insurance_recovery_income_usdt';
 
-  IF v_event_type='insurance_seed' AND NOT EXISTS (
-    SELECT 1 FROM private.demo_platform_ledger_entries
-     WHERE transaction_id=v_tx AND account_code='insurance_cash_usdt' AND debit_amount>0
-  ) THEN
-    RAISE EXCEPTION 'Insurance seed must debit insurance cash' USING ERRCODE='23514';
-  ELSIF v_event_type='insurance_payout' AND NOT EXISTS (
-    SELECT 1 FROM private.demo_platform_ledger_entries
-     WHERE transaction_id=v_tx AND account_code='liquidation_loss_expense_usdt' AND debit_amount>0
-  ) THEN
-    RAISE EXCEPTION 'Insurance payout must debit liquidation loss expense' USING ERRCODE='23514';
-  ELSIF v_event_type='insurance_recovery' AND NOT EXISTS (
-    SELECT 1 FROM private.demo_platform_ledger_entries
-     WHERE transaction_id=v_tx AND account_code='insurance_recovery_income_usdt' AND credit_amount>0
-  ) THEN
-    RAISE EXCEPTION 'Insurance recovery must credit recovery income' USING ERRCODE='23514';
+  IF v_event_type='insurance_seed' THEN
+    IF v_cash_debit<=0 OR v_cash_credit<>0 OR v_equity_credit<>v_cash_debit THEN
+      RAISE EXCEPTION 'Insurance seed must debit cash and credit fund equity for the same amount'
+        USING ERRCODE='23514';
+    END IF;
+  ELSIF v_event_type='insurance_payout' THEN
+    IF v_cash_credit<=0 OR v_cash_debit<>0 OR v_loss_debit<>v_cash_credit THEN
+      RAISE EXCEPTION 'Insurance payout must debit loss expense and credit cash for the same amount'
+        USING ERRCODE='23514';
+    END IF;
+  ELSIF v_event_type='insurance_recovery' THEN
+    IF v_cash_debit<=0 OR v_cash_credit<>0 OR v_recovery_credit<>v_cash_debit THEN
+      RAISE EXCEPTION 'Insurance recovery must debit cash and credit recovery income for the same amount'
+        USING ERRCODE='23514';
+    END IF;
   END IF;
 
   SELECT COALESCE(sum(debit_amount-credit_amount),0)
