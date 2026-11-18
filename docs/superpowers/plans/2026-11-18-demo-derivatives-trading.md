@@ -352,3 +352,13 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [x] The same run also completed the broader exact-decimal, derivative schema, maintenance tier, oracle, Reduce-only and lifecycle integration steps in the disposable test environment.
 - [!] This is CI evidence only. It does not authorize applying any draft to Supabase Production or enabling liquidation execution, payout/recovery RPCs, workers, or UI.
 - [ ] Continue with policy-independent work only until the six liquidation policy gates are explicitly decided; no fixture value may be promoted to policy.
+
+
+## CI checkpoint — exact-decimal workflow on current feature HEAD (2026-11-18)
+
+- [x] GitHub Actions run `44366483390` (run 717) was fetched for current feature HEAD `fec498d77a9a0776f094ff38888c9f7427d631d8`; workflow and `exact-decimal` job both completed with conclusion `success`.
+- [x] All 50 substantive job steps completed successfully, including the disposable PostgreSQL derivative schema, maintenance/fee schedules, Oracle storage and trusted ingestion RPCs, Oracle two-session idempotency/publication races, Reduce-only lifecycle/concurrency, and insurance/deficit accounting plus payout/recovery races.
+- [x] Retrieved job logs confirm Oracle duplicate-cycle/provider/publication retries converged idempotently; conflicting provider payloads had one winner; pre-commit provider/snapshot failures rolled back atomically and exact retries recovered. Insurance/deficit rollback and two-session race checks also passed.
+- [!] Expected negative-test errors in the logs (invalid widening preflight, lock timeout, intentional missing relation, rejected duplicate/conflicting Oracle result, overdraw/over-recovery, and unbalanced ledger) were asserted test cases; the workflow/job conclusion remained success.
+- [!] All database execution was against disposable CI PostgreSQL. No Supabase Production DDL/RPC/policy/cron/data changes occurred. No collector, liquidation execution, payout/recovery RPC, worker, or UI was enabled.
+- [ ] Continue only with policy-independent work; keep PR #12 open and Draft and do not infer policy values from test fixtures.
