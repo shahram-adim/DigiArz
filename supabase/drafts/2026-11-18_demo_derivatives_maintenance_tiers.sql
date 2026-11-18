@@ -171,13 +171,19 @@ DECLARE
   v_symbol text;
   v_status text;
 BEGIN
-  SELECT s.symbol,s.status INTO v_symbol,v_status
+  SELECT s.symbol INTO v_symbol
   FROM private.demo_derivative_maintenance_tier_schedules s
   WHERE s.id=p_schedule_id
   FOR UPDATE;
   IF NOT FOUND THEN
     RAISE EXCEPTION 'Unknown maintenance schedule' USING ERRCODE='P0002';
   END IF;
+  -- Serialize every activation for one symbol, including competing draft versions.
+  PERFORM pg_advisory_xact_lock(hashtextextended(v_symbol,0));
+  SELECT s.status INTO v_status
+  FROM private.demo_derivative_maintenance_tier_schedules s
+  WHERE s.id=p_schedule_id
+  FOR UPDATE;
   IF v_status<>'draft' THEN
     RAISE EXCEPTION 'Only a draft maintenance schedule can be activated' USING ERRCODE='55000';
   END IF;
