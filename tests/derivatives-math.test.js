@@ -137,3 +137,16 @@ test('rejects malformed or unsafe maintenance tier schedules',()=>{
     maintenanceTiers[0],maintenanceTiers[1],{...maintenanceTiers[2],maxNotional:'100000'}
   ]),/final maintenance tier/);
 });
+
+test('solves tiered isolated liquidation using the tier at the candidate price',()=>{
+  assert.equal(M.isolatedTieredLiquidationPrice('long','1','11000','5000',maintenanceTiers,'0.001'),'6066.734074823053589485');
+  assert.equal(M.isolatedTieredLiquidationPrice('short','1','9000','5000',maintenanceTiers,'0.001'),'13809.990205680705190989');
+  const r=M.riskSnapshot({
+    side:'long',quantity:'1',entryPrice:'11000',markPrice:'10000',isolatedMargin:'5000',
+    maintenanceTiers,closeFeeRate:'0.001'
+  });
+  assert.equal(r.maintenanceMargin,'100');
+  assert.equal(r.maintenanceTierIndex,0);
+  assert.equal(r.liquidationPrice,'6066.734074823053589485');
+  assert.equal(r.liquidationPriceMethod,'isolated-tiered-estimate');
+});
