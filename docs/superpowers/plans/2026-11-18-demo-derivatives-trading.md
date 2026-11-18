@@ -157,3 +157,11 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [x] Requires exactly one fill success, one rejection specifically for exceeding order remaining quantity, exactly one persisted fill, and consistent 0.7 filled / 0.3 remaining order and position quantities.
 - [x] Wired into CI after the trusted fill RPC is installed and before the sequential PnL/margin test.
 - [ ] Await a real CI run and inspect PostgreSQL logs; no local database execution is available.
+
+
+## External position reduction / Reduce-only reconciliation
+- [x] Add a trusted, service-role-only reconciliation RPC. It discovers ownership, locks the account first and the position second, then cancels active Reduce-only reservations newest-first until the remaining reserved quantity is no greater than the position quantity.
+- [x] Add an isolated ETHUSDT integration scenario with three active orders. After a simulated external position reduction from 0.6 to 0.3, the two newest 0.2 reservations must be cancelled and the oldest 0.2 reservation must remain.
+- [x] Assert authenticated callers cannot invoke the trusted RPC, cancellation order is deterministic, the final reservation invariant holds, and a retry is a no-op.
+- [ ] Run the SQL in disposable PostgreSQL through GitHub Actions and inspect complete logs.
+- [ ] Integrate the helper inside the eventual trusted position-reduction/liquidation transaction after its financial accounting has been applied. Do not call it as a substitute for the actual position-reduction accounting.
