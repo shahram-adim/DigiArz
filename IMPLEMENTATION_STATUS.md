@@ -786,3 +786,18 @@
 2. پس از سبز شدن CI، افزودن تست‌های race دو نشست برای duplicate cycle/provider result/publication و crash/retry مرزی.
 3. سپس طراحی collector و adapterهای واقعی Binance USDⓈ-M، Bybit Linear و OKX SWAP؛ پیش از تعیین quorum نهایی باید هم‌پوشانی constituentها و معنای index هر venue بررسی شود.
 4. فقط پس از backtest و تأیید منبع مستقل mark/index، سراغ risk tiers و maintenance/liquidation accounting برویم.
+
+
+## اصلاح خطای parse در RPCهای Oracle و اجرای مجدد CI — ۱۸ نوامبر ۲۰۲۶
+
+- [x] CI run `44283184610` روی commit `9a72e7200534d2510af88d4a01906f0aef124117` همه مراحل قبلی از جمله schema و storage Oracle را با موفقیت گذراند، اما در مرحلهٔ اعمال RPCهای Oracle متوقف شد.
+- [x] علت قطعی از لاگ PostgreSQL: دو regex در شرط نماد و SHA-256 به‌دلیل کوتیشن/خط‌بندی ناقص، رشتهٔ SQL را باز نگه می‌داشتند؛ در نتیجه parser خطای unterminated quoted string داد.
+- [x] فایل RPC بازبینی و از تکه‌های تکراری/ناقص پاک‌سازی شد؛ اکنون دقیقاً سه تعریف تابع، یک BEGIN/COMMIT و دو regex بسته و دارای THEN دارد.
+- [x] فایل تست Oracle همچنان یک نسخهٔ ۱۴۹ خطی است و در این اصلاح تغییر نکرد.
+- [!] اصلاح فقط در feature branch است؛ CI جدید هنوز باید همه مراحل را اجرا کند. تست‌های RPC تا نتیجهٔ آن سبز اعلام نمی‌شوند.
+- [!] Supabase Production، داده‌ها، secrets، cron و UI همچنان دست‌نخورده‌اند؛ PR #12 همچنان Draft می‌ماند.
+
+### گام بعدی
+1. بررسی اجرای CI جدید تا عبور از نصب RPC و اجرای تست‌های آن.
+2. اگر تست‌ها سبز شدند، افزودن تست‌های race دو نشست برای cycle/provider result/publication و crash/retry؛ اگر شکست خوردند، فقط بر اساس خطای دقیق اصلاح شود.
+3. سپس طراحی collector و adapterهای واقعی و ارزیابی استقلال feedها؛ هنوز هیچ Oracle زنده یا liquidation engine فعال نیست.
