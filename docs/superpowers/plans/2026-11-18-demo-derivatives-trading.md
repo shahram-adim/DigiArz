@@ -378,3 +378,11 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [x] Retrieved job logs confirm Market/Limit entrypoints, Stop-Limit and TP/SL lifecycle, two-session cancellation/execution races, derivative schema, maintenance-tier version pinning, Oracle provider/publication idempotency and rollback races, Reduce-only accounting, and insurance/deficit ledger rollback/races passed in disposable PostgreSQL.
 - [!] Expected negative-test errors in the logs were asserted rejection cases; they did not fail the job. A package repository returned HTTP 429 during setup but the workflow continued using available package indexes and the job completed successfully.
 - [!] This run predates the observability documentation commits that follow; it does not validate that documentation or any live service. No Supabase Production changes or live collector/liquidation activation occurred.
+
+
+## CI checkpoint — latest HEAD verified (2026-11-18)
+- [x] GitHub Actions run `44367963448` (run 730, Exact decimal tests) for commit `d21057ae403f167c3ea9cd5a709fce095c5e36cd` completed with conclusion `success`.
+- [x] The exact-decimal job completed its Node/browser, disposable PostgreSQL 17, derivative schema/RLS, maintenance/fee schedule, Oracle, account-risk, Reduce-only, insurance/deficit and concurrency checks.
+- [!] Expected negative SQL assertions, lock-timeout rehearsal and intentional fault injection appear as ERRORs in PostgreSQL logs; the job conclusion is success.
+- [!] This is disposable CI evidence only; no Supabase Production mutation or deployment is authorized.
+- [ ] Continue with a policy-independent task. Do not implement per-fill fee pinning until its open contract decision is approved; keep all six liquidation policy gates closed.
