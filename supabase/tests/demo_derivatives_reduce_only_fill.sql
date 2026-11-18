@@ -6,6 +6,20 @@
 SET ROLE authenticated;
 SELECT set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000001',false);
 
+DO $fill_permission_check$
+BEGIN
+  BEGIN
+    PERFORM public.apply_demo_reduce_only_limit_fill(
+      '30000000-0000-0000-0000-000000000001',
+      'a3000000-0000-0000-0000-000000000099',0.1,110,0
+    );
+    RAISE EXCEPTION 'authenticated unexpectedly executed trusted fill RPC';
+  EXCEPTION WHEN insufficient_privilege THEN
+    NULL;
+  END;
+END;
+$fill_permission_check$;
+
 SELECT public.place_demo_reduce_only_limit_order(
   '20000000-0000-0000-0000-000000000001',
   'BTCUSDT','long',1,105,
@@ -74,6 +88,15 @@ BEGIN
   IF v_fill_count<>1 OR v_ledger_count<>1 THEN
     RAISE EXCEPTION 'fill retry duplicated persisted records';
   END IF;
+
+  BEGIN
+    PERFORM public.apply_demo_reduce_only_limit_fill(
+      v_order_id,v_first_fill,0.4,111,0.02
+    );
+    RAISE EXCEPTION 'fill id reused with different execution payload unexpectedly accepted';
+  EXCEPTION WHEN unique_violation THEN
+    NULL;
+  END;
 
   BEGIN
     PERFORM public.apply_demo_reduce_only_limit_fill(
