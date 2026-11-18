@@ -301,7 +301,13 @@ jobs:
         run: |
           psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
             -f supabase/drafts/2026-11-18_demo_derivatives_reduce_only_reconcile_rpc.sql
-      - name: Test newest-first Reduce-only reservation reconciliation after external reduction
+      - name: Apply trusted atomic external Futures reduction RPC in disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-18_demo_derivatives_external_reduction_rpc.sql
+      - name: Test atomic external Futures reduction and newest-first reservation reconciliation
         env:
           PGPASSWORD: postgres
         run: |

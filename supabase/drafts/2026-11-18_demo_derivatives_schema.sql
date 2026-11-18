@@ -164,7 +164,7 @@ CREATE TABLE public.demo_derivative_risk_events (
   account_id uuid NOT NULL,
   position_id uuid,
   event_type text NOT NULL CHECK (event_type IN (
-    'margin_warning','liquidation_started','partial_liquidation','liquidated',
+    'margin_warning','liquidation_started','partial_liquidation','liquidated','external_reduction',
     'stale_price_block','risk_limit_block','margin_added','margin_released'
   )),
   snapshot jsonb NOT NULL DEFAULT '{}'::jsonb,
@@ -182,7 +182,7 @@ CREATE TABLE public.demo_derivative_ledger_transactions (
   created_xid xid8 NOT NULL DEFAULT pg_current_xact_id(),
   event_type text NOT NULL CHECK (event_type IN (
     'spot_transfer','futures_transfer','margin_transfer','order_fee','realized_pnl',
-    'funding','borrow','repayment','interest','liquidation','adjustment','reduce_only_fill'
+    'funding','borrow','repayment','interest','liquidation','adjustment','reduce_only_fill','position_reduction'
   )),
   reference_id uuid,
   metadata jsonb NOT NULL DEFAULT '{}'::jsonb,

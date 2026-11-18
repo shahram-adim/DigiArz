@@ -167,3 +167,15 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [ ] Integrate the helper inside the eventual trusted position-reduction/liquidation transaction after its financial accounting has been applied. Do not call it as a substitute for the actual position-reduction accounting.
 
 - [x] CI ordering verified: run the concurrent-fill fixture first, then apply and test reconciliation against the ETH state it creates, then continue with the independent BTC accounting test.
+
+## Checkpoint — atomic trusted external Futures position reduction (2026-11-18)
+
+- [x] Confirmed the feature branch contains no existing derivative liquidation or external position-reduction RPC; the only reduction primitive before this checkpoint was a Reduce-only order fill.
+- [x] Confirmed Supabase Production is PostgreSQL 17.11 and currently has no `demo_derivative_*` tables or Futures/liquidation functions. This was a read-only inspection; no Production objects or data were changed.
+- [x] Confirmed `market_prices` is a single last-price row per symbol, overwritten by CoinGecko/KuCoin/Gate.io responses. It has no per-source observation history, index price or mark price; it is not approved as a liquidation oracle.
+- [x] Added a draft-only trusted external Futures reduction RPC. It serializes on the account row, is idempotent by event UUID, updates position/PnL/isolated margin, posts balanced ledger entries and calls newest-first Reduce-only reconciliation in the same transaction.
+- [x] Replaced the reconciliation fixture's direct position UPDATE with an end-to-end RPC test covering the real position reduction, PnL, fee, ledger cash, newest-first cancellation, replay and invalid over-reduction.
+- [ ] Run the updated PostgreSQL 17 workflow on the new branch HEAD and inspect the full SQL logs. No test is considered passed until observed.
+- [ ] Add concurrency tests for external reduction racing with placement, fill and cancel.
+- [ ] Design the independent mark/index-price feed, maintenance tiers and liquidation/insurance accounting before any liquidation RPC. Do not use `market_prices` as a liquidation trigger.
+- No Supabase Production DDL/RPC/data, merge/rebase or derivatives UI activation was performed.

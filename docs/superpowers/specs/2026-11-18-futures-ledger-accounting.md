@@ -175,3 +175,34 @@ This first fill slice is limited to Futures Reduce-only Limit orders. Market exe
 
 
 Before a Reduce-only fill is accepted, the worker recomputes the sum of all active Reduce-only remaining quantities for that account/product/symbol/position side under the account mutex and fails closed if the total already exceeds the open position quantity. The fill then reduces both the position quantity and the filled order's remaining reservation by the same amount, preserving the aggregate reservation inequality.
+
+## 14. Atomic trusted external Futures position reduction
+
+The first external-reduction path is intentionally narrower than liquidation. It supports a trusted worker applying a manual/risk-driven reduction to an existing USDT Futures position using a server-authoritative execution price and fee. It does not calculate liquidation eligibility or choose a liquidation price.
+
+Required transaction sequence:
+1. Discover the position's account/user without locking a child row.
+2. Lock the derivative account row first; this is the mandatory serialization mutex.
+3. Check the external event UUID in `demo_derivative_risk_events` before checking current position state. Replaying the same UUID and identical payload returns the original result; changed payload is rejected.
+4. Lock the open position. Only `product_type='futures'` is accepted; Margin Spot is excluded.
+5. Validate positive quantity/price, non-negative fee, 18-decimal precision, and reduction quantity not greater than current position quantity.
+6. Compute realized PnL using the same exact Long/Short formula as the Reduce-only fill path. Release isolated margin pro rata with truncation to 18 decimals, except a full close releases the exact residual.
+7. Update position quantity, realized PnL, isolated collateral, status, closed timestamp and version.
+8. Post one balanced USDT ledger transaction keyed by the event UUID when PnL, fee or isolated-margin release is non-zero. The event type is `position_reduction`; settled cash changes only through ledger entries.
+9. Invoke the existing newest-first Reduce-only reconciliation helper after the position mutation, while still holding the same account lock. Any cancellations, position update, ledger posting and risk event are in the same transaction.
+10. Insert `demo_derivative_risk_events` with `id=event_id`, `event_type='external_reduction'`, and request/result snapshots. This durable row also provides idempotency when no ledger entries are required.
+
+The public wrapper is SECURITY INVOKER and executable only by `service_role`; its private SECURITY DEFINER helper uses an empty search_path. The service-role credential must remain server-side. No browser or Android client may invoke this operation.
+
+The disposable test reuses the concurrent ETHUSDT fixture: a trusted reduction from 0.6 to 0.3 ETH at 110 USDT against a 100 USDT Long entry realizes 3 USDT before a 0.01 USDT fee. It must cancel the newest two 0.2 ETH reservations, preserve the oldest partially-filled 0.2 ETH order, produce ledger-derived cash of 2.99 USDT, reject changed event-id payloads and reject over-reduction. The test replaces the earlier direct fixture UPDATE; it is not a production action.
+
+## 15. Liquidation remains separately gated
+
+The live `public.market_prices` table is not a derivatives mark-price oracle. It stores one last-price row per symbol, with the source overwritten by whichever CoinGecko, KuCoin or Gate.io response is processed last. It does not retain per-source observations, an index price, a mark price, a futures premium/basis, or a documented outlier/confidence calculation. A recent timestamp alone does not make this price safe for liquidation.
+
+The current Futures draft also lacks a production risk-tier table and an approved liquidation-fee/insurance-fund accounting model. The math helper's maintenance-rate inputs are test inputs, not a production risk schedule. Therefore:
+- Do not implement or activate automatic liquidation from `market_prices`.
+- Before liquidation RPC design, specify and test a server-owned multi-source index/mark-price feed with source observations, timestamp/freshness bounds, source-count/quorum, outlier rejection and fail-closed behavior.
+- Define maintenance tiers, partial-liquidation sizing, execution slippage, liquidation fee treatment, insurance/deficit handling and event idempotency.
+- Then test long/short, isolated/cross, partial/full liquidation, stale/outlier feed, fee boundaries and concurrency with placement/fill/cancel.
+- Until these gates pass, only the trusted external reduction path is in scope; it is not a substitute for a liquidation engine.

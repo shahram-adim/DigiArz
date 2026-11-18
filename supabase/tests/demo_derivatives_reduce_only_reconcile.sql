@@ -1,17 +1,19 @@
 \set ON_ERROR_STOP on
 
 -- Runs after the concurrent ETHUSDT fill race in disposable PostgreSQL.
--- The direct quantity update simulates an already-accounted external risk
--- reduction; this test isolates reservation reconciliation only.
+-- A trusted external reduction must update PnL/ledger and reconcile reservations
+-- in one transaction; no direct fixture mutation of the position is used.
 
 SET ROLE authenticated;
 DO $permission_check$
 BEGIN
   BEGIN
-    PERFORM public.reconcile_demo_reduce_only_reservations(
-      '4e000000-0000-0000-0000-000000000001'
+    PERFORM public.apply_demo_external_futures_position_reduction(
+      '4e000000-0000-0000-0000-000000000001',
+      'b6000000-0000-0000-0000-000000000001',
+      0.3,110,0.01
     );
-    RAISE EXCEPTION 'authenticated unexpectedly executed trusted reconciliation RPC';
+    RAISE EXCEPTION 'authenticated unexpectedly executed trusted external reduction';
   EXCEPTION WHEN insufficient_privilege THEN
     NULL;
   END;
@@ -19,30 +21,16 @@ END;
 $permission_check$;
 RESET ROLE;
 
-UPDATE public.demo_derivative_positions
-SET quantity=0.3,version=version+1,updated_at=now()
-WHERE id='4e000000-0000-0000-0000-000000000001'
-  AND quantity=0.6 AND status='open';
-DO $external_reduction_check$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM public.demo_derivative_positions
-    WHERE id='4e000000-0000-0000-0000-000000000001'
-      AND quantity=0.3 AND status='open'
-  ) THEN
-    RAISE EXCEPTION 'external reduction fixture did not update the expected open position';
-  END IF;
-END;
-$external_reduction_check$;
-
 SET ROLE service_role;
-DO $reconcile$
+DO $external_reduction$
 DECLARE
+  v_result jsonb;
+  v_retry jsonb;
   v_cancelled uuid[];
   v_main_order uuid;
   v_older_extra uuid;
   v_newer_extra uuid;
-  v_reserved numeric(38,18);
+  v_cash numeric(38,18);
 BEGIN
   SELECT id INTO v_main_order
   FROM public.demo_derivative_orders
@@ -54,40 +42,114 @@ BEGIN
   FROM public.demo_derivative_orders
   WHERE client_request_id='a5000000-0000-0000-0000-000000000005';
 
-  v_cancelled := public.reconcile_demo_reduce_only_reservations(
-    '4e000000-0000-0000-0000-000000000001'
+  v_result := public.apply_demo_external_futures_position_reduction(
+    '4e000000-0000-0000-0000-000000000001',
+    'b6000000-0000-0000-0000-000000000001',
+    0.3,110,0.01
   );
+  v_retry := public.apply_demo_external_futures_position_reduction(
+    '4e000000-0000-0000-0000-000000000001',
+    'b6000000-0000-0000-0000-000000000001',
+    0.3,110,0.01
+  );
+
+  IF v_retry IS DISTINCT FROM v_result THEN
+    RAISE EXCEPTION 'external reduction retry did not return the original result';
+  END IF;
+
+  SELECT array_agg(x.value::uuid ORDER BY x.ordinality)
+    INTO v_cancelled
+  FROM jsonb_array_elements_text(v_result->'cancelled_order_ids')
+       WITH ORDINALITY AS x(value,ordinality);
 
   IF cardinality(v_cancelled)<>2
      OR v_cancelled[1]<>v_newer_extra
      OR v_cancelled[2]<>v_older_extra THEN
-    RAISE EXCEPTION 'newest-first cancellation order mismatch: %',v_cancelled;
+    RAISE EXCEPTION 'external reduction did not cancel newest reservations first: %',v_cancelled;
+  END IF;
+
+  IF (v_result->>'remaining_quantity')::numeric<>0.3
+     OR (v_result->>'realized_pnl_usdt')::numeric<>3
+     OR (v_result->>'fee_usdt')::numeric<>0.01
+     OR (v_result->>'isolated_margin_released_usdt')::numeric<>0 THEN
+    RAISE EXCEPTION 'external reduction returned incorrect accounting result: %',v_result;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM public.demo_derivative_positions
+    WHERE id='4e000000-0000-0000-0000-000000000001'
+      AND quantity=0.3 AND status='open' AND realized_pnl_usdt=3
+      AND margin_mode='cross'
+  ) THEN
+    RAISE EXCEPTION 'position reduction/PnL update is incorrect';
   END IF;
 
   IF (SELECT status FROM public.demo_derivative_orders WHERE id=v_newer_extra)<>'cancelled'
      OR (SELECT status FROM public.demo_derivative_orders WHERE id=v_older_extra)<>'cancelled'
      OR (SELECT status FROM public.demo_derivative_orders WHERE id=v_main_order)<>'partially_filled' THEN
-    RAISE EXCEPTION 'reconciliation cancelled the wrong Reduce-only orders';
+    RAISE EXCEPTION 'external reduction cancelled the wrong Reduce-only orders';
   END IF;
 
-  SELECT COALESCE(sum(remaining_quantity),0)::numeric(38,18)
-    INTO v_reserved
-  FROM public.demo_derivative_orders
-  WHERE account_id='20000000-0000-0000-0000-000000000002'
-    AND product_type='futures' AND symbol='ETHUSDT' AND position_side='long'
-    AND reduce_only AND status IN ('pending','partially_filled');
-
-  IF v_reserved<>0.2 OR v_reserved>0.3 THEN
-    RAISE EXCEPTION 'remaining reservation is incorrect after reconciliation: %',v_reserved;
+  IF (SELECT count(*) FROM public.demo_derivative_risk_events
+      WHERE id='b6000000-0000-0000-0000-000000000001'
+        AND event_type='external_reduction')<>1 THEN
+    RAISE EXCEPTION 'external reduction risk event was not recorded exactly once';
   END IF;
 
-  IF cardinality(public.reconcile_demo_reduce_only_reservations(
-    '4e000000-0000-0000-0000-000000000001'
-  ))<>0 THEN
-    RAISE EXCEPTION 'reconciliation retry should be idempotent and cancel nothing';
+  IF (SELECT count(*) FROM public.demo_derivative_ledger_transactions
+      WHERE user_id='10000000-0000-0000-0000-000000000002'
+        AND idempotency_key='b6000000-0000-0000-0000-000000000001'
+        AND event_type='position_reduction')<>1 THEN
+    RAISE EXCEPTION 'external reduction ledger transaction was not recorded exactly once';
   END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM public.demo_derivative_ledger_entries e
+    JOIN public.demo_derivative_ledger_transactions t
+      ON t.id=e.transaction_id AND t.user_id=e.user_id
+    WHERE t.idempotency_key='b6000000-0000-0000-0000-000000000001'
+    GROUP BY e.asset
+    HAVING sum(e.debit_amount)<>sum(e.credit_amount)
+  ) THEN
+    RAISE EXCEPTION 'external reduction ledger transaction is unbalanced';
+  END IF;
+
+  SELECT COALESCE(sum(e.debit_amount-e.credit_amount),0)::numeric(38,18)
+    INTO v_cash
+  FROM public.demo_derivative_ledger_entries e
+  WHERE e.user_id='10000000-0000-0000-0000-000000000002'
+    AND e.asset='USDT' AND e.account_bucket='futures_cash';
+
+  IF v_cash<>2.99 THEN
+    RAISE EXCEPTION 'ledger-derived Futures cash should equal 2.99, got %',v_cash;
+  END IF;
+
+  -- Reusing an event id with changed payload must fail without a second effect.
+  BEGIN
+    PERFORM public.apply_demo_external_futures_position_reduction(
+      '4e000000-0000-0000-0000-000000000001',
+      'b6000000-0000-0000-0000-000000000001',
+      0.2,110,0.01
+    );
+    RAISE EXCEPTION 'external reduction event id accepted a changed payload';
+  EXCEPTION WHEN unique_violation THEN
+    NULL;
+  END;
+
+  -- A distinct event cannot reduce more than the remaining open quantity.
+  BEGIN
+    PERFORM public.apply_demo_external_futures_position_reduction(
+      '4e000000-0000-0000-0000-000000000001',
+      'b6000000-0000-0000-0000-000000000002',
+      0.4,110,0
+    );
+    RAISE EXCEPTION 'external reduction over-reduced the position';
+  EXCEPTION WHEN check_violation THEN
+    NULL;
+  END;
 END;
-$reconcile$;
+$external_reduction$;
 RESET ROLE;
 
-SELECT 'demo derivatives newest-first Reduce-only reservation reconciliation passed' AS result;
+SELECT 'demo derivatives atomic external position reduction and reservation reconciliation passed' AS result;
