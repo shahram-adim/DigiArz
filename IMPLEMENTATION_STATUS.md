@@ -462,3 +462,18 @@
 1. روشن‌کردن علت اجرا نشدن/قابل‌مشاهده نبودن workflow برای PR و اجرای واقعی تست‌های Node و PostgreSQL 17 روی HEAD فعلی.
 2. افزودن fixtureهای PostgreSQL برای محاسبهٔ Available Margin، ذخیرهٔ سفارش‌های Limit، آزادسازی هنگام لغو، partial fill و تخصیص Reduce-only.
 3. سپس طراحی RPCهای account-lock/idempotency و آزمون race چندنشستی؛ تا پایان آن‌ها UI مشتقه غیرفعال بماند.
+
+
+## اصلاح محرک CI برای شاخهٔ مشتقات — ۱۸ نوامبر ۲۰۲۶
+
+- [x] بررسی مستقیم نشان داد `.github/workflows/exact-decimal-tests.yml` هم در شاخهٔ قابلیت و هم در `main` وجود دارد؛ بنابراین فرض قبلیِ نبودن Workflow در base branch درست نبود.
+- [x] علت قطعیِ نبودن run هنوز از APIهای در دسترس اثبات نشده است؛ ابزار بررسی runها فقط runهای pull_request را برمی‌گرداند و check/status برای SHA قبلی نیز خالی بود.
+- [x] محرک `push` به Workflow گسترش یافت تا علاوه بر `main`، Push مستقیم به `feat/demo-derivatives-trading` را نیز اجرا کند؛ محرک `pull_request` به `main` حفظ شد.
+- [!] پس از commit تغییر محرک، هنوز run یا status check قابل مشاهده نیست؛ بنابراین تست‌ها همچنان اجراشده یا سبز محسوب نمی‌شوند.
+- [x] HEAD فعلی پس از تغییر Workflow برابر `3156a1a44e316ed5fbb45d414150fe7759abcee0` بود؛ PR #12 باز و Draft است و شاخه با main واگرا (۵۳ جلو، ۱ عقب) باقی مانده است.
+- [x] هیچ تغییری در Supabase Production انجام نشد.
+
+### گام بعدی
+1. بررسی مجدد run/status برای HEAD جدید و تشخیص اینکه GitHub Actions در مخزن فعال و مجاز است یا خیر.
+2. در صورت عدم اجرای CI، اجرای تست Node در محیط محلی/runner ایزوله و ثبت خروجی واقعی؛ تست PostgreSQL 17 نیز باید اجرا شود.
+3. پس از دریافت نتایج واقعی، خطاهای تست را اصلاح کن و سپس fixtureهای SQL مربوط به Available Margin و lifecycle رزرو سفارش را اضافه کن.
