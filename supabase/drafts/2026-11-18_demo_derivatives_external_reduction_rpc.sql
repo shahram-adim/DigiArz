@@ -34,6 +34,9 @@ DECLARE
   v_request_snapshot jsonb;
   v_result jsonb;
   v_new_quantity numeric(38,18);
+  v_updated_quantity numeric(38,18);
+  v_updated_realized_pnl numeric(38,18);
+  v_updated_status text;
   v_realized_pnl numeric(38,18);
   v_margin_release numeric(38,18);
   v_cancelled_order_ids uuid[];
@@ -131,20 +134,34 @@ BEGIN
       )
     END;
 
-  UPDATE public.demo_derivative_positions
+  UPDATE public.demo_derivative_positions AS p
   SET quantity=v_new_quantity,
       isolated_margin_usdt=CASE
         WHEN v_new_quantity=0 THEN 0
-        ELSE isolated_margin_usdt-v_margin_release
+        ELSE p.isolated_margin_usdt-v_margin_release
       END,
-      realized_pnl_usdt=realized_pnl_usdt+v_realized_pnl,
+      realized_pnl_usdt=p.realized_pnl_usdt+v_realized_pnl,
       status=CASE WHEN v_new_quantity=0 THEN 'closed' ELSE 'open' END,
       closed_at=CASE WHEN v_new_quantity=0 THEN now() ELSE NULL END,
-      version=version+1,
+      version=p.version+1,
       updated_at=now()
-  WHERE id=p_position_id
-    AND account_id=v_account_id
-    AND user_id=v_user_id;
+  WHERE p.id=p_position_id
+    AND p.account_id=v_account_id
+    AND p.user_id=v_user_id
+  RETURNING p.quantity,p.realized_pnl_usdt,p.status
+    INTO v_updated_quantity,v_updated_realized_pnl,v_updated_status;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'External reduction did not update the locked position row'
+      USING ERRCODE='40001';
+  END IF;
+
+  IF v_updated_quantity<>v_new_quantity
+     OR v_updated_realized_pnl<>v_position.realized_pnl_usdt+v_realized_pnl
+     OR v_updated_status<>CASE WHEN v_new_quantity=0 THEN 'closed' ELSE 'open' END THEN
+    RAISE EXCEPTION 'External reduction position update did not match its calculated state'
+      USING ERRCODE='23514';
+  END IF;
 
   -- The event id is also the ledger idempotency key. If a ledger header exists
   -- without its risk event, the unique constraint fails closed and rolls back.

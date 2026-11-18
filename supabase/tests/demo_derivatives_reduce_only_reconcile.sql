@@ -32,6 +32,7 @@ DECLARE
   v_newer_extra uuid;
   v_cash numeric(38,18);
   v_reserved numeric(38,18);
+  v_position_state jsonb;
 BEGIN
   SELECT id INTO v_main_order
   FROM public.demo_derivative_orders
@@ -76,13 +77,23 @@ BEGIN
     RAISE EXCEPTION 'external reduction returned incorrect accounting result: %',v_result;
   END IF;
 
-  IF NOT EXISTS (
-    SELECT 1 FROM public.demo_derivative_positions
-    WHERE id='4e000000-0000-0000-0000-000000000001'
-      AND quantity=0.3 AND status='open' AND realized_pnl_usdt=3
-      AND margin_mode='cross'
-  ) THEN
-    RAISE EXCEPTION 'position reduction/PnL update is incorrect';
+  SELECT jsonb_build_object(
+    'quantity',p.quantity,
+    'status',p.status,
+    'realized_pnl_usdt',p.realized_pnl_usdt,
+    'margin_mode',p.margin_mode,
+    'entry_price',p.entry_price,
+    'version',p.version
+  ) INTO v_position_state
+  FROM public.demo_derivative_positions AS p
+  WHERE p.id='4e000000-0000-0000-0000-000000000001';
+
+  IF v_position_state IS NULL
+     OR (v_position_state->>'quantity')::numeric<>0.3
+     OR v_position_state->>'status'<>'open'
+     OR (v_position_state->>'realized_pnl_usdt')::numeric<>3
+     OR v_position_state->>'margin_mode'<>'cross' THEN
+    RAISE EXCEPTION 'position reduction/PnL update is incorrect: %',v_position_state;
   END IF;
 
   IF (SELECT status FROM public.demo_derivative_orders WHERE id=v_newer_extra)<>'cancelled'

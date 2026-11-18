@@ -706,3 +706,6 @@
 - [ ] موتور لیکوییدیشن تا طراحی منبع مستقل index/mark price، risk tiers و مدل fee/insurance ساخته یا فعال نشود.
 - [x] هیچ DDL/RPC/migration/data در Supabase Production اجرا نشد؛ UI مشتقات خاموش ماند؛ merge/rebase انجام نشد.
 - [x] تست end-to-end کاهش خارجی یک assertion مستقل هم دارد: مجموع رزروهای فعال پس از لغو دو سفارش جدیدتر باید دقیقاً ۰٫۲ و حداکثر برابر مقدار پوزیشن باقی‌مانده ۰٫۳ باشد.
+- [!] CI run `44265930201` exposed a failure in the external-reduction integration test at the persisted position-state assertion; the workflow did not pass.
+- [x] The test failure is being instrumented: the RPC now checks that exactly one locked position row was updated and that persisted quantity/PnL/status match the calculated values; the test failure message reports the actual row snapshot. This is a diagnostic/correctness hardening change, not a verified fix.
+- [ ] Re-run PostgreSQL CI and use the reported row state to identify and correct the underlying cause before marking this slice complete.
