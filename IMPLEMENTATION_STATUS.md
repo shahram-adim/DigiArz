@@ -709,3 +709,6 @@
 - [!] CI run `44265930201` exposed a failure in the external-reduction integration test at the persisted position-state assertion; the workflow did not pass.
 - [x] The test failure is being instrumented: the RPC now checks that exactly one locked position row was updated and that persisted quantity/PnL/status match the calculated values; the test failure message reports the actual row snapshot. This is a diagnostic/correctness hardening change, not a verified fix.
 - [ ] Re-run PostgreSQL CI and use the reported row state to identify and correct the underlying cause before marking this slice complete.
+- [!] اجرای PostgreSQL CI شماره `44266382034` در مرحلهٔ ساخت RPC خارجی شکست خورد؛ لاگ قطعی علت را syntax error در مقایسهٔ `CASE` داخل IF نشان داد. شکست قبلی ناشی از اختلاف دادهٔ پوزیشن نبود؛ پیام قبلی دربارهٔ آن علت را اصلاح می‌کنیم.
+- [x] مقایسه به `IS DISTINCT FROM (CASE ... END)` تغییر کرد تا عبارت شرطی در PL/pgSQL بدون ابهام parse شود.
+- [ ] منتظر اجرای کامل workflow روی commit اصلاح‌شده هستیم؛ هنوز هیچ تستی برای RPC کاهش خارجی موفق اعلام نمی‌شود.

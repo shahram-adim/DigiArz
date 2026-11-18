@@ -158,7 +158,7 @@ BEGIN
 
   IF v_updated_quantity<>v_new_quantity
      OR v_updated_realized_pnl<>v_position.realized_pnl_usdt+v_realized_pnl
-     OR v_updated_status<>CASE WHEN v_new_quantity=0 THEN 'closed' ELSE 'open' END THEN
+     OR v_updated_status IS DISTINCT FROM (CASE WHEN v_new_quantity=0 THEN 'closed' ELSE 'open' END) THEN
     RAISE EXCEPTION 'External reduction position update did not match its calculated state'
       USING ERRCODE='23514';
   END IF;
