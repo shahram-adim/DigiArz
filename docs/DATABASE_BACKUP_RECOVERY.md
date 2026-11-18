@@ -33,15 +33,16 @@ openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 \
 pg_restore --list digiarz-database.dump
 ```
 
-The workflow itself verifies that encryption/decryption reproduces identical bytes and that expected archive entries exist. These checks validate archive integrity and expected contents; **they do not prove that a database restore succeeds**.
+The backup workflow verifies that encryption/decryption reproduces identical bytes and that expected archive entries exist. These checks validate archive integrity and expected contents.
 
 ## Recovery precautions
 
 - Never test a restore against the live DigiArz production database.
-- Prefer a separate, empty Supabase project intended for recovery testing. Creating a project may incur charges; check pricing and obtain approval before creating or upgrading anything.
+- The automated recovery drill is hard-pinned to the isolated Supabase project `DigiArz-Recovery-Test` (project ref `zrriqwyolcjhbappocuw`) and rejects the production project ref.
+- The recovery workflow drops and recreates only the `public` and `private` application schemas in that isolated test project. Do not repoint its secret to production.
 - Use a PostgreSQL client compatible with the source archive (the workflow uses PostgreSQL 17).
-- Before restoring, inspect the archive list and identify required extensions, schemas, functions, triggers, policies, and grants. Supabase-managed schemas and roles are not included in this application-schema archive.
-- A target Supabase project provides managed schemas such as `auth`, but its configuration and Auth data are not copied by this artifact. Functions and policies that refer to `auth.uid()`, Supabase roles, or other managed objects must be checked against the target.
+- The target Supabase project provides managed schemas such as `auth`, but its configuration and Auth data are not copied by this application-schema archive.
+- Auth user data is not included. The recovery drill therefore omits the 15 foreign-key constraints in the archive that reference `auth.users`; the associated Auth identities are not restored.
 - The `private.admin_users` record is logically tied to an Auth user. Because Auth user data is not included, restoring the private schema alone may leave the admin mapping unusable until the corresponding Auth account is recreated or mapped safely.
 - The backup does not include `supabase_migrations.schema_migrations`. Do not mark migrations as applied merely because their schema objects appear in the archive.
 - Do not restore Vault secrets from unrelated sources or copy production secrets into a test project.
@@ -49,4 +50,17 @@ The workflow itself verifies that encryption/decryption reproduces identical byt
 
 ## Restore status
 
-As of 2026-11-16, the latest workflow run (`43848835281`) completed successfully and produced the expected artifact. No live restore drill has been performed. A recovery test must be conducted in an isolated target and documented separately before this backup can be described as restore-tested.
+### Automated isolated restore drill — 2026-11-18
+
+GitHub Actions run [44298621534](https://github.com/shahram-adim/DigiArz/actions/runs/44298621534) completed with conclusion `success`. All seven job steps completed successfully.
+
+The workflow:
+1. Validated the recovery database connection against the exact isolated project ref `zrriqwyolcjhbappocuw` and rejected production connection details.
+2. Downloaded the known-good encrypted backup artifact from backup run `43848835281`; the downloaded artifact SHA-256 matched the expected digest.
+3. Decrypted and inspected the archive; required `public` and `private` schema entries and application table data were present.
+4. Restored the application schemas into the isolated recovery project. It removed only the 15 foreign-key constraints referencing `auth.users`, because Auth rows are not part of this backup.
+5. Verified restored table counts: `public` = 22 tables and `private` = 10 tables.
+
+**Result:** the encrypted application-schema backup has passed an automated restore drill into the isolated recovery project. The production database was not the target.
+
+**Scope limitation:** this proves the archive can be decrypted and its selected application schemas restored, with the stated Auth-related constraint exclusions. It does not test restoration of Auth users, Storage, Vault, Edge Functions, Supabase project settings, migration history, or full end-to-end application behavior. This artifact is not a full Supabase disaster-recovery backup.
