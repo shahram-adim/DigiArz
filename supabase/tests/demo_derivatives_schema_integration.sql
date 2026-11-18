@@ -9,13 +9,13 @@ INSERT INTO public.demo_derivative_accounts(id,user_id) VALUES
   ('20000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000002');
 
 INSERT INTO public.demo_derivative_orders(
-  id,user_id,account_id,product_type,symbol,position_side,order_type,
+  id,user_id,account_id,product_type,symbol,position_side,side,order_type,
   quantity,leverage,margin_mode,remaining_quantity,client_request_id
 ) VALUES (
   '30000000-0000-0000-0000-000000000001',
   '10000000-0000-0000-0000-000000000001',
   '20000000-0000-0000-0000-000000000001',
-  'futures','BTCUSDT','long','market',1,5,'isolated',1,
+  'futures','BTCUSDT','long','buy','market',1,5,'isolated',1,
   '31000000-0000-0000-0000-000000000001'
 );
 
@@ -36,14 +36,14 @@ INSERT INTO public.demo_derivative_positions(
 
 INSERT INTO public.demo_derivative_fills(
   id,user_id,account_id,order_id,position_id,fill_sequence,
-  symbol,position_side,quantity,price,fee_usdt
+  symbol,position_side,side,quantity,price,fee_usdt
 ) VALUES (
   '50000000-0000-0000-0000-000000000001',
   '10000000-0000-0000-0000-000000000001',
   '20000000-0000-0000-0000-000000000001',
   '30000000-0000-0000-0000-000000000001',
   '40000000-0000-0000-0000-000000000001',
-  1,'BTCUSDT','long',1,100,0.04
+  1,'BTCUSDT','long','buy',1,100,0.04
 );
 
 INSERT INTO public.demo_margin_loans(
@@ -100,19 +100,57 @@ INSERT INTO public.demo_derivative_ledger_entries(
 
 COMMIT;
 
+DO $order_direction_checks$
+BEGIN
+  BEGIN
+    INSERT INTO public.demo_derivative_orders(
+      id,user_id,account_id,product_type,symbol,position_side,side,order_type,
+      quantity,leverage,margin_mode,reduce_only,remaining_quantity,client_request_id
+    ) VALUES (
+      '30000000-0000-0000-0000-000000000099',
+      '10000000-0000-0000-0000-000000000001',
+      '20000000-0000-0000-0000-000000000001',
+      'futures','BTCUSDT','long','sell','limit',
+      0.1,5,'cross',false,0.1,
+      '31000000-0000-0000-0000-000000000099'
+    );
+    RAISE EXCEPTION 'sell-long opening order unexpectedly accepted';
+  EXCEPTION WHEN check_violation THEN
+    NULL;
+  END;
+
+  BEGIN
+    INSERT INTO public.demo_derivative_orders(
+      id,user_id,account_id,product_type,symbol,position_side,side,order_type,
+      quantity,leverage,margin_mode,reduce_only,remaining_quantity,client_request_id
+    ) VALUES (
+      '30000000-0000-0000-0000-000000000098',
+      '10000000-0000-0000-0000-000000000001',
+      '20000000-0000-0000-0000-000000000001',
+      'futures','BTCUSDT','short','buy','limit',
+      0.1,5,'cross',false,0.1,
+      '31000000-0000-0000-0000-000000000098'
+    );
+    RAISE EXCEPTION 'buy-short opening order unexpectedly accepted';
+  EXCEPTION WHEN check_violation THEN
+    NULL;
+  END;
+END;
+$order_direction_checks$;
+
 DO $relationship_checks$
 BEGIN
   BEGIN
     INSERT INTO public.demo_derivative_fills(
       id,user_id,account_id,order_id,position_id,fill_sequence,
-      symbol,position_side,quantity,price,fee_usdt
+      symbol,position_side,side,quantity,price,fee_usdt
     ) VALUES (
       '51000000-0000-0000-0000-000000000001',
       '10000000-0000-0000-0000-000000000001',
       '20000000-0000-0000-0000-000000000001',
       '30000000-0000-0000-0000-000000000001',
       '40000000-0000-0000-0000-000000000002',
-      2,'BTCUSDT','long',0.1,100,0.01
+      2,'BTCUSDT','long','buy',0.1,100,0.01
     );
     RAISE EXCEPTION 'cross-account fill unexpectedly accepted';
   EXCEPTION WHEN foreign_key_violation THEN
