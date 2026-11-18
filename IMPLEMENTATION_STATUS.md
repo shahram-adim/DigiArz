@@ -1252,3 +1252,18 @@
 - [!] سیاست seed/replenishment و سقف پرداخت بیمه، بازیابی کسری، کارمزد لیکوییدیشن، slippage، buffer و اولویت Cross هنوز تعیین نشده‌اند.
 - [ ] گام بعد: ساخت schema خصوصی دفترکل پلتفرمی و deficit journal به‌همراه invariant tests در PostgreSQL 17 دورریختنی CI؛ تا تصویب سیاست‌ها هیچ payout/recovery RPC یا liquidation worker ساخته/فعال نشود.
 - [x] هیچ تغییر Supabase Production، merge/rebase یا فعال‌سازی UI و auto-liquidation انجام نشد.
+
+
+## ساخت draft دفترکل مستقل بیمه و ثبت کسری مشتقات — ۱۸ نوامبر ۲۰۲۶
+
+- [x] پیش از ادامه، وضعیت واقعی PR و شاخه‌ها دوباره خوانده شد: PR #12 باز و Draft است؛ HEAD پیش از این مرحله `78022ed7078a82ef03d29e4f71d7f0808e6f8065` بود؛ شاخه مشتقات ۲۴۰ commit جلوتر و صفر commit عقب‌تر از `main` قرار داشت. بنابراین همگام‌سازی main لازم نبود و انجام نشد.
+- [x] آخرین CI پیش از تغییرات، run `44328614153` روی HEAD قبلی بود و نتیجه `success` داشت.
+- [x] draft مستقل `supabase/drafts/2026-11-18_demo_derivatives_insurance_deficit_ledger.sql` اضافه شد: chart حساب پلتفرمی چهارحسابی، دفترکل دوطرفه USDT، transaction idempotency/payload hash، append-only و immutable، balance مشتق‌شده از entries، قفل ردیف cash برای سریال‌سازی payoutها و رد موجودی منفی.
+- [x] deficit journal مستقل و بدون FK به `auth.users` اضافه شد؛ رویدادهای opening، insurance application و recovery با تطبیق مبلغ/نوع تراکنش پلتفرمی و کنترل over-recovery زیر advisory transaction lock ثبت می‌شوند. بیمه به‌اشتباه recovery شمرده نمی‌شود.
+- [x] viewهای خصوصی فقط برای محاسبه balance صندوق و exposure باقی‌مانده کسری از رویدادهای immutable ساخته شدند؛ هیچ balance قابل‌نوشتن یا user ساختگی اضافه نشد.
+- [x] تست `supabase/tests/demo_derivatives_insurance_deficit_ledger.sql` اضافه شد: seed، پوشش کامل، پوشش جزئی، پوشش صفر، recovery، رد overdraw، رد posting نامتوازن، جلوگیری از over-recovery، immutability، idempotency uniqueness و عدم دسترسی client/service_role به جداول private.
+- [x] workflow `.github/workflows/exact-decimal-tests.yml` به اجرای draft و تست جدید در همان PostgreSQL 17 دورریختنی derivatives CI مجهز شد.
+- [!] CI این تغییرات هنوز باید از روی HEAD جدید اجرا و نتیجه واقعی آن بررسی شود؛ تا دریافت نتیجه، تست‌ها را موفق اعلام نکن.
+- [!] این مرحله فقط schema/test draft است؛ هیچ posting RPC، seed/replenishment عملیاتی، payout worker، recovery worker، liquidation RPC یا UI ساخته/فعال نشده است. هیچ DDL/RPC/policy/cron یا داده‌ای در Supabase Production تغییر نکرد.
+- [!] سیاست‌های seed، سقف payout، مجوز replenishment، recovery authority/cap و liquidation fee/slippage/buffer/Cross priority همچنان باز هستند و از fixtureها مقدار عملیاتی استنتاج نمی‌شود.
+- [ ] گام بعد: بررسی CI و رفع هر خطای واقعی؛ سپس تست دو نشست برای payoutهای هم‌زمان و over-recovery هم‌زمان، و آزمون rollback اتمیک در صورت شکست بین دو دفترکل. تا تصویب سیاست‌ها هیچ RPC اجرایی یا auto-liquidation اضافه نشود.
