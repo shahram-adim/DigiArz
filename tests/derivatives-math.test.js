@@ -28,10 +28,17 @@ test('calculates isolated long and short liquidation estimates',()=>{
   assert.equal(M.isolatedLiquidationPrice('short','1','100','10','0.005','0.0004'),'109.409190371991247265');
   assert.equal(M.isolatedLiquidationPrice('long','1','100','120','0.005','0.0004'),null);
 });
-test('cross margin does not present a misleading per-position liquidation price',()=>{
-  const r=M.riskSnapshot({side:'long',quantity:'1',entryPrice:'100',markPrice:'105',isolatedMargin:'20',maintenanceRate:'0.005',closeFeeRate:'0.0004',marginMode:'cross'});
+test('cross margin defers equity and liquidation risk to the account-level engine',()=>{
+  const r=M.riskSnapshot({side:'long',quantity:'1',entryPrice:'100',markPrice:'105',maintenanceRate:'0.005',marginMode:'cross'});
+  assert.equal(r.equity,null);
+  assert.equal(r.marginRatio,null);
   assert.equal(r.liquidationPrice,null);
+  assert.equal(r.atRisk,null);
+  assert.equal(r.riskScope,'account');
   assert.equal(r.liquidationPriceMethod,'account-level-cross-risk-engine');
+});
+test('risk snapshot rejects unknown margin modes',()=>{
+  assert.throws(()=>M.riskSnapshot({side:'long',quantity:'1',entryPrice:'100',markPrice:'105',isolatedMargin:'20',maintenanceRate:'0.005',marginMode:'shared'}),/marginMode/);
 });
 test('risk snapshot identifies maintenance breach and calculates margin ratio',()=>{
   const r=M.riskSnapshot({side:'long',quantity:'1',entryPrice:'100',markPrice:'80',isolatedMargin:'10',maintenanceRate:'0.01',closeFeeRate:'0.001'});
