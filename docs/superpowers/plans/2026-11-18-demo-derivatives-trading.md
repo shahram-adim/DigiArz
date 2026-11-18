@@ -440,3 +440,14 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [x] Run 764 logs confirm all 77 Node/browser tests passed (77 pass, 0 fail), including the new Spot quote test; disposable PostgreSQL 17 also reported `demo derivatives schema integration passed`.
 - [!] CI evidence applies to code HEAD `10f6467c`; any later documentation-only commits require their own exact-HEAD run before claiming the latest branch HEAD is validated.
 - [!] No Supabase Production DDL/RPC/policy/cron/data changes, deployment, live collector, order execution, borrowing, or liquidation activation occurred. PR #12 remains Open/Draft/unmerged.
+
+ 
+## Phase 3 UI design checkpoint — 2026-11-18
+- [x] Add a read-only Futures terminal design shell with pair/side/order/leverage/margin-mode fields, order preview and account-risk disclosure; all financial controls remain disabled.
+- [x] Add a read-only Margin Spot design shell for collateral, borrowing, repayment and interest disclosure; all financial controls remain disabled.
+- [x] Add separate read-only views for open derivative positions, derivative orders and derivative ledger/history.
+- [x] Add keyboard-operable ARIA tab navigation, dark/light theme styling and responsive layout rules for narrow Android screens.
+- [x] Add regression tests proving the five views exist and the UI prototype cannot write to Supabase or activate financial controls.
+- [x] GitHub Actions run 44389215446 passed: 79 Node/browser tests, 0 failures, and all 54 workflow steps succeeded in disposable PostgreSQL 17.
+- [ ] Visual review on a real 360px Android device and desktop, including dark/light theme, remains pending.
+- Note: this checkpoint completes the visual shell/design prototype only. It does not complete functional trading UI, financial policy decisions, backend integration, or release approval.

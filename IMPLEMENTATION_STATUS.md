@@ -1528,3 +1528,13 @@
 ## تکمیل دامنهٔ آزمون‌های نمای مشتقات — ۱۸ نوامبر ۲۰۲۶
 - [x] بررسی شکست دوم نشان داد CSS در head و handler صفحه‌کلید در script انتهای سند قرار دارند؛ assertionهای آن‌ها از قطعهٔ workspace به کل سند منتقل شدند.
 - [ ] CI بعدی باید تست‌های Node و سپس PostgreSQL 17 را کامل کند.
+
+ 
+## تأیید CI رابط مشتقات پس از اصلاح تست‌ها — ۱۸ نوامبر ۲۰۲۶
+- [x] commit 2e5ea5e676591eba99cf1a561f2b407d94286e5f در GitHub Actions run 44389215446 با نتیجهٔ success اعتبارسنجی شد.
+- [x] مرحلهٔ Node/browser: ۷۹ تست موفق، صفر شکست.
+- [x] تمام ۵۴ مرحلهٔ job شامل آزمون‌های PostgreSQL 17 موقت، migration rehearsal، lifecycle و raceهای Spot و مشتقات، Oracle، RLS، ledger، insurance و deficit با موفقیت تمام شدند.
+- [x] Merge Commit همگام‌سازی main، در runهای 44387643200 و 44387628539 موفق بود.
+- [x] شاخه feature نسبت به main برابر ۳۰۶ commit جلو و صفر commit عقب است؛ PR #12 باز، Draft، ادغام‌نشده و mergeable است.
+- [ ] بازبینی بصری روی گوشی واقعی Android در عرض 360px و بررسی دسکتاپ/حالت روشن و تاریک هنوز به تأیید کاربر نیاز دارد.
+- [!] تمام اجرای SQL در PostgreSQL موقت CI بوده است؛ هیچ DDL/RPC/policy/cron/data در Supabase Production تغییر نکرده است.
