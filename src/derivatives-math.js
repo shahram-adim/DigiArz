@@ -245,7 +245,8 @@
     positions,
     openOrders,
     unpostedLiabilitiesUsdt='0',
-    maxLeverage=125
+    maxLeverage=125,
+    maintenanceTierSchedules=null
   }){
     const cash=dec(cashBalanceUsdt);
     if(D.compareDecimal(cash,'0')<0)throw new RangeError('cash balance must not be negative');
@@ -265,7 +266,12 @@
       const quantity=positive(p.quantity,'position quantity');
       const entry=positive(p.entryPrice,'entry price');
       validateLeverage(p.leverage,maxLeverage);
-      const key=validDerivativesSymbol(p.symbol)+'|'+p.side;
+      const symbol=validDerivativesSymbol(p.symbol);
+      if(maintenanceTierSchedules!==null){
+        if(!Object.prototype.hasOwnProperty.call(maintenanceTierSchedules,symbol))throw new RangeError('missing trusted maintenance tier schedule for '+symbol);
+        validateMaintenanceTiers(maintenanceTierSchedules[symbol],maxLeverage);
+      }
+      const key=symbol+'|'+p.side;
       addTo(positionQuantities,key,quantity);
       if(p.priceStatus!=='fresh'){
         hasStaleMark=true;
@@ -276,9 +282,13 @@
       totalPnl=add(totalPnl,unrealizedPnl(p.side,quantity,entry,mark));
       const positionNotional=ceilPositiveProduct(quantity,mark);
       positionInitial=add(positionInitial,ceilPositiveDivision(positionNotional,String(p.leverage)));
-      const maintenanceRate=positive(p.maintenanceRate,'maintenance rate');
-      if(D.compareDecimal(maintenanceRate,'1')>=0)throw new RangeError('maintenance rate must be below 1');
-      maintenance=add(maintenance,ceilPositiveProduct(positionNotional,maintenanceRate));
+      if(maintenanceTierSchedules!==null){
+        maintenance=add(maintenance,maintenanceMarginFromTiers(quantity,mark,maintenanceTierSchedules[symbol],maxLeverage));
+      }else{
+        const maintenanceRate=positive(p.maintenanceRate,'maintenance rate');
+        if(D.compareDecimal(maintenanceRate,'1')>=0)throw new RangeError('maintenance rate must be below 1');
+        maintenance=add(maintenance,ceilPositiveProduct(positionNotional,maintenanceRate));
+      }
       closeFeeReserve=add(closeFeeReserve,ceilPositiveProduct(positionNotional,feeRate));
     }
 
