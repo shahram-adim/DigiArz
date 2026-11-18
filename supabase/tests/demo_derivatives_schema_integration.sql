@@ -171,7 +171,7 @@ $relationship_checks$;
 
 DO $checks$
 BEGIN
-  IF (SELECT count(*) FROM public.demo_derivative_accounts) <> 2 THEN
+  IF (SELECT count(*) FROM public.demo_derivative_accounts) <> 3 THEN
     RAISE EXCEPTION 'account fixture count mismatch';
   END IF;
   IF (SELECT outstanding_amount FROM public.demo_margin_loans
@@ -190,7 +190,7 @@ SELECT set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000001'
 
 DO $rls_checks$
 BEGIN
-  IF (SELECT count(*) FROM public.demo_derivative_accounts) <> 1 THEN
+  IF (SELECT count(*) FROM public.demo_derivative_accounts) <> 2 THEN
     RAISE EXCEPTION 'RLS did not restrict accounts to the current user';
   END IF;
   IF (SELECT count(*) FROM public.demo_derivative_orders) <> 1 THEN
