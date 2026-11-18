@@ -246,3 +246,14 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [ ] Next: add versioned server-owned maintenance-tier configuration and integrate it into isolated/cross risk snapshots with stale-price and threshold-boundary tests.
 - [ ] Then specify and test partial/full liquidation sizing, liquidation fees, insurance-fund flows, deficit accounting, idempotency and concurrent liquidation/reduction races. No automatic liquidation or UI activation.
 - No Supabase Production changes, PR merge, or PR Draft status change.
+
+## Checkpoint — tier-aware isolated risk snapshot (2026-11-18)
+
+- [x] `riskSnapshot()` accepts a validated maintenance-tier schedule and calculates maintenance margin/tier index from current mark notional.
+- [x] Added a piecewise isolated liquidation-price estimate that resolves the tier at the candidate liquidation notional, including cases where the candidate crosses a tier boundary.
+- [x] Conservative 18-decimal rounding: Long threshold rounds upward and Short threshold rounds downward.
+- [x] Node tests cover Long and Short candidate prices on different tiers from entry/current notional and verify risk snapshot integration.
+- [x] CI runs `44305853609` (push) and `44305863707` (pull_request) passed on commit `760c240ea5bb9bff5234e9fedf54dfb873aac23d`, 43 steps each.
+- [!] This is a pure isolated-position estimate only. Tier configuration is not yet loaded from a versioned server-owned database table; cross-account aggregation and all liquidation accounting remain incomplete.
+- [ ] Next: draft versioned maintenance-tier storage and a trusted server-side resolver; integrate tier schedules into cross-margin account risk with stale-oracle and version-change tests.
+- [ ] Then test atomic partial/full liquidation, fee/insurance/deficit ledger flows, idempotency and concurrent liquidation vs fills/reductions. No auto-liquidation or UI activation.
