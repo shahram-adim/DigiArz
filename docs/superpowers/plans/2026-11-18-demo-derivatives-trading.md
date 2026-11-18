@@ -202,3 +202,14 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [ ] Next: run CI; then design private PostgreSQL observation/batch/snapshot/policy schema and trusted collector ingestion contract. No live collector or DDL yet.
 - [ ] Final per-symbol deviation/freshness thresholds require historical replay and explicit risk review; no hard-coded production thresholds.
 - [ ] No Supabase Production changes, no Data API exposure, no UI activation, no automatic liquidation.
+
+
+## Checkpoint — private price-oracle storage draft (2026-11-18)
+
+- [x] CI run 44268659724 passed on the exact-decimal consensus helper commit.
+- [x] Added a private storage draft for versioned per-symbol policies, collection cycles, per-provider terminal results, append-only observations, and immutable snapshots.
+- [x] Added integration coverage for private grants/RLS, immutable evidence, source quorum, terminal provider states, and cycle completion only after snapshot publication.
+- [ ] Run the new SQL integration in disposable PostgreSQL CI; fix any test failures before proceeding.
+- [ ] Next design: trusted-worker ingestion/publication RPCs, idempotent cycle creation, retry and concurrent publication semantics.
+- [ ] Venue endpoints are not automatically independent underlying feeds; map index constituents and correlated source families before final quorum policy.
+- No Production DDL, collector deployment, UI activation, merge, or rebase.

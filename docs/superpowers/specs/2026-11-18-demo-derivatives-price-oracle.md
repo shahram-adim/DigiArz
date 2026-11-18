@@ -1,99 +1,42 @@
-# DigiArz Futures Mark/Index Price Oracle — Design Specification
+# Private Futures Price Oracle Storage — Design
 
 Date: 2026-11-18
-Repository: shahram-adim/DigiArz
-Branch: feat/demo-derivatives-trading
-Status: design + deterministic consensus primitive; no live collector, migration, or Production changes.
+Status: disposable PostgreSQL draft only; no Production migration, collector, or public RPC.
 
-## 1. Problem and current-state finding
+## Trust boundary
+All objects live in non-exposed `private`. No anon/authenticated table grants. RLS is enabled as defense in depth; the trusted server collector uses a server-only `service_role` database context. Never ship that credential to Android/browser. This is separate from the existing user-facing derivatives RPC wrappers in the same schema: no oracle table privilege is granted to authenticated users.
 
-The current public.market_prices path is a last-price cache. Scheduled ingestion currently stores one row per symbol and overwrites price, source, and updated_at as CoinGecko, KuCoin, and Gate.io responses arrive. It does not preserve simultaneous per-provider observations, provider timestamps, index values, mark values, or a durable source quorum. It is suitable for market display, not an automated liquidation oracle.
+## Data model
+- `demo_derivative_price_policies`: immutable, versioned per-symbol thresholds and eligible provider allowlist. A partial unique index permits only one enabled policy per symbol. Thresholds remain unset in Production until historical replay.
+- `demo_derivative_price_cycles`: one atomic collection cycle per symbol and policy version, with explicit expected providers and terminal state.
+- `demo_derivative_price_cycle_sources`: one row per expected provider; records instrument mapping, pending/received/failed state, source timestamp, server receipt timestamp, response hash, and failure reason.
+- `demo_derivative_price_observations`: append-only normalized raw mark/index observations or rejection records, one per provider per cycle.
+- `demo_derivative_price_snapshots`: append-only consensus result; healthy prices are mandatory only for healthy status. Non-healthy snapshots contain no usable price.
 
-The existing Futures external-reduction RPC accepts a trusted worker-supplied execution price and fee. It is a position-reduction primitive, not a price source, mark-price calculator, or liquidation engine.
+## Atomic publication protocol
+1. Trusted collector creates a cycle and all expected-provider rows in one transaction.
+2. Each adapter submits one normalized observation and transitions its provider row from pending to received/failed.
+3. Snapshot insert is rejected while any provider is pending, unless all providers have terminal outcomes.
+4. Snapshot source set must match received provider rows; healthy snapshots must meet the policy quorum.
+5. Cycle can become completed only after a snapshot exists; it then becomes immutable.
+6. A timeout/failure cycle still publishes a non-healthy snapshot with null prices, then closes. No stale last-known-good price is substituted.
+7. Future implementation must wrap cycle creation, per-provider result, and snapshot publication in narrow service-only RPCs or a trusted transaction client; do not grant clients table access.
 
-## 2. Provider adapters to evaluate
+## Provenance caveat
+Three exchange endpoints are three venue operators, not necessarily three statistically independent underlying price feeds. Exchange index prices may themselves aggregate overlapping spot venues. The current design records venue and instrument provenance but does not yet establish constituent-level independence. Do not call the quorum "independent feeds" until constituent coverage, weights, and overlap have been researched. A policy must consider source-family diversity and avoid double-counting correlated index baskets.
 
-Use public, read-only linear USDT perpetual market-data endpoints; no exchange account credentials or trading permissions are needed.
+## Security / lifecycle invariants
+- Policy rows, observations, and snapshots are append-only. Threshold changes create a new policy version.
+- Provider/cycle state can transition only from pending/collecting to a terminal result.
+- Cycles cannot complete with pending providers or without a snapshot.
+- Snapshot publication cannot precede terminal provider results.
+- Healthy snapshot requires at least two received sources and a policy quorum.
+- Oracle objects are private, RLS-enabled, and not granted to client roles; service_role has no UPDATE/DELETE on immutable evidence.
+- These tables do not fetch data, compute medians, authenticate provider HTTP responses, or execute liquidations. The pure JS consensus helper remains the deterministic calculation layer.
 
-| Provider ID | Instrument scope | Required values | Provider time |
-|---|---|---|---|
-| binance_usdm | USDⓈ-M perpetual, BTCUSDT style | markPrice, indexPrice | time |
-| bybit_linear | category=linear, BTCUSDT style | markPrice, indexPrice | response envelope time |
-| okx_swap | instType=SWAP, map BTC-USDT-SWAP to BTCUSDT | markPx plus separately fetched index ticker idxPx | each response ts |
-
-Provider product listing must be checked before accepting a symbol. Do not infer that a spot pair has a corresponding perpetual contract. Provider response timestamps and server receipt timestamps are both mandatory.
-
-Official API references:
-- Binance USDⓈ-M premiumIndex: https://developers.binance.info/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/market-data
-- Bybit V5 linear tickers: https://bybit-exchange.github.io/docs/v5/market/tickers
-- OKX public market data: https://www.okx.com/docs-v5/en/
-
-## 3. Trust and ingestion boundary
-
-- A separate trusted server-side collector owns provider HTTP/WebSocket connections. Android, browser JavaScript, and user-callable RPCs cannot submit price observations.
-- Prefer provider WebSocket streams for low-latency collection; REST polling may be used for startup/reconciliation and bounded fallback only. Do not run a second-by-second liquidation loop in a browser, or rely on minute-granularity pg_cron for a latency-sensitive risk oracle.
-- The collector normalizes decimal strings and provider timestamps, stamps received_at on the server, validates instrument mapping, and submits batches through a narrow authenticated server-only ingestion RPC.
-- No exchange API key is required for public market data. Any collector credential is server-only; Supabase service_role is never placed in the app or sent to users.
-- Raw observations are append-only; partition/retention policy is decided from measured volume. Do not overwrite one venue with another.
-- Keep oracle tables/functions in a non-exposed schema (prefer private), revoke all client-role privileges, and do not add public Data API grants. Supabase's 2026 Data API change means newly-created public tables are not automatically exposed by default, but that is not a substitute for private-schema isolation and explicit grants.
-
-## 4. Deterministic consensus contract
-
-A pure exact-decimal consensus helper is introduced separately from transport adapters. It:
-1. Accepts only the explicit provider allowlist and one normalized symbol.
-2. Requires unique provider contribution; duplicate observations from one venue cannot increase quorum.
-3. Rejects invalid/non-positive decimal strings, symbol mismatches, malformed timestamps, future timestamps, and stale observations.
-4. Checks each venue's own mark/index basis against a pair policy.
-5. Computes exact-decimal medians for mark and index independently.
-6. Rejects cross-venue outliers against the median; at least the configured independent-source quorum must remain.
-7. Recomputes medians from the accepted source set and checks aggregate mark/index basis.
-8. Returns healthy only with quorum; otherwise returns no price (stale, insufficient_quorum, or deviation). No last-known-good price is returned as current.
-9. Exposes the oldest accepted provider timestamp as asOfMs; the snapshot expires at asOfMs + maxAgeMs.
-
-The deterministic policy interface requires explicit values: minimum sources (2 or 3), maximum age, allowed future clock skew, maximum cross-source mark deviation, maximum cross-source index deviation, and maximum mark/index basis deviation. Thresholds are configuration, not user input. Final per-symbol limits require historical replay/backtesting and must not be guessed or silently widened in code.
-
-## 5. Snapshot and risk consumption model (next database slice)
-
-Proposed private objects, names subject to schema review:
-- private.demo_derivative_price_observations: immutable one-row-per-provider/symbol observation with provider, instrument ID, mark, index, provider timestamp, server receipt timestamp, response hash, and validation outcome.
-- private.demo_derivative_price_snapshots: immutable accepted/rejected consensus result with source set, source count, mark, index, oldest observation timestamp, policy version, and reason code.
-- private.demo_derivative_price_policies: admin-controlled versioned per-symbol thresholds, provider eligibility, quorum, freshness, and enabled state. Client roles get no write access.
-- A private latest-snapshot pointer/view may be added only as a cache; immutable snapshot rows remain the audit source.
-
-Every risk-increasing order, fill, funding calculation and liquidation evaluation must read the same currently valid snapshot under the account-first transaction contract. A missing, expired, insufficient, or deviating snapshot blocks risk-increasing activity. Automated liquidation must also fail closed on bad prices; stale data must never be interpreted as a breach.
-
-The next implementation must define atomic snapshot publication so a partially ingested batch cannot be mistaken for a completed source cycle. An ingestion batch/cycle ID and provider completion metadata are required.
-
-## 6. Risk engine boundary
-
-This price oracle does not decide liquidation. After the oracle is tested, separately specify:
-- versioned maintenance tiers by symbol/notional, maximum leverage, initial and maintenance margin rates;
-- cross-account equity aggregation and liabilities already booked versus accrued;
-- close-fee reserve, conservative execution/slippage assumptions, partial-liquidation sizing and retry bounds;
-- liquidation fee accounting, insurance fund/deficit waterfall, and explicit behavior if the virtual insurance fund is insufficient;
-- deterministic event IDs, idempotent retries, account-first locking, and concurrency with order placement/fill/cancel/manual reduction;
-- long/short and isolated/cross boundary tests, stale/outlier recovery, and mark/index discontinuity scenarios.
-
-The existing external reduction RPC must not be wired to a timer or exposed to authenticated clients as a liquidation endpoint. A trusted risk worker may call it only after a separately approved risk engine supplies a server-authoritative execution price and fee.
-
-## 7. Required tests before collector or liquidation RPC
-
-- exact median for odd/even quorum and 18-decimal values;
-- two-source disagreement fails closed;
-- one outlier among three is excluded only if the remaining quorum agrees;
-- one source cannot satisfy quorum even if otherwise fresh;
-- duplicate provider rows cannot inflate quorum;
-- stale, future-dated, malformed, non-positive and wrong-symbol observations are rejected;
-- per-provider and aggregate mark/index basis limits;
-- atomic batch publication and crash/retry behavior;
-- provider timeout, rate limit, symbol delisting and partial-cycle handling;
-- concurrency between new snapshot publication and risk RPCs;
-- historical replay/backtesting before final production thresholds.
-
-## 8. Release gates
-
-- No production Supabase object, schedule, Edge Function, secret, or data change in this slice.
-- No Data API exposure for oracle objects.
-- No derivatives UI activation.
-- No use of market_prices as mark/index or liquidation input.
-- No automatic liquidation implementation until source quorum, risk tiers, fees, insurance, and worker recovery semantics are approved and tested.
+## Deferred before any collector
+- Validate exchange instrument listing, delisting, API timestamp semantics, WebSocket sequencing, rate limits, and failover.
+- Verify raw payload hash canonicalization and signature/transport provenance.
+- Design service-only ingestion/publication RPCs with cycle idempotency and concurrent worker safety.
+- Backtest per-symbol thresholds and source-family overlap using historical data.
+- Add crash/retry, duplicate batch, provider partial timeout, and race tests.

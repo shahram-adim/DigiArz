@@ -743,3 +743,14 @@
 - [ ] اجرای CI روی commit جدید و سپس طراحی schema خصوصی observation/batch/snapshot/policy و قرارداد ingestion worker.
 - [!] این helper به‌تنهایی منبع قیمت یا liquidation oracle نیست؛ تا زمانی که collector معتبر، snapshot اتمیک و policyهای بازپخش‌شده پیاده نشوند، risk worker و liquidation ساخته/فعال نمی‌شوند.
 - [x] Supabase Production، زمان‌بندی‌ها، secrets، داده‌ها، Data API و UI مشتقات دست‌نخورده ماندند.
+
+
+## تأیید Oracle consensus و طراحی ذخیره‌سازی خصوصی — ۱۸ نوامبر ۲۰۲۶
+
+- [x] CI run 44268659724 روی commit f76cc88a749ae6e16a17b906f9ba990d810429ee با نتیجه success تمام شد؛ Job دارای ۳۸ مرحلهٔ موفق و بدون failure بود.
+- [x] طراحی schema خصوصی برای policyهای نسخه‌دار، چرخهٔ جمع‌آوری، وضعیت هر provider، observations و snapshotهای immutable تهیه شد.
+- [x] draft SQL و تست یکپارچگی برای private schema، RLS، عدم دسترسی anon/authenticated، عدم UPDATE/DELETE شواهد immutable، quorum و atomic cycle completion اضافه شد.
+- [!] این DDL فقط draft است و در CI باید روی PostgreSQL موقت اجرا شود؛ هیچ migration یا تغییر Supabase Production انجام نشده است.
+- [!] سه venue endpoint الزاماً سه feed مستقل زیرساختی نیستند؛ constituent overlap و منبع Indexها باید پیش از تعیین quorum نهایی بررسی شود.
+- [ ] گام بعدی: CI این draft را اجرا کند؛ سپس طراحی RPCهای ingestion/publish محدود به trusted worker و تست retry/concurrency. تا آن زمان collector زنده، risk worker و liquidation وجود ندارد.
+- [x] PR #12 باز و Draft؛ شاخه feature در مقایسهٔ فعلی ۱۴۰ کامیت جلو و ۱ کامیت عقب main است؛ merge/rebase انجام نشده است.
