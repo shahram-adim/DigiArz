@@ -21,7 +21,28 @@ END;
 $permission_check$;
 RESET ROLE;
 
-SET ROLE service_role;
+-- The integration assertions run as the disposable database owner so RLS
+-- cannot hide rows from the test observer. Explicitly verify the trusted role
+-- has EXECUTE and authenticated does not before invoking the RPC.
+DO $trusted_grants$
+BEGIN
+  IF NOT has_function_privilege(
+    'service_role',
+    'public.apply_demo_external_futures_position_reduction(uuid,uuid,numeric,numeric,numeric)',
+    'EXECUTE'
+  ) THEN
+    RAISE EXCEPTION 'service_role lacks trusted external reduction EXECUTE';
+  END IF;
+  IF has_function_privilege(
+    'authenticated',
+    'public.apply_demo_external_futures_position_reduction(uuid,uuid,numeric,numeric,numeric)',
+    'EXECUTE'
+  ) THEN
+    RAISE EXCEPTION 'authenticated unexpectedly has trusted external reduction EXECUTE';
+  END IF;
+END;
+$trusted_grants$;
+
 DO $external_reduction$
 DECLARE
   v_result jsonb;
@@ -173,6 +194,5 @@ BEGIN
   END;
 END;
 $external_reduction$;
-RESET ROLE;
 
 SELECT 'demo derivatives atomic external position reduction and reservation reconciliation passed' AS result;

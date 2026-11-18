@@ -712,3 +712,6 @@
 - [!] اجرای PostgreSQL CI شماره `44266382034` در مرحلهٔ ساخت RPC خارجی شکست خورد؛ لاگ قطعی علت را syntax error در مقایسهٔ `CASE` داخل IF نشان داد. شکست قبلی ناشی از اختلاف دادهٔ پوزیشن نبود؛ پیام قبلی دربارهٔ آن علت را اصلاح می‌کنیم.
 - [x] مقایسه به `IS DISTINCT FROM (CASE ... END)` تغییر کرد تا عبارت شرطی در PL/pgSQL بدون ابهام parse شود.
 - [ ] منتظر اجرای کامل workflow روی commit اصلاح‌شده هستیم؛ هنوز هیچ تستی برای RPC کاهش خارجی موفق اعلام نمی‌شود.
+- [!] PostgreSQL run `44266662836` successfully compiled/installed the external-reduction RPC, but the end-to-end assertion's observer SELECT returned no row (`v_position_state=<NULL>`) while executing as the synthetic `service_role` in the disposable test harness.
+- [x] Adjusted the integration test observer to run as the disposable database owner (so RLS cannot hide the verification row), while separately asserting `service_role` has EXECUTE and `authenticated` does not. The actual RPC remains SECURITY DEFINER/private with service_role-only wrapper grant.
+- [ ] Re-run the full PostgreSQL workflow to determine whether the missing row was test-observer visibility or a real position-state issue. No production changes.
