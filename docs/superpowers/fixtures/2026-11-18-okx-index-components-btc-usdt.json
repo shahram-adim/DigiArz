@@ -1,0 +1,27 @@
+{
+  "evidence": {
+    "provider": "OKX",
+    "endpoint": "/api/v5/market/index-components",
+    "request_url": "https://www.okx.com/api/v5/market/index-components?index=BTC-USDT",
+    "received_at": "2026-11-18T11:00:03.937Z",
+    "http_status": 200,
+    "body_sha256": "38f79b87d7849abcc7c6030226aed63f813664d0838f799586b0f0651a958f04",
+    "capture": "one-off public API diagnostic; raw response body hash is computed over exact response text"
+  },
+  "response": {
+    "code": "0",
+    "data": {
+      "components": [
+        {"wgt":"0.1875","exch":"Coinbase","symbol":"BTC/USD","symPx":"64292.37","cnvPx":"64367.6801858174063654"},
+        {"wgt":"0.125","exch":"Bitget","symbol":"BTC/USDT","symPx":"64374.04","cnvPx":"64374.04"},
+        {"wgt":"0.25","exch":"Binance","symbol":"BTC/USDT","symPx":"64373.18","cnvPx":"64373.18"},
+        {"wgt":"0.25","exch":"OKX","symbol":"BTC/USDT","symPx":"64372.7","cnvPx":"64372.7"},
+        {"wgt":"0.1875","exch":"Bybit","symbol":"BTC/USDT","symPx":"64373.7","cnvPx":"64373.7"}
+      ],
+      "index": "BTC-USDT",
+      "last": "64372.2",
+      "ts": "1794999591686"
+    },
+    "msg": ""
+  }
+}
