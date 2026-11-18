@@ -120,7 +120,8 @@
       atRisk
     });
   }
-\n  // Conservative positive arithmetic: round required collateral and fee reserves UP
+
+  // Conservative positive arithmetic: round required collateral and fee reserves UP
   // to the supported 18 decimal places so a preview never understates commitments.
   function ceilPositiveProduct(a,b){
     const x=D.parseDecimal(dec(a)),y=D.parseDecimal(dec(b));
