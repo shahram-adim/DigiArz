@@ -1,6 +1,17 @@
 \set ON_ERROR_STOP on
 -- Run after derivative schema, maintenance tiers, and trusted oracle RPC drafts/tests.
 
+-- Extend the disposable test policy window so CI scheduling cannot expire a
+-- snapshot between publication and the immediately following account query.
+UPDATE private.demo_derivative_price_policies SET enabled=false
+WHERE symbol IN ('BTCUSDT','ETHUSDT') AND policy_version=1 AND enabled;
+INSERT INTO private.demo_derivative_price_policies(
+  symbol,policy_version,enabled,eligible_providers,min_sources,max_age_ms,max_future_skew_ms,
+  max_mark_deviation_bps,max_index_deviation_bps,max_mark_index_deviation_bps
+) VALUES
+  ('BTCUSDT',2,true,ARRAY['binance_usdm','bybit_linear','okx_swap'],2,60000,250,50,50,200),
+  ('ETHUSDT',2,true,ARRAY['binance_usdm','bybit_linear'],2,60000,250,50,50,200);
+
 -- Publish fresh BTC and ETH consensus snapshots for the pre-seeded account fixtures.
 SET request.jwt.claim.role='service_role';
 SET ROLE service_role;
@@ -133,7 +144,7 @@ SET request.jwt.claim.role='service_role';
 SET ROLE service_role;
 DO $publish_stale$
 DECLARE
-  v_old timestamptz:=clock_timestamp()-interval '10 seconds';
+  v_old timestamptz:=clock_timestamp()-interval '120 seconds';
 BEGIN
   PERFORM private.demo_derivative_price_start_cycle(
     'a2000000-0000-0000-0000-000000000003','ETHUSDT',
