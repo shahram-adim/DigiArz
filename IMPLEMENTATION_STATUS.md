@@ -1267,3 +1267,13 @@
 - [!] این مرحله فقط schema/test draft است؛ هیچ posting RPC، seed/replenishment عملیاتی، payout worker، recovery worker، liquidation RPC یا UI ساخته/فعال نشده است. هیچ DDL/RPC/policy/cron یا داده‌ای در Supabase Production تغییر نکرد.
 - [!] سیاست‌های seed، سقف payout، مجوز replenishment، recovery authority/cap و liquidation fee/slippage/buffer/Cross priority همچنان باز هستند و از fixtureها مقدار عملیاتی استنتاج نمی‌شود.
 - [ ] گام بعد: بررسی CI و رفع هر خطای واقعی؛ سپس تست دو نشست برای payoutهای هم‌زمان و over-recovery هم‌زمان، و آزمون rollback اتمیک در صورت شکست بین دو دفترکل. تا تصویب سیاست‌ها هیچ RPC اجرایی یا auto-liquidation اضافه نشود.
+
+
+## نتیجه CI دفترکل بیمه و تست‌های رقابت دو نشست — ۱۸ نوامبر ۲۰۲۶
+
+- [x] اجرای CI شماره `44358314022` روی commit `dbf1ad53f4e455a7b5c337ccdef71148ed509d16` با نتیجه نهایی `success` تأیید شد؛ هر ۹۹ step موفق بودند، از جمله اعمال draft دفترکل بیمه/کسری در PostgreSQL 17 دورریختنی و تست یکپارچگی آن.
+- [x] اسکریپت `supabase/tests/demo_derivatives_insurance_deficit_concurrency.sh` اضافه شد تا دو نشست مستقل را برای رقابت دو پرداخت ۴۰ USDT از مانده ۶۰ USDT و دو recovery هفت USDT در برابر کسری ده USDT اجرا کند؛ انتظار می‌رود دقیقاً یک درخواست در هر race موفق شود و تراکنش بازنده کاملاً rollback شود.
+- [x] workflow به اجرای تست رقابت بیمه/کسری متصل شد.
+- [!] CI commit جدید هنوز باید کامل شود؛ نتیجه تست race و syntax اسکریپت را موفق فرض نکن تا اجرای واقعی تأیید شود.
+- [ ] پس از CI، در صورت مشاهده شکست، علت را رفع کن؛ سپس fault-injection برای rollback اتمیک بین ledger و deficit journal را به تست اضافه کن.
+- [!] تمام تغییرات همچنان فقط در branch و PostgreSQL دورریختنی CI هستند. هیچ Supabase Production write، merge، فعال‌سازی UI یا liquidation انجام نشده است.
