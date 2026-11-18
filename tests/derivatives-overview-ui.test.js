@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const html = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
-const matches = [...html.matchAll(/<section id="tab-derivatives"\b[\s\S]*?<\/section>/g)];
+const matches = [...html.matchAll(/<section\b[^>]*\bid="tab-derivatives"[^>]*>[\s\S]*?<\/section>/g)];
 
 test('Derivatives overview is reachable from desktop and mobile navigation', () => {
   assert.equal(matches.length, 1, 'there must be exactly one Derivatives panel');
