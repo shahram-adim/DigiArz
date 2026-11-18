@@ -108,18 +108,27 @@
     const q=positive(quantity,'quantity'),entry=positive(entryPrice,'entry price'),margin=positive(isolatedMargin,'isolated margin');
     const fee=validateFeeRate(closeFeeRate);
     const entryNotional=notional(q,entry);
-    const tier=maintenanceTierForNotional(entryNotional,maintenanceTiers);
-    const rate=tier.maintenanceRate,deduction=tier.maintenanceAmount;
-    if(D.compareDecimal(add(rate,fee),'1')>=0)throw new RangeError('Invalid maintenance or fee rate');
-    if(side==='long'){
-      const numerator=sub(sub(entryNotional,margin),deduction);
-      if(D.compareDecimal(numerator,'0')<=0)return null;
-      const denominator=mul(q,sub(sub('1',rate),fee));
-      return ceilPositiveDivision(numerator,denominator);
+    const schedule=validateMaintenanceTiers(maintenanceTiers);
+    for(let index=0;index<schedule.length;index++){
+      const tier=schedule[index],rate=tier.maintenanceRate,deduction=tier.maintenanceAmount;
+      if(D.compareDecimal(add(rate,fee),'1')>=0)throw new RangeError('Invalid maintenance or fee rate');
+      let candidate;
+      if(side==='long'){
+        const numerator=sub(sub(entryNotional,margin),deduction);
+        if(D.compareDecimal(numerator,'0')<=0)continue;
+        const denominator=mul(q,sub(sub('1',rate),fee));
+        candidate=ceilPositiveDivision(numerator,denominator);
+      }else{
+        const numerator=add(add(entryNotional,margin),deduction);
+        const denominator=mul(q,add(add('1',rate),fee));
+        candidate=div(numerator,denominator);
+      }
+      const candidateNotional=notional(q,candidate);
+      const aboveLower=index===0||D.compareDecimal(candidateNotional,schedule[index-1].maxNotional)>0;
+      const belowUpper=tier.maxNotional===null||D.compareDecimal(candidateNotional,tier.maxNotional)<=0;
+      if(aboveLower&&belowUpper)return candidate;
     }
-    const numerator=add(add(entryNotional,margin),deduction);
-    const denominator=mul(q,add(add('1',rate),fee));
-    return div(numerator,denominator);
+    return null;
   }
 
   // USDT-settled futures cross margin. cashBalanceUsdt must be a server-side,
