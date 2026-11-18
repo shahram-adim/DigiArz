@@ -1287,3 +1287,14 @@
 - [!] commit جدید این تست باید CI را دوباره بگذراند؛ نتیجهٔ fault-injection هنوز تأیید نشده است.
 - [ ] پس از CI، گام بعدی تکمیل مستندات/تصمیم‌های سیاستی liquidation و مرور طرح اجرایی است؛ هیچ نرخ یا حد عملیاتی از اعداد تست استخراج نمی‌شود.
 - [!] payout/recovery هنوز RPC اجرایی یا worker ندارند؛ تمام SQLها draft و تمام اجراها در PostgreSQL دورریختنی CI هستند. Supabase Production، merge و UI مشتقات تغییری نکرده‌اند.
+
+
+## تأیید نهایی CI برای fault-injection دفترکل بیمه/کسری — ۱۸ نوامبر ۲۰۲۶
+
+- [x] اجرای CI شماره `44360144878` روی commit وضعیت `16d33498985a11f4ad5c5ba7e3edb03595ca6006` با نتیجه نهایی `success` تأیید شد؛ job کامل شد و stepهای اصلی ۵۰/۵۰ موفق بودند.
+- [x] از job log، پیام موفقیت تست race و پیام `Atomic rollback fault injection passed` به‌طور مستقیم پیدا شد.
+- [x] fault-injection عمداً پس از نوشتن platform ledger و deficit event و پیش از COMMIT خطای division-by-zero ایجاد کرد؛ اسکریپت تأیید کرد هیچ transaction/entry پلتفرمی باقی نمانده و remaining deficit بدون تغییر روی ۵ باقی مانده است.
+- [x] اجرای قبلی تست race روی commit تست `b16faed7db4d1aa0e8fb3e18b378b2a51931564c` نیز run شماره `44360105824` با نتیجه `success` داشت.
+- [!] تست‌ها فقط در PostgreSQL 17 دورریختنی CI اجرا شده‌اند. این نتیجه به معنی تأیید سیاست اقتصادی یا مجوز استقرار نیست.
+- [ ] گام بعدی: ثبت تصمیم‌های سیاستی پیش‌نیاز لیکوییدیشن (surcharge/cap، slippage، maintenance buffer، Cross priority، insurance funding و residual-deficit/recovery)؛ تا تعیین و تصویب این موارد هیچ liquidation execution RPC/worker ساخته یا فعال نشود.
+- [!] PR #12 باز و Draft باقی مانده است؛ هیچ merge/rebase، Supabase Production write، UI مشتقات یا auto-liquidation انجام نشده است.
