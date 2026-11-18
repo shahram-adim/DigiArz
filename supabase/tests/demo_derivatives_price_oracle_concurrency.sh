@@ -38,7 +38,7 @@ publish_sql() {
   service_sql "SELECT private.demo_derivative_price_publish_snapshot(
     '$cycle_id','$SNAPSHOT_ID','healthy',100.05,99.95,
     ARRAY['binance_usdm','bybit_linear'],'$ts'::timestamptz,
-    '$ts'::timestamptz+interval '60 seconds','[]'::jsonb
+    '$ts'::timestamptz+interval '5 seconds','[]'::jsonb
   );"
 }
 
@@ -53,11 +53,6 @@ run_pair() {
   if wait "$pid_a"; then RC_A=0; else RC_A=$?; fi
   if wait "$pid_b"; then RC_B=0; else RC_B=$?; fi
 }
-
-# Keep this disposable fixture's observations comfortably inside the freshness
-# window; this does not alter any Production policy.
-"${PSQL[@]}" -c "UPDATE private.demo_derivative_price_policies
-  SET max_age_ms=60000 WHERE symbol='ETHUSDT' AND policy_version=1;" >/dev/null
 
 # Two independent sessions create the same cycle at once. Both calls must
 # converge on one cycle and exactly one pair of provider-source rows.
