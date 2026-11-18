@@ -24,7 +24,8 @@ BEGIN
   IF current_setting('request.jwt.claim.role',true) IS DISTINCT FROM 'service_role' THEN
     RAISE EXCEPTION 'Trusted service_role required' USING ERRCODE='42501';
   END IF;
-  IF p_cycle_id IS NULL OR p_symbol IS NULL OR p_symbol !~ '^[A-Z0-9]{2,15}USDT$'     OR p_expected_providers IS NULL OR p_provider_instruments IS NULL
+  IF p_cycle_id IS NULL OR p_symbol IS NULL OR p_symbol !~ '^[A-Z0-9]{2,15}USDT$'
+     OR p_expected_providers IS NULL OR p_provider_instruments IS NULL
      OR jsonb_typeof(p_provider_instruments)<>'object' THEN
     RAISE EXCEPTION 'Invalid price-cycle request' USING ERRCODE='22023';
   END IF;
@@ -134,7 +135,8 @@ BEGIN
       RAISE EXCEPTION 'Failed provider result requires a reason and no prices' USING ERRCODE='22023';
     END IF;
   ELSE
-    IF p_provider_timestamp IS NULL OR p_response_sha256 IS NULL OR p_response_sha256 !~ '^[0-9a-f]{64}$'      RAISE EXCEPTION 'Received provider result requires timestamp and SHA-256' USING ERRCODE='22023';
+    IF p_provider_timestamp IS NULL OR p_response_sha256 IS NULL OR p_response_sha256 !~ '^[0-9a-f]{64}$' THEN
+      RAISE EXCEPTION 'Received provider result requires timestamp and SHA-256' USING ERRCODE='22023';
     END IF;
     IF p_result_status='accepted' THEN
       IF p_mark_price IS NULL OR p_mark_price<=0 OR p_index_price IS NULL OR p_index_price<=0
