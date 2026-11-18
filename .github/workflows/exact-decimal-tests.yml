@@ -291,6 +291,18 @@ jobs:
         run: |
           psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
             -f supabase/drafts/2026-11-18_demo_derivatives_reduce_only_fill_rpc.sql
+      - name: Apply trusted Reduce-only reservation reconciliation RPC in disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-18_demo_derivatives_reduce_only_reconcile_rpc.sql
+      - name: Test newest-first Reduce-only reservation reconciliation after external reduction
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/demo_derivatives_reduce_only_reconcile.sql
       - name: Test concurrent fills against one Reduce-only order
         env:
           PGPASSWORD: postgres
