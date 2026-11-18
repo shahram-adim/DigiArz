@@ -100,6 +100,27 @@
     }
     return div(add(entry,qMargin),add(add('1',mmr),fee));
   }
+  // Tiered isolated liquidation estimate. The schedule must be loaded from
+  // trusted server-owned configuration; this function is a deterministic math
+  // primitive, not an authorization or execution path.
+  function isolatedTieredLiquidationPrice(side,quantity,entryPrice,isolatedMargin,maintenanceTiers,closeFeeRate='0'){
+    if(side!=='long'&&side!=='short')throw new TypeError('side must be long or short');
+    const q=positive(quantity,'quantity'),entry=positive(entryPrice,'entry price'),margin=positive(isolatedMargin,'isolated margin');
+    const fee=validateFeeRate(closeFeeRate);
+    const entryNotional=notional(q,entry);
+    const tier=maintenanceTierForNotional(entryNotional,maintenanceTiers);
+    const rate=tier.maintenanceRate,deduction=tier.maintenanceAmount;
+    if(D.compareDecimal(add(rate,fee),'1')>=0)throw new RangeError('Invalid maintenance or fee rate');
+    if(side==='long'){
+      const numerator=sub(sub(entryNotional,margin),deduction);
+      if(D.compareDecimal(numerator,'0')<=0)return null;
+      const denominator=mul(q,sub(sub('1',rate),fee));
+      return ceilPositiveDivision(numerator,denominator);
+    }
+    const numerator=add(add(entryNotional,margin),deduction);
+    const denominator=mul(q,add(add('1',rate),fee));
+    return div(numerator,denominator);
+  }
 
   // USDT-settled futures cross margin. cashBalanceUsdt must be a server-side,
   // ledger-derived settled balance, never a browser-provided value.
@@ -311,16 +332,19 @@
     });
   }
 
-  function riskSnapshot({side,quantity,entryPrice,markPrice,isolatedMargin,maintenanceRate,closeFeeRate='0',marginMode='isolated'}){
+  function riskSnapshot({side,quantity,entryPrice,markPrice,isolatedMargin,maintenanceRate,maintenanceTiers=null,closeFeeRate='0',marginMode='isolated'}){
     if(marginMode!=='isolated'&&marginMode!=='cross')throw new TypeError('marginMode must be isolated or cross');
     const pnl=unrealizedPnl(side,quantity,entryPrice,markPrice);
-    const maintenance=maintenanceMargin(quantity,markPrice,maintenanceRate);
+    const positionNotional=notional(quantity,markPrice);
+    const tier=maintenanceTiers?maintenanceTierForNotional(positionNotional,maintenanceTiers):null;
+    const maintenance=tier?tier.maintenanceMargin:maintenanceMargin(quantity,markPrice,maintenanceRate);
     if(marginMode==='cross'){
       return Object.freeze({
-        notional:notional(quantity,markPrice),
+        notional:positionNotional,
         unrealizedPnl:pnl,
         equity:null,
         maintenanceMargin:maintenance,
+        maintenanceTierIndex:tier?tier.tierIndex:null,
         marginRatio:null,
         liquidationPrice:null,
         liquidationPriceMethod:'account-level-cross-risk-engine',
@@ -330,16 +354,17 @@
     }
     const equity=positionEquity(side,quantity,entryPrice,markPrice,isolatedMargin,closeFeeRate);
     return Object.freeze({
-      notional:notional(quantity,markPrice),
+      notional:positionNotional,
       unrealizedPnl:pnl,
       equity,
       maintenanceMargin:maintenance,
+      maintenanceTierIndex:tier?tier.tierIndex:null,
       marginRatio:D.compareDecimal(maintenance,'0')===0?null:div(equity,maintenance),
-      liquidationPrice:isolatedLiquidationPrice(side,quantity,entryPrice,isolatedMargin,maintenanceRate,closeFeeRate),
-      liquidationPriceMethod:'isolated-position-estimate',
+      liquidationPrice:tier?isolatedTieredLiquidationPrice(side,quantity,entryPrice,isolatedMargin,maintenanceTiers,closeFeeRate):isolatedLiquidationPrice(side,quantity,entryPrice,isolatedMargin,maintenanceRate,closeFeeRate),
+      liquidationPriceMethod:tier?'isolated-tiered-estimate':'isolated-position-estimate',
       riskScope:'position',
       atRisk:D.compareDecimal(equity,maintenance)<=0
     });
   }
-  return Object.freeze({notional,initialMargin,maintenanceMargin,maintenanceTierForNotional,maintenanceMarginFromTiers,validateMaintenanceTiers,unrealizedPnl,positionEquity,isolatedLiquidationPrice,riskSnapshot,crossMarginRiskSnapshot,futuresAvailableMarginSnapshot,validateLeverage});
+  return Object.freeze({notional,initialMargin,maintenanceMargin,maintenanceTierForNotional,maintenanceMarginFromTiers,validateMaintenanceTiers,unrealizedPnl,positionEquity,isolatedLiquidationPrice,isolatedTieredLiquidationPrice,riskSnapshot,crossMarginRiskSnapshot,futuresAvailableMarginSnapshot,validateLeverage});
 });
