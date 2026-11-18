@@ -410,3 +410,19 @@
 1. بازنگری draft schema بر اساس قرارداد: حذف balanceهای موازی یا تعریف cache غیرمرجع، افزودن projection فقط‌خواندنی و آزمون حسابداری آن در PostgreSQL دورریختنی.
 2. ساخت تست‌های محاسبهٔ Available Margin و رزرو سفارش‌های باز/نیمه‌پر.
 3. سپس RPCهای تراکنشی account-lock/idempotency و آزمون race چندنشستی.
+
+
+## حذف موجودی موازی و Projection دفترکل Futures — ۱۸ نوامبر ۲۰۲۶
+
+- [x] دو ستون mutable `futures_cash_usdt` و `margin_cash_usdt` از جدول حساب در Schema draft حذف شدند؛ cash دیگر در دو منبع مستقل نگهداری نمی‌شود.
+- [x] View فقط‌خواندنی `demo_derivative_futures_cash_balances` اضافه شد که USDT bucket برابر `futures_cash` را با قرارداد debit-normal یعنی `SUM(debit-credit)` محاسبه می‌کند.
+- [x] View با `security_invoker=true` ساخته شده و RLS جداول حساب و دفترکل را حفظ می‌کند؛ دسترسی SELECT فقط برای authenticated داده شده است.
+- [x] fixture ناسازگار سه حساب برای دو کاربر اصلاح شد؛ اکنون با قید یک حساب به‌ازای هر user سازگار است و پوزیشن حساب دوم متعلق به کاربر دوم است تا FKهای cross-account همچنان آزمون شوند.
+- [x] تست‌های SQL برای cash برابر ۱۰ پس از انتقال، صفر برای دفترکل خالی، نبود ستون‌های موجودی موازی و محدودیت RLS روی View اضافه/اصلاح شدند.
+- [!] اجرای PostgreSQL CI برای این تغییر هنوز مشاهده نشده؛ تا زمان اجرای workflow، صحت اجرای View و fixture تأییدشده اعلام نمی‌شود.
+- [x] فقط فایل‌های draft و test در شاخه GitHub تغییر کردند؛ Supabase Production دست‌نخورده است.
+
+### گام بعدی
+1. اجرای CI روی HEAD تازه و رفع خطاهای واقعی SQL از لاگ.
+2. افزودن تست‌های دقیق Available Margin و رزرو سفارش Limit/Reduce-only.
+3. طراحی RPCهای تراکنشی با قفل حساب و idempotency؛ بدون فعال‌سازی UI تا پایان آزمون race.
