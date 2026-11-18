@@ -732,3 +732,14 @@
 - [x] مرور کد فعلی تأیید کرد در شاخه feature هیچ liquidation/risk worker یا منبع مستقل mark/index price وجود ندارد. `market_prices` فعلی فقط last-price را نگه می‌دارد و منبع/زمان آخرین refresh را ثبت می‌کند؛ history چندمنبعی و mark/index مستقل ندارد.
 - [ ] گام بعدی: طراحی و تست منبع مستقل mark/index price، شامل provenance چندمنبعی، stale/outlier/deviation guard، ثبت snapshot و fail-closed behavior؛ سپس طراحی maintenance tiers و هزینه/insurance accounting. تا تکمیل این موارد liquidation RPC ساخته یا فعال نشود.
 - [x] Supabase Production، UI مشتقات و Spot موجود دست‌نخورده ماندند.
+
+
+## تأیید CI و آغاز طراحی Oracle قیمت مشتقات — ۱۸ نوامبر ۲۰۲۶
+
+- [x] GitHub Actions run 44268110397 روی commit 59fca3a0be00aae2fd9df326e09cfcfdc2acf9c9 با conclusion برابر success تمام شد؛ مستندات ثبت وضعیت و برنامه نیز روی همان شاخه تأیید شدند.
+- [x] مسیر فعلی market_prices بررسی شد: CoinGecko/KuCoin/Gate.io هر بار همان یک ردیف آخرین قیمت هر نماد را overwrite می‌کنند؛ history هم‌زمان per-provider، index و mark ندارد.
+- [x] endpointهای عمومی برای ارزیابی adapterها ثبت شدند: Binance USDⓈ-M premiumIndex، Bybit V5 linear tickers و OKX SWAP mark-price/index ticker.
+- [x] helper مستقل exact-decimal برای quorum/median/freshness/outlier نوشته شد؛ تست‌های Node آن در CI بعدی اجرا خواهند شد.
+- [ ] اجرای CI روی commit جدید و سپس طراحی schema خصوصی observation/batch/snapshot/policy و قرارداد ingestion worker.
+- [!] این helper به‌تنهایی منبع قیمت یا liquidation oracle نیست؛ تا زمانی که collector معتبر، snapshot اتمیک و policyهای بازپخش‌شده پیاده نشوند، risk worker و liquidation ساخته/فعال نمی‌شوند.
+- [x] Supabase Production، زمان‌بندی‌ها، secrets، داده‌ها، Data API و UI مشتقات دست‌نخورده ماندند.

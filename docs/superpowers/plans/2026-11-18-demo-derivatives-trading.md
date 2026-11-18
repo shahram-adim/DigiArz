@@ -191,3 +191,14 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [ ] Specify maintenance-margin tiers, partial/full liquidation sizing, close-fee reserve, liquidation fee, insurance/clearing treatment, cross-account risk, idempotency and recovery behavior.
 - [ ] Only after the design is approved, add disposable PostgreSQL tests for long/short, isolated/cross, stale/outlier price, threshold boundaries, concurrent fills/orders and repeated liquidation events.
 - No Production changes, no merge/rebase, and no derivatives UI activation.
+
+
+## Checkpoint — independent Futures mark/index oracle design (2026-11-18)
+
+- [x] Inspected current CoinGecko/KuCoin/Gate.io scheduled market_prices writers; they overwrite one last-price row per symbol and do not preserve concurrent provider observations, index, or mark.
+- [x] Recorded public market-data interfaces to evaluate: Binance USDⓈ-M premiumIndex, Bybit V5 linear tickers, and OKX SWAP mark-price plus index ticker.
+- [x] Added a transport-independent exact-decimal consensus helper with unique-provider quorum, freshness/future-time rejection, per-source basis checks, cross-source outlier rejection, median aggregation, and fail-closed result states.
+- [x] Added Node tests for quorum, outlier, stale/future data, duplicate provider, malformed inputs, and exact 18-decimal median.
+- [ ] Next: run CI; then design private PostgreSQL observation/batch/snapshot/policy schema and trusted collector ingestion contract. No live collector or DDL yet.
+- [ ] Final per-symbol deviation/freshness thresholds require historical replay and explicit risk review; no hard-coded production thresholds.
+- [ ] No Supabase Production changes, no Data API exposure, no UI activation, no automatic liquidation.
