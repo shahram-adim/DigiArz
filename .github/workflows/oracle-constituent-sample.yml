@@ -1,0 +1,87 @@
+name: One-off Oracle constituent API sample
+
+on:
+  push:
+    branches:
+      - feat/demo-derivatives-trading
+    paths:
+      - .github/workflows/oracle-constituent-sample.yml
+
+permissions:
+  contents: read
+
+jobs:
+  sample-public-endpoints:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Capture public endpoint responses (diagnostic only)
+        shell: bash
+        run: |
+          mkdir -p oracle-samples
+          node <<'NODE'
+          const fs = require('node:fs');
+          const crypto = require('node:crypto');
+
+          const requests = [
+            ['binance-btc', 'https://fapi.binance.com/fapi/v1/constituents?symbol=BTCUSDT'],
+            ['binance-eth', 'https://fapi.binance.com/fapi/v1/constituents?symbol=ETHUSDT'],
+            ['bybit-btc', 'https://api.bybit.com/v5/market/index-price-components?indexName=BTCUSDT'],
+            ['bybit-eth', 'https://api.bybit.com/v5/market/index-price-components?indexName=ETHUSDT'],
+            ['okx-btc', 'https://www.okx.com/api/v5/market/index-components?index=BTC-USDT'],
+            ['okx-eth', 'https://www.okx.com/api/v5/market/index-components?index=ETH-USDT'],
+          ];
+
+          (async () => {
+            const summary = [];
+            for (const [name, url] of requests) {
+              const started = Date.now();
+              let record;
+              try {
+                const response = await fetch(url, {
+                  headers: { 'accept': 'application/json', 'user-agent': 'DigiArz-one-off-schema-diagnostic/1.0' },
+                  signal: AbortSignal.timeout(12000),
+                });
+                const body = await response.text();
+                const digest = crypto.createHash('sha256').update(body).digest('hex');
+                let parsed = null;
+                try { parsed = JSON.parse(body); } catch {}
+                record = {
+                  name, url, fetched_at: new Date().toISOString(),
+                  http_status: response.status, elapsed_ms: Date.now() - started,
+                  body_sha256: digest, body_bytes: Buffer.byteLength(body),
+                  json_valid: parsed !== null, parsed_json: parsed, raw_body: body,
+                };
+              } catch (error) {
+                record = {
+                  name, url, fetched_at: new Date().toISOString(),
+                  elapsed_ms: Date.now() - started,
+                  error: String(error?.name || 'Error') + ': ' + String(error?.message || error),
+                };
+              }
+              fs.writeFileSync(`oracle-samples/${name}.json`, JSON.stringify(record, null, 2) + '\n');
+              summary.push({
+                name, http_status: record.http_status ?? null,
+                json_valid: record.json_valid ?? false,
+                body_bytes: record.body_bytes ?? 0,
+                error: record.error ?? null,
+              });
+            }
+            fs.writeFileSync('oracle-samples/summary.json', JSON.stringify({
+              diagnostic_only: true,
+              fetched_at: new Date().toISOString(),
+              samples: summary,
+            }, null, 2) + '\n');
+            for (const item of summary) {
+              console.log(JSON.stringify(item));
+            }
+          })().catch(error => { console.error(error); process.exitCode = 1; });
+          NODE
+      - name: Upload temporary diagnostic samples
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: oracle-constituent-api-samples
+          path: oracle-samples/
+          if-no-files-found: warn
+          retention-days: 3
