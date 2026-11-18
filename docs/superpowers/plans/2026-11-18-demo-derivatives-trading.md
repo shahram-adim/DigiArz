@@ -223,3 +223,14 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [ ] Next: design service-only ingestion and snapshot-publication RPCs with idempotency, cycle-level serialization, and retry/crash/concurrency tests. Do not deploy a live collector yet.
 - [ ] Investigate source-family/index constituent overlap before calling venues independent or choosing final quorum thresholds.
 - No Production changes, collector deployment, UI activation, merge, or rebase.
+
+
+## Checkpoint — Oracle ingestion/publication RPC CI green (2026-11-18)
+- [x] CI اجراشده روی همگام‌سازی branch، run `44302116508` (push) و run `44302126025` (pull_request)، هر دو با نتیجهٔ `success` برای HEAD `8ce5751790cc6fc5a524e50c79360f68777cb5d9`.
+- [x] RPCهای draft برای شروع cycle، ثبت نتیجهٔ نهایی provider و انتشار snapshot با دسترسی service_role-only، idempotency و قفل cycle در PostgreSQL دورریختنی اجرا شدند.
+- [x] تست‌ها retry یکسان/متفاوت، جلوگیری از انتشار با provider pending، quorum، محاسبه median از observations، freshness/deviation، snapshot immutable و جلوگیری از دسترسی client roles را پوشش دادند.
+- [!] تست‌های موجود هنوز آزمون مستقل crash بین دریافت پاسخ provider و commit، retry پس از قطع ارتباط نامعلوم، و رقابت هم‌زمان start/result/publish را کامل پوشش نمی‌دهند.
+- [ ] مرحلهٔ بعد: تست دو نشست و fault-injection برای چرخهٔ Oracle؛ بررسی اینکه شروع دوبارهٔ cycle و ثبت provider پس از crash هیچ snapshot متناقضی منتشر نکند.
+- [ ] بررسی منبع‌ها: venueهای Binance/Bybit/OKX الزاماً سه feed مستقل نیستند؛ تا بررسی constituents و همبستگی خانوادهٔ منبع، quorum نهایی یا threshold عملیاتی تصویب نشود.
+- [ ] سپس طراحی maintenance-margin tiers، liquidation sizing، fee reserve، insurance/deficit و cross-margin risk در fixture ایزوله؛ هیچ trigger لیکوییدیشن از `market_prices` استفاده نکند.
+- هیچ Supabase Production write، deployment، merge یا فعال‌سازی UI انجام نشد.
