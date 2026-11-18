@@ -136,6 +136,4 @@ test('rejects malformed or unsafe maintenance tier schedules',()=>{
   assert.throws(()=>M.validateMaintenanceTiers([
     maintenanceTiers[0],maintenanceTiers[1],{...maintenanceTiers[2],maxNotional:'100000'}
   ]),/final maintenance tier/);
-    {maxNotional:null,maintenanceRate:'0.01',maintenanceAmount:'1',maxLeverage:10}
-  ]),/non-positive/);
 });
