@@ -441,3 +441,24 @@
 1. پیگیری CI و اجرای واقعی PostgreSQL روی آخرین HEAD؛ پیش از سبز شدن آن، projection را فقط draft محسوب کن.
 2. سپس Available Margin و رزرو سفارش‌های باز را در ماژول دقیق و fixture SQL طراحی و آزمایش کن.
 3. بعد از آن RPCهای account-lock/idempotency و آزمون race چندنشستی.
+
+
+## محاسبهٔ دقیق Available Margin و رزرو سفارش‌ها — ۱۸ نوامبر ۲۰۲۶
+
+- [x] تابع خالص `futuresAvailableMarginSnapshot()` به ماژول محاسبات دقیق اضافه شد؛ دامنهٔ آن فقط Futures تسویه‌شونده با USDT و Cross Margin است و Spot/Isolated/Margin Spot را وارد محاسبه نمی‌کند.
+- [x] Equity از cash دفترکل، PnL تحقق‌نیافته، بدهی‌های صریحاً تسویه‌نشده و ذخیرهٔ کارمزد بستن پوزیشن محاسبه می‌شود؛ بدهی‌های ثبت‌شده در دفترکل نباید دوباره در ورودی بدهی تسویه‌نشده وارد شوند.
+- [x] Initial Margin پوزیشن‌ها بر اساس mark notional و leverage و رزرو سفارش‌های باز/نیمه‌پر بر اساس remaining quantity و limit price محاسبه می‌شود.
+- [x] رزرو وجه سفارش Limit شامل Initial Margin و کارمزد افتتاحیه است؛ Reduce-only وجه افتتاحیه رزرو نمی‌کند، اما مقدار قابل‌بستن را در سطح نماد/سمت تجمیع می‌کند و over-allocation را رد می‌کند.
+- [x] Market order باز/نیمه‌پر رد می‌شود؛ قرارداد اجرایی آن باید fill اتمیک یا rejection باشد.
+- [x] mark price نامعتبر/کهنه باعث خروجی stale و null شدن Equity و Available Margin می‌شود؛ محاسبات ذخیرهٔ وجه و کارمزد با گردکردن محافظه‌کارانه به بالا تا ۱۸ رقم اعشار انجام می‌شوند.
+- [x] ۹ تست واحد جدید برای محاسبه حساب، سفارش نیمه‌پر، Reduce-only، رزرو بیش‌ازحد، قیمت stale، Market order، بدهی تسویه‌نشده و rounding اضافه شد.
+- [!] این مرحله فقط ماژول خالص و تست‌های Node را اضافه کرده است؛ تست‌ها هنوز روی CI یا محیط محلی اجرا و تأیید نشده‌اند. تست SQL برای رزرو و قفل هم‌زمانی هنوز لازم است.
+- [!] این helper به‌تنهایی منبع معتبر موجودی یا موتور اجرایی نیست؛ ورودی cash/positions/orders باید از سمت سرور و زیر قفل حساب خوانده شود. هیچ RPC یا UI ثبت سفارش مشتقه فعال نشده است.
+- [x] PR #12 باز و Draft باقی مانده؛ HEAD پس از این مرحله `d3ce0b68ee4d139649ec105c46fe7dbf0a4fcb3d` و مقایسه با main برابر ۴۸ commit جلو و ۱ commit عقب است.
+- [x] بررسی دوبارهٔ Actions برای HEAD جدید هنوز هیچ run مرتبطی برنگرداند؛ run موفق برای این HEAD گزارش نمی‌شود.
+- [x] هیچ Migration، DDL، RPC، Cron، موجودی یا داده‌ای در Supabase Production تغییر نکرد.
+
+### گام بعدی
+1. روشن‌کردن علت اجرا نشدن/قابل‌مشاهده نبودن workflow برای PR و اجرای واقعی تست‌های Node و PostgreSQL 17 روی HEAD فعلی.
+2. افزودن fixtureهای PostgreSQL برای محاسبهٔ Available Margin، ذخیرهٔ سفارش‌های Limit، آزادسازی هنگام لغو، partial fill و تخصیص Reduce-only.
+3. سپس طراحی RPCهای account-lock/idempotency و آزمون race چندنشستی؛ تا پایان آن‌ها UI مشتقه غیرفعال بماند.
