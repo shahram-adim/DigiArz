@@ -26,6 +26,52 @@
     if(D.compareDecimal(rate,'1')>=0)throw new RangeError('Maintenance rate must be below 1');
     return mul(notional(quantity,markPrice),rate);
   }
+  // Versioned, server-owned tier schedules use the common
+  // maintenance = notional * rate - cumulative deduction convention.
+  // The final tier must be unbounded (maxNotional: null).
+  function validateMaintenanceTiers(tiers,maxLeverage=125){
+    if(!Array.isArray(tiers)||tiers.length===0)throw new TypeError('maintenance tiers must be a non-empty array');
+    if(!Number.isSafeInteger(maxLeverage)||maxLeverage<1)throw new RangeError('invalid system max leverage');
+    let previousMax=null,previousRate=null,previousDeduction='0',previousLeverage=null;
+    const normalized=tiers.map((tier,index)=>{
+      if(!tier||typeof tier!=='object')throw new TypeError('invalid maintenance tier');
+      const rate=positive(tier.maintenanceRate,'maintenance rate');
+      if(D.compareDecimal(rate,'1')>=0)throw new RangeError('maintenance rate must be below 1');
+      const deduction=dec(tier.maintenanceAmount??'0');
+      if(D.compareDecimal(deduction,'0')<0)throw new RangeError('maintenance amount must not be negative');
+      const leverage=tier.maxLeverage;
+      validateLeverage(leverage,maxLeverage);
+      if(previousRate!==null&&D.compareDecimal(rate,previousRate)<0)throw new RangeError('maintenance rates must be non-decreasing');
+      if(previousLeverage!==null&&leverage>previousLeverage)throw new RangeError('tier max leverage must not increase');
+      if(index===0&&D.compareDecimal(deduction,'0')!==0)throw new RangeError('first tier maintenance amount must be zero');
+      if(previousMax!==null){
+        const priorAtBoundary=sub(mul(previousMax,previousRate),previousDeduction);
+        const currentAtBoundary=sub(mul(previousMax,rate),deduction);
+        if(D.compareDecimal(priorAtBoundary,currentAtBoundary)!==0)throw new RangeError('maintenance tiers must be continuous at boundaries');
+      }
+      const max=tier.maxNotional===null?null:positive(tier.maxNotional,'tier max notional');
+      if(index<tiers.length-1&&max===null)throw new RangeError('only the final maintenance tier may be unbounded');
+      if(index===tiers.length-1&&max!==null)throw new RangeError('final maintenance tier must be unbounded');
+      if(previousMax!==null&&max!==null&&D.compareDecimal(max,previousMax)<=0)throw new RangeError('tier max notionals must increase');
+      const result=Object.freeze({maxNotional:max,maintenanceRate:rate,maintenanceAmount:deduction,maxLeverage:leverage});
+      previousMax=max;previousRate=rate;previousDeduction=deduction;previousLeverage=leverage;
+      return result;
+    });
+    return Object.freeze(normalized);
+  }
+  function maintenanceTierForNotional(value,tiers,maxLeverage=125){
+    const amount=positive(value,'notional');
+    const schedule=validateMaintenanceTiers(tiers,maxLeverage);
+    const index=schedule.findIndex(t=>t.maxNotional===null||D.compareDecimal(amount,t.maxNotional)<=0);
+    if(index<0)throw new RangeError('notional exceeds maintenance tier schedule');
+    const tier=schedule[index];
+    const maintenance=sub(mul(amount,tier.maintenanceRate),tier.maintenanceAmount);
+    if(D.compareDecimal(maintenance,'0')<=0)throw new RangeError('tier produces non-positive maintenance margin');
+    return Object.freeze({tierIndex:index,notional:amount,maintenanceMargin:maintenance,...tier});
+  }
+  function maintenanceMarginFromTiers(quantity,markPrice,tiers,maxLeverage=125){
+    return maintenanceTierForNotional(notional(quantity,markPrice),tiers,maxLeverage).maintenanceMargin;
+  }
   function unrealizedPnl(side,quantity,entryPrice,markPrice){
     if(side!=='long'&&side!=='short')throw new TypeError('side must be long or short');
     const q=positive(quantity,'quantity'),entry=positive(entryPrice,'entry price'),mark=positive(markPrice,'mark price');
@@ -295,5 +341,5 @@
       atRisk:D.compareDecimal(equity,maintenance)<=0
     });
   }
-  return Object.freeze({notional,initialMargin,maintenanceMargin,unrealizedPnl,positionEquity,isolatedLiquidationPrice,riskSnapshot,crossMarginRiskSnapshot,futuresAvailableMarginSnapshot,validateLeverage});
+  return Object.freeze({notional,initialMargin,maintenanceMargin,maintenanceTierForNotional,maintenanceMarginFromTiers,validateMaintenanceTiers,unrealizedPnl,positionEquity,isolatedLiquidationPrice,riskSnapshot,crossMarginRiskSnapshot,futuresAvailableMarginSnapshot,validateLeverage});
 });
