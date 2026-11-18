@@ -14,8 +14,8 @@
     if (typeof value !== 'string') return false;
     const text = value.trim();
     if (!text) return false;
-    if (/^\\+?(?:\\d+(?:\\.\\d*)?|\\.\\d+)$/.test(text)) return /[1-9]/.test(text);
-    const scientific = /^\\+?((?:\\d+(?:\\.\\d*)?|\\.\\d+))[eE][+-]?\\d+$/.exec(text);
+    if (/^\+?(?:\d+(?:\.\d*)?|\.\d+)$/.test(text)) return /[1-9]/.test(text);
+    const scientific = /^\+?((?:\d+(?:\.\d*)?|\.\d+))[eE][+-]?\d+$/.exec(text);
     return !!scientific && /[1-9]/.test(scientific[1]);
   }
 
