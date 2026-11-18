@@ -487,6 +487,7 @@
 - [x] تابع اکنون سفارش‌های فعال را فقط در صورت `productType='futures'` و `marginMode='cross'` می‌پذیرد؛ سایر سفارش‌ها صریحاً رد می‌شوند.
 - [x] fixtureهای سفارش در تست Available Margin با `marginMode='cross'` کامل شدند و تست منفی برای رد سفارش Isolated و Margin Spot اضافه شد.
 - [!] تست Node و PostgreSQL برای این تغییر هنوز اجرا نشده‌اند. محیط این نشست Node.js 22.16.0 دارد اما فایل‌های مخزن به‌صورت checkout محلی در دسترس نیستند؛ `psql` نیز نصب نیست. وضعیت Actions برای SHAهای قبلی خالی بوده و از ابزار موجود نمی‌توان اجرای push-trigger را مستقل فهرست کرد.
+- [x] بازبینی GitHub پس از اصلاح کد/تست‌ها: commit بررسی‌شده `0f4183e39a1f8da8b47c77ba08dff500e538d7db`؛ مقایسه با main برابر ۵۹ commit جلو و ۱ commit عقب (diverged) است. PR #12 همچنان Draft باقی می‌ماند؛ هیچ merge/rebase انجام نشد. اجرای Actions برای این SHA از خروجی‌های در دسترس تأیید نشد.
 - [x] تغییرات فقط در شاخه `feat/demo-derivatives-trading` انجام شده‌اند؛ هیچ تغییر Supabase Production، Migration فعال، RPC، Cron، موجودی یا داده مالی اعمال نشده است.
 
 ### گام بعدی
