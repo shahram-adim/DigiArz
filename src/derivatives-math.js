@@ -200,7 +200,8 @@
     const reservedReduceOnly=new Map();
     const activeOrders=openOrders.filter(o=>o&&(o.status==='pending'||o.status==='partially_filled'));
     for(const o of activeOrders){
-      if(o.productType!=='futures')throw new TypeError('open order is not a Futures order');
+      if(o.productType!=='futures')throw new TypeError('Available Margin accepts only Futures orders');
+      if(o.marginMode!=='cross')throw new TypeError('Available Margin accepts only cross Futures orders');
       if(o.orderType!=='limit')throw new TypeError('active market orders are forbidden; market orders must fill atomically or be rejected');
       if(o.positionSide!=='long'&&o.positionSide!=='short')throw new TypeError('order positionSide must be long or short');
       const remaining=positive(o.remainingQuantity,'remaining order quantity');
