@@ -280,3 +280,13 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [!] CI uses disposable PostgreSQL only. No Production schedule has been created, no worker/RPC calls the resolver yet, and no live trading/liquidation is enabled.
 - [ ] Next: two-session tests for concurrent schedule activation and resolver reads; define snapshot version pinning so one risk calculation cannot mix tier schedule versions.
 - [ ] Then wire the trusted resolver into server-side risk calculations and add atomic liquidation ledger/insurance/deficit accounting with partial/full reduction races.
+
+## Checkpoint — Maintenance Tier activation/resolver concurrency (2026-11-18)
+
+- [x] Per-symbol schedule activation now serializes with a transaction-scoped advisory lock and re-reads status/version after acquiring it.
+- [x] Repeated activation of an already-active schedule is idempotent.
+- [x] Added a two-session test that holds a resolver's shared lock on v2 while v3 activation waits, then concurrently retries v4 activation and asserts both calls converge on one active version.
+- [x] CI runs `44308127930` (push) and `44308135188` (pull_request) passed on commit `3595a3ea535fcc477b8f3a0ce1f21e176aebb286`, 46 successful steps each.
+- [!] The schedule resolver is not yet called by a full account risk RPC. A single risk snapshot must pin schedule IDs/versions inside one transaction to prevent mixed-version aggregation.
+- [ ] Next: implement a transaction-scoped risk-snapshot resolver that loads all relevant symbol schedules once, pins version IDs for the entire account calculation, and fails closed on missing/stale oracle data.
+- [ ] Then specify and test liquidation sizing and ledger settlement: partial/full reduction, close/liquidation fees, insurance/clearing, deficit/ADL, retries and concurrent fill/liquidation races.
