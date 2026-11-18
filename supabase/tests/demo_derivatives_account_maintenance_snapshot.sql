@@ -173,7 +173,7 @@ BEGIN
  IF v.wallet_cash_usdt<>5 OR v.cross_unrealized_pnl_usdt<>399
  OR v.unposted_funding_liability_usdt<>2 OR v.unposted_funding_receivable_usdt<>1
  OR v.close_fee_reserve_usdt<>2.1606 OR v.equity_usdt<>400.8394
- OR v.maintenance_margin_usdt<>36.01 OR v.margin_ratio<>round(400.8394/36.01,18)
+ OR v.maintenance_margin_usdt<>36.01 OR v.margin_ratio<>round(v.equity_usdt/v.maintenance_margin_usdt,18)
  OR v.cross_position_count<>1 OR jsonb_array_length(v.position_snapshots)<>2 THEN
   RAISE EXCEPTION 'Cross account risk aggregation mismatch: %',row_to_json(v);
  END IF;
