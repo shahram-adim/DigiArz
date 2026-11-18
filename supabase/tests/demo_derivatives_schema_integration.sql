@@ -10,12 +10,12 @@ INSERT INTO public.demo_derivative_accounts(id,user_id) VALUES
 
 INSERT INTO public.demo_derivative_orders(
   id,user_id,account_id,product_type,symbol,position_side,side,order_type,
-  quantity,leverage,margin_mode,remaining_quantity,client_request_id
+  quantity,leverage,margin_mode,filled_quantity,remaining_quantity,status,client_request_id
 ) VALUES (
   '30000000-0000-0000-0000-000000000001',
   '10000000-0000-0000-0000-000000000001',
   '20000000-0000-0000-0000-000000000001',
-  'futures','BTCUSDT','long','buy','market',1,5,'isolated',1,
+  'futures','BTCUSDT','long','buy','market',1,5,'isolated',1,0,'filled',
   '31000000-0000-0000-0000-000000000001'
 );
 
@@ -100,6 +100,25 @@ INSERT INTO public.demo_derivative_ledger_entries(
 
 COMMIT;
 
+DO $open_position_uniqueness$
+BEGIN
+  BEGIN
+    INSERT INTO public.demo_derivative_positions(
+      id,user_id,account_id,product_type,symbol,position_side,margin_mode,
+      leverage,quantity,entry_price,isolated_margin_usdt
+    ) VALUES (
+      '40000000-0000-0000-0000-000000000099',
+      '10000000-0000-0000-0000-000000000001',
+      '20000000-0000-0000-0000-000000000001',
+      'futures','BTCUSDT','long','isolated',5,0.25,101,5
+    );
+    RAISE EXCEPTION 'duplicate open position for same account/product/symbol/side unexpectedly accepted';
+  EXCEPTION WHEN unique_violation THEN
+    NULL;
+  END;
+END;
+$open_position_uniqueness$;
+
 DO $order_direction_checks$
 BEGIN
   BEGIN
@@ -137,6 +156,26 @@ BEGIN
   END;
 END;
 $order_direction_checks$;
+
+DO $market_atomicity_checks$
+BEGIN
+  BEGIN
+    INSERT INTO public.demo_derivative_orders(
+      id,user_id,account_id,product_type,symbol,position_side,side,order_type,
+      quantity,leverage,margin_mode,filled_quantity,remaining_quantity,status,client_request_id
+    ) VALUES (
+      '30000000-0000-0000-0000-000000000097',
+      '10000000-0000-0000-0000-000000000001',
+      '20000000-0000-0000-0000-000000000001',
+      'futures','ETHUSDT','long','buy','market',1,5,'cross',0,1,'pending',
+      '31000000-0000-0000-0000-000000000097'
+    );
+    RAISE EXCEPTION 'resting market order unexpectedly accepted';
+  EXCEPTION WHEN check_violation THEN
+    NULL;
+  END;
+END;
+$market_atomicity_checks$;
 
 DO $relationship_checks$
 BEGIN
