@@ -53,3 +53,48 @@ test('validates side and rate ranges',()=>{
   assert.throws(()=>M.isolatedLiquidationPrice('long','1','100','10','0.005','-0.001'),/fee rate/);
   assert.throws(()=>M.positionEquity('long','1','100','100','10','-0.001'),/fee rate/);
 });
+
+test('aggregates cross futures risk across multiple positions and account liabilities',()=>{
+  const r=M.crossMarginRiskSnapshot({
+    cashBalanceUsdt:'1000',marginDebtUsdt:'20',accruedInterestUsdt:'2',fundingPayableUsdt:'3',unsettledFeesUsdt:'1',
+    positions:[
+      {productType:'futures',marginMode:'cross',side:'long',quantity:'1',entryPrice:'100',markPrice:'110',maintenanceRate:'0.01',closeFeeRate:'0.001',priceStatus:'fresh'},
+      {productType:'futures',marginMode:'cross',side:'short',quantity:'2',entryPrice:'50',markPrice:'45',maintenanceRate:'0.02',closeFeeRate:'0.001',priceStatus:'fresh'}
+    ]
+  });
+  assert.equal(r.unrealizedPnl,'20');
+  assert.equal(r.maintenanceMargin,'2.8');
+  assert.equal(r.closeFeeReserve,'0.2');
+  assert.equal(r.totalLiabilities,'26');
+  assert.equal(r.equity,'993.8');
+  assert.equal(r.maintenanceBuffer,'991');
+  assert.equal(r.atRisk,false);
+  assert.equal(r.liquidationPrice,null);
+  assert.equal(r.riskScope,'account');
+});
+test('cross futures risk flags account-level maintenance breach without a single liquidation price',()=>{
+  const r=M.crossMarginRiskSnapshot({
+    cashBalanceUsdt:'5',
+    positions:[{productType:'futures',marginMode:'cross',side:'short',quantity:'1',entryPrice:'100',markPrice:'200',maintenanceRate:'0.1',closeFeeRate:'0.01',priceStatus:'fresh'}]
+  });
+  assert.equal(r.equity,'-6');
+  assert.equal(r.maintenanceMargin,'20');
+  assert.equal(r.riskStatus,'maintenance_breach');
+  assert.equal(r.atRisk,true);
+  assert.equal(r.liquidationPrice,null);
+});
+test('cross futures risk fails closed when any mark price is stale',()=>{
+  const r=M.crossMarginRiskSnapshot({
+    cashBalanceUsdt:'1000',
+    positions:[{productType:'futures',marginMode:'cross',side:'long',quantity:'1',entryPrice:'100',markPrice:'101',maintenanceRate:'0.01',closeFeeRate:'0.001',priceStatus:'stale'}]
+  });
+  assert.equal(r.riskStatus,'stale_price');
+  assert.equal(r.equity,null);
+  assert.equal(r.atRisk,null);
+});
+test('cross futures risk rejects isolated or non-futures positions and negative liabilities',()=>{
+  const p={productType:'futures',marginMode:'cross',side:'long',quantity:'1',entryPrice:'100',markPrice:'101',maintenanceRate:'0.01',closeFeeRate:'0.001',priceStatus:'fresh'};
+  assert.throws(()=>M.crossMarginRiskSnapshot({cashBalanceUsdt:'100',positions:[{...p,marginMode:'isolated'}]}),/cross futures/);
+  assert.throws(()=>M.crossMarginRiskSnapshot({cashBalanceUsdt:'100',positions:[{...p,productType:'margin'}]}),/cross futures/);
+  assert.throws(()=>M.crossMarginRiskSnapshot({cashBalanceUsdt:'100',marginDebtUsdt:'-1',positions:[]}),/must not be negative/);
+});
