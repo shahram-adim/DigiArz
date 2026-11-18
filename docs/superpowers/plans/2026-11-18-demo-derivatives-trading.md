@@ -79,3 +79,13 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - Verified Node TAP output: 58 tests, 58 passed, 0 failed. Disposable PostgreSQL 17 job also completed successfully, including derivative schema integration and arithmetic/regression scripts.
 - Expected ERROR lines in negative SQL tests were asserted and did not fail the workflow.
 - Remaining gap: SQL tests for Available Margin order reserve/release, cancel, partial fills, reduce-only allocation and concurrent account locking are not yet authored/verified. Do not activate derivatives UI or production RPCs.
+
+
+## Checkpoint — explicit order direction and reduce-only contract
+- [x] Added an explicit `side` field (`buy`/`sell`) to derivative orders, separate from `position_side` (`long`/`short`).
+- [x] Added a database CHECK invariant: Long opens/increases only with Buy non-reduce; Long reduces only with Sell reduce-only; Short opens/increases only with Sell non-reduce; Short reduces only with Buy reduce-only.
+- [x] Added `side` to fill records and extended the composite FK so a fill's execution direction must match its source order.
+- [x] Added PostgreSQL integration assertions rejecting ambiguous Sell-Long and Buy-Short non-reduce orders.
+- [ ] Run disposable PostgreSQL 17 integration tests on this checkpoint; schema/test changes are not validated until CI completes.
+- [ ] Next: design deterministic reduce-only allocation across multiple orders for the same account/symbol/position side, then test cancel release, partial fill and concurrent placement under account-first lock.
+- No RPC or UI order path is activated; no Supabase Production changes.
