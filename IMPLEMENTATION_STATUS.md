@@ -972,3 +972,18 @@
 ### گام بعدی
 1. نتیجهٔ CI commitهای اصلاح Parser را بررسی کن و در صورت شکست، فقط بر اساس لاگ اصلاح کن.
 2. تا دریافت نمونهٔ واقعی مجاز از Binance و Bybit، adapterهای آن‌ها و quorum مستقل را حدس نزن.
+
+
+## تأیید CI برای سخت‌گیری Parser OKX — ۱۸ نوامبر ۲۰۲۶
+
+- [x] اجرای CI شمارهٔ `44292212493` برای commit `5397b981eaf1fdde05b7d5417e7fe9f0b72791c3` با نتیجهٔ `success`.
+- [x] اجرای CI شمارهٔ `44292219101` برای commit `43d0a3110a1eb29eca67566382623ac97adef7d1` با نتیجهٔ `success`.
+- [x] اجرای CI شمارهٔ `44292226177` برای commit `305017908cc8caaf79ad8fe02964c4e248c7e4ef` با نتیجهٔ `success`.
+- [x] بنابراین Parser، تست‌های duplicate/malformed و همین checkpoint وضعیت در CI کامل فعلی سبز هستند.
+- [x] PR #12 همچنان open و Draft و merged=false است؛ شاخه نسبت به main برابر 180 ahead و 8 behind است. هیچ merge یا rebase انجام نشده است.
+- [!] محدودیت نمونه‌برداری Binance/Bybit همچنان باز است؛ تا دریافت دادهٔ واقعی و مجاز، adapter و quorum مستقل ساخته یا تصویب نمی‌شود.
+
+### گام بعدی
+1. حفظ شواهد OKX به‌عنوان fixture تشخیصی؛ آن را به‌تنهایی منبع کافی برای Oracle چند-provider تلقی نکن.
+2. دسترسی مجاز به endpointهای constituent برای Binance و Bybit را از محیطی که مجاز به استفاده از آن هستیم بررسی کن؛ محدودیت منطقه‌ای را دور نزن.
+3. پس از دریافت نمونه‌های واقعی، fixture و parser provider-specific را جداگانه بساز و weighted overlap را محاسبه کن.
