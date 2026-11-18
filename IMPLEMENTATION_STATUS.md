@@ -1143,3 +1143,7 @@
 - [x] PR #12 همچنان Open و Draft و merged=false است؛ PR از Draft خارج یا merge نشد.
 - [ ] گام بعدی فنی: بازبینی مستقل قراردادهای Oracle برای provider-family/constituent overlap و کامل‌کردن تست‌های crash/retry/concurrency بین start-cycle، provider-result و publish-snapshot؛ سپس ریسک‌مدل maintenance margin، liquidation و insurance در fixture ایزوله.
 - [ ] گام بعدی محصول: UI مشتقات، live order entry و auto-liquidation تا تکمیل risk-engine، تست‌های lifecycle/race و تأییدهای جداگانه غیرفعال بمانند.
+
+- [x] Post-documentation CI run `44303387834` on commit `119a527e49defa0ec8dfc50ac118d334f83d8536`: completed `success`, all 43 steps passed, including real two-session Stop-Limit child execution/cancellation races and derivative schema/RLS/ledger immutability checks.
+- [x] Post-documentation CI run `44303393491` on branch HEAD `52709186288209630864c3e9bf1913bcbbb9be29`: completed `success`, all 43 steps passed, including exact-decimal rollout rehearsal, TP-SL concurrent execution/cancellation, and Futures price-oracle idempotency/publication races.
+- [x] Both documentation-triggered CI runs completed successfully; no failed steps.
