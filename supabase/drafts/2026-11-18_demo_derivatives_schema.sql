@@ -66,6 +66,7 @@ CREATE TABLE public.demo_derivative_positions (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE (id,user_id),
+  UNIQUE (id,account_id,user_id),
   UNIQUE (id,account_id,user_id,symbol,position_side),
   FOREIGN KEY (account_id,user_id)
     REFERENCES public.demo_derivative_accounts(id,user_id) ON DELETE CASCADE,
