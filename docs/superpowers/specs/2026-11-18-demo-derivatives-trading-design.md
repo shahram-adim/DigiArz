@@ -159,3 +159,14 @@ This section records calculation boundaries and candidate semantics. It does not
 Before order confirmation and in position/history views, disclose the estimated opening fee, actual Maker/Taker fee after fill, possible closing fee, simulated funding exposure, and (for Margin Spot only) borrowing-interest basis. Distinguish estimates from booked ledger amounts. Never label funding or borrowing interest as a trading fee.
 
 No operational values are approved by this section. Any rates or quantities in tests remain fixtures only.
+
+
+### Funding convention and settlement boundary (proposed; values unapproved)
+
+- Adopt an explicit signed-rate convention for all formulas: a positive funding rate means Long positions pay and Short positions receive; a negative rate reverses payer and receiver. This is a proposed convention for the simulator and must be visible in UI/history.
+- Candidate per-position amount: absolute eligible position notional at the approved funding reference snapshot multiplied by the signed rate, with side determining debit/credit. The final notional basis (mark vs another pinned reference), rate scaling, and rounding stage require approval and exact-decimal tests.
+- Eligibility must be defined at one deterministic settlement instant. Snapshot eligible position quantity and account/position version under stable locks; concurrent open/reduce/close operations must serialize against that boundary so a position is neither charged twice nor omitted inconsistently.
+- Use a unique idempotency key for (account, position, symbol, funding window, policy version). A retry returns the prior settlement result and cannot create a second ledger posting.
+- The funding event and balanced ledger postings must commit atomically. If the simulation uses a platform clearing account to balance net payer/receiver flows, its treatment and any residual imbalance policy must be approved; never create value silently or allow a negative user balance.
+- Candidate schedule-pinning rule for trading fees: resolve and persist the active schedule version inside the transaction that creates each actual fill. This makes the fee reflect the rate active at execution and allows partial fills spanning a policy change to retain an auditable per-fill rate. Order acceptance may store an estimate only; it must not freeze the final fee rate. This is a recommendation, not yet an approved policy.
+- Funding interval, source, rate caps/floors, settlement instant/timezone, notional reference, partial-period eligibility, rounding, clearing-account treatment and policy activation remain NOT DECIDED.
