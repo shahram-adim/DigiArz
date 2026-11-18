@@ -97,6 +97,11 @@ $immutability$;
 -- directly read/write the private configuration tables.
 DO $privileges$
 BEGIN
+  IF has_schema_privilege('anon','private','USAGE')
+     OR has_schema_privilege('authenticated','private','USAGE')
+     OR NOT has_schema_privilege('service_role','private','USAGE') THEN
+    RAISE EXCEPTION 'private schema usage grants are incorrect';
+  END IF;
   IF has_table_privilege('anon','private.demo_derivative_maintenance_tiers','SELECT')
      OR has_table_privilege('authenticated','private.demo_derivative_maintenance_tiers','SELECT')
      OR has_table_privilege('service_role','private.demo_derivative_maintenance_tiers','SELECT')
