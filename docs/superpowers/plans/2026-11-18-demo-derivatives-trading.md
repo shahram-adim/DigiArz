@@ -64,3 +64,10 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [ ] Before relying on order previews, review the short-limit reservation price policy and enforce fill-time margin checks in the eventual account-locked RPC.
 - Pre-documentation GitHub comparison for commit `0f4183e39a1f8da8b47c77ba08dff500e538d7db`: 59 ahead / 1 behind `main` (`diverged`); PR #12 remains Draft. No merge/rebase; Actions run/status unverified.
 - No Supabase Production schema, migration, RPC, cron, balances, orders or data were changed.
+
+
+## Checkpoint: syntax failure discovered and corrected (2026-11-18)
+- GitHub Actions run `44258864323` for the preceding HEAD failed in the Node test step because a literal stray `\\n` token appeared at line 123 of `src/derivatives-math.js`.
+- The token was removed in commit `4020813ede6a3fbcaff1db43e92e979ae694c664`.
+- The failing run discovered 37 tests; 35 passed and two derivative test files failed to load due to the same syntax error. PostgreSQL steps were skipped after the Node step failed.
+- The correction is not yet validated. Inspect the new Actions run and its logs before proceeding to PostgreSQL reservation lifecycle fixtures or RPC implementation.
