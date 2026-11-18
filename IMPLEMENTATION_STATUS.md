@@ -1209,3 +1209,14 @@
 - [!] این تغییرات همچنان draft و CI-only هستند؛ Production Supabase دست‌نخورده است و هیچ worker/سفارش/لیکوییدیشنی از resolver استفاده نمی‌کند.
 - [ ] گام بعد: ساخت risk snapshot RPC server-side که در یک تراکنش، schedule_id/version هر نماد را pin کند و همهٔ positionهای همان حساب را با همان نسخه محاسبه کند؛ تست race در زمان تعویض schedule.
 - [ ] سپس مدل و دفترکل liquidation/insurance/deficit را طراحی و در PostgreSQL دورریختنی آزمایش کن؛ auto-liquidation و UI مشتقات غیرفعال بمانند.
+## پیاده‌سازی account maintenance snapshot با Oracle تازه و schedule نسخه‌پین‌شده — ۱۸ نوامبر ۲۰۲۶
+
+- [x] تابع خصوصی `private.demo_derivative_account_maintenance_snapshot(uuid)` اضافه شد؛ فقط service_role می‌تواند آن را اجرا کند.
+- [x] تابع ابتدا account row را `FOR SHARE` قفل می‌کند، سپس positionهای باز را با ترتیب پایدار می‌خواند و scheduleهای فعال را `FOR SHARE` نگه می‌دارد؛ تغییر وضعیت سفارش/موقعیت و تعویض tier در میانهٔ یک فراخوانی نمی‌تواند محاسبه را مخلوط کند.
+- [x] برای هر موقعیت، جدیدترین Oracle snapshot صرف‌نظر از status انتخاب می‌شود؛ فقط snapshot سالم و هنوز معتبر پذیرفته می‌شود. snapshot جدیدتر stale/deviation/insufficient-quorum باعث رد کل محاسبه می‌شود و به قیمت سالم قدیمی fallback نمی‌کند.
+- [x] خروجی شامل mark price و شناسه/زمان snapshot، notional، PnL، maintenance margin، tier index، schedule_id/version، leverage cap و ledger-derived Futures cash است.
+- [x] تست PostgreSQL حساب‌های مجزا، موقعیت isolated و cross، چند نماد، محاسبات tier/version، cash projection و رد snapshot stale جدیدتر را پوشش می‌دهد.
+- [x] CI روی commit `70a637270cdd7f9ee115d6b08de3ad0c584d7280` سبز شد: run `44310385007` (push، ۴۶ مرحله) و `44310397178` (pull_request، ۴۸ مرحله)، بدون شکست.
+- [!] این خروجی هنوز فقط position maintenance snapshot است؛ close-fee reserve، unposted liabilities، account equity/margin ratio و available margin نهایی در SQL RPC تجمیع نشده‌اند. هیچ order RPC یا liquidation worker آن را مصرف نمی‌کند.
+- [ ] گام بعد: افزودن fee schedule معتبر و محاسبهٔ close-fee reserve، liabilities بدون دوباره‌شماری، account equity، maintenance buffer و margin ratio در همان تراکنش؛ تست چندموقعیتی و stale-price fail-closed.
+- [ ] سپس طراحی liquidation/insurance/deficit accounting و تست‌های اتمیک partial/full liquidation و race با fill/cancel. Auto-liquidation و UI مشتقات خاموش می‌مانند.
