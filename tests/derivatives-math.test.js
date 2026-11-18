@@ -98,3 +98,45 @@ test('cross futures risk rejects isolated or non-futures positions and negative 
   assert.throws(()=>M.crossMarginRiskSnapshot({cashBalanceUsdt:'100',positions:[{...p,productType:'margin'}]}),/cross futures/);
   assert.throws(()=>M.crossMarginRiskSnapshot({cashBalanceUsdt:'100',otherLiabilitiesUsdt:'-1',positions:[]}),/must not be negative/);
 });
+
+const maintenanceTiers=[
+  {maxNotional:'10000',maintenanceRate:'0.01',maintenanceAmount:'0',maxLeverage:100},
+  {maxNotional:'50000',maintenanceRate:'0.02',maintenanceAmount:'100',maxLeverage:50},
+  {maxNotional:null,maintenanceRate:'0.05',maintenanceAmount:'1600',maxLeverage:25}
+];
+test('selects exact-decimal maintenance tiers with continuous boundaries and leverage caps',()=>{
+  const first=M.maintenanceTierForNotional('10000',maintenanceTiers);
+  assert.equal(first.tierIndex,0);
+  assert.equal(first.maintenanceMargin,'100');
+  assert.equal(first.maxLeverage,100);
+  const second=M.maintenanceTierForNotional('10000.000000000000000001',maintenanceTiers);
+  assert.equal(second.tierIndex,1);
+  assert.equal(second.maintenanceMargin,'100.00000000000000000002');
+  assert.equal(second.maxLeverage,50);
+  const third=M.maintenanceTierForNotional('100000',maintenanceTiers);
+  assert.equal(third.tierIndex,2);
+  assert.equal(third.maintenanceMargin,'3400');
+  assert.equal(third.maxLeverage,25);
+  assert.equal(M.maintenanceMarginFromTiers('0.5','20000',maintenanceTiers),'100');
+});
+test('rejects malformed or unsafe maintenance tier schedules',()=>{
+  assert.throws(()=>M.validateMaintenanceTiers([]),/non-empty/);
+  assert.throws(()=>M.validateMaintenanceTiers([
+    maintenanceTiers[0],{...maintenanceTiers[1],maintenanceAmount:'99'},maintenanceTiers[2]
+  ]),/continuous/);
+  assert.throws(()=>M.validateMaintenanceTiers([
+    maintenanceTiers[0],{...maintenanceTiers[1],maintenanceRate:'0.009',maintenanceAmount:'-10'},maintenanceTiers[2]
+  ]),/must not be negative|non-decreasing/);
+  assert.throws(()=>M.validateMaintenanceTiers([
+    maintenanceTiers[0],{...maintenanceTiers[1],maxLeverage:125},maintenanceTiers[2]
+  ]),/must not increase/);
+  assert.throws(()=>M.validateMaintenanceTiers([
+    {...maintenanceTiers[0],maxNotional:null},maintenanceTiers[1],maintenanceTiers[2]
+  ]),/only the final/);
+  assert.throws(()=>M.validateMaintenanceTiers([
+    maintenanceTiers[0],maintenanceTiers[1],{...maintenanceTiers[2],maxNotional:'100000'}
+  ]),/final maintenance tier/);
+  assert.throws(()=>M.maintenanceTierForNotional('1',[
+    {maxNotional:null,maintenanceRate:'0.01',maintenanceAmount:'1',maxLeverage:10}
+  ]),/non-positive/);
+});
