@@ -310,7 +310,7 @@ CREATE TRIGGER demo_derivative_deficit_events_immutable
 
 CREATE VIEW private.demo_derivative_deficit_exposure AS
 SELECT source_liquidation_event_id,
-       max(account_id) AS account_id,
+       (array_agg(account_id))[1] AS account_id,
        max(asset) AS asset,
        sum(amount_usdt) FILTER (WHERE event_type='deficit_opened') AS opened_usdt,
        COALESCE(sum(amount_usdt) FILTER (WHERE event_type='insurance_applied'),0) AS insurance_applied_usdt,
