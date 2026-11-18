@@ -1132,3 +1132,14 @@
 - [x] شاخه با merge commit دووالدی (ابتدا head شاخه، سپس main) همگام شد؛ rebase و force-push انجام نشد.
 - [!] این همگام‌سازی فقط روی feature branch است؛ PR merge، انتشار، Supabase write و Production migration انجام نشده است.
 - [ ] اجرای CI روی merge commit و بازبینی نهایی diff لازم است.
+
+
+## اعتبارسنجی پس از همگام‌سازی main و تکمیل لایهٔ Oracle — ۱۸ نوامبر ۲۰۲۶
+- [x] اجرای push روی commit `8ce5751790cc6fc5a524e50c79360f68777cb5d9`: run `44302116508`، workflow `Exact decimal tests`، نتیجهٔ نهایی `success`.
+- [x] اجرای مستقل رویداد `pull_request` برای همان HEAD: run `44302126025`، نتیجهٔ نهایی `success`.
+- [x] job `exact-decimal` در هر دو اجرا موفق شد؛ ۳۹ مرحلهٔ اصلی job push شامل Node/browser، PostgreSQL 17، atomic migration rehearsal، Spot advanced-order lifecycle/races، Futures schema/RLS/ledger، oracle storage/RPC، دو نشست هم‌زمان، Reduce-only fill/reconciliation و رد ledger نامتوازن همگی موفق شدند.
+- [x] اجرای runها روی شاخهٔ `feat/demo-derivatives-trading` و commit همگام‌سازی‌شده بود؛ main تغییر نکرد.
+- [!] سبز بودن CI صرفاً اعتبارسنجی fixtureها و SQL draftها در PostgreSQL دورریختنی است؛ هیچ migration، RPC، policy، cron، worker یا داده‌ای در Supabase Production اعمال نشده و هیچ مجوز فعال‌سازی معاملات مشتقه ایجاد نمی‌کند.
+- [x] PR #12 همچنان Open و Draft و merged=false است؛ PR از Draft خارج یا merge نشد.
+- [ ] گام بعدی فنی: بازبینی مستقل قراردادهای Oracle برای provider-family/constituent overlap و کامل‌کردن تست‌های crash/retry/concurrency بین start-cycle، provider-result و publish-snapshot؛ سپس ریسک‌مدل maintenance margin، liquidation و insurance در fixture ایزوله.
+- [ ] گام بعدی محصول: UI مشتقات، live order entry و auto-liquidation تا تکمیل risk-engine، تست‌های lifecycle/race و تأییدهای جداگانه غیرفعال بمانند.
