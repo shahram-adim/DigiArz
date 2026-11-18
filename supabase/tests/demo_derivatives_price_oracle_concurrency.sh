@@ -22,7 +22,7 @@ start_sql() {
   local cycle_id="$1"
   service_sql "SELECT private.demo_derivative_price_start_cycle(
     '$cycle_id','ETHUSDT',ARRAY['binance_usdm','bybit_linear'],
-    '{\"binance_usdm\":\"ETHUSDT\",\"bybit_linear\":\"ETHUSDT\"}'::jsonb
+    '{"binance_usdm":"ETHUSDT","bybit_linear":"ETHUSDT"}'::jsonb
   );"
 }
 
