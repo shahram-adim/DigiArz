@@ -126,3 +126,17 @@ An order stores execution direction separately from the position it affects. `po
 - Short reduce/close: `side='buy'`, `reduce_only=true`.
 
 The draft schema enforces these combinations with a CHECK constraint. Fill rows persist `side` and a composite foreign key ties it to the originating order, preventing an execution record from silently reversing direction. Non-reduce orders may not implicitly close or flip an opposing position; explicit reduce-only orders are required. A future one-way/netting mode or position flip requires a separately specified state transition and must not be inferred from order direction.
+
+
+## 10. Deterministic Reduce-only allocation and lifecycle
+
+The account row is the serialization mutex. Every operation below takes the account `FOR UPDATE` lock before reading or writing the position or its orders. For a given `(account_id, product_type, symbol, position_side)`, the engine maintains one open position; the server enforces this with a partial unique index on open positions.
+
+- **Place Limit Reduce-only:** lock account, then the matching open position; sum `remaining_quantity` for active (`pending`/`partially_filled`) Reduce-only orders for the same key. Accept only when `new_quantity <= position.quantity - active_reserved_quantity`. The new order joins the active reservation sum in the same transaction. It reserves no opening margin.
+- **Place Market Reduce-only:** Market is atomic fill-or-reject. Under the same locks, require requested quantity to be no greater than unreserved reducible quantity, execute immediately, and never persist an active Market order.
+- **Cancel/expire/reject:** change the order to a terminal status in the transaction. Terminal orders no longer count toward reserved reduce quantity; retain original and remaining quantities for audit, and do not create a cash-ledger entry solely for reservation release.
+- **Partial/full fill of a Reduce-only Limit:** in one transaction reduce both position quantity and order remaining quantity by the exact fill quantity. Because both decrease by the same amount, the aggregate reserved quantity of all active Reduce-only orders remains bounded by the remaining position quantity.
+- **Other position reductions (manual close, liquidation, admin risk action):** before commit, recompute active reservations. If the new position quantity is below aggregate reservations, cancel active Reduce-only orders newest-first (`created_at DESC, id DESC`) until the remaining reservations fit. This is intentionally deterministic and conservative; it never silently enlarges an order or changes its price/quantity.
+- **Concurrency:** account lock serializes two simultaneous Reduce-only placements, fills, cancels and liquidation. Lock affected order/position rows in stable primary-key order after the account lock. Idempotency is checked before effects; a retry returns the prior result.
+
+A reduce-only order may never increase or reverse a position. Any future netting/flip behavior requires a separate explicit product contract. All rules are server-side; the browser preview is advisory only.
