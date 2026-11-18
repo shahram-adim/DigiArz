@@ -163,3 +163,12 @@ The draft now contains a deliberately narrow first server-side slice:
 - Public PostgREST wrappers are SECURITY INVOKER. The write helpers live in the non-exposed `private` schema, are SECURITY DEFINER with empty search_path, and require `auth.uid()`. The private schema is not intended for Data API exposure.
 
 This slice intentionally does not implement fills, realized PnL, fees, margin release, liquidation reconciliation, Market Reduce-only, or cross-session race tests. Those must be designed with the complete atomic fill/ledger contract before enabling execution.
+
+
+## 13. Atomic Reduce-only Limit partial fills
+
+A trusted execution worker may submit an actual fill only through a server-only RPC granted to `service_role`; neither `anon` nor `authenticated` may execute it, and the service key must never enter the Android client. The RPC accepts the trusted execution's fill ID, quantity, price and fee, validates 18-decimal precision and Limit price protection, and is idempotent by immutable fill ID plus exact payload.
+
+The transaction locks account first, then order, then the unique open position. It inserts one immutable fill, reduces position quantity, updates realized PnL, releases isolated margin pro rata (rounding release down to 18 decimals except full close, which releases the exact remainder), updates order filled/remaining quantity and weighted average fill price, and writes one balanced USDT ledger group for realized PnL, fee and isolated-margin transfer. A zero-value component creates no empty entries. All state and ledger writes commit or roll back together.
+
+This first fill slice is limited to Futures Reduce-only Limit orders. Market execution, opening/increasing positions, cross-session stress tests, liquidation reconciliation and external reductions that may invalidate other Reduce-only reservations remain out of scope. The caller is a trusted matching/execution service; fee and execution price are not user inputs.
