@@ -54,7 +54,73 @@
     }
     return div(add(entry,qMargin),add(add('1',mmr),fee));
   }
-  function riskSnapshot({side,quantity,entryPrice,markPrice,isolatedMargin,maintenanceRate,closeFeeRate='0',marginMode='isolated'}){
+
+  // USDT-settled futures cross margin. cashBalanceUsdt must be a server-side,
+  // ledger-derived settled balance, never a browser-provided value.
+  function crossMarginRiskSnapshot({
+    cashBalanceUsdt,
+    positions,
+    marginDebtUsdt='0',
+    accruedInterestUsdt='0',
+    fundingPayableUsdt='0',
+    unsettledFeesUsdt='0'
+  }){
+    const cash=dec(cashBalanceUsdt);
+    if(D.compareDecimal(cash,'0')<0)throw new RangeError('cash balance must not be negative');
+    if(!Array.isArray(positions))throw new TypeError('positions must be an array');
+    const liabilityInputs=[
+      ['margin debt',marginDebtUsdt],
+      ['accrued interest',accruedInterestUsdt],
+      ['funding payable',fundingPayableUsdt],
+      ['unsettled fees',unsettledFeesUsdt]
+    ];
+    let liabilities='0';
+    for(const [name,value] of liabilityInputs){
+      const amount=dec(value);
+      if(D.compareDecimal(amount,'0')<0)throw new RangeError(name+' must not be negative');
+      liabilities=add(liabilities,amount);
+    }
+    for(const p of positions){
+      if(!p||p.productType!=='futures'||p.marginMode!=='cross')throw new TypeError('cross margin aggregation accepts only cross futures positions');
+      if(p.side!=='long'&&p.side!=='short')throw new TypeError('position side must be long or short');
+      positive(p.quantity,'quantity');
+      positive(p.entryPrice,'entry price');
+      if(p.priceStatus!=='fresh')return Object.freeze({
+        riskScope:'account',riskStatus:'stale_price',positionsCount:positions.length,
+        equity:null,maintenanceMargin:null,closeFeeReserve:null,totalLiabilities:null,
+        marginRatio:null,maintenanceBuffer:null,liquidationPrice:null,atRisk:null
+      });
+      positive(p.markPrice,'mark price');
+      validateFeeRate(p.closeFeeRate);
+    }
+    let totalPnl='0',totalMaintenance='0',closeFeeReserve='0';
+    for(const p of positions){
+      totalPnl=add(totalPnl,unrealizedPnl(p.side,p.quantity,p.entryPrice,p.markPrice));
+      totalMaintenance=add(totalMaintenance,maintenanceMargin(p.quantity,p.markPrice,p.maintenanceRate));
+      closeFeeReserve=add(closeFeeReserve,mul(notional(p.quantity,p.markPrice),validateFeeRate(p.closeFeeRate)));
+    }
+    const equity=sub(add(cash,totalPnl),add(liabilities,closeFeeReserve));
+    const hasExposure=D.compareDecimal(totalMaintenance,'0')>0;
+    const buffer=sub(equity,totalMaintenance);
+    const atRisk=hasExposure&&D.compareDecimal(equity,totalMaintenance)<=0;
+    return Object.freeze({
+      riskScope:'account',
+      riskStatus:atRisk?'maintenance_breach':'healthy',
+      positionsCount:positions.length,
+      cashBalance:cash,
+      unrealizedPnl:totalPnl,
+      equity,
+      maintenanceMargin:totalMaintenance,
+      closeFeeReserve,
+      totalLiabilities:liabilities,
+      marginRatio:hasExposure?div(equity,totalMaintenance):null,
+      maintenanceBuffer:buffer,
+      liquidationPrice:null,
+      liquidationPriceMethod:'account-level-no-single-price',
+      atRisk
+    });
+  }
+\n  function riskSnapshot({side,quantity,entryPrice,markPrice,isolatedMargin,maintenanceRate,closeFeeRate='0',marginMode='isolated'}){
     if(marginMode!=='isolated'&&marginMode!=='cross')throw new TypeError('marginMode must be isolated or cross');
     const pnl=unrealizedPnl(side,quantity,entryPrice,markPrice);
     const maintenance=maintenanceMargin(quantity,markPrice,maintenanceRate);
@@ -84,5 +150,5 @@
       atRisk:D.compareDecimal(equity,maintenance)<=0
     });
   }
-  return Object.freeze({notional,initialMargin,maintenanceMargin,unrealizedPnl,positionEquity,isolatedLiquidationPrice,riskSnapshot,validateLeverage});
+  return Object.freeze({notional,initialMargin,maintenanceMargin,unrealizedPnl,positionEquity,isolatedLiquidationPrice,riskSnapshot,crossMarginRiskSnapshot,validateLeverage});
 });
