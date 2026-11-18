@@ -391,3 +391,22 @@
 1. اجرای CI روی آخرین HEAD و اصلاح هر خطای جدید با لاگ.
 2. تکمیل طراحی projection دفترکل برای futures_cash و تعریف دقیق نحوهٔ نمایش/رزرو سفارش‌های باز در Equity و Available Margin.
 3. سپس پیاده‌سازی تابع حساب‌محور در PostgreSQL و آزمون‌های دو نشست برای سفارش/بستن/لیکوییدیشن؛ قبل از این مرحله هیچ UI ثبت سفارش مشتقه فعال نشود.
+
+
+## قرارداد حسابداری دفترکل و Available Margin فیوچرز — ۱۸ نوامبر ۲۰۲۶
+
+- [x] وضعیت واقعی شاخه پیش از ادامه بررسی شد: HEAD برابر `e55808b46b94457658aae9a9ef7bb580a777b9ba`؛ PR #12 باز و Draft؛ شاخه نسبت به main برابر ۳۴ commit جلو و ۱ commit عقب است.
+- [x] بازبینی Schema draft نشان داد `futures_cash_usdt` و `margin_cash_usdt` در جدول حساب کنار دفترکل مستقل تعریف شده‌اند؛ اگر هر دو منبع حقیقت باشند خطر اختلاف مانده وجود دارد.
+- [x] قرارداد حسابداری در `docs/superpowers/specs/2026-11-18-futures-ledger-accounting.md` ثبت شد: دفترکل immutable تنها منبع حقیقت cash؛ ماندهٔ Futures از مجموع debit-credit در bucket برابر `futures_cash` و asset برابر USDT محاسبه می‌شود.
+- [x] تفکیک Wallet Cash، Unrealized PnL، Equity، Maintenance Margin، Initial Margin و Available Margin تعریف شد.
+- [x] رزرو سفارش Limit به‌عنوان تعهد مشتق‌شده از سفارش‌های باز تعریف شد، نه برداشت نقدی یا ردیف دفترکل؛ سفارش Reduce-only فقط مقدار قابل‌بستن را رزرو می‌کند.
+- [x] قواعد جلوگیری از دوباره‌شماری کارمزد/Funding ثبت شد: مواردی که در دفترکل ثبت شده‌اند نباید دوباره از Equity کم شوند؛ بدهی و بهرهٔ Margin Spot از حساب Futures جدا هستند.
+- [x] قفل حساب با `FOR UPDATE` به‌عنوان mutex تمام RPCها و workerها، همراه با idempotency و ترتیب قفل ثابت، تعریف شد.
+- [!] این commit فقط سند طراحی است؛ ستون‌های فعلی Schema draft هنوز حذف/اصلاح نشده‌اند و هیچ projection یا RPC پیاده‌سازی نشده است.
+- [ ] اجرای CI روی HEAD جدید هنوز مشاهده نشده است.
+- [x] هیچ Migration، DDL، RPC، Cron، موجودی یا داده‌ای در Supabase Production تغییر نکرد.
+
+### گام بعدی
+1. بازنگری draft schema بر اساس قرارداد: حذف balanceهای موازی یا تعریف cache غیرمرجع، افزودن projection فقط‌خواندنی و آزمون حسابداری آن در PostgreSQL دورریختنی.
+2. ساخت تست‌های محاسبهٔ Available Margin و رزرو سفارش‌های باز/نیمه‌پر.
+3. سپس RPCهای تراکنشی account-lock/idempotency و آزمون race چندنشستی.
