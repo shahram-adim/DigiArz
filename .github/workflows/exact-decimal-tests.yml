@@ -2,7 +2,7 @@ name: Exact decimal tests
 
 on:
   push:
-    branches: [main]
+    branches: [main, feat/demo-derivatives-trading]
   pull_request:
     branches: [main]
 
