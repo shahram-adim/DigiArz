@@ -893,3 +893,18 @@
 - [!] این مرحله فقط طراحی مستنداتی است؛ هیچ جدول، RPC، collector یا adapter اجرایی اضافه نشده است. هیچ تغییر Supabase Production، secret، cron یا UI انجام نشده است.
 - [ ] گام بعدی: دریافت نمونه‌های واقعی API از یک مسیر قابل دسترس و تطبیق response schema، به‌خصوص OKX؛ سپس پیاده‌سازی DDL draft و تست‌های PostgreSQL موقت برای append-only، RLS، hash/timestamp provenance و linkage اتمیک.
 - [!] تا اندازه‌گیری overlap واقعی constituentها و تصویب effective quorum، هیچ venue به‌تنهایی به‌عنوان feed مستقل شمرده نمی‌شود و liquidation/Futures UI خاموش می‌مانند.
+
+
+## تأیید CI طراحی provenance برای constituentهای Oracle — ۱۸ نوامبر ۲۰۲۶
+
+- [x] اجرای GitHub Actions شمارهٔ `44288878922` روی commit سند طراحی `fbbc0e12f52da4907afed395f4112fe0584512ce` با نتیجهٔ `success` تمام شد.
+- [x] اجرای GitHub Actions شمارهٔ `44288898171` روی HEAD شاخه `bf79fb9a7d9c791929053ecfc614e9e9b4bd0f99` نیز با نتیجهٔ `success` تمام شد.
+- [x] هر دو اجرا job اصلی `exact-decimal` را با موفقیت و تمام ۳۸ مرحلهٔ تست/رگرسیون/تست هم‌زمانی موجود به پایان رساندند؛ مرحلهٔ تست دو نشست Oracle نیز موفق بود.
+- [!] این اجراها طراحی provenance را به‌عنوان مستندات تأیید می‌کنند و تست‌های فعلی schema/RPC را روی PostgreSQL موقت اجرا می‌کنند؛ هنوز DDL جدید constituent provenance، adapter یا نمونهٔ زندهٔ API وجود ندارد.
+- [x] PR #12 همچنان باز و Draft است و merge نشده. در بررسی فعلی شاخه نسبت به `main` تعداد ۱۶۸ commit جلو و ۷ commit عقب گزارش شد؛ هیچ merge یا rebase انجام نشد.
+- [x] هیچ تغییری در Supabase Production، داده‌ها، secrets، cron، collector یا Futures UI انجام نشد.
+
+### گام بعدی
+1. دریافت پاسخ واقعی endpointهای constituent از مسیر قابل دسترس، به‌خصوص OKX؛ نمونهٔ مستندات رسمی جایگزین نمونهٔ زنده محسوب نشود.
+2. پس از مشاهدهٔ shape واقعی، طراحی و تست DDL provenance فقط در draft و PostgreSQL موقت.
+3. تا تأیید mapping و overlap واقعی، quorum مستقل تصویب نشود و collector/Oracle زنده و liquidation/Futures UI غیرفعال بمانند.
