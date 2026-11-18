@@ -25,8 +25,12 @@ WHERE id='4e000000-0000-0000-0000-000000000001'
   AND quantity=0.6 AND status='open';
 DO $external_reduction_check$
 BEGIN
-  IF NOT FOUND THEN
-    RAISE EXCEPTION 'external reduction fixture did not update exactly one open position';
+  IF NOT EXISTS (
+    SELECT 1 FROM public.demo_derivative_positions
+    WHERE id='4e000000-0000-0000-0000-000000000001'
+      AND quantity=0.3 AND status='open'
+  ) THEN
+    RAISE EXCEPTION 'external reduction fixture did not update the expected open position';
   END IF;
 END;
 $external_reduction_check$;
