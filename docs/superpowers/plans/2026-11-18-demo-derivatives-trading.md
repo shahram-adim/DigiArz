@@ -334,3 +334,12 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [x] Added `docs/superpowers/specs/2026-11-18-demo-derivatives-insurance-deficit-ledger.md` defining a separate private platform ledger, append-only deficit memorandum journal, event-linked cross-ledger reconciliation, debit/credit conventions, atomicity and required tests.
 - [!] This checkpoint is design-only. No insurance/deficit SQL, RPC, migration, Production write, or liquidation worker was created or enabled.
 - [ ] Next: implement the isolated private platform-ledger and deficit-journal schema plus invariant tests in the existing disposable PostgreSQL 17 CI fixture; do not implement payout/recovery RPCs until seed/replenishment and residual-deficit policies are approved.
+
+
+## Checkpoint — private platform insurance ledger and deficit journal validated (2026-11-18)
+
+- [x] The isolated private platform ledger and append-only deficit memorandum schema draft are present at `supabase/drafts/2026-11-18_demo_derivatives_insurance_deficit_ledger.sql`.
+- [x] Disposable-PostgreSQL integration coverage is present at `supabase/tests/demo_derivatives_insurance_deficit_ledger.sql`, including balanced postings, seed/payout/recovery classification, overdraw rejection, over-recovery rejection, immutability, idempotency, and private access boundaries.
+- [x] GitHub Actions run `44361544743` on commit `efe928d38ce2174c237abe9fae8cfb0232e72d04` completed successfully; the job steps specifically report success for applying the draft, testing insurance accounting/deficit exposure/private access, and running two-session insurance payout/deficit recovery races.
+- [!] This evidence is for disposable PostgreSQL CI only. It does not authorize payout/recovery RPCs, liquidation execution, or any Supabase Production change.
+- [ ] Next: keep execution paths blocked and obtain explicit policy decisions for the six liquidation gates in `docs/superpowers/specs/2026-11-18-demo-derivatives-liquidation-policy-decisions.md`. Do not infer values from fixtures.
