@@ -150,3 +150,16 @@ Market orders are strictly atomic: the only valid terminal states are fully fill
 
 
 The active Reduce-only order scan is supported by a partial index on `(account_id, product_type, symbol, position_side, created_at DESC, id DESC)` restricted to `reduce_only` rows in `pending` or `partially_filled` status. This supports both the reservation sum and deterministic newest-first cancellation without including terminal orders.
+
+
+## 12. First account-locked Reduce-only RPC slice
+
+The draft now contains a deliberately narrow first server-side slice:
+- Place a Reduce-only Limit order only against an existing open position; derive execution side from the position side (Long→Sell, Short→Buy).
+- Lock the user's derivative account row first, then the target position row, before summing active reservations and inserting the order.
+- Enforce the active reservation ceiling with exact database numeric arithmetic.
+- Make placement idempotent by `(user_id, client_request_id)`; replay with identical parameters returns the original order, while key reuse with changed parameters is rejected.
+- Cancel an active Reduce-only order under the same account-first lock; its terminal status releases reservation and creates no cash-ledger entry.
+- Public PostgREST wrappers are SECURITY INVOKER. The write helpers live in the non-exposed `private` schema, are SECURITY DEFINER with empty search_path, and require `auth.uid()`. The private schema is not intended for Data API exposure.
+
+This slice intentionally does not implement fills, realized PnL, fees, margin release, liquidation reconciliation, Market Reduce-only, or cross-session race tests. Those must be designed with the complete atomic fill/ledger contract before enabling execution.
