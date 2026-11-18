@@ -719,3 +719,16 @@
 - [x] Root cause isolated to the disposable role setup: it only created `service_role BYPASSRLS` if absent, and did not normalize an already-existing role. The schema setup now explicitly enforces `NOLOGIN BYPASSRLS` and asserts the role attributes.
 - [x] Restored the external-reduction integration observer to `service_role`, so both the new RPC and existing fill test verify the actual trusted role's row visibility after setup normalization.
 - [ ] Re-run CI. Do not mark the overall workflow green until the full run, including the partial-fill/ledger tests, passes.
+
+## تأیید اجرای کامل PostgreSQL برای کاهش خارجی و چرخه Reduce-only — ۱۸ نوامبر ۲۰۲۶
+
+- [x] GitHub Actions run `44267541202` روی HEAD برابر `cd1d4aae09680e5edacefdbdf396a3ed80df820b` با conclusion برابر `success` تمام شد.
+- [x] کل job موفق بود: Node exact-decimal و browser integration، تست‌های regression و arithmetic در PostgreSQL 17، rehearsalهای migration/DDL و همه تست‌های موجود Spot advanced orders.
+- [x] تست‌های مشتقات نیز موفق شدند: schema/RLS/ledger immutability، placement/cancel و رقابت رزرو Reduce-only، رقابت دو Fill، نصب و تست reconciliation، کاهش اتمیک خارجی Futures و لغو newest-first، partial Fill/PnL/fees/margin release و رد ledger نامتوازن.
+- [x] علت شکست‌های متوالی تست قبلی رفع شد: fixture اکنون نقش disposable `service_role` را صریحاً `NOLOGIN BYPASSRLS` می‌کند و این ویژگی را assert می‌کند؛ تست نهایی نیز با همان نقش trusted اجرا و مشاهده می‌شود.
+- [x] وضعیت واقعی GitHub مجدداً بررسی شد: PR #12 باز و Draft است؛ feature branch برابر ۱۳۷ کامیت جلو و ۱ کامیت عقب `main` است (`diverged`). Merge/rebase انجام نشد.
+- [!] این موفقیت فقط تست در PostgreSQL موقت CI است؛ به معنی استقرار در Supabase Production، تأیید نهایی طراحی لیکوییدیشن یا فعال‌سازی UI نیست.
+- [!] RPC کاهش خارجی فعلی ورودی `execution_price` را از فراخوان trusted می‌گیرد و برای worker داخلی طراحی شده؛ خودش mark/index price را از منبع مستقل تأیید نمی‌کند و نباید به‌عنوان liquidation engine یا endpoint کاربر استفاده شود.
+- [x] مرور کد فعلی تأیید کرد در شاخه feature هیچ liquidation/risk worker یا منبع مستقل mark/index price وجود ندارد. `market_prices` فعلی فقط last-price را نگه می‌دارد و منبع/زمان آخرین refresh را ثبت می‌کند؛ history چندمنبعی و mark/index مستقل ندارد.
+- [ ] گام بعدی: طراحی و تست منبع مستقل mark/index price، شامل provenance چندمنبعی، stale/outlier/deviation guard، ثبت snapshot و fail-closed behavior؛ سپس طراحی maintenance tiers و هزینه/insurance accounting. تا تکمیل این موارد liquidation RPC ساخته یا فعال نشود.
+- [x] Supabase Production، UI مشتقات و Spot موجود دست‌نخورده ماندند.
