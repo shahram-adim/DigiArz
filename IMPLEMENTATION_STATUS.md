@@ -509,3 +509,20 @@
 1. بررسی run تازهٔ Actions روی commit اصلاحی و دریافت لاگ کامل.
 2. رفع خطاهای واقعی باقی‌مانده در تست Node و سپس اجرای تمام مراحل PostgreSQL 17.
 3. فقط پس از سبز شدن تست‌ها، افزودن fixtureهای SQL برای lifecycle رزرو سفارش و رقابت تراکنشی.
+
+
+## تأیید موفق CI پس از اصلاح SyntaxError — ۱۸ نوامبر ۲۰۲۶
+
+- [x] اجرای Node + PostgreSQL 17 روی commit اصلاح کد `4020813ede6a3fbcaff1db43e92e979ae694c664` با run `44259730430` موفق شد.
+- [x] همان workflow روی commit ثبت وضعیت `4e48a2dc1246e01b2aed04471882b2f6510b46b1` با run `44259762686` موفق شد.
+- [x] workflow روی commit برنامه `e95c055524cde94ca7118f29ba3a769c20b2e820` با run `44259768302` نیز موفق شد.
+- [x] لاگ Node در run دوم: ۵۸ تست، ۵۸ موفق، صفر ناموفق.
+- [x] PostgreSQL 17 disposable job با موفقیت پایان یافت؛ لاگ شامل پیام موفق `demo derivatives schema integration passed` و اجرای اسکریپت‌های arithmetic و regression است. پیام‌های ERROR مورد انتظار در تست‌های منفی (ledger نامتوازن، lock timeout، relation عمداً ناموجود و رد cancel نامعتبر) بخشی از assertionها هستند؛ job در نهایت success شده است.
+- [!] این سبز شدن CI، فقط کد/fixtureهای فعلی را پوشش می‌دهد؛ هنوز تست SQL برای lifecycle رزرو Available Margin شامل reserve/release/cancel/partial fill/reduce-only و race تراکنشی اضافه نشده است.
+- [x] آخرین commit مستندات بررسی‌شده `e95c055524cde94ca7118f29ba3a769c20b2e820` است؛ PR #12 باز و Draft و شاخه با main واگراست (در بررسی آخر ۶۴ جلو و ۱ عقب).
+- [x] هیچ Merge/Rebase و هیچ تغییر Supabase Production انجام نشد.
+
+### گام بعدی
+1. طراحی قرارداد رزرو سفارش و allocation دقیق Reduce-only در SQL؛ ابتدا روشن‌کردن سمت سفارش در برابر positionSide و نحوه تخصیص چند سفارش کاهنده.
+2. افزودن integration tests برای reserve، cancel release، partial fill، reduce-only over-allocation و رقابت دو نشست با قفل ردیف حساب.
+3. سپس RPCهای اتمیک با auth.uid، idempotency و ledger append-only؛ UI مشتقه تا تکمیل این مراحل غیرفعال بماند.
