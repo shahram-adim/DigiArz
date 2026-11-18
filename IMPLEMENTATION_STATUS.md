@@ -479,3 +479,17 @@
 3. پس از دریافت نتایج واقعی، خطاهای تست را اصلاح کن و سپس fixtureهای SQL مربوط به Available Margin و lifecycle رزرو سفارش را اضافه کن.
 
 - [x] بازبینی نهایی همین مرحله: PR #12 باز و Draft؛ شاخه در مقایسهٔ نهایی ۵۴ commit جلو و ۱ commit عقب main و همچنان واگراست. هیچ merge/rebase انجام نشد.
+
+
+## محدودسازی ورودی Available Margin به سفارش‌های Cross Futures — ۱۸ نوامبر ۲۰۲۶
+
+- [x] بازبینی قرارداد تابع نشان داد `futuresAvailableMarginSnapshot()` فقط برای Futures با Cross Margin تعریف شده، اما سفارش‌های ورودی را از نظر `marginMode` محدود نمی‌کرد؛ بنابراین سفارش Isolated یا Margin می‌توانست اشتباهاً وارد preview حساب Cross شود.
+- [x] تابع اکنون سفارش‌های فعال را فقط در صورت `productType='futures'` و `marginMode='cross'` می‌پذیرد؛ سایر سفارش‌ها صریحاً رد می‌شوند.
+- [x] fixtureهای سفارش در تست Available Margin با `marginMode='cross'` کامل شدند و تست منفی برای رد سفارش Isolated و Margin Spot اضافه شد.
+- [!] تست Node و PostgreSQL برای این تغییر هنوز اجرا نشده‌اند. محیط این نشست Node.js 22.16.0 دارد اما فایل‌های مخزن به‌صورت checkout محلی در دسترس نیستند؛ `psql` نیز نصب نیست. وضعیت Actions برای SHAهای قبلی خالی بوده و از ابزار موجود نمی‌توان اجرای push-trigger را مستقل فهرست کرد.
+- [x] تغییرات فقط در شاخه `feat/demo-derivatives-trading` انجام شده‌اند؛ هیچ تغییر Supabase Production، Migration فعال، RPC، Cron، موجودی یا داده مالی اعمال نشده است.
+
+### گام بعدی
+1. تأیید SHA نهایی شاخه و PR #12 و بررسی اجرای Actions برای commitهای تازه؛ در صورت عدم اجرا، فراهم‌کردن runner واقعی Node/PostgreSQL 17.
+2. پس از اجرای تست‌ها، طراحی SQL برای رزرو، لغو، partial fill و Reduce-only زیر قفل حساب و آزمون رقابت دو نشست.
+3. بررسی قرارداد قیمت مرجع و رزرو سفارش short-limit پیش از استفاده از این helper در RPC؛ این تابع صرفاً preview است و نباید منبع تصمیم اجرای سفارش باشد.
