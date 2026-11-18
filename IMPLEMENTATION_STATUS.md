@@ -1147,3 +1147,17 @@
 - [x] Post-documentation CI run `44303387834` on commit `119a527e49defa0ec8dfc50ac118d334f83d8536`: completed `success`, all 43 steps passed, including real two-session Stop-Limit child execution/cancellation races and derivative schema/RLS/ledger immutability checks.
 - [x] Post-documentation CI run `44303393491` on branch HEAD `52709186288209630864c3e9bf1913bcbbb9be29`: completed `success`, all 43 steps passed, including exact-decimal rollout rehearsal, TP-SL concurrent execution/cancellation, and Futures price-oracle idempotency/publication races.
 - [x] Both documentation-triggered CI runs completed successfully; no failed steps.
+## تکمیل Fault Injection و نخستین لایهٔ Maintenance Margin — ۱۸ نوامبر ۲۰۲۶
+
+- [x] CI run `44304369272` روی commit `6980ec6eba38e73779c024e58bfbdee96e95d0e2` با نتیجهٔ `success`؛ تست‌های دو نشست Oracle و fault-injection برای rollback پیش از commit و retry موفق provider-result و snapshot گذشتند.
+- [x] در `supabase/tests/demo_derivatives_price_oracle_concurrency.sh` دو شکست کنترل‌شده قبل از commit اضافه شد؛ در هر دو حالت نبود اثر نیمه‌کاره پس از rollback و تکمیل دقیقاً یک‌باره با retry بررسی می‌شود.
+- [x] در `src/derivatives-math.js` توابع مستقل `validateMaintenanceTiers`, `maintenanceTierForNotional` و `maintenanceMarginFromTiers` اضافه شدند؛ مدل محاسبه `notional × maintenanceRate − cumulative maintenanceAmount` است.
+- [x] اعتبارسنجی پلکان شامل سقف‌های افزایشی و tier نهایی نامحدود، نرخ غیرکاهشی، مقدار تعدیل غیرمنفی، پیوستگی در مرز tierها و حداکثر اهرم غیر افزایشی است.
+- [x] تست‌های Node برای انتخاب tier، مرزها، دقت ۱۸ رقم اعشار، پیوستگی و ورودی‌های نامعتبر اضافه شدند.
+- [x] پس از اصلاح دو انتظار نادرست تست (precision محدود به ۱۸ رقم و assertion غیرقابل‌دستیابی)، CI نهایی روی commit `049246e84cd3927e31e8f50fda35b56a423f79b7` موفق شد: run `44305188672` (push) و `44305201068` (pull_request)، هر دو ۴۳ مرحله موفق و بدون شکست.
+- [!] اعداد tier فقط fixture آزمایشی‌اند؛ هیچ schedule واقعی بازار یا leverage cap عملیاتی تصویب نشده است. این helper هنوز به SQL، ریسک‌موتور cross/isolated یا مسیر سفارش وصل نشده است.
+- [!] Oracle provider-family/constituent independence هنوز نیازمند بررسی است؛ سه venue لزوماً سه feed مستقل نیستند.
+- [ ] گام بعد: اتصال کنترل‌شدهٔ schedule نسخه‌دار و server-owned به محاسبهٔ maintenance در risk snapshotهای isolated/cross، همراه تست‌های مرز و stale price در Node و PostgreSQL دورریختنی.
+- [ ] سپس طراحی/تست فرمول liquidation sizing، partial/full reduction، liquidation fee، insurance fund و deficit accounting؛ تا آن زمان auto-liquidation و معاملات مشتقه در UI غیرفعال بمانند.
+- [x] PR #12 همچنان Open و Draft و merged=false است؛ هیچ merge انجام نشد.
+- [x] هیچ Supabase Production migration/RPC/schema/policy/cron/worker یا تغییر داده‌ای انجام نشد.
