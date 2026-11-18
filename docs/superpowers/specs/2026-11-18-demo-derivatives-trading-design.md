@@ -124,3 +124,38 @@ The browser may submit intent and display previews; it must never authoritativel
 - Persian RTL UI works at 360px width and desktop widths, with accessible controls and dark/light themes.
 - The interface consistently discloses demo-only funds and simulated liquidation/funding.
 - Android/PWA build and existing app navigation remain functional.
+
+
+## 16. Futures fee, funding and borrowing-cost contract (design only)
+
+This section records calculation boundaries and candidate semantics. It does not approve any rate, funding interval, fee tier, interest rate, recipient, or Production activation.
+
+### Trading fees
+
+- Maker/Taker classification is determined per actual fill by liquidity role: an execution that adds resting liquidity is Maker; an execution that immediately consumes resting liquidity is Taker. Order type alone is not authoritative; a marketable Limit order can execute as Taker.
+- Calculate the fee from the actual executed fill notional, never from the original order quantity after a partial fill. Each fill stores the fee schedule ID/version and the Maker/Taker classification used.
+- A partially filled order may contain both Maker and Taker fills only if the matching engine actually produced both roles; each fill is charged using its own recorded role and pinned schedule.
+- Opening and closing fees are separate executions. A close fee is not silently included in unrealized PnL or charged twice when the fill is settled.
+- For opening-order margin reservation, use a conservative fee estimate (candidate: Taker rate) until actual fills determine the final fee. Reservation is not a ledger debit; actual fee is posted exactly once with the fill.
+- The current schedule draft is per-symbol and versioned, with one active schedule per symbol. The policy must still decide whether an order pins the schedule at acceptance or each fill resolves the active schedule at execution. The chosen rule must be deterministic across retries and schedule activation races.
+- Settlement precision, per-fill versus aggregated rounding, fee cap, rebates, and any VIP/volume-tier calculation remain policy decisions. Do not infer them from SQL test fixtures.
+
+### Futures funding
+
+- Funding is a periodic simulated transfer between eligible Long and Short positions, not an exchange trading fee and not Margin Spot loan interest.
+- Each funding event pins symbol, interval/window, rate source/version, rate sign convention, mark/reference price snapshot, position quantity, notional, and exact settlement timestamp.
+- Define one signed convention and test both positive and negative rates. The payer/receiver direction must be explicit; a sign change must reverse the transfer without changing the formula silently.
+- Funding is settled idempotently per position and funding window. A retry cannot post twice, and a closed/reduced position is charged only for the eligible quantity and timestamp window defined by the approved rule.
+- Rate source, interval, caps/floors, eligibility timestamp, treatment of partial intervals, and rounding remain NOT DECIDED. Live exchange funding rates must not be copied into user balances without a separately approved simulation rule.
+
+### Margin Spot borrowing interest
+
+- Borrow principal and accrued interest are separate liabilities, denominated in the borrowed asset; they must not be mixed into the USDT Futures cash ledger.
+- Interest accrues from a pinned principal/time/rate basis using exact-decimal arithmetic and a deterministic accrual window. Repayment allocation between accrued interest and principal must be explicitly specified and journaled.
+- Borrow APR/rate, accrual frequency, day-count basis, compounding, grace period, repayment priority, and liquidation treatment remain NOT DECIDED. No interest worker or loan accrual RPC is authorized by this design section.
+
+### Required disclosures
+
+Before order confirmation and in position/history views, disclose the estimated opening fee, actual Maker/Taker fee after fill, possible closing fee, simulated funding exposure, and (for Margin Spot only) borrowing-interest basis. Distinguish estimates from booked ledger amounts. Never label funding or borrowing interest as a trading fee.
+
+No operational values are approved by this section. Any rates or quantities in tests remain fixtures only.
