@@ -45,8 +45,8 @@
       if(previousLeverage!==null&&leverage>previousLeverage)throw new RangeError('tier max leverage must not increase');
       if(index===0&&D.compareDecimal(deduction,'0')!==0)throw new RangeError('first tier maintenance amount must be zero');
       if(previousMax!==null){
-        const priorAtBoundary=sub(mul(previousMax,previousRate),previousDeduction);
-        const currentAtBoundary=sub(mul(previousMax,rate),deduction);
+        const priorAtBoundary=sub(ceilPositiveProduct(previousMax,previousRate),previousDeduction);
+        const currentAtBoundary=sub(ceilPositiveProduct(previousMax,rate),deduction);
         if(D.compareDecimal(priorAtBoundary,currentAtBoundary)!==0)throw new RangeError('maintenance tiers must be continuous at boundaries');
       }
       const max=tier.maxNotional===null?null:positive(tier.maxNotional,'tier max notional');
@@ -65,7 +65,7 @@
     const index=schedule.findIndex(t=>t.maxNotional===null||D.compareDecimal(amount,t.maxNotional)<=0);
     if(index<0)throw new RangeError('notional exceeds maintenance tier schedule');
     const tier=schedule[index];
-    const maintenance=sub(mul(amount,tier.maintenanceRate),tier.maintenanceAmount);
+    const maintenance=sub(ceilPositiveProduct(amount,tier.maintenanceRate),tier.maintenanceAmount);
     if(D.compareDecimal(maintenance,'0')<=0)throw new RangeError('tier produces non-positive maintenance margin');
     return Object.freeze({tierIndex:index,notional:amount,maintenanceMargin:maintenance,...tier});
   }
@@ -139,7 +139,8 @@
     accruedInterestUsdt='0',
     fundingPayableUsdt='0',
     unsettledFeesUsdt='0',
-    otherLiabilitiesUsdt='0'
+    otherLiabilitiesUsdt='0',
+    maintenanceTierSchedules=null
   }){
     const cash=dec(cashBalanceUsdt);
     if(D.compareDecimal(cash,'0')<0)throw new RangeError('cash balance must not be negative');
@@ -161,6 +162,11 @@
       if(p.side!=='long'&&p.side!=='short')throw new TypeError('position side must be long or short');
       positive(p.quantity,'quantity');
       positive(p.entryPrice,'entry price');
+      if(maintenanceTierSchedules!==null){
+        const symbol=validDerivativesSymbol(p.symbol);
+        if(!Object.prototype.hasOwnProperty.call(maintenanceTierSchedules,symbol))throw new RangeError('missing trusted maintenance tier schedule for '+symbol);
+        validateMaintenanceTiers(maintenanceTierSchedules[symbol]);
+      }
       if(p.priceStatus!=='fresh')return Object.freeze({
         riskScope:'account',riskStatus:'stale_price',positionsCount:positions.length,
         equity:null,maintenanceMargin:null,closeFeeReserve:null,totalLiabilities:null,
@@ -172,7 +178,10 @@
     let totalPnl='0',totalMaintenance='0',closeFeeReserve='0';
     for(const p of positions){
       totalPnl=add(totalPnl,unrealizedPnl(p.side,p.quantity,p.entryPrice,p.markPrice));
-      totalMaintenance=add(totalMaintenance,maintenanceMargin(p.quantity,p.markPrice,p.maintenanceRate));
+      const requiredMaintenance=maintenanceTierSchedules!==null
+        ?maintenanceMarginFromTiers(p.quantity,p.markPrice,maintenanceTierSchedules[validDerivativesSymbol(p.symbol)])
+        :maintenanceMargin(p.quantity,p.markPrice,p.maintenanceRate);
+      totalMaintenance=add(totalMaintenance,requiredMaintenance);
       closeFeeReserve=add(closeFeeReserve,mul(notional(p.quantity,p.markPrice),validateFeeRate(p.closeFeeRate)));
     }
     const equity=sub(add(cash,totalPnl),add(liabilities,closeFeeReserve));
