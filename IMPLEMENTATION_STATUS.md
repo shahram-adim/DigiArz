@@ -1277,3 +1277,13 @@
 - [!] CI commit جدید هنوز باید کامل شود؛ نتیجه تست race و syntax اسکریپت را موفق فرض نکن تا اجرای واقعی تأیید شود.
 - [ ] پس از CI، در صورت مشاهده شکست، علت را رفع کن؛ سپس fault-injection برای rollback اتمیک بین ledger و deficit journal را به تست اضافه کن.
 - [!] تمام تغییرات همچنان فقط در branch و PostgreSQL دورریختنی CI هستند. هیچ Supabase Production write، merge، فعال‌سازی UI یا liquidation انجام نشده است.
+
+
+## نتیجهٔ CI رقابت بیمه/کسری و افزودن fault-injection — ۱۸ نوامبر ۲۰۲۶
+
+- [x] CI شماره `44359636179` روی HEAD قبلی `787e52ab429020ea6530dd56c952553ae2f858c0` با نتیجه نهایی `success` تأیید شد؛ هر ۵۰ مرحله اصلی موفق بودند.
+- [x] تست دو نشست واقعی برای پرداخت‌های رقابتی بیمه و بازیابی رقابتی کسری در PostgreSQL 17 دورریختنی موفق شد؛ دقیقاً یک درخواست در هر رقابت پذیرفته و درخواست بیش‌ازحد رد شد.
+- [x] تست fault-injection به `supabase/tests/demo_derivatives_insurance_deficit_concurrency.sh` افزوده شد: پس از درج هر دو دفترکل، خطای عمدی پیش از COMMIT ایجاد می‌شود و باید هم دفترکل پلتفرم و هم deficit journal به‌طور کامل rollback شوند.
+- [!] commit جدید این تست باید CI را دوباره بگذراند؛ نتیجهٔ fault-injection هنوز تأیید نشده است.
+- [ ] پس از CI، گام بعدی تکمیل مستندات/تصمیم‌های سیاستی liquidation و مرور طرح اجرایی است؛ هیچ نرخ یا حد عملیاتی از اعداد تست استخراج نمی‌شود.
+- [!] payout/recovery هنوز RPC اجرایی یا worker ندارند؛ تمام SQLها draft و تمام اجراها در PostgreSQL دورریختنی CI هستند. Supabase Production، merge و UI مشتقات تغییری نکرده‌اند.
