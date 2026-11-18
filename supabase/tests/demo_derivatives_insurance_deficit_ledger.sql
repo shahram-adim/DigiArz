@@ -152,7 +152,8 @@ BEGIN
 END;
 $partial_recovery$;
 
--- Empty fund / overdraw is rejected and transaction rolls back.
+-- A payout larger than the derived cash balance is rejected at the deferred
+-- balance boundary. The inner PL/pgSQL block rolls back only the attempted post.
 DO $overdraw$
 BEGIN
  BEGIN
@@ -166,10 +167,10 @@ BEGIN
   VALUES ('a1000000-0000-0000-0000-000000000005','liquidation_loss_expense_usdt',61);
   INSERT INTO private.demo_platform_ledger_entries(transaction_id,account_code,credit_amount)
   VALUES ('a1000000-0000-0000-0000-000000000005','insurance_cash_usdt',61);
-  COMMIT;
+  SET CONSTRAINTS ALL IMMEDIATE;
   RAISE EXCEPTION 'overdrawn insurance payout unexpectedly committed';
  EXCEPTION WHEN check_violation THEN
-  ROLLBACK;
+  NULL;
  END;
 END;
 $overdraw$;
@@ -189,7 +190,7 @@ BEGIN
   SET CONSTRAINTS ALL IMMEDIATE;
   RAISE EXCEPTION 'unbalanced platform ledger transaction unexpectedly accepted';
  EXCEPTION WHEN check_violation THEN
-  ROLLBACK;
+  NULL;
  END;
 END;
 $unbalanced$;
