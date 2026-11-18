@@ -1,6 +1,6 @@
 # DigiArz — وضعیت اجرای پروژه
 آخرین به‌روزرسانی: 2026-11-18
-شاخه: `main`
+شاخهٔ جاری این ثبت: `feat/demo-derivatives-trading`
 مخزن: https://github.com/shahram-adim/DigiArz
 
 ## مرحله انجام‌شده: زیرساخت اولیه PWA
@@ -1371,3 +1371,12 @@
 - [!] نرخ بهره، APR، day-count، compounding، اولویت بازپرداخت، rounding، fee cap/rebate/tier و سیاست‌های مالی همچنان تصویب نشده‌اند.
 - [!] هیچ migration/RPC/worker/UI یا تغییر Supabase Production انجام نشد.
 - [ ] گام بعد: پس از تصویب قرارداد علامت Funding و زمان pin شدن fee schedule، پیاده‌سازی تست‌های disposable PostgreSQL آغاز شود؛ تصمیم‌های بهره Margin جداگانه اخذ شوند.
+
+
+## ثبت تکمیل و تأیید CI دفترکل بیمه پلتفرمی و کسری — ۱۸ نوامبر ۲۰۲۶
+
+- [x] پیش‌نویس schema دفترکل مستقل و خصوصی بیمه پلتفرمی و ژورنال append-only کسری در شاخه وجود دارد: `supabase/drafts/2026-11-18_demo_derivatives_insurance_deficit_ledger.sql`.
+- [x] تست یکپارچه PostgreSQL دورریختنی در `supabase/tests/demo_derivatives_insurance_deficit_ledger.sql` موجود است؛ توازن سند، تفکیک seed/payout/recovery، جلوگیری از overdraw و over-recovery، تغییرناپذیری، idempotency و مرز دسترسی private را پوشش می‌دهد.
+- [x] اجرای GitHub Actions شمارهٔ `44361544743` روی commit `efe928d38ce2174c237abe9fae8cfb0232e72d04` با نتیجهٔ موفق بررسی شد. سه گام مربوط به اعمال draft در PostgreSQL دورریختنی، تست حسابداری بیمه/نمایش کسری/مرز دسترسی و race دو نشست برای payout/recovery همگی success بودند.
+- [!] این تأیید فقط مربوط به PostgreSQL دورریختنی CI است؛ هیچ payout/recovery RPC، اجرای liquidation یا تغییر Supabase Production مجاز یا انجام نشده است.
+- [ ] گام بعد: شش دروازهٔ سیاستی لیکوییدیشن در worksheet مربوطه باید با تصمیم صریح تعیین شوند؛ تا آن زمان مسیرهای اجرا، worker و UI لیکوییدیشن غیرفعال/پیاده‌سازی‌نشده بمانند و از fixtureها سیاست واقعی استنباط نشود.
