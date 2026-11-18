@@ -1352,3 +1352,12 @@
 - [!] فاصله تسویه، منبع و سقف نرخ، مبنای notional، زمان eligibility، rounding و حساب clearing هنوز NOT DECIDED هستند؛ هیچ نرخ یا زمان‌بندی اجرایی تعیین نشد.
 - [!] فقط اسناد branch تغییر کردند؛ SQL/RPC/worker/UI و Supabase Production دست‌نخورده‌اند.
 - [ ] گام بعد: تأیید یا اصلاح قرارداد علامت و سیاست pin شدن fee schedule؛ سپس ساخت تست‌های exact-decimal، رقابت هم‌زمان با settlement و retry idempotency در PostgreSQL دورریختنی.
+
+
+## ماتریس آزمون طراحی Funding — ۱۸ نوامبر ۲۰۲۶
+
+- [x] ماتریس آزمون پیش از پیاده‌سازی ثبت شد: تقارن علامت نرخ، exact-decimal، snapshot pinning، مرز eligibility، رقابت هم‌زمان با کاهش/بستن پوزیشن، retry idempotency، rollback اتمیک، تطبیق حساب clearing، جداسازی نسخه سیاست و audit trail.
+- [!] این مرحله فقط طراحی تست است؛ هیچ تست جدیدی نوشته یا اجرا نشده و هیچ CI موفقی برای آن ادعا نمی‌شود.
+- [!] مقادیر fixture فقط مصنوعی خواهند بود؛ تا تصویب مبنای notional، زمان eligibility، rounding، مدل clearing و رفتار کسری موجودی، هیچ سیاست مالی عملیاتی تعیین نشده است.
+- [!] فقط سند طراحی branch تغییر کرد؛ SQL/RPC/worker/UI و Supabase Production بدون تغییر باقی ماندند.
+- [ ] گام بعد: گرفتن تأیید کاربر برای قرارداد علامت Funding و زمان pin شدن fee schedule؛ سپس نوشتن تست‌ها در PostgreSQL دورریختنی، نه Production.
