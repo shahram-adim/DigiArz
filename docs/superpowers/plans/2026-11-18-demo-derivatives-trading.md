@@ -362,3 +362,11 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [!] Expected negative-test errors in the logs (invalid widening preflight, lock timeout, intentional missing relation, rejected duplicate/conflicting Oracle result, overdraw/over-recovery, and unbalanced ledger) were asserted test cases; the workflow/job conclusion remained success.
 - [!] All database execution was against disposable CI PostgreSQL. No Supabase Production DDL/RPC/policy/cron/data changes occurred. No collector, liquidation execution, payout/recovery RPC, worker, or UI was enabled.
 - [ ] Continue only with policy-independent work; keep PR #12 open and Draft and do not infer policy values from test fixtures.
+
+
+## Oracle operations observability contract — design-only checkpoint (2026-11-18)
+
+- [x] Added `docs/superpowers/specs/2026-11-18-demo-derivatives-oracle-operations-observability.md` defining lifecycle telemetry, bounded-cardinality metrics, correlated structured events, alert classes, fail-closed states, incident runbooks, evidence retention/access controls, and a disposable-CI verification matrix.
+- [!] Alert thresholds, SLOs, retention periods, source quorum, and financial risk eligibility remain intentionally unset; no operational policy was inferred.
+- [!] This is documentation only. No collector, telemetry sink, alert, cron, RPC, migration, production secret, liquidation path, or Supabase Production object was created or enabled.
+- [ ] Next: when implementation is separately authorized, translate the verification matrix into isolated tests and add instrumentation only behind a reviewed trusted-service design; do not deploy a live collector before source-family and policy review.
