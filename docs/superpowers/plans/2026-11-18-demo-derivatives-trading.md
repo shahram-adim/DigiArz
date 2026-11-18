@@ -290,3 +290,12 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [!] The schedule resolver is not yet called by a full account risk RPC. A single risk snapshot must pin schedule IDs/versions inside one transaction to prevent mixed-version aggregation.
 - [ ] Next: implement a transaction-scoped risk-snapshot resolver that loads all relevant symbol schedules once, pins version IDs for the entire account calculation, and fails closed on missing/stale oracle data.
 - [ ] Then specify and test liquidation sizing and ledger settlement: partial/full reduction, close/liquidation fees, insurance/clearing, deficit/ADL, retries and concurrent fill/liquidation races.
+
+## Checkpoint — private schema privilege hardening (2026-11-18)
+
+- [x] Explicitly revoked `private` schema usage from PUBLIC, anon and authenticated; service_role retains only schema usage and function execute grants.
+- [x] PostgreSQL integration tests assert client schema isolation, no direct table access for service_role, and service-role-only resolver/activation function privileges.
+- [x] CI runs `44308662580` (push) and `44308674101` (pull_request) passed on commit `4c04ffd4024f671a51ec1a6ca5240df2953aec4a`, 46 successful steps each.
+- [!] Still draft-only and disposable-PostgreSQL-only; Production remains unchanged and no live risk/order/worker path consumes the resolver.
+- [ ] Next: create a server-side account risk snapshot RPC that pins each symbol's schedule ID/version in one transaction and calculates every position against that pinned version; add a two-session schedule-replacement race.
+- [ ] Then design and test atomic liquidation/insurance/deficit ledger accounting. Keep auto-liquidation and derivatives UI disabled.
