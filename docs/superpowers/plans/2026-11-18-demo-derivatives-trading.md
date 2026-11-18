@@ -137,3 +137,5 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [x] Added the fill SQL and test to disposable PostgreSQL CI workflow.
 - [ ] Await actual CI run and inspect PostgreSQL output; this change has not yet been executed in a database.
 - [ ] Next: add two-session concurrency tests and design cancellation/position-reduction reconciliation; keep UI disabled.
+
+- [x] Fill path rechecks aggregate active Reduce-only reservations under the account lock and rejects pre-existing over-reserved state before mutating a position.
