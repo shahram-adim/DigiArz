@@ -409,3 +409,15 @@ jobs:
             echo "Ledger rejection failed for an unexpected reason."
             exit 1
           fi
+      - name: Apply private platform insurance and deficit ledger draft in disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-18_demo_derivatives_insurance_deficit_ledger.sql
+      - name: Test platform insurance accounting, deficit exposure and private access boundaries
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/demo_derivatives_insurance_deficit_ledger.sql
