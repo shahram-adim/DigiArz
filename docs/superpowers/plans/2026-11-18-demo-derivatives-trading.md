@@ -325,3 +325,12 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [x] Added `docs/superpowers/specs/2026-11-18-demo-derivatives-liquidation-accounting.md` defining the isolated/cross liquidation boundary, partial/full reduction safety, execution-price/slippage contract, fees, insurance/deficit accounting, idempotency and the required test matrix.
 - [ ] Before writing liquidation execution SQL, resolve the six explicit policy decisions in the new spec: liquidation surcharge, slippage bound/execution evidence, target buffer/partial sizing, Cross position priority, insurance seed/replenishment, and residual deficit/recovery/ADL.
 - [ ] After policy decisions, implement the system-level insurance ledger and deficit journal first, then isolated and Cross liquidation RPCs in disposable PostgreSQL with the full concurrency/fault-injection matrix. Keep auto-liquidation and UI disabled.
+
+
+## Checkpoint — platform insurance ledger and deficit accounting boundary (2026-11-18)
+
+- [x] Inspected the existing derivatives schema and trusted reduction/fill ledger postings on the live feature branch.
+- [x] Confirmed the user ledger is keyed to `auth.users`; `system_clearing` is a per-user balancing bucket, not a platform insurance account. No fabricated system user or negative user wallet is acceptable.
+- [x] Added `docs/superpowers/specs/2026-11-18-demo-derivatives-insurance-deficit-ledger.md` defining a separate private platform ledger, append-only deficit memorandum journal, event-linked cross-ledger reconciliation, debit/credit conventions, atomicity and required tests.
+- [!] This checkpoint is design-only. No insurance/deficit SQL, RPC, migration, Production write, or liquidation worker was created or enabled.
+- [ ] Next: implement the isolated private platform-ledger and deficit-journal schema plus invariant tests in the existing disposable PostgreSQL 17 CI fixture; do not implement payout/recovery RPCs until seed/replenishment and residual-deficit policies are approved.
