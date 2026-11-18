@@ -1220,3 +1220,24 @@
 - [!] این خروجی هنوز فقط position maintenance snapshot است؛ close-fee reserve، unposted liabilities، account equity/margin ratio و available margin نهایی در SQL RPC تجمیع نشده‌اند. هیچ order RPC یا liquidation worker آن را مصرف نمی‌کند.
 - [ ] گام بعد: افزودن fee schedule معتبر و محاسبهٔ close-fee reserve، liabilities بدون دوباره‌شماری، account equity، maintenance buffer و margin ratio در همان تراکنش؛ تست چندموقعیتی و stale-price fail-closed.
 - [ ] سپس طراحی liquidation/insurance/deficit accounting و تست‌های اتمیک partial/full liquidation و race با fill/cancel. Auto-liquidation و UI مشتقات خاموش می‌مانند.
+
+
+## تکمیل تجمیع ریسک حساب مشتقات و طراحی دروازه لیکوییدیشن — ۱۸ نوامبر ۲۰۲۶
+
+- [x] Draft خصوصی و نسخه‌دار کارمزد Futures برای Maker/Taker اضافه شد؛ نسخه‌های فعال/بازنشسته immutable هستند، فعال‌سازی نسخه به‌صورت اتمیک و صعودی انجام می‌شود و resolver فقط برای `service_role` قابل اجراست.
+- [x] Funding accrualها immutable شدند؛ تسویه فقط با تراکنش دفترکل Funding متناظر و حرکت دقیق USDT در `futures_cash` مجاز است. رویداد settled از liabilities محاسبه ریسک کنار گذاشته می‌شود تا دوباره‌شماری رخ ندهد.
+- [x] تابع خصوصی `private.demo_derivative_account_risk_snapshot(uuid)` اضافه شد: cash دفترکل‌محور، PnL موقعیت‌های Cross، Funding پرداختنی/دریافتنی تسویه‌نشده، ذخیره کارمزد بستن، Equity، Maintenance Margin و Margin Ratio را در یک snapshot تجمیع می‌کند. برای هر موقعیت نیز snapshot جداگانه شامل tier/schedule version، fee version، isolated equity و Funding ارائه می‌شود.
+- [x] تست‌های PostgreSQL برای Funding تسویه‌شده/نشده، immutability، جلوگیری از تسویه بدون دفترکل متناظر، تجمیع Isolated/Cross، نسخه‌بندی کارمزد و رد Oracle جدیدتر stale اضافه شدند.
+- [x] دو انتظار تستی اصلاح شدند: Margin Ratio با اجزای همان snapshot مقایسه می‌شود؛ cash پس از دو fill با احتساب Funding تسویه‌شده برابر 31.95 USDT است (10 اولیه - 5 Funding + 20 آزادسازی وثیقه + 7 سود تحقق‌یافته - 0.05 کارمزد).
+- [x] CI نهایی روی commit `bec86d6338b8d188a8fb2406d903e19c013bda90` موفق شد: run پوش `44326154079` و run رویداد pull_request برابر `44326169424`؛ هر دو ۵۱ از ۵۱ مرحله موفق، بدون شکست.
+- [!] تمام SQLهای جدید همچنان draft هستند و فقط در PostgreSQL 17 دورریختنی CI اجرا شده‌اند. هیچ DDL/RPC/policy/cron یا داده‌ای در Supabase Production تغییر نکرده است.
+- [x] سند طراحی `docs/superpowers/specs/2026-11-18-demo-derivatives-liquidation-accounting.md` ساخته شد؛ مرز Isolated/Cross، partial/full reduction، execution price/slippage، کارمزدها، insurance/deficit، idempotency و ماتریس تست را تعریف می‌کند.
+- [!] اجرای لیکوییدیشن هنوز مجاز/پیاده‌سازی نشده است. نرخ liquidation surcharge، سقف slippage، safety buffer، اولویت موقعیت‌های Cross، تأمین/شارژ insurance fund و سیاست deficit/recovery/ADL هنوز تصمیم‌گیری نشده‌اند.
+- [x] PR شماره ۱۲ همچنان Open و Draft و ادغام‌نشده است؛ شاخه feature نسبت به main همگام است و ۲۳۳ commit جلوتر است.
+- [x] هیچ Supabase Production write، merge/rebase، فعال‌سازی UI مشتقات یا auto-liquidation انجام نشد.
+
+### گام بعد
+1. تعیین و ثبت سیاست‌های باز در سند liquidation، بدون استفاده از اعداد fixture به‌عنوان نرخ عملیاتی.
+2. ساخت دفترکل مستقل و immutable برای insurance fund و deficit journal در PostgreSQL دورریختنی؛ سپس آزمون کامل پوشش کامل/جزئی/صفر insurance.
+3. پس از تثبیت accounting، پیاده‌سازی و آزمون isolated liquidation و سپس Cross account liquidation، همراه race با fill/cancel/reduce-only و fault-injection.
+4. تا عبور تمام gates، UI و auto-liquidation خاموش بمانند و Production دست‌نخورده بماند.
