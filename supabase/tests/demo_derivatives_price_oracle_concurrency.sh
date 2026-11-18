@@ -149,4 +149,63 @@ fi
 # Simulate a lost post-commit acknowledgement and replay the exact publication.
 "${PSQL[@]}" -c "$PUBLISH_SQL" >/dev/null
 
-echo "Oracle two-session races passed: duplicate cycle creation converged; identical provider retries created one observation; conflicting provider payloads had one winner; concurrent snapshot publication created one snapshot; post-commit retries were idempotent."
+# Fault injection: abort a provider-result transaction after the RPC has written.
+# The connection closes with an open transaction; PostgreSQL must roll back both
+# the observation and source-state transition. A subsequent exact retry must work.
+CYCLE_ABORT_PROVIDER="a1000000-0000-0000-0000-000000000024"
+"\${PSQL[@]}" -c "\$(start_sql "\$CYCLE_ABORT_PROVIDER")" >/dev/null
+TS_ABORT_PROVIDER="\$("\${PSQL[@]}" -c "SELECT clock_timestamp();")"
+ABORT_PROVIDER_SQL="\$(record_sql "\$CYCLE_ABORT_PROVIDER" binance_usdm 100 99.9 "\$TS_ABORT_PROVIDER" 2)"
+if "\${PSQL[@]}" -c "BEGIN; \$ABORT_PROVIDER_SQL SELECT 1/0; COMMIT;" >"\$OUT_A" 2>&1; then
+  echo "Expected injected pre-commit provider transaction failure."
+  exit 1
+fi
+ABORT_PROVIDER_STATE="\$("\${PSQL[@]}" -c "SELECT CASE
+  WHEN (SELECT source_status FROM private.demo_derivative_price_cycle_sources
+        WHERE cycle_id='\$CYCLE_ABORT_PROVIDER' AND provider='binance_usdm')='pending'
+   AND (SELECT count(*) FROM private.demo_derivative_price_observations
+        WHERE cycle_id='\$CYCLE_ABORT_PROVIDER' AND provider='binance_usdm')=0
+  THEN 'ok' ELSE 'bad' END;")"
+if [[ "\$ABORT_PROVIDER_STATE" != "ok" ]]; then
+  echo "Aborted provider transaction left partial state: \$ABORT_PROVIDER_STATE"
+  exit 1
+fi
+"\${PSQL[@]}" -c "\$ABORT_PROVIDER_SQL" >/dev/null
+if [[ "\$("\${PSQL[@]}" -c "SELECT count(*) FROM private.demo_derivative_price_observations WHERE cycle_id='\$CYCLE_ABORT_PROVIDER' AND provider='binance_usdm';")" != "1" ]]; then
+  echo "Provider retry after transaction rollback did not persist exactly one observation."
+  exit 1
+fi
+
+# Fault injection: abort snapshot publication after INSERT/UPDATE have executed
+# but before COMMIT. Both writes must roll back, leaving a collecting cycle that
+# can be safely published by an exact retry.
+CYCLE_ABORT_PUBLISH="a1000000-0000-0000-0000-000000000025"
+SNAPSHOT_ABORT_PUBLISH="b1000000-0000-0000-0000-000000000025"
+"\${PSQL[@]}" -c "\$(start_sql "\$CYCLE_ABORT_PUBLISH")" >/dev/null
+TS_ABORT_PUBLISH="\$("\${PSQL[@]}" -c "SELECT clock_timestamp();")"
+"\${PSQL[@]}" -c "\$(record_sql "\$CYCLE_ABORT_PUBLISH" binance_usdm 100 99.9 "\$TS_ABORT_PUBLISH" 3)" >/dev/null
+"\${PSQL[@]}" -c "\$(record_sql "\$CYCLE_ABORT_PUBLISH" bybit_linear 100.1 100.0 "\$TS_ABORT_PUBLISH" 4)" >/dev/null
+ABORT_PUBLISH_SQL="\$(service_sql "SELECT private.demo_derivative_price_publish_snapshot(
+  '\$CYCLE_ABORT_PUBLISH','\$SNAPSHOT_ABORT_PUBLISH','healthy',100.05,99.95,
+  ARRAY['binance_usdm','bybit_linear'],'\$TS_ABORT_PUBLISH'::timestamptz,
+  '\$TS_ABORT_PUBLISH'::timestamptz+interval '5 seconds','[]'::jsonb
+);")"
+if "\${PSQL[@]}" -c "BEGIN; \$ABORT_PUBLISH_SQL SELECT 1/0; COMMIT;" >"\$OUT_A" 2>&1; then
+  echo "Expected injected pre-commit snapshot transaction failure."
+  exit 1
+fi
+ABORT_PUBLISH_STATE="\$("\${PSQL[@]}" -c "SELECT CASE
+  WHEN (SELECT cycle_status FROM private.demo_derivative_price_cycles WHERE id='\$CYCLE_ABORT_PUBLISH')='collecting'
+   AND (SELECT count(*) FROM private.demo_derivative_price_snapshots WHERE cycle_id='\$CYCLE_ABORT_PUBLISH')=0
+  THEN 'ok' ELSE 'bad' END;")"
+if [[ "\$ABORT_PUBLISH_STATE" != "ok" ]]; then
+  echo "Aborted snapshot transaction left partial state: \$ABORT_PUBLISH_STATE"
+  exit 1
+fi
+"\${PSQL[@]}" -c "\$ABORT_PUBLISH_SQL" >/dev/null
+if [[ "\$("\${PSQL[@]}" -c "SELECT CASE WHEN cycle_status='completed' AND (SELECT count(*) FROM private.demo_derivative_price_snapshots WHERE cycle_id='\$CYCLE_ABORT_PUBLISH')=1 THEN 'ok' ELSE 'bad' END FROM private.demo_derivative_price_cycles WHERE id='\$CYCLE_ABORT_PUBLISH';")" != "ok" ]]; then
+  echo "Snapshot retry after transaction rollback did not publish exactly once."
+  exit 1
+fi
+
+echo "Oracle two-session races and recovery passed: duplicate cycle/provider/publication requests converged; conflicting provider payloads had one winner; pre-commit provider and snapshot failures rolled back atomically and exact retries recovered; post-commit retries were idempotent."
