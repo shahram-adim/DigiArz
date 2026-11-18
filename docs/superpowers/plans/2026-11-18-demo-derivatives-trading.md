@@ -112,3 +112,15 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [ ] Next: add lifecycle functions/tests for Limit reserve, cancel release, partial fill, reduce-only allocation and two-session account-lock races. No RPC/UI activation or Production deployment.
 
 - [x] Added a partial index over active Reduce-only orders keyed by account/product/symbol/position side and newest-first ordering; schema integration now asserts both the position uniqueness and Reduce-only indexes exist.
+
+
+## Checkpoint — first Reduce-only placement/cancel RPC slice
+- [x] Added a private, account-serialized placement helper for Reduce-only Limit orders. It locks account first, then position, sums active remaining quantity, and rejects over-allocation.
+- [x] Added idempotency: same key and same payload returns the existing order; same key with changed payload rejects.
+- [x] Added account-first cancellation; terminal status releases reservation without a ledger cash movement.
+- [x] Added SECURITY INVOKER public wrappers and private SECURITY DEFINER helpers with auth.uid checks and restricted grants.
+- [x] Added disposable PostgreSQL lifecycle test for reservation amount, idempotent retry, over-allocation rejection, idempotency mismatch, cancel release, repeated cancel and cross-user denial.
+- [x] Added the lifecycle SQL draft/test to the existing PostgreSQL CI workflow.
+- [ ] CI execution on current branch HEAD and SQL logs must be observed before treating this as verified.
+- [ ] Partial fill remains blocked until realized PnL, fees, margin release and immutable ledger entries can be updated atomically in the same transaction.
+- [ ] Next: implement/test partial Reduce-only fills and then real two-session account-lock races. No Production deployment or UI activation.
