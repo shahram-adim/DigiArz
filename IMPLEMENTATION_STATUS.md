@@ -1192,3 +1192,12 @@
 - [!] این SQL فقط در PostgreSQL دورریختنی CI اجرا شده؛ هیچ‌یک از scheduleها در Supabase Production ساخته یا فعال نشده‌اند. هنوز RPCهای سفارش/لیکوییدیشن از resolver استفاده نمی‌کنند.
 - [ ] گام بعد: تست دو نشست برای تعویض هم‌زمان schedule و resolver، و بررسی snapshot/risk calculation در برابر تغییر نسخه؛ سپس اتصال resolver به backendهای محاسبه ریسک بدون اعتماد به ورودی مرورگر.
 - [ ] پس از آن، طراحی دفترکل liquidation fee، insurance fund و deficit/ADL policy، و تست اتمیک partial/full liquidation در fixture ایزوله. Auto-liquidation غیرفعال می‌ماند.
+## آزمون هم‌زمانی تعویض Maintenance Tier و resolver — ۱۸ نوامبر ۲۰۲۶
+
+- [x] فعال‌سازی schedule برای هر نماد با advisory transaction lock سریال شد؛ نسخهٔ schedule پس از گرفتن قفل دوباره خوانده می‌شود تا race نسخهٔ قدیمی/جدید باعث downgrade نشود.
+- [x] retry فعال‌سازی همان schedule در صورت active بودن، idempotent است و همان نسخه را برمی‌گرداند.
+- [x] اسکریپت دو نشست `supabase/tests/demo_derivatives_maintenance_tiers_concurrency.sh` اضافه شد: یک resolver نسخهٔ ۲ را در تراکنش باز pin می‌کند، فعال‌سازی نسخهٔ ۳ تا پایان snapshot منتظر می‌ماند، سپس دو retry هم‌زمان فعال‌سازی نسخهٔ ۴ به یک نتیجه converged می‌شوند.
+- [x] تست هم‌زمانی و کل workflow روی commit `3595a3ea535fcc477b8f3a0ce1f21e176aebb286` موفق شد: run `44308127930` (push) و run `44308135188` (pull_request)، هر دو ۴۶ مرحله موفق و بدون شکست.
+- [!] این رفتار فقط در PostgreSQL دورریختنی CI اثبات شده؛ هنوز risk RPCهای واقعی از resolver استفاده نمی‌کنند و scheduleها در Production وجود ندارند.
+- [ ] گام بعد: اتصال resolver به محاسبهٔ risk snapshot در یک تراکنش واحد و pin کردن `schedule_id/version` برای کل حساب/نماد؛ تست دو نشست برای اینکه هیچ snapshot واحدی tierهای دو نسخه را مخلوط نکند.
+- [ ] سپس طراحی دفترکل liquidation: partial/full sizing، close fee، liquidation fee، انتقال کسری به insurance/clearing، deficit/ADL policy و idempotent worker. Auto-liquidation همچنان خاموش.
