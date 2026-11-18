@@ -138,6 +138,54 @@ BEGIN
 END;
 $risk_snapshot$;
 
+
+-- Seed accrued and ledger-settled funding. Positive amounts are payables;
+-- negative amounts are receivables. Settled funding changes cash once only.
+INSERT INTO public.demo_derivative_funding_events(id,user_id,account_id,position_id,interval_start,interval_end,funding_rate,mark_price,position_notional_usdt,amount_usdt) VALUES
+ ('50000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001','40000000-0000-0000-0000-000000000003',clock_timestamp()-interval '3 hours',clock_timestamp()-interval '2 hours',0.0001,1800.5,3601,5),
+ ('50000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001','40000000-0000-0000-0000-000000000003',clock_timestamp()-interval '2 hours',clock_timestamp()-interval '1 hour',0.0001,1800.5,3601,2),
+ ('50000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001','40000000-0000-0000-0000-000000000003',clock_timestamp()-interval '1 hour',clock_timestamp()-interval '30 minutes',-0.00005,1800.5,3601,-1),
+ ('50000000-0000-0000-0000-000000000004','10000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001','40000000-0000-0000-0000-000000000001',clock_timestamp()-interval '2 hours',clock_timestamp()-interval '1 hour',0.0001,20005,20005,7);
+INSERT INTO public.demo_derivative_ledger_transactions(id,user_id,idempotency_key,event_type,reference_id,metadata)
+VALUES('60000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','60000000-0000-0000-0000-000000000001','funding','50000000-0000-0000-0000-000000000001','{"fixture":"funding-settlement"}'::jsonb);
+INSERT INTO public.demo_derivative_ledger_entries(transaction_id,user_id,asset,account_bucket,debit_amount,credit_amount) VALUES
+ ('60000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','USDT','futures_cash',0,5),
+ ('60000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','USDT','system_clearing',5,0);
+UPDATE public.demo_derivative_funding_events SET settled_at=clock_timestamp() WHERE id='50000000-0000-0000-0000-000000000001';
+DO $funding_guard_test$
+BEGIN
+ BEGIN
+  UPDATE public.demo_derivative_funding_events SET amount_usdt=9 WHERE id='50000000-0000-0000-0000-000000000002';
+  RAISE EXCEPTION 'Accrued funding unexpectedly mutable';
+ EXCEPTION WHEN object_not_in_prerequisite_state THEN NULL; END;
+ BEGIN
+  UPDATE public.demo_derivative_funding_events SET settled_at=clock_timestamp() WHERE id='50000000-0000-0000-0000-000000000002';
+  RAISE EXCEPTION 'Funding unexpectedly settled without ledger';
+ EXCEPTION WHEN object_not_in_prerequisite_state THEN NULL; END;
+END;
+$funding_guard_test$;
+DO $account_risk_test$
+DECLARE v record;
+BEGIN
+ SELECT * INTO v FROM private.demo_derivative_account_risk_snapshot('20000000-0000-0000-0000-000000000001');
+ IF v.wallet_cash_usdt<>5 OR v.cross_unrealized_pnl_usdt<>399
+ OR v.unposted_funding_liability_usdt<>2 OR v.unposted_funding_receivable_usdt<>1
+ OR v.close_fee_reserve_usdt<>2.1606 OR v.equity_usdt<>400.8394
+ OR v.maintenance_margin_usdt<>36.01 OR v.margin_ratio<>round(400.8394/36.01,18)
+ OR v.cross_position_count<>1 OR jsonb_array_length(v.position_snapshots)<>2 THEN
+  RAISE EXCEPTION 'Cross account risk aggregation mismatch: %',row_to_json(v);
+ END IF;
+ IF v.position_snapshots->0->>'symbol'<>'BTCUSDT'
+ OR (v.position_snapshots->0->>'unposted_funding_liability_usdt')::numeric<>7
+ OR (v.position_snapshots->0->>'close_fee_reserve_usdt')::numeric<>12.003
+ OR v.position_snapshots->1->>'symbol'<>'ETHUSDT'
+ OR (v.position_snapshots->1->>'unposted_funding_liability_usdt')::numeric<>2
+ OR (v.position_snapshots->1->>'unposted_funding_receivable_usdt')::numeric<>1 THEN
+  RAISE EXCEPTION 'Per-position funding/fee values mismatch: %',v.position_snapshots;
+ END IF;
+END;
+$account_risk_test$;
+
 -- A newer stale oracle result must block the account snapshot rather than
 -- silently falling back to the previous still-recorded healthy snapshot.
 SET request.jwt.claim.role='service_role';
@@ -175,6 +223,11 @@ BEGIN
   BEGIN
     PERFORM * FROM private.demo_derivative_account_maintenance_snapshot('20000000-0000-0000-0000-000000000001');
     RAISE EXCEPTION 'account snapshot unexpectedly used an older healthy ETH snapshot';
+  BEGIN
+    PERFORM * FROM private.demo_derivative_account_risk_snapshot('20000000-0000-0000-0000-000000000001');
+    RAISE EXCEPTION 'account risk snapshot unexpectedly used an older healthy ETH snapshot';
+  EXCEPTION WHEN object_not_in_prerequisite_state THEN NULL;
+  END;
   EXCEPTION WHEN object_not_in_prerequisite_state THEN NULL;
   END;
 END;
@@ -184,7 +237,10 @@ DO $privileges$
 BEGIN
   IF has_function_privilege('anon','private.demo_derivative_account_maintenance_snapshot(uuid)','EXECUTE')
      OR has_function_privilege('authenticated','private.demo_derivative_account_maintenance_snapshot(uuid)','EXECUTE')
-     OR NOT has_function_privilege('service_role','private.demo_derivative_account_maintenance_snapshot(uuid)','EXECUTE') THEN
+     OR NOT has_function_privilege('service_role','private.demo_derivative_account_maintenance_snapshot(uuid)','EXECUTE')
+     OR has_function_privilege('anon','private.demo_derivative_account_risk_snapshot(uuid)','EXECUTE')
+     OR has_function_privilege('authenticated','private.demo_derivative_account_risk_snapshot(uuid)','EXECUTE')
+     OR NOT has_function_privilege('service_role','private.demo_derivative_account_risk_snapshot(uuid)','EXECUTE') THEN
     RAISE EXCEPTION 'account maintenance snapshot grants are incorrect';
   END IF;
 END;

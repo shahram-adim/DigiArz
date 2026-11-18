@@ -149,12 +149,14 @@ CREATE TABLE public.demo_derivative_funding_events (
   mark_price numeric(38,18) NOT NULL CHECK (mark_price > 0),
   position_notional_usdt numeric(38,18) NOT NULL CHECK (position_notional_usdt > 0),
   amount_usdt numeric(38,18) NOT NULL,
-  settled_at timestamptz NOT NULL DEFAULT now(),
+  -- NULL means accrued but not yet posted to Futures cash.
+  settled_at timestamptz,
   FOREIGN KEY (account_id,user_id)
     REFERENCES public.demo_derivative_accounts(id,user_id) ON DELETE CASCADE,
   FOREIGN KEY (position_id,account_id,user_id)
     REFERENCES public.demo_derivative_positions(id,account_id,user_id) ON DELETE RESTRICT,
   CHECK (interval_end > interval_start),
+  CHECK (amount_usdt<>0),
   UNIQUE (position_id,interval_start)
 );
 
@@ -239,6 +241,13 @@ CREATE INDEX demo_margin_loans_user_status_idx
   ON public.demo_margin_loans(user_id,status,updated_at DESC);
 CREATE INDEX demo_derivative_funding_user_created_idx
   ON public.demo_derivative_funding_events(user_id,settled_at DESC);
+CREATE UNIQUE INDEX demo_derivative_ledger_funding_reference_uidx
+  ON public.demo_derivative_ledger_transactions(reference_id)
+  WHERE event_type='funding' AND reference_id IS NOT NULL;
+CREATE INDEX demo_derivative_funding_unsettled_account_idx
+  ON public.demo_derivative_funding_events(account_id,position_id,interval_end)
+  WHERE settled_at IS NULL;
+
 CREATE INDEX demo_derivative_risk_user_created_idx
   ON public.demo_derivative_risk_events(user_id,created_at DESC);
 CREATE INDEX demo_derivative_ledger_entries_user_created_idx
@@ -337,6 +346,42 @@ BEGIN
 END;
 $function$;
 
+CREATE FUNCTION public.prevent_demo_derivative_funding_event_mutation()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $function$
+DECLARE v_tx uuid; v_cash_delta numeric;
+BEGIN
+ IF TG_OP='DELETE' THEN
+  RAISE EXCEPTION 'Funding accruals cannot be deleted' USING ERRCODE='55000';
+ END IF;
+ IF TG_OP='INSERT' THEN
+  IF NEW.settled_at IS NOT NULL THEN
+   RAISE EXCEPTION 'Funding must be accrued before settlement' USING ERRCODE='55000';
+  END IF;
+  RETURN NEW;
+ END IF;
+ IF OLD.settled_at IS NOT NULL OR NEW.settled_at IS NULL
+    OR (to_jsonb(NEW)-'settled_at') IS DISTINCT FROM (to_jsonb(OLD)-'settled_at') THEN
+  RAISE EXCEPTION 'Funding accruals are immutable except for ledger-backed settlement' USING ERRCODE='55000';
+ END IF;
+ SELECT t.id INTO v_tx FROM public.demo_derivative_ledger_transactions t
+ WHERE t.user_id=OLD.user_id AND t.event_type='funding' AND t.reference_id=OLD.id;
+ IF v_tx IS NULL THEN
+  RAISE EXCEPTION 'Funding settlement requires its matching ledger transaction' USING ERRCODE='55000';
+ END IF;
+ SELECT COALESCE(sum(e.debit_amount-e.credit_amount),0) INTO v_cash_delta
+ FROM public.demo_derivative_ledger_entries e
+ WHERE e.transaction_id=v_tx AND e.user_id=OLD.user_id
+  AND e.asset='USDT' AND e.account_bucket='futures_cash';
+ IF v_cash_delta<>-OLD.amount_usdt THEN
+  RAISE EXCEPTION 'Funding ledger cash movement does not match accrued amount' USING ERRCODE='23514';
+ END IF;
+ RETURN NEW;
+END;
+$function$;
+CREATE TRIGGER demo_derivative_funding_event_guard
+ BEFORE INSERT OR UPDATE OR DELETE ON public.demo_derivative_funding_events
+ FOR EACH ROW EXECUTE FUNCTION public.prevent_demo_derivative_funding_event_mutation();
+
 CREATE CONSTRAINT TRIGGER demo_derivative_ledger_entries_balanced
 AFTER INSERT OR UPDATE OR DELETE ON public.demo_derivative_ledger_entries
 DEFERRABLE INITIALLY DEFERRED
@@ -383,5 +428,6 @@ $rls$;
 REVOKE ALL ON FUNCTION public.validate_demo_derivative_ledger_group() FROM PUBLIC,anon,authenticated;
 REVOKE ALL ON FUNCTION public.prevent_demo_derivative_ledger_append() FROM PUBLIC,anon,authenticated;
 REVOKE ALL ON FUNCTION public.prevent_demo_derivative_ledger_mutation() FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION public.prevent_demo_derivative_funding_event_mutation() FROM PUBLIC,anon,authenticated,service_role;
 
 COMMIT;
