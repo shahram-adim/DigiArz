@@ -149,3 +149,11 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [ ] Await and inspect a real CI run; not executed locally because no PostgreSQL client/server is available in this environment.
 
 - [x] Shell syntax of the concurrent placement test was checked with `bash -n`; database behavior remains unverified until CI executes it.
+
+
+## Concurrent Fill checkpoint
+- [x] Added a two-session race against one 1 ETH Reduce-only Limit order, with each worker attempting a 0.7 ETH fill.
+- [x] The test uses a separate user's ETHUSDT Cross position so it cannot consume or mutate the BTCUSDT fixture used by the sequential accounting test.
+- [x] Requires exactly one fill success, one rejection specifically for exceeding order remaining quantity, exactly one persisted fill, and consistent 0.7 filled / 0.3 remaining order and position quantities.
+- [x] Wired into CI after the trusted fill RPC is installed and before the sequential PnL/margin test.
+- [ ] Await a real CI run and inspect PostgreSQL logs; no local database execution is available.
