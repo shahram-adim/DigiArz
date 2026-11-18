@@ -16,7 +16,7 @@ test('Derivatives overview is reachable from desktop and mobile navigation', () 
 });
 
 test('Derivatives overview remains read-only until backend and policy gates are approved', () => {
-  const panel = matches[0][0];
+  const panel = matches[0][0].split('<div class="da-deriv-workspace"')[0];
   assert.match(panel, /معاملات مشتقه/);
   assert.match(panel, /ثبت سفارش، اهرم، وام‌گیری و لیکوییدیشن فعال نیستند/);
   assert.match(panel, /هیچ عملیات مالی از این صفحه انجام نمی‌شود/);
@@ -55,7 +55,7 @@ test('Derivatives workspace contains the five planned read-only terminal views',
   }
   assert.match(workspace, /ثبت سفارش آزمایشی — فعلاً غیرفعال/);
   assert.match(workspace, /وام‌گیری یا بازپرداخت — غیرفعال/);
-  assert.match(workspace, /مرجع Mark\/Index یا محاسبهٔ ریسک و لیکوییدیشن مشتقات نیست/);
+  assert.match(workspace, /قیمت Spot نمایشی، قیمت Mark\\/Index یا مبنای لیکوییدیشن محسوب نمی‌شود/);
 });
 
 test('Derivatives UI prototype cannot write to Supabase or activate financial controls', () => {
@@ -65,5 +65,5 @@ test('Derivatives UI prototype cannot write to Supabase or activate financial co
   assert.doesNotMatch(workspace, /supabaseClient|\.rpc\s*\(|\.insert\s*\(|\.update\s*\(|\.delete\s*\(/i);
   assert.match(workspace, /<button[^>]*disabled/);
   assert.match(workspace, /<select[^>]*disabled/);
-  assert.match(workspace, /<input[^>]*disabled/);
+  assert.match(workspace, /<input[^>]*disabled/);\n  assert.match(workspace, /body\\.light-theme/);\n  assert.match(workspace, /@media\\(max-width:420px\\)/);\n  assert.match(workspace, /ArrowLeft/);\n  assert.match(workspace, /aria-selected/);
 });
