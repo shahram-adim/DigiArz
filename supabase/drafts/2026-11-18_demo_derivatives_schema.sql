@@ -141,8 +141,8 @@ CREATE TABLE public.demo_derivative_funding_events (
   settled_at timestamptz NOT NULL DEFAULT now(),
   FOREIGN KEY (account_id,user_id)
     REFERENCES public.demo_derivative_accounts(id,user_id) ON DELETE CASCADE,
-  FOREIGN KEY (position_id,user_id)
-    REFERENCES public.demo_derivative_positions(id,user_id) ON DELETE RESTRICT,
+  FOREIGN KEY (position_id,account_id,user_id)
+    REFERENCES public.demo_derivative_positions(id,account_id,user_id) ON DELETE RESTRICT,
   CHECK (interval_end > interval_start),
   UNIQUE (position_id,interval_start)
 );
@@ -160,8 +160,8 @@ CREATE TABLE public.demo_derivative_risk_events (
   created_at timestamptz NOT NULL DEFAULT now(),
   FOREIGN KEY (account_id,user_id)
     REFERENCES public.demo_derivative_accounts(id,user_id) ON DELETE CASCADE,
-  FOREIGN KEY (position_id,user_id)
-    REFERENCES public.demo_derivative_positions(id,user_id) ON DELETE RESTRICT
+  FOREIGN KEY (position_id,account_id,user_id)
+    REFERENCES public.demo_derivative_positions(id,account_id,user_id) ON DELETE RESTRICT
 );
 
 CREATE TABLE public.demo_derivative_ledger_transactions (
