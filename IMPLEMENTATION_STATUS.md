@@ -705,3 +705,4 @@
 - [ ] رقابت هم‌زمان external reduction با placement/fill/cancel اضافه شود.
 - [ ] موتور لیکوییدیشن تا طراحی منبع مستقل index/mark price، risk tiers و مدل fee/insurance ساخته یا فعال نشود.
 - [x] هیچ DDL/RPC/migration/data در Supabase Production اجرا نشد؛ UI مشتقات خاموش ماند؛ merge/rebase انجام نشد.
+- [x] تست end-to-end کاهش خارجی یک assertion مستقل هم دارد: مجموع رزروهای فعال پس از لغو دو سفارش جدیدتر باید دقیقاً ۰٫۲ و حداکثر برابر مقدار پوزیشن باقی‌مانده ۰٫۳ باشد.

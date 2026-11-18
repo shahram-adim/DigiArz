@@ -31,6 +31,7 @@ DECLARE
   v_older_extra uuid;
   v_newer_extra uuid;
   v_cash numeric(38,18);
+  v_reserved numeric(38,18);
 BEGIN
   SELECT id INTO v_main_order
   FROM public.demo_derivative_orders
@@ -88,6 +89,17 @@ BEGIN
      OR (SELECT status FROM public.demo_derivative_orders WHERE id=v_older_extra)<>'cancelled'
      OR (SELECT status FROM public.demo_derivative_orders WHERE id=v_main_order)<>'partially_filled' THEN
     RAISE EXCEPTION 'external reduction cancelled the wrong Reduce-only orders';
+  END IF;
+
+  SELECT COALESCE(sum(remaining_quantity),0)::numeric(38,18)
+    INTO v_reserved
+  FROM public.demo_derivative_orders
+  WHERE account_id='20000000-0000-0000-0000-000000000002'
+    AND product_type='futures' AND symbol='ETHUSDT' AND position_side='long'
+    AND reduce_only AND status IN ('pending','partially_filled');
+
+  IF v_reserved<>0.2 OR v_reserved>0.3 THEN
+    RAISE EXCEPTION 'remaining Reduce-only reservation violates position ceiling: %',v_reserved;
   END IF;
 
   IF (SELECT count(*) FROM public.demo_derivative_risk_events
