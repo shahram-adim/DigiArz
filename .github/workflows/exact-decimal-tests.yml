@@ -269,6 +269,18 @@ jobs:
         run: |
           psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
             -f supabase/tests/demo_derivatives_schema_integration.sql
+      - name: Apply versioned private Futures maintenance tier draft in disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-18_demo_derivatives_maintenance_tiers.sql
+      - name: Test maintenance tier versioning, integrity and trusted resolver
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/demo_derivatives_maintenance_tiers.sql
       - name: Apply private derivatives price-oracle storage draft in disposable PostgreSQL
         env:
           PGPASSWORD: postgres
