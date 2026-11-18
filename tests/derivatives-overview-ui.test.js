@@ -29,3 +29,17 @@ test('Android bottom navigation allocates a responsive slot for Derivatives', ()
   assert.match(html, /\.mobile-bottom-nav\{grid-template-columns:repeat\(7,minmax\(0,1fr\)\)/);
   assert.match(html, /#tab-derivatives \.detail-section/);
 });
+
+test('Derivatives overview shows informational Spot quotes without treating them as a risk oracle', () => {
+  assert.match(html, /id="derivativesSpotQuotes"/);
+  assert.match(html, /id="derivativesSpotQuoteStatus"/);
+  assert.match(html, /function renderDerivativesMarketPreview\(\)/);
+  assert.match(html, /getTrustedMarketPrice\(item\)/);
+  assert.match(html, /renderDashboardMarketPreview\(\);renderDerivativesMarketPreview\(\);renderTopGainers\(\)/);
+  assert.match(html, /مرجع Mark\/Index یا محاسبهٔ ریسک و لیکوییدیشن مشتقات نیستند/);
+  const start = html.indexOf('function renderDerivativesMarketPreview()');
+  const end = html.indexOf('\nfunction renderDashboardSummary()', start);
+  assert.ok(start >= 0 && end > start, 'Spot quote renderer must be isolated');
+  const renderer = html.slice(start, end);
+  assert.doesNotMatch(renderer, /\.rpc\s*\(|\.insert\s*\(|\.update\s*\(|\.delete\s*\(/);
+});
