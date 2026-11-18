@@ -101,3 +101,12 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [ ] Implement the partial unique index and SQL fixtures for duplicate open positions, reserve, cancel, partial fill, market reduce-only, over-allocation and two-session races.
 - [ ] Implement account-locked idempotent RPCs only after those SQL tests pass.
 - No UI activation or Production database changes.
+
+
+## Checkpoint — unique open position and atomic Market invariant
+- [x] Added a partial unique index allowing at most one open position per account/product/symbol/position side (Long and Short remain independent).
+- [x] Tightened Market order CHECK constraint: either fully filled in the same transaction or rejected with zero fill; no resting/partial Market order.
+- [x] Updated the schema fixture to model a fully filled Market order.
+- [x] Added PostgreSQL negative tests for duplicate open positions and pending Market orders.
+- [ ] Await GitHub Actions on the resulting HEAD and inspect all PostgreSQL logs before marking tests passed.
+- [ ] Next: add lifecycle functions/tests for Limit reserve, cancel release, partial fill, reduce-only allocation and two-session account-lock races. No RPC/UI activation or Production deployment.
