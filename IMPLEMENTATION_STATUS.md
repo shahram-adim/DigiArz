@@ -801,3 +801,19 @@
 1. بررسی اجرای CI جدید تا عبور از نصب RPC و اجرای تست‌های آن.
 2. اگر تست‌ها سبز شدند، افزودن تست‌های race دو نشست برای cycle/provider result/publication و crash/retry؛ اگر شکست خوردند، فقط بر اساس خطای دقیق اصلاح شود.
 3. سپس طراحی collector و adapterهای واقعی و ارزیابی استقلال feedها؛ هنوز هیچ Oracle زنده یا liquidation engine فعال نیست.
+
+
+## تأیید CI برای RPCهای Oracle — ۱۸ نوامبر ۲۰۲۶
+
+- [x] اجرای GitHub Actions شمارهٔ `44284543586` با نتیجهٔ `success` و هر ۳۸ مرحلهٔ اصلی موفق تمام شد.
+- [x] این اجرا commit کد `aa90a91e4728e0ec83353c3ed70aa59ea2188fe6` را checkout کرد؛ فایل SQL اصلاح‌شدهٔ RPC و تست Oracle در همین commit حضور داشتند.
+- [x] مراحل ۲۲ تا ۲۸ موفق: ساخت دیتابیس مشتقات موقت، اعمال schema، بررسی RLS/ledger/immutability، اعمال storage اوراکل و تست provenance/quorum/atomic publication، سپس اعمال هر سه RPC مورداعتماد و تست چرخهٔ provider/idempotency/انتشار اتمیک.
+- [x] تمام مراحل بعدی Reduce-only، reconciliation، fill، external reduction و ledger نیز سبز شدند.
+- [!] PR #12 در زمان ثبت این یادداشت همچنان Draft است. HEAD فعلی PR برابر `9e27b132111b498df0bb9a6c927c4ca99e5878f0` است؛ این commit پس از commit تست‌شده فقط ثبت وضعیت را به‌روزرسانی کرده و فایل‌های اجرایی Oracle را تغییر نداده است.
+- [!] مقایسهٔ فعلی feature با main: ۱۵۳ commit جلو و ۱ commit عقب؛ GitHub هنوز وضعیت را diverged گزارش می‌کند. ادغام/بازپایه‌سازی انجام نشد.
+- [x] هیچ تغییری در Supabase Production، داده‌ها، secrets، cron یا UI انجام نشد.
+
+### گام بعدی
+1. اضافه‌کردن آزمون‌های واقعی دو نشست PostgreSQL برای raceهای start-cycle با UUID یکسان، ثبت هم‌زمان نتیجهٔ یک provider، انتشار هم‌زمان یک snapshot، و retry پس از قطع/خطای client.
+2. اجرای CI مجدد و بررسی نتیجهٔ آزمون‌های جدید.
+3. پس از آن، طراحی collector و adapterهای Binance USDⓈ-M، Bybit Linear و OKX SWAP و بررسی استقلال واقعی feedها؛ تا آن زمان Oracle زنده محسوب نمی‌شود.
