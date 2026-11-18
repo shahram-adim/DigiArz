@@ -21,7 +21,7 @@ Spec: `docs/superpowers/specs/2026-11-18-demo-derivatives-trading-design.md`
 - [ ] Specify funding-rate calculation, settlement interval, caps and idempotency.
 - [x] Add disposable PostgreSQL fixture coverage for ledger-derived Futures cash (positive transfer, zero-balance account, absence of mutable cash columns, and RLS on the projection view); execution on latest HEAD remains pending.
 - [ ] Add disposable PostgreSQL fixtures for exact arithmetic, rounding, negative balances, stale prices and liquidation boundaries, including the account-level cross-risk SQL projection.
-- [ ] Add exact-decimal Available Margin tests for open/partially-filled limit orders and reduce-only quantity reservations.
+- [x] Add pure exact-decimal Available Margin unit tests for open/partially-filled limit orders and reduce-only quantity reservations (PostgreSQL reservation/race tests remain pending).
 - [ ] Add concurrent-session fixtures for order duplication, account locking, partial close and liquidation races.
 
 ## Phase 2 — Backend implementation (feature branch only)
@@ -54,4 +54,4 @@ Spec: `docs/superpowers/specs/2026-11-18-demo-derivatives-trading-design.md`
 - [ ] Deploy only after explicit approval; no automatic Production migration or PR merge.
 
 ## Current checkpoint
-Phase 0 product/design baseline is recorded. The Futures ledger accounting contract is now specified in `docs/superpowers/specs/2026-11-18-futures-ledger-accounting.md`: ledger-derived cash, no double-counting of booked fees/funding, separate equity/maintenance/initial/available margin, and derived open-order reservations. No runtime RPC, Supabase Production schema, migration, cron, function, balance, order or Production data has been changed. Next task is to revise the disposable schema draft to remove mutable cash authorities and add a read-only ledger projection, then test Available Margin and order reservations.
+Phase 0 product/design baseline is recorded. The Futures ledger accounting contract is specified in `docs/superpowers/specs/2026-11-18-futures-ledger-accounting.md`; the draft schema now derives Futures cash from an immutable ledger view. A pure exact-decimal `futuresAvailableMarginSnapshot()` helper and nine Node unit tests now cover cross Futures equity, position/order initial margin, open and partially filled Limit reservations, Reduce-only quantity allocation, stale marks, and conservative rounding. These tests have not yet been executed on CI or PostgreSQL. No runtime RPC, Supabase Production schema, migration, cron, function, balance, order or Production data has been changed. Next task is to obtain a real test run, add disposable PostgreSQL reservation/cancellation/partial-fill fixtures, and only then design account-locked idempotent RPCs.
