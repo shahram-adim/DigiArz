@@ -1415,3 +1415,12 @@
 - [x] لاگ واقعی، موفقیت entrypointهای Market/Limit، چرخه Stop-Limit و TP/SL، raceهای دو نشست اجرا/لغو، schema مشتقات، pin شدن نسخه maintenance tier، idempotency و rollback Oracle، حسابداری Reduce-only و rollback/race دفترکل بیمه و کسری را در PostgreSQL دورریختنی تأیید می‌کند.
 - [!] خطاهای تست منفی در لاگ‌ها، rejectionهای مورد انتظار بودند و job را ناموفق نکردند. مخزن بسته‌ها در setup پاسخ HTTP 429 داد، اما workflow با indexهای موجود ادامه یافت و job موفق شد.
 - [!] این اجرا قبل از commitهای مستندات پایش انجام شده و آن مستندات یا سرویس زنده را validate نمی‌کند. هیچ تغییر Supabase Production یا فعال‌سازی collector/liquidation رخ نداد.
+
+
+## CI تأییدشده روی HEAD مستندات Oracle — ۱۸ نوامبر ۲۰۲۶
+- [x] اجرای GitHub Actions شمارهٔ `44367963448` (run 730، Exact decimal tests) که برای commit `d21057ae403f167c3ea9cd5a709fce095c5e36cd` دریافت شد، با نتیجهٔ نهایی `success` تمام شد.
+- [x] job اصلی `exact-decimal` تکمیل شد؛ Node/browser، PostgreSQL 17 دورریختنی، versioned maintenance tiers و fee schedules، Oracle storage/RPC، account maintenance/risk snapshot، Reduce-only lifecycle و تست‌های insurance/deficit و concurrency در این workflow اجرا شدند.
+- [!] خطاهای SQL ثبت‌شده در لاگ شامل rejectionهای منفیِ مورد انتظار، lock-timeout rehearsal و fault-injection عمدی بودند؛ نتیجهٔ job موفق بود.
+- [!] این CI فقط کد و draftهای موجود را در محیط ایزوله بررسی می‌کند؛ هیچ تغییر Supabase Production، deployment، collector، worker یا مجوز فعال‌سازی liquidation ایجاد نمی‌کند.
+- [x] PR #12 همچنان Open و Draft و merged=false باقی ماند؛ هیچ merge/rebase انجام نشد.
+- [ ] کار بعدی باید مستقل از شش policy gate لیکوییدیشن باشد؛ تصمیم‌های fee pinning در هر fill نیز تا تصویب قرارداد نهایی، صرفاً باز و تأییدنشده می‌مانند.
