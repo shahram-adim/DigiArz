@@ -249,3 +249,39 @@ jobs:
             -f supabase/tests/exact_decimal_conditional_exit_integration.sql
 
 # TP/SL conditional worker diagnostics are enabled in the isolated CI fixture.
+
+      - name: Prepare isolated derivatives schema database
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_derivatives_schema_test;"
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/demo_derivatives_schema_setup.sql
+      - name: Apply derivatives schema draft to disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-18_demo_derivatives_schema.sql
+      - name: Verify derivative schema, RLS, ledger and immutability
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/demo_derivatives_schema_integration.sql
+      - name: Verify unbalanced derivative ledger transaction is rejected
+        env:
+          PGPASSWORD: postgres
+        run: |
+          if psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/demo_derivatives_ledger_unbalanced.sql \
+            > /tmp/demo-derivatives-ledger-negative.log 2>&1; then
+            cat /tmp/demo-derivatives-ledger-negative.log
+            echo "Expected the unbalanced ledger transaction to be rejected."
+            exit 1
+          fi
+          cat /tmp/demo-derivatives-ledger-negative.log
+          if ! grep -Fq 'not balanced per asset' /tmp/demo-derivatives-ledger-negative.log; then
+            echo "Ledger rejection failed for an unexpected reason."
+            exit 1
+          fi
