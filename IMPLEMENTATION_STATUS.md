@@ -1380,3 +1380,12 @@
 - [x] اجرای GitHub Actions شمارهٔ `44361544743` روی commit `efe928d38ce2174c237abe9fae8cfb0232e72d04` با نتیجهٔ موفق بررسی شد. سه گام مربوط به اعمال draft در PostgreSQL دورریختنی، تست حسابداری بیمه/نمایش کسری/مرز دسترسی و race دو نشست برای payout/recovery همگی success بودند.
 - [!] این تأیید فقط مربوط به PostgreSQL دورریختنی CI است؛ هیچ payout/recovery RPC، اجرای liquidation یا تغییر Supabase Production مجاز یا انجام نشده است.
 - [ ] گام بعد: شش دروازهٔ سیاستی لیکوییدیشن در worksheet مربوطه باید با تصمیم صریح تعیین شوند؛ تا آن زمان مسیرهای اجرا، worker و UI لیکوییدیشن غیرفعال/پیاده‌سازی‌نشده بمانند و از fixtureها سیاست واقعی استنباط نشود.
+
+
+## تأیید اجرای کامل CI مشتقات و دفترکل بیمه/کسری — ۱۸ نوامبر ۲۰۲۶
+
+- [x] اجرای GitHub Actions شمارهٔ `44365892534` (run 714) روی commit `806644414e8a2ab14ce471d1bb36fc7e1709e0e3` با conclusion برابر `success` پایان یافت؛ job با نام `exact-decimal` نیز موفق و بدون step ناموفق بود.
+- [x] لاگ واقعی job تأیید می‌کند تست یکپارچه دفترکل بیمه و کسری، fault-injection برای rollback اتمیک و race دو نشست بیمه/کسری موفق شدند؛ از دو payout رقیب فقط پرداخت قابل‌تأمین و از recoveryهای رقیب فقط بازیابی مجاز پذیرفته شد؛ overdraw و over-recovery رد شدند.
+- [x] همان run مراحل گستردهٔ exact-decimal، schema مشتقات، maintenance tier، oracle، Reduce-only و lifecycle را در محیط تست PostgreSQL دورریختنی با موفقیت گذراند.
+- [!] این صرفاً شواهد CI است؛ هیچ draft به Supabase Production اعمال نشده و هیچ liquidation execution، payout/recovery RPC، worker یا UI فعال نشده است.
+- [ ] ادامه فقط روی کارهای مستقل از policy انجام شود تا شش دروازهٔ سیاستی لیکوییدیشن صریحاً تعیین شوند؛ اعداد fixture به سیاست واقعی تبدیل نشوند.
