@@ -1389,3 +1389,13 @@
 - [x] همان run مراحل گستردهٔ exact-decimal، schema مشتقات، maintenance tier، oracle، Reduce-only و lifecycle را در محیط تست PostgreSQL دورریختنی با موفقیت گذراند.
 - [!] این صرفاً شواهد CI است؛ هیچ draft به Supabase Production اعمال نشده و هیچ liquidation execution، payout/recovery RPC، worker یا UI فعال نشده است.
 - [ ] ادامه فقط روی کارهای مستقل از policy انجام شود تا شش دروازهٔ سیاستی لیکوییدیشن صریحاً تعیین شوند؛ اعداد fixture به سیاست واقعی تبدیل نشوند.
+
+
+## تأیید اجرای CI روی آخرین HEAD شاخه — ۱۸ نوامبر ۲۰۲۶
+
+- [x] اجرای GitHub Actions شمارهٔ `44366483390` (run 717) روی HEAD شاخه `fec498d77a9a0776f094ff38888c9f7427d631d8` بازیابی شد؛ workflow و job با نام `exact-decimal` هر دو با نتیجهٔ `success` پایان یافتند.
+- [x] هر ۵۰ گام اصلی job موفق شدند؛ از جمله schema مشتقات در PostgreSQL دورریختنی، maintenance/fee schedule، ذخیره‌سازی و RPCهای Oracle، raceهای دو نشست Oracle، چرخه و هم‌زمانی Reduce-only و حسابداری بیمه/کسری به همراه raceهای payout/recovery.
+- [x] لاگ واقعی تأیید می‌کند retryهای تکراری چرخه/provider/publication در Oracle idempotent بودند؛ payload متناقض provider فقط یک برنده داشت؛ خطاهای پیش از commit در provider/snapshot به‌صورت اتمیک rollback شدند و retry دقیق بازیابی شد. rollback و raceهای بیمه/کسری نیز موفق بودند.
+- [!] خطاهای مورد انتظار در لاگ‌ها مربوط به تست‌های منفیِ عمداً ردشونده بودند (preflight نامعتبر، lock timeout، relation عمداً ناموجود، نتیجهٔ متناقض Oracle، overdraw/over-recovery و سند نامتوازن)؛ نتیجهٔ کل workflow و job همچنان success بود.
+- [!] تمام اجراهای دیتابیس فقط در PostgreSQL دورریختنی CI انجام شدند. هیچ DDL/RPC/policy/cron/data در Supabase Production تغییر نکرد؛ collector، اجرای liquidation، payout/recovery RPC، worker یا UI فعال نشد.
+- [ ] ادامه فقط روی کارهای مستقل از policy انجام شود؛ PR شمارهٔ ۱۲ باز و Draft بماند و اعداد fixture به سیاست واقعی تبدیل نشوند.
