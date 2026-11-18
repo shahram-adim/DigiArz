@@ -213,3 +213,13 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [ ] Next design: trusted-worker ingestion/publication RPCs, idempotent cycle creation, retry and concurrent publication semantics.
 - [ ] Venue endpoints are not automatically independent underlying feeds; map index constituents and correlated source families before final quorum policy.
 - No Production DDL, collector deployment, UI activation, merge, or rebase.
+
+
+## Checkpoint — private price-oracle storage CI passed (2026-11-18)
+
+- [x] GitHub Actions run 44269201438 passed on commit 7dfc68a8d98cb4c2791206e6fdcc0fdb8abadbdf (40 successful steps, no failures).
+- [x] The private oracle storage draft was applied to disposable PostgreSQL and its integration test passed.
+- [x] Verified private client isolation, RLS, append-only observations/snapshots, provider terminal-state requirements, healthy quorum enforcement, and cycle completion only after snapshot insertion.
+- [ ] Next: design service-only ingestion and snapshot-publication RPCs with idempotency, cycle-level serialization, and retry/crash/concurrency tests. Do not deploy a live collector yet.
+- [ ] Investigate source-family/index constituent overlap before calling venues independent or choosing final quorum thresholds.
+- No Production changes, collector deployment, UI activation, merge, or rebase.

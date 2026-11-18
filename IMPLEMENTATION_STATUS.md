@@ -754,3 +754,15 @@
 - [!] سه venue endpoint الزاماً سه feed مستقل زیرساختی نیستند؛ constituent overlap و منبع Indexها باید پیش از تعیین quorum نهایی بررسی شود.
 - [ ] گام بعدی: CI این draft را اجرا کند؛ سپس طراحی RPCهای ingestion/publish محدود به trusted worker و تست retry/concurrency. تا آن زمان collector زنده، risk worker و liquidation وجود ندارد.
 - [x] PR #12 باز و Draft؛ شاخه feature در مقایسهٔ فعلی ۱۴۰ کامیت جلو و ۱ کامیت عقب main است؛ merge/rebase انجام نشده است.
+
+
+## تأیید ذخیره‌سازی Oracle قیمت در PostgreSQL موقت — ۱۸ نوامبر ۲۰۲۶
+
+- [x] GitHub Actions run 44269201438 روی commit 7dfc68a8d98cb4c2791206e6fdcc0fdb8abadbdf با conclusion برابر success تمام شد؛ ۴۰ مرحله موفق و صفر مرحله ناموفق.
+- [x] دو مرحلهٔ جدید Oracle به‌طور مشخص در CI اجرا و تأیید شدند: اعمال draft ذخیره‌سازی خصوصی در PostgreSQL موقت و تست provenance/quorum/atomic publication/immutability.
+- [x] تست‌ها تأیید کردند: تکمیل cycle با provider pending رد می‌شود؛ snapshot پیش از پاسخ terminal همهٔ providerها منتشر نمی‌شود؛ cycle تکمیل‌شده باید snapshot داشته باشد؛ healthy snapshot حداقل quorum را می‌خواهد؛ observations و snapshots قابل UPDATE/DELETE نیستند؛ anon/authenticated به جداول Oracle دسترسی ندارند.
+- [x] policy نسخه‌دار، provider cycle، observation و snapshot در schema خصوصی و با RLS فعال طراحی شدند؛ collector هنوز وجود ندارد و service_role فقط برای trusted server-side در نظر گرفته شده است.
+- [!] این نتیجه فقط PostgreSQL موقت CI است؛ هیچ DDL، migration، secret، function، schedule یا داده‌ای در Supabase Production تغییر نکرده است.
+- [ ] گام بعدی: طراحی RPCهای محدود ingestion و snapshot publication، با idempotency، قفل چرخه و رفتار retry/crash/concurrency؛ قبل از collector زنده باید تست شوند.
+- [!] سه venue endpoint لزوماً سه منبع underlying مستقل نیستند؛ constituent overlap و استقلال source-family هنوز نیازمند بررسی است.
+- [x] وضعیت مقایسهٔ GitHub هنگام ثبت این checkpoint: PR #12 باز و Draft؛ شاخه ۱۴۲ کامیت جلو و ۱ کامیت عقب main است. Merge/rebase انجام نشده است.
