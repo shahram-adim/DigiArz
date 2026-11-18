@@ -242,11 +242,17 @@ BEGIN
   END IF;
   SELECT count(DISTINCT u.provider) INTO v_source_count
   FROM unnest(NEW.source_providers) AS u(provider)
-  JOIN private.demo_derivative_price_cycle_sources s
-    ON s.cycle_id=NEW.cycle_id AND s.provider=u.provider
-  WHERE s.source_status='received';
-  IF v_source_count<>NEW.source_count THEN
-    RAISE EXCEPTION 'Snapshot providers must match received provider responses' USING ERRCODE='23514';
+  JOIN private.demo_derivative_price_observations o
+    ON o.cycle_id=NEW.cycle_id AND o.provider=u.provider
+  WHERE o.validation_status='accepted';
+  IF v_source_count<>NEW.source_count
+     OR ARRAY(SELECT u.provider FROM unnest(NEW.source_providers) AS u(provider) ORDER BY u.provider)
+        IS DISTINCT FROM ARRAY(
+          SELECT o.provider FROM private.demo_derivative_price_observations o
+          WHERE o.cycle_id=NEW.cycle_id AND o.validation_status='accepted'
+          ORDER BY o.provider
+        ) THEN
+    RAISE EXCEPTION 'Snapshot providers must exactly match accepted observations' USING ERRCODE='23514';
   END IF;
   IF NEW.snapshot_status='healthy' AND NEW.source_count<v_min_sources THEN
     RAISE EXCEPTION 'Healthy snapshot does not satisfy configured quorum' USING ERRCODE='23514';
@@ -284,12 +290,9 @@ REVOKE ALL ON private.demo_derivative_price_policies,
   private.demo_derivative_price_cycles,private.demo_derivative_price_cycle_sources,
   private.demo_derivative_price_observations,private.demo_derivative_price_snapshots
   FROM PUBLIC,anon,authenticated,service_role;
-GRANT SELECT,INSERT ON private.demo_derivative_price_policies TO service_role;
-GRANT UPDATE(enabled) ON private.demo_derivative_price_policies TO service_role;
-GRANT SELECT,INSERT,UPDATE ON private.demo_derivative_price_cycles TO service_role;
-GRANT SELECT,INSERT,UPDATE ON private.demo_derivative_price_cycle_sources TO service_role;
-GRANT SELECT,INSERT ON private.demo_derivative_price_observations TO service_role;
-GRANT SELECT,INSERT ON private.demo_derivative_price_snapshots TO service_role;
+-- Trusted workers write only through the narrow SECURITY DEFINER RPCs.
+-- No direct table DML is granted to service_role.
+
 
 REVOKE ALL ON FUNCTION private.guard_demo_derivative_price_policy() FROM PUBLIC,anon,authenticated;
 REVOKE ALL ON FUNCTION private.guard_demo_derivative_price_cycle() FROM PUBLIC,anon,authenticated;
