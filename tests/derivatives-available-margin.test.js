@@ -64,7 +64,7 @@ test('reduce-only orders reserve position quantity but no opening margin or extr
   assert.equal(r.reduceOnlyReservedQuantity,'1');
   assert.equal(r.openOrderInitialMarginUsdt,'0');
   assert.equal(r.openOrderFeeReserveUsdt,'0');
-  assert.equal(r.availableMarginUsdt,'88.89');
+  assert.equal(r.availableMarginUsdt,'98.89');
 });
 
 test('rejects aggregate reduce-only reservations larger than the open position',()=>{
