@@ -690,3 +690,18 @@
 - [x] ترتیب workflow پس از بازبینی اصلاح شد: رقابت Fill قبل از reconciliation اجرا می‌شود، زیرا reconciliation به Fixture ETH ساخته‌شده در تست رقابت وابسته است.
 
 - [x] نحو Bash اسکریپت رقابت Fill پس از افزودن دو رزرو اضافی با `bash -n` بررسی شد؛ این فقط صحت نحوی است و اجرای دیتابیسی را ثابت نمی‌کند.
+
+## کاهش اتمیک خارجی پوزیشن Futures و تطبیق رزروها — ۱۸ نوامبر ۲۰۲۶
+
+- [x] بررسی مجدد وضعیت واقعی مخزن: PR #12 باز و Draft؛ HEAD پیش از ثبت این checkpoint برابر `0bea0ddd1979f99d62961e02fd876940bca25441` بود؛ شاخه نسبت به `main` تعداد ۱۳۱ کامیت جلو و ۱ کامیت عقب است (`diverged`).
+- [x] در Supabase Production فقط‌خواندنی بررسی شد: پروژه `ACTIVE_HEALTHY` و PostgreSQL `17.11.0.018` است؛ هیچ جدول `demo_derivative_*` و هیچ تابع عمومی Futures/derivatives/liquidation وجود ندارد.
+- [x] منبع فعلی `market_prices` بررسی شد: ۸۹۸ ردیف، ۸۹۷ ردیف تازه‌تر از ۶۰ ثانیه هنگام snapshot، منابع CoinGecko/KuCoin/Gate.io؛ جدول فقط یک last-price برای هر symbol نگه می‌دارد و refresh worker منبع آخر را جایگزین می‌کند. این داده، index/mark price یا liquidation oracle نیست.
+- [x] در commit `0bea0ddd1979f99d62961e02fd876940bca25441` فایل Draft `supabase/drafts/2026-11-18_demo_derivatives_external_reduction_rpc.sql` اضافه شد. RPC فقط برای `service_role` است، account-first lock دارد، رویداد را با UUID idempotent می‌کند، PnL/fee/isolated margin را محاسبه و ledger متوازن ثبت می‌کند و سپس helper تطبیق Reduce-only را در همان تراکنش فراخوانی می‌کند.
+- [x] قید نوع رویداد Schema برای `external_reduction` در risk events و `position_reduction` در ledger به‌روزرسانی شد.
+- [x] تست reconciliation دیگر position را مستقیم UPDATE نمی‌کند؛ اکنون RPC واقعی را برای کاهش ETH از ۰٫۶ به ۰٫۳، PnL برابر ۳ USDT، کارمزد ۰٫۰۱، مانده ledger برابر ۲٫۹۹، لغو دو رزرو جدیدتر، retry و رد payload متفاوت/over-reduction آزمایش می‌کند.
+- [x] assertion آرایهٔ سفارش‌های لغوشده null-safe شد تا نبود cancellation به‌اشتباه از تست عبور نکند.
+- [x] Workflow جدید به نصب RPC و اجرای تست end-to-end متصل شد. اجرای GitHub Actions شماره `44265930201` برای commit `0bea0ddd...` شروع شده است؛ نتیجه هنوز تأیید نشده و نباید موفق اعلام شود.
+- [ ] پس از پایان run، لاگ SQL مربوط به external reduction و کل PostgreSQL job بررسی شود؛ هر شکست واقعی اصلاح و دوباره اجرا شود.
+- [ ] رقابت هم‌زمان external reduction با placement/fill/cancel اضافه شود.
+- [ ] موتور لیکوییدیشن تا طراحی منبع مستقل index/mark price، risk tiers و مدل fee/insurance ساخته یا فعال نشود.
+- [x] هیچ DDL/RPC/migration/data در Supabase Production اجرا نشد؛ UI مشتقات خاموش ماند؛ merge/rebase انجام نشد.

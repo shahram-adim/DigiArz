@@ -62,7 +62,7 @@ BEGIN
   FROM jsonb_array_elements_text(v_result->'cancelled_order_ids')
        WITH ORDINALITY AS x(value,ordinality);
 
-  IF cardinality(v_cancelled)<>2
+  IF COALESCE(cardinality(v_cancelled),0)<>2
      OR v_cancelled[1]<>v_newer_extra
      OR v_cancelled[2]<>v_older_extra THEN
     RAISE EXCEPTION 'external reduction did not cancel newest reservations first: %',v_cancelled;
