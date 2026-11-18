@@ -43,6 +43,11 @@ CREATE TABLE public.demo_derivative_orders (
   CHECK (average_fill_price IS NULL OR average_fill_price > 0),
   CHECK (filled_quantity <= quantity),
   CHECK (
+    order_type <> 'market'
+    OR (status='filled' AND filled_quantity=quantity AND remaining_quantity=0)
+    OR (status='rejected' AND filled_quantity=0 AND remaining_quantity=quantity)
+  ),
+  CHECK (
     (position_side='long' AND ((side='buy' AND NOT reduce_only) OR (side='sell' AND reduce_only)))
     OR
     (position_side='short' AND ((side='sell' AND NOT reduce_only) OR (side='buy' AND reduce_only)))
@@ -214,6 +219,12 @@ CREATE INDEX demo_derivative_positions_user_status_idx
   ON public.demo_derivative_positions(user_id,status,updated_at DESC);
 CREATE INDEX demo_derivative_positions_pair_status_idx
   ON public.demo_derivative_positions(symbol,status);
+
+-- Hedge mode permits one open position per account/product/symbol/side.
+-- This is the serialization target for deterministic Reduce-only allocation.
+CREATE UNIQUE INDEX demo_derivative_positions_one_open_side_uidx
+  ON public.demo_derivative_positions(account_id,product_type,symbol,position_side)
+  WHERE status='open';
 CREATE INDEX demo_derivative_fills_user_created_idx
   ON public.demo_derivative_fills(user_id,created_at DESC);
 CREATE INDEX demo_margin_loans_user_status_idx
