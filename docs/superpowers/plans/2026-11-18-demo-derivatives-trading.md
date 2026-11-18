@@ -386,3 +386,12 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [!] Expected negative SQL assertions, lock-timeout rehearsal and intentional fault injection appear as ERRORs in PostgreSQL logs; the job conclusion is success.
 - [!] This is disposable CI evidence only; no Supabase Production mutation or deployment is authorized.
 - [ ] Continue with a policy-independent task. Do not implement per-fill fee pinning until its open contract decision is approved; keep all six liquidation policy gates closed.
+
+
+## تأیید CI روی HEAD شاخه — ۱۸ نوامبر ۲۰۲۶ (run 733)
+- [x] اجرای GitHub Actions شمارهٔ `44368468782` (run 733، workflow: Exact decimal tests) برای commit `a1146e1aef8d36beb49308eb574dc18e2fbc841a` با conclusion برابر `success` پایان یافت.
+- [x] job اصلی `exact-decimal` با نتیجهٔ `success` تمام شد؛ ۵۰ گام اصلی workflow موفق بودند (به‌علاوهٔ مراحل setup و cleanup).
+- [x] لاگ واقعی اعمال و تست draft نسخه‌بندی کارمزد Futures، resolver مورداعتماد، چرخه Reduce-only fill، رقابت fill دو نشست، حسابداری PnL/fee/margin release، دفترکل بیمه/کسری، rollback اتمیک و raceهای دو نشست را در PostgreSQL 17 دورریختنی تأیید می‌کند.
+- [!] این run فقط CI ایزوله است و هیچ‌یک از draftها را روی Supabase Production اعمال نمی‌کند؛ deployment یا مجوز فعال‌سازی worker/RPC/UI ایجاد نمی‌کند.
+- [!] تست فعلی fee schedule فقط activation/immutability/resolver را پوشش می‌دهد. RPC مربوط به Reduce-only fill هنوز `p_fee_usdt` را از ورودی trusted service می‌گیرد و schedule ID/version را در هر fill ثبت/اعتبارسنجی نمی‌کند. زمان pin شدن schedule per-fill هنوز تصمیم‌گیری/تصویب نشده؛ این شکاف باید باز بماند و با fixtureهای نرخ به سیاست واقعی تبدیل نشود.
+- [x] PR #12 همچنان Open/Draft و unmerged است؛ هیچ merge/rebase و هیچ تغییر Supabase Production انجام نشد.
