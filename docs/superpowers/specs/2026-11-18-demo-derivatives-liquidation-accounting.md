@@ -67,6 +67,22 @@ The Oracle mark is a trigger/risk reference, not an execution guarantee. A futur
 
 If execution evidence is missing, stale or beyond the approved slippage bound, the worker fails closed and records a blocked attempt. A fallback-to-mark-price execution path is not permitted without a separately approved, explicit simulation rule.
 
+
+### Trusted simulated execution evidence contract
+
+The provider and maximum-slippage policy remain undecided. The following are implementation invariants, not approval of a provider or numeric limit:
+
+1. A trusted server-side simulator must create an immutable execution-evidence record before any liquidation mutation. Android/browser clients must not submit execution price, fee, book depth, or slippage as authoritative values.
+2. Evidence is bound to one symbol/instrument mapping, close side, requested position/reduction, pinned Oracle snapshot, collection cycle, and policy version. It cannot be replayed for another account, position, symbol, quantity, or event.
+3. Preserve the raw order-book payload hash, provider/venue, endpoint and normalizer versions, source timestamp, server receipt timestamp, request latency, exact decimal bid/ask levels, and rejection/failure reason. Retain the exact evidence record ID in the liquidation event.
+4. For a Long close, simulated sells consume bid depth; for a Short close, simulated buys consume ask depth. Walk levels in deterministic price order and compute the quantity-weighted execution price using exact-decimal arithmetic. Never substitute mark/index price for missing depth.
+5. Compute adverse slippage directionally against the pinned mark reference: Long close is adverse below mark; Short close is adverse above mark. Store the signed price difference and the non-negative adverse-slippage measure separately. The denominator/reference convention and maximum bound require explicit policy approval.
+6. Reject evidence with missing or mismatched instruments, non-positive or malformed levels, crossed/empty books, duplicate or unordered levels, unsupported precision, invalid timestamps, stale data, insufficient depth, or an already-consumed evidence ID. Whether insufficient depth may produce a partial fill remains a policy decision; absent that approval, fail closed.
+7. The trusted server derives execution price, executable quantity, slippage and applicable fees from the immutable evidence and pinned schedules. A service-role caller must not be able to bypass validation merely by supplying a raw price/fee pair.
+8. The evidence record, consumption marker, liquidation event, position/order changes and all user/platform ledger writes must be committed atomically. A retry with the same event and identical evidence returns the original result; a changed payload or evidence reuse is rejected.
+
+The existing external-position-reduction draft accepts execution price and fee as service-side arguments for its separate external-reduction use case. Do not repurpose it as the liquidation executor without an evidence-ID-based validation path and tests proving the trusted evidence binding above.
+
 ## 6. Fees
 
 - The ordinary close fee is resolved from the active server-owned Maker/Taker fee schedule pinned by ID and version. A liquidation close uses the approved taker path.
