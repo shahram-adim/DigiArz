@@ -74,6 +74,8 @@ INSERT INTO public.demo_derivative_risk_events(
   'margin_warning','{"margin_ratio":"1.2"}'::jsonb
 );
 
+BEGIN;
+
 INSERT INTO public.demo_derivative_ledger_transactions(
   id,user_id,idempotency_key,event_type
 ) VALUES (
@@ -90,6 +92,8 @@ INSERT INTO public.demo_derivative_ledger_entries(
    '10000000-0000-0000-0000-000000000001','USDT','futures_cash',10,0),
   ('92000000-0000-0000-0000-000000000002','90000000-0000-0000-0000-000000000001',
    '10000000-0000-0000-0000-000000000001','USDT','system_clearing',0,10);
+
+COMMIT;
 
 DO $checks$
 BEGIN
