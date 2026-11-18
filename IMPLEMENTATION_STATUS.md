@@ -817,3 +817,23 @@
 1. اضافه‌کردن آزمون‌های واقعی دو نشست PostgreSQL برای raceهای start-cycle با UUID یکسان، ثبت هم‌زمان نتیجهٔ یک provider، انتشار هم‌زمان یک snapshot، و retry پس از قطع/خطای client.
 2. اجرای CI مجدد و بررسی نتیجهٔ آزمون‌های جدید.
 3. پس از آن، طراحی collector و adapterهای Binance USDⓈ-M، Bybit Linear و OKX SWAP و بررسی استقلال واقعی feedها؛ تا آن زمان Oracle زنده محسوب نمی‌شود.
+
+
+## افزودن تست‌های هم‌زمانی واقعی برای Price Oracle — ۱۸ نوامبر ۲۰۲۶
+
+- [x] پیش از افزودن، workflow، تست ترتیبی RPC و الگوی race دو نشست PostgreSQL موجود بازخوانی شد؛ تست قبلی دست‌نخورده باقی ماند.
+- [x] فایل جدید `supabase/tests/demo_derivatives_price_oracle_concurrency.sh` اضافه شد. دو اتصال مستقل PostgreSQL این سناریوها را اجرا می‌کنند:
+  - ساخت هم‌زمان یک cycle با UUID و درخواست یکسان؛ انتظار یک cycle و دقیقاً دو source row.
+  - تحویل هم‌زمان نتیجهٔ یکسان برای provider؛ انتظار یک observation و پاسخ idempotent برای هر دو فراخوانی.
+  - تحویل هم‌زمان دو payload متفاوت برای یک provider/cycle؛ انتظار یک برنده، یک رد idempotency و بدون overwrite.
+  - انتشار هم‌زمان یک snapshot یکسان؛ انتظار تکمیل cycle و فقط یک snapshot.
+  - retry پس از commit با فرض گم‌شدن پاسخ موفق client برای start-cycle، provider-result و publication.
+- [x] مرحلهٔ جدید اجرای این shell test به workflow `.github/workflows/exact-decimal-tests.yml` اضافه شد.
+- [x] تست از policy نسخهٔ immutable استفاده می‌کند و آن را update نمی‌کند؛ بازهٔ freshness و expiry همان مقدار fixture است.
+- [!] تست‌های جدید هنوز در CI اجرا نشده‌اند؛ هیچ نتیجهٔ سبزی برای این بخش ادعا نمی‌شود. اجرای CI پس از آخرین commit باید بررسی شود.
+- [x] تغییرات فقط در feature branch و disposable PostgreSQL workflow هستند؛ Supabase Production، داده‌ها، secrets، cron و UI تغییری نکرده‌اند. PR #12 همچنان Draft است.
+
+### گام بعدی
+1. بررسی CI جدید و اصلاح صرفاً بر اساس خطای واقعی shell/SQL یا race.
+2. اگر raceها سبز شدند، بررسی adapterهای HTTP و قرارداد timestamp/precision/normalization برای Binance USDⓈ-M، Bybit Linear و OKX SWAP.
+3. سپس سنجش استقلال feedها و backtest آستانه‌ها؛ هنوز هیچ worker یا Oracle زنده‌ای فعال نیست.
