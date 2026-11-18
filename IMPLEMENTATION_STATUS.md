@@ -882,3 +882,14 @@
 1. نمونهٔ زندهٔ عمومی endpointهای constituent هر سه venue را برای BTCUSDT و ETHUSDT بررسی و alias/weight/timestamp را تطبیق بده.
 2. بر اساس دادهٔ واقعی، draft ذخیره‌سازی immutable برای constituent snapshots و endpoint-level hashes طراحی کن؛ schema فعلی یک provider timestamp/hash دارد و برای چند endpoint کامل نیست.
 3. بعد از تثبیت provenance، collector adapterها و تست‌های parser/timeout/rate-limit ساخته شوند. تا آن زمان liquidation و Futures UI خاموش می‌مانند.
+
+
+## طراحی provenance برای constituentهای Oracle — ۱۸ نوامبر ۲۰۲۶
+
+- [x] پیش از ادامه، HEAD شاخه و فایل ثبت وضعیت/قرارداد adapter بازخوانی شدند؛ تغییرات قبلی تکرار نشدند.
+- [x] تلاش برای دریافت نمونهٔ زندهٔ Binance constituents و Bybit index components برای BTCUSDT و ETHUSDT و OKX index components انجام شد؛ مسیر دسترسی فعلی پاسخ API را در دسترس قرار نداد. بنابراین هیچ schema یا فیلد OKX به‌عنوان نمونهٔ زنده تأییدشده ادعا نمی‌شود.
+- [x] سند طراحی `docs/superpowers/specs/2026-11-18-demo-derivatives-oracle-constituent-provenance.md` اضافه شد؛ مدل پیشنهادی endpoint-level evidence، raw response hash، timestamp مستقل هر endpoint، immutable constituent snapshot/header/rows، alias mapping نسخه‌دار و linkage به observation را مشخص می‌کند.
+- [x] طراحی برای پاسخ‌های provider-specific انعطاف‌پذیر است: raw JSON و schema marker حفظ می‌شوند و canonical exchange/instrument/source type تا زمان تأیید mapping حدسی پر نمی‌شوند.
+- [!] این مرحله فقط طراحی مستنداتی است؛ هیچ جدول، RPC، collector یا adapter اجرایی اضافه نشده است. هیچ تغییر Supabase Production، secret، cron یا UI انجام نشده است.
+- [ ] گام بعدی: دریافت نمونه‌های واقعی API از یک مسیر قابل دسترس و تطبیق response schema، به‌خصوص OKX؛ سپس پیاده‌سازی DDL draft و تست‌های PostgreSQL موقت برای append-only، RLS، hash/timestamp provenance و linkage اتمیک.
+- [!] تا اندازه‌گیری overlap واقعی constituentها و تصویب effective quorum، هیچ venue به‌تنهایی به‌عنوان feed مستقل شمرده نمی‌شود و liquidation/Futures UI خاموش می‌مانند.
