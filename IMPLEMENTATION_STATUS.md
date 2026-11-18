@@ -581,3 +581,16 @@
 - [x] ایندکس جزئی برای سفارش‌های Reduce-only فعال بر اساس حساب/محصول/نماد/سمت پوزیشن و ترتیب جدیدترین به قدیمی‌ترین اضافه شد؛ سفارش‌های terminal در ایندکس وارد نمی‌شوند.
 - [x] تست Schema وجود ایندکس یکتایی پوزیشن باز و ایندکس رزرو Reduce-only را بررسی می‌کند.
 - [!] CI برای HEAD فعلی هنوز از ابزار GitHub قابل مشاهده نیست؛ تست موفق اعلام نمی‌شود.
+
+
+## اصلاح وضعیت پس از تکمیل ایندکس‌ها — ۱۸ نوامبر ۲۰۲۶
+
+این checkpoint جدید، موارد قدیمی‌تر بالا را در مورد partial unique index به‌روزرسانی می‌کند:
+- [x] partial unique index پوزیشن باز `demo_derivative_positions_one_open_side_uidx` در Schema draft وجود دارد.
+- [x] partial index سفارش‌های فعال Reduce-only با نام `demo_derivative_orders_reduce_only_active_idx` اضافه شده است.
+- [x] Integration test وجود هر دو index و رد پوزیشن باز تکراری و Market pending را بررسی می‌کند.
+- [!] در آخرین بررسی HEAD شاخه `ad71db32ebcdc16af51c83d2b4503acfaa3856f3` بود؛ Combined commit status و wrapper مربوط به runهای PR هر دو خالی بودند. اجرای تست جدید از این ابزار قابل تأیید نیست.
+- [x] PR #12 باز و Draft؛ شاخه ۸۴ کامیت جلو و ۱ عقب `main` است.
+- [x] هیچ تغییر Production، merge یا rebase انجام نشده است.
+
+گام بعدی: به‌دست‌آوردن نتیجه CI قابل‌مشاهده؛ سپس ساخت و تست تراکنش‌های واقعی رزرو/لغو/partial fill و رقابت دو نشست. تا آن زمان RPC و UI مشتقه غیرفعال می‌مانند.
