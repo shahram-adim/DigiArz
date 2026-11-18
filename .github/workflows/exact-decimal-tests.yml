@@ -291,6 +291,10 @@ jobs:
         run: |
           psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
             -f supabase/drafts/2026-11-18_demo_derivatives_reduce_only_fill_rpc.sql
+      - name: Test concurrent fills against one Reduce-only order
+        env:
+          PGPASSWORD: postgres
+        run: bash supabase/tests/demo_derivatives_reduce_only_fill_concurrency.sh
       - name: Test Reduce-only partial fills, realized PnL, fees, margin release and ledger
         env:
           PGPASSWORD: postgres
