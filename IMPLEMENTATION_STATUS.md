@@ -560,3 +560,17 @@
 1. اجرای واقعی workflow روی HEAD و بررسی تست‌های PostgreSQL برای side/reduce-only.
 2. افزودن partial unique index و fixtureهای چرخه رزرو/لغو/partial fill/Market و رقابت دو نشست.
 3. سپس RPCهای account-lock/idempotency؛ رابط مشتقه تا تکمیل آن‌ها خاموش بماند.
+
+
+## پوزیشن باز یکتا و سفارش Market اتمیک — ۱۸ نوامبر ۲۰۲۶
+
+- [x] قید یکتایی جزئی برای هر `(account_id, product_type, symbol, position_side)` در پوزیشن‌های باز اضافه شد؛ Long و Short مستقل باقی می‌مانند.
+- [x] Market فقط می‌تواند در همان تراکنش کامل Fill شود یا بدون Fill رد شود؛ حالت pending یا partial برای Market با CHECK دیتابیس ممنوع شد.
+- [x] Fixture سفارش Market به حالت کاملاً پرشده اصلاح شد.
+- [x] تست PostgreSQL برای رد پوزیشن باز تکراری و Market pending افزوده شد.
+- [!] اجرای CI روی HEAD جدید هنوز بررسی نشده؛ نتیجه موفق اعلام نمی‌شود.
+- [x] Supabase Production و UI/RPC سفارش مشتقه بدون تغییر مانده‌اند.
+
+### گام بعدی
+1. مشاهده CI و لاگ PostgreSQL.
+2. افزودن توابع/تست چرخه Limit reserve، لغو و آزادسازی، partial fill، Reduce-only و race دو نشست با قفل حساب.
