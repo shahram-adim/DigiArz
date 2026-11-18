@@ -866,3 +866,19 @@
 1. طراحی قرارداد collector و adapterهای HTTP برای Binance USDⓈ-M، Bybit Linear و OKX SWAP: symbol mapping، timestamp semantics، decimal parsing، timeout/retry، response hashing و health classification.
 2. پیش از انتخاب quorum نهایی، استقلال feedها و هم‌پوشانی constituentهای index بررسی شود.
 3. سپس backtest آستانه‌های freshness/deviation و بررسی مسیر fail-closed انجام شود. تا پایان این مراحل Oracle و Futures UI زنده نمی‌شوند.
+
+
+## قرارداد Adapterها و کشف هم‌پوشانی منابع — ۱۸ نوامبر ۲۰۲۶
+
+- [x] پس از موفقیت CI شمارهٔ `44286245890`، مستند طراحی adapterها و وابستگی constituentها در `docs/superpowers/specs/2026-11-18-demo-derivatives-oracle-adapter-contract.md` اضافه شد.
+- [x] endpointهای candidate و فیلدهای mark/index برای Binance USDⓈ-M، Bybit Linear و OKX SWAP ثبت شدند؛ timestampهای چند endpointی OKX باید جدا نگه داشته شوند.
+- [x] endpointهای constituent برای Binance و Bybit مستند شدند؛ endpoint OKX شناسایی شده ولی schema دقیق آن تا مشاهدهٔ نمونهٔ زنده تأییدنشده باقی مانده است.
+- [x] یافتهٔ مهم: طبق مستند رسمی Binance، index آن می‌تواند از Bybit و OKX و چندین صرافی دیگر قیمت constituent بگیرد؛ Bybit نیز index شش‌جفتی spot با وزن‌های پویا می‌سازد. بنابراین سه venue را نمی‌توان بدون تحلیل overlap سه feed مستقل شمرد.
+- [x] سند اصلی Oracle به این قرارداد و یافتهٔ هم‌پوشانی ارجاع می‌دهد.
+- [!] هیچ collector، WebSocket worker، cron، migration Production، secret یا Futures UI فعال نشده است؛ هیچ quorum/threshold نهایی تصویب نشده.
+- [!] CI پس از تغییرات مستنداتی اخیر ممکن است دوباره اجرا شود؛ این تغییرات صرفاً docs هستند و نتیجهٔ قبلی ۳۸ مرحله‌ای همچنان برای کد تست‌شده معتبر است.
+
+### گام بعدی
+1. نمونهٔ زندهٔ عمومی endpointهای constituent هر سه venue را برای BTCUSDT و ETHUSDT بررسی و alias/weight/timestamp را تطبیق بده.
+2. بر اساس دادهٔ واقعی، draft ذخیره‌سازی immutable برای constituent snapshots و endpoint-level hashes طراحی کن؛ schema فعلی یک provider timestamp/hash دارد و برای چند endpoint کامل نیست.
+3. بعد از تثبیت provenance، collector adapterها و تست‌های parser/timeout/rate-limit ساخته شوند. تا آن زمان liquidation و Futures UI خاموش می‌مانند.
