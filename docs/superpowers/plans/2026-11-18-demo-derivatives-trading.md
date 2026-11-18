@@ -299,3 +299,14 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [!] Still draft-only and disposable-PostgreSQL-only; Production remains unchanged and no live risk/order/worker path consumes the resolver.
 - [ ] Next: create a server-side account risk snapshot RPC that pins each symbol's schedule ID/version in one transaction and calculates every position against that pinned version; add a two-session schedule-replacement race.
 - [ ] Then design and test atomic liquidation/insurance/deficit ledger accounting. Keep auto-liquidation and derivatives UI disabled.
+
+## Checkpoint — transaction-pinned account maintenance snapshot (2026-11-18)
+
+- [x] Added a private service_role-only account snapshot function that locks the account and open positions and pins active per-symbol maintenance schedule rows for the duration of the call.
+- [x] Each position uses the newest Oracle snapshot regardless of status; any newest stale/deviation/insufficient-quorum or expired snapshot fails closed rather than falling back to an older healthy price.
+- [x] Snapshot output includes mark/oracle provenance, notional, unrealized PnL, maintenance tier/rate/deduction, schedule ID/version, leverage cap, and ledger-derived Futures cash.
+- [x] PostgreSQL tests cover isolated and cross positions, multiple symbols/accounts, exact tier calculations, cash projection, and stale-latest-snapshot rejection.
+- [x] CI runs `44310385007` (push, 46 steps) and `44310397178` (pull_request, 48 steps) passed on commit `70a637270cdd7f9ee115d6b08de3ad0c584d7280`.
+- [!] This is still a maintenance/PnL snapshot, not a complete account risk engine: close-fee reserve, unposted liabilities, account equity, maintenance buffer and final margin ratio are not yet assembled in SQL. No order or liquidation worker consumes it.
+- [ ] Next: add trusted fee schedule/resolution, non-duplicated unposted liabilities, and account-level equity/maintenance/margin-ratio aggregation within the same transaction.
+- [ ] Then implement atomic liquidation/insurance/deficit ledger accounting and test partial/full liquidation against concurrent fills/cancels. Keep automatic liquidation and derivatives UI disabled.
