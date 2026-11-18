@@ -1361,3 +1361,13 @@
 - [!] مقادیر fixture فقط مصنوعی خواهند بود؛ تا تصویب مبنای notional، زمان eligibility، rounding، مدل clearing و رفتار کسری موجودی، هیچ سیاست مالی عملیاتی تعیین نشده است.
 - [!] فقط سند طراحی branch تغییر کرد؛ SQL/RPC/worker/UI و Supabase Production بدون تغییر باقی ماندند.
 - [ ] گام بعد: گرفتن تأیید کاربر برای قرارداد علامت Funding و زمان pin شدن fee schedule؛ سپس نوشتن تست‌ها در PostgreSQL دورریختنی، نه Production.
+
+
+## ماتریس طراحی آزمون بهره Margin و pin شدن کارمزد — ۱۸ نوامبر ۲۰۲۶
+
+- [x] آزمون‌های طراحی بهره Margin Spot ثبت شد: جداسازی دارایی، مرز accrual، pin شدن اصل و نرخ، exact-decimal، منع compounding ضمنی، تخصیص بازپرداخت، رقابت هم‌زمان، idempotency، rollback و audit trail.
+- [x] آزمون‌های طراحی کارمزد ثبت شد: تعیین schedule در مرز اجرای Fill، رقابت activation با Fill، partial fill، retry، نقش واقعی Maker/Taker، مبنای notional واقعی، تفکیک reserve از debit و جداسازی fee باز و بسته‌شدن.
+- [!] هیچ SQL تست جدیدی نوشته یا اجرا نشد؛ این مرحله صرفاً تکمیل طرح آزمون است. هیچ ادعای CI موفق مطرح نیست.
+- [!] نرخ بهره، APR، day-count، compounding، اولویت بازپرداخت، rounding، fee cap/rebate/tier و سیاست‌های مالی همچنان تصویب نشده‌اند.
+- [!] هیچ migration/RPC/worker/UI یا تغییر Supabase Production انجام نشد.
+- [ ] گام بعد: پس از تصویب قرارداد علامت Funding و زمان pin شدن fee schedule، پیاده‌سازی تست‌های disposable PostgreSQL آغاز شود؛ تصمیم‌های بهره Margin جداگانه اخذ شوند.
