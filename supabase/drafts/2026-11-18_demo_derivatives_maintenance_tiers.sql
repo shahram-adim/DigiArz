@@ -3,6 +3,7 @@
 BEGIN;
 
 CREATE SCHEMA IF NOT EXISTS private;
+REVOKE ALL ON SCHEMA private FROM PUBLIC,anon,authenticated;
 GRANT USAGE ON SCHEMA private TO service_role;
 
 CREATE TABLE private.demo_derivative_maintenance_tier_schedules (
