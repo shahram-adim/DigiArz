@@ -234,3 +234,15 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [ ] بررسی منبع‌ها: venueهای Binance/Bybit/OKX الزاماً سه feed مستقل نیستند؛ تا بررسی constituents و همبستگی خانوادهٔ منبع، quorum نهایی یا threshold عملیاتی تصویب نشود.
 - [ ] سپس طراحی maintenance-margin tiers، liquidation sizing، fee reserve، insurance/deficit و cross-margin risk در fixture ایزوله؛ هیچ trigger لیکوییدیشن از `market_prices` استفاده نکند.
 - هیچ Supabase Production write، deployment، merge یا فعال‌سازی UI انجام نشد.
+
+## Checkpoint — Oracle rollback recovery and exact maintenance tiers (2026-11-18)
+
+- [x] Added two pre-commit fault-injection scenarios for provider-result and snapshot publication; both verify atomic rollback followed by a successful exact retry.
+- [x] CI run `44304369272` passed for the Oracle recovery tests.
+- [x] Added exact-decimal maintenance tier validation and lookup helpers. Tier schedules require increasing notional caps, a final unbounded tier, non-decreasing maintenance rates, continuous maintenance amounts at boundaries, non-negative cumulative deductions, and non-increasing leverage caps.
+- [x] Added Node coverage for tier selection, 18-decimal precision, boundary continuity, and malformed schedules.
+- [x] CI runs `44305188672` (push) and `44305201068` (pull_request) passed on commit `049246e84cd3927e31e8f50fda35b56a423f79b7`, 43 successful steps each.
+- [!] Tier numbers are test fixtures only; no production schedule, leverage caps, SQL tier table, or order/risk integration has been approved.
+- [ ] Next: add versioned server-owned maintenance-tier configuration and integrate it into isolated/cross risk snapshots with stale-price and threshold-boundary tests.
+- [ ] Then specify and test partial/full liquidation sizing, liquidation fees, insurance-fund flows, deficit accounting, idempotency and concurrent liquidation/reduction races. No automatic liquidation or UI activation.
+- No Supabase Production changes, PR merge, or PR Draft status change.
