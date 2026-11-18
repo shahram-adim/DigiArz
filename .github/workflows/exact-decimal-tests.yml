@@ -303,6 +303,12 @@ jobs:
         run: |
           psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
             -f supabase/drafts/2026-11-18_demo_derivatives_price_oracle_rpcs.sql
+      - name: Apply transaction-pinned Futures account maintenance snapshot draft
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-18_demo_derivatives_account_maintenance_snapshot.sql
       - name: Test trusted Futures price-oracle cycle, provider idempotency and atomic publication
         env:
           PGPASSWORD: postgres
@@ -313,6 +319,12 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: bash supabase/tests/demo_derivatives_price_oracle_concurrency.sh
+      - name: Test transaction-pinned Futures maintenance snapshot and stale-oracle fail-closed behavior
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/demo_derivatives_account_maintenance_snapshot.sql
       - name: Apply account-locked Reduce-only Limit RPC draft in disposable PostgreSQL
         env:
           PGPASSWORD: postgres
