@@ -1399,3 +1399,11 @@
 - [!] خطاهای مورد انتظار در لاگ‌ها مربوط به تست‌های منفیِ عمداً ردشونده بودند (preflight نامعتبر، lock timeout، relation عمداً ناموجود، نتیجهٔ متناقض Oracle، overdraw/over-recovery و سند نامتوازن)؛ نتیجهٔ کل workflow و job همچنان success بود.
 - [!] تمام اجراهای دیتابیس فقط در PostgreSQL دورریختنی CI انجام شدند. هیچ DDL/RPC/policy/cron/data در Supabase Production تغییر نکرد؛ collector، اجرای liquidation، payout/recovery RPC، worker یا UI فعال نشد.
 - [ ] ادامه فقط روی کارهای مستقل از policy انجام شود؛ PR شمارهٔ ۱۲ باز و Draft بماند و اعداد fixture به سیاست واقعی تبدیل نشوند.
+
+
+## قرارداد پایش و عملیات Oracle — طراحی مستقل از سیاست مالی — ۱۸ نوامبر ۲۰۲۶
+
+- [x] سند `docs/superpowers/specs/2026-11-18-demo-derivatives-oracle-operations-observability.md` اضافه شد: معیارهای چرخه و provider، محدودیت cardinality متریک‌ها، رخدادهای ساخت‌یافته و trace، طبقه‌بندی هشدارها، حالت‌های fail-closed، runbook رخدادها، نگهداری/دسترسی شواهد و ماتریس تست CI دورریختنی.
+- [!] آستانه هشدار، SLO، دوره نگهداری، quorum منبع و صلاحیت قیمت برای ریسک عمداً تعیین نشدند؛ هیچ سیاست مالی از fixture یا حدس استخراج نشده است.
+- [!] این مرحله فقط مستندات است؛ collector، telemetry sink، alert، cron، RPC، migration، secret عملیاتی، مسیر liquidation یا شیء Supabase Production ساخته یا فعال نشد.
+- [ ] گام بعد: پس از مجوز جداگانه، ماتریس را به تست‌های ایزوله تبدیل و instrumentation را فقط پشت طراحی trusted-service بازبینی‌شده اضافه کنیم؛ پیش از بررسی source-family و سیاست‌ها collector زنده deploy نشود.
