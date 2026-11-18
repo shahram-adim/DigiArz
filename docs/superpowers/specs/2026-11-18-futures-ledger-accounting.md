@@ -147,3 +147,6 @@ A reduce-only order may never increase or reverse a position. Any future netting
 In hedge mode, at most one open position exists for each `(account_id, product_type, symbol, position_side)`. A partial unique index enforces this invariant and provides a single deterministic position row for Reduce-only reservation accounting. Long and Short remain distinct positions.
 
 Market orders are strictly atomic: the only valid terminal states are fully filled (`filled_quantity=quantity`, `remaining_quantity=0`) or rejected without any fill (`filled_quantity=0`, `remaining_quantity=quantity`). A Market order may never persist as pending or partially filled. Limit orders retain the pending/partial-fill lifecycle.
+
+
+The active Reduce-only order scan is supported by a partial index on `(account_id, product_type, symbol, position_side, created_at DESC, id DESC)` restricted to `reduce_only` rows in `pending` or `partially_filled` status. This supports both the reservation sum and deterministic newest-first cancellation without including terminal orders.
