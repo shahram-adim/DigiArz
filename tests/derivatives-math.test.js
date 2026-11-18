@@ -150,3 +150,22 @@ test('solves tiered isolated liquidation using the tier at the candidate price',
   assert.equal(r.liquidationPrice,'6066.734074823053589485');
   assert.equal(r.liquidationPriceMethod,'isolated-tiered-estimate');
 });
+
+test('cross margin aggregates maintenance from trusted per-symbol tier schedules',()=>{
+  const r=M.crossMarginRiskSnapshot({
+    cashBalanceUsdt:'10000',
+    maintenanceTierSchedules:{BTCUSDT:maintenanceTiers,ETHUSDT:maintenanceTiers},
+    positions:[
+      {productType:'futures',marginMode:'cross',symbol:'BTCUSDT',side:'long',quantity:'1',entryPrice:'100',markPrice:'20000',closeFeeRate:'0.001',priceStatus:'fresh'},
+      {productType:'futures',marginMode:'cross',symbol:'ETHUSDT',side:'short',quantity:'1',entryPrice:'20000',markPrice:'10000',closeFeeRate:'0.001',priceStatus:'fresh'}
+    ]
+  });
+  assert.equal(r.maintenanceMargin,'400');
+  assert.equal(r.closeFeeReserve,'30');
+  assert.equal(r.equity,'39870');
+  assert.equal(r.maintenanceBuffer,'39470');
+  assert.throws(()=>M.crossMarginRiskSnapshot({
+    cashBalanceUsdt:'10000',maintenanceTierSchedules:{BTCUSDT:maintenanceTiers},
+    positions:[{productType:'futures',marginMode:'cross',symbol:'ETHUSDT',side:'long',quantity:'1',entryPrice:'100',markPrice:'20000',closeFeeRate:'0.001',priceStatus:'fresh'}]
+  }),/missing trusted maintenance tier schedule/);
+});
