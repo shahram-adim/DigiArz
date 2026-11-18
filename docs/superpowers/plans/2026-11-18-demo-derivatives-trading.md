@@ -370,3 +370,11 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [!] Alert thresholds, SLOs, retention periods, source quorum, and financial risk eligibility remain intentionally unset; no operational policy was inferred.
 - [!] This is documentation only. No collector, telemetry sink, alert, cron, RPC, migration, production secret, liquidation path, or Supabase Production object was created or enabled.
 - [ ] Next: when implementation is separately authorized, translate the verification matrix into isolated tests and add instrumentation only behind a reviewed trusted-service design; do not deploy a live collector before source-family and policy review.
+
+
+## CI checkpoint — complete exact-decimal workflow on documented HEAD (2026-11-18)
+
+- [x] GitHub Actions run `44367314575` (run 721) on commit `abf6ac3757135dd742d94f147b810c85d0e15e93` completed with workflow/job conclusion `success`; all 54 job steps completed successfully.
+- [x] Retrieved job logs confirm Market/Limit entrypoints, Stop-Limit and TP/SL lifecycle, two-session cancellation/execution races, derivative schema, maintenance-tier version pinning, Oracle provider/publication idempotency and rollback races, Reduce-only accounting, and insurance/deficit ledger rollback/races passed in disposable PostgreSQL.
+- [!] Expected negative-test errors in the logs were asserted rejection cases; they did not fail the job. A package repository returned HTTP 429 during setup but the workflow continued using available package indexes and the job completed successfully.
+- [!] This run predates the observability documentation commits that follow; it does not validate that documentation or any live service. No Supabase Production changes or live collector/liquidation activation occurred.
