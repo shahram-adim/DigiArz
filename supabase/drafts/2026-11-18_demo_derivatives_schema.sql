@@ -5,8 +5,6 @@ BEGIN;
 CREATE TABLE public.demo_derivative_accounts (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
-  futures_cash_usdt numeric(38,18) NOT NULL DEFAULT 0 CHECK (futures_cash_usdt >= 0),
-  margin_cash_usdt numeric(38,18) NOT NULL DEFAULT 0 CHECK (margin_cash_usdt >= 0),
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE (id,user_id)
@@ -221,6 +219,28 @@ CREATE INDEX demo_derivative_ledger_entries_user_created_idx
   ON public.demo_derivative_ledger_entries(user_id,created_at DESC);
 CREATE INDEX demo_derivative_ledger_entries_transaction_idx
   ON public.demo_derivative_ledger_entries(transaction_id,asset);
+
+
+-- Settled Futures cash is projected from the immutable ledger, never stored as
+-- an independently writable account balance. security_invoker preserves RLS.
+CREATE VIEW public.demo_derivative_futures_cash_balances
+WITH (security_invoker = true)
+AS
+SELECT
+  a.id AS account_id,
+  a.user_id,
+  COALESCE(SUM(e.debit_amount - e.credit_amount),0::numeric) AS futures_cash_usdt
+FROM public.demo_derivative_accounts AS a
+LEFT JOIN public.demo_derivative_ledger_entries AS e
+  ON e.user_id=a.user_id
+ AND e.asset='USDT'
+ AND e.account_bucket='futures_cash'
+GROUP BY a.id,a.user_id;
+
+COMMENT ON VIEW public.demo_derivative_futures_cash_balances IS
+  'Read-only ledger-derived USDT Futures cash; debit-normal balance. Never use a client-supplied balance.';
+REVOKE ALL ON public.demo_derivative_futures_cash_balances FROM anon,authenticated;
+GRANT SELECT ON public.demo_derivative_futures_cash_balances TO authenticated;
 
 CREATE FUNCTION public.validate_demo_derivative_ledger_group()
 RETURNS trigger
