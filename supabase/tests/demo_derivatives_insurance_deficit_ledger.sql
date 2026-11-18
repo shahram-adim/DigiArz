@@ -195,16 +195,43 @@ BEGIN
 END;
 $unbalanced$;
 
+-- A zero-insurance-coverage deficit remains fully visible; no cash is fabricated.
+INSERT INTO private.demo_derivative_deficit_events(
+ id,idempotency_key,payload_hash,source_liquidation_event_id,account_id,event_type,amount_usdt
+) VALUES (
+ 'a3000000-0000-0000-0000-000000000007','deficit-open-zero-cover',repeat('7',64),
+ 'a2000000-0000-0000-0000-000000000007','a4000000-0000-0000-0000-000000000001',
+ 'deficit_opened',5
+);
+DO $zero_coverage$
+BEGIN
+ IF (SELECT remaining_deficit_usdt FROM private.demo_derivative_deficit_exposure
+     WHERE source_liquidation_event_id='a2000000-0000-0000-0000-000000000007')<>5 THEN
+  RAISE EXCEPTION 'zero-coverage deficit must remain fully exposed';
+ END IF;
+END;
+$zero_coverage$;
+
 -- Deficit over-recovery and mutation attempts are rejected.
 DO $deficit_guards$
 BEGIN
  BEGIN
+  INSERT INTO private.demo_platform_ledger_transactions(
+   id,idempotency_key,payload_hash,event_type,event_reference,policy_version
+  ) VALUES (
+   'a1000000-0000-0000-0000-000000000008','excess-recovery-ledger',repeat('8',64),
+   'insurance_recovery','a2000000-0000-0000-0000-000000000008','recovery-policy-draft'
+  );
+  INSERT INTO private.demo_platform_ledger_entries(transaction_id,account_code,debit_amount)
+  VALUES ('a1000000-0000-0000-0000-000000000008','insurance_cash_usdt',21);
+  INSERT INTO private.demo_platform_ledger_entries(transaction_id,account_code,credit_amount)
+  VALUES ('a1000000-0000-0000-0000-000000000008','insurance_recovery_income_usdt',21);
   INSERT INTO private.demo_derivative_deficit_events(
    id,idempotency_key,payload_hash,source_liquidation_event_id,account_id,event_type,amount_usdt,platform_ledger_transaction_id
   ) VALUES (
    'a3000000-0000-0000-0000-000000000006','excess-recovery',repeat('6',64),
    'a2000000-0000-0000-0000-000000000003','a4000000-0000-0000-0000-000000000001',
-   'recovery_received',21,'a1000000-0000-0000-0000-000000000004'
+   'recovery_received',21,'a1000000-0000-0000-0000-000000000008'
   );
   RAISE EXCEPTION 'over-recovery unexpectedly accepted';
  EXCEPTION WHEN check_violation THEN
