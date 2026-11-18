@@ -32,6 +32,27 @@ if [[ ! "$ORDER_ID" =~ ^[0-9a-f]{8}-[0-9a-f-]{27,}$ ]]; then
   exit 1
 fi
 
+
+place_extra_order() {
+  local request_id="$1"
+  "${PSQL[@]}" -c "SET ROLE authenticated; SELECT set_config('request.jwt.claim.sub','$USER_ID',false); SELECT public.place_demo_reduce_only_limit_order('$ACCOUNT_ID','ETHUSDT','long',0.2,100,'$request_id');" | tail -n 1
+}
+OLDER_EXTRA_ID="$(place_extra_order "$OLDER_EXTRA_REQUEST")"
+NEWER_EXTRA_ID="$(place_extra_order "$NEWER_EXTRA_REQUEST")"
+for EXTRA_ID in "$OLDER_EXTRA_ID" "$NEWER_EXTRA_ID"; do
+  if [[ ! "$EXTRA_ID" =~ ^[0-9a-f]{8}-[0-9a-f-]{27,}$ ]]; then
+    echo "Could not create or parse extra Reduce-only order id: $EXTRA_ID"
+    exit 1
+  fi
+done
+"${PSQL[@]}" -c "UPDATE public.demo_derivative_orders
+  SET created_at=CASE
+    WHEN id='$ORDER_ID' THEN '2026-11-18 00:00:00+00'::timestamptz
+    WHEN id='$OLDER_EXTRA_ID' THEN '2026-11-18 00:01:00+00'::timestamptz
+    WHEN id='$NEWER_EXTRA_ID' THEN '2026-11-18 00:02:00+00'::timestamptz
+  END
+  WHERE id IN ('$ORDER_ID','$OLDER_EXTRA_ID','$NEWER_EXTRA_ID');" >/dev/null
+
 fill_sql() {
   local fill_id="$1"
   printf "SET ROLE service_role; SELECT public.apply_demo_reduce_only_limit_fill('%s','%s',0.4,100,0);" \
