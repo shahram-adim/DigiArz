@@ -526,3 +526,19 @@
 1. طراحی قرارداد رزرو سفارش و allocation دقیق Reduce-only در SQL؛ ابتدا روشن‌کردن سمت سفارش در برابر positionSide و نحوه تخصیص چند سفارش کاهنده.
 2. افزودن integration tests برای reserve، cancel release، partial fill، reduce-only over-allocation و رقابت دو نشست با قفل ردیف حساب.
 3. سپس RPCهای اتمیک با auth.uid، idempotency و ledger append-only؛ UI مشتقه تا تکمیل این مراحل غیرفعال بماند.
+
+
+## تفکیک جهت سفارش از سمت پوزیشن — ۱۸ نوامبر ۲۰۲۶
+
+- [x] بازبینی رابطهٔ Order/Position نشان داد `position_side` به‌تنهایی جهت اجرای خرید/فروش را ثبت نمی‌کند؛ در نتیجه تشخیص بازکردن Long/Short از بستن آن‌ها مبهم بود.
+- [x] به Schema draft ستون مستقل `side` با مقادیر `buy/sell` اضافه شد.
+- [x] چهار حالت مجاز صریح شد: Buy+Long+non-reduce برای افزایش Long؛ Sell+Long+reduce-only برای کاهش Long؛ Sell+Short+non-reduce برای افزایش Short؛ Buy+Short+reduce-only برای کاهش Short.
+- [x] این قرارداد با CHECK constraint در دیتابیس enforce می‌شود؛ Fill نیز side را ثبت می‌کند و FK مرکب آن را با سفارش مبدأ تطبیق می‌دهد.
+- [x] تست PostgreSQL برای رد سفارش Sell-Long و Buy-Short غیر Reduce-only افزوده شد.
+- [!] این تغییر هنوز در PostgreSQL 17 یا CI اجرا نشده؛ موفقیت آن اعلام نمی‌شود.
+- [x] هیچ RPC، رابط سفارش مشتقه یا Supabase Production تغییر نکرده است.
+
+### گام بعدی
+1. اجرای CI روی commit جدید و بررسی لاگ PostgreSQL.
+2. طراحی تخصیص قطعی Reduce-only میان چند سفارش هم‌زمان برای یک نماد و سمت پوزیشن، همراه با آزادسازی در cancel و partial fill.
+3. سپس آزمون چندنشستی زیر قفل حساب؛ RPC فقط بعد از عبور تست‌ها.
