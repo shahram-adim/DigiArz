@@ -1201,3 +1201,11 @@
 - [!] این رفتار فقط در PostgreSQL دورریختنی CI اثبات شده؛ هنوز risk RPCهای واقعی از resolver استفاده نمی‌کنند و scheduleها در Production وجود ندارند.
 - [ ] گام بعد: اتصال resolver به محاسبهٔ risk snapshot در یک تراکنش واحد و pin کردن `schedule_id/version` برای کل حساب/نماد؛ تست دو نشست برای اینکه هیچ snapshot واحدی tierهای دو نسخه را مخلوط نکند.
 - [ ] سپس طراحی دفترکل liquidation: partial/full sizing، close fee، liquidation fee، انتقال کسری به insurance/clearing، deficit/ADL policy و idempotent worker. Auto-liquidation همچنان خاموش.
+## تکمیل مرز دسترسی private schema و اجرای مجدد CI — ۱۸ نوامبر ۲۰۲۶
+
+- [x] draft Maintenance Tier اکنون دسترسی schema `private` را از `PUBLIC`, `anon` و `authenticated` صریحاً revoke می‌کند و فقط `service_role` را برای اجرای resolver/activation مجاز می‌سازد.
+- [x] تست PostgreSQL بررسی می‌کند که نقش‌های client به schema دسترسی ندارند، service_role فقط به توابع مجاز دسترسی دارد و هیچ دسترسی مستقیم به جدول‌های schedule/tier ندارد.
+- [x] CI کامل پس از این سخت‌سازی روی HEAD `4c04ffd4024f671a51ec1a6ca5240df2953aec4a` موفق شد: run `44308662580` (push) و `44308674101` (pull_request)، هر دو ۴۶ مرحله موفق.
+- [!] این تغییرات همچنان draft و CI-only هستند؛ Production Supabase دست‌نخورده است و هیچ worker/سفارش/لیکوییدیشنی از resolver استفاده نمی‌کند.
+- [ ] گام بعد: ساخت risk snapshot RPC server-side که در یک تراکنش، schedule_id/version هر نماد را pin کند و همهٔ positionهای همان حساب را با همان نسخه محاسبه کند؛ تست race در زمان تعویض schedule.
+- [ ] سپس مدل و دفترکل liquidation/insurance/deficit را طراحی و در PostgreSQL دورریختنی آزمایش کن؛ auto-liquidation و UI مشتقات غیرفعال بمانند.
