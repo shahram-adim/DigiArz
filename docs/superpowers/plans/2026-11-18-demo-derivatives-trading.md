@@ -139,3 +139,11 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [ ] Next: add two-session concurrency tests and design cancellation/position-reduction reconciliation; keep UI disabled.
 
 - [x] Fill path rechecks aggregate active Reduce-only reservations under the account lock and rejects pre-existing over-reserved state before mutating a position.
+
+
+## Concurrency checkpoint — Reduce-only reservation
+- [x] Added a two-process PostgreSQL test that races two independent authenticated sessions, each attempting to reserve 0.7 BTC against the same 1 BTC Long position with distinct idempotency keys.
+- [x] Requires exactly one successful placement and one rejection specifically for exceeding unreserved position quantity; any unrelated failure fails the test.
+- [x] Cancels the winning order and verifies the active reservation is fully released.
+- [x] Wired the script into disposable PostgreSQL CI before the partial-fill test.
+- [ ] Await and inspect a real CI run; not executed locally because no PostgreSQL client/server is available in this environment.
