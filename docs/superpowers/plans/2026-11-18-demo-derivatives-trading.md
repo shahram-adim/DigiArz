@@ -395,3 +395,11 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [!] این run فقط CI ایزوله است و هیچ‌یک از draftها را روی Supabase Production اعمال نمی‌کند؛ deployment یا مجوز فعال‌سازی worker/RPC/UI ایجاد نمی‌کند.
 - [!] تست فعلی fee schedule فقط activation/immutability/resolver را پوشش می‌دهد. RPC مربوط به Reduce-only fill هنوز `p_fee_usdt` را از ورودی trusted service می‌گیرد و schedule ID/version را در هر fill ثبت/اعتبارسنجی نمی‌کند. زمان pin شدن schedule per-fill هنوز تصمیم‌گیری/تصویب نشده؛ این شکاف باید باز بماند و با fixtureهای نرخ به سیاست واقعی تبدیل نشود.
 - [x] PR #12 همچنان Open/Draft و unmerged است؛ هیچ merge/rebase و هیچ تغییر Supabase Production انجام نشد.
+
+
+## CI checkpoint — exact-decimal workflow on latest documented HEAD (2026-11-18)
+- [x] GitHub Actions run `44369305097` (run 739, pull_request event) executed on the exact current feature HEAD `ff57e5384ae84dc659959ff3aee6e3ba146a92f6` and completed with workflow and `exact-decimal` job conclusion `success`.
+- [x] Retrieved job `135031423465` reports all 50 substantive steps completed successfully, including exact-decimal/browser tests, disposable PostgreSQL 17 derivative schema/RLS, maintenance and fee schedules, Oracle storage/ingestion and two-session races, account-risk snapshot, Reduce-only lifecycle/fill/reconciliation, insurance/deficit accounting and concurrency.
+- [x] Retrieved logs include the explicit message `demo derivatives schema integration passed`; the insurance/deficit draft and integration/race checks also completed successfully.
+- [!] This run validates the current branch HEAD in disposable CI only. It does not authorize any Supabase Production DDL/RPC/policy/cron/data change or enable live collector, liquidation execution, payout/recovery, worker, or UI.
+- [!] PR #12 remains Open/Draft and unmerged; the feature branch remains 285 commits ahead of `main` and zero behind at this checkpoint.
