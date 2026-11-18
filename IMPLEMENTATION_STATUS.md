@@ -1181,3 +1181,14 @@
 - [!] scheduleها هنوز آرگومان ورودی helperهای خالص هستند؛ resolver نسخه‌دار server-owned، schema SQL، کنترل مجوز و ثبت audit هنوز ساخته نشده‌اند. هیچ کلاینتی نباید این schedule را منبع حقیقت تعیین کند.
 - [ ] گام بعد: ساخت draft دیتابیس برای schedule نسخه‌دار per-symbol و tierها، اعتبارسنجی constraint/trigger در PostgreSQL و resolver فقط server-side؛ سپس تست تغییر نسخه و مرزهای tier در SQL.
 - [ ] پس از resolver، تکمیل liquidation accounting، liquidation fee، insurance/deficit و raceهای اجرا در fixture ایزوله. هیچ auto-liquidation یا UI activation.
+## ساخت و اعتبارسنجی مخزن نسخه‌دار Maintenance Tier در PostgreSQL ایزوله — ۱۸ نوامبر ۲۰۲۶
+
+- [x] Draft خصوصی `supabase/drafts/2026-11-18_demo_derivatives_maintenance_tiers.sql` ساخته شد؛ شامل schedule per-symbol با version/status، tier rows، فعال‌سازی اتمیک نسخه، resolver و دسترسی service_role-only.
+- [x] validator دیتابیس پیوستگی فرمول، tier_index پیوسته از ۱، سقف‌های افزایشی، tier نهایی نامحدود، نرخ غیرکاهشی، deduction غیرمنفی، max leverage غیر افزایشی و گردکردن محافظه‌کارانهٔ ۱۸ رقم اعشار را بررسی می‌کند.
+- [x] schedule و tierهای فعال/بازنشسته immutable هستند؛ نسخهٔ جدید ابتدا draft ساخته و فقط پس از اعتبارسنجی فعال می‌شود؛ نسخهٔ قدیمی در همان تراکنش retire می‌شود و downgrade نسخه رد می‌شود.
+- [x] resolver فقط از طریق تابع private قابل فراخوانی service_role است؛ جدول‌ها برای anon/authenticated/service_role دسترسی مستقیم ندارند.
+- [x] تست `supabase/tests/demo_derivatives_maintenance_tiers.sql` فعال‌سازی، انتخاب tier در مرز، رد schedule ناپیوسته، تعویض نسخه، immutability، grants و resolver service_role را پوشش می‌دهد.
+- [x] workflow کامل PostgreSQL 17 برای draft و تست جدید اجرا شد: run `44307356561` (push) و run `44307363912` (pull_request)، هر دو `success` با ۴۵ مرحله موفق.
+- [!] این SQL فقط در PostgreSQL دورریختنی CI اجرا شده؛ هیچ‌یک از scheduleها در Supabase Production ساخته یا فعال نشده‌اند. هنوز RPCهای سفارش/لیکوییدیشن از resolver استفاده نمی‌کنند.
+- [ ] گام بعد: تست دو نشست برای تعویض هم‌زمان schedule و resolver، و بررسی snapshot/risk calculation در برابر تغییر نسخه؛ سپس اتصال resolver به backendهای محاسبه ریسک بدون اعتماد به ورودی مرورگر.
+- [ ] پس از آن، طراحی دفترکل liquidation fee، insurance fund و deficit/ADL policy، و تست اتمیک partial/full liquidation در fixture ایزوله. Auto-liquidation غیرفعال می‌ماند.
