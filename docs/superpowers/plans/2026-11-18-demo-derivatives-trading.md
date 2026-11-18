@@ -19,7 +19,7 @@ Spec: `docs/superpowers/specs/2026-11-18-demo-derivatives-trading-design.md`
 - [ ] Specify cross risk for Margin Spot with supported collateral assets and conservative haircuts.
 - [ ] Specify and test margin borrow/repay, accrued interest, short sale proceeds and debt closeout.
 - [ ] Specify funding-rate calculation, settlement interval, caps and idempotency.
-- [x] Add disposable PostgreSQL fixture coverage for ledger-derived Futures cash (positive transfer, zero-balance account, absence of mutable cash columns, and RLS on the projection view); execution on latest HEAD remains pending.
+- [x] Add and execute disposable PostgreSQL fixture coverage for ledger-derived Futures cash (positive transfer, zero-balance account, absence of mutable cash columns, and RLS on the projection view); verified by `demo_derivatives_schema_integration.sql` in CI run 733 on commit `a1146e1a`.
 - [ ] Add disposable PostgreSQL fixtures for exact arithmetic, rounding, negative balances, stale prices and liquidation boundaries, including the account-level cross-risk SQL projection.
 - [x] Add pure exact-decimal Available Margin unit tests for open/partially-filled limit orders and reduce-only quantity reservations (PostgreSQL reservation/race tests remain pending).
 - [ ] Add concurrent-session fixtures for order duplication, account locking, partial close and liquidation races.
