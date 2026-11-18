@@ -46,6 +46,16 @@ test('rejects invalid status, index mismatch, malformed timestamp and non-exact 
   assert.throws(() => parseOkxIndexComponents(JSON.stringify(badWeights), 'BTC-USDT'), /sum exactly to 1/);
 });
 
+test('rejects duplicate exchange/pair rows and array-shaped component objects', () => {
+  const f = fixture('2026-11-18-okx-index-components-btc-usdt.json');
+  const duplicated = { ...f.response, data: { ...f.response.data, components: [...f.response.data.components, { ...f.response.data.components[0] }] } };
+  assert.throws(() => parseOkxIndexComponents(JSON.stringify(duplicated), 'BTC-USDT'), /duplicate exchange and spot pair/);
+  const arrayComponent = { ...f.response, data: { ...f.response.data, components: f.response.data.components.map((c, i) => i ? c : []) } };
+  assert.throws(() => parseOkxIndexComponents(JSON.stringify(arrayComponent), 'BTC-USDT'), /must be an object/);
+  const arrayData = { ...f.response, data: [] };
+  assert.throws(() => parseOkxIndexComponents(JSON.stringify(arrayData), 'BTC-USDT'), /not successful/);
+});
+
 test('rejects numeric JSON values and malformed component prices instead of coercing them', () => {
   const f = fixture('2026-11-18-okx-index-components-btc-usdt.json');
   const numericPrice = { ...f.response, data: { ...f.response.data, last: 64372.2 } };
