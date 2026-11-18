@@ -310,3 +310,18 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [!] This is still a maintenance/PnL snapshot, not a complete account risk engine: close-fee reserve, unposted liabilities, account equity, maintenance buffer and final margin ratio are not yet assembled in SQL. No order or liquidation worker consumes it.
 - [ ] Next: add trusted fee schedule/resolution, non-duplicated unposted liabilities, and account-level equity/maintenance/margin-ratio aggregation within the same transaction.
 - [ ] Then implement atomic liquidation/insurance/deficit ledger accounting and test partial/full liquidation against concurrent fills/cancels. Keep automatic liquidation and derivatives UI disabled.
+
+
+## Checkpoint — SQL account-risk aggregation and full CI green (2026-11-18)
+
+- [x] Added a versioned private Maker/Taker Futures fee schedule with immutable active/retired versions, monotonic activation and a service_role-only resolver.
+- [x] Added a ledger-backed Funding settlement guard: accrued events are immutable, settlement requires a matching immutable funding ledger transaction, and the USDT Futures cash movement must equal the accrued amount.
+- [x] Added a private account-level Cross risk snapshot that combines ledger-derived cash, Cross unrealized PnL, unposted Funding liabilities/receivables, close-fee reserve, Equity, Maintenance Margin and Margin Ratio; per-position snapshots include isolated equity, fee schedule version and funding accruals.
+- [x] Tests cover settled versus unposted Funding, immutable accruals, no settlement without a matching ledger movement, isolated/cross aggregation, fee schedule versioning and stale-newest-oracle fail-closed behavior.
+- [x] Corrected the Margin Ratio test to compare the returned ratio against the same returned Equity/Maintenance components.
+- [x] Corrected the Reduce-only cash assertion to account for the already-settled 5 USDT funding debit in the shared account fixture: 10 initial free cash - 5 settled funding + 20 isolated margin released + 7 realized PnL - 0.05 fees = 31.95 USDT.
+- [x] Final CI on commit `bec86d6338b8d188a8fb2406d903e19c013bda90`: push run `44326154079` and pull_request run `44326169424`, both `success`, 51/51 steps each.
+- [!] All SQL remains draft-only and was exercised in disposable PostgreSQL 17. No Supabase Production DDL/RPC/policy/cron/data changes were made; PR #12 remains Open/Draft and unmerged.
+- [x] Added `docs/superpowers/specs/2026-11-18-demo-derivatives-liquidation-accounting.md` defining the isolated/cross liquidation boundary, partial/full reduction safety, execution-price/slippage contract, fees, insurance/deficit accounting, idempotency and the required test matrix.
+- [ ] Before writing liquidation execution SQL, resolve the six explicit policy decisions in the new spec: liquidation surcharge, slippage bound/execution evidence, target buffer/partial sizing, Cross position priority, insurance seed/replenishment, and residual deficit/recovery/ADL.
+- [ ] After policy decisions, implement the system-level insurance ledger and deficit journal first, then isolated and Cross liquidation RPCs in disposable PostgreSQL with the full concurrency/fault-injection matrix. Keep auto-liquidation and UI disabled.
