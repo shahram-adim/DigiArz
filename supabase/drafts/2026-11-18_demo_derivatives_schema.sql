@@ -35,6 +35,7 @@ CREATE TABLE public.demo_derivative_orders (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE (id,user_id),
+  UNIQUE (id,account_id,user_id,symbol,position_side),
   UNIQUE (user_id,client_request_id),
   FOREIGN KEY (account_id,user_id)
     REFERENCES public.demo_derivative_accounts(id,user_id) ON DELETE CASCADE,
@@ -65,6 +66,7 @@ CREATE TABLE public.demo_derivative_positions (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE (id,user_id),
+  UNIQUE (id,account_id,user_id,symbol,position_side),
   FOREIGN KEY (account_id,user_id)
     REFERENCES public.demo_derivative_accounts(id,user_id) ON DELETE CASCADE,
   CHECK (
@@ -92,10 +94,10 @@ CREATE TABLE public.demo_derivative_fills (
   created_at timestamptz NOT NULL DEFAULT now(),
   FOREIGN KEY (account_id,user_id)
     REFERENCES public.demo_derivative_accounts(id,user_id) ON DELETE CASCADE,
-  FOREIGN KEY (order_id,user_id)
-    REFERENCES public.demo_derivative_orders(id,user_id) ON DELETE RESTRICT,
-  FOREIGN KEY (position_id,user_id)
-    REFERENCES public.demo_derivative_positions(id,user_id) ON DELETE RESTRICT,
+  FOREIGN KEY (order_id,account_id,user_id,symbol,position_side)
+    REFERENCES public.demo_derivative_orders(id,account_id,user_id,symbol,position_side) ON DELETE RESTRICT,
+  FOREIGN KEY (position_id,account_id,user_id,symbol,position_side)
+    REFERENCES public.demo_derivative_positions(id,account_id,user_id,symbol,position_side) ON DELETE RESTRICT,
   UNIQUE (order_id,fill_sequence)
 );
 
@@ -118,8 +120,8 @@ CREATE TABLE public.demo_margin_loans (
     GENERATED ALWAYS AS (principal + accrued_interest - repaid_amount) STORED,
   FOREIGN KEY (account_id,user_id)
     REFERENCES public.demo_derivative_accounts(id,user_id) ON DELETE CASCADE,
-  FOREIGN KEY (position_id,user_id)
-    REFERENCES public.demo_derivative_positions(id,user_id) ON DELETE RESTRICT,
+  FOREIGN KEY (position_id,account_id,user_id)
+    REFERENCES public.demo_derivative_positions(id,account_id,user_id) ON DELETE RESTRICT,
   CHECK (repaid_amount <= principal + accrued_interest),
   CHECK ((status='open' AND principal + accrued_interest > repaid_amount) OR status<>'open'),
   CHECK ((status='repaid' AND principal + accrued_interest = repaid_amount) OR status<>'repaid')
@@ -166,6 +168,7 @@ CREATE TABLE public.demo_derivative_ledger_transactions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   idempotency_key uuid NOT NULL,
+  created_xid xid8 NOT NULL DEFAULT pg_current_xact_id(),
   event_type text NOT NULL CHECK (event_type IN (
     'spot_transfer','futures_transfer','margin_transfer','order_fee','realized_pnl',
     'funding','borrow','repayment','interest','liquidation','adjustment'
@@ -254,6 +257,27 @@ BEGIN
 END;
 $function$;
 
+CREATE FUNCTION public.prevent_demo_derivative_ledger_append()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO ''
+AS $function$
+DECLARE
+  v_created_xid xid8;
+BEGIN
+  SELECT created_xid INTO v_created_xid
+  FROM public.demo_derivative_ledger_transactions
+  WHERE id=NEW.transaction_id AND user_id=NEW.user_id
+  FOR KEY SHARE;
+  IF v_created_xid IS NULL OR v_created_xid <> pg_current_xact_id() THEN
+    RAISE EXCEPTION 'Derivative ledger transaction is finalized; append is forbidden'
+      USING ERRCODE='55000';
+  END IF;
+  RETURN NEW;
+END;
+$function$;
+
 CREATE FUNCTION public.prevent_demo_derivative_ledger_mutation()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -275,6 +299,10 @@ CREATE CONSTRAINT TRIGGER demo_derivative_ledger_header_balanced
 AFTER INSERT ON public.demo_derivative_ledger_transactions
 DEFERRABLE INITIALLY DEFERRED
 FOR EACH ROW EXECUTE FUNCTION public.validate_demo_derivative_ledger_group();
+
+CREATE TRIGGER demo_derivative_ledger_entries_no_late_append
+BEFORE INSERT ON public.demo_derivative_ledger_entries
+FOR EACH ROW EXECUTE FUNCTION public.prevent_demo_derivative_ledger_append();
 
 CREATE TRIGGER demo_derivative_ledger_entries_immutable
 BEFORE UPDATE OR DELETE ON public.demo_derivative_ledger_entries
@@ -306,6 +334,7 @@ END;
 $rls$;
 
 REVOKE ALL ON FUNCTION public.validate_demo_derivative_ledger_group() FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION public.prevent_demo_derivative_ledger_append() FROM PUBLIC,anon,authenticated;
 REVOKE ALL ON FUNCTION public.prevent_demo_derivative_ledger_mutation() FROM PUBLIC,anon,authenticated;
 
 COMMIT;
