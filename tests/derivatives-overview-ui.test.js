@@ -43,3 +43,27 @@ test('Derivatives overview shows informational Spot quotes without treating them
   const renderer = html.slice(start, end);
   assert.doesNotMatch(renderer, /\.rpc\s*\(|\.insert\s*\(|\.update\s*\(|\.delete\s*\(/);
 });
+
+
+test('Derivatives workspace contains the five planned read-only terminal views', () => {
+  const start = html.indexOf('id="derivativesWorkspace"');
+  const workspace = html.slice(start, html.indexOf('<section id="tab-dashboard"', start));
+  assert.ok(start >= 0 && workspace.length > 0);
+  for (const view of ['futures','margin','positions','orders','history']) {
+    assert.match(workspace, new RegExp('data-deriv-tab="' + view + '"'));
+    assert.match(workspace, new RegExp('data-deriv-panel="' + view + '"'));
+  }
+  assert.match(workspace, /ثبت سفارش آزمایشی — فعلاً غیرفعال/);
+  assert.match(workspace, /وام‌گیری یا بازپرداخت — غیرفعال/);
+  assert.match(workspace, /مرجع Mark\/Index یا محاسبهٔ ریسک و لیکوییدیشن مشتقات نیست/);
+});
+
+test('Derivatives UI prototype cannot write to Supabase or activate financial controls', () => {
+  const start = html.indexOf('id="derivativesWorkspace"');
+  const end = html.indexOf('<section id="tab-dashboard"', start);
+  const workspace = html.slice(start, end);
+  assert.doesNotMatch(workspace, /supabaseClient|\.rpc\s*\(|\.insert\s*\(|\.update\s*\(|\.delete\s*\(/i);
+  assert.match(workspace, /<button[^>]*disabled/);
+  assert.match(workspace, /<select[^>]*disabled/);
+  assert.match(workspace, /<input[^>]*disabled/);
+});

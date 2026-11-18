@@ -1623,6 +1623,64 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .pwa-install-banner button{flex:0 0 auto;min-height:42px;padding:10px 18px}
 @media(max-width:520px){.pwa-install-banner{align-items:stretch;flex-direction:column}.pwa-install-banner button{width:100%}}
 </style>
+
+<style id="derivatives-workspace-styles">
+.da-deriv-workspace{margin-top:20px;padding:clamp(12px,2.5vw,22px);border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,#121923,#0d121a);color:#edf2f8;min-width:0}
+.da-deriv-workspace-head,.da-deriv-card-head,.da-deriv-section-intro{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.da-deriv-eyebrow,.da-deriv-card-head>div>span{font-size:9px;letter-spacing:1.1px;color:#d8b85e;font-weight:800}
+.da-deriv-workspace-head h3{font-size:20px;margin:5px 0}.da-deriv-workspace-head p{font-size:11px;color:#aab5c4;margin:0;line-height:1.9}
+.da-deriv-state,.da-deriv-lock{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border:1px solid rgba(216,184,94,.3);border-radius:999px;color:#e6c96f;font-size:10px;white-space:nowrap}
+.da-deriv-state i{width:6px;height:6px;border-radius:50%;background:#d8b85e}
+.da-deriv-tabs{display:flex;gap:7px;overflow-x:auto;padding:12px 0;margin:10px 0 14px;border-bottom:1px solid rgba(148,163,184,.18);scrollbar-width:thin}
+.da-deriv-tabs button{flex:0 0 auto;background:#202a38;color:#aeb9c8;border:1px solid #344154;padding:9px 14px;font-size:11px}
+.da-deriv-tabs button.active{background:#d8b85e;color:#171b22;border-color:#d8b85e}
+.da-deriv-panel[hidden]{display:none!important}
+.da-deriv-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:10px 0 14px}
+.da-deriv-metrics article{min-width:0;padding:12px;border:1px solid rgba(148,163,184,.18);border-radius:12px;background:rgba(255,255,255,.035)}
+.da-deriv-metrics small,.da-deriv-metrics span{display:block;color:#9caabd;font-size:10px;line-height:1.8}
+.da-deriv-metrics strong{display:block;margin:8px 0 3px;font-size:20px;direction:ltr;text-align:right;color:#f3f5f8;font-variant-numeric:tabular-nums}
+.da-deriv-metrics strong em{font-size:10px;color:#9caabd;font-style:normal}
+.da-deriv-layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:12px}
+.da-deriv-card{min-width:0;padding:15px;border:1px solid rgba(148,163,184,.18);border-radius:14px;background:rgba(255,255,255,.035)}
+.da-deriv-card h4,.da-deriv-section-intro h4{margin:5px 0 12px;font-size:15px}
+.da-deriv-card-head>i{color:#d8b85e;width:22px;height:22px}
+.da-deriv-card label{display:grid;gap:6px;margin:10px 0;color:#aeb9c8;font-size:11px}
+.da-deriv-card input,.da-deriv-card select{min-width:0;background:#0b1119;border-color:#344154;color:#e8edf4;font-size:11px;padding:11px}
+.da-deriv-card input:disabled,.da-deriv-card select:disabled{opacity:.7;cursor:not-allowed}
+.da-deriv-field-label{font-size:11px;color:#aeb9c8;margin:10px 0 6px}
+.da-deriv-choice,.da-deriv-two-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.da-deriv-choice button{padding:10px 8px;font-size:11px}.da-deriv-choice .long{background:rgba(14,203,129,.14);color:#55dca5;border:1px solid rgba(14,203,129,.3)}.da-deriv-choice .short{background:rgba(246,70,93,.13);color:#ff8290;border:1px solid rgba(246,70,93,.3)}
+.da-deriv-preview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0}
+.da-deriv-preview>div,.da-deriv-risk-list>div{display:flex;justify-content:space-between;gap:8px;padding:9px 10px;border-radius:9px;background:rgba(0,0,0,.17);font-size:10px}
+.da-deriv-preview span,.da-deriv-risk-list span{color:#9caabd}.da-deriv-preview b,.da-deriv-risk-list b{color:#e7edf5;direction:ltr}
+.da-deriv-submit{width:100%;background:#4a4b45;color:#b8b9b3;font-size:11px}.da-deriv-submit:disabled{opacity:1;cursor:not-allowed}
+.da-deriv-disclaimer,.da-deriv-footer-note{font-size:10px;color:#aab5c4;line-height:1.9}
+.da-deriv-risk-empty,.da-deriv-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;padding:24px 14px;color:#aab5c4}
+.da-deriv-risk-empty>i,.da-deriv-empty>i{width:27px;height:27px;color:#d8b85e}
+.da-deriv-risk-empty b,.da-deriv-empty b{color:#e6ebf2;font-size:12px}
+.da-deriv-risk-empty p,.da-deriv-empty p{max-width:520px;margin:0;font-size:10px;line-height:2}
+.da-deriv-risk-list{display:grid;gap:7px;margin-top:12px}.da-deriv-risk-list .pending{color:#e6c96f}
+.da-deriv-section-intro{margin:8px 0 12px}.da-deriv-section-intro h4{margin-bottom:0}
+.da-deriv-table-wrap{max-width:100%;overflow-x:auto;border:1px solid rgba(148,163,184,.18);border-radius:12px}
+.da-deriv-table-wrap table{min-width:680px}.da-deriv-table-wrap td{text-align:center;color:#aab5c4}
+.da-deriv-history-types{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0}.da-deriv-history-types span{padding:7px 10px;border:1px solid rgba(148,163,184,.2);border-radius:999px;color:#bdc7d5;font-size:10px}
+.da-deriv-footer-note{display:flex;align-items:flex-start;gap:8px;margin-top:14px;padding:10px 12px;border-radius:10px;background:rgba(216,184,94,.08)}
+.da-deriv-footer-note i{width:16px;height:16px;flex:0 0 16px;color:#d8b85e}
+body.light-theme .da-deriv-workspace{background:linear-gradient(145deg,#fff,#f1f4f8);color:#1d2938;border-color:#dce1e8}
+body.light-theme .da-deriv-workspace-head p,body.light-theme .da-deriv-metrics small,body.light-theme .da-deriv-metrics span,body.light-theme .da-deriv-card label,body.light-theme .da-deriv-field-label,body.light-theme .da-deriv-disclaimer,body.light-theme .da-deriv-footer-note,body.light-theme .da-deriv-risk-empty,body.light-theme .da-deriv-empty,body.light-theme .da-deriv-risk-empty p,body.light-theme .da-deriv-empty p{color:#627084}
+body.light-theme .da-deriv-card,body.light-theme .da-deriv-metrics article{background:#fff;border-color:#dce1e8}
+body.light-theme .da-deriv-card input,body.light-theme .da-deriv-card select{background:#fff;color:#1d2938;border-color:#dce1e8}
+body.light-theme .da-deriv-preview>div,body.light-theme .da-deriv-risk-list>div{background:#f1f4f8}
+body.light-theme .da-deriv-preview span,body.light-theme .da-deriv-risk-list span{color:#627084}
+body.light-theme .da-deriv-preview b,body.light-theme .da-deriv-risk-list b,body.light-theme .da-deriv-risk-empty b,body.light-theme .da-deriv-empty b{color:#243246}
+body.light-theme .da-deriv-tabs button{background:#edf0f4;color:#344052;border-color:#dce1e8}
+body.light-theme .da-deriv-tabs button.active{background:#d8b85e;color:#171b22;border-color:#d8b85e}
+body.light-theme .da-deriv-choice .long{background:#e7f8f0;color:#167a52}body.light-theme .da-deriv-choice .short{background:#fff0f1;color:#b42d40}
+@media(max-width:760px){.da-deriv-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.da-deriv-layout{grid-template-columns:1fr}}
+@media(max-width:420px){.da-deriv-workspace{padding:11px}.da-deriv-workspace-head{align-items:flex-start}.da-deriv-workspace-head h3{font-size:17px}.da-deriv-state{font-size:9px;padding:5px 7px}.da-deriv-tabs button{padding:9px 11px}.da-deriv-metrics article{padding:10px}.da-deriv-metrics strong{font-size:17px}.da-deriv-two-fields{grid-template-columns:1fr}.da-deriv-preview{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.da-deriv-tabs button{transition:none}}
+</style>
+
 </head>
 <body>
 <div class="wrap">
@@ -1696,7 +1754,66 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   </ul>
   <div class="notice">قیمت بازار Spot فعلی به‌تنهایی مرجع لیکوییدیشن Futures نیست. تا تکمیل قراردادهای مالی و مجوزهای اجرایی، هیچ سفارش یا دکمهٔ معاملاتی در این بخش ارائه نمی‌شود.</div>
  </div>
-</section>
+
+ <div class="da-deriv-workspace" id="derivativesWorkspace">
+  <div class="da-deriv-workspace-head"><div><span class="da-deriv-eyebrow">DEMO DERIVATIVES TERMINAL</span><h3>میز معاملات مشتقه</h3><p>پیش‌نمایش طراحی فیوچرز و مارجین؛ بدون ثبت سفارش یا تغییر موجودی</p></div><span class="da-deriv-state"><i></i> فقط نمایشی</span></div>
+  <div class="da-deriv-tabs" role="tablist" aria-label="بخش‌های معاملات مشتقه">
+   <button type="button" class="active" role="tab" aria-selected="true" aria-controls="da-deriv-panel-futures" data-deriv-tab="futures">فیوچرز</button>
+   <button type="button" role="tab" aria-selected="false" aria-controls="da-deriv-panel-margin" data-deriv-tab="margin">مارجین</button>
+   <button type="button" role="tab" aria-selected="false" aria-controls="da-deriv-panel-positions" data-deriv-tab="positions">پوزیشن‌های باز</button>
+   <button type="button" role="tab" aria-selected="false" aria-controls="da-deriv-panel-orders" data-deriv-tab="orders">سفارش‌ها</button>
+   <button type="button" role="tab" aria-selected="false" aria-controls="da-deriv-panel-history" data-deriv-tab="history">تاریخچه</button>
+  </div>
+  <section class="da-deriv-panel" id="da-deriv-panel-futures" role="tabpanel" data-deriv-panel="futures">
+   <div class="da-deriv-metrics">
+    <article><small>Mark Price · قیمت مرجع</small><strong>—</strong><span>پس از تأیید فید مستقل</span></article>
+    <article><small>Index Price · قیمت شاخص</small><strong>—</strong><span>منبع و تازگی تأیید نشده</span></article>
+    <article><small>موجودی حساب فیوچرز</small><strong>— <em>USDT</em></strong><span>از دفترکل مشتقات خوانده می‌شود</span></article>
+    <article><small>Margin Ratio · نسبت مارجین</small><strong>—</strong><span>پس از تکمیل سیاست ریسک</span></article>
+   </div>
+   <div class="da-deriv-layout">
+    <article class="da-deriv-card da-deriv-order-card">
+     <div class="da-deriv-card-head"><div><span>FUTURES</span><h4>ثبت سفارش فیوچرز</h4></div><span class="da-deriv-lock">غیرفعال</span></div>
+     <label>جفت‌ارز <select disabled><option>انتخاب از بازارهای USDT فعال</option></select></label>
+     <div class="da-deriv-field-label">جهت موقعیت</div><div class="da-deriv-choice"><button type="button" class="long" disabled>Long · خرید</button><button type="button" class="short" disabled>Short · فروش</button></div>
+     <div class="da-deriv-two-fields"><label>نوع سفارش<select disabled><option>Market</option><option>Limit</option></select></label><label>اهرم<select disabled><option>پس از تعیین سقف مجاز</option></select></label></div>
+     <div class="da-deriv-two-fields"><label>حالت مارجین<select disabled><option>Cross / Isolated</option></select></label><label>مقدار قرارداد<input disabled placeholder="مقدار به واحد دارایی"></label></div>
+     <div class="da-deriv-preview"><div><span>ارزش اسمی</span><b>—</b></div><div><span>مارجین اولیه</span><b>—</b></div><div><span>کارمزد تخمینی</span><b>—</b></div><div><span>قیمت لیکوییدیشن تخمینی</span><b>—</b></div></div>
+     <button type="button" class="da-deriv-submit" disabled>ثبت سفارش آزمایشی — فعلاً غیرفعال</button>
+     <p class="da-deriv-disclaimer">این فرم صرفاً نمونهٔ رابط است. تا تصویب سیاست‌ها و اتصال RPC امن، هیچ سفارش یا رزروی ساخته نمی‌شود.</p>
+    </article>
+    <article class="da-deriv-card da-deriv-risk-card">
+     <div class="da-deriv-card-head"><div><span>ACCOUNT RISK</span><h4>وضعیت ریسک حساب</h4></div><i data-lucide="shield-check"></i></div>
+     <div class="da-deriv-risk-empty"><i data-lucide="activity"></i><b>دادهٔ ریسک هنوز متصل نیست</b><p>قیمت Mark معتبر، موجودی دفترکل و سطوح نگهداری باید از مسیر سرور خوانده شوند.</p></div>
+     <div class="da-deriv-risk-list"><div><span>مارجین نگهداری</span><b>—</b></div><div><span>فاصله تا لیکوییدیشن</span><b>—</b></div><div><span>ذخیرهٔ کارمزد بستن</span><b>—</b></div><div><span>وضعیت تازگی قیمت</span><b class="pending">تأیید نشده</b></div></div>
+    </article>
+   </div>
+  </section>
+  <section class="da-deriv-panel" id="da-deriv-panel-margin" role="tabpanel" data-deriv-panel="margin" hidden>
+   <div class="da-deriv-section-intro"><div><span class="da-deriv-eyebrow">MARGIN SPOT</span><h4>معاملات اعتباری و وام مجازی</h4></div><span class="da-deriv-lock">طراحی نمایشی</span></div>
+   <div class="da-deriv-metrics da-deriv-metrics-three"><article><small>ارزش وثیقه</small><strong>—</strong><span>دارایی‌های پشتیبانی‌شده پس از تصویب</span></article><article><small>بدهی و بهرهٔ انباشته</small><strong>—</strong><span>به تفکیک دارایی وام‌گرفته‌شده</span></article><article><small>Collateral Ratio</small><strong>—</strong><span>با Haircut مصوب</span></article></div>
+   <div class="da-deriv-layout">
+    <article class="da-deriv-card"><div class="da-deriv-card-head"><div><span>LONG / SHORT</span><h4>پیش‌نمایش وام و معامله</h4></div></div><label>جفت‌ارز<select disabled><option>انتخاب بازار مجاز</option></select></label><div class="da-deriv-choice"><button disabled class="long">Long · وام Quote</button><button disabled class="short">Short · وام Base</button></div><div class="da-deriv-two-fields"><label>حالت وثیقه<select disabled><option>Isolated / Cross</option></select></label><label>مقدار وام<input disabled placeholder="پس از تعیین سقف وام"></label></div><div class="da-deriv-two-fields"><label>وثیقهٔ اختصاص‌یافته<input disabled placeholder="مقدار وثیقه"></label><label>بهرهٔ تخمینی<input disabled placeholder="نرخ هنوز تصویب نشده"></label></div><button class="da-deriv-submit" disabled>وام‌گیری یا بازپرداخت — غیرفعال</button></article>
+    <article class="da-deriv-card"><div class="da-deriv-card-head"><div><span>LOAN HEALTH</span><h4>سلامت بدهی</h4></div><i data-lucide="landmark"></i></div><div class="da-deriv-risk-empty"><i data-lucide="wallet-cards"></i><b>هنوز وامی ثبت نشده است</b><p>اصل وام و بهره به تفکیک دارایی نگهداری می‌شوند؛ نرخ و روش بازپرداخت هنوز تصویب نشده است.</p></div><div class="da-deriv-risk-list"><div><span>اصل بدهی</span><b>—</b></div><div><span>بهرهٔ انباشته</span><b>—</b></div><div><span>ارزش خالص وثیقه</span><b>—</b></div></div></article>
+   </div>
+  </section>
+  <section class="da-deriv-panel" id="da-deriv-panel-positions" role="tabpanel" data-deriv-panel="positions" hidden>
+   <div class="da-deriv-section-intro"><div><span class="da-deriv-eyebrow">OPEN POSITIONS</span><h4>موقعیت‌های باز مشتقه</h4></div><span class="da-deriv-lock">فقط خواندنی</span></div>
+   <div class="da-deriv-empty"><i data-lucide="layers-3"></i><b>هنوز موقعیت مشتقه‌ای برای نمایش وجود ندارد</b><p>پس از تکمیل موتور اجرا، موقعیت‌ها همراه با اندازه، میانگین ورود، قیمت Mark، اهرم، وثیقه، سود و زیان و فاصلهٔ لیکوییدیشن اینجا نمایش داده می‌شوند.</p></div>
+   <div class="da-deriv-table-wrap"><table><thead><tr><th>جفت‌ارز</th><th>جهت</th><th>اندازه</th><th>قیمت ورود</th><th>Mark Price</th><th>اهرم</th><th>حالت</th><th>سود/زیان</th></tr></thead><tbody><tr><td colspan="8">داده‌ای برای نمایش وجود ندارد</td></tr></tbody></table></div>
+  </section>
+  <section class="da-deriv-panel" id="da-deriv-panel-orders" role="tabpanel" data-deriv-panel="orders" hidden>
+   <div class="da-deriv-section-intro"><div><span class="da-deriv-eyebrow">DERIVATIVE ORDERS</span><h4>سفارش‌های مشتقه</h4></div><span class="da-deriv-lock">جدا از سفارش‌های Spot</span></div>
+   <div class="da-deriv-empty"><i data-lucide="clipboard-list"></i><b>سفارش مشتقه‌ای ثبت نشده است</b><p>سفارش‌های فیوچرز و مارجین در دفتر مستقل خود نمایش داده می‌شوند و وارد جدول سفارش‌های Spot نمی‌شوند.</p></div>
+   <div class="da-deriv-table-wrap"><table><thead><tr><th>زمان</th><th>بازار</th><th>نوع</th><th>جهت</th><th>مقدار</th><th>پرشده</th><th>وضعیت</th></tr></thead><tbody><tr><td colspan="7">هنوز سفارشی وجود ندارد</td></tr></tbody></table></div>
+  </section>
+  <section class="da-deriv-panel" id="da-deriv-panel-history" role="tabpanel" data-deriv-panel="history" hidden>
+   <div class="da-deriv-section-intro"><div><span class="da-deriv-eyebrow">DERIVATIVES HISTORY</span><h4>تاریخچهٔ معاملات و دفترکل</h4></div><span class="da-deriv-lock">دفترکل تغییرناپذیر</span></div>
+   <div class="da-deriv-history-types"><span>Fillها</span><span>کارمزد</span><span>Funding</span><span>وام و بهره</span><span>سود و زیان</span><span>انتقال داخلی</span></div>
+   <div class="da-deriv-empty"><i data-lucide="scroll-text"></i><b>تاریخچه‌ای برای نمایش وجود ندارد</b><p>هر رویداد پس از اتصال backend با زمان، شناسهٔ مرجع، دارایی، مبلغ دقیق و پیوند دفترکل قابل پیگیری خواهد بود.</p></div>
+  </section>
+  <div class="da-deriv-footer-note"><i data-lucide="info"></i><span>همهٔ موجودی‌ها و معاملات این بخش مجازی هستند. قیمت Spot نمایشی، قیمت Mark/Index یا مبنای لیکوییدیشن محسوب نمی‌شود.</span></div>
+ </div></section>
 
 <section id="tab-dashboard" class="card dashboard-panel digiarz-v2-dashboard">
  <div id="adminRoleStatus" class="notice warn hidden" role="status" style="margin-bottom:14px"></div>
@@ -3207,6 +3324,46 @@ if ("serviceWorker" in navigator && (location.protocol === "https:" || location.
 }
 </script>
 <!-- DigiArz APK build checkpoint: market provider batching verified 2026-11-17. -->
+
+<script id="derivatives-workspace-navigation">
+(() => {
+ const root=document.getElementById('derivativesWorkspace');
+ if(!root)return;
+ const tabs=[...root.querySelectorAll('[data-deriv-tab]')];
+ const panels=[...root.querySelectorAll('[data-deriv-panel]')];
+ const activate=(name,focus=false)=>{
+  const target=panels.find(panel=>panel.dataset.derivPanel===name);
+  if(!target)return;
+  tabs.forEach(tab=>{
+   const active=tab.dataset.derivTab===name;
+   tab.classList.toggle('active',active);
+   tab.setAttribute('aria-selected',active?'true':'false');
+   tab.tabIndex=active?0:-1;
+   if(active&&focus)tab.focus();
+  });
+  panels.forEach(panel=>{panel.hidden=panel!==target});
+  if(window.lucide?.createIcons)window.lucide.createIcons({root});
+ };
+ root.addEventListener('click',event=>{
+  const tab=event.target.closest('[data-deriv-tab]');
+  if(tab&&root.contains(tab))activate(tab.dataset.derivTab);
+ });
+ root.addEventListener('keydown',event=>{
+  const tab=event.target.closest('[data-deriv-tab]');
+  if(!tab)return;
+  const index=tabs.indexOf(tab);
+  let next=index;
+  if(event.key==='ArrowLeft')next=(index+1)%tabs.length;
+  else if(event.key==='ArrowRight')next=(index-1+tabs.length)%tabs.length;
+  else if(event.key==='Home')next=0;
+  else if(event.key==='End')next=tabs.length-1;
+  else return;
+  event.preventDefault();activate(tabs[next].dataset.derivTab,true);
+ });
+ tabs.forEach((tab,index)=>tab.tabIndex=index===0?0:-1);
+})();
+</script>
+
 </body>
 </html>
 +formatNum(price,12);
