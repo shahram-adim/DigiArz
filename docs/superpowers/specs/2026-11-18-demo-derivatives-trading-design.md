@@ -188,3 +188,32 @@ The disposable-PostgreSQL test suite must cover these invariants before any fund
 10. **Audit trail:** each result must retain source/version, signed rate, reference snapshot, eligible quantity/notional, window, settlement timestamp, policy version, and idempotency key.
 
 The tests must be isolated from Supabase Production. Until the sign convention, eligibility instant, notional basis, rounding, clearing model and insufficient-balance policy are approved, tests may use named synthetic fixtures only and must not be represented as policy approval.
+
+
+### Margin Spot borrowing-interest verification matrix (test design only)
+
+Before any interest accrual implementation, disposable-PostgreSQL tests must verify:
+
+1. **Asset isolation:** principal and interest liabilities remain denominated in the borrowed asset and never enter the USDT Futures cash ledger.
+2. **Accrual boundaries:** borrowing, repayment, partial repayment and full repayment immediately before/at/after an accrual boundary follow the subsequently approved timestamp rule.
+3. **Principal snapshot:** accrual uses the principal and rate version pinned for the relevant interval; later borrowing/repayment or rate changes cannot rewrite a completed interval.
+4. **Exact-decimal accrual:** calculate with exact numeric intermediates; test tiny amounts, long elapsed intervals and precision boundaries without selecting an operational rounding scale from fixtures.
+5. **No implicit compounding:** accrued interest does not become interest-bearing principal unless an explicit compounding policy is approved and versioned.
+6. **Repayment allocation:** test the approved priority between accrued interest and principal, partial payments, insufficient repayment amount and repeated repayment requests; both liability balances and ledger entries must reconcile.
+7. **Concurrency:** race accrual with borrow/repay and two repayments; serialize on the account/loan liability and prevent duplicated accrual or over-repayment.
+8. **Idempotency:** a retry for the same loan and accrual window/policy version creates no second interest event or journal.
+9. **Atomic rollback:** a fault after one liability/journal write leaves principal, interest and all ledger rows unchanged.
+10. **Audit and disclosure:** preserve loan ID, borrowed asset, principal basis, rate and policy version, accrual interval, day-count basis, timestamps, exact intermediate, rounding result and repayment allocation; UI distinguishes accrued interest from principal.
+
+APR, frequency, day-count basis, compounding, grace period, repayment priority, rounding and liquidation treatment remain undecided. This matrix does not authorize an interest worker, RPC, schema migration or Production change.
+
+### Fee schedule pinning test matrix (test design only)
+
+- Resolve schedule version under the same transaction boundary that persists each actual fill; store the exact schedule ID/version and Maker/Taker role on that fill.
+- Race activation of a newer schedule against fill creation. Each fill must retain exactly one complete version; no mixed Maker/Taker rates from different versions are permitted.
+- A partially filled order spanning activation may contain fills from different versions only when each fill independently resolves and pins the active version at its own execution boundary.
+- Retry of the same fill must reuse its persisted schedule/version and fee result, never resolve a newer active schedule and charge again.
+- Test Maker and Taker roles independently of order type, including marketable Limit execution and partial fills.
+- Assert fee base equals actual fill notional, not requested order notional; opening and closing fills are separate fee events.
+- Test reserve estimate separately from booked fee: reservation must not create a fee ledger debit, and actual fill fee posts exactly once.
+- Rounding, cap, rebate and tier behavior remain untested until separately specified; synthetic fixture rates are not approved policy.
