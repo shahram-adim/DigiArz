@@ -69,7 +69,7 @@ BEGIN
       WHERE t.schedule_id=p_schedule_id
     ) ordered_tiers
     WHERE
-      (row_no=1 AND maintenance_amount<>0)
+      (row_no=1 AND (tier_index<>1 OR maintenance_amount<>0))
       OR (row_no<tier_count AND max_notional IS NULL)
       OR (row_no=tier_count AND max_notional IS NOT NULL)
       OR (row_no>1 AND (
@@ -114,6 +114,9 @@ BEGIN
   IF NEW.status NOT IN ('draft','active') THEN
     RAISE EXCEPTION 'Invalid maintenance schedule transition' USING ERRCODE='55000';
   END IF;
+  IF NEW.status='active' AND NEW.effective_from>clock_timestamp() THEN
+    RAISE EXCEPTION 'Maintenance schedule cannot activate before its effective time' USING ERRCODE='23514';
+  END IF;
   IF NEW.status='active' AND NOT private.demo_derivative_maintenance_schedule_valid(OLD.id) THEN
     RAISE EXCEPTION 'Maintenance tier schedule is incomplete or inconsistent' USING ERRCODE='23514';
   END IF;
@@ -139,6 +142,9 @@ BEGIN
     v_schedule_id:=OLD.schedule_id;
   ELSE
     v_schedule_id:=NEW.schedule_id;
+  END IF;
+  IF TG_OP='UPDATE' AND NEW.schedule_id<>OLD.schedule_id THEN
+    RAISE EXCEPTION 'A maintenance tier cannot move between schedules' USING ERRCODE='55000';
   END IF;
   SELECT s.status INTO v_status
   FROM private.demo_derivative_maintenance_tier_schedules s
@@ -174,6 +180,13 @@ BEGIN
   END IF;
   IF v_status<>'draft' THEN
     RAISE EXCEPTION 'Only a draft maintenance schedule can be activated' USING ERRCODE='55000';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM private.demo_derivative_maintenance_tier_schedules s
+    WHERE s.symbol=v_symbol AND s.status='retired' AND s.schedule_version>=
+      (SELECT x.schedule_version FROM private.demo_derivative_maintenance_tier_schedules x WHERE x.id=p_schedule_id)
+  ) THEN
+    RAISE EXCEPTION 'Maintenance schedule version must increase monotonically' USING ERRCODE='23514';
   END IF;
   IF NOT private.demo_derivative_maintenance_schedule_valid(p_schedule_id) THEN
     RAISE EXCEPTION 'Maintenance tier schedule is incomplete or inconsistent' USING ERRCODE='23514';
