@@ -343,3 +343,12 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [x] GitHub Actions run `44361544743` on commit `efe928d38ce2174c237abe9fae8cfb0232e72d04` completed successfully; the job steps specifically report success for applying the draft, testing insurance accounting/deficit exposure/private access, and running two-session insurance payout/deficit recovery races.
 - [!] This evidence is for disposable PostgreSQL CI only. It does not authorize payout/recovery RPCs, liquidation execution, or any Supabase Production change.
 - [ ] Next: keep execution paths blocked and obtain explicit policy decisions for the six liquidation gates in `docs/superpowers/specs/2026-11-18-demo-derivatives-liquidation-policy-decisions.md`. Do not infer values from fixtures.
+
+
+## CI checkpoint — complete derivatives exact-decimal pipeline (2026-11-18)
+
+- [x] GitHub Actions run `44365892534` (run 714, commit `806644414e8a2ab14ce471d1bb36fc7e1709e0e3`) completed with conclusion `success`; the `exact-decimal` job also completed successfully with no failed steps.
+- [x] Retrieved job logs confirm the disposable PostgreSQL insurance/deficit integration passed, atomic rollback fault injection passed, and two-session insurance/deficit races passed (one affordable payout and one recovery won; overdraw and over-recovery were rejected).
+- [x] The same run also completed the broader exact-decimal, derivative schema, maintenance tier, oracle, Reduce-only and lifecycle integration steps in the disposable test environment.
+- [!] This is CI evidence only. It does not authorize applying any draft to Supabase Production or enabling liquidation execution, payout/recovery RPCs, workers, or UI.
+- [ ] Continue with policy-independent work only until the six liquidation policy gates are explicitly decided; no fixture value may be promoted to policy.
