@@ -36,7 +36,7 @@ BEGIN
     'a2000000-0000-0000-0000-000000000001',
     'b2000000-0000-0000-0000-000000000001','healthy',
     20005,19992.5,ARRAY['binance_usdm','bybit_linear'],
-    v_ts,v_ts+interval '5 seconds','[]'::jsonb
+    v_ts,v_ts+interval '60 seconds','[]'::jsonb
   );
 
   PERFORM private.demo_derivative_price_start_cycle(
@@ -56,7 +56,7 @@ BEGIN
     'a2000000-0000-0000-0000-000000000002',
     'b2000000-0000-0000-0000-000000000002','healthy',
     1800.5,1799.5,ARRAY['binance_usdm','bybit_linear'],
-    v_ts,v_ts+interval '5 seconds','[]'::jsonb
+    v_ts,v_ts+interval '60 seconds','[]'::jsonb
   );
 END;
 $fresh_oracle$;
