@@ -124,3 +124,16 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [ ] CI execution on current branch HEAD and SQL logs must be observed before treating this as verified.
 - [ ] Partial fill remains blocked until realized PnL, fees, margin release and immutable ledger entries can be updated atomically in the same transaction.
 - [ ] Next: implement/test partial Reduce-only fills and then real two-session account-lock races. No Production deployment or UI activation.
+
+
+## Checkpoint — atomic Reduce-only Limit partial-fill slice
+- [x] Added a `reduce_only_fill` immutable ledger event type.
+- [x] Added a server-only fill RPC: only `service_role` can execute the public SECURITY INVOKER wrapper; its private SECURITY DEFINER helper has an empty search_path. Never expose the service key to the Android app.
+- [x] Fill path locks account → order → open position, checks idempotent fill ID, validates 18-decimal precision and Limit price protection, and rejects fills beyond order/position remainder.
+- [x] One transaction inserts the fill, updates position quantity/realized PnL/isolated margin, updates order filled/remaining/weighted average/status, and posts a balanced ledger group for PnL, fee and margin release.
+- [x] Isolated margin release is pro-rata and truncated downward to 18 decimals; a full close releases the exact residual margin.
+- [x] Added PostgreSQL lifecycle assertions for two fills, idempotent replay, overfill and price-protection rejection, final close, weighted average price and ledger-derived Futures cash.
+- [x] Reconciled schema fixture: position's 20 USDT isolated margin is now represented by a ledger transfer while free Futures cash remains 10 USDT.
+- [x] Added the fill SQL and test to disposable PostgreSQL CI workflow.
+- [ ] Await actual CI run and inspect PostgreSQL output; this change has not yet been executed in a database.
+- [ ] Next: add two-session concurrency tests and design cancellation/position-reduction reconciliation; keep UI disabled.
