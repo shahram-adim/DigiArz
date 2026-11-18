@@ -165,8 +165,10 @@ BEGIN
   SELECT futures_cash_usdt INTO v_cash
   FROM public.demo_derivative_futures_cash_balances
   WHERE user_id='10000000-0000-0000-0000-000000000001';
-  IF v_cash<>36.95 THEN
-    RAISE EXCEPTION 'ledger-derived cash after two fills mismatch: %',v_cash;
+  -- 10 initial free cash - 5 settled funding + 20 released isolated margin
+  -- + 7 realized PnL - 0.05 execution fees = 31.95 USDT.
+  IF v_cash<>31.95 THEN
+    RAISE EXCEPTION 'ledger-derived cash after funding settlement and two fills mismatch: %',v_cash;
   END IF;
 END;
 $cash_projection$;
