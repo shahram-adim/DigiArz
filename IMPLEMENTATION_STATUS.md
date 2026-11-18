@@ -837,3 +837,16 @@
 1. بررسی CI جدید و اصلاح صرفاً بر اساس خطای واقعی shell/SQL یا race.
 2. اگر raceها سبز شدند، بررسی adapterهای HTTP و قرارداد timestamp/precision/normalization برای Binance USDⓈ-M، Bybit Linear و OKX SWAP.
 3. سپس سنجش استقلال feedها و backtest آستانه‌ها؛ هنوز هیچ worker یا Oracle زنده‌ای فعال نیست.
+
+
+## اصلاح race ساخت هم‌زمان Price Cycle — ۱۸ نوامبر ۲۰۲۶
+
+- [x] اجرای اولیهٔ race fixture در CI شمارهٔ `44285940192` به مرحلهٔ جدید رسید اما شکست واقعی را آشکار کرد: در دو نشست هم‌زمان، `INSERT ... ON CONFLICT (id) DO NOTHING` فقط قید primary key را به‌عنوان arbiter می‌پذیرفت و برخورد روی قید یکتای مرکب `(id,symbol)` را مدیریت نمی‌کرد.
+- [x] در تابع `demo_derivative_price_start_cycle` عبارت به `ON CONFLICT DO NOTHING` تغییر کرد تا همهٔ قیود یکتا پوشش داده شوند؛ مسیر بعدی همچنان ردیف موجود را قفل و symbol/providers/instrument map را مقایسه می‌کند و درخواست متفاوت را رد می‌کند.
+- [x] خطای قبلی fixture دربارهٔ تغییر `max_age_ms` نیز حذف شده است؛ policy نسخه‌ای immutable می‌ماند و تست از پنجرهٔ اصلی ۵۰۰۰ms استفاده می‌کند.
+- [!] اجرای جدید روی commit اصلاح‌شده هنوز باید تمام شود؛ raceهای provider و snapshot هنوز تأیید نشده‌اند.
+- [x] هیچ تغییری در Supabase Production یا داده‌های واقعی انجام نشد.
+
+### گام بعدی
+1. بررسی CI جدید روی commit اصلاح conflict؛ به‌ویژه step دو نشست Oracle.
+2. در صورت عبور، بررسی raceهای provider-result و publication و سپس طراحی collector.
