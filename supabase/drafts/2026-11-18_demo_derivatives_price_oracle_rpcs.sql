@@ -78,7 +78,7 @@ BEGIN
 
   INSERT INTO private.demo_derivative_price_cycles(id,symbol,policy_version,expected_providers)
   VALUES (p_cycle_id,p_symbol,v_policy_version,v_expected)
-  ON CONFLICT (id) DO NOTHING;
+  ON CONFLICT DO NOTHING;
   GET DIAGNOSTICS v_inserted = ROW_COUNT;
   IF v_inserted=0 THEN
     SELECT * INTO STRICT v_existing FROM private.demo_derivative_price_cycles c
