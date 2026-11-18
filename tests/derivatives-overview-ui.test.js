@@ -66,8 +66,8 @@ test('Derivatives UI prototype cannot write to Supabase or activate financial co
   assert.match(workspace, /<button[^>]*disabled/);
   assert.match(workspace, /<select[^>]*disabled/);
   assert.match(workspace, /<input[^>]*disabled/);
-  assert.match(workspace, /body\.light-theme/);
-  assert.match(workspace, /@media\(max-width:420px\)/);
-  assert.match(workspace, /ArrowLeft/);
-  assert.match(workspace, /aria-selected/);
+  assert.match(html, /body\.light-theme/);
+  assert.match(html, /@media\(max-width:420px\)/);
+  assert.match(html, /ArrowLeft/);
+  assert.match(html, /aria-selected/);
 });
