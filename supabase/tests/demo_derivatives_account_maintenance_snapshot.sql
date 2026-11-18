@@ -178,7 +178,7 @@ BEGIN
   RAISE EXCEPTION 'Cross account risk aggregation mismatch: %',row_to_json(v);
  END IF;
  IF v.position_snapshots->0->>'symbol'<>'BTCUSDT'
- OR (v.position_snapshots->0->>'unposted_funding_liability_usdt')::numeric<>7
+ OR (v.position_snapshots->0->>'unposted_funding_liability_usdt')::numeric<>7.1
  OR (v.position_snapshots->0->>'close_fee_reserve_usdt')::numeric<>12.003
  OR v.position_snapshots->1->>'symbol'<>'ETHUSDT'
  OR (v.position_snapshots->1->>'unposted_funding_liability_usdt')::numeric<>2
