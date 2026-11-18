@@ -120,7 +120,143 @@
       atRisk
     });
   }
-\n  function riskSnapshot({side,quantity,entryPrice,markPrice,isolatedMargin,maintenanceRate,closeFeeRate='0',marginMode='isolated'}){
+\n  // Conservative positive arithmetic: round required collateral and fee reserves UP
+  // to the supported 18 decimal places so a preview never understates commitments.
+  function ceilPositiveProduct(a,b){
+    const x=D.parseDecimal(dec(a)),y=D.parseDecimal(dec(b));
+    const coefficient=x.coefficient*y.coefficient,scale=x.scale+y.scale;
+    if(scale<=SCALE)return D.toString({coefficient:coefficient*10n**BigInt(SCALE-scale),scale:SCALE});
+    const divisor=10n**BigInt(scale-SCALE);
+    let quotient=coefficient/divisor;
+    if(coefficient%divisor!==0n)quotient+=1n;
+    return D.toString({coefficient:quotient,scale:SCALE});
+  }
+  function ceilPositiveDivision(a,b){
+    const x=D.parseDecimal(positive(a,'dividend')),y=D.parseDecimal(positive(b,'divisor'));
+    const exponent=SCALE+y.scale-x.scale;
+    let numerator=x.coefficient,denominator=y.coefficient;
+    if(exponent>=0)numerator*=10n**BigInt(exponent);
+    else denominator*=10n**BigInt(-exponent);
+    let quotient=numerator/denominator;
+    if(numerator%denominator!==0n)quotient+=1n;
+    return D.toString({coefficient:quotient,scale:SCALE});
+  }
+  function addTo(map,key,value){
+    map.set(key,add(map.get(key)||'0',value));
+  }
+
+  // Account-level USDT Futures preview. Inputs must be server-derived snapshots:
+  // cash from the immutable ledger, positions and active orders from PostgreSQL,
+  // and fresh mark prices from the trusted server-side price source.
+  // unpostedLiabilitiesUsdt MUST exclude fees/funding/interest already posted to
+  // the ledger; otherwise the account would be charged twice.
+  function futuresAvailableMarginSnapshot({
+    cashBalanceUsdt,
+    positions,
+    openOrders,
+    unpostedLiabilitiesUsdt='0',
+    maxLeverage=125
+  }){
+    const cash=dec(cashBalanceUsdt);
+    if(D.compareDecimal(cash,'0')<0)throw new RangeError('cash balance must not be negative');
+    if(!Array.isArray(positions))throw new TypeError('positions must be an array');
+    if(!Array.isArray(openOrders))throw new TypeError('openOrders must be an array');
+    const liabilities=dec(unpostedLiabilitiesUsdt);
+    if(D.compareDecimal(liabilities,'0')<0)throw new RangeError('unposted liabilities must not be negative');
+
+    let totalPnl='0',positionInitial='0',maintenance='0',closeFeeReserve='0';
+    let hasStaleMark=false;
+    const positionQuantities=new Map();
+
+    for(const p of positions){
+      if(!p||p.productType!=='futures'||p.marginMode!=='cross')throw new TypeError('Available Margin accepts only cross Futures positions');
+      if(p.status!==undefined&&p.status!=='open')throw new TypeError('positions must be open');
+      if(p.side!=='long'&&p.side!=='short')throw new TypeError('position side must be long or short');
+      const quantity=positive(p.quantity,'position quantity');
+      const entry=positive(p.entryPrice,'entry price');
+      validateLeverage(p.leverage,maxLeverage);
+      const key=String(p.symbol)+'|'+p.side;
+      addTo(positionQuantities,key,quantity);
+      if(p.priceStatus!=='fresh'){
+        hasStaleMark=true;
+        continue;
+      }
+      const mark=positive(p.markPrice,'mark price');
+      const feeRate=validateFeeRate(p.closeFeeRate);
+      totalPnl=add(totalPnl,unrealizedPnl(p.side,quantity,entry,mark));
+      const positionNotional=ceilPositiveProduct(quantity,mark);
+      positionInitial=add(positionInitial,ceilPositiveDivision(positionNotional,String(p.leverage)));
+      maintenance=add(maintenance,ceilPositiveProduct(positionNotional,positive(p.maintenanceRate,'maintenance rate')));
+      closeFeeReserve=add(closeFeeReserve,ceilPositiveProduct(positionNotional,feeRate));
+    }
+
+    let openOrderInitial='0',openOrderFees='0',reduceOnlyReservations='0';
+    const reservedReduceOnly=new Map();
+    const activeOrders=openOrders.filter(o=>o&&(o.status==='pending'||o.status==='partially_filled'));
+    for(const o of activeOrders){
+      if(o.productType!=='futures')throw new TypeError('open order is not a Futures order');
+      if(o.orderType!=='limit')throw new TypeError('active market orders are forbidden; market orders must fill atomically or be rejected');
+      if(o.positionSide!=='long'&&o.positionSide!=='short')throw new TypeError('order positionSide must be long or short');
+      const remaining=positive(o.remainingQuantity,'remaining order quantity');
+      const limitPrice=positive(o.limitPrice,'limit price');
+      validateLeverage(o.leverage,maxLeverage);
+      const feeRate=validateFeeRate(o.feeRate);
+      if(o.reduceOnly){
+        const key=String(o.symbol)+'|'+o.positionSide;
+        const totalPosition=positionQuantities.get(key)||'0';
+        const alreadyReserved=reservedReduceOnly.get(key)||'0';
+        const nextReserved=add(alreadyReserved,remaining);
+        if(D.compareDecimal(nextReserved,totalPosition)>0)throw new RangeError('reduce-only orders exceed the available position quantity');
+        reservedReduceOnly.set(key,nextReserved);
+        reduceOnlyReservations=add(reduceOnlyReservations,remaining);
+      }else{
+        const orderNotional=ceilPositiveProduct(remaining,limitPrice);
+        openOrderInitial=add(openOrderInitial,ceilPositiveDivision(orderNotional,String(o.leverage)));
+        openOrderFees=add(openOrderFees,ceilPositiveProduct(orderNotional,feeRate));
+      }
+    }
+
+    if(hasStaleMark)return Object.freeze({
+      riskScope:'account',riskStatus:'stale_price',positionsCount:positions.length,
+      activeOrdersCount:activeOrders.length,walletCashUsdt:cash,
+      unrealizedPnlUsdt:null,equityUsdt:null,maintenanceMarginUsdt:null,
+      closeFeeReserveUsdt:null,positionInitialMarginUsdt:null,
+      openOrderInitialMarginUsdt:openOrderInitial,openOrderFeeReserveUsdt:openOrderFees,
+      reduceOnlyReservedQuantity:reduceOnlyReservations,totalOpenOrderReservationUsdt:null,
+      availableMarginUsdt:null,maintenanceBufferUsdt:null,atRisk:null
+    });
+
+    const equity=sub(add(cash,totalPnl),add(liabilities,closeFeeReserve));
+    const totalOpenReservation=add(openOrderInitial,openOrderFees);
+    const available=sub(sub(sub(equity,positionInitial),openOrderInitial),openOrderFees);
+    const hasExposure=D.compareDecimal(maintenance,'0')>0;
+    const atRisk=hasExposure&&D.compareDecimal(equity,maintenance)<=0;
+    return Object.freeze({
+      riskScope:'account',
+      riskStatus:atRisk?'maintenance_breach':'healthy',
+      positionsCount:positions.length,
+      activeOrdersCount:activeOrders.length,
+      walletCashUsdt:cash,
+      unrealizedPnlUsdt:totalPnl,
+      unpostedLiabilitiesUsdt:liabilities,
+      closeFeeReserveUsdt:closeFeeReserve,
+      equityUsdt:equity,
+      maintenanceMarginUsdt:maintenance,
+      positionInitialMarginUsdt:positionInitial,
+      openOrderInitialMarginUsdt:openOrderInitial,
+      openOrderFeeReserveUsdt:openOrderFees,
+      totalOpenOrderReservationUsdt:totalOpenReservation,
+      reduceOnlyReservedQuantity:reduceOnlyReservations,
+      availableMarginUsdt:available,
+      maintenanceBufferUsdt:sub(equity,maintenance),
+      marginRatio:hasExposure?div(equity,maintenance):null,
+      liquidationPrice:null,
+      liquidationPriceMethod:'account-level-no-single-price',
+      atRisk
+    });
+  }
+
+  function riskSnapshot({side,quantity,entryPrice,markPrice,isolatedMargin,maintenanceRate,closeFeeRate='0',marginMode='isolated'}){
     if(marginMode!=='isolated'&&marginMode!=='cross')throw new TypeError('marginMode must be isolated or cross');
     const pnl=unrealizedPnl(side,quantity,entryPrice,markPrice);
     const maintenance=maintenanceMargin(quantity,markPrice,maintenanceRate);
@@ -150,5 +286,5 @@
       atRisk:D.compareDecimal(equity,maintenance)<=0
     });
   }
-  return Object.freeze({notional,initialMargin,maintenanceMargin,unrealizedPnl,positionEquity,isolatedLiquidationPrice,riskSnapshot,crossMarginRiskSnapshot,validateLeverage});
+  return Object.freeze({notional,initialMargin,maintenanceMargin,unrealizedPnl,positionEquity,isolatedLiquidationPrice,riskSnapshot,crossMarginRiskSnapshot,futuresAvailableMarginSnapshot,validateLeverage});
 });
