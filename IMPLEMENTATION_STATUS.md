@@ -1171,3 +1171,13 @@
 - [ ] گام بعد: تعریف schema draft برای maintenance-tier versioning و resolver امن server-side؛ سپس اتصال همان schedule به cross-account risk aggregation و تست SQL مرز tier/تغییر نسخه/stale oracle.
 - [ ] پس از آن طراحی و تست partial/full liquidation accounting، fees، insurance fund و deficit handling در PostgreSQL ایزوله؛ auto-liquidation همچنان غیرفعال.
 - [x] هیچ Supabase Production تغییر نکرده و PR #12 همچنان Draft و ادغام‌نشده است.
+## اتصال scheduleهای Maintenance Margin به ریسک Cross و Available Margin — ۱۸ نوامبر ۲۰۲۶
+
+- [x] `crossMarginRiskSnapshot()` اکنون schedule پلکانی را به تفکیک نماد می‌پذیرد و Maintenance Margin هر موقعیت را با tier متناسب با mark notional جمع می‌کند.
+- [x] `futuresAvailableMarginSnapshot()` نیز در صورت ارائهٔ schedule per-symbol از tier و cumulative deduction استفاده می‌کند؛ نبود schedule برای نماد موقعیت، خطای صریح است و fallback خاموش ندارد.
+- [x] محاسبهٔ tiered maintenance با گردکردن محافظه‌کارانهٔ حاصل‌ضرب مثبت به بالا در ۱۸ رقم اعشار انجام می‌شود؛ continuity نیز بر همان قاعده اعتبارسنجی می‌شود.
+- [x] تست‌های Cross برای چند نماد، schedule گمشده، Available Margin و maintenance tier هر نماد اضافه شدند.
+- [x] CI روی HEAD `4f0204423006a5da7245fcbebe640d05f6dd5e1d` سبز شد: run `44306457201` (push) و `44306468761` (pull_request)، هر دو ۴۳ مرحله موفق.
+- [!] scheduleها هنوز آرگومان ورودی helperهای خالص هستند؛ resolver نسخه‌دار server-owned، schema SQL، کنترل مجوز و ثبت audit هنوز ساخته نشده‌اند. هیچ کلاینتی نباید این schedule را منبع حقیقت تعیین کند.
+- [ ] گام بعد: ساخت draft دیتابیس برای schedule نسخه‌دار per-symbol و tierها، اعتبارسنجی constraint/trigger در PostgreSQL و resolver فقط server-side؛ سپس تست تغییر نسخه و مرزهای tier در SQL.
+- [ ] پس از resolver، تکمیل liquidation accounting، liquidation fee، insurance/deficit و raceهای اجرا در fixture ایزوله. هیچ auto-liquidation یا UI activation.
