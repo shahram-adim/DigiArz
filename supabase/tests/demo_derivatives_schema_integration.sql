@@ -94,10 +94,31 @@ INSERT INTO public.demo_derivative_ledger_entries(
   id,transaction_id,user_id,asset,account_bucket,debit_amount,credit_amount
 ) VALUES
   ('92000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-000000000001',
-   '10000000-0000-0000-0000-000000000001','USDT','futures_cash',10,0),
+   '10000000-0000-0000-0000-000000000001','USDT','futures_cash',30,0),
   ('92000000-0000-0000-0000-000000000002','90000000-0000-0000-0000-000000000001',
-   '10000000-0000-0000-0000-000000000001','USDT','system_clearing',0,10);
+   '10000000-0000-0000-0000-000000000001','USDT','system_clearing',0,30);
 
+COMMIT;
+
+-- The fixture position starts with 20 USDT in isolated margin. Seed 30 USDT
+-- into Futures cash, then transfer 20 into isolated margin so the ledger and
+-- the position's collateral projection agree; free Futures cash remains 10.
+BEGIN;
+INSERT INTO public.demo_derivative_ledger_transactions(
+  id,user_id,idempotency_key,event_type
+) VALUES (
+  '90000000-0000-0000-0000-000000000002',
+  '10000000-0000-0000-0000-000000000001',
+  '91000000-0000-0000-0000-000000000002',
+  'margin_transfer'
+);
+INSERT INTO public.demo_derivative_ledger_entries(
+  transaction_id,user_id,asset,account_bucket,debit_amount,credit_amount
+) VALUES
+  ('90000000-0000-0000-0000-000000000002',
+   '10000000-0000-0000-0000-000000000001','USDT','isolated_margin',20,0),
+  ('90000000-0000-0000-0000-000000000002',
+   '10000000-0000-0000-0000-000000000001','USDT','futures_cash',0,20);
 COMMIT;
 
 DO $open_position_uniqueness$
