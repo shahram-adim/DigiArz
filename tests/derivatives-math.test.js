@@ -169,3 +169,31 @@ test('cross margin aggregates maintenance from trusted per-symbol tier schedules
     positions:[{productType:'futures',marginMode:'cross',symbol:'ETHUSDT',side:'long',quantity:'1',entryPrice:'100',markPrice:'20000',closeFeeRate:'0.001',priceStatus:'fresh'}]
   }),/missing trusted maintenance tier schedule/);
 });
+
+test('available margin uses the per-symbol maintenance tier schedule for open cross positions',()=>{
+  const r=M.futuresAvailableMarginSnapshot({
+    cashBalanceUsdt:'1000',
+    maintenanceTierSchedules:{BTCUSDT:maintenanceTiers},
+    positions:[{
+      productType:'futures',marginMode:'cross',symbol:'BTCUSDT',status:'open',side:'long',
+      quantity:'1',entryPrice:'100',markPrice:'20000',priceStatus:'fresh',
+      leverage:10,closeFeeRate:'0.001'
+    }],
+    openOrders:[]
+  });
+  assert.equal(r.maintenanceMarginUsdt,'300');
+  assert.equal(r.positionInitialMarginUsdt,'2000');
+  assert.equal(r.closeFeeReserveUsdt,'20');
+  assert.equal(r.equityUsdt,'20880');
+  assert.equal(r.availableMarginUsdt,'18880');
+  assert.throws(()=>M.futuresAvailableMarginSnapshot({
+    cashBalanceUsdt:'1000',
+    maintenanceTierSchedules:{},
+    positions:[{
+      productType:'futures',marginMode:'cross',symbol:'BTCUSDT',status:'open',side:'long',
+      quantity:'1',entryPrice:'100',markPrice:'20000',priceStatus:'fresh',
+      leverage:10,closeFeeRate:'0.001'
+    }],
+    openOrders:[]
+  }),/missing trusted maintenance tier schedule/);
+});
