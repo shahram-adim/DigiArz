@@ -1439,3 +1439,11 @@
 - [x] فایل `supabase/tests/demo_derivatives_schema_integration.sql` در GitHub Actions run `44368468782` (run 733، commit `a1146e1aef8d36beb49308eb574dc18e2fbc841a`) روی PostgreSQL 17 دورریختنی اجرا شد و خروجی صریح `demo derivatives schema integration passed` ثبت شد.
 - [x] لاگ نشان می‌دهد fixture انتقال مثبت به Futures cash، انتقال بخشی به isolated margin، صفر بودن projection برای حساب بدون ledger، نبود ستون‌های cash قابل‌تغییر و محدودسازی RLS view برای کاربر جاری را بررسی کرده است.
 - [!] این تأیید فقط برای disposable CI است؛ هیچ تغییری در Supabase Production انجام نشد.
+
+
+## CI checkpoint — exact-decimal workflow on latest documented HEAD (2026-11-18)
+- [x] GitHub Actions run `44369305097` (run 739, pull_request event) executed on the exact current feature HEAD `ff57e5384ae84dc659959ff3aee6e3ba146a92f6` and completed with workflow and `exact-decimal` job conclusion `success`.
+- [x] Retrieved job `135031423465` reports all 50 substantive steps completed successfully, including exact-decimal/browser tests, disposable PostgreSQL 17 derivative schema/RLS, maintenance and fee schedules, Oracle storage/ingestion and two-session races, account-risk snapshot, Reduce-only lifecycle/fill/reconciliation, insurance/deficit accounting and concurrency.
+- [x] Retrieved logs include the explicit message `demo derivatives schema integration passed`; the insurance/deficit draft and integration/race checks also completed successfully.
+- [!] This run validates the current branch HEAD in disposable CI only. It does not authorize any Supabase Production DDL/RPC/policy/cron/data change or enable live collector, liquidation execution, payout/recovery, worker, or UI.
+- [!] PR #12 remains Open/Draft and unmerged; the feature branch remains 285 commits ahead of `main` and zero behind at this checkpoint.
