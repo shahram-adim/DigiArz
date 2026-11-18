@@ -56,18 +56,18 @@ test('validates side and rate ranges',()=>{
 
 test('aggregates cross futures risk across multiple positions and account liabilities',()=>{
   const r=M.crossMarginRiskSnapshot({
-    cashBalanceUsdt:'1000',marginDebtUsdt:'20',accruedInterestUsdt:'2',fundingPayableUsdt:'3',unsettledFeesUsdt:'1',
+    cashBalanceUsdt:'1000',otherLiabilitiesUsdt:'20',accruedInterestUsdt:'2',fundingPayableUsdt:'3',unsettledFeesUsdt:'1',
     positions:[
       {productType:'futures',marginMode:'cross',side:'long',quantity:'1',entryPrice:'100',markPrice:'110',maintenanceRate:'0.01',closeFeeRate:'0.001',priceStatus:'fresh'},
       {productType:'futures',marginMode:'cross',side:'short',quantity:'2',entryPrice:'50',markPrice:'45',maintenanceRate:'0.02',closeFeeRate:'0.001',priceStatus:'fresh'}
     ]
   });
   assert.equal(r.unrealizedPnl,'20');
-  assert.equal(r.maintenanceMargin,'2.8');
+  assert.equal(r.maintenanceMargin,'2.9');
   assert.equal(r.closeFeeReserve,'0.2');
   assert.equal(r.totalLiabilities,'26');
   assert.equal(r.equity,'993.8');
-  assert.equal(r.maintenanceBuffer,'991');
+  assert.equal(r.maintenanceBuffer,'990.9');
   assert.equal(r.atRisk,false);
   assert.equal(r.liquidationPrice,null);
   assert.equal(r.riskScope,'account');
@@ -77,7 +77,7 @@ test('cross futures risk flags account-level maintenance breach without a single
     cashBalanceUsdt:'5',
     positions:[{productType:'futures',marginMode:'cross',side:'short',quantity:'1',entryPrice:'100',markPrice:'200',maintenanceRate:'0.1',closeFeeRate:'0.01',priceStatus:'fresh'}]
   });
-  assert.equal(r.equity,'-6');
+  assert.equal(r.equity,'-97');
   assert.equal(r.maintenanceMargin,'20');
   assert.equal(r.riskStatus,'maintenance_breach');
   assert.equal(r.atRisk,true);
@@ -96,5 +96,5 @@ test('cross futures risk rejects isolated or non-futures positions and negative 
   const p={productType:'futures',marginMode:'cross',side:'long',quantity:'1',entryPrice:'100',markPrice:'101',maintenanceRate:'0.01',closeFeeRate:'0.001',priceStatus:'fresh'};
   assert.throws(()=>M.crossMarginRiskSnapshot({cashBalanceUsdt:'100',positions:[{...p,marginMode:'isolated'}]}),/cross futures/);
   assert.throws(()=>M.crossMarginRiskSnapshot({cashBalanceUsdt:'100',positions:[{...p,productType:'margin'}]}),/cross futures/);
-  assert.throws(()=>M.crossMarginRiskSnapshot({cashBalanceUsdt:'100',marginDebtUsdt:'-1',positions:[]}),/must not be negative/);
+  assert.throws(()=>M.crossMarginRiskSnapshot({cashBalanceUsdt:'100',otherLiabilitiesUsdt:'-1',positions:[]}),/must not be negative/);
 });
