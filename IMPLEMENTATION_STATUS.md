@@ -1298,3 +1298,13 @@
 - [!] تست‌ها فقط در PostgreSQL 17 دورریختنی CI اجرا شده‌اند. این نتیجه به معنی تأیید سیاست اقتصادی یا مجوز استقرار نیست.
 - [ ] گام بعدی: ثبت تصمیم‌های سیاستی پیش‌نیاز لیکوییدیشن (surcharge/cap، slippage، maintenance buffer، Cross priority، insurance funding و residual-deficit/recovery)؛ تا تعیین و تصویب این موارد هیچ liquidation execution RPC/worker ساخته یا فعال نشود.
 - [!] PR #12 باز و Draft باقی مانده است؛ هیچ merge/rebase، Supabase Production write، UI مشتقات یا auto-liquidation انجام نشده است.
+
+
+## آماده‌سازی کاربرگ تصمیم‌های سیاستی لیکوییدیشن — ۱۸ نوامبر ۲۰۲۶
+
+- [x] کاربرگ `docs/superpowers/specs/2026-11-18-demo-derivatives-liquidation-policy-decisions.md` اضافه شد تا شش دسته تصمیم باز را به‌صورت صریح و قابل تصویب ثبت کند: surcharge/cap، execution slippage/evidence، maintenance buffer و partial/full، ترتیب Cross، seed/replenishment/payout بیمه، و deficit/recovery/ADL.
+- [x] هیچ نرخ، سقف، buffer، اولویت یا مقدار seed حدس زده یا از fixtureهای تست استخراج نشد؛ تمام فیلدهای اقتصادی عمداً NOT DECIDED باقی مانده‌اند. ADL همچنان OFF است.
+- [!] این سند فقط worksheet است و تأیید سیاست یا مجوز اجرا نیست. تا تصویب صریح همه موارد، liquidation RPC/worker/UI ساخته یا فعال نمی‌شود.
+- [!] تست CI قبلی شماره `44360144878` موفق بود و fault-injection rollback نیز از job log تأیید شد؛ commit worksheet اکنون باید CI را بگذراند.
+- [ ] گام بعد: بازبینی کاربرگ و ثبت تصمیم‌های صریح؛ سپس طراحی تست‌ها بر اساس مقادیر مصوب، بدون تغییر Supabase Production.
+- [!] PR #12 باز و Draft؛ هیچ merge/rebase، Production write، UI مشتقات یا auto-liquidation انجام نشده است.
