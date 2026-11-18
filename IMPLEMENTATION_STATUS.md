@@ -929,3 +929,18 @@
 1. برای Binance و Bybit مسیر دسترسی عمومی مجاز و قابل تکرار پیدا شود؛ تا آن زمان schema آن‌ها را از روی حدس پیاده‌سازی نکن.
 2. برای OKX parser دقیق مبتنی بر رشته‌های decimal و fixtureهای BTC/ETH نوشته و در PostgreSQL/Node CI تست شود؛ raw exchange/pair و قیمت‌های `symPx` و `cnvPx` جدا بمانند.
 3. پس از دریافت نمونهٔ مستقل Binance/Bybit، overlap و استقلال constituentها دوباره سنجیده شود؛ تا آن زمان quorum و live Oracle تصویب نشوند.
+
+
+## پیاده‌سازی Parser دقیق OKX بر اساس نمونه‌های زنده — ۱۸ نوامبر ۲۰۲۶
+
+- [x] ماژول مستقل `src/okx-index-components.js` اضافه شد؛ فقط envelope موفق OKX را می‌پذیرد و index درخواستی را با پاسخ تطبیق می‌دهد.
+- [x] timestamp منبع باید رشتهٔ ۱۳ رقمی میلی‌ثانیه‌ای باشد؛ قیمت‌ها و وزن‌ها فقط به‌صورت decimal string پذیرفته می‌شوند و هیچ parseFloat/Number یا تبدیل دودویی برای مقادیر مالی استفاده نمی‌شود.
+- [x] parser فیلدهای خام exchange label و spot pair را بدون canonicalization نگه می‌دارد، `symPx` و `cnvPx` را جدا حفظ می‌کند و مجموع وزن‌ها را با decimal arithmetic دقیقاً برابر 1 کنترل می‌کند.
+- [x] تست‌های fixture برای BTC و ETH و تست‌های رد پاسخ ناموفق، index mismatch، timestamp نامعتبر، مجموع وزن نادرست، قیمت عددی JSON و scientific notation اضافه شدند.
+- [x] در اجرای CI شمارهٔ `44291063482`، مرحلهٔ Node exact-decimal/browser integration شامل تست‌های جدید با موفقیت تمام شد؛ اجرای کامل workflow هنگام ثبت این checkpoint هنوز در حال انجام است و نتیجهٔ نهایی آن ادعا نمی‌شود.
+- [x] کد و fixtureها فقط در feature branch هستند؛ هیچ collector، live worker، cron، migration یا Production write ایجاد نشده است.
+
+### گام بعدی
+1. نتیجهٔ کامل CI روی commit `485d45855af5495e5a1c46d822482af763d5632d` را بررسی کن؛ در صورت شکست فقط بر اساس لاگ اصلاح شود.
+2. نمونهٔ واقعی Bybit و Binance هنوز در دسترس نیست؛ مستند رسمی Bybit endpoint و فیلدهای مورد انتظار را مشخص می‌کند، اما پاسخ زندهٔ این runner برای Bybit 403 و برای Binance 451 بوده است.
+3. پس از سبز شدن CI، parser و fixtureهای بعدی را فقط با شواهد واقعی providerهای دیگر گسترش بده؛ هنوز quorum یا Oracle زنده تصویب نشده است.
