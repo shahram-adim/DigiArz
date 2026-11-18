@@ -40,3 +40,13 @@ Three exchange endpoints are three venue operators, not necessarily three statis
 - Design service-only ingestion/publication RPCs with cycle idempotency and concurrent worker safety.
 - Backtest per-symbol thresholds and source-family overlap using historical data.
 - Add crash/retry, duplicate batch, provider partial timeout, and race tests.
+
+
+## Provider adapter and constituent-independence research — 2026-11-18
+
+- Binance USDⓈ-M exposes the mark/index pair from `/fapi/v1/premiumIndex` and constituent detail from `/fapi/v1/constituents`.
+- Bybit V5 exposes mark/index from `/v5/market/tickers` and underlying basket composition from `/v5/market/index-price-components`.
+- OKX requires separate mark and index endpoints; its `/api/v5/market/index-components` endpoint is the candidate constituent source. Exact response schema remains a live-sample verification gate.
+- Binance's documented index basket can include Bybit and OKX; Bybit's six-pair spot basket can overlap with Binance/OKX and dynamically changes weights. Therefore the current three venue observations are correlated composites, not three independent feeds.
+- Detailed transport, timestamp, exact-decimal, response-hash and constituent-provenance requirements are recorded in [the adapter contract](2026-11-18-demo-derivatives-oracle-adapter-contract.md).
+- No final quorum or per-symbol thresholds are approved. Preserve constituents and calculate source-family overlap before enabling risk use.
