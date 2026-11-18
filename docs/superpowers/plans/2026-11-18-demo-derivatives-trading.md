@@ -15,10 +15,12 @@ Spec: `docs/superpowers/specs/2026-11-18-demo-derivatives-trading-design.md`
 
 ## Phase 1 — Domain model and formula tests
 - [ ] Specify and independently test futures notional, initial margin, maintenance margin, unrealized/realized PnL, fee reserve and liquidation price.
-- [x] Specify and unit-test the initial USDT futures cross-risk aggregation helper (ledger-derived account cash + all cross positions + liabilities + close-fee reserve + stale-price fail-closed).\n- [ ] Specify cross risk for Margin Spot with supported collateral assets and conservative haircuts.
+- [x] Specify and unit-test the initial USDT futures cross-risk aggregation helper (ledger-derived account cash + all cross positions + liabilities + close-fee reserve + stale-price fail-closed).
+- [ ] Specify cross risk for Margin Spot with supported collateral assets and conservative haircuts.
 - [ ] Specify and test margin borrow/repay, accrued interest, short sale proceeds and debt closeout.
 - [ ] Specify funding-rate calculation, settlement interval, caps and idempotency.
-- [ ] Add disposable PostgreSQL fixtures for exact arithmetic, rounding, negative balances, stale prices and liquidation boundaries, including the ledger-derived futures cash projection and account-level cross-risk SQL projection.\n- [ ] Add exact-decimal Available Margin tests for open/partially-filled limit orders and reduce-only quantity reservations.
+- [ ] Add disposable PostgreSQL fixtures for exact arithmetic, rounding, negative balances, stale prices and liquidation boundaries, including the ledger-derived futures cash projection and account-level cross-risk SQL projection.
+- [ ] Add exact-decimal Available Margin tests for open/partially-filled limit orders and reduce-only quantity reservations.
 - [ ] Add concurrent-session fixtures for order duplication, account locking, partial close and liquidation races.
 
 ## Phase 2 — Backend implementation (feature branch only)
@@ -51,4 +53,4 @@ Spec: `docs/superpowers/specs/2026-11-18-demo-derivatives-trading-design.md`
 - [ ] Deploy only after explicit approval; no automatic Production migration or PR merge.
 
 ## Current checkpoint
-Phase 0 product/design baseline is recorded. No runtime code, Supabase schema, migrations, cron, functions, balances, orders or Production data have been changed. Next task is the authoritative read-only schema/function/grant/RLS/cron reconciliation, then formula and disposable-fixture tests.
+Phase 0 product/design baseline is recorded. The Futures ledger accounting contract is now specified in `docs/superpowers/specs/2026-11-18-futures-ledger-accounting.md`: ledger-derived cash, no double-counting of booked fees/funding, separate equity/maintenance/initial/available margin, and derived open-order reservations. No runtime RPC, Supabase Production schema, migration, cron, function, balance, order or Production data has been changed. Next task is to revise the disposable schema draft to remove mutable cash authorities and add a read-only ledger projection, then test Available Margin and order reservations.
