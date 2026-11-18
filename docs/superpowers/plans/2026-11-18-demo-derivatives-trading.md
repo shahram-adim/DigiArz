@@ -55,3 +55,11 @@ Spec: `docs/superpowers/specs/2026-11-18-demo-derivatives-trading-design.md`
 
 ## Current checkpoint
 Phase 0 product/design baseline is recorded. The Futures ledger accounting contract is specified in `docs/superpowers/specs/2026-11-18-futures-ledger-accounting.md`; the draft schema now derives Futures cash from an immutable ledger view. A pure exact-decimal `futuresAvailableMarginSnapshot()` helper and nine Node unit tests now cover cross Futures equity, position/order initial margin, open and partially filled Limit reservations, Reduce-only quantity allocation, stale marks, and conservative rounding. These tests have not yet been executed on CI or PostgreSQL. No runtime RPC, Supabase Production schema, migration, cron, function, balance, order or Production data has been changed. Next task is to obtain a real test run, add disposable PostgreSQL reservation/cancellation/partial-fill fixtures, and only then design account-locked idempotent RPCs.
+
+
+## Checkpoint — cross-only order validation
+- [x] Tightened `futuresAvailableMarginSnapshot()`: active orders must be Futures and `marginMode='cross'`; isolated and Margin Spot orders are rejected rather than mixed into the Cross Futures account snapshot.
+- [x] Updated all Available Margin order fixtures with explicit cross margin mode and added a negative test for isolated and Margin Spot orders.
+- [ ] Node and PostgreSQL 17 tests remain unexecuted/unverified for this checkpoint. The current execution container has Node 22.16.0 but no repository checkout and no `psql` binary; GitHub Actions run visibility remains incomplete.
+- [ ] Before relying on order previews, review the short-limit reservation price policy and enforce fill-time margin checks in the eventual account-locked RPC.
+- No Supabase Production schema, migration, RPC, cron, balances, orders or data were changed.
