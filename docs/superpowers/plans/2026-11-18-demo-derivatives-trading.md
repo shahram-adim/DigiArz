@@ -179,3 +179,15 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [ ] Add concurrency tests for external reduction racing with placement, fill and cancel.
 - [ ] Design the independent mark/index-price feed, maintenance tiers and liquidation/insurance accounting before any liquidation RPC. Do not use `market_prices` as a liquidation trigger.
 - No Supabase Production DDL/RPC/data, merge/rebase or derivatives UI activation was performed.
+
+
+## Checkpoint — full PostgreSQL CI green for trusted external reduction (2026-11-18)
+
+- [x] GitHub Actions run `44267541202` on commit `cd1d4aae09680e5edacefdbdf396a3ed80df820b` completed with `success`.
+- [x] The complete job passed Node/browser tests, PostgreSQL 17 regression/schema rehearsals, Spot advanced-order lifecycle/concurrency tests, derivative schema/RLS/ledger tests, Reduce-only placement/cancel and race tests, concurrent Fill test, atomic external Futures reduction/reconciliation, partial Fill accounting and ledger-balance rejection.
+- [x] Fixed the disposable test-role fixture by explicitly enforcing and asserting `service_role NOLOGIN BYPASSRLS`; the trusted-worker test now verifies actual row visibility under that role.
+- [x] Updated `IMPLEMENTATION_STATUS.md` with the successful run, current PR divergence and the next risk-engine design gate.
+- [ ] Design a separate mark/index-price observation model with source provenance, freshness, quorum/deviation/outlier checks, immutable snapshots and fail-closed behavior. Existing `market_prices` last-price is not a liquidation oracle.
+- [ ] Specify maintenance-margin tiers, partial/full liquidation sizing, close-fee reserve, liquidation fee, insurance/clearing treatment, cross-account risk, idempotency and recovery behavior.
+- [ ] Only after the design is approved, add disposable PostgreSQL tests for long/short, isolated/cross, stale/outlier price, threshold boundaries, concurrent fills/orders and repeated liquidation events.
+- No Production changes, no merge/rebase, and no derivatives UI activation.
