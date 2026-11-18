@@ -908,3 +908,24 @@
 1. دریافت پاسخ واقعی endpointهای constituent از مسیر قابل دسترس، به‌خصوص OKX؛ نمونهٔ مستندات رسمی جایگزین نمونهٔ زنده محسوب نشود.
 2. پس از مشاهدهٔ shape واقعی، طراحی و تست DDL provenance فقط در draft و PostgreSQL موقت.
 3. تا تأیید mapping و overlap واقعی، quorum مستقل تصویب نشود و collector/Oracle زنده و liquidation/Futures UI غیرفعال بمانند.
+
+
+## نمونه‌برداری زندهٔ constituentهای OKX و محدودیت دسترسی Binance/Bybit — ۱۸ نوامبر ۲۰۲۶
+
+- [x] چون دسترسی مستقیم API از مسیر جست‌وجوی وب پاسخ قابل اتکا نداد، یک workflow تشخیصی یک‌باره در `.github/workflows/oracle-constituent-sample.yml` اضافه شد؛ فقط با push همان فایل اجرا می‌شود، schedule/cron ندارد، secret نمی‌خواند و هیچ داده‌ای به Production نمی‌نویسد.
+- [x] اجرای تشخیصی `44290583897` موفق شد و artifact موقت `oracle-constituent-api-samples` را تولید کرد. artifact تا ۳ روز نگه داشته می‌شود؛ پاسخ‌های OKX به‌صورت fixture پایدار در مخزن ثبت شدند.
+- [x] OKX برای هر دو درخواست پاسخ HTTP 200 و `code=0` برگرداند. شکل واقعی پاسخ: `data.index`, `data.last`, `data.ts` و آرایهٔ `data.components[]` با فیلدهای `wgt`, `exch`, `symbol`, `symPx`, `cnvPx`.
+- [x] BTC-USDT در نمونهٔ زنده ۵ constituent داشت: Coinbase، Bitget، Binance، OKX و Bybit؛ مجموع وزن‌ها دقیقاً 1 بود. timestamp منبع `1794999591686` برابر `2026-11-18T10:59:51.686Z` است.
+- [x] ETH-USDT نیز ۵ constituent با همان پنج venue و مجموع وزن 1 داشت؛ timestamp منبع `1794999586930` برابر `2026-11-18T10:59:46.930Z` است. این overlap مستقیم نشان می‌دهد دو index constituent set مشترک دارند؛ venueهای Binance/Bybit/OKX را نباید مستقل از یکدیگر شمرد.
+- [x] در هر دو نمونه، Coinbase با pair خام `BTC/USD` یا `ETH/USD` آمده و `cnvPx` با `symPx` تفاوت دارد؛ بنابراین raw pair و قیمت تبدیل‌شده باید جداگانه حفظ شوند و canonical mapping بدون قرارداد روشن نباید حدس زده شود.
+- [x] fixtureهای تأییدشده:
+  - `docs/superpowers/fixtures/2026-11-18-okx-index-components-btc-usdt.json` — raw body SHA-256: `38f79b87d7849abcc7c6030226aed63f813664d0838f799586b0f0651a958f04`
+  - `docs/superpowers/fixtures/2026-11-18-okx-index-components-eth-usdt.json` — raw body SHA-256: `81e1ec7f0cca3230e71fab90eddbc067824bd0d88faac4f3cf04c647af7a1c7f`
+- [!] Binance برای هر دو نماد HTTP 451 با پیام محدودیت جغرافیایی runner داد؛ Bybit برای هر دو نماد HTTP 403 داد. این‌ها محدودیت دسترسی همین runner هستند و به معنی نامعتبر بودن endpoint یا schema نیستند؛ پاسخ constituent زندهٔ آن دو provider هنوز تأیید نشده است.
+- [x] نمونه‌ها در fixtureها برای بررسی parser آینده ثبت شدند؛ هنوز adapter اجرایی، collector، schema جدید یا quorum ساخته/فعال نشده است.
+- [x] اجرای تشخیصی به‌صورت workflow موقت، بدون زمان‌بندی و بدون دسترسی نوشتن به مخزن/Production انجام شد؛ PR #12 همچنان Draft است.
+
+### گام بعدی
+1. برای Binance و Bybit مسیر دسترسی عمومی مجاز و قابل تکرار پیدا شود؛ تا آن زمان schema آن‌ها را از روی حدس پیاده‌سازی نکن.
+2. برای OKX parser دقیق مبتنی بر رشته‌های decimal و fixtureهای BTC/ETH نوشته و در PostgreSQL/Node CI تست شود؛ raw exchange/pair و قیمت‌های `symPx` و `cnvPx` جدا بمانند.
+3. پس از دریافت نمونهٔ مستقل Binance/Bybit، overlap و استقلال constituentها دوباره سنجیده شود؛ تا آن زمان quorum و live Oracle تصویب نشوند.
