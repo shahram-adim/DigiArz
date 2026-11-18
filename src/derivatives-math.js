@@ -141,6 +141,10 @@
     if(numerator%denominator!==0n)quotient+=1n;
     return D.toString({coefficient:quotient,scale:SCALE});
   }
+  function validDerivativesSymbol(value){
+    if(typeof value!=='string'||! /^[A-Z0-9]{2,15}USDT$/.test(value))throw new TypeError('invalid Futures symbol');
+    return value;
+  }
   function addTo(map,key,value){
     map.set(key,add(map.get(key)||'0',value));
   }
@@ -175,7 +179,7 @@
       const quantity=positive(p.quantity,'position quantity');
       const entry=positive(p.entryPrice,'entry price');
       validateLeverage(p.leverage,maxLeverage);
-      const key=String(p.symbol)+'|'+p.side;
+      const key=validDerivativesSymbol(p.symbol)+'|'+p.side;
       addTo(positionQuantities,key,quantity);
       if(p.priceStatus!=='fresh'){
         hasStaleMark=true;
@@ -186,7 +190,9 @@
       totalPnl=add(totalPnl,unrealizedPnl(p.side,quantity,entry,mark));
       const positionNotional=ceilPositiveProduct(quantity,mark);
       positionInitial=add(positionInitial,ceilPositiveDivision(positionNotional,String(p.leverage)));
-      maintenance=add(maintenance,ceilPositiveProduct(positionNotional,positive(p.maintenanceRate,'maintenance rate')));
+      const maintenanceRate=positive(p.maintenanceRate,'maintenance rate');
+      if(D.compareDecimal(maintenanceRate,'1')>=0)throw new RangeError('maintenance rate must be below 1');
+      maintenance=add(maintenance,ceilPositiveProduct(positionNotional,maintenanceRate));
       closeFeeReserve=add(closeFeeReserve,ceilPositiveProduct(positionNotional,feeRate));
     }
 
@@ -202,7 +208,7 @@
       validateLeverage(o.leverage,maxLeverage);
       const feeRate=validateFeeRate(o.feeRate);
       if(o.reduceOnly){
-        const key=String(o.symbol)+'|'+o.positionSide;
+        const key=validDerivativesSymbol(o.symbol)+'|'+o.positionSide;
         const totalPosition=positionQuantities.get(key)||'0';
         const alreadyReserved=reservedReduceOnly.get(key)||'0';
         const nextReserved=add(alreadyReserved,remaining);
@@ -210,6 +216,7 @@
         reservedReduceOnly.set(key,nextReserved);
         reduceOnlyReservations=add(reduceOnlyReservations,remaining);
       }else{
+        validDerivativesSymbol(o.symbol);
         const orderNotional=ceilPositiveProduct(remaining,limitPrice);
         openOrderInitial=add(openOrderInitial,ceilPositiveDivision(orderNotional,String(o.leverage)));
         openOrderFees=add(openOrderFees,ceilPositiveProduct(orderNotional,feeRate));
