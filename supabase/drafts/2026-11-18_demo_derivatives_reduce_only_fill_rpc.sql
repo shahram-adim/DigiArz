@@ -5,6 +5,13 @@
 BEGIN;
 
 GRANT USAGE ON SCHEMA private TO service_role;
+GRANT SELECT ON TABLE
+  public.demo_derivative_orders,
+  public.demo_derivative_positions,
+  public.demo_derivative_fills,
+  public.demo_derivative_ledger_transactions,
+  public.demo_derivative_ledger_entries
+TO service_role;
 
 CREATE OR REPLACE FUNCTION private.apply_demo_reduce_only_limit_fill(
   p_order_id uuid,
