@@ -257,3 +257,14 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [!] This is a pure isolated-position estimate only. Tier configuration is not yet loaded from a versioned server-owned database table; cross-account aggregation and all liquidation accounting remain incomplete.
 - [ ] Next: draft versioned maintenance-tier storage and a trusted server-side resolver; integrate tier schedules into cross-margin account risk with stale-oracle and version-change tests.
 - [ ] Then test atomic partial/full liquidation, fee/insurance/deficit ledger flows, idempotency and concurrent liquidation vs fills/reductions. No auto-liquidation or UI activation.
+
+## Checkpoint — per-symbol maintenance tiers in Cross risk and Available Margin (2026-11-18)
+
+- [x] Cross-margin account risk now aggregates maintenance using a trusted per-symbol tier schedule map; missing schedules fail closed.
+- [x] Available Margin preview uses the same per-symbol schedule for open positions and rejects missing tier configuration.
+- [x] Positive notional × maintenance rate is rounded upward to 18 decimal places before subtracting the tier's cumulative maintenance deduction.
+- [x] Node tests cover multi-symbol Cross aggregation, missing schedule rejection, and Available Margin reservations with tier-derived maintenance.
+- [x] CI runs `44306457201` (push) and `44306468761` (pull_request) passed on commit `4f0204423006a5da7245fcbebe640d05f6dd5e1d`, 43 steps each.
+- [!] Tier maps are still injected into pure math helpers; there is no versioned database authority, server-side resolver, RLS/grant model, or audited configuration lifecycle yet.
+- [ ] Next: add draft PostgreSQL schema for immutable versioned per-symbol schedules and tiers, validate monotonic/continuous tier invariants in the database, and expose only a trusted server-side resolver.
+- [ ] Add PostgreSQL tests for activation/version changes, missing/overlapping schedules, exact tier boundaries and concurrent resolver reads. Then proceed to liquidation ledger/insurance accounting.
