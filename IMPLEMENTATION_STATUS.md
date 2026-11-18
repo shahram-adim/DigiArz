@@ -1472,3 +1472,15 @@
 - [x] Retrieved run 755 logs confirm all 76 Node/browser tests passed (76 pass, 0 fail), including the three new Derivatives overview navigation/read-only/responsive checks; the disposable PostgreSQL 17 log explicitly reports `demo derivatives schema integration passed`.
 - [!] Run 755 is the verification for code HEAD `edaac554`. The documentation commits that record this checkpoint are newer and have not themselves been validated by a later run.
 - [!] All database execution remained inside disposable PostgreSQL CI. No Supabase Production changes, deployment, live collector, order execution, borrowing, or liquidation activation occurred. PR #12 remains Open/Draft/unmerged.
+
+
+## Read-only Spot quotes in Derivatives overview — 2026-11-18
+- [x] Added a read-only Spot quote strip to the Derivatives overview for enabled BTCUSDT, ETHUSDT, SOLUSDT and BNBUSDT pairs when present in the active demo market list.
+- [x] Values use the app's existing freshness-checked `getTrustedMarketPrice()` path; 24-hour movement uses the existing fresh ticker cache. The UI distinguishes live ticker, fresh stored price, and unavailable price states.
+- [x] The panel explicitly labels these as informational Spot quotes, not Mark/Index prices or inputs to derivatives risk/liquidation. No order controls, RPC calls, data writes, new endpoints, or Supabase changes were added.
+- [x] Added a regression test ensuring the quote renderer uses the trusted freshness-checked market-price helper, refreshes with market ticker updates, and contains no database write/RPC calls.
+- [!] Initial run 762 (`44372410204`) on `5773446249f44e2b0c67af2e9ffe1118959f912c` exposed a JavaScript syntax error caused by an insertion overlapping the existing dashboard summary function. The exact CI log was inspected; the renderer and summary function were reconstructed and read back before re-running.
+- [x] Corrected code HEAD `10f6467c9c69a6c633bea292e6655650eb8303ae` passed GitHub Actions run 764 (`44372652035`), workflow and job conclusion `success`; job `135043318187` completed all 54 steps with zero failures.
+- [x] Run 764 logs confirm all 77 Node/browser tests passed (77 pass, 0 fail), including the new Spot quote test; disposable PostgreSQL 17 also reported `demo derivatives schema integration passed`.
+- [!] CI evidence applies to code HEAD `10f6467c`; any later documentation-only commits require their own exact-HEAD run before claiming the latest branch HEAD is validated.
+- [!] No Supabase Production DDL/RPC/policy/cron/data changes, deployment, live collector, order execution, borrowing, or liquidation activation occurred. PR #12 remains Open/Draft/unmerged.
