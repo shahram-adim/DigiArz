@@ -37,6 +37,7 @@ DECLARE
   v_new_average_price numeric(38,18);
   v_realized_pnl numeric(38,18);
   v_margin_release numeric(38,18);
+  v_total_reserved numeric(38,18);
   v_fill_sequence integer;
   v_ledger_transaction_id uuid;
 BEGIN
@@ -128,6 +129,24 @@ BEGIN
 
   IF p_fill_quantity>v_position.quantity THEN
     RAISE EXCEPTION 'Fill quantity exceeds remaining position quantity'
+      USING ERRCODE='23514';
+  END IF;
+
+  -- Fail closed if prior/manual state already over-reserved this position.
+  -- Every supported mutation takes the same account lock, so this sum is
+  -- stable for the duration of the fill transaction.
+  SELECT COALESCE(sum(o.remaining_quantity),0)::numeric(38,18)
+    INTO v_total_reserved
+  FROM public.demo_derivative_orders AS o
+  WHERE o.account_id=v_account_id
+    AND o.product_type=v_order.product_type
+    AND o.symbol=v_order.symbol
+    AND o.position_side=v_order.position_side
+    AND o.reduce_only
+    AND o.status IN ('pending','partially_filled');
+
+  IF v_total_reserved>v_position.quantity THEN
+    RAISE EXCEPTION 'Active Reduce-only reservations exceed position quantity'
       USING ERRCODE='23514';
   END IF;
 
