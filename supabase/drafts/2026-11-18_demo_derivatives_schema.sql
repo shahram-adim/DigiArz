@@ -17,6 +17,7 @@ CREATE TABLE public.demo_derivative_orders (
   product_type text NOT NULL CHECK (product_type IN ('futures','margin')),
   symbol text NOT NULL CHECK (symbol ~ '^[A-Z0-9]{2,15}USDT$'),
   position_side text NOT NULL CHECK (position_side IN ('long','short')),
+  side text NOT NULL CHECK (side IN ('buy','sell')),
   order_type text NOT NULL CHECK (order_type IN ('market','limit')),
   quantity numeric(38,18) NOT NULL CHECK (quantity > 0),
   limit_price numeric(38,18),
@@ -33,7 +34,7 @@ CREATE TABLE public.demo_derivative_orders (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE (id,user_id),
-  UNIQUE (id,account_id,user_id,symbol,position_side),
+  UNIQUE (id,account_id,user_id,symbol,position_side,side),
   UNIQUE (user_id,client_request_id),
   FOREIGN KEY (account_id,user_id)
     REFERENCES public.demo_derivative_accounts(id,user_id) ON DELETE CASCADE,
@@ -41,6 +42,11 @@ CREATE TABLE public.demo_derivative_orders (
   CHECK ((order_type='market' AND limit_price IS NULL) OR (order_type='limit' AND limit_price > 0)),
   CHECK (average_fill_price IS NULL OR average_fill_price > 0),
   CHECK (filled_quantity <= quantity),
+  CHECK (
+    (position_side='long' AND ((side='buy' AND NOT reduce_only) OR (side='sell' AND reduce_only)))
+    OR
+    (position_side='short' AND ((side='sell' AND NOT reduce_only) OR (side='buy' AND reduce_only)))
+  ),
   CHECK ((status='filled' AND remaining_quantity=0) OR status<>'filled')
 );
 
@@ -87,14 +93,15 @@ CREATE TABLE public.demo_derivative_fills (
   fill_sequence integer NOT NULL CHECK (fill_sequence > 0),
   symbol text NOT NULL CHECK (symbol ~ '^[A-Z0-9]{2,15}USDT$'),
   position_side text NOT NULL CHECK (position_side IN ('long','short')),
+  side text NOT NULL CHECK (side IN ('buy','sell')),
   quantity numeric(38,18) NOT NULL CHECK (quantity > 0),
   price numeric(38,18) NOT NULL CHECK (price > 0),
   fee_usdt numeric(38,18) NOT NULL DEFAULT 0 CHECK (fee_usdt >= 0),
   created_at timestamptz NOT NULL DEFAULT now(),
   FOREIGN KEY (account_id,user_id)
     REFERENCES public.demo_derivative_accounts(id,user_id) ON DELETE CASCADE,
-  FOREIGN KEY (order_id,account_id,user_id,symbol,position_side)
-    REFERENCES public.demo_derivative_orders(id,account_id,user_id,symbol,position_side) ON DELETE RESTRICT,
+  FOREIGN KEY (order_id,account_id,user_id,symbol,position_side,side)
+    REFERENCES public.demo_derivative_orders(id,account_id,user_id,symbol,position_side,side) ON DELETE RESTRICT,
   FOREIGN KEY (position_id,account_id,user_id,symbol,position_side)
     REFERENCES public.demo_derivative_positions(id,account_id,user_id,symbol,position_side) ON DELETE RESTRICT,
   UNIQUE (order_id,fill_sequence)
