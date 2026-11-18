@@ -268,3 +268,15 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [!] Tier maps are still injected into pure math helpers; there is no versioned database authority, server-side resolver, RLS/grant model, or audited configuration lifecycle yet.
 - [ ] Next: add draft PostgreSQL schema for immutable versioned per-symbol schedules and tiers, validate monotonic/continuous tier invariants in the database, and expose only a trusted server-side resolver.
 - [ ] Add PostgreSQL tests for activation/version changes, missing/overlapping schedules, exact tier boundaries and concurrent resolver reads. Then proceed to liquidation ledger/insurance accounting.
+
+## Checkpoint — versioned private Maintenance Tier storage and resolver (2026-11-18)
+
+- [x] Added private per-symbol versioned schedule and tier tables, draft/active/retired lifecycle, and a one-active-version-per-symbol index.
+- [x] Database validator enforces contiguous tier indexes, increasing notional caps, final unbounded tier, non-decreasing rates, continuous cumulative deductions, non-increasing leverage caps, and 18-decimal ceiling arithmetic.
+- [x] Added immutable active/retired schedule guards, tier mutation guards, monotonic version activation, and atomic retirement/replacement.
+- [x] Added a private service_role-only resolver returning schedule version, tier, maintenance rate/deduction, leverage cap, and exact maintenance margin. No direct table grants to client or service roles.
+- [x] Added PostgreSQL integration coverage for tier boundaries, invalid schedule rejection, schedule version replacement, immutability, grants, and service-role resolution.
+- [x] Added the new SQL draft/test to the exact-decimal CI workflow. Runs `44307356561` (push) and `44307363912` (pull_request) passed, 45 successful steps each.
+- [!] CI uses disposable PostgreSQL only. No Production schedule has been created, no worker/RPC calls the resolver yet, and no live trading/liquidation is enabled.
+- [ ] Next: two-session tests for concurrent schedule activation and resolver reads; define snapshot version pinning so one risk calculation cannot mix tier schedule versions.
+- [ ] Then wire the trusted resolver into server-side risk calculations and add atomic liquidation ledger/insurance/deficit accounting with partial/full reduction races.
