@@ -9,11 +9,7 @@ Status: design checkpoint only; no Production changes.
 
 The immutable, double-entry derivatives ledger is the sole authoritative source for settled virtual cash. The account row is an identity, configuration, and transaction-lock row; it must not be an independently editable balance authority.
 
-The current draft columns `futures_cash_usdt` and `margin_cash_usdt` are therefore not authoritative. Before any RPC is implemented, revise the draft schema to either:
-- remove these mutable balance columns; or
-- retain them only as explicitly rebuildable cache fields, updated in the same transaction as ledger entries and never read as the source of truth.
-
-Preferred choice for the first implementation: remove both columns and derive balances from ledger entries. This avoids cache drift and avoids creating a second accounting authority. Any later performance cache requires a rebuild/reconciliation routine and invariant tests.
+The draft schema has now removed both `futures_cash_usdt` and `margin_cash_usdt` from `demo_derivative_accounts`. Settled Futures cash is exposed through the read-only `demo_derivative_futures_cash_balances` view, derived from immutable ledger entries. No separate cash cache is used in this first implementation. Any later performance cache requires a rebuild/reconciliation routine and invariant tests.
 
 ## 2. Ledger balance convention
 
