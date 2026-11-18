@@ -1,0 +1,27 @@
+{
+  "evidence": {
+    "provider": "OKX",
+    "endpoint": "/api/v5/market/index-components",
+    "request_url": "https://www.okx.com/api/v5/market/index-components?index=ETH-USDT",
+    "received_at": "2026-11-18T11:00:03.937Z",
+    "http_status": 200,
+    "body_sha256": "81e1ec7f0cca3230e71fab90eddbc067824bd0d88faac4f3cf04c647af7a1c7f",
+    "capture": "one-off public API diagnostic; raw response body hash is computed over exact response text"
+  },
+  "response": {
+    "code": "0",
+    "data": {
+      "components": [
+        {"wgt":"0.25","exch":"OKX","symbol":"ETH/USDT","symPx":"1807.13","cnvPx":"1807.13"},
+        {"wgt":"0.25","exch":"Binance","symbol":"ETH/USDT","symPx":"1807.08","cnvPx":"1807.08"},
+        {"wgt":"0.1875","exch":"Bybit","symbol":"ETH/USDT","symPx":"1807.12","cnvPx":"1807.12"},
+        {"wgt":"0.1875","exch":"Coinbase","symbol":"ETH/USD","symPx":"1804.93","cnvPx":"1807.0442417628625491"},
+        {"wgt":"0.125","exch":"Bitget","symbol":"ETH/USDT","symPx":"1807.05","cnvPx":"1807.05"}
+      ],
+      "index": "ETH-USDT",
+      "last": "1807.08",
+      "ts": "1794999586930"
+    },
+    "msg": ""
+  }
+}

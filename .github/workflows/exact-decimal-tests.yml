@@ -2,7 +2,7 @@ name: Exact decimal tests
 
 on:
   push:
-    branches: [main]
+    branches: [main, feat/demo-derivatives-trading]
   pull_request:
     branches: [main]
 
@@ -249,3 +249,179 @@ jobs:
             -f supabase/tests/exact_decimal_conditional_exit_integration.sql
 
 # TP/SL conditional worker diagnostics are enabled in the isolated CI fixture.
+
+      - name: Prepare isolated derivatives schema database
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_derivatives_schema_test;"
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/demo_derivatives_schema_setup.sql
+      - name: Apply derivatives schema draft to disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-18_demo_derivatives_schema.sql
+      - name: Verify derivative schema, RLS, ledger and immutability
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/demo_derivatives_schema_integration.sql
+      - name: Apply versioned private Futures maintenance tier draft in disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-18_demo_derivatives_maintenance_tiers.sql
+      - name: Test maintenance tier versioning, integrity and trusted resolver
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/demo_derivatives_maintenance_tiers.sql
+      - name: Run two-session maintenance tier resolver and activation races
+        env:
+          PGPASSWORD: postgres
+        run: bash supabase/tests/demo_derivatives_maintenance_tiers_concurrency.sh
+      - name: Apply private Futures fee schedule draft in disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-18_demo_derivatives_fee_schedules.sql
+      - name: Test versioned Futures fee schedule and trusted resolver
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/demo_derivatives_fee_schedules.sql
+      - name: Apply private derivatives price-oracle storage draft in disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-18_demo_derivatives_price_oracle_storage.sql
+      - name: Verify private price-oracle provenance, quorum, atomic publication and immutability
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/demo_derivatives_price_oracle_storage.sql
+      - name: Apply trusted Futures price-oracle ingestion RPC draft in disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-18_demo_derivatives_price_oracle_rpcs.sql
+      - name: Apply transaction-pinned Futures account maintenance snapshot draft
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-18_demo_derivatives_account_maintenance_snapshot.sql
+      - name: Apply account-level Futures risk aggregation draft
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-18_demo_derivatives_account_risk_snapshot.sql
+      - name: Test trusted Futures price-oracle cycle, provider idempotency and atomic publication
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/demo_derivatives_price_oracle_rpcs.sql
+      - name: Run real two-session Futures price-oracle idempotency and publication races
+        env:
+          PGPASSWORD: postgres
+        run: bash supabase/tests/demo_derivatives_price_oracle_concurrency.sh
+      - name: Test transaction-pinned Futures maintenance snapshot and stale-oracle fail-closed behavior
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/demo_derivatives_account_maintenance_snapshot.sql
+      - name: Apply account-locked Reduce-only Limit RPC draft in disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-18_demo_derivatives_reduce_only_rpcs.sql
+      - name: Test Reduce-only reservation, idempotency, over-allocation and cancellation
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/demo_derivatives_reduce_only_lifecycle.sql
+      - name: Test concurrent Reduce-only placement and reservation release
+        env:
+          PGPASSWORD: postgres
+        run: bash supabase/tests/demo_derivatives_reduce_only_concurrency.sh
+      - name: Apply trusted-worker Reduce-only fill RPC draft in disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-18_demo_derivatives_reduce_only_fill_rpc.sql
+      - name: Test concurrent fills against one Reduce-only order
+        env:
+          PGPASSWORD: postgres
+        run: bash supabase/tests/demo_derivatives_reduce_only_fill_concurrency.sh
+      - name: Apply trusted Reduce-only reservation reconciliation RPC in disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-18_demo_derivatives_reduce_only_reconcile_rpc.sql
+      - name: Apply trusted atomic external Futures reduction RPC in disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-18_demo_derivatives_external_reduction_rpc.sql
+      - name: Test atomic external Futures reduction and newest-first reservation reconciliation
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/demo_derivatives_reduce_only_reconcile.sql
+      - name: Test Reduce-only partial fills, realized PnL, fees, margin release and ledger
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/demo_derivatives_reduce_only_fill.sql
+      - name: Verify unbalanced derivative ledger transaction is rejected
+        env:
+          PGPASSWORD: postgres
+        run: |
+          if psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/demo_derivatives_ledger_unbalanced.sql \
+            > /tmp/demo-derivatives-ledger-negative.log 2>&1; then
+            cat /tmp/demo-derivatives-ledger-negative.log
+            echo "Expected the unbalanced ledger transaction to be rejected."
+            exit 1
+          fi
+          cat /tmp/demo-derivatives-ledger-negative.log
+          if ! grep -Fq 'not balanced per asset' /tmp/demo-derivatives-ledger-negative.log; then
+            echo "Ledger rejection failed for an unexpected reason."
+            exit 1
+          fi
+      - name: Apply private platform insurance and deficit ledger draft in disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-18_demo_derivatives_insurance_deficit_ledger.sql
+      - name: Test platform insurance accounting, deficit exposure and private access boundaries
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_derivatives_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/demo_derivatives_insurance_deficit_ledger.sql
+      - name: Run two-session insurance payout and deficit recovery races
+        env:
+          PGPASSWORD: postgres
+        run: bash supabase/tests/demo_derivatives_insurance_deficit_concurrency.sh
