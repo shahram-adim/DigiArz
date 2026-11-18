@@ -60,19 +60,19 @@
   function crossMarginRiskSnapshot({
     cashBalanceUsdt,
     positions,
-    marginDebtUsdt='0',
     accruedInterestUsdt='0',
     fundingPayableUsdt='0',
-    unsettledFeesUsdt='0'
+    unsettledFeesUsdt='0',
+    otherLiabilitiesUsdt='0'
   }){
     const cash=dec(cashBalanceUsdt);
     if(D.compareDecimal(cash,'0')<0)throw new RangeError('cash balance must not be negative');
     if(!Array.isArray(positions))throw new TypeError('positions must be an array');
     const liabilityInputs=[
-      ['margin debt',marginDebtUsdt],
       ['accrued interest',accruedInterestUsdt],
       ['funding payable',fundingPayableUsdt],
-      ['unsettled fees',unsettledFeesUsdt]
+      ['unsettled fees',unsettledFeesUsdt],
+      ['other liabilities',otherLiabilitiesUsdt]
     ];
     let liabilities='0';
     for(const [name,value] of liabilityInputs){
