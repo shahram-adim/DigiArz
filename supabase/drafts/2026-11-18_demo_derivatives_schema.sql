@@ -215,6 +215,14 @@ CREATE INDEX demo_derivative_orders_user_status_created_idx
   ON public.demo_derivative_orders(user_id,status,created_at DESC);
 CREATE INDEX demo_derivative_orders_pair_status_idx
   ON public.demo_derivative_orders(symbol,status,created_at);
+
+-- Supports account-locked Reduce-only reservation sums and deterministic
+-- newest-first cancellation of active orders after an external position reduction.
+CREATE INDEX demo_derivative_orders_reduce_only_active_idx
+  ON public.demo_derivative_orders(
+    account_id,product_type,symbol,position_side,created_at DESC,id DESC
+  )
+  WHERE reduce_only AND status IN ('pending','partially_filled');
 CREATE INDEX demo_derivative_positions_user_status_idx
   ON public.demo_derivative_positions(user_id,status,updated_at DESC);
 CREATE INDEX demo_derivative_positions_pair_status_idx
