@@ -110,3 +110,5 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [x] Added PostgreSQL negative tests for duplicate open positions and pending Market orders.
 - [ ] Await GitHub Actions on the resulting HEAD and inspect all PostgreSQL logs before marking tests passed.
 - [ ] Next: add lifecycle functions/tests for Limit reserve, cancel release, partial fill, reduce-only allocation and two-session account-lock races. No RPC/UI activation or Production deployment.
+
+- [x] Added a partial index over active Reduce-only orders keyed by account/product/symbol/position side and newest-first ordering; schema integration now asserts both the position uniqueness and Reduce-only indexes exist.
