@@ -419,3 +419,12 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [x] GitHub Actions run 746 (`44370393350`) completed successfully on the immediately preceding documentation-only HEAD `223e40bd731f5ec3980167857a95cb7174337936`; Node/browser tests and all SQL steps through the maintenance-tier race completed successfully in disposable PostgreSQL 17.
 - [!] The UI commit `288ddf4d5e65ce5bb822be148c61038ffa979be4` is newer than run 746. Its own CI validation is pending and must not be described as passed until a run for that exact SHA completes.
 - [!] PR #12 remains Open/Draft/unmerged. No Supabase Production object or data was changed.
+
+
+## Derivatives overview UI regression fix and CI verification — 2026-11-18
+- [x] Exact-decimal run 751 (`44371006863`) completed successfully on documentation HEAD `d98b48026c2870743d6d11605fd89b587daa7579`; all 54 job steps succeeded. This confirms the preceding account-risk/Oracle/Reduce-only/insurance suite after the UI documentation checkpoint, but predates the UI regression test file.
+- [!] Run 753 (`44371172757`) on `ffaa200b172f32a859506fb063d803f1633dbdfc` failed in the Node/browser step because the new test regex used a word-boundary after the closing quote of the section ID, matching zero sections. The application panel was present; the assertion itself was defective. PostgreSQL steps were skipped after the Node failure.
+- [x] Corrected the selector to match the section tag and its attributes. Exact-decimal run 755 (`44371544048`) on exact code HEAD `edaac5548279a54f8ca3c8bae1077d557f60d276` completed with workflow and job conclusion `success`; all 54 job steps succeeded.
+- [x] Retrieved run 755 logs confirm all 76 Node/browser tests passed (76 pass, 0 fail), including the three new Derivatives overview navigation/read-only/responsive checks; the disposable PostgreSQL 17 log explicitly reports `demo derivatives schema integration passed`.
+- [!] Run 755 is the verification for code HEAD `edaac554`. The documentation commits that record this checkpoint are newer and have not themselves been validated by a later run.
+- [!] All database execution remained inside disposable PostgreSQL CI. No Supabase Production changes, deployment, live collector, order execution, borrowing, or liquidation activation occurred. PR #12 remains Open/Draft/unmerged.
