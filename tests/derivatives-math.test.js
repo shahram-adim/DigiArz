@@ -109,9 +109,9 @@ test('selects exact-decimal maintenance tiers with continuous boundaries and lev
   assert.equal(first.tierIndex,0);
   assert.equal(first.maintenanceMargin,'100');
   assert.equal(first.maxLeverage,100);
-  const second=M.maintenanceTierForNotional('10000.000000000000000001',maintenanceTiers);
+  const second=M.maintenanceTierForNotional('10000.000000000000001',maintenanceTiers);
   assert.equal(second.tierIndex,1);
-  assert.equal(second.maintenanceMargin,'100.00000000000000000002');
+  assert.equal(second.maintenanceMargin,'100.00000000000000002');
   assert.equal(second.maxLeverage,50);
   const third=M.maintenanceTierForNotional('100000',maintenanceTiers);
   assert.equal(third.tierIndex,2);
