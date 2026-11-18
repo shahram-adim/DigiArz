@@ -182,7 +182,7 @@ CREATE TABLE public.demo_derivative_ledger_transactions (
   created_xid xid8 NOT NULL DEFAULT pg_current_xact_id(),
   event_type text NOT NULL CHECK (event_type IN (
     'spot_transfer','futures_transfer','margin_transfer','order_fee','realized_pnl',
-    'funding','borrow','repayment','interest','liquidation','adjustment'
+    'funding','borrow','repayment','interest','liquidation','adjustment','reduce_only_fill'
   )),
   reference_id uuid,
   metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
