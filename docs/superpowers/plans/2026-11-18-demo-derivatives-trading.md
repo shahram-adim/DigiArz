@@ -152,7 +152,7 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 
 
 ## Concurrent Fill checkpoint
-- [x] Added a two-session race against one 1 ETH Reduce-only Limit order, with each worker attempting a 0.7 ETH fill.
+- [x] Added a two-session race against one 0.6 ETH Reduce-only Limit order, alongside two additional 0.2 ETH reservations, with each worker attempting a 0.7 ETH fill.
 - [x] The test uses a separate user's ETHUSDT Cross position so it cannot consume or mutate the BTCUSDT fixture used by the sequential accounting test.
 - [x] Requires exactly one fill success, one rejection specifically for exceeding order remaining quantity, exactly one persisted fill, and consistent 0.7 filled / 0.3 remaining order and position quantities.
 - [x] Wired into CI after the trusted fill RPC is installed and before the sequential PnL/margin test.
@@ -165,3 +165,5 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [x] Assert authenticated callers cannot invoke the trusted RPC, cancellation order is deterministic, the final reservation invariant holds, and a retry is a no-op.
 - [ ] Run the SQL in disposable PostgreSQL through GitHub Actions and inspect complete logs.
 - [ ] Integrate the helper inside the eventual trusted position-reduction/liquidation transaction after its financial accounting has been applied. Do not call it as a substitute for the actual position-reduction accounting.
+
+- [x] CI ordering verified: run the concurrent-fill fixture first, then apply and test reconciliation against the ETH state it creates, then continue with the independent BTC accounting test.
