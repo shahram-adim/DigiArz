@@ -403,3 +403,11 @@ Phase 0 product/design baseline is recorded. The Futures ledger accounting contr
 - [x] Retrieved logs include the explicit message `demo derivatives schema integration passed`; the insurance/deficit draft and integration/race checks also completed successfully.
 - [!] This run validates the current branch HEAD in disposable CI only. It does not authorize any Supabase Production DDL/RPC/policy/cron/data change or enable live collector, liquidation execution, payout/recovery, worker, or UI.
 - [!] PR #12 remains Open/Draft and unmerged; the feature branch remains 285 commits ahead of `main` and zero behind at this checkpoint.
+
+
+## CI checkpoint — current feature HEAD run 742 (2026-11-18)
+- [x] GitHub Actions run `44369719365` (run 742, Exact decimal tests, pull_request) ran against exact feature HEAD `e65d4bb3a950f2fd3e75bd39787526e6d1aedd72` and completed with workflow and `exact-decimal` job conclusion `success`.
+- [x] Job `135032879836` completed all 50 substantive steps successfully. The observed steps include account-level Futures risk aggregation, transaction-pinned maintenance snapshots and stale-oracle fail-closed behavior, Oracle provider idempotency/publication races, Reduce-only lifecycle/fill/reconciliation, platform insurance/deficit accounting and two-session payout/recovery races.
+- [!] All SQL was applied only to disposable PostgreSQL 17 CI. This does not authorize Supabase Production changes, collector deployment, liquidation execution, payout/recovery RPCs, workers, or UI activation.
+- [!] PR #12 remains Open/Draft/unmerged. At the pre-documentation checkpoint the branch was 287 commits ahead of `main`, zero behind. The documentation commits that record this run have not yet been validated by a subsequent CI run.
+- [ ] Continue only with work independent of the unapproved per-fill fee-version decision and six liquidation policy gates. Do not repeat already-green account-risk, Oracle, Reduce-only, or insurance tests without a new code change that needs them.
