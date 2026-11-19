@@ -315,18 +315,29 @@ test('market list rows use five aligned cells, 40px logos, visible Persian names
 });
 
 
-test('login screen follows the selected Binance-inspired black-and-yellow responsive theme', () => {
-  assert.match(html, /DigiArz Binance-inspired authentication refresh/);
-  assert.match(html, /#authView\.auth[\s\S]*?background:#181a20[\s\S]*?color:var\(--auth-ink\)/);
-  assert.match(html, /#authView \.auth-visual[\s\S]*?linear-gradient\(145deg,#29230d,#171a22 68%,#101318\)/);
-  assert.match(html, /#authView \.auth-form\{[\s\S]*?background:#181a20/);
-  assert.match(html, /#authView \.auth-form input\{[\s\S]*?background:#0b0e11/);
-  assert.match(html, /#authView #loginBtn\{background:var\(--yellow\);color:#111/);
-  assert.match(html, /#authView #signupBtn\{background:#252a33;color:#f5f5f5/);
-  assert.match(html, /#authView #forgotBtn\{[\s\S]*?color:#f0b90b/);
+test('login screen uses the scoped premium light-blue-and-gold responsive design', () => {
+  assert.match(html, /DigiArz premium authentication refresh/);
+  assert.match(html, /#authView\.auth[\s\S]*?background:#fff/);
+  assert.match(html, /#authView \.auth-visual[\s\S]*?linear-gradient\(145deg,#102b60 0%,#17458f 52%,#10234a 100%\)/);
+  assert.match(html, /#authView #loginBtn[\s\S]*?linear-gradient\(135deg,#1746a2,#2864c7\)/);
+  assert.match(html, /#authView #signupBtn[\s\S]*?background:#eef3fb/);
   assert.match(html, /@media\(max-width:700px\)[\s\S]*?#authView\.auth\{grid-template-columns:1fr/);
   assert.match(html, /@media\(prefers-reduced-motion:reduce\)[\s\S]*?#authView \*\{transition:none!important\}/);
   for (const id of ['fullName','email','password','loginBtn','signupBtn','forgotBtn','authMsg','recoveryPanel','newPassword','confirmPassword','saveNewPassword']) {
     assert.match(html, new RegExp('id="' + id + '"'), 'existing auth control remains: ' + id);
   }
+});
+
+
+test('login screen embeds a live market phone preview with rotating crypto tickers', () => {
+  assert.match(html, /class="auth-phone-preview"/);
+  assert.match(html, /id="authMiniChart"/);
+  assert.match(html, /id="authCoinTrack"/);
+  assert.match(html, /async function refreshAuthMiniChart\(\)/);
+  assert.match(html, /async function refreshAuthCoinPrices\(\)/);
+  assert.match(html, /authCoinRotationTimer=setInterval/);
+  assert.match(html, /fetchBinanceKlines\('BTCUSDT','5m',36\)/);
+  assert.match(html, /fetchBinanceResponse\('\/api\/v3\/ticker\/24hr\?symbol='/);
+  assert.match(html, /body:not\(\.light-theme\) #authView\.auth/);
+  assert.match(html, /body:not\(\.light-theme\) #authView \.auth-form/);
 });
