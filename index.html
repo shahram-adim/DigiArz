@@ -1614,6 +1614,128 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .pwa-install-banner button{flex:0 0 auto;min-height:42px;padding:10px 18px}
 @media(max-width:520px){.pwa-install-banner{align-items:stretch;flex-direction:column}.pwa-install-banner button{width:100%}}
 </style>
+
+<style id="digiarz-market-row-fix-20261119">
+/* Market rows: match the five rendered cells and keep every field readable. */
+#tab-markets .market-board-v34 .coin{
+ direction:rtl!important;
+ display:grid!important;
+ grid-template-columns:34px minmax(0,1.2fr) minmax(54px,.55fr) minmax(82px,.72fr) minmax(112px,.86fr)!important;
+ align-items:center!important;
+ gap:9px!important;
+ min-width:0!important;
+ padding:12px 11px!important;
+ background:linear-gradient(110deg,#14243a,#101b2d)!important;
+ border:1px solid #314663!important;
+ border-radius:13px!important;
+ color:#f4f7fc!important;
+}
+#tab-markets .market-board-v34 .coin>.favorite-btn{
+ grid-column:1!important;grid-row:1!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ width:30px!important;height:34px!important;min-width:30px!important;
+ padding:0!important;margin:0!important;
+ border:0!important;border-radius:0!important;
+ background:transparent!important;box-shadow:none!important;
+ color:#f0c45c!important;
+}
+#tab-markets .market-board-v34 .coin>.favorite-btn svg{
+ width:21px!important;height:21px!important;stroke:currentColor!important;
+ fill:transparent!important;stroke-width:1.9!important;
+}
+#tab-markets .market-board-v34 .coin>.favorite-btn.is-favorite svg{fill:currentColor!important}
+#tab-markets .market-board-v34 .coin-identity{
+ grid-column:2!important;grid-row:1!important;
+ display:flex!important;flex-direction:row!important;align-items:center!important;
+ justify-content:flex-start!important;gap:9px!important;
+ min-width:0!important;overflow:hidden!important;
+ color:#f4f7fc!important;text-align:right!important;
+}
+#tab-markets .market-board-v34 .coin-identity .coin-icon{
+ display:inline-flex!important;width:40px!important;height:40px!important;
+ min-width:40px!important;flex:0 0 40px!important;margin:0!important;
+ border:0!important;border-radius:50%!important;object-fit:cover!important;
+}
+#tab-markets .market-board-v34 .coin-name-stack{display:grid!important;gap:1px!important;min-width:0!important}
+#tab-markets .market-board-v34 .coin-name-fa{
+ display:block!important;visibility:visible!important;opacity:1!important;
+ color:#f7f9fd!important;font-size:14px!important;font-weight:850!important;
+ line-height:1.7!important;white-space:normal!important;
+}
+#tab-markets .market-board-v34 .coin-symbol-en{
+ display:block!important;color:#c0ccdc!important;font-size:11px!important;
+ font-weight:800!important;line-height:1.5!important;direction:ltr!important;
+}
+#tab-markets .market-board-v34 .coin-english-name{
+ display:block!important;color:#9eacc0!important;font-size:10px!important;
+ line-height:1.5!important;direction:ltr!important;
+}
+#tab-markets .market-board-v34 .coin-sparkline{
+ grid-column:3!important;grid-row:1!important;display:block!important;
+ min-width:0!important;width:100%!important;height:28px!important;
+ color:#c4d2e5!important;overflow:hidden!important;
+}
+#tab-markets .market-board-v34 .coin-change-wrap{
+ grid-column:4!important;grid-row:1!important;display:flex!important;
+ flex-direction:column!important;align-items:center!important;justify-content:center!important;
+ min-width:0!important;text-align:center!important;gap:3px!important;
+}
+#tab-markets .market-board-v34 .coin-change-label{color:#c3cede!important;font-size:10px!important}
+#tab-markets .market-board-v34 .coin-change{font-size:12px!important;font-weight:850!important}
+#tab-markets .market-board-v34 .coin-volume{color:#e5c879!important;font-size:9px!important;white-space:normal!important}
+#tab-markets .market-board-v34 .coin>.price-stack{
+ grid-column:5!important;grid-row:1!important;align-items:flex-end!important;
+ min-width:0!important;text-align:left!important;
+}
+#tab-markets .market-board-v34 .coin .price-usd{color:#f4f7fc!important;font-size:13px!important;font-weight:800!important}
+#tab-markets .market-board-v34 .coin .price-toman{color:#f2cb70!important;font-size:13px!important;font-weight:900!important}
+#tab-markets .market-board-v34 .coin-source{color:#b8c6d8!important;font-size:9px!important}
+#tab-markets .market-board-v34 .coin-source.fresh{color:#65dfb1!important}
+#tab-markets .market-board-v34 .coin:hover,
+#tab-markets .market-board-v34 .coin.selected{background:#1a2b43!important;border-color:#6482a9!important}
+body.light-theme #tab-markets .market-board-v34 .coin{background:#f5f8fd!important;border-color:#d5dfeb!important;color:#1d2d43!important}
+body.light-theme #tab-markets .market-board-v34 .coin-name-fa{color:#17263b!important}
+body.light-theme #tab-markets .market-board-v34 .coin-symbol-en{color:#465a73!important}
+body.light-theme #tab-markets .market-board-v34 .coin-english-name,
+body.light-theme #tab-markets .market-board-v34 .coin-source{color:#60718a!important}
+body.light-theme #tab-markets .market-board-v34 .coin .price-usd{color:#1c2d43!important}
+body.light-theme #tab-markets .market-board-v34 .coin .price-toman{color:#805a0a!important}
+@media(max-width:700px){
+ #tab-markets .market-board-v34 .coin{
+  grid-template-columns:30px minmax(0,1fr) minmax(88px,auto)!important;
+  grid-template-rows:auto auto!important;
+  gap:5px 8px!important;padding:10px 8px!important;
+ }
+ #tab-markets .market-board-v34 .coin>.favorite-btn{
+  grid-column:1!important;grid-row:1/3!important;width:28px!important;
+  min-width:28px!important;height:30px!important;align-self:center!important;
+ }
+ #tab-markets .market-board-v34 .coin-identity{
+  grid-column:2!important;grid-row:1!important;gap:7px!important;
+ }
+ #tab-markets .market-board-v34 .coin-identity .coin-icon{
+  width:40px!important;height:40px!important;min-width:40px!important;flex-basis:40px!important;
+ }
+ #tab-markets .market-board-v34 .coin-name-fa{font-size:13px!important}
+ #tab-markets .market-board-v34 .coin-sparkline{display:none!important}
+ #tab-markets .market-board-v34 .coin-change-wrap{
+  grid-column:2!important;grid-row:2!important;align-items:flex-start!important;
+  text-align:right!important;flex-direction:row!important;flex-wrap:wrap!important;
+  justify-content:flex-start!important;gap:5px 8px!important;
+ }
+ #tab-markets .market-board-v34 .coin-change-label{font-size:9px!important}
+ #tab-markets .market-board-v34 .coin-change{font-size:11px!important;min-width:0!important;padding:4px 6px!important}
+ #tab-markets .market-board-v34 .coin-volume{font-size:9px!important}
+ #tab-markets .market-board-v34 .coin>.price-stack{
+  grid-column:3!important;grid-row:1/3!important;align-self:center!important;
+  align-items:flex-end!important;
+ }
+ #tab-markets .market-board-v34 .coin .price-usd{font-size:12px!important}
+ #tab-markets .market-board-v34 .coin .price-toman{font-size:11px!important;white-space:normal!important}
+ #tab-markets .market-board-v34 .coin-source{font-size:8px!important;line-height:1.5!important}
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
@@ -2331,7 +2453,7 @@ function renderMarkets(){
   const ticker=getFreshMarketTicker(item),trustedPrice=getTrustedMarketPrice(item),usd=trustedPrice===null?NaN:trustedPrice,valid=Number.isFinite(usd)&&usd>0,toman=valid&&currentFxIsValid?usd*currentFxRate:null,div=document.createElement('div');
   div.className='coin'+(item.symbol===selectedSymbol?' selected':'');div.dataset.symbol=String(item.symbol).toUpperCase();
   const fullSymbol=String(item.symbol).toUpperCase(),base=fullSymbol.replace(/USDT$/i,'');
-  const change=changeOf(item),isFavorite=isFavoriteSymbol(item.symbol);
+  const change=changeOf(item),isFavorite=isFavoriteSymbol(item.symbol),persianName=String(item.name_fa||persianCoinName(item.symbol));
   div.setAttribute('role','group');div.setAttribute('tabindex','0');div.setAttribute('aria-label',`اطلاعات ${persianCoinName(item.symbol)} (${base})`);
   const usdMarkup=`<div class="price-usd"><strong>${valid?'$ '+formatNum(usd,10):'—'}</strong></div>`;
   const tomanMarkup=`<div class="price-toman"><strong>${toman!==null?formatNum(toman,0)+' تومان':'نرخ تومان ناموجود'}</strong></div>`;
