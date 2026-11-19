@@ -51,7 +51,28 @@ Deno.serve(async (req: Request) => {
     }
 
     const encoded = encodeURIComponent(symbol);
-    const response = await fetchFirstAvailable([
+    const imageUrl = String(url.searchParams.get("image_url") || "").trim();
+    let curatedResponse: Response | null = null;
+    if (imageUrl) {
+      try {
+        const parsed = new URL(imageUrl);
+        const allowedHosts = new Set(["coin-images.coingecko.com", "assets.coingecko.com"]);
+        if (parsed.protocol === "https:" && allowedHosts.has(parsed.hostname) && !parsed.username && !parsed.password && imageUrl.length <= 2048) {
+          const candidate = await fetch(parsed.toString(), {
+            headers: { accept: "image/*" },
+            signal: AbortSignal.timeout(8000)
+          });
+          const finalHost = candidate.url ? new URL(candidate.url).hostname : parsed.hostname;
+          const contentType = candidate.headers.get("content-type") || "";
+          if (candidate.ok && allowedHosts.has(finalHost) && contentType.toLowerCase().startsWith("image/")) {
+            curatedResponse = candidate;
+          }
+        }
+      } catch (_) {
+        // Invalid, unavailable or non-image catalog URLs fall through to public icon providers.
+      }
+    }
+    const response = curatedResponse || await fetchFirstAvailable([
       "https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/" + encoded + ".png",
       "https://assets.coincap.io/assets/icons/" + encoded + "@2x.png"
     ]);
