@@ -192,3 +192,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Android visual QA و live logo smoke test هنوز انجام نشده‌اند.
 
 **Next:** بازبینی نهایی PR و تکمیل تست بصری Android؛ merge و deploy را جداگانه و فقط پس از تأیید صریح انجام بده.
+
+
+### تأیید اجرای دوم CI — ۱۹ نوامبر ۲۰۲۶
+- Run `44475656448` روی commit `33eb1e5b94d5fb2a2019294e3be12a5afcc4cc58` با نتیجهٔ `success` تمام شد؛ تمام ۴۳ مرحله موفق شدند.
+- مراحل Node/browser و PostgreSQL ایزوله، از جمله widening، lock timeout، rollback، Market/Limit، Stop-Limit، TP/SL، rounding و رقابت دو نشست موفق شدند.
+- PR #13 باز و Draft است؛ merge نشده؛ main همچنان `ad8d52bf49027b20756242259b1de867c04d5ab9` است.
+- هیچ deploy یا تغییر دیتابیس Production انجام نشده؛ Edge Function لوگو هنوز deploy نشده و Android visual QA/live smoke test باقی است.
+
+**Next:** تست بصری در Android و تصمیم جداگانهٔ تأییدشده برای merge/deploy.
