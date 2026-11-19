@@ -1603,3 +1603,6 @@
 - [x] فایل index.html و تست از GitHub دوباره خوانده شدند؛ بررسی ایستا: stylesheetOnce=PASS, fiveGridParts=PASS, mobileWidth=PASS, overflow=PASS, navSix=PASS, logoFallback=PASS, lightDark=PASS. این بررسی فقط ساختار/قواعد CSS را تأیید می‌کند و جای اجرای workflow یا مشاهده روی گوشی را نمی‌گیرد.
 - [ ] اجرای GitHub Actions و ساخت APK جدید هنوز از endpointهای در دسترس این نشست قابل بازیابی/تأیید نیست؛ لینک APK جدید تا دریافت artifact معتبر ارائه نشود.
 - گام بعد: دریافت نتیجهٔ run و artifact APK از Actions، سپس نصب و بازبینی واقعی روی گوشی.
+
+- [x] بازبینی سربرگ بر اساس تصویر کاربر، ترتیب نوشتاری انگلیسی نام برند را اصلاح کرد: DigiArz اکنون داخل bdi با جهت LTR قرار گرفته تا در صفحه RTL به شکل وارونه/جابجا دیده نشود؛ برچسب DEMO و چیدمان راست‌به‌چپ هدر حفظ شده‌اند.
+- [x] تست رگرسیون جهت نوشتار برند اضافه شد؛ commitهای این اصلاح: b58c272fd8a1e8a273d343b1412c0e567b5c8f3e و 821da20edbe7a9a6953e06842dd41a2f22ef4bc0.
