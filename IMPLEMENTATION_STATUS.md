@@ -1615,3 +1615,16 @@
 - [ ] هنوز APK جدید یا run موفق برای آخرین head تأیید نشده است؛ نسخهٔ قبلی APK برای این commitها قابل استفاده به‌عنوان preview جدید نیست.
 - [!] شاخه نسبت به main در آخرین compare برابر ۳۲۵ commit جلو و ۲ commit عقب است؛ بدون مجوز کاربر merge/rebase/sync انجام نشود.
 - گام بعدی ایمن: با فعال شدن/در دسترس بودن workflow build، APK دقیقاً از head بالا ساخته و artifact بررسی شود؛ سپس تست ظاهری روی گوشی انجام شود.
+
+
+## تأیید نهایی APK و CI روی وضعیت فعلی شاخه — ۱۹ نوامبر ۲۰۲۶
+- [x] وضعیت زنده GitHub تأیید شد: HEAD شاخه `feat/demo-derivatives-trading` برابر `15d5527852de390742caf51edfcbce9d7f710652` است؛ PR #12 باز، Draft و ادغام‌نشده باقی مانده است.
+- [x] اجرای Exact decimal workflow روی همین HEAD با run شماره `44463162980` و نتیجه `success` پایان یافته است.
+- [x] اجرای Android APK workflow شماره `44462777374` با نتیجه `success` پایان یافته؛ هر ۱۱ مرحله اصلی build، از جمله `assembleDebug` و بارگذاری artifact، موفق بوده‌اند.
+- [x] artifact `DigiArz-Android-debug-APK` با شناسه `14501125910` از GitHub دریافت و ZIP واقعاً باز و بررسی شد؛ شامل `app-debug.apk` و `BUILD-INFO.txt` است.
+- [x] فایل BUILD-INFO تأیید می‌کند APK از commit `b58c272fd8a1e8a273d343b1412c0e567b5c8f3e` روی شاخه feature ساخته شده است؛ SHA-256 خود APK برابر `105cfd866118ed1de55362179fde18670425870ac7406e53411d972c4538ab27` و SHA-256 آرشیو artifact برابر `72559d155025cceef7e63f8a2fb6104ec80e2d7e53498c0a09fe4409668b5ba4` است.
+- [x] مقایسهٔ commit ساخت APK با HEAD فعلی نشان داد سه commit بعدی فقط `IMPLEMENTATION_STATUS.md` و `tests/market-mobile-layout.test.js` را تغییر داده‌اند؛ هیچ تغییر دیگری در سورس برنامه، تنظیمات بسته‌بندی یا workflow ساخت APK پس از commit ساخت ثبت نشده است. بنابراین APK موجود از نظر کد برنامه با HEAD فعلی هم‌ارز است، هرچند provenance آن به SHA ساخت `b58c272...` اشاره می‌کند، نه SHA مستندسازی HEAD.
+- [!] APK از نوع Debug و برای پیش‌نمایش/نصب آزمایشی است، نه Release امضاشده برای انتشار عمومی. نصب و آزمون روی گوشی واقعی کاربر هنوز انجام نشده است.
+- [!] شاخه همچنان با `main` در وضعیت diverged است: ۳۲۶ commit جلو و ۲ commit عقب. هیچ merge، rebase یا sync انجام نشد.
+- [!] هیچ تغییری در Supabase Production، migration، RPC، worker، داده، سفارش یا موجودی انجام نشد.
+- گام بعد: نصب APK روی Android و بررسی بازار در عرض واقعی گوشی، تم روشن/تیره و اسکرول؛ سپس ایرادهای قابل مشاهده اصلاح شوند.
