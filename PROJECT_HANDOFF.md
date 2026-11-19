@@ -270,3 +270,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - A new Android debug APK was built from that exact main commit and uploaded successfully (run `44483387973`, artifact `14509018848`). BUILD-INFO confirms commit `1e5d7ee5bcc6571003bfebf6eeca57c7973d2269`; APK SHA-256 `8d2481a4eb1582f7806aa65173ae8ecb463c466ea5fab57fc417fc550cb7c686`.
 - Exact-decimal workflow run `44483387900` completed all 43 steps successfully.
 - User has not yet confirmed installing/running the new APK. Next: install this build, then inspect fresh app-assets logs for imageUrl propagation and successful image responses; visual confirmation still required.
+
+
+## Checkpoint — market row layout/readability — 2026-11-19
+- User confirmed the logo issue is now fixed and requested: repair the market asset rows, set logos to 40px, improve low-contrast/dim text, remove the favorite star's ugly border, and restore Persian coin names.
+- Current main index.html was inspected. renderMarkets() appends five direct children per .coin row (favorite button, identity, sparkline, change/volume, price), while accumulated CSS overrides had conflicting 2/3/4-column layouts. This is the confirmed structural cause of row misalignment.
+- Created work branch fix/market-row-layout-readability from current main.
+- Added a final CSS override scoped to #tab-markets .market-board-v34: five aligned desktop columns; compact two-row mobile layout with sparkline hidden; 40x40px coin logos; borderless transparent star; improved contrast for Persian names, symbols, prices, changes and freshness labels.
+- Renderer explicitly prefers item.name_fa when present, otherwise uses the existing Persian-name dictionary. No fabricated translations are added.
+- Added a regression test in tests/index-syntax.test.js for the five-cell layout, 40px logos, borderless star, visible Persian name, and mobile grid.
+- Code is on the work branch only. No main merge, Pages deployment, APK publication, Supabase deployment, database migration, or financial-data change has occurred.
+- CI and Android visual QA are pending. Next: open PR to trigger CI, fix any failures, then ask the user to review the installed build. Merge and release require explicit approval.
