@@ -246,7 +246,7 @@ test('enabled market pairs load logo metadata by exact CoinGecko id, not ambiguo
   assert.equal(rows[0].name, 'Cat Token A');
   assert.equal(rows[0].image_url, 'https://img.example/cat-a.png');
   assert.equal(rows[0].change_updated_at, 'stale');
-  assert.equal(rows[1].image_url, undefined === rows[1].image_url ? null : rows[1].image_url);
+  assert.equal(rows[1].image_url, null);
   assert.equal(rows[1].coingecko_id, 'bitcoin');
 });
 
