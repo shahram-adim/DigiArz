@@ -429,3 +429,19 @@ test('orbiting login coins stop moving when reduced motion is requested', () => 
   assert.ok(orbit>=0&&reduced>orbit,'reduced-motion override follows the orbit animation');
   assert.match(html.slice(reduced),/#authView \.login-orbit-coin\{animation:none!important;offset-distance:0!important\}/);
 });
+
+const proUiCss = fs.readFileSync('src/digiarz-pro-ui.css', 'utf8');
+
+test('unified professional UI stylesheet is loaded for every authenticated screen', () => {
+  assert.match(html, /href="\\.\/src\/digiarz-pro-ui\\.css\\?v=20261120"/);
+  for (const selector of [
+    '#tab-dashboard', '#tab-markets', '#tab-toman', '#tab-chart',
+    '#tab-trade', '#tab-assets', '#tab-orders', '#tab-history',
+    '#tab-admin', '#tab-settings', '.mobile-bottom-nav'
+  ]) assert.ok(proUiCss.includes(selector), 'redesign covers ' + selector);
+  assert.match(proUiCss, /body\\.light-theme/);
+  assert.match(proUiCss, /body\\.luxury-theme/);
+  assert.match(proUiCss, /@media\\(max-width:700px\\)/);
+  assert.match(proUiCss, /prefers-reduced-motion:reduce/);
+  assert.match(proUiCss, /:focus-visible/);
+});
