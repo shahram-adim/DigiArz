@@ -937,3 +937,14 @@
 - [x] ساخت APK آزمایشی شمارهٔ ۷۱ با شناسهٔ `44611543045` روی commit `f2c63bf1c59072c92dc148ae3544ca0f152e79a7` آغاز شده است؛ در آخرین بررسی مرحلهٔ Gradle هنوز در حال اجرا بود و artifact/Release هنوز تأیید نشده است.
 - [!] CI موفق، رندر واقعی و کیفیت ظاهری در Android/WebView را اثبات نمی‌کند؛ تست دستگاه همچنان لازم است.
 - [ ] گام بعد: بررسی نتیجه نهایی Build 71، provenance و SHA-256؛ سپس ارائه APK برای تست روی Android.
+
+
+### نتیجه ساخت و تأیید APK بازطراحی کامل — Build 71
+- [x] اجرای GitHub Actions شمارهٔ ۷۱ با شناسهٔ `44611543045` روی commit `f2c63bf1c59072c92dc148ae3544ca0f152e79a7` با نتیجهٔ نهایی `success` تکمیل شد؛ هر ۱۲ مرحله از جمله build وب، sync اندروید، Gradle، ثبت provenance، آپلود artifact و انتشار Release موفق شدند.
+- [x] Artifact با شناسهٔ `14571393639` و نام `DigiArz-Android-debug-APK` ایجاد شد؛ حجم ZIP برابر 3,531,456 بایت و digest آرشیو `sha256:3e312c345a9eda2f5645dbef637074bf5c8c341030dc36572f2f9fa061a8f3fb` است.
+- [x] Release با tag برابر `android-debug-71` منتشر شد: https://github.com/shahram-adim/DigiArz/releases/tag/android-debug-71
+- [x] فایل مستقیم APK با نام `app-debug.apk` و حجم 3,912,350 بایت در Release موجود است: https://github.com/shahram-adim/DigiArz/releases/download/android-debug-71/app-debug.apk
+- [x] Artifact دانلود و استخراج شد؛ `BUILD-INFO.txt` commit/ref/run را تأیید می‌کند و SHA-256 خود APK مستقلاً محاسبه و با provenance و Release تطبیق داده شد: `ad586316144651fbbdeea5059accad3d8ab68a7f2b088c58a71d97d383bba2a4`.
+- [x] محتوای APK بررسی شد و هر سه فایل `assets/public/index.html`، `assets/public/src/digiarz-pro-ui.css` و `assets/public/sw.js` در بسته وجود دارند.
+- [!] این یک debug build آزمایشی است، نه نسخه production-signed. ساخت موفق و تطبیق hash، کیفیت بصری یا عملکرد واقعی در گوشی را اثبات نمی‌کند.
+- [ ] گام بعد: نصب Build 71 روی Android و بررسی تمام صفحات، سه تم و ناوبری موبایل؛ سپس ایرادهای گزارش‌شده اصلاح شوند. تا تأیید کاربر، PR #30 Draft می‌ماند و main ادغام نمی‌شود.
