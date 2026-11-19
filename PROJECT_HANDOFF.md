@@ -201,3 +201,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - هیچ deploy یا تغییر دیتابیس Production انجام نشده؛ Edge Function لوگو هنوز deploy نشده و Android visual QA/live smoke test باقی است.
 
 **Next:** تست بصری در Android و تصمیم جداگانهٔ تأییدشده برای merge/deploy.
+
+
+### وضعیت نهایی انتشار اصلاح بازار و لوگو — ۱۹ نوامبر ۲۰۲۶
+- PR #13 با اجازهٔ کاربر merge شد؛ merge commit روی `main`: `d062f4f6d9fed77bae2c1d122fb0cada0801462e`.
+- Edge Function `app-assets` در پروژهٔ `gfoaubfilhttnwjykaox` به نسخهٔ ۲ deploy شد و پس از deploy به صورت `ACTIVE` با `verify_jwt=false` تأیید شد.
+- SHA-256 نسخهٔ فعال: `1fe0c818ffd91d057fea77406dc6a6df4eb3a2daa20c73b2553a355c037cdb4f`؛ fallback تصویر از SpotHQ و CoinCap در سورس فعال وجود دارد.
+- هیچ تغییر دیتابیس/مهاجرت/دادهٔ مالی انجام نشد.
+- محدودیت تست: درخواست مستقیم به endpoint از محیط اجرا به علت DNS/شبکه ناموفق بود؛ smoke test واقعی تصویر و بررسی بصری روی Android هنوز باقی است.
+
+**Next:** برنامه DigiArz را refresh کن و چند نماد بدون لوگوی قبلی و ترتیب بخش‌های صعودی/نزولی را بررسی کن؛ اگر موردی باقی مانده، اسکرین‌شات بفرست.
