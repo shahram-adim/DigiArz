@@ -81,10 +81,10 @@ The current Production cron rows were read without modification:
 | Job ID | Active schedule | Command |
 |---|---|---|
 | 13 | `*/10 * * * *` | `request_iran_exchange_asset_sync()` |
-| 14 | `* * * * *` | `process_iran_exchange_asset_sync()` |
+| 14 | `1-59/10 * * * *` | `process_iran_exchange_asset_sync()` |
 | 17 | `5-59/10 * * * *` | `private.request_market_price_overflow()` |
 
-These schedules match the SQL body in the local `20261117130000_stagger_market_price_overflow_and_refresh_exchange_discovery.sql` file, while the applied version recorded by Supabase is `20261116205451`. This is a timestamp mismatch, not a reason to re-run the schedule change.
+As of the read-only snapshot on 2026-11-20, jobs 13 and 17 match the local SQL, but live job 14 is `1-59/10 * * * *` while the local SQL still sets `* * * * *`. The applied Supabase version is `20261116205451`, whereas the local file is version `20261117130000`; this is both a timestamp and content/schedule mismatch. Do not replay the local file or manually rewrite migration history.
 
 ## Transfer safeguards
 
