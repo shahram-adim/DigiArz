@@ -278,3 +278,17 @@ test('24h ticker batches retain successful results when an independent batch fai
   assert.equal(result.errors.length, 1);
   assert.match(result.errors[0], /502/);
 });
+
+test('ticker fallback coverage is measured across the full enabled market, not only the first dozen pairs', () => {
+  const start = html.indexOf('function isValidMarketChangeValue(');
+  const end = html.indexOf('\nasync function refreshMarketTickersUnlocked(', start);
+  assert.ok(start >= 0 && end > start, 'ticker coverage helpers found');
+  const context = {};
+  vm.runInNewContext(html.slice(start, end) + '\nthis.isValidMarketChangeValue=isValidMarketChangeValue; this.getMarketTickerCoverageThreshold=getMarketTickerCoverageThreshold;', context);
+  assert.equal(context.getMarketTickerCoverageThreshold(398), 299);
+  assert.equal(context.getMarketTickerCoverageThreshold(2), 2);
+  assert.equal(context.isValidMarketChangeValue(null), false);
+  assert.equal(context.isValidMarketChangeValue(undefined), false);
+  assert.equal(context.isValidMarketChangeValue('0'), true);
+  assert.equal(context.isValidMarketChangeValue('-2.5'), true);
+});
