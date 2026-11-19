@@ -1538,3 +1538,19 @@
 - [x] شاخه feature نسبت به main برابر ۳۰۶ commit جلو و صفر commit عقب است؛ PR #12 باز، Draft، ادغام‌نشده و mergeable است.
 - [ ] بازبینی بصری روی گوشی واقعی Android در عرض 360px و بررسی دسکتاپ/حالت روشن و تاریک هنوز به تأیید کاربر نیاز دارد.
 - [!] تمام اجرای SQL در PostgreSQL موقت CI بوده است؛ هیچ DDL/RPC/policy/cron/data در Supabase Production تغییر نکرده است.
+
+
+## آماده‌سازی APK پیش‌نمایش شاخه مشتقات — ۱۹ نوامبر ۲۰۲۶
+- [x] وضعیت زنده PR #12 خوانده شد: Open و Draft؛ head پیش از تغییر workflow برابر `224baa70c70e62c57f523e963e168a21fb2965b0` بود.
+- [x] اجرای Exact decimal شماره `44389676167` روی همان head با نتیجهٔ `success` بررسی شد؛ هر ۵۰ مرحلهٔ اصلی از Node/browser تا PostgreSQL 17 دورریختنی، Oracle، account risk، Reduce-only و insurance/deficit موفق بودند.
+- [x] مشخص شد workflow قبلی Android APK فقط روی push شاخه `main` اجرا می‌شد؛ بنابراین APK حاوی پیش‌نمایش مشتقات از شاخه feature ساخته نمی‌شد.
+- [x] workflow `.github/workflows/android-apk.yml` اصلاح شد تا push روی `feat/demo-derivatives-trading` نیز APK Debug بسازد؛ trigger مربوط به pull_request هم برای PRهای آینده اضافه شد. فایل پس از commit دوباره از GitHub خوانده و وجود trigger شاخه feature تأیید شد.
+- [x] تغییر workflow در commit `2c428afe7bc31d96d3647040108f203985e9a32e` ثبت شد و سپس trigger شاخه feature در commit `e6722eccdccfa63d24c1bee03f491703ffe69e14` نهایی شد.
+- [!] اجرای APK workflow و artifact مربوط به head جدید هنوز از ابزار در دسترس این نوبت قابل تأیید نیست؛ تا مشاهدهٔ run و artifact، ساخت APK موفق فرض نشود.
+- [!] آخرین مقایسهٔ زندهٔ شاخه پس از این تغییر: ۳۰۸ commit جلو و ۲ commit عقب از `main`؛ PR #12 همچنان Open/Draft و unmerged است. دو commit عقب‌مانده در main صرفاً مستندات `IMPLEMENTATION_STATUS.md` هستند، اما همگام‌سازی شاخه انجام نشد.
+- [!] هیچ Supabase Production object/data، migration، RPC، worker، سفارش، کیف پول یا موجودی تغییر نکرد؛ هیچ merge/rebase/force-push یا deployment انجام نشد.
+
+### گام بعدی
+1. نتیجهٔ Android APK workflow روی head `e6722eccdccfa63d24c1bee03f491703ffe69e14` و artifact آن را تأیید کن؛ فقط پس از موفقیت، لینک artifact و checksum را ثبت کن.
+2. پس از نصب APK پیش‌نمایش روی Android، نمای مشتقات را در عرض واقعی گوشی، حالت روشن/تاریک و اسکرول بررسی کن.
+3. همگام‌سازی دو commit مستنداتی main به شاخه PR فقط پس از تأیید صریح انجام شود؛ PR همچنان Draft بماند.
