@@ -1604,6 +1604,84 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
  .mobile-bottom-nav button svg{width:16px;height:16px;flex-basis:16px}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+/* DigiArz premium authentication refresh — scoped to the login card only */
+#authView.auth{
+  --auth-ink:#10254a;--auth-muted:#64748b;--auth-blue:#1746a2;--auth-blue2:#2864c7;
+  max-width:1040px;min-height:600px;margin:clamp(18px,5vh,56px) auto;
+  grid-template-columns:minmax(0,1fr) minmax(0,1.02fr);gap:0;
+  background:#fff;border:1px solid #e4eaf3;border-radius:24px;
+  box-shadow:0 24px 70px rgba(15,35,75,.14);color:var(--auth-ink);
+}
+#authView .auth-visual{
+  isolation:isolate;overflow:hidden;padding:clamp(28px,4vw,48px);
+  background:radial-gradient(circle at 18% 16%,rgba(255,255,255,.2),transparent 31%),
+    radial-gradient(circle at 82% 78%,rgba(218,174,75,.2),transparent 30%),
+    linear-gradient(145deg,#102b60 0%,#17458f 52%,#10234a 100%);
+  border:0;border-radius:0 22px 22px 0;color:#fff;
+}
+#authView .auth-visual:before{
+  content:"";position:absolute;z-index:-1;width:340px;height:340px;left:-125px;top:36%;
+  border:1px solid rgba(255,255,255,.14);border-radius:50%;
+  box-shadow:0 0 0 32px rgba(255,255,255,.035),0 0 0 70px rgba(255,255,255,.025);
+}
+#authView .auth-visual:after{
+  width:180px;height:180px;left:auto;right:-80px;bottom:-90px;
+  border-color:rgba(231,194,111,.3);box-shadow:0 0 0 24px rgba(231,194,111,.07),0 0 0 52px rgba(231,194,111,.04);
+}
+#authView .auth-brand{font-size:36px;letter-spacing:-.8px;color:#fff}
+#authView .auth-brand span{color:#f0cc78}
+#authView .auth-kicker{color:#f0d99f;font-size:10px;font-weight:800;letter-spacing:1.7px}
+#authView .auth-headline{font-size:clamp(25px,3vw,34px);line-height:1.85;margin:22px 0 12px;color:#fff}
+#authView .auth-copy{max-width:390px;color:#dbe6f8;font-size:13px;line-height:2.25}
+#authView .auth-benefits{grid-template-columns:1fr 1fr;gap:12px;margin-top:34px}
+#authView .auth-benefit{min-height:54px;padding:10px 11px;border:1px solid rgba(255,255,255,.15);border-radius:13px;background:rgba(255,255,255,.075);color:#f3f6fc;font-size:11px;line-height:1.8;backdrop-filter:blur(8px)}
+#authView .auth-benefit i{width:32px;height:32px;flex:0 0 32px;border:1px solid rgba(240,204,120,.4);border-radius:10px;color:#f0cc78;background:rgba(7,20,46,.22)}
+#authView .auth-form{padding:clamp(28px,4.2vw,52px);background:#fff;color:var(--auth-ink)}
+#authView .auth-form .auth-kicker{color:#a47b28;font-size:11px;letter-spacing:0;font-weight:800}
+#authView .auth-form h2{font-size:25px;line-height:1.6;color:#142b52;margin:7px 0 5px}
+#authView .auth-intro{color:#718096;font-size:12px;line-height:2;margin-bottom:17px}
+#authView .auth-form .field{margin:12px 0}
+#authView .auth-form .field label{color:#425675;font-size:12px;font-weight:700}
+#authView .auth-form input{
+  min-height:51px;padding:0 14px;border:1px solid #dce4ef;border-radius:12px;
+  background:#f8fafd;color:#142b52;outline:none;box-shadow:inset 0 1px 2px rgba(20,43,82,.025);
+  transition:border-color .18s,box-shadow .18s,background .18s;
+}
+#authView .auth-form input:focus{border-color:#3e73c9;background:#fff;box-shadow:0 0 0 3px rgba(44,100,199,.12)}
+#authView .auth-form input::placeholder{color:#9aa8bb}
+#authView .auth-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+#authView .auth-actions button{min-height:50px;border-radius:12px;font-weight:800}
+#authView #loginBtn{background:linear-gradient(135deg,#1746a2,#2864c7);color:#fff;box-shadow:0 8px 18px rgba(23,70,162,.2)}
+#authView #signupBtn{background:#eef3fb;color:#19458e;border:1px solid #dce6f5}
+#authView #forgotBtn{min-height:43px;background:transparent;color:#315d9e;border:1px solid #e1e8f2;border-radius:11px}
+#authView .auth-security{padding:11px 12px;margin-top:18px;border:1px solid #e7edf5;border-radius:12px;background:#f7f9fc;color:#6d7d94;font-size:10px;line-height:1.9}
+#authView .auth-security svg{color:#23865d}
+#authView #authMsg{border-radius:11px}
+#authView #recoveryPanel{padding:14px;margin-top:14px;border:1px solid #e3eaf4;border-radius:14px;background:#f8fafd}
+#authView #recoveryPanel h2{font-size:18px}
+@media(max-width:700px){
+  #authView.auth{grid-template-columns:1fr;margin:14px auto 22px;min-height:0;border-radius:20px;box-shadow:0 14px 38px rgba(15,35,75,.12)}
+  #authView .auth-visual{padding:22px 20px 20px;border-radius:0 0 18px 18px;min-height:0;border:0}
+  #authView .auth-brand{font-size:29px}
+  #authView .auth-headline{font-size:23px;line-height:1.75;margin:10px 0 7px}
+  #authView .auth-copy{font-size:11px;line-height:2}
+  #authView .auth-benefits{grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+  #authView .auth-benefit{min-height:46px;padding:7px 8px;font-size:9px;gap:7px}
+  #authView .auth-benefit i{width:27px;height:27px;flex-basis:27px}
+  #authView .auth-form{padding:23px 19px 21px}
+  #authView .auth-form h2{font-size:22px}
+  #authView .auth-form .field{margin:10px 0}
+  #authView .auth-form input{min-height:49px}
+  #authView .auth-actions{gap:8px}
+  #authView .auth-actions button{min-height:48px;padding-inline:8px;font-size:12px}
+}
+@media(max-width:360px){
+  #authView .auth-benefit{font-size:8.5px}
+  #authView .auth-actions{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){
+  #authView *{transition:none!important}
+}
 </style>
 <style>
 .pwa-install-banner{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 16px;margin:0 0 14px;border:1px solid rgba(240,185,11,.45);border-radius:14px;background:linear-gradient(110deg,rgba(240,185,11,.10),rgba(24,26,32,.96));box-shadow:0 8px 24px rgba(0,0,0,.12)}
