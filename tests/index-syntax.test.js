@@ -383,3 +383,26 @@ test('three visual themes are selectable, persisted, and backward-compatible', (
   assert.match(html, /@supports not \(\(backdrop-filter:blur\(1px\)\) or \(-webkit-backdrop-filter:blur\(1px\)\)\)/);
   assert.match(html, /prefers-reduced-motion:reduce/);
 });
+
+
+test('approved DigiArz login reference is implemented as a real responsive vertical page', () => {
+  const authStart=html.indexOf('<section id="authView" class="card auth login-screen">');
+  const authEnd=html.indexOf('</section>\n<section id="loginDailyAd"',authStart);
+  const ad=html.indexOf('id="loginDailyAd"',authStart);
+  assert.ok(authStart>=0&&authEnd>authStart&&ad>authEnd,'daily ad is placed after the complete login card');
+  const auth=html.slice(authStart,authEnd);
+  for(const token of ['class="login-brandbar"','class="login-hero"','class="login-globe-wrap"','class="login-orbit"','class="login-phone"','id="authMiniChart"','id="authCoinTrack"','class="login-card"']) assert.ok(auth.includes(token),'approved visual component exists: '+token);
+  for(const symbol of ['BTCUSDT','ETHUSDT','BNBUSDT','XRPUSDT','SOLUSDT','TRXUSDT','DOGEUSDT','ADAUSDT','LINKUSDT','LTCUSDT']) assert.ok(html.includes("symbol:'"+symbol+"'"),'live ticker candidate exists: '+symbol);
+  assert.match(html,/quoteVolume/,'visible market assets are ranked by returned 24h quote volume');
+  assert.match(html,/loginEarthSpin/);
+  assert.match(html,/loginOrbitSpin/);
+  assert.match(html,/@media\(max-width:760px\)[\s\S]*?#authView \.login-market-layout\{grid-template-columns:1fr/);
+  assert.match(html,/@media\(prefers-reduced-motion:reduce\)[\s\S]*?loginEarthSvg/);
+});
+
+test('login password visibility control preserves the entered password and is accessible', () => {
+  assert.match(html,/id="togglePasswordVisibility"/);
+  assert.match(html,/input\.type=reveal\?'text':'password'/);
+  assert.match(html,/button\.setAttribute\('aria-pressed',String\(reveal\)\)/);
+  assert.match(html,/digiarz-login-password-toggle-20261119/);
+});
