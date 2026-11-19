@@ -2454,7 +2454,7 @@ function renderMarkets(){
   div.className='coin'+(item.symbol===selectedSymbol?' selected':'');div.dataset.symbol=String(item.symbol).toUpperCase();
   const fullSymbol=String(item.symbol).toUpperCase(),base=fullSymbol.replace(/USDT$/i,'');
   const change=changeOf(item),isFavorite=isFavoriteSymbol(item.symbol),persianName=String(item.name_fa||persianCoinName(item.symbol));
-  div.setAttribute('role','group');div.setAttribute('tabindex','0');div.setAttribute('aria-label',`اطلاعات ${persianCoinName(item.symbol)} (${base})`);
+  div.setAttribute('role','group');div.setAttribute('tabindex','0');div.setAttribute('aria-label',`اطلاعات ${persianName} (${base})`);
   const usdMarkup=`<div class="price-usd"><strong>${valid?'$ '+formatNum(usd,10):'—'}</strong></div>`;
   const tomanMarkup=`<div class="price-toman"><strong>${toman!==null?formatNum(toman,0)+' تومان':'نرخ تومان ناموجود'}</strong></div>`;
   const freshnessMarkup=valid?'<small class="coin-source fresh">قیمت تازه · زمان منبع حداکثر ۲ دقیقه</small>':'<small class="coin-source stale">قیمت قدیمی یا ناموجود · برای معامله قابل اتکا نیست</small>';
@@ -2467,8 +2467,8 @@ function renderMarkets(){
   star.addEventListener('click',event=>{event.stopPropagation();toggleFavoriteSymbol(item.symbol);renderMarkets();renderDashboardMarketPreview()});
   const identity=document.createElement('button');identity.type='button';identity.className='coin-identity market-coin-open';
   const englishName=String(coinInfo[base]?.name||item.name||base);
-  identity.innerHTML=coinLogo(base,'coin-icon',item.image_url)+'<span class="coin-name-stack"><b class="coin-name-fa">'+safeText(persianCoinName(item.symbol))+'</b><small class="coin-symbol-en" dir="ltr">'+safeText(base)+'</small><small class="coin-english-name" dir="ltr">'+safeText(englishName)+'</small></span>';
-  identity.title=persianCoinName(item.symbol)+' · '+base+' · '+englishName;
+  identity.innerHTML=coinLogo(base,'coin-icon',item.image_url)+'<span class="coin-name-stack"><b class="coin-name-fa">'+safeText(persianName)+'</b><small class="coin-symbol-en" dir="ltr">'+safeText(base)+'</small><small class="coin-english-name" dir="ltr">'+safeText(englishName)+'</small></span>';
+  identity.title=persianName+' · '+base+' · '+englishName;
   identity.setAttribute('role','button');identity.setAttribute('tabindex','0');identity.setAttribute('aria-label','باز کردن جزئیات و نمودار '+base);
   identity.addEventListener('click',event=>{event.stopPropagation();openChart(item.symbol)});
   identity.setAttribute('aria-label','باز کردن جزئیات و نمودار '+base);
