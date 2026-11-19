@@ -409,3 +409,19 @@ test('login mini chart renders real five-minute candles without depending on a c
   assert.match(html, /fetchBinanceKlines\('BTCUSDT','5m',36\)/);
   assert.match(html, /<svg viewBox=/);
 });
+
+const proUiCss = fs.readFileSync('src/digiarz-pro-ui.css', 'utf8');
+
+test('unified professional UI stylesheet is loaded for every authenticated screen', () => {
+  assert.ok(html.includes('href="./src/digiarz-pro-ui.css?v=20261120"'));
+  for (const selector of [
+    '#tab-dashboard', '#tab-markets', '#tab-toman', '#tab-chart',
+    '#tab-trade', '#tab-assets', '#tab-orders', '#tab-history',
+    '#tab-admin', '#tab-settings', '.mobile-bottom-nav'
+  ]) assert.ok(proUiCss.includes(selector), 'redesign covers ' + selector);
+  assert.ok(proUiCss.includes('body.light-theme'));
+  assert.ok(proUiCss.includes('body.luxury-theme'));
+  assert.ok(proUiCss.includes('@media(max-width:700px)'));
+  assert.ok(proUiCss.includes('prefers-reduced-motion:reduce'));
+  assert.ok(proUiCss.includes(':focus-visible'));
+});
