@@ -3791,7 +3791,9 @@ body:not(.light-theme) .daily-ad-card{background:linear-gradient(110deg,#14243b,
 <style id="digiarz-approved-login-screen-20261119">
 /* Complete implementation of the user-approved DigiArz login reference. */
 #authView.login-screen{display:flex!important;flex-direction:column!important;gap:0!important;width:100%;max-width:1160px;min-height:0;margin:10px auto 16px;padding:0!important;overflow:hidden;border:1px solid rgba(221,184,95,.34);border-radius:27px;background:#071426;box-shadow:0 26px 76px rgba(0,0,0,.24)}
-#authView .login-brandbar{position:relative;display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0;padding:16px clamp(17px,3vw,34px);border:0;border-bottom:1px solid rgba(232,194,105,.24);border-radius:0;background:linear-gradient(100deg,#071326,#0c2040 62%,#101d35);color:#fff;box-shadow:none}
+
+#authView.login-screen.hidden{display:none!important}
+#authView .login-brandbar{position:relative;top:auto;z-index:1;max-width:none;display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0;padding:16px clamp(17px,3vw,34px);border:0;border-bottom:1px solid rgba(232,194,105,.24);border-radius:0;background:linear-gradient(100deg,#071326,#0c2040 62%,#101d35);color:#fff;box-shadow:none}
 #authView .login-brand-lockup{display:flex;align-items:center;gap:12px;min-width:0}
 #authView .login-brand-symbol{display:grid;place-items:center;width:52px;height:52px;flex:0 0 52px;border:1px solid rgba(244,205,117,.7);border-radius:16px;background:linear-gradient(145deg,#f8df91,#b77a1d 58%,#f7d879);color:#101a2b;font-size:22px;font-weight:1000;box-shadow:0 0 24px rgba(237,187,70,.24)}
 #authView .login-brand-word{display:grid;gap:1px;color:#f5d47d;font-size:clamp(23px,3vw,31px);font-weight:950;letter-spacing:.2px;line-height:1.1}
@@ -3872,9 +3874,9 @@ body:not(.light-theme) .daily-ad-card{background:linear-gradient(110deg,#14243b,
 #authView .auth-security svg{width:16px;height:16px;flex:0 0 16px;color:#31d39a}
 #authView .login-footer{display:none}
 #loginDailyAd{width:min(980px,calc(100% - 24px));margin:0 auto 18px;border-radius:18px;overflow:hidden}
-.login-footer{display:flex;align-items:center;justify-content:center;gap:16px;margin:10px auto 26px;color:#d5b967;font-size:clamp(11px,1.5vw,15px);text-align:center}
+.login-footer{display:none;align-items:center;justify-content:center;gap:16px;margin:10px auto 26px;color:#d5b967;font-size:clamp(11px,1.5vw,15px);text-align:center}
 .login-footer span{width:min(22vw,140px);height:1px;background:linear-gradient(90deg,transparent,#d5b967)}
-body.light-theme #authView.login-screen{border-color:#e1c77f;background:#f6f8fc;box-shadow:0 20px 60px rgba(35,63,101,.13)}
+body.auth-page-active .login-footer{display:flex}\nbody.light-theme #authView.login-screen{border-color:#e1c77f;background:#f6f8fc;box-shadow:0 20px 60px rgba(35,63,101,.13)}
 body.light-theme #authView .login-brandbar{background:linear-gradient(100deg,#fff,#f5f8fd 62%,#fff8e8);border-color:#e9dfc5;color:#172b49}
 body.light-theme #authView .login-brand-word>span{color:#172b49}
 body.light-theme #authView .login-brand-word small{color:#687d98}
