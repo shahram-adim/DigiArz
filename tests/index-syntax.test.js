@@ -347,7 +347,7 @@ test('login screen has a complete branded header, market feature strip and a wor
   assert.match(html, /class="auth-quick-stats"/);
   assert.match(html, /id="authThemeToggle"/);
   assert.match(html, /id="authThemeLabel"/);
-  assert.match(html, /\$\('authThemeToggle'\)\?\.addEventListener\('click',toggleTheme\)/);
+  assert.match(html, /\$\('authThemeToggle'\)\?\.addEventListener\('click',cycleTheme\)/);
   assert.match(html, /const authThemeButton=\$\('authThemeToggle'\)/);
   assert.match(html, /body\.auth-page-active \.auth-top-banner/);
   assert.match(html, /@media\(max-width:760px\)[\s\S]*?#authView\.auth\{display:flex;flex-direction:column/);
