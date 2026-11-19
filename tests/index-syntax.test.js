@@ -230,3 +230,51 @@ test('coin logos try curated metadata, the primary icon set and an independent f
   assert.match(edge, /assets\.coincap\.io\/assets\/icons/);
   assert.match(edge, /fetchFirstAvailable/);
 });
+
+test('enabled market pairs load logo metadata by exact CoinGecko id, not ambiguous ticker symbol', () => {
+  const start = html.indexOf('function attachMarketAssetMetadata(');
+  const end = html.indexOf('\nasync function loadMarkets(', start);
+  assert.ok(start >= 0 && end > start, 'market metadata helper boundaries found');
+  const context = {};
+  vm.runInNewContext(html.slice(start, end) + '\nthis.attachMarketAssetMetadata=attachMarketAssetMetadata;', context);
+  const rows = context.attachMarketAssetMetadata(
+    [{symbol:'CATUSDT',price:'1',updated_at:'fresh'}, {symbol:'BTCUSDT',price:'2',updated_at:'fresh'}],
+    [{pair_symbol:'CATUSDT',is_enabled:true,base_coingecko_id:'cat-token-a'}, {pair_symbol:'BTCUSDT',is_enabled:true,base_coingecko_id:'bitcoin'}],
+    [{coingecko_id:'cat-token-a',symbol:'cat',name:'Cat Token A',image_url:'https://img.example/cat-a.png',price_change_percentage_24h:4,last_updated:'stale'}, {coingecko_id:'cat-token-b',symbol:'cat',name:'Cat Token B',image_url:'https://img.example/cat-b.png'}]
+  );
+  assert.equal(rows.length, 2);
+  assert.equal(rows[0].name, 'Cat Token A');
+  assert.equal(rows[0].image_url, 'https://img.example/cat-a.png');
+  assert.equal(rows[0].change_updated_at, 'stale');
+  assert.equal(rows[1].image_url, undefined === rows[1].image_url ? null : rows[1].image_url);
+  assert.equal(rows[1].coingecko_id, 'bitcoin');
+});
+
+test('market change fallback uses the crypto asset metadata timestamp, not the newer price timestamp', () => {
+  const start = html.indexOf('function getMarketChange24h(item){');
+  const end = html.indexOf('function compareMarketChange(', start);
+  assert.ok(start >= 0 && end > start);
+  const context = {
+    getFreshMarketTicker: () => null,
+    isMarketTimestampFresh: value => value === 'fresh'
+  };
+  vm.runInNewContext(html.slice(start, end) + '\nthis.getMarketChange24h=getMarketChange24h;', context);
+  assert.equal(context.getMarketChange24h({change:12,updated_at:'fresh',change_updated_at:'stale'}), null);
+  assert.equal(context.getMarketChange24h({change:12,updated_at:'stale',change_updated_at:'fresh'}), 12);
+});
+
+test('24h ticker batches retain successful results when an independent batch fails', () => {
+  const start = html.indexOf('function collectMarketTickerBatchResults(');
+  const end = html.indexOf('\nasync function fetchBinance24hrTickerRows(', start);
+  assert.ok(start >= 0 && end > start, 'ticker batch collector boundaries found');
+  const context = {};
+  vm.runInNewContext(html.slice(start, end) + '\nthis.collectMarketTickerBatchResults=collectMarketTickerBatchResults;', context);
+  const result = context.collectMarketTickerBatchResults([
+    {status:'fulfilled',value:[{symbol:'BTCUSDT'},{symbol:'ETHUSDT'}]},
+    {status:'rejected',reason:new Error('HTTP 502')},
+    {status:'fulfilled',value:[{symbol:'SOLUSDT'}]}
+  ]);
+  assert.deepEqual(Array.from(result.rows, row => row.symbol), ['BTCUSDT','ETHUSDT','SOLUSDT']);
+  assert.equal(result.errors.length, 1);
+  assert.match(result.errors[0], /502/);
+});
