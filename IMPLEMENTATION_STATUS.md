@@ -1554,3 +1554,14 @@
 1. نتیجهٔ Android APK workflow روی head `e6722eccdccfa63d24c1bee03f491703ffe69e14` و artifact آن را تأیید کن؛ فقط پس از موفقیت، لینک artifact و checksum را ثبت کن.
 2. پس از نصب APK پیش‌نمایش روی Android، نمای مشتقات را در عرض واقعی گوشی، حالت روشن/تاریک و اسکرول بررسی کن.
 3. همگام‌سازی دو commit مستنداتی main به شاخه PR فقط پس از تأیید صریح انجام شود؛ PR همچنان Draft بماند.
+
+
+## تأیید ساخت APK پیش‌نمایش و CI — ۱۹ نوامبر ۲۰۲۶
+- [x] اجرای Android APK workflow شماره `44458932809` روی شاخه `feat/demo-derivatives-trading` و commit `e6722eccdccfa63d24c1bee03f491703ffe69e14` با نتیجهٔ `success` پایان یافت.
+- [x] هر ۱۱ مرحلهٔ job موفق بود؛ از جمله نصب Capacitor، build وب، تولید و sync پروژه Android، اجرای `assembleDebug` و بارگذاری artifact.
+- [x] artifact `DigiArz-Android-debug-APK` با شناسهٔ `14498658280` دریافت و محتوای ZIP بررسی شد؛ شامل `app-debug.apk` و `BUILD-INFO.txt` است.
+- [x] SHA-256 فایل APK: `327de21adbbe2e8784d246c9a7597050231be31ba3df39c400fdc7ca81fa3cd1`.
+- [x] اجرای Exact decimal شماره `44459007802` روی commit مستندسازی `299e5257267e47666dad8cde64e1153b7e98aeb0` نیز با نتیجهٔ `success` پایان یافت.
+- [!] APK ساخته‌شده از commit `e6722eccdccfa63d24c1bee03f491703ffe69e14` است؛ commit بعدی `299e5257267e47666dad8cde64e1153b7e98aeb0` فقط فایل وضعیت پروژه را به‌روز کرده و محتوای برنامه/تنظیمات ساخت را تغییر نداده است.
+- [ ] نصب و بازبینی عملی APK روی گوشی Android هنوز انجام نشده و نیازمند تأیید کاربر است.
+- [!] PR #12 همچنان Open و Draft است؛ شاخه با main ادغام نشده و دو commit عقب‌ماندهٔ مستنداتی main نیز بدون اجازهٔ صریح همگام نشده‌اند.
