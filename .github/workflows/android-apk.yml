@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - feature/login-3d-live-scene
     paths:
       - "index.html"
       - "manifest.webmanifest"
