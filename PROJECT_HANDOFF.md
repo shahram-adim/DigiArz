@@ -326,3 +326,15 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 
 ### Next
 Wait for the user's installation/UI feedback. Investigate Auth recovery only with minimal read-only checks after DB access is stable. PR #18 merge requires separate explicit user approval.
+
+
+## 2026-11-19 — Latest Auth/DB incident diagnosis (09:54 UTC)
+- Supabase project API reports `ACTIVE_HEALTHY`, but this is not proof that PostgreSQL connections are responsive.
+- Auth gateway logs: latest recorded real password POST at 08:38:15 UTC returned 504; a prior POST at 08:27:25 UTC returned 200. At 09:54:14 UTC an OPTIONS preflight returned 200. The failure is intermittent, not evidence of a wrong password.
+- PostgreSQL logs from 09:47–09:53 UTC show repeated pg_cron startup timeouts across jobs 2/3/8/9/12/13/14/18, SSL connection resets, and a statement timeout on a pg_stat_statements management query.
+- `refresh_market_prices()` logged DNS/TLS timeouts against Gate.io, KuCoin and CoinGecko, around 19–22 seconds per logged request. This is consistent with connection/resource pressure and external egress latency but does not prove one single root cause.
+- A read-only SQL query also failed with `Connection terminated due to connection timeout`; this is broader than Android UI or the Auth endpoint.
+- Supabase health advisor returned no lints; that does not certify runtime availability. Public Supabase status page reported all systems operational and no Nov 19 incident at check time. Official guidance says this SQL connection-timeout symptom commonly occurs when the database is overloaded: https://supabase.com/kb/troubleshooting/failed-to-run-sql-query-connection-terminated-due-to-connection-timeout
+- No new Production mutation was made. In particular, jobs 2/3 and financial workers 8/9/12 remain untouched; no database restart or compute resize was attempted. Those actions may disrupt service or incur cost and require specific approval.
+- Next: inspect Supabase Database Reports for CPU/RAM/Swap/I/O and connection saturation correlated to 09:47–09:53 UTC. If the compute ceiling is confirmed, present the exact cost before requesting approval to resize. Consider restart only if supported by evidence and with prior coordination.
+- PR #18 remains the documentation-only branch; do not merge without explicit user approval.
