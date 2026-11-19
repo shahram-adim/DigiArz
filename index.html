@@ -3975,6 +3975,22 @@ body.luxury-theme #authView .auth-security{background:rgba(255,255,255,.035);bor
  #authView .login-top-coins,#authView .login-card,#authView .auth-quick-stats>span{background:rgba(8,24,44,.96)}
  body.light-theme #authView .login-card,body.light-theme #authView .login-top-coins{background:#fff}
 }
+
+/* Crypto coins travel around the phone instead of merely bobbing in place. */
+@supports (offset-path:ellipse(43% 31% at 50% 50%)){
+ #authView .login-orbit-coin{
+  top:auto;right:auto;bottom:auto;left:auto;
+  offset-path:ellipse(43% 31% at 50% 50%);
+  offset-anchor:50% 50%;
+  offset-distance:0%;
+  offset-rotate:0deg;
+  animation:loginCoinOrbitTravel 28s linear infinite;
+ }
+ #authView .coin-ethereum{animation-delay:-7s}
+ #authView .coin-tether{animation-delay:-14s}
+ #authView .coin-solana{animation-delay:-21s}
+}
+@keyframes loginCoinOrbitTravel{to{offset-distance:100%}}
 </style>
 <script id="digiarz-login-password-toggle-20261119">
 (() => {
