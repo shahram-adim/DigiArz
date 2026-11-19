@@ -1606,3 +1606,12 @@
 
 - [x] بازبینی سربرگ بر اساس تصویر کاربر، ترتیب نوشتاری انگلیسی نام برند را اصلاح کرد: DigiArz اکنون داخل bdi با جهت LTR قرار گرفته تا در صفحه RTL به شکل وارونه/جابجا دیده نشود؛ برچسب DEMO و چیدمان راست‌به‌چپ هدر حفظ شده‌اند.
 - [x] تست رگرسیون جهت نوشتار برند اضافه شد؛ commitهای این اصلاح: b58c272fd8a1e8a273d343b1412c0e567b5c8f3e و 821da20edbe7a9a6953e06842dd41a2f22ef4bc0.
+
+
+## بازبینی ادامهٔ کار — ۱۹ نوامبر ۲۰۲۶
+- [x] وضعیت زنده PR شماره ۱۲ از GitHub خوانده شد: open، draft=true، head=feat/demo-derivatives-trading، base=main، head SHA=d0fb7d39507197a980485410ec16c5b8ada0a5a7؛ هنوز merge نشده است.
+- [x] وضعیت head و فایل‌های index.html و tests/market-mobile-layout.test.js دوباره بررسی شد؛ اصلاح ترتیب نوشتار DigiArz و تست مربوطه در head موجودند.
+- [x] workflow runs مربوط به head از endpoint موجود درخواست شد؛ پاسخ خالی بود. این endpoint فقط runهای PR-triggered را نشان می‌دهد، پس از آن نمی‌توان نتیجهٔ کل Actions یا APK build را نتیجه گرفت.
+- [ ] هنوز APK جدید یا run موفق برای آخرین head تأیید نشده است؛ نسخهٔ قبلی APK برای این commitها قابل استفاده به‌عنوان preview جدید نیست.
+- [!] شاخه نسبت به main در آخرین compare برابر ۳۲۵ commit جلو و ۲ commit عقب است؛ بدون مجوز کاربر merge/rebase/sync انجام نشود.
+- گام بعدی ایمن: با فعال شدن/در دسترس بودن workflow build، APK دقیقاً از head بالا ساخته و artifact بررسی شود؛ سپس تست ظاهری روی گوشی انجام شود.
