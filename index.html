@@ -2228,7 +2228,7 @@ async function refreshMarketTickersUnlocked(){
  renderMarkets();
  const valid=sortMarketRowsByChange(marketRows,'desc');
  const avg=valid.length?valid.reduce((sum,item)=>sum+getMarketChange24h(item),0)/valid.length:null;
- const gain=valid[0],loss=valid[valid.length-1];
+ const gain=valid.find(item=>getMarketChange24h(item)>0)||null,loss=valid.find(item=>getMarketChange24h(item)<0)||null;
  const avgEl=$('marketAvgChange'),gainEl=$('marketTopGain'),lossEl=$('marketTopLoss');
  if(avgEl){avgEl.textContent=avg===null?'—':(avg>0?'+':'')+formatNum(avg,2)+'٪';avgEl.className=avg>0?'pos':avg<0?'neg':''}
  if(gainEl){const change=gain?getMarketChange24h(gain):null;gainEl.textContent=gain?gain.symbol+'  '+(change>0?'+':'')+formatNum(change,2)+'٪':'—';gainEl.className=gain?(change>0?'pos':change<0?'neg':''):'muted'}
