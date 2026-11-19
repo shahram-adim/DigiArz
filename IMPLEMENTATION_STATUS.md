@@ -958,3 +958,13 @@
 - [!] اجرای موفق CI، اجرای واقعی CoinGecko در WebView، ظاهر روی گوشی یا نصب APK را اثبات نمی‌کند.
 - [x] `main` و Supabase Production بدون تغییر باقی ماندند؛ PR #28 همچنان Draft و ادغام‌نشده است.
 - [ ] گام بعد: پس از اجرای دستی workflow، بررسی run، artifact، BUILD-INFO و SHA-256 APK؛ سپس کاربر آن را روی Android نصب و نتیجهٔ بصری را گزارش کند.
+
+
+## شروع خودکار ساخت APK از شاخهٔ آزمایشی — ۱۹ نوامبر ۲۰۲۶
+- [x] به‌جای نیاز به کلیک دستی، trigger مربوط به `push` در `.github/workflows/android-apk.yml` برای شاخهٔ `feature/login-3d-live-scene` نیز فعال شد؛ تغییر فقط در شاخهٔ آزمایشی است.
+- [x] commit تغییر workflow: `2c35f3d65b98731763bcf90360c7b67cb0fc8cc6`.
+- [x] GitHub Actions به‌طور خودکار اجرای ساخت APK شمارهٔ 68 با شناسهٔ `44605904447` را روی همین شاخه و همین commit آغاز کرد.
+- [x] مراحل checkout، تنظیم Node/Java، نصب Capacitor، build وب و تولید/همگام‌سازی پروژهٔ Android موفق شدند.
+- [!] در آخرین بررسی، مرحلهٔ `Build installable debug APK` هنوز در حال اجرا بود؛ هنوز artifact یا Release قابل دانلود منتشر نشده بود.
+- [x] PR #28 همچنان Draft و باز است؛ `main` و Supabase Production تغییر نکرده‌اند.
+- [ ] گام بعد: بررسی نتیجهٔ نهایی run شمارهٔ 68، تأیید artifact و BUILD-INFO/SHA-256، و ارائهٔ لینک دانلود APK در صورت موفقیت.
