@@ -939,7 +939,7 @@
 
 
 ### نتیجه نهایی CI برای بازسازی صحنه ورود — ۱۹ نوامبر ۲۰۲۶
-- [x] GitHub Actions Run #925 با شناسهٔ `44604653303` روی commit نهایی کد `6245f3416a2dedaba49434200aa91b2593a5707f` و سپس commit مستندسازی `23f109949e89661ce877f6cd0786075eb65421bf` با نتیجهٔ نهایی `success` تکمیل شد.
+- [x] GitHub Actions Run #924 با شناسهٔ `44604498565` برای commit کد `6245f3416a2dedaba49434200aa91b2593a5707f` و Run #925 با شناسهٔ `44604653303` برای commit مستندسازی `23f109949e89661ce877f6cd0786075eb65421bf` هر دو با نتیجهٔ نهایی `success` تکمیل شدند؛ محتوای `index.html` در این دو commit یکسان بود.
 - [x] همهٔ مراحل job موفق شدند: تست‌های JavaScript و Browser Integration، آزمون‌های محاسبات PostgreSQL، شبیه‌سازی مهاجرت و rollback/lock timeout، Market و Limit، Stop-Limit و TP-SL، worker/cancellation و رقابت‌های دو نشست.
 - [x] بررسی DOM و CSS تأیید کرد selector لایهٔ نقشهٔ کره، سه سکهٔ BTC/ETH/BNB، سکهٔ USDT و چهار ردیف بازار با ساختار HTML موجود تطابق دارند.
 - [x] PR #28 فقط دو فایل `index.html` و `IMPLEMENTATION_STATUS.md` را تغییر می‌دهد؛ PR همچنان Draft است.
