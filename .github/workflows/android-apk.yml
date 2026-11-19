@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - feat/approved-login-screen-full-implementation
+      - redesign/full-app-experience
     paths:
       - "index.html"
       - "manifest.webmanifest"
