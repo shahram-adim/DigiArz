@@ -327,3 +327,17 @@ test('login screen uses the scoped premium light-blue-and-gold responsive design
     assert.match(html, new RegExp('id="' + id + '"'), 'existing auth control remains: ' + id);
   }
 });
+
+
+test('login screen embeds a live market phone preview with rotating crypto tickers', () => {
+  assert.match(html, /class="auth-phone-preview"/);
+  assert.match(html, /id="authMiniChart"/);
+  assert.match(html, /id="authCoinTrack"/);
+  assert.match(html, /async function refreshAuthMiniChart\(\)/);
+  assert.match(html, /async function refreshAuthCoinPrices\(\)/);
+  assert.match(html, /authCoinRotationTimer=setInterval/);
+  assert.match(html, /fetchBinanceKlines\('BTCUSDT','5m',36\)/);
+  assert.match(html, /fetchBinanceResponse\('\/api\/v3\/ticker\/24hr\?symbol='/);
+  assert.match(html, /body:not\(\.light-theme\) #authView\.auth/);
+  assert.match(html, /body:not\(\.light-theme\) #authView \.auth-form/);
+});
