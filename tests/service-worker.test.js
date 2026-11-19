@@ -12,7 +12,7 @@ function createHarness(fetchImpl = async () => ({ ok: true, clone() { return thi
   const stored = new Map();
   const added = [];
   const deleted = [];
-  const cacheNames = ['digiarz-shell-v53', 'digiarz-shell-v54', 'digiarz-shell-v55', 'digiarz-shell-v56'];
+  const cacheNames = ['digiarz-shell-v53', 'digiarz-shell-v54', 'digiarz-shell-v55', 'digiarz-shell-v56', 'digiarz-shell-v57'];
   const workerUrl = 'https://app.example/DigiArz/sw.js';
   const resolveKey = request => typeof request === 'string'
     ? new URL(request, workerUrl).href
@@ -112,6 +112,6 @@ test('activation removes old shell caches and claims clients', async () => {
   let activatePromise;
   harness.listeners.get('activate')({ waitUntil(value) { activatePromise = Promise.resolve(value); } });
   await activatePromise;
-  assert.deepEqual(harness.deleted, ['digiarz-shell-v53', 'digiarz-shell-v54', 'digiarz-shell-v55', 'digiarz-shell-v56']);
+  assert.deepEqual(harness.deleted, ['digiarz-shell-v53', 'digiarz-shell-v54', 'digiarz-shell-v55', 'digiarz-shell-v56', 'digiarz-shell-v57']);
   assert.equal(harness.claimed, true);
 });
