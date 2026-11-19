@@ -31,3 +31,7 @@ test('dark and light themes both define readable market text', () => {
   assert.match(style, /body\.light-theme #tab-markets \.coin-name-fa\{color:#1c2938!important\}/);
   assert.match(style, /body\.light-theme #tab-markets \.price-usd strong\{color:#24364b!important\}/);
 });
+
+test('mobile bottom navigation allocates one column per six app sections', () => {
+  assert.ok(style.includes('.mobile-bottom-nav{position:fixed!important;z-index:130!important;inset:auto 0 0!important;display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;'));
+});
