@@ -2190,6 +2190,8 @@ async function fetchBinance24hrTickerRows(){
   if(!collected.rows.length)throw new Error('سرور هیچ اطلاعات ۲۴ ساعته‌ای برای نمادهای فعال برنگرداند'+(collected.errors.length?' · '+collected.errors.join('؛ '):''));
   return collected.rows;
 }
+function isValidMarketChangeValue(value){return value!==null&&value!==undefined&&value!==''&&Number.isFinite(Number(value))}
+function getMarketTickerCoverageThreshold(total){return total>0?Math.min(total,Math.max(3,Math.ceil(total*0.75))):0}
 async function refreshMarketTickersUnlocked(){
  const stamp=$('marketTickerUpdated');let provider='Binance',failure='';
  try{
@@ -2202,8 +2204,8 @@ async function refreshMarketTickersUnlocked(){
   marketTickerMap=next;
   marketTickerLastFetchedAt=Date.now();
   const btc=marketTickerMap.get('BTCUSDT');
-  const validPrimaryCount=marketRows.filter(item=>{const value=marketTickerMap.get(item.symbol)?.change;return value!==null&&value!==undefined&&value!==''&&Number.isFinite(Number(value))}).length;
-  const coverageThreshold=Math.max(3,Math.ceil(Math.min(marketRows.length,12)*0.75));
+  const validPrimaryCount=marketRows.filter(item=>isValidMarketChangeValue(marketTickerMap.get(item.symbol)?.change)).length;
+  const coverageThreshold=getMarketTickerCoverageThreshold(marketRows.length);
   if(!btc||btc.change===null||validPrimaryCount<coverageThreshold){
    const fallback=await discoverMultiExchangeMarkets();
    let recovered=0;
@@ -2215,7 +2217,7 @@ async function refreshMarketTickersUnlocked(){
     }
    }
    if(recovered)provider='Binance + '+[...new Set(fallback.rows.filter(x=>Number.isFinite(Number(x.change))).map(x=>x.source.split(' · ')[0]))].join('، ');
-   const validAfterFallback=marketRows.filter(item=>Number.isFinite(Number(marketTickerMap.get(item.symbol)?.change))).length;
+   const validAfterFallback=marketRows.filter(item=>isValidMarketChangeValue(marketTickerMap.get(item.symbol)?.change)).length;
    if(validAfterFallback===0)failure='درصد تغییر از Binance و منابع جایگزین دریافت نشد';
    else if(validAfterFallback<marketRows.length)failure='درصد تغییر برای '+validAfterFallback+' از '+marketRows.length+' ارز دریافت شد';
   }
