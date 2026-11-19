@@ -433,15 +433,15 @@ test('orbiting login coins stop moving when reduced motion is requested', () => 
 const proUiCss = fs.readFileSync('src/digiarz-pro-ui.css', 'utf8');
 
 test('unified professional UI stylesheet is loaded for every authenticated screen', () => {
-  assert.match(html, /href="\\.\/src\/digiarz-pro-ui\\.css\\?v=20261120"/);
+  assert.ok(html.includes('href="./src/digiarz-pro-ui.css?v=20261120"'));
   for (const selector of [
     '#tab-dashboard', '#tab-markets', '#tab-toman', '#tab-chart',
     '#tab-trade', '#tab-assets', '#tab-orders', '#tab-history',
     '#tab-admin', '#tab-settings', '.mobile-bottom-nav'
   ]) assert.ok(proUiCss.includes(selector), 'redesign covers ' + selector);
-  assert.match(proUiCss, /body\\.light-theme/);
-  assert.match(proUiCss, /body\\.luxury-theme/);
-  assert.match(proUiCss, /@media\\(max-width:700px\\)/);
-  assert.match(proUiCss, /prefers-reduced-motion:reduce/);
-  assert.match(proUiCss, /:focus-visible/);
+  assert.ok(proUiCss.includes('body.light-theme'));
+  assert.ok(proUiCss.includes('body.luxury-theme'));
+  assert.ok(proUiCss.includes('@media(max-width:700px)'));
+  assert.ok(proUiCss.includes('prefers-reduced-motion:reduce'));
+  assert.ok(proUiCss.includes(':focus-visible'));
 });
