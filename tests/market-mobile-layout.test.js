@@ -35,3 +35,8 @@ test('dark and light themes both define readable market text', () => {
 test('mobile bottom navigation allocates one column per six app sections', () => {
   assert.ok(style.includes('.mobile-bottom-nav{position:fixed!important;z-index:130!important;inset:auto 0 0!important;display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;'));
 });
+
+test('failed coin logos render a deliberate branded fallback instead of broken-image chrome', () => {
+  assert.ok(style.includes('.coin-identity .coin-icon.coin-logo-fallback{display:grid!important;place-items:center'));
+  assert.ok(style.includes('color:#f3ca70!important'));
+});
