@@ -1625,6 +1625,16 @@
 - [x] فایل BUILD-INFO تأیید می‌کند APK از commit `b58c272fd8a1e8a273d343b1412c0e567b5c8f3e` روی شاخه feature ساخته شده است؛ SHA-256 خود APK برابر `105cfd866118ed1de55362179fde18670425870ac7406e53411d972c4538ab27` و SHA-256 آرشیو artifact برابر `72559d155025cceef7e63f8a2fb6104ec80e2d7e53498c0a09fe4409668b5ba4` است.
 - [x] مقایسهٔ commit ساخت APK با HEAD فعلی نشان داد سه commit بعدی فقط `IMPLEMENTATION_STATUS.md` و `tests/market-mobile-layout.test.js` را تغییر داده‌اند؛ هیچ تغییر دیگری در سورس برنامه، تنظیمات بسته‌بندی یا workflow ساخت APK پس از commit ساخت ثبت نشده است. بنابراین APK موجود از نظر کد برنامه با HEAD فعلی هم‌ارز است، هرچند provenance آن به SHA ساخت `b58c272...` اشاره می‌کند، نه SHA مستندسازی HEAD.
 - [!] APK از نوع Debug و برای پیش‌نمایش/نصب آزمایشی است، نه Release امضاشده برای انتشار عمومی. نصب و آزمون روی گوشی واقعی کاربر هنوز انجام نشده است.
-- [!] شاخه همچنان با `main` در وضعیت diverged است: ۳۲۶ commit جلو و ۲ commit عقب. هیچ merge، rebase یا sync انجام نشد.
+- [!] شاخه همچنان با `main` در وضعیت diverged است: ۳۲۷ commit جلو و ۲ commit عقب. هیچ merge، rebase یا sync انجام نشد.
 - [!] هیچ تغییری در Supabase Production، migration، RPC، worker، داده، سفارش یا موجودی انجام نشد.
 - گام بعد: نصب APK روی Android و بررسی بازار در عرض واقعی گوشی، تم روشن/تیره و اسکرول؛ سپس ایرادهای قابل مشاهده اصلاح شوند.
+
+
+## پیگیری CI پس از ثبت APK — ۱۹ نوامبر ۲۰۲۶
+- [x] HEAD زنده شاخه اکنون `cb149e6d407518129b3bd0978a899bf38b0364db` است؛ این commit فقط مستندات وضعیت را به‌روزرسانی کرده است.
+- [x] مقایسهٔ دقیق APK commit `b58c272fd8a1e8a273d343b1412c0e567b5c8f3e` تا HEAD فعلی نشان داد فقط دو فایل `IMPLEMENTATION_STATUS.md` و `tests/market-mobile-layout.test.js` تغییر کرده‌اند؛ سورس برنامه و تنظیمات build تغییر نکرده‌اند. APK موجود برای کد فعلی همچنان معتبر است؛ provenance آن به commit ساخت اشاره می‌کند.
+- [x] اجرای تازهٔ Exact decimal tests روی HEAD فعلی، run `44464510891`، با نتیجهٔ `success` تکمیل شد. تمام ۵۰ مرحلهٔ اصلی شامل تست‌های مرورگر، PostgreSQL ایزوله، Stop-Limit، TP-SL، Futures، اوراکل، Reduce-only، دفترکل و رقابت‌های همزمان موفق بودند.
+- [x] PR #12 هنوز open و Draft است؛ head SHA برابر `cb149e6...` و ادغام نشده است.
+- [!] مقایسهٔ زندهٔ شاخه با main اکنون `diverged` با ۳۲۷ commit جلو و ۲ commit عقب است. هیچ merge/rebase/sync انجام نشد.
+- [!] هیچ تغییر Production در Supabase انجام نشد؛ تست‌های PostgreSQL در محیط disposable workflow اجرا شدند.
+- گام بعد: نصب APK Debug روی گوشی و دریافت نتیجهٔ تست ظاهری واقعی؛ پس از گزارش کاربر، اصلاح UI و build مجدد در صورت نیاز.
