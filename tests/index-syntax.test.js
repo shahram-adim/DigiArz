@@ -414,6 +414,11 @@ const proUiCss = fs.readFileSync('src/digiarz-pro-ui.css', 'utf8');
 
 test('unified professional UI stylesheet is loaded for every authenticated screen', () => {
   assert.ok(html.includes('href="./src/digiarz-pro-ui.css?v=20261120"'));
+  const finalProUiLink = html.lastIndexOf('<link rel="stylesheet" href="./src/digiarz-pro-ui.css?v=20261120">');
+  const lastInlineStyle = html.lastIndexOf('</style>');
+  assert.ok(html.includes('<link rel="preload" as="style" href="./src/digiarz-pro-ui.css?v=20261120">'), 'preloads the redesign stylesheet early');
+  assert.ok(finalProUiLink > lastInlineStyle, 'applies the redesign after all legacy inline styles');
+  assert.ok(html.indexOf('<style', finalProUiLink) === -1, 'no later inline stylesheet can override the redesign');
   for (const selector of [
     '#tab-dashboard', '#tab-markets', '#tab-toman', '#tab-chart',
     '#tab-trade', '#tab-assets', '#tab-orders', '#tab-history',
