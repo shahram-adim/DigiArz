@@ -54,7 +54,8 @@
    path='daily-ads/'+token+'.'+ext;
    const uploaded=await client.storage.from(bucket).upload(path,file,{contentType:file.type,upsert:false,cacheControl:'3600'});if(uploaded.error)throw uploaded.error;
    const starts=new Date(),ends=new Date(starts.getTime()+86400000);
-   const inserted=await client.from('daily_ads').insert({title,body,image_path:path,is_active:true,starts_at:starts.toISOString(),ends_at:ends.toISOString()});if(inserted.error)throw inserted.error;
+   const inserted=await client.from('daily_ads').insert({title,body,image_path:path,is_active:true,starts_at:starts.toISOString(),ends_at:ends.toISOString()}).select('id').single();if(inserted.error)throw inserted.error;
+   const superseded=await client.from('daily_ads').update({is_active:false,updated_at:starts.toISOString()}).eq('is_active',true).neq('id',inserted.data.id);if(superseded.error)console.warn('Older daily ads could not all be deactivated:',superseded.error);
    $('adminDailyAdTitle').value='';$('adminDailyAdBody').value='';$('adminDailyAdImage').value='';
    notify('تبلیغ برای ۲۴ ساعت ثبت شد.','ok');await Promise.all([load(),loadAdmin()]);
   }catch(error){
@@ -64,7 +65,7 @@
  }
  async function toggle(button){
   if(!isAdmin()||!button)return;button.disabled=true;
-  try{const {error}=await client.from('daily_ads').update({is_active:button.dataset.nextActive==='true',updated_at:new Date().toISOString()}).eq('id',button.dataset.dailyAdToggle);if(error)throw error;await Promise.all([load(),loadAdmin()])}
+  try{const now=new Date(),patch={is_active:button.dataset.nextActive==='true',updated_at:now.toISOString()};if(patch.is_active){patch.starts_at=now.toISOString();patch.ends_at=new Date(now.getTime()+86400000).toISOString()}const {error}=await client.from('daily_ads').update(patch).eq('id',button.dataset.dailyAdToggle);if(error)throw error;await Promise.all([load(),loadAdmin()])}
   catch(error){notify('تغییر وضعیت تبلیغ انجام نشد: '+(error.message||String(error)),'err');button.disabled=false}
  }
  async function remove(button){
