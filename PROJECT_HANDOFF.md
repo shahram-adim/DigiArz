@@ -291,3 +291,22 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Android APK workflow run 44486985383 was automatically triggered by the main push. Capacitor install, web build, Android project generation and sync completed successfully; Gradle assembleDebug is still running. Artifact not yet uploaded/available.
 - No Supabase deploy, schema migration, DB or financial-data change was performed.
 - Next: monitor both runs; when APK run succeeds, retrieve artifact and verify BUILD-INFO.txt commit matches 0ee8c9dbeb0c8229b2181acc2e9cb52544e6868b, then provide verified APK download.
+
+
+## 2026-11-19 — Auth 504 / pg_cron scheduling mitigation and login UI PR
+- User installed the APK built from main commit 0ee8c9dbeb0c8229b2181acc2e9cb52544e6868b (Android workflow run 44486985383, artifact 14510144088) and reported login fails with HTTP 504 after a long wait.
+- Auth log at 2026-11-19 08:38:15 UTC: user lookup timed out after ~35.5 seconds with error finding user: timeout: context canceled. Do not ask the user to reinstall the APK or change their password as a first response.
+- PostgreSQL logs around 09:12–09:17 UTC: refresh_market_prices() took ~100.2s; refresh_market_fx_rate() took ~17.6s; Iran exchange sync, Bit24 sync and automatic verified-pair activation hit statement timeouts. Several cron jobs, including financial workers, also logged startup timeouts. This is consistent with database/connection pressure but does not prove cron alone is the root cause.
+- User explicitly approved rescheduling background price/asset-sync jobs while leaving order engines, wallets, trades and balances untouched.
+- Applied and read-back verified these schedule-only changes in Production project gfoaubfilhttnwjykaox:
+  - job 4 refresh-crypto-assets: 6-59/10 * * * *
+  - job 5 refresh-crypto-assets-toman: 7-59/10 * * * *
+  - job 11 digiarz-crypto-assets-stale-request-recovery: 3-59/5 * * * *
+  - job 14 digiarz-iran-exchange-process: 1-59/10 * * * *
+  - job 16 digiarz-bit24-process: 2-59/10 * * * *
+  - job 18 digiarz-auto-activate-verified-exchange-pairs: 9-59/10 * * * *
+- Preserved the core FX refresh job 2 and market-price refresh job 3 at every minute. Preserved financial workers unchanged and active: job 8 Limit, job 9 conditional/TP-SL, job 12 Stop-Limit. Request jobs 13/15 and overflow-price job 17 were also unchanged. No job was disabled.
+- No cron command/function body, schema, migration, wallet, balance, order, trade or financial record was modified.
+- The schedules were successfully read back and all listed jobs remained active. A later read of cron.job_run_details timed out, so reduced failure rate and Auth recovery are not yet verified.
+- Opened draft PR #17: https://github.com/shahram-adim/DigiArz/pull/17. It adds a scoped premium white/royal-blue/gold login-card design, mobile layout refinements and regression coverage; no Auth logic or backend code changed. Exact-decimal CI run 44496195383 completed successfully. PR remains unmerged; no Pages deployment or APK was created from this UI branch.
+- Next: once DB access is stable, verify recent cron run outcomes and test Auth; request separate user approval before merging PR #17 and building/releasing the next APK.
