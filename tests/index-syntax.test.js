@@ -383,3 +383,49 @@ test('three visual themes are selectable, persisted, and backward-compatible', (
   assert.match(html, /@supports not \(\(backdrop-filter:blur\(1px\)\) or \(-webkit-backdrop-filter:blur\(1px\)\)\)/);
   assert.match(html, /prefers-reduced-motion:reduce/);
 });
+
+
+test('approved DigiArz login reference is implemented as a real responsive vertical page', () => {
+  const authStart=html.indexOf('<section id="authView" class="card auth login-screen">');
+  const authEnd=html.indexOf('</section>\n<section id="loginDailyAd"',authStart);
+  const ad=html.indexOf('id="loginDailyAd"',authStart);
+  assert.ok(authStart>=0&&authEnd>authStart&&ad>authEnd,'daily ad is placed after the complete login card');
+  const auth=html.slice(authStart,authEnd);
+  for(const token of ['id="loginBrandbar"','class="auth-visual login-hero"','class="login-globe-wrap"','class="login-orbit login-orbit-one"','class="auth-phone-preview"','id="authMiniChart"','id="authCoinTrack"','class="auth-form login-card"']) assert.ok(auth.includes(token),'approved visual component exists: '+token);
+  for(const symbol of ['BTCUSDT','ETHUSDT','BNBUSDT','XRPUSDT','SOLUSDT','TRXUSDT','DOGEUSDT','ADAUSDT','LINKUSDT','LTCUSDT']) assert.ok(html.includes("symbol:'"+symbol+"'"),'live ticker candidate exists: '+symbol);
+  assert.match(html,/quoteVolume/,'visible market assets are ranked by returned 24h quote volume');
+  assert.match(html,/loginEarthSpin/);
+  assert.match(html,/loginOrbitSpin/);
+  assert.match(html,/@media\(max-width:760px\)[\s\S]*?#authView \.login-market-layout\{grid-template-columns:1fr/);
+  assert.match(html,/@media\(prefers-reduced-motion:reduce\)[\s\S]*?login-earth-svg/);
+});
+
+test('login password visibility control preserves the entered password and is accessible', () => {
+  assert.match(html,/id="togglePasswordVisibility"/);
+  assert.match(html,/input\.type=reveal\?'text':'password'/);
+  assert.match(html,/button\.setAttribute\('aria-pressed',String\(reveal\)\)/);
+  assert.match(html,/digiarz-login-password-toggle-20261119/);
+});
+
+test('login light-theme CSS selectors remain separated by a real stylesheet newline', () => {
+  assert.match(html, /body\.light-theme #authView\.login-screen\{/);
+  assert.doesNotMatch(html, /\\nbody\.light-theme #authView\.login-screen/);
+});
+
+test('login coins travel around the phone on a motion path and respect reduced-motion settings', () => {
+  assert.match(html, /@supports \(offset-path:ellipse\(43% 31% at 50% 50%\)\)/);
+  assert.match(html, /offset-distance:0%/);
+  assert.match(html, /@keyframes loginCoinOrbitTravel\{to\{offset-distance:100%\}\}/);
+  const reducedStart = html.lastIndexOf('@media(prefers-reduced-motion:reduce)');
+  const reducedEnd = html.indexOf('</style>', reducedStart);
+  const reduced = html.slice(reducedStart, reducedEnd);
+  assert.match(reduced, /#authView \.login-orbit-coin\{animation:none!important;offset-distance:0!important\}/);
+});
+
+
+test('orbiting login coins stop moving when reduced motion is requested', () => {
+  const orbit=html.indexOf('@keyframes loginCoinOrbitTravel');
+  const reduced=html.lastIndexOf('@media(prefers-reduced-motion:reduce)');
+  assert.ok(orbit>=0&&reduced>orbit,'reduced-motion override follows the orbit animation');
+  assert.match(html.slice(reduced),/#authView \.login-orbit-coin\{animation:none!important;offset-distance:0!important\}/);
+});
