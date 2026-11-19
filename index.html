@@ -3418,11 +3418,12 @@ async function start(){
  const signupButton=$('signupBtn');
  if(signupButton)signupButton.addEventListener('click',signup);
  try{
- initTheme();initCurrencyMode();initAuthMarketPreview();
+ initTheme();initCurrencyMode();
  // Bind navigation before remote data clients so menu controls survive network failures.
  try{bindTabs()}catch(navError){console.error('DigiArz navigation initialization failed:',navError)}
  renderLucideIcons();
  initClient();
+ initAuthMarketPreview();
  $('forgotBtn').addEventListener('click',forgotPassword);
  $('saveNewPassword').addEventListener('click',saveNewPassword);
  $('logoutBtn').addEventListener('click',signOut);
