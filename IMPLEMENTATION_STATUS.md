@@ -852,3 +852,12 @@
 - [ ] تأیید اجرای خودکار workflow، نتیجهٔ Gradle و انتشار artifact با نام `DigiArz-Android-debug-APK` در انتظار بررسی Actions است.
 - [!] این تغییر فقط workflow ساخت APK است؛ هیچ تغییری در main، Supabase Production، Auth، schema یا داده‌های مالی انجام نشد.
 - [!] PR #25 همچنان ادغام‌نشده می‌ماند تا کاربر جداگانه تأیید کند.
+
+
+### نتیجهٔ نهایی ساخت و بررسی APK شاخهٔ صفحه ورود — ۱۹ نوامبر ۲۰۲۶
+- [x] اجرای GitHub Actions شماره `44582999853` روی شاخه `feat/approved-login-screen-full-implementation` و commit کد `a5235730c898c2011940a8b70fb7023c60a1b304` با conclusion برابر `success` پایان یافت؛ هر ۱۴ مرحله، از آماده‌سازی تا Gradle build و upload artifact، موفق شدند.
+- [x] Artifact با نام `DigiArz-Android-debug-APK` و شناسه `14559861367` منتشر شد؛ حجم ZIP برابر 3,523,128 بایت و digest اعلام‌شده GitHub برابر `sha256:696d28413b8034be8b6e9574bfb8e05dc277a34c1b91a4449b24674ca8c9c1d9` است؛ انقضا `2026-12-03T18:01:00Z`.
+- [x] ZIP دانلود و محتویات آن بررسی شد: `app-debug.apk` با حجم 3,904,460 بایت و `BUILD-INFO.txt` موجودند. SHA-256 فایل APK برابر `6761dd0b0ec2441a8d9bfec5757969bcb76e4b70d1da3f7872c0bd1a7097dea2` است.
+- [x] فایل provenance تأیید می‌کند نسخه `1.0.0`، ref شاخهٔ PR #25 و commit ساخت `a5235730c898c2011940a8b70fb7023c60a1b304` است.
+- [!] APK با موفقیت ساخته و محتوای ZIP آن بررسی شده است؛ نصب و اجرای واقعی روی گوشی Android کاربر هنوز تأیید نشده است.
+- [!] PR #25 همچنان ادغام‌نشده است؛ این APK نسخهٔ شاخهٔ آزمایشی PR است و تغییرات آن وارد main نشده‌اند.
