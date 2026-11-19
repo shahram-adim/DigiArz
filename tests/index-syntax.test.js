@@ -411,3 +411,13 @@ test('login light-theme CSS selectors remain separated by a real stylesheet newl
   assert.match(html, /body\.light-theme #authView\.login-screen\{/);
   assert.doesNotMatch(html, /\\nbody\.light-theme #authView\.login-screen/);
 });
+
+test('login coins travel around the phone on a motion path and respect reduced-motion settings', () => {
+  assert.match(html, /@supports \(offset-path:ellipse\(43% 31% at 50% 50%\)\)/);
+  assert.match(html, /offset-distance:0%/);
+  assert.match(html, /@keyframes loginCoinOrbitTravel\{to\{offset-distance:100%\}\}/);
+  const reducedStart = html.lastIndexOf('@media(prefers-reduced-motion:reduce)');
+  const reducedEnd = html.indexOf('</style>', reducedStart);
+  const reduced = html.slice(reducedStart, reducedEnd);
+  assert.match(reduced, /#authView \.login-orbit-coin\{animation:none!important\}/);
+});
