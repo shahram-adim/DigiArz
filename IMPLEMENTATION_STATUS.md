@@ -910,3 +910,21 @@
 - [!] این APK از نوع Debug/test است و هنوز نصب و اجرای واقعی آن روی گوشی Android کاربر تأیید نشده است.
 - [x] هیچ تغییری در Supabase Production انجام نشد.
 - [ ] گام بعد: نصب APK روی Android و بررسی بازشدن برنامه، ورود و نمایش صحیح صحنهٔ صفحه ورود؛ هر ایراد مشاهده‌شده جداگانه ثبت شود.
+
+
+## پایش شبانهٔ Auth/pg_cron و تطبیق schedule زنده — ۲۰ نوامبر ۲۰۲۶
+- [x] وضعیت تازهٔ GitHub بررسی شد: HEAD پیش از این ثبت `b59a85370ffff91447629d4bbfaf77ada5797b96` بود. Exact Decimal روی main با run `44596513481` و GitHub Pages با run `44596512278` هر دو success هستند.
+- [x] APK آزمایشی مستقیم Build 67 با run `44596189517` موفق شد؛ Release `android-debug-67` و لینک مستقیم آن ثبت شده‌اند. این فایل Debug است و نصب واقعی روی Android هنوز تأیید نشده است.
+- [x] PR #30 با عنوان بازطراحی یکپارچهٔ UI همچنان Draft و ادغام‌نشده است؛ head برابر `30dac3a0271148a9cb6103188b35bbfb5bc9bd13`، 18 commit جلو، 7 فایل تغییرکرده، 580 addition و 5 deletion. Exact Decimal برای head آن با run `44617266637` موفق است؛ اجرای Android/Pages برای همین head در snapshot حاضر دیده نشد. هیچ ادغامی انجام نشد.
+- [x] Supabase همچنان `ACTIVE_HEALTHY` و PostgreSQL `17.11.0.018` است. Health Advisor بدون یافته؛ Security: 15 جدول RLS فعال بدون policy، 2 تابع SECURITY DEFINER قابل اجرا برای anon، 23 برای authenticated و 1 هشدار حفاظت رمزهای افشاشده؛ Performance: 9 FK بدون ایندکس پوششی، 11 هشدار RLS initplan و 7 ایندکس استفاده‌نشده.
+- [!] snapshot 24 ساعتهٔ `cron.job_run_details` (حدود 2026-11-19 23:05 UTC):
+  - job 13: 67 موفق، 73 ناموفق؛ تمام 73 مورد startup timeout؛ آخرین موفقیت 23:00:00Z و آخرین شکست 22:31:27Z.
+  - job 14: 563 موفق، 136 ناموفق؛ 106 startup timeout و 30 statement timeout؛ median اجرای موفق 19.66 ثانیه؛ آخرین موفقیت 23:01:16Z و آخرین شکست 22:31:41Z.
+  - job 17: 74 موفق، 67 ناموفق؛ تمام 67 مورد startup timeout؛ آخرین موفقیت 23:05:00Z و آخرین شکست 21:55:10Z.
+- [!] در unified logs همان بازهٔ 24 ساعته، 640 رویداد `could not accept SSL connection: Connection reset by peer`، تعداد 106 رویداد `EOF detected`، تعداد 226 رویداد `canceling statement due to statement timeout` و 23 رویداد PgBouncer `connect timeout` دیده شد. startup timeout هم‌زمان در چند job دیگر (از جمله 2، 3، 4، 8، 9، 11، 12، 15، 16 و 18) نیز ثبت شده است. این‌ها شمارش رویدادهای log هستند و لزوماً معادل اجرای یکتای cron نیستند.
+- [!] خطاهای SSL و startup در چند job مستقل، فرضیهٔ اختلال گسترده‌تر در اتصال/پاسخ‌گویی PostgreSQL را تقویت می‌کنند؛ اما علت host-level یا resource bottleneck اثبات نشده است. timeoutهای providerهای بازار نیز جداگانه ثبت شده‌اند و نباید بدون شواهد به Auth نسبت داده شوند.
+- [x] snapshot لحظه‌ای `pg_stat_activity` فقط 7 backend (2 active، 4 idle و 1 با state تهی) از سقف `max_connections=60` نشان داد؛ این snapshot کوتاه‌مدت، فشار گذرای ساعاتی قبل را رد نمی‌کند.
+- [!] زمان‌بندی زنده با منبع local تفاوت دارد: job 14 اکنون `1-59/10 * * * *` است، ولی migration محلی `20261117130000...` مقدار `* * * * *` را ثبت می‌کند. همچنین remote version `20261116205451` است و source file با همین نسخه در migrations محلی موجود نیست. جزئیات در `supabase/MIGRATION_RECONCILIATION.md` ثبت شد.
+- [!] inventory مهاجرت هنوز 52 نسخهٔ اعمال‌شده در Supabase در برابر 40 فایل محلی، 14 source مفقود، 20 timestamp متفاوت و 2 فایل local-only را نشان می‌دهد. اجرای `supabase db push` همچنان ممنوع است.
+- [x] هیچ migration، تابع، grant، policy، cron schedule، index، سفارش، معامله، رزرو، موجودی، کیف پول یا سابقهٔ مالی در Production تغییر نکرد. تمام پرس‌وجوهای Supabase فقط‌خواندنی بودند.
+- [ ] گام بعد: منشأ تغییر schedule job 14 را از audit/deployment record معتبر بازیابی کن؛ سپس drift را فقط در منبع و PostgreSQL 17 دورریختنی reconciliate کن. هم‌زمان شواهد SSL reset و startup timeout را با Supabase Support و resource metrics تطبیق بده؛ تا اثبات علت، تابع/timeout/cron Production را تغییر نده.
