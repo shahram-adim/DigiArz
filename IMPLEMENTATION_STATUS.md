@@ -832,3 +832,14 @@
 - [x] اجرای CI نهایی شماره 44580003707 روی آخرین commit کد 7ff074556d3279f1517a7eeca8aa42e00a5da77f با نتیجه success تکمیل شد؛ هر ۴۳ مرحله از جمله آزمون‌های Node/browser، PostgreSQL و سناریوهای Market/Limit/Stop-Limit/TP-SL موفق شدند.
 - [!] PR شماره ۲۵ باز و آماده بازبینی است؛ ادغام انجام نشده و بدون تأیید صریح کاربر انجام نخواهد شد.
 - [!] هیچ تغییر Supabase Production، Auth، migration، جدول، policy، bucket، Worker یا داده مالی انجام نشده است.
+
+
+
+### تأیید اجرای CI روی آخرین HEAD صفحه ورود — ۱۹ نوامبر ۲۰۲۶
+- [x] وضعیت زنده PR #25 بازخوانی شد: open، Ready for review، mergeable=true، merged=false؛ شاخه `feat/approved-login-screen-full-implementation` برابر ۲۰ commit جلوتر و صفر commit عقب‌تر از main است.
+- [x] آخرین HEAD بررسی‌شده: `97800cc2b3e0f0faaf9b639a4f646b29a32bb0c1`.
+- [x] اجرای workflow شماره `44580458015` روی همین HEAD با conclusion برابر success تکمیل شد؛ job مربوط به exact-decimal و هر ۲۵ مرحلهٔ آن موفق شدند، از جمله تست‌های مرورگر، PostgreSQL موقت، Market/Limit، Stop-Limit، TP-SL و رقابت‌های هم‌زمان.
+- [x] فهرست reviewها و review threadهای PR خالی است؛ بازبینی GitHub هنوز ثبت نشده است.
+- [!] این CI آزمون خودکار کد است و جای تست بصری رندر روی Android را نمی‌گیرد؛ هنوز اسکرین‌شات/تأیید اجرای واقعی صفحه ورود روی گوشی دریافت نشده است.
+- [!] PR #25 ادغام نشده و فقط با تأیید صریح کاربر ادغام می‌شود. هیچ تغییر Supabase Production، Auth، schema، migration یا دادهٔ مالی انجام نشده است.
+- گام بعد: بازبینی بصری صفحه ورود در مرورگر/Android و رفع ایرادهای مشاهده‌شده؛ پس از تأیید کاربر درباره ادغام تصمیم‌گیری شود.
