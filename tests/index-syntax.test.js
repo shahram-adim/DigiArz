@@ -285,7 +285,7 @@ test('ticker fallback coverage is measured across the full enabled market, not o
   assert.ok(start >= 0 && end > start, 'ticker coverage helpers found');
   const context = {};
   vm.runInNewContext(html.slice(start, end) + '\nthis.isValidMarketChangeValue=isValidMarketChangeValue; this.getMarketTickerCoverageThreshold=getMarketTickerCoverageThreshold;', context);
-  assert.equal(context.getMarketTickerCoverageThreshold(398), 299);
+  assert.equal(context.getMarketTickerCoverageThreshold(398), 398);
   assert.equal(context.getMarketTickerCoverageThreshold(2), 2);
   assert.equal(context.isValidMarketChangeValue(null), false);
   assert.equal(context.isValidMarketChangeValue(undefined), false);
