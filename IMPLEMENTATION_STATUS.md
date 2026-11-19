@@ -968,3 +968,15 @@
 - [!] در آخرین بررسی، مرحلهٔ `Build installable debug APK` هنوز در حال اجرا بود؛ هنوز artifact یا Release قابل دانلود منتشر نشده بود.
 - [x] PR #28 همچنان Draft و باز است؛ `main` و Supabase Production تغییر نکرده‌اند.
 - [ ] گام بعد: بررسی نتیجهٔ نهایی run شمارهٔ 68، تأیید artifact و BUILD-INFO/SHA-256، و ارائهٔ لینک دانلود APK در صورت موفقیت.
+
+
+## تکمیل ساخت APK آزمایشی — Build 68 — ۱۹ نوامبر ۲۰۲۶
+- [x] اجرای GitHub Actions با شناسهٔ `44605904447` و شمارهٔ 68 با نتیجهٔ `success` پایان یافت.
+- [x] هر ۱۲ مرحلهٔ اصلی workflow، از آماده‌سازی تا ساخت APK، ثبت provenance، آپلود artifact و انتشار Release موفق شدند.
+- [x] Artifact با شناسهٔ `14570148479` و نام `DigiArz-Android-debug-APK` ساخته شد؛ اندازهٔ ZIP برابر 3,525,178 بایت است و تا ۳ دسامبر ۲۰۲۶ منقضی می‌شود.
+- [x] Release با tag برابر `android-debug-68` منتشر شد و فایل `app-debug.apk` با اندازهٔ 3,906,574 بایت در آن موجود است.
+- [x] فایل `BUILD-INFO.txt` از artifact استخراج و بررسی شد: نسخهٔ بسته `1.0.0`، commit کد `2c35f3d65b98731763bcf90360c7b67cb0fc8cc6`، ref برابر `refs/heads/feature/login-3d-live-scene` و run برابر `44605904447`.
+- [x] SHA-256 فایل APK از خود فایل داخل artifact محاسبه و با digest ثبت‌شده در Release تطبیق داده شد: `7afa32602a9b9ffc8c12cd264e3f904109abf47945c0b26d9de8bb159d9165ff`.
+- [!] این یک debug build آزمایشی است، نه نسخهٔ production-signed. اجرای CI و تطبیق hash به معنی تست نصب/اجرای واقعی روی گوشی یا تأیید عملکرد زندهٔ CoinGecko در WebView نیست.
+- [x] PR #28 همچنان باز و Draft است؛ هیچ merge به `main` و هیچ تغییری در Supabase Production انجام نشده است.
+- [ ] گام بعد: کاربر APK را روی Android نصب و صفحهٔ ورود را از نظر چیدمان ثابت، حرکت عناصر و دریافت دادهٔ بازار بررسی کند؛ سپس مشکلات واقعی گزارش‌شده رفع شوند.
