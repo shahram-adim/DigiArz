@@ -3507,16 +3507,19 @@ async function refreshAuthTopMarketAssets(){
   if(!response.ok)throw new Error('CoinGecko HTTP '+response.status);
   const rows=await response.json();
   if(!Array.isArray(rows)||rows.length!==10)throw new Error('فهرست ۱۰ ارز برتر کامل دریافت نشد');
-  authTopMarketAssets=rows.filter(x=>x&&x.symbol&&Number(x.current_price)>0).slice(0,10);
-  if(authTopMarketAssets.length!==10)throw new Error('داده یکی از ۱۰ ارز برتر معتبر نیست');
+  const valid=rows.filter(x=>x&&x.symbol&&Number(x.current_price)>0);
+  if(valid.length!==10)throw new Error('داده یکی از ۱۰ ارز برتر معتبر نیست');
+  authTopMarketAssets=valid;
   authTopMarketFetchedAt=Date.now();
   renderAuthTopMarketRows();
  }catch(error){console.warn('DigiArz top-10 market list:',error)}
  finally{authTopMarketBusy=false}
 }
 function renderAuthTopMarketRows(){
- const root=document.querySelector('#authView .ref-coin-list');if(!root||authTopMarketAssets.length!==10)return;
- const start=authCoinOffset%10,visible=Array.from({length:4},(_,i)=>authTopMarketAssets[(start+i)%10]);
+ const root=document.querySelector('#authView .ref-coin-list');
+ if(!root||authTopMarketAssets.length!==10)return;
+ const start=authCoinOffset%10;
+ const visible=Array.from({length:4},(_,i)=>authTopMarketAssets[(start+i)%10]);
  const nodes=Array.from(root.querySelectorAll('.ref-coin-row'));
  visible.forEach((coin,i)=>{
   const row=nodes[i];if(!row)return;
@@ -3525,7 +3528,16 @@ function renderAuthTopMarketRows(){
   if(icon){icon.src=coin.image;icon.alt=coin.name||code;icon.onerror=()=>{icon.style.visibility='hidden'};icon.style.visibility=''}
   if(symbol)symbol.textContent=code;
   if(name)name.textContent=coin.name||code;
-  if(value){const change=Number(coin.price_change_percentage_24h),price=Number(coin.current_price);value.textContent=(price>=1000?formatNum(price,0):price>=1?formatNum(price,2):formatNum(price,5))+' 
+  if(value){
+   const change=Number(coin.price_change_percentage_24h),price=Number(coin.current_price);
+   value.textContent=(price>=1000?formatNum(price,0):price>=1?formatNum(price,2):formatNum(price,5))+' $';
+   value.title='تغییر ۲۴ ساعت: '+(Number.isFinite(change)?formatNum(change,2)+'%':'نامشخص')+' · رتبه ارزش بازار: '+(coin.market_cap_rank||'—');
+   value.style.color=Number.isFinite(change)?(change>=0?'#16e47a':'#ff687c'):'#fff';
+  }
+ });
+ root.dataset.marketRank='market-cap';
+ root.setAttribute('aria-label','چهار مورد از ده ارز برتر بر اساس ارزش بازار؛ به‌روزرسانی '+new Date(authTopMarketFetchedAt).toLocaleTimeString('fa-IR'));
+}
 async function refreshAuthMiniChart(){if(authMiniBusy||!supabaseClient||authView.classList.contains('hidden'))return;authMiniBusy=true;try{const rows=await fetchBinanceKlines('BTCUSDT','5m',36);const candles=rows.map(candleFromKline).filter(c=>[c.time,c.open,c.high,c.low,c.close].every(Number.isFinite)&&c.high>=c.low&&c.open>0&&c.close>0);if(!candles.length)throw new Error('داده کندلی معتبر دریافت نشد');renderAuthMiniChart(candles)}catch(error){renderAuthMiniChart([]);const price=$('authMiniPrice');if(price&&price.textContent==='در حال دریافت قیمت…')price.textContent='قیمت موقتاً در دسترس نیست';console.warn('DigiArz login market preview:',error)}finally{authMiniBusy=false}}
 function initAuthMarketPreview(){if(authMiniRefreshTimer||!$('authMiniChart'))return;renderAuthCoinTrack();renderAuthMiniChart([]);const run=()=>{if(!document.hidden&&!authView.classList.contains('hidden')){refreshAuthMiniChart();refreshAuthCoinPrices();refreshAuthTopMarketAssets()}};run();authMiniRefreshTimer=setInterval(run,60000);authCoinRotationTimer=setInterval(()=>{if(document.hidden||authView.classList.contains('hidden'))return;authCoinOffset=(authCoinOffset+1)%10;if(authTopMarketAssets.length===10)renderAuthTopMarketRows();renderAuthCoinTrack();refreshAuthCoinPrices()},4500)}
 
