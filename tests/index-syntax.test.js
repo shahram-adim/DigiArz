@@ -406,3 +406,8 @@ test('login password visibility control preserves the entered password and is ac
   assert.match(html,/button\.setAttribute\('aria-pressed',String\(reveal\)\)/);
   assert.match(html,/digiarz-login-password-toggle-20261119/);
 });
+
+test('login light-theme CSS selectors remain separated by a real stylesheet newline', () => {
+  assert.match(html, /body\.light-theme #authView\.login-screen\{/);
+  assert.doesNotMatch(html, /\\nbody\.light-theme #authView\.login-screen/);
+});
