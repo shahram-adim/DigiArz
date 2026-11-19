@@ -1975,7 +1975,7 @@ body.light-theme #tab-markets .market-board-v34 .coin .price-toman{color:#805a0a
 
 
 <style id="digiarz-login-live-motion-v1">
-/* Motion is confined to the approved artwork bounds; layout geometry remains unchanged. */
+/* Animate only existing artwork layers; keep all layout boxes and element positions fixed. */
 #authView .ref-earth svg>g[clip-path]{transform-box:view-box;transform-origin:260px 260px;animation:digiarzGlobeSpin 48s linear infinite}
 #authView .ref-gold-coin,#authView .ref-usdt-coin{will-change:transform;backface-visibility:hidden}
 #authView .ref-gold-coin.auth-floating-coin-btc{animation:digiarzOrbitA 13s linear infinite!important}
@@ -1987,7 +1987,6 @@ body.light-theme #tab-markets .market-board-v34 .coin .price-toman{color:#805a0a
 @keyframes digiarzOrbitB{0%{transform:translate(0,0) rotateY(0deg)}25%{transform:translate(26px,14px) rotateY(90deg)}50%{transform:translate(48px,-4px) rotateY(180deg)}75%{transform:translate(20px,-22px) rotateY(270deg)}100%{transform:translate(0,0) rotateY(360deg)}}
 @keyframes digiarzOrbitC{0%{transform:translate(0,0) rotateY(0deg)}25%{transform:translate(-22px,20px) rotateY(90deg)}50%{transform:translate(-42px,4px) rotateY(180deg)}75%{transform:translate(-18px,-20px) rotateY(270deg)}100%{transform:translate(0,0) rotateY(360deg)}}
 @keyframes digiarzOrbitD{0%{transform:translate(0,0) rotateY(0deg)}25%{transform:translate(22px,-14px) rotateY(90deg)}50%{transform:translate(38px,10px) rotateY(180deg)}75%{transform:translate(14px,20px) rotateY(270deg)}100%{transform:translate(0,0) rotateY(360deg)}}
-#authView .ref-phone-device,#authView .ref-phone{transform-style:preserve-3d}
 @media(max-width:760px){
  #authView .ref-gold-coin.auth-floating-coin-btc{animation:digiarzOrbitMobileA 13s linear infinite!important}
  #authView .ref-gold-coin.auth-floating-coin-eth{animation:digiarzOrbitMobileB 16s linear infinite!important}
@@ -3483,8 +3482,8 @@ async function fetchBinanceResponse(urlOrPath){
 }
 async function fetchBinanceKlines(symbol,interval,limit){const response=await fetchBinanceResponse(`/api/v3/klines?symbol=${encodeURIComponent(symbol)}&interval=${encodeURIComponent(interval)}&limit=${encodeURIComponent(limit)}`);const rows=await response.json();if(!Array.isArray(rows)||!rows.length)throw new Error('برای این نماد کندل معتبر از منابع بازار دریافت نشد.');return rows}
 let authMiniRefreshTimer=null,authCoinRotationTimer=null,authCoinOffset=0,authMiniBusy=false;
-const authMiniSymbols=[{symbol:'BTCUSDT',label:'BTC'},{symbol:'ETHUSDT',label:'ETH'},{symbol:'USDTUSDT',label:'USDT'},{symbol:'BNBUSDT',label:'BNB'},{symbol:'XRPUSDT',label:'XRP'},{symbol:'USDCUSDT',label:'USDC'},{symbol:'SOLUSDT',label:'SOL'},{symbol:'TRXUSDT',label:'TRX'},{symbol:'DOGEUSDT',label:'DOGE'},{symbol:'HYPEUSDT',label:'HYPE'}];
-let authTopMarketAssets=[],authTopMarketFetchedAt=0,authTopMarketBusy=false;
+const authMiniSymbols=[{symbol:'BTCUSDT',label:'BTC'},{symbol:'ETHUSDT',label:'ETH'},{symbol:'SOLUSDT',label:'SOL'},{symbol:'BNBUSDT',label:'BNB'},{symbol:'XRPUSDT',label:'XRP'},{symbol:'ADAUSDT',label:'ADA'}];
+let authTopMarketAssets=[],authTopMarketFetchedAt=0,authTopMarketBusy=false,authTopMarketOffset=0;
 function renderAuthMiniChart(candles){
  const el=$('authMiniChart');if(!el)return;
  const width=Math.max(280,Math.floor(el.clientWidth||320)),height=Math.max(90,Math.floor(el.clientHeight||112)),data=Array.isArray(candles)?candles.slice(-36):[];
@@ -3499,6 +3498,7 @@ function renderAuthMiniChart(candles){
 }
 function authCoinLogoUrl(symbol){return 'https://assets.coincap.io/assets/icons/'+String(symbol||'').toLowerCase()+'@2x.png'}
 function renderAuthCoinTrack(){const root=$('authCoinTrack');if(!root)return;const visible=Array.from({length:3},(_,i)=>authMiniSymbols[(authCoinOffset+i)%authMiniSymbols.length]);root.replaceChildren();for(const coin of visible){const node=document.createElement('div');node.className='auth-coin-chip';node.dataset.symbol=coin.symbol;const icon=document.createElement('img');icon.src=authCoinLogoUrl(coin.label);icon.alt=coin.label;icon.loading='lazy';icon.decoding='async';icon.onerror=()=>{const fallback=document.createElement('b');fallback.textContent=coin.label.slice(0,1);fallback.className='auth-coin-fallback';icon.replaceWith(fallback)};const label=document.createElement('span');label.textContent=coin.label;const price=document.createElement('strong');price.textContent='—';price.dataset.price='true';node.append(icon,label,price);root.appendChild(node)}}
+async function refreshAuthCoinPrices(){if(!supabaseClient||authView.classList.contains('hidden'))return;const root=$('authCoinTrack');if(!root)return;const visible=Array.from(root.querySelectorAll('.auth-coin-chip'));await Promise.allSettled(visible.map(async node=>{const symbol=node.dataset.symbol;const response=await fetchBinanceResponse('/api/v3/ticker/24hr?symbol='+encodeURIComponent(symbol));const ticker=await response.json();const price=Number(ticker?.lastPrice),change=Number(ticker?.priceChangePercent);const target=node.querySelector('[data-price]');if(target&&Number.isFinite(price)&&price>0)target.textContent=price>=1000?formatNum(price,0):price>=1?formatNum(price,2):formatNum(price,5);const refRow=document.querySelector('[data-ref-market="'+symbol+'"]');if(refRow&&Number.isFinite(change)){refRow.textContent=(change>=0?'▲ +':'▼ ')+formatNum(Math.abs(change),1)+'%';refRow.style.color=change>=0?'#16e47a':'#ff687c'}if(symbol==='BTCUSDT'&&Number.isFinite(price)&&price>0){$('authMiniPrice').textContent=formatNum(price,2)+' USDT';const changeNode=$('authMiniChange');if(Number.isFinite(change)){changeNode.textContent=(change>0?'+':'')+formatNum(change,2)+'%';changeNode.style.color=change>=0?'#8ee6bd':'#ff9ba6'}}}))}
 async function refreshAuthTopMarketAssets(){
  if(authTopMarketBusy||authView.classList.contains('hidden'))return;
  authTopMarketBusy=true;
@@ -3518,8 +3518,7 @@ async function refreshAuthTopMarketAssets(){
 function renderAuthTopMarketRows(){
  const root=document.querySelector('#authView .ref-coin-list');
  if(!root||authTopMarketAssets.length!==10)return;
- const start=authCoinOffset%10;
- const visible=Array.from({length:4},(_,i)=>authTopMarketAssets[(start+i)%10]);
+ const visible=Array.from({length:4},(_,i)=>authTopMarketAssets[(authTopMarketOffset+i)%10]);
  const nodes=Array.from(root.querySelectorAll('.ref-coin-row'));
  visible.forEach((coin,i)=>{
   const row=nodes[i];if(!row)return;
@@ -3529,6 +3528,7 @@ function renderAuthTopMarketRows(){
   if(symbol)symbol.textContent=code;
   if(name)name.textContent=coin.name||code;
   if(value){
+   value.removeAttribute('data-ref-market');
    const change=Number(coin.price_change_percentage_24h),price=Number(coin.current_price);
    value.textContent=(price>=1000?formatNum(price,0):price>=1?formatNum(price,2):formatNum(price,5))+' $';
    value.title='تغییر ۲۴ ساعت: '+(Number.isFinite(change)?formatNum(change,2)+'%':'نامشخص')+' · رتبه ارزش بازار: '+(coin.market_cap_rank||'—');
@@ -3539,478 +3539,7 @@ function renderAuthTopMarketRows(){
  root.setAttribute('aria-label','چهار مورد از ده ارز برتر بر اساس ارزش بازار؛ به‌روزرسانی '+new Date(authTopMarketFetchedAt).toLocaleTimeString('fa-IR'));
 }
 async function refreshAuthMiniChart(){if(authMiniBusy||!supabaseClient||authView.classList.contains('hidden'))return;authMiniBusy=true;try{const rows=await fetchBinanceKlines('BTCUSDT','5m',36);const candles=rows.map(candleFromKline).filter(c=>[c.time,c.open,c.high,c.low,c.close].every(Number.isFinite)&&c.high>=c.low&&c.open>0&&c.close>0);if(!candles.length)throw new Error('داده کندلی معتبر دریافت نشد');renderAuthMiniChart(candles)}catch(error){renderAuthMiniChart([]);const price=$('authMiniPrice');if(price&&price.textContent==='در حال دریافت قیمت…')price.textContent='قیمت موقتاً در دسترس نیست';console.warn('DigiArz login market preview:',error)}finally{authMiniBusy=false}}
-function initAuthMarketPreview(){if(authMiniRefreshTimer||!$('authMiniChart'))return;renderAuthCoinTrack();renderAuthMiniChart([]);const run=()=>{if(!document.hidden&&!authView.classList.contains('hidden')){refreshAuthMiniChart();refreshAuthCoinPrices();refreshAuthTopMarketAssets()}};run();authMiniRefreshTimer=setInterval(run,60000);authCoinRotationTimer=setInterval(()=>{if(document.hidden||authView.classList.contains('hidden'))return;authCoinOffset=(authCoinOffset+1)%10;if(authTopMarketAssets.length===10)renderAuthTopMarketRows();renderAuthCoinTrack();refreshAuthCoinPrices()},4500)}
-
-function candleFromKline(k){return {time:Math.floor(Number(k[0])/1000),open:Number(k[1]),high:Number(k[2]),low:Number(k[3]),close:Number(k[4]),volume:Number(k[5]||0),quoteVolume:Number(k[7]||0)}}
-function calculateRsi(values,period=14){if(values.length<=period)return null;let gain=0,loss=0;for(let i=1;i<=period;i++){const d=values[i]-values[i-1];if(d>0)gain+=d;else loss-=d}let avgGain=gain/period,avgLoss=loss/period;for(let i=period+1;i<values.length;i++){const d=values[i]-values[i-1];avgGain=(avgGain*(period-1)+Math.max(d,0))/period;avgLoss=(avgLoss*(period-1)+Math.max(-d,0))/period}if(avgLoss===0)return avgGain===0?50:100;return 100-(100/(1+avgGain/avgLoss))}
-function emaSeries(values,period){if(values.length<period)return [];const out=Array(values.length).fill(null),k=2/(period+1);let ema=values.slice(0,period).reduce((a,b)=>a+b,0)/period;out[period-1]=ema;for(let i=period;i<values.length;i++){ema=values[i]*k+ema*(1-k);out[i]=ema}return out}
-function calculateMacd(values){if(values.length<35)return null;const fast=emaSeries(values,12),slow=emaSeries(values,26),lineSeries=[];for(let i=0;i<values.length;i++)lineSeries.push(fast[i]===null||slow[i]===null?null:fast[i]-slow[i]);const firstValid=lineSeries.findIndex(x=>x!==null);if(firstValid<0)return null;const compact=lineSeries.slice(firstValid),signal=emaSeries(compact,9);const line=compact[compact.length-1],signalValue=signal[signal.length-1];if(!Number.isFinite(line)||!Number.isFinite(signalValue))return null;return {line,signal:signalValue,histogram:line-signalValue}}
-function renderTechnicalIndicators(candles){const values=candles.map(x=>Number(x.close)).filter(x=>Number.isFinite(x)&&x>0),rsi=calculateRsi(values,14),macd=calculateMacd(values);$('indicatorRsi').textContent=rsi===null?'سابقه ناکافی':formatNum(rsi,2);$('indicatorMacd').textContent=macd?formatNum(macd.line,8):'سابقه ناکافی';$('indicatorSignal').textContent=macd?formatNum(macd.signal,8):'سابقه ناکافی';$('indicatorHistogram').textContent=macd?formatNum(macd.histogram,8):'سابقه ناکافی';$('indicatorRsi').className=rsi!==null&&rsi>=70?'neg':rsi!==null&&rsi<=30?'pos':''}
-
-function yearlyCandles(monthly){const groups=new Map();for(const c of monthly){const year=new Date(c.time*1000).getUTCFullYear();if(!groups.has(year))groups.set(year,{time:Date.UTC(year,0,1)/1000,open:c.open,high:c.high,low:c.low,close:c.close,volume:Number(c.volume)||0,quoteVolume:Number(c.quoteVolume)||0});else{const g=groups.get(year);g.high=Math.max(g.high,c.high);g.low=Math.min(g.low,c.low);g.close=c.close;g.volume+=Number(c.volume)||0;g.quoteVolume+=Number(c.quoteVolume)||0}}return [...groups.values()]}
-async function fetchAllMonthly(symbol=selectedSymbol){let startTime=0,all=[],loops=0;while(loops++<30){const url=`/api/v3/klines?symbol=${encodeURIComponent(symbol)}&interval=1M&limit=1000&startTime=${startTime}`;const r=await fetchBinanceResponse(url);if(!r.ok)throw new Error('دریافت تاریخچه کامل ممکن نشد (HTTP '+r.status+').');const rows=await r.json();if(!Array.isArray(rows)||!rows.length)break;all.push(...rows);const next=Number(rows[rows.length-1][0])+1;if(next<=startTime)break;startTime=next;if(rows.length<1000)break}return all.map(candleFromKline).filter(c=>[c.time,c.open,c.high,c.low,c.close].every(Number.isFinite));}
-let candleRequestId=0,candleRequestKey='',candleRequestPromise=null;
-async function loadCandles(){
- const symbol=selectedSymbol,interval=chartInterval,requestKey=symbol+'|'+interval;
- if(candleRequestPromise&&candleRequestKey===requestKey)return candleRequestPromise;
- const requestId=++candleRequestId;candleRequestKey=requestKey;
- const task=(async()=>{
-  const msg=$('chartMessage');if(msg)msg.textContent='در حال دریافت داده‌های نمودار…';
-  try{
-   ensureChart();if(!chart)throw new Error('کتابخانه نمودار بارگذاری نشده است. اتصال اینترنت را بررسی کنید.');
-   let candles=[],label=interval;
-   if(interval==='24h'){
-    const raw=await fetchBinanceKlines(symbol,'1h',24);
-    candles=raw.map(candleFromKline).filter(c=>[c.time,c.open,c.high,c.low,c.close].every(Number.isFinite)).sort((a,b)=>a.time-b.time);
-    if(!candles.length)throw new Error('برای این نماد داده ۲۴ ساعته معتبر پیدا نشد.');
-    label='۲۴ ساعت · کندل‌های یک‌ساعته';
-   }else if(interval==='all'){candles=await fetchAllMonthly(symbol);label='از ابتدا · کندل‌های ماهانه'}
-   else if(['3M','6M','1y'].includes(interval)){
-    const days=interval==='3M'?90:interval==='6M'?180:365;
-    const r=await fetchBinanceResponse(`/api/v3/klines?symbol=${encodeURIComponent(symbol)}&interval=1d&limit=${days}`);
-    if(!r.ok)throw new Error('دریافت داده بازه‌ای ممکن نشد (HTTP '+r.status+').');
-    const raw=await r.json();if(!Array.isArray(raw)||!raw.length)throw new Error('برای این نماد داده کندلی پیدا نشد.');
-    candles=raw.map(candleFromKline);label=interval==='3M'?'۳ ماه':interval==='6M'?'۶ ماه':'یک سال';
-   }else{
-    const url=`/api/v3/klines?symbol=${encodeURIComponent(symbol)}&interval=${encodeURIComponent(interval)}&limit=300`;
-    const response=await fetchBinanceResponse(url);
-    if(!response.ok)throw new Error('دریافت داده از منبع نمودار ممکن نشد (HTTP '+response.status+').');
-    const raw=await response.json();if(!Array.isArray(raw)||!raw.length)throw new Error('برای این نماد داده کندلی پیدا نشد.');
-    candles=raw.map(candleFromKline);
-   }
-   if(requestId!==candleRequestId||symbol!==selectedSymbol||interval!==chartInterval)return;
-   if(!candles.length)throw new Error('برای این نماد داده کندلی پیدا نشد.');
-   candleSeries.setData(candles);lineSeries.setData(candles.map(k=>({time:k.time,value:k.close})));areaSeries.setData(candles.map(k=>({time:k.time,value:k.close})));volumeSeries.setData(candles.map(k=>({time:k.time,value:Number(k.volume)||0,color:k.close>=k.open?'rgba(14,203,129,.65)':'rgba(246,70,93,.65)'})));
-   renderTechnicalIndicators(candles);setChartType(chartType);chart.timeScale().fitContent();volumeChart.timeScale().fitContent();
-   const last=candles[candles.length-1],high=Math.max(...candles.map(x=>x.high)),low=Math.min(...candles.map(x=>x.low));
-   $('chartLastPrice').textContent=formatNum(last.close,10)+' USDT';$('sumLast').textContent=formatNum(last.close,10);$('sumHigh').textContent=formatNum(high,10);$('sumLow').textContent=formatNum(low,10);
-   if(msg)msg.textContent=`${candles.length} کندل دریافت شد · بازه ${label} · آخرین به‌روزرسانی: ${new Date(last.time*1000).toLocaleString('fa-IR')}`;
-  }catch(e){
-   if(requestId!==candleRequestId||symbol!==selectedSymbol||interval!==chartInterval)return;
-   if(candleSeries)candleSeries.setData([]);if(lineSeries)lineSeries.setData([]);if(areaSeries)areaSeries.setData([]);if(volumeSeries)volumeSeries.setData([]);
-   ['indicatorRsi','indicatorMacd','indicatorSignal','indicatorHistogram'].forEach(id=>{if($(id))$(id).textContent='—'});
-   if(msg)msg.textContent='نمودار بارگذاری نشد: '+(e.message||String(e))+'؛ نمودار پاک‌سازی شد و با انتخاب بازه دیگر قابل بارگذاری مجدد است. ممکن است API عمومی Binance در شبکه شما در دسترس نباشد.';
-  }
- })();
- candleRequestPromise=task;
- try{return await task}finally{if(candleRequestPromise===task){candleRequestPromise=null;candleRequestKey=''}}
-}
-async function loadPerformance(){
- const requestId=++performanceRequestId,symbol=selectedSymbol,periods=[['perf7',7],['perf30',30],['perf90',90],['perf365',365]];
- for(const id of ['perf24',...periods.map(x=>x[0])]){const el=$(id);if(el){el.textContent='…';el.className=''}}
- $('performanceUpdated').textContent='در حال دریافت داده‌های بازده…';
- try{
-  const [tickerResponse,candleResponse]=await Promise.all([
-   fetchBinanceResponse(`/api/v3/ticker/24hr?symbol=${encodeURIComponent(symbol)}`),
-   fetchBinanceResponse(`/api/v3/klines?symbol=${encodeURIComponent(symbol)}&interval=1d&limit=366`)
-  ]);
-  if(!tickerResponse.ok)throw new Error('دریافت بازده ۲۴ ساعته ناموفق بود (HTTP '+tickerResponse.status+').');
-  if(!candleResponse.ok)throw new Error('دریافت سابقه روزانه ناموفق بود (HTTP '+candleResponse.status+').');
-  const ticker=await tickerResponse.json(),rows=await candleResponse.json();
-  if(requestId!==performanceRequestId||symbol!==selectedSymbol)return;
-  const pct24=Number(ticker.priceChangePercent),el24=$('perf24');
-  if(Number.isFinite(pct24)){el24.textContent=(pct24>0?'+':'')+formatNum(pct24,2)+'%';el24.className=pct24>0?'pos':pct24<0?'neg':'muted'}else{el24.textContent='ناموجود';el24.className='muted small'}
-  if(!Array.isArray(rows)||!rows.length)throw new Error('سابقه روزانه در دسترس نیست.');
-  const candles=rows.map(candleFromKline).filter(x=>Number.isFinite(x.open)&&Number.isFinite(x.close)&&x.open>0&&x.close>0),last=candles[candles.length-1];
-  for(const [id,days] of periods){const el=$(id),first=candles[Math.max(0,candles.length-days)];if(!el)continue;if(candles.length<days||!first){el.textContent='سابقه ناکافی';el.className='muted small';continue}const pct=((last.close/first.open)-1)*100;el.textContent=(pct>0?'+':'')+formatNum(pct,2)+'%';el.className=pct>0?'pos':pct<0?'neg':'muted'}
-  $('performanceUpdated').textContent='به‌روزرسانی: '+new Date().toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'})+' · Binance';
- }catch(e){if(requestId!==performanceRequestId)return;for(const id of ['perf24',...periods.map(x=>x[0])]){const el=$(id);if(el){el.textContent='ناموجود';el.className='muted small'}}$('performanceUpdated').textContent='دریافت بازده ممکن نشد: '+(e.message||String(e))}
-}
-async function loadCoinNews(){
- const list=$('coinNewsList'),note=$('coinNewsNote');list.innerHTML='<div class="muted small">در حال دریافت اخبار مرتبط…</div>';const base=currentBase();
- try{
-  const {data,error}=await supabaseClient.functions.invoke('market-data',{body:{action:'news',category:base}});
-  if(error)throw error;if(!data?.success||!Array.isArray(data.rows))throw new Error(data?.error||'سرویس خبر پاسخ معتبر نداد');
-  const rows=data.rows;if(!rows.length){list.innerHTML='<div class="notice">در حال حاضر خبر مرتبطی برای این ارز پیدا نشد.</div>';return}
-  list.innerHTML='';for(const item of rows){const article=document.createElement('article');article.className='news-item';const title=document.createElement('a');title.href=item.url||'#';title.target='_blank';title.rel='noopener noreferrer';title.textContent=item.title||'خبر رمزارز';const meta=document.createElement('div');meta.className='news-meta';const source=document.createElement('span');source.textContent=item.source||'منبع خبری';const date=document.createElement('span');date.textContent=item.published_on?new Date(item.published_on*1000).toLocaleString('fa-IR'):'زمان نامشخص';meta.append(source,date);article.append(title,meta);list.appendChild(article)}
-  note.textContent='منبع: CryptoCompare از مسیر امن سرور DigiArz · تیترها به زبان اصلی منبع نمایش داده می‌شوند.'
- }catch(e){list.innerHTML='<div class="notice warn">دریافت اخبار در حال حاضر ممکن نشد. سرویس مرکزی خبر را بررسی کنید.</div>';note.textContent='خطا در دریافت خبر: '+(e.message||String(e))}
-}
-
-function bindTabs(){$('exchangeSyncRefreshBtn')?.addEventListener('click',loadExchangeAssetSyncReport);$('exchangeSyncRunBtn')?.addEventListener('click',runExchangeAssetSyncNow);$('adminRefreshBtn')?.addEventListener('click',loadAdminUsers);$('adminAssetSearchBtn')?.addEventListener('click',searchAdminAssets);$('adminAssetSearch')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();searchAdminAssets()}});$('adminAssetListingsRefreshBtn')?.addEventListener('click',loadAdminMarketListings);$('adminPairReviewRefreshBtn')?.addEventListener('click',loadAdminMarketListings);$('adminPairReview')?.addEventListener('click',e=>{const on=e.target.closest('[data-enable-market-pair]');const off=e.target.closest('[data-disable-market-pair]');if(on)enableAdminMarketPair(on);else if(off)disableAdminMarketPair(off)});$('adminAssetCandidates')?.addEventListener('click',e=>{const b=e.target.closest('[data-add-market-asset]');if(b)addAdminMarketListing(b)});$('adminAssetListings')?.addEventListener('click',e=>{const b=e.target.closest('[data-remove-market-asset]');if(b)removeAdminMarketListing(b)});$('adminUsersList')?.addEventListener('click',e=>{const button=e.target.closest('.admin-adjust-btn');if(button)submitAdminAdjustment(button.closest('.admin-user-card'),button)});$('allGainersBtn')?.addEventListener('click',showAllGainers);$('allLosersBtn')?.addEventListener('click',showAllLosers);$('themeToggle')?.addEventListener('click',cycleTheme);$('authThemeToggle')?.addEventListener('click',cycleTheme);$('themeToggleTop')?.addEventListener('click',cycleTheme);document.querySelectorAll('[data-theme-choice]').forEach(el=>el.addEventListener('click',()=>applyTheme(el.dataset.themeChoice)));document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));document.querySelectorAll('.mobile-bottom-nav [data-tab]').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));$('heroTradeBtn').addEventListener('click',()=>switchTab('trade'));$('heroMarketBtn').addEventListener('click',()=>switchTab('markets'));document.querySelectorAll('[data-dashboard-tab]').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.dashboardTab)));$('dashboardRefreshBtn')?.addEventListener('click',async()=>{const btn=$('dashboardRefreshBtn');if(!btn||btn.disabled)return;const label=btn.textContent;btn.disabled=true;btn.textContent='در حال به‌روزرسانی…';try{await loadDashboard();btn.textContent=dashboardLoadErrors.length?'به‌روزرسانی با خطا':'به‌روزرسانی شد';}catch(e){console.warn('Dashboard refresh:',e);btn.textContent='به‌روزرسانی ناموفق بود';}finally{setTimeout(()=>{if(btn){btn.disabled=false;btn.textContent=label}},1800)}});$('backMarketBtn').addEventListener('click',()=>switchTab('markets'));$('timeframes').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{chartInterval=b.dataset.interval;$('timeframes').querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b));loadCandles()}));$('chartFullscreenBtn')?.addEventListener('click',async()=>{const section=$('chartSection'),btn=$('chartFullscreenBtn');try{if(document.fullscreenElement){await document.exitFullscreen();return}if(section.requestFullscreen){await section.requestFullscreen()}else{section.classList.add('chart-fullscreen');btn.textContent='خروج از تمام‌صفحه'}if(chart)chart.applyOptions({width:$('priceChart').clientWidth,height:$('priceChart').clientHeight});if(volumeChart)volumeChart.applyOptions({width:$('volumeChart').clientWidth,height:$('volumeChart').clientHeight})}catch(e){section.classList.toggle('chart-fullscreen');btn.textContent=section.classList.contains('chart-fullscreen')?'خروج از تمام‌صفحه':'تمام‌صفحه'}});document.addEventListener('fullscreenchange',()=>{const section=$('chartSection'),btn=$('chartFullscreenBtn');if(!section||!btn)return;const active=document.fullscreenElement===section;btn.textContent=active?'خروج از تمام‌صفحه':'تمام‌صفحه';if(chart)chart.applyOptions({width:$('priceChart').clientWidth,height:$('priceChart').clientHeight});if(volumeChart)volumeChart.applyOptions({width:$('volumeChart').clientWidth,height:$('volumeChart').clientHeight})});$('marketList')?.addEventListener('click',event=>{const favorite=event.target.closest('.favorite-btn');if(favorite)return;const row=event.target.closest('.coin[data-symbol]');if(!row||!$('marketList').contains(row))return;event.preventDefault();event.stopPropagation();openChart(row.dataset.symbol).catch(error=>{console.error('Market asset open failed:',error);const message=$('chartMessage');if(message)message.textContent='باز کردن جزئیات ارز ناموفق بود: '+(error?.message||String(error))})},true);$('marketSearch').addEventListener('input',()=>{marketDisplayLimit=80;renderMarkets()});$('marketSort').addEventListener('change',()=>{marketDisplayLimit=80;renderMarkets()});$('marketCurrencyMode')?.addEventListener('change',e=>setCurrencyMode(e.target.value));$('refreshMarketPageBtn')?.addEventListener('click',async()=>{const btn=$('refreshMarketPageBtn');btn.disabled=true;btn.textContent='در حال دریافت…';try{await loadMarkets(true);const note=$('marketPriceFreshness');if(note)note.textContent+=' · فهرست بازار تازه‌سازی شد.'}catch(e){const note=$('marketPriceFreshness');if(note)note.textContent='به‌روزرسانی بازار ناموفق بود: '+(e.message||String(e))}finally{btn.disabled=false;btn.textContent='به‌روزرسانی بازار'}});$('buySymbol')?.addEventListener('input',()=>updateTradeAssetPreview('buy'));$('sellSymbol')?.addEventListener('input',()=>updateTradeAssetPreview('sell'));$('buySymbol')?.addEventListener('change',e=>{loadOrderBook(e.currentTarget.value);loadRecentMarketTrades(e.currentTarget.value)});$('sellSymbol')?.addEventListener('change',e=>{loadOrderBook(e.currentTarget.value);loadRecentMarketTrades(e.currentTarget.value)});$('refreshOrderBookBtn')?.addEventListener('click',loadOrderBook);$('refreshRecentTradesBtn')?.addEventListener('click',loadRecentMarketTrades);updateTradeAssetPreview('buy');updateTradeAssetPreview('sell');document.querySelectorAll('.quick-percent-btn').forEach(button=>button.addEventListener('click',()=>setQuickTradePercent(button.dataset.quickSide,Number(button.dataset.percent))));['buy','sell'].forEach(side=>{const amount=$(side+'Amount'),symbol=$(side+'Symbol');amount?.addEventListener('input',()=>updateQuickTradeEstimate(side));symbol?.addEventListener('input',()=>updateQuickTradeEstimate(side));symbol?.addEventListener('change',()=>updateQuickTradeEstimate(side))});updateQuickTradeEstimate('buy');updateQuickTradeEstimate('sell');$('placeLimitBtn')?.addEventListener('click',placeLimitOrder);$('placeConditionalBtn')?.addEventListener('click',placeConditionalExitOrder);$('stopLimitSide')?.addEventListener('change',updateStopLimitPriceHint);updateStopLimitPriceHint();$('placeStopLimitBtn')?.addEventListener('click',placeStopLimitOrder);$('refreshStopLimitBtn')?.addEventListener('click',()=>loadStopLimitOrders().catch(e=>showMessage($('stopLimitMsg'),'بارگذاری سفارش‌های Stop-Limit ناموفق بود: '+(e.message||String(e)),'err')));$('refreshConditionalBtn')?.addEventListener('click',()=>loadConditionalOrders().catch(e=>showMessage($('conditionalOrderMsg'),'بارگذاری سفارش‌های شرطی ناموفق بود: '+(e.message||String(e)),'err')));$('refreshOrdersBtn')?.addEventListener('click',()=>loadOpenOrders().catch(e=>showMessage($('limitOrderMsg'),'بارگذاری سفارش‌ها ناموفق بود: '+(e.message||String(e)),'err')));$('refreshAllOrdersBtn')?.addEventListener('click',()=>loadAllOrders().catch(e=>showMessage($('allOrdersMsg'),'بارگذاری سفارش‌ها ناموفق بود: '+(e.message||String(e)),'err')));$('refreshHistoryBtn')?.addEventListener('click',()=>loadHistory().catch(e=>showMessage($('allOrdersMsg'),'بارگذاری تاریخچه ناموفق بود: '+(e.message||String(e)),'err')));$('refreshAssetsBtn')?.addEventListener('click',()=>loadAssets().catch(e=>showMessage($('allOrdersMsg'),'بارگذاری دارایی‌ها ناموفق بود: '+(e.message||String(e)),'err')));$('assetSearch')?.addEventListener('input',renderAssets);$('assetSort')?.addEventListener('change',renderAssets);$('historySearch')?.addEventListener('input',renderHistory);$('exportHistoryCsvBtn')?.addEventListener('click',exportHistoryCsv);$('historySideFilter')?.addEventListener('change',renderHistory);$('historyDateFrom')?.addEventListener('change',renderHistory);$('historyDateTo')?.addEventListener('change',renderHistory);$('historyDatePresets')?.addEventListener('click',event=>{const button=event.target.closest('[data-history-range]');if(button)setHistoryDatePreset(button.dataset.historyRange)});$('historyDateFrom')?.addEventListener('change',()=>document.querySelectorAll('[data-history-range]').forEach(button=>{button.classList.remove('active');button.setAttribute('aria-pressed','false')}));$('historyDateTo')?.addEventListener('change',()=>document.querySelectorAll('[data-history-range]').forEach(button=>{button.classList.remove('active');button.setAttribute('aria-pressed','false')}));$('clearHistoryFiltersBtn')?.addEventListener('click',()=>{['historySearch','historyDateFrom','historyDateTo'].forEach(id=>{const field=$(id);if(field)field.value=''});if($('historySideFilter'))$('historySideFilter').value='all';setHistoryDatePreset('all')});$('loadMoreHistoryBtn')?.addEventListener('click',()=>loadMoreHistory().catch(()=>{}));$('orderStatusFilter')?.addEventListener('change',renderAllOrders);$('orderTypeFilter')?.addEventListener('change',renderAllOrders)}
-async function start(){
- document.body.classList.add('auth-page-active');document.body.classList.remove('dashboard-page-active');
- // Bind the authentication controls before any optional page initialization.
- // This keeps login usable even if another dashboard control fails to initialize.
- const signupButton=$('signupBtn');
- if(signupButton)signupButton.addEventListener('click',signup);
- try{
- initTheme();initCurrencyMode();
- // Bind navigation before remote data clients so menu controls survive network failures.
- try{bindTabs()}catch(navError){console.error('DigiArz navigation initialization failed:',navError)}
- renderLucideIcons();
- initClient();
- window.DigiDailyAds?.init({client:supabaseClient,isAdmin:()=>isSuperAdmin,notify:(message,type)=>showMessage($('adminDailyAdMsg'),message,type)});
-  initAuthMarketPreview();
- $('forgotBtn').addEventListener('click',forgotPassword);
- $('saveNewPassword').addEventListener('click',saveNewPassword);
- $('logoutBtn').addEventListener('click',signOut);
- $('deactivateAccountBtn').addEventListener('click',deactivateMyAccount);
- $('reactivateAccountBtn').addEventListener('click',reactivateMyAccount);
- $('refreshBtn').addEventListener('click',refreshAll);
- $('tomanRefreshBtn').addEventListener('click',refreshTomanMarket);
- $('tomanSearch').addEventListener('input',()=>loadTomanMarket().catch(e=>showTomanStatus(e.message,'err')));
- $('buyBtn').addEventListener('click',()=>trade('buy'));
- $('sellBtn').addEventListener('click',()=>trade('sell'));
- $('detailBuyBtn').addEventListener('click',()=>tradeDetail('buy'));
- $('detailSellBtn').addEventListener('click',()=>tradeDetail('sell'));
- $('submitReviewBtn').addEventListener('click',submitReview);
- $('chartTypes').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>setChartType(b.dataset.chartType)));
- renderLucideIcons();
- // Register the auth listener before reading the session so recovery events are not missed.
- supabaseClient.auth.onAuthStateChange((event,session)=>{
-  if(event==='PASSWORD_RECOVERY'){
-   showRecoveryForm();
-   return;
-  }
-  if(event==='SIGNED_OUT'){
-   document.body.classList.add('auth-page-active');document.body.classList.remove('dashboard-page-active');
-   isRecoveryMode=false;
-   appView.classList.add('hidden');appView.classList.remove('app-view-active');
-   $('logoutBtn').classList.add('hidden');
-   authView.classList.remove('hidden');
-   hideRecoveryForm();
-  }else if(event==='SIGNED_IN'&&session&&!isRecoveryMode){
-   document.body.classList.add('auth-page-active');document.body.classList.remove('dashboard-page-active');
-   setTimeout(()=>{showApp(session).catch(error=>{console.error('DigiArz account loading failed:',error);if(!authView.classList.contains('hidden'))showMessage(authMsg,'ورود انجام شد، اما بارگذاری حساب کامل نشد: '+(error?.message||String(error)),'err')})},0);
-  }
- });
- let sessionData;
- try{const result=await supabaseClient.auth.getSession();if(result.error)throw result.error;sessionData=result.data}
- catch(sessionError){
-  const message=String(sessionError?.message||sessionError||'');
-  if(/refresh.?token|session.*not found|invalid.*session/i.test(message)){
-   try{await supabaseClient.auth.signOut({scope:'local'})}catch(cleanupError){console.warn('Local stale session cleanup failed:',cleanupError)}
-   showMessage(authMsg,'نشست قبلی معتبر نبود و از این دستگاه پاک شد. لطفاً دوباره با ایمیل و رمز عبور وارد شوید.','warn');
-  }else throw sessionError;
- }
- const data=sessionData||{session:null};
- const recoveryInUrl=new URLSearchParams(location.search).get('type')==='recovery'||new URLSearchParams(location.hash.replace(/^#/,'')).get('type')==='recovery';
- if(recoveryInUrl){
-  if(data.session)showRecoveryForm();
-  else showMessage(authMsg,'نشست بازیابی از لینک دریافت نشد یا لینک منقضی شده است. از بخش فراموشی رمز عبور، لینک تازه درخواست کنید.','err');
- }else if(data.session&&!isRecoveryMode){
-  await showApp(data.session);
- }
- }catch(e){showMessage(authMsg,'راه‌اندازی برنامه با خطا روبه‌رو شد: '+(e.message||String(e)),'err')}}
-window.__digiArzLogin=login;
-document.addEventListener('DOMContentLoaded',start,{once:true});
-setInterval(()=>{if(!document.hidden&&supabaseClient){refreshMarketTickers().then(renderMarkets).catch(console.warn)}},60000);
-})();
-</script>
-<script>
-/* Independent authentication click bridge: still gives visible feedback if app startup fails. */
-(() => {
- const button=document.getElementById('loginBtn');
- if(!button)return;
- button.addEventListener('click',()=>{
-  const message=document.getElementById('authMsg');
-  if(typeof window.__digiArzLogin==='function'){
-   window.__digiArzLogin();
-  }else if(message){
-   message.textContent='بخش ورود برنامه به‌درستی بارگذاری نشده است. صفحه را دوباره باز کنید؛ در حال بررسی مشکل هستیم.';
-   message.className='notice err';
-   message.classList.remove('hidden');
-  }
- },{capture:true});
-})();
-</script>
-<script>
-if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js", { scope: "./" }).catch(error => console.warn("DigiArz offline shell registration failed:", error)));
-}
-</script>
-<!-- DigiArz APK build checkpoint: market provider batching verified 2026-11-17. -->
-
-<style id="digiarz-login-layout-v2">
-/* Login-only composition refresh: intro banner, market identity and usable theme switch. */
-body.auth-page-active .auth-top-banner{display:flex;align-items:center;justify-content:space-between;gap:14px;position:sticky;top:0;z-index:35;margin:0 auto 14px;padding:11px 15px;max-width:1120px;border:1px solid #d9e4f3;border-radius:14px;background:linear-gradient(100deg,#fff 0%,#f5f8fd 68%,#fff8e8 100%);box-shadow:0 8px 24px rgba(20,48,90,.07);color:#18345d}
-.auth-top-banner-brand{display:flex;align-items:center;gap:10px;min-width:0}
-.auth-top-banner-mark{display:grid;place-items:center;width:37px;height:37px;flex:0 0 37px;border-radius:11px;background:linear-gradient(145deg,#1746a2,#2864c7);color:#f3d48a;font-size:13px;font-weight:950;letter-spacing:-.5px;box-shadow:0 5px 12px rgba(23,70,162,.18)}
-.auth-top-banner-brand>span:last-child{display:grid;gap:2px;min-width:0}
-.auth-top-banner-brand strong{font-size:12px;font-weight:900}
-.auth-top-banner-brand small{font-size:10px;color:#71829a;line-height:1.6}
-.auth-top-banner-live{display:flex;align-items:center;gap:7px;white-space:nowrap;padding:7px 10px;border:1px solid #dce8f5;border-radius:20px;background:#f7faff;color:#315d9e;font-size:10px;font-weight:800}
-.auth-top-banner-live i{width:7px;height:7px;border-radius:50%;background:#20b981;box-shadow:0 0 0 4px rgba(32,185,129,.12)}
-#authView.auth{max-width:1120px;min-height:650px;grid-template-columns:minmax(0,1.04fr) minmax(0,.96fr);border:1px solid #dce5f1;border-radius:25px;overflow:hidden;box-shadow:0 26px 76px rgba(16,43,86,.16)}
-#authView .auth-visual{display:flex;flex-direction:column;justify-content:flex-start;min-width:0;padding:clamp(25px,3.5vw,43px);background:radial-gradient(circle at 12% 8%,rgba(255,255,255,.2),transparent 32%),radial-gradient(circle at 92% 88%,rgba(231,194,111,.2),transparent 32%),linear-gradient(145deg,#102b60 0%,#17458f 54%,#10234a 100%);border-radius:0;color:#fff}
-#authView .auth-headline{max-width:470px;font-size:clamp(27px,3.1vw,37px);line-height:1.75;margin:18px 0 10px;font-weight:900}
-#authView .auth-copy{max-width:440px;font-size:13px;line-height:2.15;color:#dce8fa}
-#authView .auth-quick-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:18px 0 3px}
-#authView .auth-quick-stats>span{display:grid;gap:3px;min-width:0;padding:9px 10px;border:1px solid rgba(255,255,255,.17);border-radius:12px;background:rgba(255,255,255,.075);backdrop-filter:blur(8px)}
-#authView .auth-quick-stats b{font-size:14px;line-height:1.3;color:#f0d18a;font-weight:950;direction:ltr;text-align:right}
-#authView .auth-quick-stats small{font-size:9px;color:#dce7f8}
-#authView .auth-phone-preview{width:min(100%,410px);margin:17px auto 3px;padding:14px 15px 12px;border-color:rgba(240,204,120,.5);border-radius:21px}
-#authView #authMiniChart{height:116px}
-#authView .auth-benefits{margin-top:auto;padding-top:18px;gap:9px}
-#authView .auth-benefit{min-height:48px;padding:8px 10px;border-color:rgba(255,255,255,.16);background:rgba(255,255,255,.07)}
-#authView .auth-form{display:flex;flex-direction:column;justify-content:center;min-width:0;padding:clamp(25px,4vw,49px);background:linear-gradient(155deg,#fff,#f8faff);color:#10254a}
-#authView .auth-form-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:23px;padding-bottom:15px;border-bottom:1px solid #e8edf5}
-#authView .auth-form-secure{display:inline-flex;align-items:center;gap:7px;color:#63758f;font-size:10px;font-weight:800}
-#authView .auth-form-secure svg{width:16px;height:16px;color:#218b69}
-#authView #authThemeToggle{display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:7px 11px;border:1px solid #dce6f5;border-radius:10px;background:#f4f7fc;color:#315d9e;font:inherit;font-size:10px;font-weight:800;cursor:pointer}
-#authView #authThemeToggle:focus-visible{outline:3px solid rgba(40,100,199,.25);outline-offset:2px}
-#authView .auth-theme-icon{font-size:15px;line-height:1}
-#authView .auth-form h2{font-size:27px;line-height:1.55;margin:7px 0 5px}
-#authView .auth-intro{font-size:12px;line-height:2.1}
-#authView .auth-form .field{margin:13px 0}
-#authView .auth-form input{min-height:53px;border-radius:13px}
-#authView .auth-actions{grid-template-columns:1fr 1fr;gap:10px;margin-top:17px}
-#authView .auth-actions button{min-height:51px;border-radius:13px}
-#authView #loginBtn{background:linear-gradient(135deg,#1746a2,#2864c7);box-shadow:0 9px 20px rgba(23,70,162,.22)}
-#authView #signupBtn{background:#eef3fb;color:#19458e;border:1px solid #dce6f5}
-#authView .auth-security{margin-top:18px;padding:12px 13px;border-radius:13px;line-height:2}
-body.light-theme.auth-page-active .auth-top-banner{background:linear-gradient(100deg,#fff,#f5f8fd 68%,#fff8e8);border-color:#d9e4f3}
-body:not(.light-theme).auth-page-active .auth-top-banner{background:linear-gradient(100deg,#14243b,#172b47 68%,#302a20);border-color:#344b69;color:#edf4ff;box-shadow:0 8px 24px rgba(0,0,0,.2)}
-body:not(.light-theme) .auth-top-banner-brand small{color:#b6c7df}
-body:not(.light-theme) .auth-top-banner-live{background:#1c3453;border-color:#3b5679;color:#d4e2f4}
-body:not(.light-theme) #authView.auth{background:#14243b;border-color:#344b69}
-body:not(.light-theme) #authView .auth-form{background:linear-gradient(155deg,#172b45,#122238);color:#edf4ff}
-body:not(.light-theme) #authView .auth-form h2{color:#f5f8ff}
-body:not(.light-theme) #authView .auth-intro,body:not(.light-theme) #authView .auth-form .field label{color:#b7c8df}
-body:not(.light-theme) #authView .auth-form-toolbar{border-color:#344b69}
-body:not(.light-theme) #authView .auth-form-secure{color:#c1d0e3}
-body:not(.light-theme) #authView #authThemeToggle{background:#203a5a;border-color:#3b5679;color:#d9e7fa}
-body:not(.light-theme) #authView .auth-form input{background:#0e1e33;border-color:#3a5271;color:#f3f7ff}
-body:not(.light-theme) #authView .auth-form input::placeholder{color:#91a6c3}
-body:not(.light-theme) #authView #signupBtn{background:#243d5d;border-color:#3b5679;color:#edf4ff}
-body:not(.light-theme) #authView #forgotBtn{border-color:#3b5679;color:#c5d6eb}
-body:not(.light-theme) #authView .auth-security,body:not(.light-theme) #authView #recoveryPanel{background:#1a304c;border-color:#3b5679;color:#c5d6eb}
-@media(max-width:760px){
- body.auth-page-active .auth-top-banner{position:relative;margin:0 0 10px;padding:9px 11px;border-radius:12px}
- .auth-top-banner-mark{width:33px;height:33px;flex-basis:33px}
- .auth-top-banner-brand strong{font-size:11px}
- .auth-top-banner-brand small{font-size:9px}
- .auth-top-banner-live{padding:6px 8px;font-size:9px}
- #authView.auth{display:flex;flex-direction:column;min-height:0;margin:10px auto 20px;border-radius:20px}
- #authView .auth-visual{padding:21px 18px 19px;border-radius:0;min-height:0}
- #authView .auth-brand{font-size:31px}
- #authView .auth-headline{font-size:24px;line-height:1.7;margin:10px 0 7px}
- #authView .auth-copy{font-size:11px;line-height:2}
- #authView .auth-quick-stats{gap:6px;margin:13px 0 2px}
- #authView .auth-quick-stats>span{padding:8px 7px}
- #authView .auth-quick-stats b{font-size:12px}
- #authView .auth-quick-stats small{font-size:8px}
- #authView .auth-phone-preview{width:100%;margin:13px auto 2px;padding:11px}
- #authView #authMiniChart{height:96px}
- #authView .auth-coin-chip{padding:6px 5px;gap:4px}
- #authView .auth-phone-price strong{font-size:14px}
- #authView .auth-benefits{margin-top:14px;padding-top:0;gap:7px}
- #authView .auth-benefit{min-height:42px;padding:7px 8px;font-size:9px}
- #authView .auth-benefit i{width:25px;height:25px;flex-basis:25px}
- #authView .auth-form{padding:21px 18px 20px}
- #authView .auth-form-toolbar{margin-bottom:17px;padding-bottom:12px}
- #authView .auth-form h2{font-size:22px}
- #authView .auth-form .field{margin:10px 0}
- #authView .auth-form input{min-height:49px}
- #authView .auth-actions{gap:8px;margin-top:14px}
- #authView .auth-actions button{min-height:48px;font-size:12px}
-}
-@media(max-width:380px){
- #authView .auth-visual{padding:18px 15px}
- #authView .auth-benefits{grid-template-columns:1fr 1fr}
- #authView .auth-form{padding:19px 14px}
- #authView .auth-actions{grid-template-columns:1fr}
- .auth-top-banner-live span{display:none}
-}
-@media(prefers-reduced-motion:reduce){#authView *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
-</style>
-
-<style id="digiarz-daily-ad-v1">
-.daily-ad-card{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:16px;align-items:center;margin:12px auto 16px;max-width:1120px;padding:13px;border:1px solid #d8e2f0;border-radius:16px;background:linear-gradient(110deg,#fff,#f5f8fd 68%,#fff8e8);box-shadow:0 8px 24px rgba(20,48,90,.07);color:#17345f}
-.daily-ad-card:not(.hidden){display:grid}.daily-ad-media{min-width:0;overflow:hidden;border-radius:12px;background:#e8edf5}.daily-ad-media img{display:block;width:100%;max-height:210px;aspect-ratio:16/7;object-fit:cover}.daily-ad-copy{min-width:0;padding:8px 10px}.daily-ad-kicker{display:inline-block;margin-bottom:7px;color:#9b7626;font-size:10px;font-weight:900}.daily-ad-copy h3{margin:0 0 7px;font-size:16px;line-height:1.7;color:inherit}.daily-ad-copy p{margin:0;color:#64748b;font-size:12px;line-height:2;white-space:pre-wrap;overflow-wrap:anywhere}
-body:not(.light-theme) .daily-ad-card{background:linear-gradient(110deg,#14243b,#172b47 68%,#302a20);border-color:#344b69;color:#edf4ff}body:not(.light-theme) .daily-ad-copy p{color:#c1d0e3}
-.daily-ad-admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end}.daily-ad-admin-grid .field{margin:5px 0}.daily-ad-admin-grid textarea{width:100%;min-height:88px;padding:12px;border:1px solid var(--line);border-radius:9px;background:#0b0e11;color:white;resize:vertical}.daily-ad-admin-body,.daily-ad-admin-grid>button{grid-column:1/-1}
-.daily-ad-admin-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:#101318}.daily-ad-admin-copy{display:grid;gap:5px;min-width:0}.daily-ad-admin-copy strong{font-size:12px;overflow-wrap:anywhere}.daily-ad-admin-copy small{font-size:10px;color:var(--muted);line-height:1.8}.daily-ad-admin-actions{display:flex;gap:7px;flex:0 0 auto}.daily-ad-admin-actions button{padding:8px 10px;font-size:10px}
-@media(max-width:650px){.daily-ad-card{grid-template-columns:1fr;gap:9px;padding:10px;margin:10px 0}.daily-ad-media img{max-height:180px;aspect-ratio:16/8}.daily-ad-copy{padding:3px 5px}.daily-ad-copy h3{font-size:14px}.daily-ad-copy p{font-size:11px}.daily-ad-admin-grid{grid-template-columns:1fr}.daily-ad-admin-body,.daily-ad-admin-grid>button{grid-column:auto}.daily-ad-admin-item{align-items:flex-start;flex-direction:column}.daily-ad-admin-actions{width:100%}.daily-ad-admin-actions button{flex:1}}
-</style>
-
-
-<style id="digiarz-login-hero-premium-v1">
-#authView .auth-scene{position:relative;isolation:isolate;width:100%;min-height:390px;margin:15px 0 5px;display:flex;align-items:center;justify-content:flex-end}
-#authView .auth-earth{position:absolute;z-index:0;left:0;top:40px;width:clamp(175px,43%,245px);aspect-ratio:1;filter:drop-shadow(0 18px 28px rgba(0,0,0,.28));animation:authEarthFloat 8s ease-in-out infinite}
-#authView .auth-earth svg{display:block;width:100%;height:100%;overflow:visible}
-#authView .auth-phone-device{position:relative;z-index:2;width:min(72%,335px);margin-right:2%;padding:8px;border:1px solid rgba(226,239,255,.65);border-radius:36px;background:linear-gradient(135deg,#f5f7fb 0%,#68758a 12%,#111b2c 23%,#d7e0ed 26%,#1b2b43 31%,#081426 100%);box-shadow:0 28px 48px rgba(0,0,0,.42),inset 0 1px 2px rgba(255,255,255,.85),inset 0 -2px 5px rgba(0,0,0,.6);transform:rotate(-2deg);transition:transform .35s ease}
-#authView .auth-phone-device:before{content:"";position:absolute;right:-3px;top:90px;width:3px;height:58px;border-radius:0 3px 3px 0;background:linear-gradient(#e5edf8,#58677d);box-shadow:0 70px 0 #8997aa}
-#authView .auth-phone-preview{width:100%;margin:0;padding:16px 13px 13px;border:1px solid rgba(157,195,237,.3);border-radius:29px;background:radial-gradient(circle at 50% 0%,#173d6b 0%,#0c1d37 54%,#071326 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.045),inset 0 10px 28px rgba(90,160,235,.07),0 0 24px rgba(39,125,211,.12)}
-#authView .auth-phone-top{min-height:18px}
-#authView .auth-phone-camera{width:42px;height:7px;border-radius:9px;background:linear-gradient(90deg,#050b14,#263e5e);box-shadow:0 0 0 2px rgba(255,255,255,.04)}
-#authView #authMiniChart{height:116px;position:relative;background:linear-gradient(180deg,rgba(17,44,78,.35),rgba(7,19,37,.08));border:1px solid rgba(139,184,231,.1)}
-#authView #authMiniChart svg{display:block;width:100%;height:100%}
-#authView .auth-chart-empty{display:grid;place-items:center;height:100%;font-size:10px;color:#91a8c7}
-#authView .auth-coin-track{gap:5px;min-height:40px}
-#authView .auth-coin-chip{padding:6px 5px;gap:5px;border-color:rgba(183,211,245,.18);background:linear-gradient(145deg,rgba(255,255,255,.1),rgba(255,255,255,.035))}
-#authView .auth-coin-chip img{width:21px;height:21px;flex:0 0 21px;object-fit:contain;border-radius:50%;filter:drop-shadow(0 2px 3px rgba(0,0,0,.28))}
-#authView .auth-coin-chip .auth-coin-fallback{display:grid;place-items:center;width:21px;height:21px;flex:0 0 21px;border-radius:50%;background:#d8b65e;color:#17243a;font-size:11px;font-weight:900}
-#authView .auth-coin-chip span{font-size:9px}
-#authView .auth-coin-chip strong{font-size:8px}
-#authView .auth-phone-foot{font-size:8px}
-#authView .auth-floating-coin{position:absolute;z-index:3;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;border:1px solid rgba(255,229,164,.85);background:radial-gradient(circle at 30% 25%,#fff4c9 0%,#e9c46b 24%,#a97822 72%,#54370e 100%);box-shadow:0 10px 20px rgba(0,0,0,.32),inset 0 0 0 3px rgba(255,247,212,.24),inset 0 -4px 8px rgba(75,42,0,.35)}
-#authView .auth-floating-coin img{width:26px;height:26px;object-fit:contain;filter:drop-shadow(0 2px 2px rgba(0,0,0,.3))}
-#authView .auth-floating-coin-btc{left:7%;top:7%;animation:authCoinFloat 6s ease-in-out infinite}
-#authView .auth-floating-coin-eth{left:1%;bottom:12%;width:42px;height:42px;animation:authCoinFloat 7s ease-in-out -2s infinite}
-#authView .auth-floating-coin-bnb{right:4%;top:1%;width:38px;height:38px;animation:authCoinFloat 6.5s ease-in-out -1s infinite}
-@keyframes authEarthFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-9px) rotate(1deg)}}
-@keyframes authCoinFloat{0%,100%{transform:translateY(0) rotate(-7deg)}50%{transform:translateY(-10px) rotate(9deg)}}
-#authView .auth-visual{overflow:hidden}
-body.light-theme #authView .auth-earth{filter:drop-shadow(0 15px 22px rgba(27,76,130,.2))}
-body.luxury-theme #authView .auth-phone-device{border-color:rgba(232,218,183,.8);box-shadow:0 28px 50px rgba(0,0,0,.48),inset 0 1px 2px rgba(255,255,255,.85),0 0 26px rgba(58,172,194,.12)}
-@media(max-width:760px){
- #authView .auth-scene{min-height:335px;margin:12px 0 3px;align-items:center}
- #authView .auth-earth{left:-9px;top:65px;width:clamp(155px,48%,190px)}
- #authView .auth-phone-device{width:min(76%,315px);margin-right:0;transform:rotate(-1deg);padding:7px;border-radius:32px}
- #authView .auth-phone-preview{padding:13px 10px 11px;border-radius:25px}
- #authView #authMiniChart{height:102px}
- #authView .auth-floating-coin{width:39px;height:39px}
- #authView .auth-floating-coin img{width:22px;height:22px}
- #authView .auth-floating-coin-btc{left:2%;top:14%}
- #authView .auth-floating-coin-eth{left:0;bottom:8%;width:35px;height:35px}
- #authView .auth-floating-coin-bnb{right:0;top:4%;width:33px;height:33px}
-}
-@media(max-width:390px){
- #authView .auth-scene{min-height:310px}
- #authView .auth-earth{left:-18px;top:75px;width:165px}
- #authView .auth-phone-device{width:79%;margin-right:-2px}
- #authView .auth-coin-chip{padding:5px 3px;gap:3px}
- #authView .auth-coin-chip img,#authView .auth-coin-chip .auth-coin-fallback{width:18px;height:18px;flex-basis:18px}
- #authView .auth-coin-chip span{font-size:8px}
- #authView .auth-coin-chip strong{font-size:7px}
-}
-@media(prefers-reduced-motion:reduce){#authView .auth-earth,#authView .auth-floating-coin{animation:none!important}#authView .auth-phone-device{transition:none!important}}
- 
-/* Faithful reconstruction of the approved DigiArz login reference */
-#authView.auth-reference-layout{display:flex!important;flex-direction:column!important;max-width:1024px!important;min-height:0!important;margin:0 auto 24px!important;padding:0!important;overflow:visible!important;border:0!important;border-radius:0!important;background:#031127!important;box-shadow:0 20px 70px rgba(0,0,0,.35)!important;color:#f7f8fc!important;direction:rtl}
-#authView.auth-reference-layout .auth-reference-visual{display:block!important;position:relative!important;overflow:visible!important;isolation:isolate!important;padding:30px 34px 18px!important;border:0!important;background:radial-gradient(ellipse at 76% 47%,rgba(12,85,154,.32),transparent 48%),radial-gradient(ellipse at 8% 90%,rgba(12,78,139,.2),transparent 40%),linear-gradient(155deg,#03152e 0%,#020d22 60%,#061a37 100%)!important}
-#authView .ref-brandbar{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:112px;direction:ltr}
-#authView .ref-brand-lockup{display:flex;align-items:center;gap:22px;color:#ffd76a}
-#authView .ref-monogram{position:relative;display:grid;place-items:center;width:190px;height:100px;font:bold 76px Georgia,serif;letter-spacing:-12px;color:#ffda70;text-shadow:0 2px 2px #7b4d05,0 0 18px rgba(255,194,55,.75);border-bottom:4px solid #dba92f;transform:skew(-9deg)}
-#authView .ref-monogram:after{content:"";position:absolute;width:170px;height:32px;border:5px solid #e8bb48;border-left-color:transparent;border-right-color:transparent;border-radius:50%;transform:rotate(-24deg);bottom:10px}
-#authView .ref-monogram small{position:absolute;right:4px;bottom:-2px;font-size:25px;letter-spacing:0}
-#authView .ref-brand-lockup>span:last-child{display:flex;flex-direction:column;gap:2px}
-#authView .ref-brand-lockup strong{font-size:clamp(42px,7vw,78px);font-weight:900;line-height:1;letter-spacing:-3px;color:#ffdc76;text-shadow:0 3px 2px #815b16,0 0 18px rgba(255,190,56,.35)}
-#authView .ref-brand-lockup em{font-style:normal;font-size:clamp(16px,2.5vw,25px);font-weight:800;color:#f2cb67}
-#authView .ref-live-pill{display:flex;align-items:center;gap:10px;padding:10px 18px;border:1px solid #3a9c65;border-radius:28px;color:white;background:rgba(2,31,31,.75);font-size:17px;white-space:nowrap}
-#authView .ref-live-pill i{width:15px;height:15px;border-radius:50%;background:#11e76a;box-shadow:0 0 14px #11e76a}
-#authView .ref-live-pill b{color:#12d86d;font-size:23px}
-#authView .ref-hero-grid{display:grid;grid-template-columns:minmax(270px,.78fr) minmax(0,1.35fr);gap:12px;align-items:center;direction:ltr;min-height:520px}
-#authView .ref-market-copy{direction:rtl;align-self:center;position:relative;z-index:5;padding:8px 0 18px}
-#authView .ref-market-copy h1{margin:0 0 10px;font-size:clamp(28px,4vw,46px);line-height:1.55;font-weight:900;color:#fff}
-#authView .ref-market-copy h1 span{color:#ffd34f}
-#authView .ref-market-copy>p{margin:0 0 20px;color:#f1f3f8;font-size:23px}
-#authView .ref-coin-list{display:grid;gap:10px;max-width:340px}
-#authView .ref-coin-row{display:grid;grid-template-columns:52px 52px minmax(70px,1fr) auto;align-items:center;gap:9px;min-height:52px;color:#fff;font-size:16px}
-#authView .ref-coin-row img{width:48px;height:48px;object-fit:contain;border-radius:50%;filter:drop-shadow(0 3px 7px rgba(0,0,0,.4))}
-#authView .ref-coin-row b{font-size:17px;direction:ltr}
-#authView .ref-coin-row span{font-size:15px;white-space:nowrap}
-#authView .ref-coin-row strong{color:#16e47a;font-size:15px;direction:ltr;white-space:nowrap}
-#authView .ref-scene{height:520px;min-height:520px!important;margin:0!important;position:relative!important;display:block!important;overflow:visible!important;isolation:isolate}
-#authView .ref-earth{position:absolute!important;z-index:0!important;left:0!important;top:30px!important;width:min(100%,490px)!important;aspect-ratio:1!important;filter:drop-shadow(0 15px 25px rgba(0,0,0,.4))!important;animation:none!important;opacity:1!important;visibility:visible!important}
-#authView .ref-earth svg{display:block;width:100%;height:100%;overflow:visible}
-#authView .ref-phone{position:absolute!important;z-index:4!important;right:8%!important;top:62px!important;width:min(61%,300px)!important;margin:0!important;padding:8px!important;border-radius:38px!important;transform:rotate(10deg)!important;border:2px solid rgba(240,246,255,.9)!important;background:linear-gradient(110deg,#f2f4fa,#7f899a 10%,#14233a 19%,#e3e9f3 23%,#0a1930 28%,#020b1a 100%)!important;box-shadow:0 28px 55px rgba(0,0,0,.68),inset 0 1px 2px #fff!important}
-#authView .ref-phone .auth-phone-preview{padding:16px 12px 13px!important;border-radius:29px!important;background:linear-gradient(160deg,#102c52,#06152b 65%,#020b1b)!important}
-#authView .ref-phone #authMiniChart{height:150px!important}
-#authView .ref-platform{position:absolute;z-index:1;left:1%;right:0;bottom:2px;height:60px;border:4px solid #d7a93f;border-radius:50%;background:linear-gradient(180deg,rgba(255,219,114,.35),rgba(7,22,44,.92) 45%,#020a18);box-shadow:0 12px 26px rgba(0,0,0,.7),0 0 22px rgba(245,186,52,.4),inset 0 5px 12px rgba(255,224,145,.35)}
-#authView .ref-gold-coin{width:104px!important;height:104px!important;border:3px solid #ffdf83!important;background:radial-gradient(circle at 32% 25%,#fff8d9,#f1c65b 28%,#a96d14 65%,#583507)!important;box-shadow:0 12px 30px rgba(0,0,0,.55),inset 0 0 0 5px rgba(255,243,193,.5),inset 0 -7px 13px rgba(69,37,0,.5)!important;animation:none!important}
-#authView .ref-gold-coin:after{content:"";position:absolute;inset:8px;border:2px dashed rgba(255,246,202,.65);border-radius:50%}
-#authView .ref-gold-coin img{width:57px!important;height:57px!important;filter:drop-shadow(0 3px 3px rgba(0,0,0,.55))!important}
-#authView .ref-gold-coin.auth-floating-coin-btc{left:22%!important;top:53%!important}
-#authView .ref-gold-coin.auth-floating-coin-eth{left:0!important;bottom:19%!important;width:80px!important;height:80px!important}
-#authView .ref-gold-coin.auth-floating-coin-bnb{right:0!important;top:48%!important;width:84px!important;height:84px!important}
-#authView .ref-usdt-coin{position:absolute;z-index:5;left:6%;top:72%;display:grid;place-items:center;width:78px;height:78px;border-radius:50%;border:3px solid #d6b75b;background:linear-gradient(145deg,#e8f2e6,#157d75 55%,#073d45);box-shadow:0 10px 25px rgba(0,0,0,.6)}
-#authView .ref-usdt-coin img{width:49px;height:49px;object-fit:contain}
-#authView .auth-reference-visual .auth-benefits,#authView .auth-reference-visual .auth-quick-stats{display:none!important}
-#authView.auth-reference-layout .auth-form{margin:0 5.5% 20px!important;padding:24px 42px 28px!important;border:2px solid #d9a936!important;border-radius:34px!important;background:linear-gradient(145deg,#061a36,#031127 72%)!important;box-shadow:0 0 0 1px rgba(255,221,125,.12),0 16px 38px rgba(0,0,0,.42)!important;color:#fff!important}
-#authView .auth-form-toolbar{display:none!important}
-#authView .auth-form .auth-kicker{color:#e7bd51!important;text-align:center;font-size:14px!important}
-#authView .auth-form h2{font-size:clamp(24px,3.2vw,34px)!important;color:#ffd66a!important;text-align:center;margin:4px 0 8px!important}
-#authView .auth-form .auth-intro{color:#aebbd0!important;text-align:center}
-#authView .auth-form .field{margin:11px 0!important}
-#authView .auth-form .field label{color:#d5dfef!important}
-#authView .auth-form input{background:rgba(5,22,46,.85)!important;border:1px solid #586c8c!important;border-radius:19px!important;color:white!important;min-height:62px!important}
-#authView .auth-form input::placeholder{color:#8798b3!important}
-#authView .auth-form .auth-actions{grid-template-columns:1fr!important}
-#authView .auth-form .auth-actions button{min-height:66px!important;border-radius:18px!important;background:linear-gradient(110deg,#ffdf7a,#d99b1d 45%,#ffe18a)!important;color:#07152c!important;font-size:19px!important;font-weight:900!important;box-shadow:0 5px 16px rgba(236,178,44,.32)!important}
-#authView .auth-form .auth-actions #signupBtn{background:rgba(10,31,59,.9)!important;color:#d7e7ff!important;border:1px solid #536a8d!important}
-#authView .auth-form #forgotBtn{background:transparent!important;border:0!important;color:#d5dff0!important}
-#authView .auth-form .auth-security{justify-content:center;border-top:1px solid rgba(255,214,106,.2);color:#aebbd0!important}
-#authView .ref-daily-promo{display:flex;align-items:center;gap:22px;min-height:145px;margin:0 28px 18px;padding:18px 28px;border:2px solid #d8a739;border-radius:30px;background:radial-gradient(ellipse at 12% 50%,rgba(15,116,184,.38),transparent 32%),linear-gradient(110deg,#07172d,#06152d 58%,#09264b);box-shadow:inset 0 0 25px rgba(38,120,198,.15),0 12px 26px rgba(0,0,0,.35)}
-#authView .ref-gift{font-size:65px;filter:drop-shadow(0 7px 10px rgba(0,0,0,.5))}
-#authView .ref-promo-tag{padding:12px 15px;border-radius:8px;background:linear-gradient(120deg,#ffe18a,#dba32e);color:#17233a;font-weight:900;transform:rotate(-5deg)}
-#authView .ref-promo-copy{display:flex;flex-direction:column;gap:9px;flex:1;text-align:center}
-#authView .ref-promo-copy strong{font-size:clamp(22px,4vw,38px);color:#fff}
-#authView .ref-promo-copy span{font-size:16px;color:#f4d46f}
-#authView .ref-clock{position:relative;font-size:62px;color:#ffcf57;line-height:1}
-#authView .ref-clock b{position:absolute;inset:22px 0 0;text-align:center;font-size:24px;color:#fff}
-#authView .ref-demo-footer{text-align:center;padding:10px 20px 22px;color:#f2d26d;font-size:22px;font-weight:800;letter-spacing:.2px;background:#031127}
-@media(max-width:760px){
- #authView.auth-reference-layout{margin:0 auto 18px!important}
- #authView.auth-reference-layout .auth-reference-visual{padding:18px 15px 8px!important}
- #authView .ref-brandbar{min-height:78px;gap:8px}
- #authView .ref-monogram{width:80px;height:65px;font-size:43px;letter-spacing:-8px}
- #authView .ref-monogram:after{width:76px;height:19px;border-width:3px;bottom:7px}
- #authView .ref-monogram small{font-size:13px}
- #authView .ref-brand-lockup{gap:8px}
- #authView .ref-brand-lockup strong{font-size:clamp(31px,8vw,48px);letter-spacing:-2px}
- #authView .ref-brand-lockup em{font-size:12px}
- #authView .ref-live-pill{padding:7px 9px;font-size:11px;gap:6px}
- #authView .ref-live-pill i{width:9px;height:9px}
- #authView .ref-live-pill b{font-size:16px}
- #authView .ref-hero-grid{grid-template-columns:minmax(118px,.72fr) minmax(0,1.28fr);gap:2px;min-height:320px}
- #authView .ref-market-copy{padding:0 0 10px}
- #authView .ref-market-copy h1{font-size:clamp(19px,5vw,29px);line-height:1.65}
- #authView .ref-market-copy>p{font-size:15px;margin-bottom:12px}
- #authView .ref-coin-list{gap:5px}
- #authView .ref-coin-row{grid-template-columns:30px 33px minmax(34px,1fr);gap:4px;min-height:35px;font-size:11px}
- #authView .ref-coin-row img{width:29px;height:29px}
- #authView .ref-coin-row b{font-size:11px}
- #authView .ref-coin-row span{font-size:10px}
- #authView .ref-coin-row strong{display:none}
- #authView .ref-scene{height:330px;min-height:330px!important}
- #authView .ref-earth{left:-10px!important;top:38px!important;width:100%!important}
- #authView .ref-phone{right:1%!important;top:55px!important;width:65%!important;padding:5px!important;border-radius:26px!important}
- #authView .ref-phone .auth-phone-preview{padding:10px 7px 8px!important;border-radius:20px!important}
- #authView .ref-phone #authMiniChart{height:90px!important}
- #authView .ref-gold-coin{width:61px!important;height:61px!important}
- #authView .ref-gold-coin img{width:34px!important;height:34px!important}
- #authView .ref-gold-coin.auth-floating-coin-btc{left:17%!important;top:58%!important}
- #authView .ref-gold-coin.auth-floating-coin-eth{left:-2%!important;bottom:15%!important;width:52px!important;height:52px!important}
- #authView .ref-gold-coin.auth-floating-coin-bnb{right:-1%!important;top:49%!important;width:54px!important;height:54px!important}
- #authView .ref-usdt-coin{left:2%;top:74%;width:48px;height:48px}
- #authView .ref-usdt-coin img{width:30px;height:30px}
- #authView.auth-reference-layout .auth-form{margin:0 4% 14px!important;padding:20px 16px 22px!important;border-radius:24px!important}
- #authView .auth-form input{min-height:55px!important}
- #authView .auth-form .auth-actions button{min-height:56px!important;font-size:16px!important}
- #authView .ref-daily-promo{gap:8px;min-height:86px;margin:0 10px 10px;padding:9px;border-radius:18px}
- #authView .ref-gift{font-size:36px}
- #authView .ref-promo-tag{font-size:9px;padding:7px}
- #authView .ref-promo-copy{gap:5px}
- #authView .ref-promo-copy strong{font-size:17px}
- #authView .ref-promo-copy span{font-size:10px}
- #authView .ref-clock{font-size:38px}
- #authView .ref-clock b{inset:14px 0 0;font-size:14px}
- #authView .ref-demo-footer{font-size:16px;padding:8px 10px 18px}
-}
-@media(max-width:390px){
- #authView .ref-hero-grid{grid-template-columns:112px minmax(0,1fr);min-height:290px}
- #authView .ref-scene{height:300px;min-height:300px!important}
- #authView .ref-phone{width:69%!important;right:-2%!important}
- #authView .ref-market-copy h1{font-size:18px}
- #authView .ref-coin-row{grid-template-columns:27px 29px minmax(30px,1fr)}
- #authView .ref-coin-row img{width:26px;height:26px}
-}
-@media(prefers-reduced-motion:reduce){#authView .ref-earth,#authView .ref-gold-coin{animation:none!important;transition:none!important}}
-</style>
-
-</body>
-</html>
-;value.title='تغییر ۲۴ ساعت: '+(Number.isFinite(change)?formatNum(change,2)+'%':'نامشخص')+' · رتبه ارزش بازار: '+(coin.market_cap_rank||'—');value.style.color=Number.isFinite(change)?(change>=0?'#16e47a':'#ff687c'):'#fff'}
- });
- root.dataset.marketRank='market-cap';
- root.setAttribute('aria-label','چهار مورد از ده ارز برتر بر اساس ارزش بازار؛ به‌روزرسانی '+new Date(authTopMarketFetchedAt).toLocaleTimeString('fa-IR'));
-}
-async function refreshAuthCoinPrices(){if(!supabaseClient||authView.classList.contains('hidden'))return;const root=$('authCoinTrack');if(!root)return;const visible=Array.from(root.querySelectorAll('.auth-coin-chip'));await Promise.allSettled(visible.map(async node=>{const symbol=node.dataset.symbol;const response=await fetchBinanceResponse('/api/v3/ticker/24hr?symbol='+encodeURIComponent(symbol));const ticker=await response.json();const price=Number(ticker?.lastPrice),change=Number(ticker?.priceChangePercent);const target=node.querySelector('[data-price]');if(target&&Number.isFinite(price)&&price>0)target.textContent=price>=1000?formatNum(price,0):price>=1?formatNum(price,2):formatNum(price,5);if(symbol==='BTCUSDT'&&Number.isFinite(price)&&price>0){$('authMiniPrice').textContent=formatNum(price,2)+' USDT';const changeNode=$('authMiniChange');if(Number.isFinite(change)){changeNode.textContent=(change>0?'+':'')+formatNum(change,2)+'%';changeNode.style.color=change>=0?'#8ee6bd':'#ff9ba6'}}}))}
-async function refreshAuthMiniChart(){if(authMiniBusy||!supabaseClient||authView.classList.contains('hidden'))return;authMiniBusy=true;try{const rows=await fetchBinanceKlines('BTCUSDT','5m',36);const candles=rows.map(candleFromKline).filter(c=>[c.time,c.open,c.high,c.low,c.close].every(Number.isFinite)&&c.high>=c.low&&c.open>0&&c.close>0);if(!candles.length)throw new Error('داده کندلی معتبر دریافت نشد');renderAuthMiniChart(candles)}catch(error){renderAuthMiniChart([]);const price=$('authMiniPrice');if(price&&price.textContent==='در حال دریافت قیمت…')price.textContent='قیمت موقتاً در دسترس نیست';console.warn('DigiArz login market preview:',error)}finally{authMiniBusy=false}}
-function initAuthMarketPreview(){if(authMiniRefreshTimer||!$('authMiniChart'))return;renderAuthCoinTrack();renderAuthMiniChart([]);const run=()=>{if(!document.hidden&&!authView.classList.contains('hidden')){refreshAuthMiniChart();refreshAuthCoinPrices()}};run();authMiniRefreshTimer=setInterval(run,60000);authCoinRotationTimer=setInterval(()=>{if(document.hidden||authView.classList.contains('hidden'))return;authCoinOffset=(authCoinOffset+1)%authMiniSymbols.length;renderAuthCoinTrack();refreshAuthCoinPrices()},4500)}
+function initAuthMarketPreview(){if(authMiniRefreshTimer||!$('authMiniChart'))return;renderAuthCoinTrack();renderAuthMiniChart([]);const run=()=>{if(!document.hidden&&!authView.classList.contains('hidden')){refreshAuthMiniChart();refreshAuthCoinPrices();refreshAuthTopMarketAssets()}};run();authMiniRefreshTimer=setInterval(run,60000);authCoinRotationTimer=setInterval(()=>{if(document.hidden||authView.classList.contains('hidden'))return;authCoinOffset=(authCoinOffset+1)%authMiniSymbols.length;authTopMarketOffset=(authTopMarketOffset+1)%10;if(authTopMarketAssets.length===10)renderAuthTopMarketRows();renderAuthCoinTrack();refreshAuthCoinPrices()},4500)}
 
 function candleFromKline(k){return {time:Math.floor(Number(k[0])/1000),open:Number(k[1]),high:Number(k[2]),low:Number(k[3]),close:Number(k[4]),volume:Number(k[5]||0),quoteVolume:Number(k[7]||0)}}
 function calculateRsi(values,period=14){if(values.length<=period)return null;let gain=0,loss=0;for(let i=1;i<=period;i++){const d=values[i]-values[i-1];if(d>0)gain+=d;else loss-=d}let avgGain=gain/period,avgLoss=loss/period;for(let i=period+1;i<values.length;i++){const d=values[i]-values[i-1];avgGain=(avgGain*(period-1)+Math.max(d,0))/period;avgLoss=(avgLoss*(period-1)+Math.max(-d,0))/period}if(avgLoss===0)return avgGain===0?50:100;return 100-(100/(1+avgGain/avgLoss))}
