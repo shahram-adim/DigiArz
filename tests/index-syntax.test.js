@@ -370,3 +370,16 @@ test('daily advertisement module parses and remains a non-clickable image/text d
   assert.match(source, /86400000/);
   assert.doesNotMatch(source, /createElement\(['"]a['"]\)|\.href\s*=/, 'daily ads must not render clickable links');
 });
+
+
+test('three visual themes are selectable, persisted, and backward-compatible', () => {
+  for (const theme of ['light', 'dark', 'luxury']) assert.match(html, new RegExp('data-theme-choice="' + theme + '"'));
+  assert.match(html, /function applyTheme\(theme\)/);
+  assert.match(html, /document\.body\.classList\.toggle\('luxury-theme',luxury\)/);
+  assert.match(html, /localStorage\.setItem\('digiArzTheme',selected\)/);
+  assert.match(html, /\['light','dark','luxury'\]\.includes\(stored\)/);
+  assert.match(html, /function cycleTheme\(\)/);
+  assert.match(html, /body\.luxury-theme/);
+  assert.match(html, /@supports not \(\(backdrop-filter:blur\(1px\)\) or \(-webkit-backdrop-filter:blur\(1px\)\)\)/);
+  assert.match(html, /prefers-reduced-motion:reduce/);
+});
