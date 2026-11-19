@@ -383,3 +383,24 @@ test('three visual themes are selectable, persisted, and backward-compatible', (
   assert.match(html, /@supports not \(\(backdrop-filter:blur\(1px\)\) or \(-webkit-backdrop-filter:blur\(1px\)\)\)/);
   assert.match(html, /prefers-reduced-motion:reduce/);
 });
+
+
+test('login hero separates a detailed 3D globe from a premium handset and uses real coin logos', () => {
+  assert.match(html, /class="auth-scene"/);
+  assert.match(html, /class="auth-earth"/);
+  assert.match(html, /id="authEarthOcean"/);
+  assert.match(html, /class="auth-phone-device"/);
+  assert.match(html, /class="auth-floating-coin auth-floating-coin-btc"/);
+  assert.match(html, /assets\.coincap\.io\/assets\/icons\/(?:btc|eth|sol|bnb)@2x\.png/);
+  assert.match(html, /authCoinLogoUrl\(coin\.label\)/);
+  assert.match(html, /auth-coin-chip img/);
+});
+
+test('login mini chart renders real five-minute candles without depending on a chart CDN', () => {
+  assert.match(html, /function renderAuthMiniChart\(candles\)/);
+  assert.match(html, /۳۶ کندل واقعی پنج دقیقه‌ای بیت‌کوین/);
+  assert.match(html, /renderAuthMiniChart\(candles\)/);
+  assert.match(html, /renderAuthMiniChart\(\[\]\)/);
+  assert.match(html, /fetchBinanceKlines\('BTCUSDT','5m',36\)/);
+  assert.match(html, /<svg viewBox=/);
+});
