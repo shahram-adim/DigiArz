@@ -61,5 +61,5 @@ test('dashboard market preview has readable colors in light theme', () => {
 test('no JavaScript or markup is appended after the closing HTML document', () => {
   const closingTag = html.toLowerCase().lastIndexOf('</html>');
   assert.notEqual(closingTag, -1, 'document must contain a closing html tag');
-  assert.match(html.slice(closingTag + '</html>'.length), /^\\s*$/, 'nothing may render after the document and appear as raw source text');
+  assert.equal(html.slice(closingTag + '</html>'.length).trim(), '', 'nothing may render after the document and appear as raw source text');
 });
