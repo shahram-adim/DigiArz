@@ -946,3 +946,15 @@
 - [!] CI موفق، تأیید اجرای واقعی CoinGecko در مرورگر WebView گوشی یا بررسی بصری دستگاه نیست. دسترسی API عمومی، CORS/rate limit و کیفیت/موقعیت انیمیشن در گوشی هنوز دستی تأیید نشده‌اند.
 - [!] هیچ APK جدیدی از این شاخه ساخته نشده و هیچ تغییری در `main` یا Supabase Production انجام نشده است.
 - [ ] گام بعد: تأیید کاربر برای نصب/اجرای نسخهٔ آزمایشی در محیط گوشی یا فراهم‌شدن بررسی مرورگر واقعی؛ سپس رفع هر ایراد مشاهده‌شده و فقط پس از تأیید کاربر تصمیم‌گیری دربارهٔ آماده‌سازی merge.
+
+
+## بررسی امکان ساخت APK آزمایشی از شاخهٔ صحنه ورود — ۱۹ نوامبر ۲۰۲۶
+- [x] وضعیت PR #28 دوباره از GitHub بررسی شد: باز (open)، در حالت Draft و head برابر `03a93b13e7d76aa62776f2c192bda8fa61a79c6f)؛ ادغام انجام نشده است.
+- [x] اجرای Exact Decimal با شمارهٔ 927 و شناسهٔ `44605287565` روی head فعلی با نتیجهٔ نهایی `success` تکمیل شد.
+- [x] فایل workflow اندروید `.github/workflows/android-apk.yml` در شاخهٔ آزمایشی بررسی شد. این workflow دارای `workflow_dispatch` است و build APK را از ref انتخاب‌شده انجام می‌دهد؛ trigger خودکار push آن فقط برای `main` تعریف شده است.
+- [x] اجرای 927 هیچ artifactی تولید نکرد؛ این workflow فقط آزمون Exact Decimal است و نباید artifact آن APK تلقی شود.
+- [!] ابزارهای متصل GitHub در این نشست فقط امکان خواندن workflowها و اجرای مجدد jobهای ناموفق را فراهم می‌کنند؛ action مجاز برای ارسال `workflow_dispatch` در دسترس نیست. بنابراین از این محیط اجرای دستی build امکان‌پذیر نشد و هیچ فایل workflow یا کد پروژه برای دور زدن این محدودیت تغییر داده نشد.
+- [!] ساخت APK از branch نیازمند اجرای دستی workflow از GitHub Actions با branch `feature/login-3d-live-scene` است. لینک: https://github.com/shahram-adim/DigiArz/actions/workflows/android-apk.yml
+- [!] اجرای موفق CI، اجرای واقعی CoinGecko در WebView، ظاهر روی گوشی یا نصب APK را اثبات نمی‌کند.
+- [x] `main` و Supabase Production بدون تغییر باقی ماندند؛ PR #28 همچنان Draft و ادغام‌نشده است.
+- [ ] گام بعد: پس از اجرای دستی workflow، بررسی run، artifact، BUILD-INFO و SHA-256 APK؛ سپس کاربر آن را روی Android نصب و نتیجهٔ بصری را گزارش کند.
