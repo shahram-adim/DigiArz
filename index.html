@@ -1604,6 +1604,76 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
  .mobile-bottom-nav button svg{width:16px;height:16px;flex-basis:16px}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* Premium light authentication experience — UI only; auth handlers and field IDs stay unchanged. */
+:root{--auth-ink:#14264a;--auth-blue:#155eef;--auth-blue-deep:#103d9b;--auth-gold:#d8ad4a}
+body:has(#authView:not(.hidden)){background:radial-gradient(ellipse at 12% 8%,rgba(21,94,239,.08),transparent 34%),linear-gradient(135deg,#f7f9fd 0%,#eef3fb 100%);color:var(--auth-ink)}
+.wrap:has(#authView:not(.hidden)){width:100%;max-width:none;min-height:100svh;padding:18px clamp(14px,4vw,56px) 30px}
+.wrap:has(#authView:not(.hidden))>.top{max-width:1180px;margin:0 auto;padding:8px 2px 18px;border-bottom:1px solid #e2e9f3;color:var(--auth-ink)}
+.wrap:has(#authView:not(.hidden)) .brand{color:#14264a;font-size:29px;letter-spacing:-.5px}
+.wrap:has(#authView:not(.hidden)) .brand span:not(.tag){color:var(--auth-blue)}
+.wrap:has(#authView:not(.hidden)) .tag{color:#8a6417;border-color:#e6d4a6;background:#fff9e9}
+.wrap:has(#authView:not(.hidden)) .top .muted{color:#66758f}
+.wrap:has(#authView:not(.hidden)) .theme-switch-top{background:#fff;color:#28436f;border:1px solid #dce5f2;box-shadow:0 3px 12px rgba(26,54,98,.06)}
+#authView.auth{position:relative;isolation:isolate;width:min(1120px,100%);min-height:min(700px,calc(100svh - 132px));margin:30px auto 42px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);background:#fff;color:var(--auth-ink);border:1px solid #e1e8f2;border-radius:28px;box-shadow:0 28px 80px rgba(26,49,88,.13);overflow:hidden}
+#authView .auth-visual{position:relative;isolation:isolate;overflow:hidden;justify-content:space-between;padding:clamp(28px,4vw,52px);background:radial-gradient(circle at 18% 12%,rgba(255,255,255,.16),transparent 30%),linear-gradient(145deg,#102b66 0%,#155eef 54%,#0d2b68 100%);border:0;color:#fff}
+#authView .auth-visual:before{content:"";position:absolute;z-index:-1;inset:0;pointer-events:none;opacity:.18;background:repeating-linear-gradient(0deg,transparent 0 38px,rgba(255,255,255,.2) 39px,transparent 40px),repeating-linear-gradient(90deg,transparent 0 38px,rgba(255,255,255,.2) 39px,transparent 40px);mask-image:linear-gradient(135deg,#000,transparent 75%)}
+#authView .auth-visual:after{width:260px;height:260px;left:-105px;bottom:-115px;border-color:rgba(255,255,255,.22);box-shadow:0 0 0 25px rgba(255,255,255,.045),0 0 0 58px rgba(255,255,255,.03)}
+#authView .auth-visual>div{position:relative;z-index:1}
+#authView .auth-brand{font-size:36px;letter-spacing:-.7px;color:#fff}
+#authView .auth-brand span{color:#f2cf78}
+#authView .auth-kicker{color:#f4d78e;font-size:11px;font-weight:800;letter-spacing:1.2px}
+#authView .auth-headline{max-width:440px;margin:24px 0 14px;font-size:clamp(27px,3vw,37px);line-height:1.75;letter-spacing:-.5px}
+#authView .auth-copy{max-width:390px;color:rgba(255,255,255,.82);font-size:13px;line-height:2.25}
+#authView .auth-benefits{grid-template-columns:1fr 1fr;gap:11px;margin-top:32px}
+#authView .auth-benefit{min-height:54px;padding:10px 12px;border:1px solid rgba(255,255,255,.16);border-radius:13px;background:rgba(255,255,255,.075);color:#fff;font-size:11px;line-height:1.8;backdrop-filter:blur(8px)}
+#authView .auth-benefit i{width:32px;height:32px;flex:0 0 32px;border:1px solid rgba(244,215,142,.45);background:rgba(244,215,142,.12);color:#f4d78e;border-radius:10px}
+#authView .auth-form{min-width:0;padding:clamp(28px,4vw,54px);background:#fff;color:var(--auth-ink);justify-content:center}
+#authView .auth-form h2{color:#14264a;font-size:25px;font-weight:900;letter-spacing:-.4px;margin:7px 0 8px}
+#authView .auth-intro{color:#71809a;font-size:12px;line-height:2.15;margin-bottom:18px}
+#authView .auth-form .field{margin:13px 0}
+#authView .auth-form .field label{color:#52627d;font-size:12px;font-weight:700}
+#authView .auth-form input{min-height:51px;padding:13px 15px;background:#f8faff;color:#14264a;border:1px solid #dce5f1;border-radius:12px;box-shadow:inset 0 1px 2px rgba(20,38,74,.025);transition:border-color .18s,box-shadow .18s,background .18s}
+#authView .auth-form input::placeholder{color:#9aa7ba}
+#authView .auth-form input:focus{background:#fff;border-color:#5b8df5;box-shadow:0 0 0 4px rgba(21,94,239,.10)}
+#authView .auth-actions{grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+#authView .auth-actions button{min-height:51px;border-radius:12px;font-size:12px;transition:transform .16s,box-shadow .16s,background .16s}
+#authView .auth-actions button:first-child{background:linear-gradient(135deg,#246df0,#124bbd);color:#fff;box-shadow:0 9px 20px rgba(21,94,239,.2)}
+#authView .auth-actions button:first-child:hover{box-shadow:0 12px 24px rgba(21,94,239,.28);transform:translateY(-1px)}
+#authView .auth-actions button.secondary,#authView #forgotBtn{background:#f1f5fb!important;color:#29436d!important;border:1px solid #e0e8f3!important;box-shadow:none}
+#authView .auth-actions button.secondary:hover,#authView #forgotBtn:hover{background:#e8eff9!important}
+#authView #forgotBtn{min-height:45px;border-radius:11px;font-size:11px;font-weight:700}
+#authView #recoveryPanel{margin-top:16px;padding:17px;border:1px solid #e4ebf5;border-radius:14px;background:#f8faff}
+#authView #recoveryPanel h2{font-size:18px}
+#authView #recoveryPanel button{width:100%;min-height:48px;border-radius:11px;background:linear-gradient(135deg,#246df0,#124bbd);color:#fff}
+#authView #authMsg{border-radius:12px}
+#authView .auth-security{margin-top:22px;padding-top:16px;border-top:1px solid #edf1f7;color:#75839a;font-size:10px;line-height:2}
+#authView .auth-security svg{color:#159b70}
+@media(max-width:760px){
+ .wrap:has(#authView:not(.hidden)){padding:12px 12px 22px}
+ .wrap:has(#authView:not(.hidden))>.top{padding:6px 1px 14px}
+ .wrap:has(#authView:not(.hidden)) .brand{font-size:25px}
+ #authView.auth{width:100%;min-height:0;margin:16px auto 24px;grid-template-columns:minmax(0,1fr);border-radius:22px}
+ #authView .auth-visual{min-height:255px;padding:25px 23px 22px}
+ #authView .auth-brand{font-size:30px}
+ #authView .auth-headline{font-size:24px;line-height:1.65;margin:12px 0 8px}
+ #authView .auth-copy{font-size:11px;line-height:2}
+ #authView .auth-benefits{margin-top:18px;gap:8px}
+ #authView .auth-benefit{min-height:45px;padding:7px 9px;font-size:10px}
+ #authView .auth-benefit i{width:27px;height:27px;flex-basis:27px}
+ #authView .auth-form{padding:27px 22px 25px}
+ #authView .auth-form h2{font-size:22px}
+}
+@media(max-width:390px){
+ #authView .auth-visual{min-height:0}
+ #authView .auth-benefits{grid-template-columns:1fr 1fr}
+ #authView .auth-benefit{font-size:9px;gap:7px}
+ #authView .auth-form{padding:23px 17px}
+ #authView .auth-actions{gap:7px}
+ #authView .auth-actions button{padding:11px 7px;font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){#authView *{transition:none!important;scroll-behavior:auto!important}}
+
 </style>
 <style>
 .pwa-install-banner{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 16px;margin:0 0 14px;border:1px solid rgba(240,185,11,.45);border-radius:14px;background:linear-gradient(110deg,rgba(240,185,11,.10),rgba(24,26,32,.96));box-shadow:0 8px 24px rgba(0,0,0,.12)}
