@@ -213,6 +213,12 @@ test('gainer, loser, volatility and market-list views share the same ranking hel
   assert.ok(market.includes("compareMarketChange(a,b,'desc')"));
   assert.ok(market.includes("compareMarketChange(a,b,'asc')"));
   assert.ok(html.includes("const valid=sortMarketRowsByChange(marketRows,'desc')"));
+  const dashboardStart = html.indexOf('function renderDashboardMarketPreview(){');
+  const dashboardEnd = html.indexOf('function ', dashboardStart + 10);
+  const dashboard = html.slice(dashboardStart, dashboardEnd);
+  assert.ok(dashboard.includes('change=getMarketChange24h(item)'), 'dashboard filters use the shared freshness-aware percentage');
+  assert.ok(dashboard.includes("compareMarketChange(a.item,b.item,'desc')"), 'dashboard gainers use the shared descending comparator');
+  assert.ok(dashboard.includes("compareMarketChange(a.item,b.item,'asc')"), 'dashboard losers use the shared ascending comparator');
 });
 
 test('coin logos try curated metadata, the primary icon set and an independent fallback', () => {
