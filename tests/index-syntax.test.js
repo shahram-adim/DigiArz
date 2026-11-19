@@ -313,3 +313,17 @@ test('market list rows use five aligned cells, 40px logos, visible Persian names
   assert.match(html, /coin-name-fa\{[\s\S]{0,200}display:block!important/);
   assert.match(html, /@media\(max-width:700px\)[\s\S]{0,900}grid-template-columns:30px minmax\(0,1fr\) minmax\(88px,auto\)!important/);
 });
+
+
+test('login screen uses the scoped premium light-blue-and-gold responsive design', () => {
+  assert.match(html, /DigiArz premium authentication refresh/);
+  assert.match(html, /#authView\.auth[\s\S]*?background:#fff/);
+  assert.match(html, /#authView \.auth-visual[\s\S]*?linear-gradient\(145deg,#102b60 0%,#17458f 52%,#10234a 100%\)/);
+  assert.match(html, /#authView #loginBtn[\s\S]*?linear-gradient\(135deg,#1746a2,#2864c7\)/);
+  assert.match(html, /#authView #signupBtn[\s\S]*?background:#eef3fb/);
+  assert.match(html, /@media\(max-width:700px\)[\s\S]*?#authView\.auth\{grid-template-columns:1fr/);
+  assert.match(html, /@media\(prefers-reduced-motion:reduce\)[\s\S]*?#authView \*\{transition:none!important\}/);
+  for (const id of ['email','password','loginBtn','signupBtn','forgotBtn','authMsg','recoveryPanel']) {
+    assert.match(html, new RegExp('id="' + id + '"'), 'existing auth control remains: ' + id);
+  }
+});
