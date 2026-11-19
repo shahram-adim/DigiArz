@@ -1973,6 +1973,32 @@ body.light-theme #tab-markets .market-board-v34 .coin .price-toman{color:#805a0a
 
 </style>
 
+
+<style id="digiarz-login-live-motion-v1">
+/* Animate only existing artwork layers; keep all layout boxes and element positions fixed. */
+#authView .ref-earth svg>g[clip-path]{transform-box:view-box;transform-origin:260px 260px;animation:digiarzGlobeSpin 48s linear infinite}
+#authView .ref-gold-coin,#authView .ref-usdt-coin{will-change:transform;backface-visibility:hidden}
+#authView .ref-gold-coin.auth-floating-coin-btc{animation:digiarzOrbitA 13s linear infinite!important}
+#authView .ref-gold-coin.auth-floating-coin-eth{animation:digiarzOrbitB 16s linear infinite!important}
+#authView .ref-gold-coin.auth-floating-coin-bnb{animation:digiarzOrbitC 14s linear infinite!important}
+#authView .ref-usdt-coin{animation:digiarzOrbitD 18s linear infinite}
+@keyframes digiarzGlobeSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes digiarzOrbitA{0%{transform:translate(0,0) rotateY(0deg)}25%{transform:translate(22px,-18px) rotateY(90deg)}50%{transform:translate(42px,4px) rotateY(180deg)}75%{transform:translate(18px,22px) rotateY(270deg)}100%{transform:translate(0,0) rotateY(360deg)}}
+@keyframes digiarzOrbitB{0%{transform:translate(0,0) rotateY(0deg)}25%{transform:translate(26px,14px) rotateY(90deg)}50%{transform:translate(48px,-4px) rotateY(180deg)}75%{transform:translate(20px,-22px) rotateY(270deg)}100%{transform:translate(0,0) rotateY(360deg)}}
+@keyframes digiarzOrbitC{0%{transform:translate(0,0) rotateY(0deg)}25%{transform:translate(-22px,20px) rotateY(90deg)}50%{transform:translate(-42px,4px) rotateY(180deg)}75%{transform:translate(-18px,-20px) rotateY(270deg)}100%{transform:translate(0,0) rotateY(360deg)}}
+@keyframes digiarzOrbitD{0%{transform:translate(0,0) rotateY(0deg)}25%{transform:translate(22px,-14px) rotateY(90deg)}50%{transform:translate(38px,10px) rotateY(180deg)}75%{transform:translate(14px,20px) rotateY(270deg)}100%{transform:translate(0,0) rotateY(360deg)}}
+@media(max-width:760px){
+ #authView .ref-gold-coin.auth-floating-coin-btc{animation:digiarzOrbitMobileA 13s linear infinite!important}
+ #authView .ref-gold-coin.auth-floating-coin-eth{animation:digiarzOrbitMobileB 16s linear infinite!important}
+ #authView .ref-gold-coin.auth-floating-coin-bnb{animation:digiarzOrbitMobileC 14s linear infinite!important}
+ #authView .ref-usdt-coin{animation:digiarzOrbitMobileD 18s linear infinite}
+}
+@keyframes digiarzOrbitMobileA{0%{transform:translate(0,0) rotateY(0)}25%{transform:translate(10px,-9px) rotateY(90deg)}50%{transform:translate(19px,2px) rotateY(180deg)}75%{transform:translate(8px,10px) rotateY(270deg)}100%{transform:translate(0,0) rotateY(360deg)}}
+@keyframes digiarzOrbitMobileB{0%{transform:translate(0,0) rotateY(0)}25%{transform:translate(12px,8px) rotateY(90deg)}50%{transform:translate(21px,-2px) rotateY(180deg)}75%{transform:translate(8px,-9px) rotateY(270deg)}100%{transform:translate(0,0) rotateY(360deg)}}
+@keyframes digiarzOrbitMobileC{0%{transform:translate(0,0) rotateY(0)}25%{transform:translate(-10px,9px) rotateY(90deg)}50%{transform:translate(-19px,2px) rotateY(180deg)}75%{transform:translate(-8px,-9px) rotateY(270deg)}100%{transform:translate(0,0) rotateY(360deg)}}
+@keyframes digiarzOrbitMobileD{0%{transform:translate(0,0) rotateY(0)}25%{transform:translate(10px,-7px) rotateY(90deg)}50%{transform:translate(18px,5px) rotateY(180deg)}75%{transform:translate(7px,9px) rotateY(270deg)}100%{transform:translate(0,0) rotateY(360deg)}}
+@media(prefers-reduced-motion:reduce){#authView .ref-earth svg>g[clip-path],#authView .ref-gold-coin,#authView .ref-usdt-coin{animation:none!important}}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -3457,6 +3483,7 @@ async function fetchBinanceResponse(urlOrPath){
 async function fetchBinanceKlines(symbol,interval,limit){const response=await fetchBinanceResponse(`/api/v3/klines?symbol=${encodeURIComponent(symbol)}&interval=${encodeURIComponent(interval)}&limit=${encodeURIComponent(limit)}`);const rows=await response.json();if(!Array.isArray(rows)||!rows.length)throw new Error('برای این نماد کندل معتبر از منابع بازار دریافت نشد.');return rows}
 let authMiniRefreshTimer=null,authCoinRotationTimer=null,authCoinOffset=0,authMiniBusy=false;
 const authMiniSymbols=[{symbol:'BTCUSDT',label:'BTC'},{symbol:'ETHUSDT',label:'ETH'},{symbol:'SOLUSDT',label:'SOL'},{symbol:'BNBUSDT',label:'BNB'},{symbol:'XRPUSDT',label:'XRP'},{symbol:'ADAUSDT',label:'ADA'}];
+let authTopMarketAssets=[],authTopMarketFetchedAt=0,authTopMarketBusy=false,authTopMarketOffset=0;
 function renderAuthMiniChart(candles){
  const el=$('authMiniChart');if(!el)return;
  const width=Math.max(280,Math.floor(el.clientWidth||320)),height=Math.max(90,Math.floor(el.clientHeight||112)),data=Array.isArray(candles)?candles.slice(-36):[];
@@ -3472,8 +3499,47 @@ function renderAuthMiniChart(candles){
 function authCoinLogoUrl(symbol){return 'https://assets.coincap.io/assets/icons/'+String(symbol||'').toLowerCase()+'@2x.png'}
 function renderAuthCoinTrack(){const root=$('authCoinTrack');if(!root)return;const visible=Array.from({length:3},(_,i)=>authMiniSymbols[(authCoinOffset+i)%authMiniSymbols.length]);root.replaceChildren();for(const coin of visible){const node=document.createElement('div');node.className='auth-coin-chip';node.dataset.symbol=coin.symbol;const icon=document.createElement('img');icon.src=authCoinLogoUrl(coin.label);icon.alt=coin.label;icon.loading='lazy';icon.decoding='async';icon.onerror=()=>{const fallback=document.createElement('b');fallback.textContent=coin.label.slice(0,1);fallback.className='auth-coin-fallback';icon.replaceWith(fallback)};const label=document.createElement('span');label.textContent=coin.label;const price=document.createElement('strong');price.textContent='—';price.dataset.price='true';node.append(icon,label,price);root.appendChild(node)}}
 async function refreshAuthCoinPrices(){if(!supabaseClient||authView.classList.contains('hidden'))return;const root=$('authCoinTrack');if(!root)return;const visible=Array.from(root.querySelectorAll('.auth-coin-chip'));await Promise.allSettled(visible.map(async node=>{const symbol=node.dataset.symbol;const response=await fetchBinanceResponse('/api/v3/ticker/24hr?symbol='+encodeURIComponent(symbol));const ticker=await response.json();const price=Number(ticker?.lastPrice),change=Number(ticker?.priceChangePercent);const target=node.querySelector('[data-price]');if(target&&Number.isFinite(price)&&price>0)target.textContent=price>=1000?formatNum(price,0):price>=1?formatNum(price,2):formatNum(price,5);const refRow=document.querySelector('[data-ref-market="'+symbol+'"]');if(refRow&&Number.isFinite(change)){refRow.textContent=(change>=0?'▲ +':'▼ ')+formatNum(Math.abs(change),1)+'%';refRow.style.color=change>=0?'#16e47a':'#ff687c'}if(symbol==='BTCUSDT'&&Number.isFinite(price)&&price>0){$('authMiniPrice').textContent=formatNum(price,2)+' USDT';const changeNode=$('authMiniChange');if(Number.isFinite(change)){changeNode.textContent=(change>0?'+':'')+formatNum(change,2)+'%';changeNode.style.color=change>=0?'#8ee6bd':'#ff9ba6'}}}))}
+async function refreshAuthTopMarketAssets(){
+ if(authTopMarketBusy||authView.classList.contains('hidden'))return;
+ authTopMarketBusy=true;
+ try{
+  const response=await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false',{headers:{accept:'application/json'},cache:'no-store'});
+  if(!response.ok)throw new Error('CoinGecko HTTP '+response.status);
+  const rows=await response.json();
+  if(!Array.isArray(rows)||rows.length!==10)throw new Error('فهرست ۱۰ ارز برتر کامل دریافت نشد');
+  const valid=rows.filter(x=>x&&x.symbol&&Number(x.current_price)>0);
+  if(valid.length!==10)throw new Error('داده یکی از ۱۰ ارز برتر معتبر نیست');
+  authTopMarketAssets=valid;
+  authTopMarketFetchedAt=Date.now();
+  renderAuthTopMarketRows();
+ }catch(error){console.warn('DigiArz top-10 market list:',error)}
+ finally{authTopMarketBusy=false}
+}
+function renderAuthTopMarketRows(){
+ const root=document.querySelector('#authView .ref-coin-list');
+ if(!root||authTopMarketAssets.length!==10)return;
+ const visible=Array.from({length:4},(_,i)=>authTopMarketAssets[(authTopMarketOffset+i)%10]);
+ const nodes=Array.from(root.querySelectorAll('.ref-coin-row'));
+ visible.forEach((coin,i)=>{
+  const row=nodes[i];if(!row)return;
+  const icon=row.querySelector('img'),symbol=row.querySelector('b'),name=row.querySelector('span'),value=row.querySelector('strong');
+  const code=String(coin.symbol||'').toUpperCase();
+  if(icon){icon.src=coin.image;icon.alt=coin.name||code;icon.onerror=()=>{icon.style.visibility='hidden'};icon.style.visibility=''}
+  if(symbol)symbol.textContent=code;
+  if(name)name.textContent=coin.name||code;
+  if(value){
+   value.removeAttribute('data-ref-market');
+   const change=Number(coin.price_change_percentage_24h),price=Number(coin.current_price);
+   value.textContent=(price>=1000?formatNum(price,0):price>=1?formatNum(price,2):formatNum(price,5))+' $';
+   value.title='تغییر ۲۴ ساعت: '+(Number.isFinite(change)?formatNum(change,2)+'%':'نامشخص')+' · رتبه ارزش بازار: '+(coin.market_cap_rank||'—');
+   value.style.color=Number.isFinite(change)?(change>=0?'#16e47a':'#ff687c'):'#fff';
+  }
+ });
+ root.dataset.marketRank='market-cap';
+ root.setAttribute('aria-label','چهار مورد از ده ارز برتر بر اساس ارزش بازار؛ به‌روزرسانی '+new Date(authTopMarketFetchedAt).toLocaleTimeString('fa-IR'));
+}
 async function refreshAuthMiniChart(){if(authMiniBusy||!supabaseClient||authView.classList.contains('hidden'))return;authMiniBusy=true;try{const rows=await fetchBinanceKlines('BTCUSDT','5m',36);const candles=rows.map(candleFromKline).filter(c=>[c.time,c.open,c.high,c.low,c.close].every(Number.isFinite)&&c.high>=c.low&&c.open>0&&c.close>0);if(!candles.length)throw new Error('داده کندلی معتبر دریافت نشد');renderAuthMiniChart(candles)}catch(error){renderAuthMiniChart([]);const price=$('authMiniPrice');if(price&&price.textContent==='در حال دریافت قیمت…')price.textContent='قیمت موقتاً در دسترس نیست';console.warn('DigiArz login market preview:',error)}finally{authMiniBusy=false}}
-function initAuthMarketPreview(){if(authMiniRefreshTimer||!$('authMiniChart'))return;renderAuthCoinTrack();renderAuthMiniChart([]);const run=()=>{if(!document.hidden&&!authView.classList.contains('hidden')){refreshAuthMiniChart();refreshAuthCoinPrices()}};run();authMiniRefreshTimer=setInterval(run,60000);authCoinRotationTimer=setInterval(()=>{if(document.hidden||authView.classList.contains('hidden'))return;authCoinOffset=(authCoinOffset+1)%authMiniSymbols.length;renderAuthCoinTrack();refreshAuthCoinPrices()},4500)}
+function initAuthMarketPreview(){if(authMiniRefreshTimer||!$('authMiniChart'))return;renderAuthCoinTrack();renderAuthMiniChart([]);const run=()=>{if(!document.hidden&&!authView.classList.contains('hidden')){refreshAuthMiniChart();refreshAuthCoinPrices();refreshAuthTopMarketAssets()}};run();authMiniRefreshTimer=setInterval(run,60000);authCoinRotationTimer=setInterval(()=>{if(document.hidden||authView.classList.contains('hidden'))return;authCoinOffset=(authCoinOffset+1)%authMiniSymbols.length;authTopMarketOffset=(authTopMarketOffset+1)%10;if(authTopMarketAssets.length===10)renderAuthTopMarketRows();renderAuthCoinTrack();refreshAuthCoinPrices()},4500)}
 
 function candleFromKline(k){return {time:Math.floor(Number(k[0])/1000),open:Number(k[1]),high:Number(k[2]),low:Number(k[3]),close:Number(k[4]),volume:Number(k[5]||0),quoteVolume:Number(k[7]||0)}}
 function calculateRsi(values,period=14){if(values.length<=period)return null;let gain=0,loss=0;for(let i=1;i<=period;i++){const d=values[i]-values[i-1];if(d>0)gain+=d;else loss-=d}let avgGain=gain/period,avgLoss=loss/period;for(let i=period+1;i<values.length;i++){const d=values[i]-values[i-1];avgGain=(avgGain*(period-1)+Math.max(d,0))/period;avgLoss=(avgLoss*(period-1)+Math.max(-d,0))/period}if(avgLoss===0)return avgGain===0?50:100;return 100-(100/(1+avgGain/avgLoss))}
