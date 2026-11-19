@@ -291,3 +291,50 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Android APK workflow run 44486985383 was automatically triggered by the main push. Capacitor install, web build, Android project generation and sync completed successfully; Gradle assembleDebug is still running. Artifact not yet uploaded/available.
 - No Supabase deploy, schema migration, DB or financial-data change was performed.
 - Next: monitor both runs; when APK run succeeds, retrieve artifact and verify BUILD-INFO.txt commit matches 0ee8c9dbeb0c8229b2181acc2e9cb52544e6868b, then provide verified APK download.
+
+
+## 2026-11-19 — Auth 504 / pg_cron scheduling mitigation and login UI PR
+- User installed the APK built from main commit 0ee8c9dbeb0c8229b2181acc2e9cb52544e6868b (Android workflow run 44486985383, artifact 14510144088) and reported login fails with HTTP 504 after a long wait.
+- Auth log at 2026-11-19 08:38:15 UTC: user lookup timed out after ~35.5 seconds with error finding user: timeout: context canceled. Do not ask the user to reinstall the APK or change their password as a first response.
+- PostgreSQL logs around 09:12–09:17 UTC: refresh_market_prices() took ~100.2s; refresh_market_fx_rate() took ~17.6s; Iran exchange sync, Bit24 sync and automatic verified-pair activation hit statement timeouts. Several cron jobs, including financial workers, also logged startup timeouts. This is consistent with database/connection pressure but does not prove cron alone is the root cause.
+- User explicitly approved rescheduling background price/asset-sync jobs while leaving order engines, wallets, trades and balances untouched.
+- Applied and read-back verified these schedule-only changes in Production project gfoaubfilhttnwjykaox:
+  - job 4 refresh-crypto-assets: 6-59/10 * * * *
+  - job 5 refresh-crypto-assets-toman: 7-59/10 * * * *
+  - job 11 digiarz-crypto-assets-stale-request-recovery: 3-59/5 * * * *
+  - job 14 digiarz-iran-exchange-process: 1-59/10 * * * *
+  - job 16 digiarz-bit24-process: 2-59/10 * * * *
+  - job 18 digiarz-auto-activate-verified-exchange-pairs: 9-59/10 * * * *
+- Preserved the core FX refresh job 2 and market-price refresh job 3 at every minute. Preserved financial workers unchanged and active: job 8 Limit, job 9 conditional/TP-SL, job 12 Stop-Limit. Request jobs 13/15 and overflow-price job 17 were also unchanged. No job was disabled.
+- No cron command/function body, schema, migration, wallet, balance, order, trade or financial record was modified.
+- The schedules were successfully read back and all listed jobs remained active. A later read of cron.job_run_details timed out, so reduced failure rate and Auth recovery are not yet verified.
+- Opened draft PR #17: https://github.com/shahram-adim/DigiArz/pull/17. It adds a scoped premium white/royal-blue/gold login-card design, mobile layout refinements and regression coverage; no Auth logic or backend code changed. Exact-decimal CI run 44496195383 completed successfully. PR remains unmerged; no Pages deployment or APK was created from this UI branch.
+- Next: once DB access is stable, verify recent cron run outcomes and test Auth; request separate user approval before merging PR #17 and building/releasing the next APK.
+
+- Follow-up logs at 09:30–09:31 UTC after the schedule adjustment still show startup timeouts for core FX/market-price jobs 2/3 and financial workers 8/9/12; request jobs 13/15 also timed out. A management pg_stat_statements query hit statement_timeout. The scheduling mitigation is verified as applied, but has not resolved the underlying DB availability issue; do not report Auth as recovered.
+
+
+## Verified premium login APK — 2026-11-19
+- PR #17 was explicitly approved by the user and squash-merged to `main`: `685e1eef2b530e0c565a09a8cfc0962a4a6a01fe`.
+- Android workflow run `44498554161` succeeded and uploaded artifact `DigiArz-Android-debug-APK` (artifact ID `14515334940`).
+- The APK was downloaded and extracted. Its Android package file type was verified and its SHA-256 matched BUILD-INFO: `79957474d406b6d8a0e148afe6472a44e30d3718faa31e251231fdee3182a539`.
+- BUILD-INFO identifies main commit `685e1eef2b530e0c565a09a8cfc0962a4a6a01fe`, ref `refs/heads/main`, workflow run `44498554161`, and build time `2026-11-19T09:41:34Z`.
+- GitHub Pages deployment for the same commit succeeded (run `44498553540`); exact-decimal workflow succeeded (run `44498554204`).
+- This is a debug APK, not a Play Store release-signed package.
+- The Auth HTTP 504 / PostgreSQL responsiveness incident remains unresolved/unverified. The UI-only merge and APK build do not establish backend recovery. Do not ask the user to repeatedly retry login.
+- PR #18 remains open and unmerged. These documentation updates are on `docs/cron-auth-incident-2026-11-19` only; no merge to `main`, Supabase deploy, database mutation, or financial-data change was made.
+
+### Next
+Wait for the user's installation/UI feedback. Investigate Auth recovery only with minimal read-only checks after DB access is stable. PR #18 merge requires separate explicit user approval.
+
+
+## 2026-11-19 — Latest Auth/DB incident diagnosis (09:54 UTC)
+- Supabase project API reports `ACTIVE_HEALTHY`, but this is not proof that PostgreSQL connections are responsive.
+- Auth gateway logs: latest recorded real password POST at 08:38:15 UTC returned 504; a prior POST at 08:27:25 UTC returned 200. At 09:54:14 UTC an OPTIONS preflight returned 200. The failure is intermittent, not evidence of a wrong password.
+- PostgreSQL logs from 09:47–09:53 UTC show repeated pg_cron startup timeouts across jobs 2/3/8/9/12/13/14/18, SSL connection resets, and a statement timeout on a pg_stat_statements management query.
+- `refresh_market_prices()` logged DNS/TLS timeouts against Gate.io, KuCoin and CoinGecko, around 19–22 seconds per logged request. This is consistent with connection/resource pressure and external egress latency but does not prove one single root cause.
+- A read-only SQL query also failed with `Connection terminated due to connection timeout`; this is broader than Android UI or the Auth endpoint.
+- Supabase health advisor returned no lints; that does not certify runtime availability. Public Supabase status page reported all systems operational and no Nov 19 incident at check time. Official guidance says this SQL connection-timeout symptom commonly occurs when the database is overloaded: https://supabase.com/kb/troubleshooting/failed-to-run-sql-query-connection-terminated-due-to-connection-timeout
+- No new Production mutation was made. In particular, jobs 2/3 and financial workers 8/9/12 remain untouched; no database restart or compute resize was attempted. Those actions may disrupt service or incur cost and require specific approval.
+- Next: inspect Supabase Database Reports for CPU/RAM/Swap/I/O and connection saturation correlated to 09:47–09:53 UTC. If the compute ceiling is confirmed, present the exact cost before requesting approval to resize. Consider restart only if supported by evidence and with prior coordination.
+- PR #18 remains the documentation-only branch; do not merge without explicit user approval.
