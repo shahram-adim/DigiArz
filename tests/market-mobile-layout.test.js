@@ -40,3 +40,8 @@ test('failed coin logos render a deliberate branded fallback instead of broken-i
   assert.ok(style.includes('.coin-identity .coin-icon.coin-logo-fallback{display:grid!important;place-items:center'));
   assert.ok(style.includes('color:#f3ca70!important'));
 });
+
+test('English DigiArz wordmark remains left-to-right inside the RTL header', () => {
+  assert.ok(html.includes('<div class="brand"><bdi dir="ltr">Digi<span>Arz</span></bdi><span class="tag">DEMO</span></div>'));
+  assert.ok(style.includes('.brand>bdi{direction:ltr;unicode-bidi:isolate'));
+});
