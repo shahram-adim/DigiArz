@@ -341,3 +341,18 @@ test('login screen embeds a live market phone preview with rotating crypto ticke
   assert.match(html, /body:not\(\.light-theme\) #authView\.auth/);
   assert.match(html, /body:not\(\.light-theme\) #authView \.auth-form/);
 });
+
+test('login screen has a complete branded header, market feature strip and a working theme switch', () => {
+  assert.match(html, /class="auth-top-banner"/);
+  assert.match(html, /class="auth-quick-stats"/);
+  assert.match(html, /id="authThemeToggle"/);
+  assert.match(html, /id="authThemeLabel"/);
+  assert.match(html, /\$\('authThemeToggle'\)\?\.addEventListener\('click',toggleTheme\)/);
+  assert.match(html, /const authThemeButton=\$\('authThemeToggle'\)/);
+  assert.match(html, /body\.auth-page-active \.auth-top-banner/);
+  assert.match(html, /@media\(max-width:760px\)[\s\S]*?#authView\.auth\{display:flex;flex-direction:column/);
+  assert.match(html, /body:not\(\.light-theme\) #authView \.auth-form\{background:linear-gradient\(155deg,#172b45,#122238\)/);
+  for (const id of ['fullName','email','password','loginBtn','signupBtn','forgotBtn','authMsg','recoveryPanel','newPassword','confirmPassword','saveNewPassword']) {
+    assert.match(html, new RegExp('id="' + id + '"'), 'existing auth control remains: ' + id);
+  }
+});
