@@ -370,3 +370,11 @@ test('daily advertisement module parses and remains a non-clickable image/text d
   assert.match(source, /86400000/);
   assert.doesNotMatch(source, /createElement\(['"]a['"]\)|\.href\s*=/, 'daily ads must not render clickable links');
 });
+
+test('login daily advertisement is placed below the authentication card', () => {
+  const authStart = html.indexOf('<section id="authView"');
+  const loginAd = html.indexOf('<section id="loginDailyAd"');
+  const appView = html.indexOf('<main id="appView"');
+  assert.ok(authStart >= 0 && loginAd > authStart && appView > loginAd);
+  assert.match(html, /<\/section>\s*<section id="loginDailyAd" class="daily-ad-card hidden"/);
+});
