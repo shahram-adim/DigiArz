@@ -163,3 +163,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - PR #11 remains Draft. No Production DDL/index/function/cron/migration/data/order/wallet/balance changes. No merge and no supabase db push.
 - Design/results details recorded in docs/IRAN_EXCHANGE_MATCHER_INCREMENTAL_DESIGN_2026-11-17.md on PR #11 branch.
 - Immediate next step: verify exact-decimal run 44184100898 (and current PR head/checks), then inspect remaining uncovered queue invariants only if they are not already represented in fixtures. Keep PR #11 Draft pending broader production-schema/concurrency/query-plan/migration reconciliation gates.
+
+## Market logos and 24h ranking consistency — 2026-11-19
+- Work branch: `fix/market-logo-and-ranking-consistency`, created from verified `main` HEAD `ad8d52bf49027b20756242259b1de867c04d5ab9`.
+- Root cause confirmed from live Supabase Edge Function source: active `app-assets` v1 used only the SpotHQ cryptocurrency icon set; missing symbol files returned HTTP 404.
+- Branch changes: `index.html` now resolves curated HTTPS `image_url` metadata when available, then tries the existing `app-assets` route and a CoinCap fallback before the text fallback. The repository now contains `supabase/functions/app-assets/index.ts` with a two-provider logo fetcher; this source has **not** been deployed to Supabase.
+- Branch changes: one freshness-aware `getMarketChange24h` helper and deterministic `sortMarketRowsByChange` comparator now drive the market list, top gainers, top losers and volatility summary. Gainers sort descending; losers ascending; stale stored percentages are excluded; tie order is deterministic by symbol; summary gain/loss selects positive/negative values only.
+- Added regression tests to `tests/index-syntax.test.js` for helper ordering, stale data, shared view ranking and logo fallbacks.
+- Manual V8 check passed: all three inline scripts parsed; test sample returned descending `BTC, DOGE, ADA, SOL, ETH`, ascending `ETH, SOL, ADA, DOGE, BTC`; stale fallback was rejected and fresh fallback accepted.
+- No Supabase Production deployment, schema/migration/cron/RPC changes, or financial data changes were made.
+- Pending: open Draft PR, verify GitHub Actions `node --test tests/*.test.js` and the rest of the exact-decimal workflow, fix failures, then separately decide whether to deploy the Edge Function. Android visual QA and a live smoke test for previously missing symbols remain outstanding.
