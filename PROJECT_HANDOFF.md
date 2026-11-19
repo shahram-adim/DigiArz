@@ -173,3 +173,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Manual V8 check passed: all three inline scripts parsed; test sample returned descending `BTC, DOGE, ADA, SOL, ETH`, ascending `ETH, SOL, ADA, DOGE, BTC`; stale fallback was rejected and fresh fallback accepted.
 - No Supabase Production deployment, schema/migration/cron/RPC changes, or financial data changes were made.
 - Pending: open Draft PR, verify GitHub Actions `node --test tests/*.test.js` and the rest of the exact-decimal workflow, fix failures, then separately decide whether to deploy the Edge Function. Android visual QA and a live smoke test for previously missing symbols remain outstanding.
+
+## PR #13 opened — market logos and 24h ranking — 2026-11-19
+- Draft PR: https://github.com/shahram-adim/DigiArz/pull/13
+- Base: `main` at `ad8d52bf49027b20756242259b1de867c04d5ab9`; head branch: `fix/market-logo-and-ranking-consistency`.
+- Latest code/test head at this checkpoint: `693a598a0d51076e6c1981728725413074e57a6a`.
+- Follow-up audit found the dashboard market preview had a second independent percentage parser and comparator. It has now been aligned to `getMarketChange24h` / `compareMarketChange`, and regression assertions cover dashboard gainers/losers too.
+- GitHub Actions run `44475074226` on the latest code head: Node test step `node --test tests/*.test.js` completed successfully. PostgreSQL integration steps are still running; do not claim the whole workflow passed yet.
+- PR remains Draft, not merged. Production Supabase `app-assets` remains at its previously inspected v1; new two-provider Edge Function source exists only in the GitHub branch and has not been deployed.
+- Next action: verify the remaining exact-decimal workflow steps and PR checks, then decide separately whether the Edge Function is ready for deployment. No user financial data, DB schema, migrations, cron, RPC, wallets, balances, orders or trades were changed.
