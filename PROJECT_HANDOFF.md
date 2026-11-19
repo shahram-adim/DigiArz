@@ -243,3 +243,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - All 43 job steps completed successfully: browser/market tests, PostgreSQL arithmetic and migration rehearsal tests, two-session Limit worker/cancellation races, TP-SL conditional execution/cancellation races, Stop-Limit child execution/cancellation races, and isolated lifecycle integrations.
 - The prior syntax regression was fixed before this run. The new CI run is green.
 - CI does not prove visual behavior on the Android device or successful live upstream image fetches. PR #14 remains unmerged; no Production deployment or database changes were made.
+
+## Logo recovery follow-up — 2026-11-19
+- Live Android function logs after the prior release still showed HTTP 404 for fallback requests for symbols including ZRO, ICNT, ZKC, ASTER and MANTA.
+- Read-only Production SQL confirmed the corresponding `crypto_assets.image_url` values exist on CoinGecko image hosts. The browser's direct image attempt was not being retried through the server proxy with that curated URL.
+- Work branch: `fix/market-logo-proxy-fallback`, created from current `main`.
+- The client now carries the curated image URL in the fallback request; market-list and dashboard-preview renderers pass each row's exact image URL. The `app-assets` source accepts only HTTPS URLs on `coin-images.coingecko.com` or `assets.coingecko.com`, validates the final redirect host and image content type, then falls back to the existing SpotHQ/CoinCap providers.
+- Regression assertions were added for URL propagation, market/dashboard rendering and server host allowlisting.
+- No merge, Pages publication or Supabase Production Edge Function deployment has been performed. CI and Android visual QA remain required.
+- Next: run the project test workflow, inspect the PR, then request separate approval before merge or Production deployment.

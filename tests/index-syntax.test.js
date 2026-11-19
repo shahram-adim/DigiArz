@@ -221,13 +221,20 @@ test('gainer, loser, volatility and market-list views share the same ranking hel
   assert.ok(dashboard.includes("compareMarketChange(a.item,b.item,'asc')"), 'dashboard losers use the shared ascending comparator');
 });
 
-test('coin logos try curated metadata, the primary icon set and an independent fallback', () => {
+test('coin logos proxy failed curated CoinGecko images before independent symbol fallbacks', () => {
   assert.match(html, /function getCoinLogoImageUrl\(symbol\)/);
   assert.match(html, /data-custom-image-url=/);
+  assert.match(html, /data-image-url=/);
+  assert.match(html, /encodeURIComponent\(imageUrl\)/);
+  assert.match(html, /coinLogo\(base,'coin-icon',item\.image_url\)/);
+  assert.match(html, /coinLogo\(base,'da-market-logo-inner',row\.item\.image_url\)/);
   assert.match(html, /assets\.coincap\.io\/assets\/icons/);
   const edge = fs.readFileSync('supabase/functions/app-assets/index.ts', 'utf8');
   assert.match(edge, /spothq\/cryptocurrency-icons/);
   assert.match(edge, /assets\.coincap\.io\/assets\/icons/);
+  assert.match(edge, /coin-images\.coingecko\.com/);
+  assert.match(edge, /assets\.coingecko\.com/);
+  assert.match(edge, /contentType\.toLowerCase\(\)\.startsWith\("image\/"\)/);
   assert.match(edge, /fetchFirstAvailable/);
 });
 
