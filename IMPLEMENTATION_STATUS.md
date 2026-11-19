@@ -899,3 +899,14 @@
 - [!] فایل APK از نوع Debug است؛ هنوز نصب و اجرای واقعی روی دستگاه Android کاربر و بررسی بصری کره، موبایل، سکه‌ها و فرم ورود تأیید نشده است.
 - [x] هیچ تغییر تازه‌ای در Supabase Production انجام نشد.
 - [ ] گام بعد: کاربر artifact را از صفحهٔ اجرای workflow دانلود، ZIP را استخراج و `app-debug.apk` را نصب کند؛ سپس نتیجهٔ نصب و تصویر صفحه ورود را برای بررسی ظاهری گزارش دهد.
+
+
+## انتشار لینک مستقیم APK — ۱۹ نوامبر ۲۰۲۶
+- [x] workflow اندروید Run #67 با شناسهٔ `44596189517` روی commit `0b640b8538283ff3bf899d52257a5b4655a7b6a5` با نتیجهٔ نهایی `success` تکمیل شد.
+- [x] تمام مراحل ساخت موفق شدند: Gradle build، ثبت provenance، بارگذاری artifact و انتشار مستقیم APK در GitHub Releases.
+- [x] Release با تگ `android-debug-67` و عنوان `DigiArz Android Debug APK (Build 67)` ایجاد شد: https://github.com/shahram-adim/DigiArz/releases/tag/android-debug-67
+- [x] فایل مستقیم `app-debug.apk` با حجم 3,905,016 بایت و نوع `application/vnd.android.package-archive` منتشر شد.
+- [x] لینک مستقیم تأییدشده: https://github.com/shahram-adim/DigiArz/releases/download/android-debug-67/app-debug.apk
+- [!] این APK از نوع Debug/test است و هنوز نصب و اجرای واقعی آن روی گوشی Android کاربر تأیید نشده است.
+- [x] هیچ تغییری در Supabase Production انجام نشد.
+- [ ] گام بعد: نصب APK روی Android و بررسی بازشدن برنامه، ورود و نمایش صحیح صحنهٔ صفحه ورود؛ هر ایراد مشاهده‌شده جداگانه ثبت شود.
