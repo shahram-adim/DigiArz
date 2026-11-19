@@ -142,7 +142,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   background:linear-gradient(135deg,rgba(233,189,99,.2),rgba(233,189,99,.08));
   color:var(--da-accent-strong);box-shadow:inset 0 0 0 1px rgba(233,189,99,.08);
 }
-#appView .card{
+#appView .card:not(.digiarz-v2-dashboard){
   margin:0 0 18px;padding:clamp(16px,2.2vw,26px);
   border:1px solid var(--line);border-radius:var(--da-radius);
   background:linear-gradient(145deg,color-mix(in srgb,var(--panel) 96%,transparent),var(--panel));
