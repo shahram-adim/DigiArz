@@ -261,3 +261,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - No database migrations, schema, RPCs, cron jobs, wallets, balances, orders, trades, or financial data were changed.
 - A direct live HTTP image smoke test and Android visual QA have not yet been completed. Do not claim the logos are visually fixed until the user refreshes the app and confirms the previously missing symbols display.
 - Next: ask the user to fully refresh DigiArz and check ZRO, ICNT, ZKC, ASTER, and MANTA; capture a screenshot and symbol list if any remain broken.
+
+
+## Android client diagnosis after app-assets v3 — 2026-11-19
+- Supabase logs after v3 deployment show the Android client still making symbol-only logo fallback requests. At 08:00 UTC, 112 requests were recorded: 108 HTTP 404 and 4 HTTP 200; sample URLs contain only `asset=logo&symbol=...`, with no curated `imageUrl` query parameter.
+- This establishes that the Edge Function is active but the client observed in those logs had not yet started forwarding the catalog image URL. Do not repeat the Edge Function deployment as the presumed fix.
+- GitHub Pages build and deploy for merge commit `1e5d7ee5bcc6571003bfebf6eeca57c7973d2269` succeeded (run `44483387814`).
+- A new Android debug APK was built from that exact main commit and uploaded successfully (run `44483387973`, artifact `14509018848`). BUILD-INFO confirms commit `1e5d7ee5bcc6571003bfebf6eeca57c7973d2269`; APK SHA-256 `8d2481a4eb1582f7806aa65173ae8ecb463c466ea5fab57fc417fc550cb7c686`.
+- Exact-decimal workflow run `44483387900` completed all 43 steps successfully.
+- User has not yet confirmed installing/running the new APK. Next: install this build, then inspect fresh app-assets logs for imageUrl propagation and successful image responses; visual confirmation still required.
