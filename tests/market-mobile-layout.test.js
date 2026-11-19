@@ -57,3 +57,9 @@ test('dashboard market preview has readable colors in light theme', () => {
   assert.match(html, /body\.light-theme #dashboardMarketPreview \.da-market-price\{color:#26364b!important\}/);
   assert.match(html, /body\.light-theme #dashboardMarketPreview \.da-market-toman\{color:#13835f!important\}/);
 });
+
+test('no JavaScript or markup is appended after the closing HTML document', () => {
+  const closingTag = html.toLowerCase().lastIndexOf('</html>');
+  assert.notEqual(closingTag, -1, 'document must contain a closing html tag');
+  assert.match(html.slice(closingTag + '</html>'.length), /^\\s*$/, 'nothing may render after the document and appear as raw source text');
+});
