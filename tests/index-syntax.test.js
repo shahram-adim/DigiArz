@@ -342,14 +342,17 @@ test('login screen embeds a live market phone preview with rotating crypto ticke
   assert.match(html, /body:not\(\.light-theme\) #authView \.auth-form/);
 });
 
-test('login screen has a complete branded header, market feature strip and a working theme switch', () => {
-  assert.match(html, /class="auth-top-banner"/);
-  assert.match(html, /class="auth-quick-stats"/);
+test('reference login has its branded market header, live coin list and working theme switch', () => {
+  assert.match(html, /class="ref-brandbar"/);
+  assert.match(html, /class="ref-live-pill"/);
+  assert.match(html, /class="ref-coin-list"/);
+  for (const symbol of ['BTCUSDT','ETHUSDT','USDTUSDT','SOLUSDT']) {
+    assert.match(html, new RegExp('data-ref-market="' + symbol + '"'));
+  }
   assert.match(html, /id="authThemeToggle"/);
   assert.match(html, /id="authThemeLabel"/);
   assert.match(html, /\$\('authThemeToggle'\)\?\.addEventListener\('click',cycleTheme\)/);
   assert.match(html, /const authThemeButton=\$\('authThemeToggle'\)/);
-  assert.match(html, /body\.auth-page-active \.auth-top-banner/);
   assert.match(html, /@media\(max-width:760px\)[\s\S]*?#authView\.auth\{display:flex;flex-direction:column/);
   assert.match(html, /body:not\(\.light-theme\) #authView \.auth-form\{background:linear-gradient\(155deg,#172b45,#122238\)/);
   for (const id of ['fullName','email','password','loginBtn','signupBtn','forgotBtn','authMsg','recoveryPanel','newPassword','confirmPassword','saveNewPassword']) {
@@ -385,13 +388,15 @@ test('three visual themes are selectable, persisted, and backward-compatible', (
 });
 
 
-test('login hero separates a detailed 3D globe from a premium handset and uses real coin logos', () => {
-  assert.match(html, /class="auth-scene"/);
-  assert.match(html, /class="auth-earth"/);
-  assert.match(html, /id="authEarthOcean"/);
-  assert.match(html, /class="auth-phone-device"/);
-  assert.match(html, /class="auth-floating-coin auth-floating-coin-btc"/);
-  assert.match(html, /assets\.coincap\.io\/assets\/icons\/(?:btc|eth|sol|bnb)@2x\.png/);
+test('reference login hero keeps the globe, handset and floating branded crypto coins together', () => {
+  assert.match(html, /class="auth-scene ref-scene"/);
+  assert.match(html, /class="auth-earth ref-earth"/);
+  assert.match(html, /id="refGlobeClip"/);
+  assert.match(html, /class="auth-phone-device ref-phone"/);
+  assert.match(html, /class="auth-floating-coin auth-floating-coin-btc ref-gold-coin"/);
+  assert.match(html, /class="auth-floating-coin auth-floating-coin-eth ref-gold-coin"/);
+  assert.match(html, /class="ref-usdt-coin"/);
+  assert.match(html, /assets\.coincap\.io\/assets\/icons\/(?:btc|eth|sol|usdt)@2x\.png/);
   assert.match(html, /authCoinLogoUrl\(coin\.label\)/);
   assert.match(html, /auth-coin-chip img/);
 });
