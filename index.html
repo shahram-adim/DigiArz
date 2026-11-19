@@ -1984,7 +1984,7 @@ body.light-theme #tab-markets .market-board-v34 .coin .price-toman{color:#805a0a
 </aside>
 
 <section id="authView" class="card auth login-screen">
- <header class="auth-top-banner login-brandbar" aria-label="هویت و وضعیت بازار DigiArz">
+ <header id="loginBrandbar" class="auth-top-banner" aria-label="هویت و وضعیت بازار DigiArz">
   <div class="login-brand-lockup">
    <span class="login-brand-symbol" aria-hidden="true">DA</span>
    <span class="login-brand-word">Digi<span>Arz</span><small>صرافی هوشمند رمزارزها</small></span>
@@ -2044,7 +2044,7 @@ body.light-theme #tab-markets .market-board-v34 .coin .price-toman{color:#805a0a
     <div class="login-orbit-coin coin-ethereum">◆</div>
     <div class="login-orbit-coin coin-tether">₮</div>
     <div class="login-orbit-coin coin-solana">S</div>
-    <div class="auth-phone-preview login-phone">
+    <div id="loginPhone" class="auth-phone-preview">
      <div class="auth-phone-top"><span class="auth-phone-camera"></span><span class="auth-phone-live"><i></i> بازار زنده</span><span class="auth-phone-pair">BTC / USDT</span></div>
      <div class="auth-phone-price"><strong id="authMiniPrice">در حال دریافت قیمت…</strong><span id="authMiniChange">—</span></div>
      <div id="authMiniChart" role="img" aria-label="نمودار کندل‌استیک زنده بیت‌کوین"></div>
@@ -3793,7 +3793,7 @@ body:not(.light-theme) .daily-ad-card{background:linear-gradient(110deg,#14243b,
 #authView.login-screen{display:flex!important;flex-direction:column!important;gap:0!important;width:100%;max-width:1160px;min-height:0;margin:10px auto 16px;padding:0!important;overflow:hidden;border:1px solid rgba(221,184,95,.34);border-radius:27px;background:#071426;box-shadow:0 26px 76px rgba(0,0,0,.24)}
 
 #authView.login-screen.hidden{display:none!important}
-#authView .login-brandbar{position:relative;top:auto;z-index:1;max-width:none;display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0;padding:16px clamp(17px,3vw,34px);border:0;border-bottom:1px solid rgba(232,194,105,.24);border-radius:0;background:linear-gradient(100deg,#071326,#0c2040 62%,#101d35);color:#fff;box-shadow:none}
+#authView #loginBrandbar{position:relative;top:auto;z-index:1;max-width:none;display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0;padding:16px clamp(17px,3vw,34px);border:0;border-bottom:1px solid rgba(232,194,105,.24);border-radius:0;background:linear-gradient(100deg,#071326,#0c2040 62%,#101d35);color:#fff;box-shadow:none}
 #authView .login-brand-lockup{display:flex;align-items:center;gap:12px;min-width:0}
 #authView .login-brand-symbol{display:grid;place-items:center;width:52px;height:52px;flex:0 0 52px;border:1px solid rgba(244,205,117,.7);border-radius:16px;background:linear-gradient(145deg,#f8df91,#b77a1d 58%,#f7d879);color:#101a2b;font-size:22px;font-weight:1000;box-shadow:0 0 24px rgba(237,187,70,.24)}
 #authView .login-brand-word{display:grid;gap:1px;color:#f5d47d;font-size:clamp(23px,3vw,31px);font-weight:950;letter-spacing:.2px;line-height:1.1}
@@ -3839,16 +3839,16 @@ body:not(.light-theme) .daily-ad-card{background:linear-gradient(110deg,#14243b,
 #authView .coin-ethereum{top:15%;right:4%;animation-delay:-1.2s}
 #authView .coin-tether{bottom:18%;left:12%;animation-delay:-2.1s}
 #authView .coin-solana{bottom:12%;right:5%;animation-delay:-.7s}
-#authView .login-phone{position:absolute;z-index:3;top:9%;left:50%;width:clamp(148px,19vw,205px);min-height:0;margin:0;padding:13px 11px 12px;border:2px solid rgba(244,211,139,.88);border-radius:27px;background:linear-gradient(155deg,#10294b,#061326 72%);box-shadow:0 22px 48px rgba(0,0,0,.52),0 0 28px rgba(218,171,76,.2);transform:translateX(-50%) rotate(-8deg)}
-#authView .login-phone .auth-phone-top{display:flex;align-items:center;justify-content:space-between;gap:5px;font-size:8px;color:#c7d6e8}
-#authView .login-phone .auth-phone-camera{width:27px;height:5px;border-radius:8px;background:#020a16}
-#authView .login-phone .auth-phone-live{font-size:8px;color:#a8f1d0}
-#authView .login-phone .auth-phone-live i{display:inline-block;width:5px;height:5px;border-radius:50%;background:#20d28c}
-#authView .login-phone .auth-phone-pair{font-size:7px;color:#b8c9dc}
-#authView .login-phone .auth-phone-price{display:flex;justify-content:space-between;gap:4px;margin:14px 0 7px;color:#fff;font-size:8px}
-#authView .login-phone .auth-phone-price strong{font-size:9px}
+#authView #loginPhone{position:absolute;z-index:3;top:9%;left:50%;width:clamp(148px,19vw,205px);min-height:0;margin:0;padding:13px 11px 12px;border:2px solid rgba(244,211,139,.88);border-radius:27px;background:linear-gradient(155deg,#10294b,#061326 72%);box-shadow:0 22px 48px rgba(0,0,0,.52),0 0 28px rgba(218,171,76,.2);transform:translateX(-50%) rotate(-8deg)}
+#authView #loginPhone .auth-phone-top{display:flex;align-items:center;justify-content:space-between;gap:5px;font-size:8px;color:#c7d6e8}
+#authView #loginPhone .auth-phone-camera{width:27px;height:5px;border-radius:8px;background:#020a16}
+#authView #loginPhone .auth-phone-live{font-size:8px;color:#a8f1d0}
+#authView #loginPhone .auth-phone-live i{display:inline-block;width:5px;height:5px;border-radius:50%;background:#20d28c}
+#authView #loginPhone .auth-phone-pair{font-size:7px;color:#b8c9dc}
+#authView #loginPhone .auth-phone-price{display:flex;justify-content:space-between;gap:4px;margin:14px 0 7px;color:#fff;font-size:8px}
+#authView #loginPhone .auth-phone-price strong{font-size:9px}
 #authView #authMiniChart{height:126px;width:100%;overflow:hidden;border-radius:8px;background:#0b1d35}
-#authView .login-phone .auth-phone-foot{display:flex;justify-content:space-between;gap:5px;margin-top:8px;color:#91a9c7;font-size:7px}
+#authView #loginPhone .auth-phone-foot{display:flex;justify-content:space-between;gap:5px;margin-top:8px;color:#91a9c7;font-size:7px}
 #authView .login-card{position:relative;z-index:2;width:min(760px,calc(100% - 34px));margin:0 auto 24px;padding:clamp(20px,3vw,32px);border:1px solid rgba(235,195,101,.68);border-radius:24px;background:linear-gradient(145deg,rgba(9,27,52,.97),rgba(7,19,37,.96));box-shadow:0 18px 48px rgba(0,0,0,.25),0 0 28px rgba(225,178,75,.08);color:#f7f9fc}
 #authView .login-form-heading{display:flex;align-items:center;justify-content:center;gap:12px;margin:0 0 18px;text-align:right}
 #authView .login-form-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:linear-gradient(145deg,#ffe7a7,#c28a2d);color:#17243a;font-size:25px}
@@ -3877,7 +3877,7 @@ body:not(.light-theme) .daily-ad-card{background:linear-gradient(110deg,#14243b,
 .login-footer{display:none;align-items:center;justify-content:center;gap:16px;margin:10px auto 26px;color:#d5b967;font-size:clamp(11px,1.5vw,15px);text-align:center}
 .login-footer span{width:min(22vw,140px);height:1px;background:linear-gradient(90deg,transparent,#d5b967)}
 body.auth-page-active .login-footer{display:flex}\nbody.light-theme #authView.login-screen{border-color:#e1c77f;background:#f6f8fc;box-shadow:0 20px 60px rgba(35,63,101,.13)}
-body.light-theme #authView .login-brandbar{background:linear-gradient(100deg,#fff,#f5f8fd 62%,#fff8e8);border-color:#e9dfc5;color:#172b49}
+body.light-theme #authView #loginBrandbar{background:linear-gradient(100deg,#fff,#f5f8fd 62%,#fff8e8);border-color:#e9dfc5;color:#172b49}
 body.light-theme #authView .login-brand-word>span{color:#172b49}
 body.light-theme #authView .login-brand-word small{color:#687d98}
 body.light-theme #authView #authThemeToggle{background:rgba(255,255,255,.8);color:#75531b;border-color:#e2c57d}
@@ -3905,7 +3905,7 @@ body.light-theme #authView .auth-security{background:rgba(246,249,253,.7);border
 body.light-theme #authView #recoveryPanel{background:rgba(255,255,255,.75);border-color:#e1d1aa}
 body.light-theme #authView #recoveryPanel h2{color:#805c22}
 body.luxury-theme #authView.login-screen{border-color:rgba(116,203,215,.38);background:#071c2b}
-body.luxury-theme #authView .login-brandbar{background:linear-gradient(100deg,#071d2d,#0d3348 60%,#10283b);border-color:rgba(120,194,205,.25)}
+body.luxury-theme #authView #loginBrandbar{background:linear-gradient(100deg,#071d2d,#0d3348 60%,#10283b);border-color:rgba(120,194,205,.25)}
 body.luxury-theme #authView .login-brand-symbol{background:linear-gradient(145deg,#f5d995,#c9a05b,#f4e0a6)}
 body.luxury-theme #authView .login-hero{background:radial-gradient(ellipse at 70% 44%,rgba(35,163,182,.24),transparent 40%),linear-gradient(145deg,#082c40,#0a2032 58%,#071a2a)}
 body.luxury-theme #authView .login-hero .auth-headline span{color:#e8d08e}
@@ -3924,7 +3924,7 @@ body.luxury-theme #authView .auth-security{background:rgba(255,255,255,.035);bor
 @keyframes loginCoinBob{0%,100%{translate:0 0}50%{translate:0 -9px}}
 @media(max-width:760px){
  #authView.login-screen{margin:4px auto 12px;border-radius:19px}
- #authView .login-brandbar{padding:11px 12px;gap:8px}
+ #authView #loginBrandbar{padding:11px 12px;gap:8px}
  #authView .login-brand-symbol{width:39px;height:39px;flex-basis:39px;border-radius:12px;font-size:17px}
  #authView .login-brand-word{font-size:21px}
  #authView .login-brand-word small{font-size:8px}
@@ -3938,7 +3938,7 @@ body.luxury-theme #authView .auth-security{background:rgba(255,255,255,.035);bor
  #authView .login-market-layout{grid-template-columns:1fr;gap:12px}
  #authView .login-scene{grid-row:1;height:290px;max-width:520px;width:100%;margin:0 auto}
  #authView .login-globe-wrap{right:20%;width:min(68%,280px)}
- #authView .login-phone{top:8%;width:155px;left:50%}
+ #authView #loginPhone{top:8%;width:155px;left:50%}
  #authView #authMiniChart{height:112px}
  #authView .login-orbit{width:85%;height:52%}
  #authView .login-top-coins{grid-row:2;padding:11px}
@@ -3962,7 +3962,7 @@ body.luxury-theme #authView .auth-security{background:rgba(255,255,255,.035);bor
  #authView .login-live-pill{font-size:8px;padding:6px}
  #authView #authThemeToggle{gap:4px;padding:6px;font-size:8px}
  #authView .login-scene{height:255px}
- #authView .login-phone{width:143px}
+ #authView #loginPhone{width:143px}
 }
 @media(prefers-reduced-motion:reduce){
  #authView .login-earth-svg,#authView .login-globe-wrap,#authView .login-orbit,#authView .login-orbit-coin{animation:none!important}
