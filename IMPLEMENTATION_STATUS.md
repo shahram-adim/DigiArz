@@ -1594,3 +1594,12 @@
 - [x] اصلاح نهایی index.html در commit 65ff084947bab5a0b5f16c31c172b2f3de989c3b ثبت شد؛ این تغییر مسیر push مربوط به Android APK workflow را هم لمس کرده و باید build تازه را فعال کند.
 - [x] تست رگرسیون تکمیلی در commit 5acb49b0fd6e2ea274ce2fa66a2b18af06fca151 ثبت شد.
 - [ ] اجرای workflow و artifact APK تازه هنوز از ابزارهای موجود در این نشست قابل مشاهده/تأیید نشده‌اند؛ تا دریافت نتیجه، APK جدید را آمادهٔ دانلود اعلام نکن.
+
+
+## تکمیل جزئیات بازطراحی بازار موبایل — ۱۹ نوامبر ۲۰۲۶
+- [x] در ادامهٔ بازبینی تصویر، fallback لوگوهای ارز که در صورت نبود فایل تصویری فقط حرف نماد را نشان می‌داد، به نشان دایره‌ای یکپارچه با رنگ طلایی/سرمه‌ای تبدیل شد تا تصویر شکسته یا placeholder نامرتب دیده نشود.
+- [x] تست رگرسیون این fallback در tests/market-mobile-layout.test.js اضافه شد.
+- [x] commitهای تغییرات: CSS fallback با شناسه dd2c62e726048f90b9d5b6a64d5412238491cd6b؛ تست با شناسه 09af9f59e93c5965e309f93e9d98fc677364c84e.
+- [x] فایل index.html و تست از GitHub دوباره خوانده شدند؛ بررسی ایستا: stylesheetOnce=PASS, fiveGridParts=PASS, mobileWidth=PASS, overflow=PASS, navSix=PASS, logoFallback=PASS, lightDark=PASS. این بررسی فقط ساختار/قواعد CSS را تأیید می‌کند و جای اجرای workflow یا مشاهده روی گوشی را نمی‌گیرد.
+- [ ] اجرای GitHub Actions و ساخت APK جدید هنوز از endpointهای در دسترس این نشست قابل بازیابی/تأیید نیست؛ لینک APK جدید تا دریافت artifact معتبر ارائه نشود.
+- گام بعد: دریافت نتیجهٔ run و artifact APK از Actions، سپس نصب و بازبینی واقعی روی گوشی.
