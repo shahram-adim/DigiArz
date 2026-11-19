@@ -97,3 +97,15 @@ These schedules match the SQL body in the local `20261117130000_stagger_market_p
 7. Before any future deployment, rehearse the reconciled migration set against a disposable PostgreSQL 17 database and verify the final `refresh_market_prices()` definition and cron schedules.
 
 This report is an inventory and safety analysis only. It changes no database object, cron job, migration-history row, order, wallet, balance, or financial record.
+
+
+## تصحیح زمان‌بندی زندهٔ بازار و مغایرت منبع Migration — ۲۰ نوامبر ۲۰۲۶
+- [x] وضعیت زندهٔ `cron.job` دوباره فقط‌خواندنی خوانده شد. برنامهٔ فعلی:
+  - job 13: `*/10 * * * *` — `request_iran_exchange_asset_sync()`
+  - job 14: `1-59/10 * * * *` — `process_iran_exchange_asset_sync()`
+  - job 17: `5-59/10 * * * *` — `private.request_market_price_overflow()`
+- [!] فایل محلی `20261117130000_stagger_market_price_overflow_and_refresh_exchange_discovery.sql` در خط مربوط به job 14 هنوز `* * * * *` (هر دقیقه) را ثبت می‌کند؛ بنابراین ادعای قبلی این سند که زمان‌بندی زنده با بدنهٔ فایل محلی منطبق است، برای job 14 دیگر صحیح نیست. نسخهٔ ثبت‌شدهٔ Supabase برابر `20261116205451` است، درحالی‌که فایل محلی نسخهٔ `20261117130000` دارد؛ فایل canonical با نسخهٔ remote در مسیر migrations پیدا نشد.
+- [!] این یک اختلاف واقعی بین وضعیت زنده و منبع محلی است. منشأ تغییر schedule زنده به `1-59/10` از تاریخچهٔ قابل‌دسترسی GitHub اثبات نشد؛ ممکن است تغییر بعدی مستقیم یا از مسیر دیگری اعمال شده باشد، اما این صرفاً احتمال است.
+- [x] آمار اجرای ۲۴ ساعت اخیر نشان می‌دهد job 14 در مجموع 563 موفق و 136 ناموفق داشته (106 startup timeout و 30 statement timeout). این آمار شامل اجرای قبل از تغییر cadence نیز هست؛ بنابراین نباید از آن برای استنتاج cadence فعلی استفاده کرد. در شش ساعت اخیر 36 اجرا ثبت شده که با cadence فعلی 6 بار در ساعت سازگار است.
+- [!] هیچ‌یک از scheduleها تغییر داده نشدند و تاریخچهٔ migration نیز دست‌کاری نشد. تا بازیابی منبع canonical و تعیین cadence مورد انتظار، `supabase db push` همچنان ممنوع است.
+- [ ] اقدام بعدی: منبع معتبر تغییر job 14 به `1-59/10` را از deployment/audit record بازیابی کن؛ سپس نسخهٔ local و remote را با مقایسهٔ کامل SQL reconciliate و در PostgreSQL 17 دورریختنی replay کن. هیچ اصلاح Production بدون تأیید صریح کاربر انجام نشود.
