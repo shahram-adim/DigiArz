@@ -2143,8 +2143,16 @@ async function loadReviews(){
 async function submitReview(){const btn=$('submitReviewBtn'),msg=$('reviewMsg'),comment=$('reviewComment').value.trim(),rating=Number($('reviewRating').value);msg.classList.remove('hidden','err','ok');msg.textContent='';btn.disabled=true;try{if(comment.length<5||comment.length>1000)throw new Error('متن نظر باید بین ۵ تا ۱۰۰۰ نویسه باشد.');if(!Number.isInteger(rating)||rating<1||rating>5)throw new Error('امتیاز معتبر نیست.');const {data:{user},error:ue}=await supabaseClient.auth.getUser();if(ue)throw ue;if(!user)throw new Error('برای ثبت نظر ابتدا وارد حساب شوید.');const {error}=await supabaseClient.from('coin_reviews').insert({user_id:user.id,symbol:selectedSymbol,rating,comment});if(error)throw error;$('reviewComment').value='';msg.textContent='نظر شما با موفقیت ثبت شد.';msg.classList.add('ok');await loadReviews()}catch(e){msg.textContent=e.message||'ثبت نظر انجام نشد.';msg.classList.add('err')}finally{btn.disabled=false}}
 const cleanCoinSymbol=symbol=>String(symbol||'').replace(/USDT$/i,'').replace(/[^a-z0-9]/gi,'').toUpperCase();
 const logoUrl=symbol=>`https://gfoaubfilhttnwjykaox.supabase.co/functions/v1/app-assets?asset=logo&symbol=${encodeURIComponent(cleanCoinSymbol(symbol).toLowerCase())}`;
-function handleCoinLogoError(img){const symbol=cleanCoinSymbol(img.dataset.symbol||'');const holder=img.parentElement;if(img.classList.contains('asset-logo')&&holder?.classList.contains('asset-detail-head')){const fallback=document.createElement('span');fallback.className='asset-logo coin-logo-fallback';fallback.textContent=symbol.slice(0,1)||'؟';fallback.setAttribute('aria-label',`نماد ${symbol}`);img.replaceWith(fallback);return}img.style.display='none';if(holder){holder.classList.add('coin-logo-fallback');holder.textContent=symbol.slice(0,1)||'؟';holder.setAttribute('aria-label',`نماد ${symbol}`)}}
-function coinLogo(symbol,sizeClass='coin-icon'){const clean=cleanCoinSymbol(symbol);return `<span class="${sizeClass}" aria-label="لوگوی ${safeText(clean)}"><img src="${logoUrl(clean)}" data-symbol="${safeText(clean)}" data-fallback-index="0" alt="${safeText(clean)}" loading="lazy" decoding="async" onerror="handleCoinLogoError(this)"></span>`}
+function safeCoinImageUrl(value){const url=String(value||'').trim();return /^https:\/\/[^\s"'<>]+$/i.test(url)?url:''}
+function getCoinLogoImageUrl(symbol){const clean=cleanCoinSymbol(symbol);const rows=[...(Array.isArray(featuredMarketRows)?featuredMarketRows:[]),...(Array.isArray(marketRows)?marketRows:[])];const match=rows.find(item=>cleanCoinSymbol(item.symbol||item.asset||'')===clean);return safeCoinImageUrl(match?.image_url)}
+function handleCoinLogoError(img){
+ const symbol=cleanCoinSymbol(img.dataset.symbol||''),holder=img.parentElement,index=Number(img.dataset.fallbackIndex||0);
+ const fallbacks=img.dataset.customImageUrl==='1'?[logoUrl(symbol),`https://assets.coincap.io/assets/icons/${symbol.toLowerCase()}@2x.png`]:[`https://assets.coincap.io/assets/icons/${symbol.toLowerCase()}@2x.png`];
+ if(index<fallbacks.length){img.dataset.fallbackIndex=String(index+1);img.src=fallbacks[index];return}
+ if(img.classList.contains('asset-logo')&&holder?.classList.contains('asset-detail-head')){const fallback=document.createElement('span');fallback.className='asset-logo coin-logo-fallback';fallback.textContent=symbol.slice(0,1)||'؟';fallback.setAttribute('aria-label',`نماد ${symbol}`);img.replaceWith(fallback);return}
+ img.style.display='none';if(holder){holder.classList.add('coin-logo-fallback');holder.textContent=symbol.slice(0,1)||'؟';holder.setAttribute('aria-label',`نماد ${symbol}`)}
+}
+function coinLogo(symbol,sizeClass='coin-icon',imageUrl=''){const clean=cleanCoinSymbol(symbol),custom=safeCoinImageUrl(imageUrl)||getCoinLogoImageUrl(clean),initial=custom||logoUrl(clean);return `<span class="${sizeClass}" aria-label="لوگوی ${safeText(clean)}"><img src="${safeText(initial)}" data-symbol="${safeText(clean)}" data-custom-image-url="${custom?'1':'0'}" data-fallback-index="0" alt="${safeText(clean)}" loading="lazy" decoding="async" onerror="handleCoinLogoError(this)"></span>`}
 function updateQuickTradeEstimate(side){
  const symbol=String($(side+'Symbol')?.value||'').trim().toUpperCase(),amount=Number($(side+'Amount')?.value),root=$(side+'Estimate');if(!root)return;
  const item=marketRows.find(x=>String(x.symbol).toUpperCase()===symbol),price=item?getTrustedMarketPrice(item):null,ticker=item?getFreshMarketTicker(item):null;
@@ -2162,9 +2170,9 @@ function applyTheme(theme){const light=theme==='light';document.body.classList.t
 function initTheme(){let saved='dark';try{if(localStorage.getItem('digiArzVisualSystem')!=='premium-graphite-gold-v2'){localStorage.setItem('digiArzTheme','dark');localStorage.setItem('digiArzVisualSystem','premium-graphite-gold-v2')}saved=localStorage.getItem('digiArzTheme')||'dark'}catch(_){}applyTheme(saved)}
 function showAllGainers(){activeMarketCategory='gainers';$('marketSearch').value='';$('marketSort').value='change-desc';renderCategoryButtons();renderMarkets();$('marketList').scrollIntoView({behavior:'smooth',block:'start'})}
 function showAllLosers(){activeMarketCategory='losers';$('marketSearch').value='';$('marketSort').value='change-asc';renderCategoryButtons();renderMarkets();$('marketList').scrollIntoView({behavior:'smooth',block:'start'})}
-function renderTopGainers(){const root=$('topGainersList');if(!root)return;const rows=[...marketRows].map(x=>({item:x,t:getFreshMarketTicker(x)})).filter(x=>x.t&&Number.isFinite(x.t.change)&&x.t.change>0).sort((a,b)=>b.t.change-a.t.change).slice(0,5);if(!rows.length){root.innerHTML='<div class="muted small">اطلاعات رشد ۲۴ ساعته هنوز در دسترس نیست.</div>';return}root.innerHTML='';for(const row of rows){const base=String(row.item.symbol).replace(/USDT$/i,'');const el=document.createElement('button');el.type='button';el.className='gainer-card';el.innerHTML=`${coinLogo(base)}<span><b>${safeText(persianCoinName(row.item.symbol))}</b><small>${safeText(base)}</small></span><strong>+${formatNum(row.t.change,2)}٪</strong><span class="muted small">مشاهده ←</span>`;el.addEventListener('click',()=>openChart(row.item.symbol));root.appendChild(el)}}
-function renderTopLosers(){const root=$('topLosersList');if(!root)return;const rows=[...marketRows].map(x=>({item:x,t:getFreshMarketTicker(x)})).filter(x=>x.t&&Number.isFinite(x.t.change)&&x.t.change<0).sort((a,b)=>a.t.change-b.t.change).slice(0,5);if(!rows.length){root.innerHTML='<div class="muted small">اطلاعات کاهش ۲۴ ساعته هنوز در دسترس نیست.</div>';return}root.innerHTML='';for(const row of rows){const base=String(row.item.symbol).replace(/USDT$/i,'');const el=document.createElement('button');el.type='button';el.className='gainer-card loser-card';el.innerHTML=`${coinLogo(base)}<span><b>${safeText(persianCoinName(row.item.symbol))}</b><small>${safeText(base)}</small></span><strong>${formatNum(row.t.change,2)}٪</strong><span class="muted small">مشاهده ←</span>`;el.addEventListener('click',()=>openChart(row.item.symbol));root.appendChild(el)}}
-function renderTopAssets(){const root=$('topAssetsList');if(!root)return;const rows=[...marketRows].map(item=>({item,t:getFreshMarketTicker(item)})).filter(x=>x.t&&Number.isFinite(x.t.quoteVolume)&&x.t.quoteVolume>0).sort((a,b)=>b.t.quoteVolume-a.t.quoteVolume).slice(0,10);if(!rows.length){root.innerHTML='<div class="muted small">اطلاعات حجم معاملات برای رتبه‌بندی در دسترس نیست.</div>';return}root.innerHTML='';for(const row of rows){const symbol=String(row.item.symbol),base=symbol.replace(/USDT$/i,''),liveUsd=Number(row.t.last),storedUsd=Number(row.item.price),usd=Number.isFinite(liveUsd)&&liveUsd>0?liveUsd:storedUsd,toman=Number.isFinite(usd)&&usd>0&&currentFxIsValid?usd*currentFxRate:null,rawChange=row.t.change,hasChange=rawChange!==null&&rawChange!==undefined&&!(typeof rawChange==='string'&&rawChange.trim()==='')&&Number.isFinite(Number(rawChange)),change=hasChange?Number(rawChange):null;const el=document.createElement('button');el.type='button';el.className='top-asset-card';el.innerHTML=`${coinLogo(base)}<b>${safeText(persianCoinName(symbol))}</b><small>${safeText(base)}</small><span class="top-usd">${Number.isFinite(usd)&&usd>0?formatNum(usd,8)+' $':'—'}</span><span class="top-toman">${toman!==null?formatNum(toman,0)+' تومان':'نرخ تومان ناموجود'}</span><strong class="top-change ${hasChange?(change>0?'pos':change<0?'neg':''):''}">${hasChange?(change>0?'+':change<0?'−':'')+formatNum(Math.abs(change),2)+'٪':'—'}</strong><small style="direction:ltr">حجم: ${formatNum(row.t.quoteVolume,0)} USDT</small>`;el.addEventListener('click',()=>openChart(symbol));root.appendChild(el)}}
+function renderTopGainers(){const root=$('topGainersList');if(!root)return;const rows=sortMarketRowsByChange(marketRows,'desc').filter(item=>getMarketChange24h(item)>0).slice(0,5);if(!rows.length){root.innerHTML='<div class="muted small">اطلاعات رشد ۲۴ ساعته هنوز در دسترس نیست.</div>';return}root.innerHTML='';for(const item of rows){const base=String(item.symbol).replace(/USDT$/i,''),change=getMarketChange24h(item);const el=document.createElement('button');el.type='button';el.className='gainer-card';el.innerHTML=`${coinLogo(base)}<span><b>${safeText(persianCoinName(item.symbol))}</b><small>${safeText(base)}</small></span><strong>+${formatNum(change,2)}٪</strong><span class="muted small">مشاهده ←</span>`;el.addEventListener('click',()=>openChart(item.symbol));root.appendChild(el)}}
+function renderTopLosers(){const root=$('topLosersList');if(!root)return;const rows=sortMarketRowsByChange(marketRows,'asc').filter(item=>getMarketChange24h(item)<0).slice(0,5);if(!rows.length){root.innerHTML='<div class="muted small">اطلاعات کاهش ۲۴ ساعته هنوز در دسترس نیست.</div>';return}root.innerHTML='';for(const item of rows){const base=String(item.symbol).replace(/USDT$/i,''),change=getMarketChange24h(item);const el=document.createElement('button');el.type='button';el.className='gainer-card loser-card';el.innerHTML=`${coinLogo(base)}<span><b>${safeText(persianCoinName(item.symbol))}</b><small>${safeText(base)}</small></span><strong>${formatNum(change,2)}٪</strong><span class="muted small">مشاهده ←</span>`;el.addEventListener('click',()=>openChart(item.symbol));root.appendChild(el)}}
+function renderTopAssets(){const root=$('topAssetsList');if(!root)return;const rows=[...marketRows].map(item=>({item,t:getFreshMarketTicker(item)})).filter(x=>x.t&&Number.isFinite(x.t.quoteVolume)&&x.t.quoteVolume>0).sort((a,b)=>b.t.quoteVolume-a.t.quoteVolume).slice(0,10);if(!rows.length){root.innerHTML='<div class="muted small">اطلاعات حجم معاملات برای رتبه‌بندی در دسترس نیست.</div>';return}root.innerHTML='';for(const row of rows){const symbol=String(row.item.symbol),base=symbol.replace(/USDT$/i,''),liveUsd=Number(row.t.last),storedUsd=Number(row.item.price),usd=Number.isFinite(liveUsd)&&liveUsd>0?liveUsd:storedUsd,toman=Number.isFinite(usd)&&usd>0&&currentFxIsValid?usd*currentFxRate:null,change=getMarketChange24h(row.item),hasChange=change!==null;const el=document.createElement('button');el.type='button';el.className='top-asset-card';el.innerHTML=`${coinLogo(base)}<b>${safeText(persianCoinName(symbol))}</b><small>${safeText(base)}</small><span class="top-usd">${Number.isFinite(usd)&&usd>0?formatNum(usd,8)+' $':'—'}</span><span class="top-toman">${toman!==null?formatNum(toman,0)+' تومان':'نرخ تومان ناموجود'}</span><strong class="top-change ${hasChange?(change>0?'pos':change<0?'neg':''):''}">${hasChange?(change>0?'+':change<0?'−':'')+formatNum(Math.abs(change),2)+'٪':'—'}</strong><small style="direction:ltr">حجم: ${formatNum(row.t.quoteVolume,0)} USDT</small>`;el.addEventListener('click',()=>openChart(symbol));root.appendChild(el)}}
 async function fetchBinance24hrTickerRows(){
   if(!supabaseClient)throw new Error('اتصال امن سرور بازار آماده نیست');
   const symbols=[...new Set(marketRows.map(item=>String(item.symbol||'').toUpperCase()).filter(symbol=>/^[A-Z0-9]{2,20}USDT$/.test(symbol)))];
@@ -2218,14 +2226,13 @@ async function refreshMarketTickersUnlocked(){
  }
  renderDashboardMarketPreview();renderTopGainers();renderTopLosers();renderTopAssets();
  renderMarkets();
- const valid=marketRows.map(x=>marketTickerMap.get(x.symbol)).filter(x=>x&&x.change!==null&&x.change!==undefined&&Number.isFinite(Number(x.change)));
- const avg=valid.length?valid.reduce((sum,x)=>sum+Number(x.change),0)/valid.length:null;
- const sorted=[...marketRows].map(x=>({symbol:x.symbol,t:marketTickerMap.get(x.symbol)})).filter(x=>x.t&&x.t.change!==null&&x.t.change!==undefined&&Number.isFinite(Number(x.t.change)));
- sorted.sort((a,b)=>Number(b.t.change)-Number(a.t.change));const gain=sorted[0],loss=sorted[sorted.length-1];
+ const valid=sortMarketRowsByChange(marketRows,'desc');
+ const avg=valid.length?valid.reduce((sum,item)=>sum+getMarketChange24h(item),0)/valid.length:null;
+ const gain=valid.find(item=>getMarketChange24h(item)>0)||null,loss=valid.find(item=>getMarketChange24h(item)<0)||null;
  const avgEl=$('marketAvgChange'),gainEl=$('marketTopGain'),lossEl=$('marketTopLoss');
  if(avgEl){avgEl.textContent=avg===null?'—':(avg>0?'+':'')+formatNum(avg,2)+'٪';avgEl.className=avg>0?'pos':avg<0?'neg':''}
- if(gainEl){gainEl.textContent=gain?gain.symbol+'  '+(Number(gain.t.change)>0?'+':'')+formatNum(gain.t.change,2)+'٪':'—';gainEl.className=gain?(Number(gain.t.change)>0?'pos':Number(gain.t.change)<0?'neg':''):'muted'}
- if(lossEl){lossEl.textContent=loss?loss.symbol+'  '+(Number(loss.t.change)>0?'+':'')+formatNum(loss.t.change,2)+'٪':'—';lossEl.className=loss?(Number(loss.t.change)>0?'pos':Number(loss.t.change)<0?'neg':''):'muted'}
+ if(gainEl){const change=gain?getMarketChange24h(gain):null;gainEl.textContent=gain?gain.symbol+'  '+(change>0?'+':'')+formatNum(change,2)+'٪':'—';gainEl.className=gain?(change>0?'pos':change<0?'neg':''):'muted'}
+ if(lossEl){const change=loss?getMarketChange24h(loss):null;lossEl.textContent=loss?loss.symbol+'  '+(change>0?'+':'')+formatNum(change,2)+'٪':'—';lossEl.className=loss?(change>0?'pos':change<0?'neg':''):'muted'}
  if(stamp)stamp.textContent='آخرین دریافت: '+new Date().toLocaleTimeString('fa-IR')+' · '+valid.length.toLocaleString('fa-IR')+' جفت‌ارز دارای درصد معتبر · منبع: '+provider+(failure?' · '+failure:'');
 }
 function refreshMarketTickers(force=false){if(marketTickerRefreshPromise)return marketTickerRefreshPromise;if(!force&&marketTickerMap.size&&Date.now()-marketTickerLastFetchedAt<15000)return Promise.resolve();marketTickerRefreshPromise=refreshMarketTickersUnlocked().then(result=>{marketTickerLastFetchedAt=Date.now();return result}).finally(()=>{marketTickerRefreshPromise=null});return marketTickerRefreshPromise}
@@ -2238,6 +2245,24 @@ function isMarketTimestampFresh(value,maxAge=120000){
 function getFreshMarketTicker(item){
  const fetchedAt=Number(marketTickerLastFetchedAt)||0;
  return isMarketTimestampFresh(fetchedAt)?marketTickerMap.get(item.symbol)||null:null;
+}
+function getMarketChange24h(item){
+ const ticker=getFreshMarketTicker(item),liveRaw=ticker?.change;
+ if(liveRaw!==null&&liveRaw!==undefined&&liveRaw!==''&&Number.isFinite(Number(liveRaw)))return Number(liveRaw);
+ const storedRaw=item?.change;
+ if(isMarketTimestampFresh(item?.updated_at)&&storedRaw!==null&&storedRaw!==undefined&&storedRaw!==''&&Number.isFinite(Number(storedRaw)))return Number(storedRaw);
+ return null;
+}
+function compareMarketChange(a,b,direction='desc'){
+ const av=getMarketChange24h(a),bv=getMarketChange24h(b);
+ if(av===null&&bv===null)return String(a.symbol||'').localeCompare(String(b.symbol||''));
+ if(av===null)return 1;
+ if(bv===null)return -1;
+ const difference=direction==='asc'?av-bv:bv-av;
+ return difference||String(a.symbol||'').localeCompare(String(b.symbol||''));
+}
+function sortMarketRowsByChange(rows,direction='desc'){
+ return rows.filter(item=>getMarketChange24h(item)!==null).sort((a,b)=>compareMarketChange(a,b,direction));
 }
 function getTrustedMarketPrice(item){
  const ticker=getFreshMarketTicker(item),live=Number(ticker?.last);
@@ -2278,8 +2303,7 @@ function observeMarketSparklines(list){
 function renderMarkets(){
  const list=$('marketList');if(!list)return;list.replaceChildren();
  const q=String($('marketSearch')?.value||'').trim().toUpperCase(),sort=$('marketSort')?.value||'symbol';
- const changeCache=new Map();
- const changeOf=item=>{if(changeCache.has(item.symbol))return changeCache.get(item.symbol);const raw=getFreshMarketTicker(item)?.change;const live=raw===null||raw===undefined||raw===''?NaN:Number(raw);const fallback=isMarketTimestampFresh(item.updated_at)&&item.change!==null&&item.change!==undefined&&item.change!==''?Number(item.change):NaN;const value=Number.isFinite(live)?live:Number.isFinite(fallback)?fallback:null;changeCache.set(item.symbol,value);return value};
+ const changeOf=item=>getMarketChange24h(item);
  const volumeOf=item=>{const live=getFreshMarketTicker(item)?.quoteVolume,stored=isMarketTimestampFresh(item.updated_at)?item.quoteVolume:null,value=live??stored;return value===null||value===undefined||!Number.isFinite(Number(value))?null:Number(value)};
  const sourceRows=activeMarketCategory==='new'?featuredMarketRows:marketRows;let rows=sourceRows.filter(x=>{const symbol=String(x.symbol||'').toUpperCase(),base=symbol.replace(/USDT$/i,''),english=String(coinInfo[base]?.name||x.name||'').toUpperCase(),persian=String(persianCoinName(symbol)||'').toUpperCase();return !q||symbol.includes(q)||base.includes(q)||english.includes(q)||persian.includes(q)});
  if(activeMarketCategory==='gainers')rows=rows.filter(x=>changeOf(x)!==null&&changeOf(x)>0);
@@ -2290,8 +2314,8 @@ function renderMarkets(){
  else if(['defi','meme','metaverse','stable','ai','gaming'].includes(activeMarketCategory)){const set=categorySymbols[activeMarketCategory]||[];rows=rows.filter(x=>set.includes(String(x.symbol).replace(/USDT$/i,'')))}
  else if(activeMarketCategory==='top'||activeMarketCategory==='selected')rows=rows.filter(x=>['BTCUSDT','ETHUSDT','BNBUSDT','SOLUSDT','XRPUSDT','ADAUSDT','DOGEUSDT'].includes(x.symbol));
  if(activeMarketCategory==='volume'||activeMarketCategory==='trending'||sort==='volume-desc')rows.sort((a,b)=>(volumeOf(b)??-Infinity)-(volumeOf(a)??-Infinity));
- else if(activeMarketCategory==='gainers'||sort==='change-desc')rows.sort((a,b)=>(changeOf(b)??-Infinity)-(changeOf(a)??-Infinity));
- else if(activeMarketCategory==='losers'||sort==='change-asc')rows.sort((a,b)=>(changeOf(a)??Infinity)-(changeOf(b)??Infinity));
+ else if(activeMarketCategory==='gainers'||sort==='change-desc')rows.sort((a,b)=>compareMarketChange(a,b,'desc'));
+ else if(activeMarketCategory==='losers'||sort==='change-asc')rows.sort((a,b)=>compareMarketChange(a,b,'asc'));
  else if(activeMarketCategory==='cheapest'||sort==='price-asc')rows.sort((a,b)=>(getTrustedMarketPrice(a)??Infinity)-(getTrustedMarketPrice(b)??Infinity));
  else if(activeMarketCategory==='expensive'||sort==='price-desc')rows.sort((a,b)=>(getTrustedMarketPrice(b)??-Infinity)-(getTrustedMarketPrice(a)??-Infinity));
  else if(activeMarketCategory==='new')rows.sort((a,b)=>new Date(b.observed_at||b.updated_at||0).getTime()-new Date(a.observed_at||a.updated_at||0).getTime());
@@ -2884,14 +2908,14 @@ function renderDashboardMarketPreview(){
  }
  filters?.querySelectorAll('[data-dash-market-filter]').forEach(button=>{const active=button.dataset.dashMarketFilter===dashboardMarketFilter;button.classList.toggle('active',active);button.setAttribute('aria-pressed',active?'true':'false')});
  const q=String(search?.value||'').trim().toLocaleLowerCase('fa-IR'),sortMode=sort?.value||'volume';
- let rows=(marketRows||[]).map(item=>{const t=getFreshMarketTicker(item),live=Number(t?.last),price=getTrustedMarketPrice(item),changeRaw=t?.change,change=changeRaw===null||changeRaw===undefined||changeRaw===''?null:Number(changeRaw),volume=Number(t?.quoteVolume);return {item,t,price,live:Number.isFinite(live)&&live>0,change:Number.isFinite(change)?change:null,volume:Number.isFinite(volume)?volume:0}}).filter(x=>Number.isFinite(x.price)&&x.price>0);
+ let rows=(marketRows||[]).map(item=>{const t=getFreshMarketTicker(item),live=Number(t?.last),price=getTrustedMarketPrice(item),change=getMarketChange24h(item),volume=Number(t?.quoteVolume);return {item,t,price,live:Number.isFinite(live)&&live>0,change,volume:Number.isFinite(volume)?volume:0}}).filter(x=>Number.isFinite(x.price)&&x.price>0);
  if(q)rows=rows.filter(x=>{const symbol=String(x.item.symbol||''),base=symbol.replace(/USDT$/i,''),fa=persianCoinName(symbol)||'',en=String(x.item.name||coinInfo[base]?.name||'');return (symbol+' '+base+' '+fa+' '+en).toLocaleLowerCase('fa-IR').includes(q)});
  if(dashboardMarketFilter==='gainers')rows=rows.filter(x=>x.change!==null&&x.change>0);
  else if(dashboardMarketFilter==='losers')rows=rows.filter(x=>x.change!==null&&x.change<0);
  else if(dashboardMarketFilter==='volume')rows=rows.filter(x=>x.volume>0);
  else if(dashboardMarketFilter==='favorites')rows=rows.filter(x=>isFavoriteSymbol(x.item.symbol));
  else if(dashboardMarketFilter==='mine'){const owned=new Set((assetRows||[]).filter(x=>Number(x.balance)>0).map(x=>String(x.asset||'').toUpperCase()));rows=rows.filter(x=>owned.has(String(x.item.symbol||'').replace(/USDT$/i,'')))}
- rows.sort((a,b)=>{if(sortMode==='change-up')return (b.change??-Infinity)-(a.change??-Infinity);if(sortMode==='change-down')return (a.change??Infinity)-(b.change??Infinity);if(sortMode==='price-high')return b.price-a.price;if(sortMode==='price-low')return a.price-b.price;if(sortMode==='name')return String(persianCoinName(a.item.symbol)||a.item.symbol).localeCompare(String(persianCoinName(b.item.symbol)||b.item.symbol),'fa');return b.volume-a.volume});
+ rows.sort((a,b)=>{if(sortMode==='change-up')return compareMarketChange(a.item,b.item,'desc');if(sortMode==='change-down')return compareMarketChange(a.item,b.item,'asc');if(sortMode==='price-high')return b.price-a.price;if(sortMode==='price-low')return a.price-b.price;if(sortMode==='name')return String(persianCoinName(a.item.symbol)||a.item.symbol).localeCompare(String(persianCoinName(b.item.symbol)||b.item.symbol),'fa');return b.volume-a.volume});
  const total=rows.length,visible=rows.slice(0,dashboardMarketLimit);root.replaceChildren();
  if(count)count.textContent=total.toLocaleString('fa-IR')+' ارز با قیمت معتبر · نمایش '+visible.length.toLocaleString('fa-IR');
  if(!visible.length){const empty=document.createElement('div');empty.className='da-market-empty';empty.textContent='با این جست‌وجو یا فیلتر، ارزی با قیمت معتبر پیدا نشد.';root.append(empty);if(more)more.hidden=true;if(stamp)stamp.textContent='برای نمایش قیمت، داده معتبر بازار لازم است.';return}

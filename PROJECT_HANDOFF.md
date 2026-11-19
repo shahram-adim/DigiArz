@@ -163,3 +163,41 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - PR #11 remains Draft. No Production DDL/index/function/cron/migration/data/order/wallet/balance changes. No merge and no supabase db push.
 - Design/results details recorded in docs/IRAN_EXCHANGE_MATCHER_INCREMENTAL_DESIGN_2026-11-17.md on PR #11 branch.
 - Immediate next step: verify exact-decimal run 44184100898 (and current PR head/checks), then inspect remaining uncovered queue invariants only if they are not already represented in fixtures. Keep PR #11 Draft pending broader production-schema/concurrency/query-plan/migration reconciliation gates.
+
+## Market logos and 24h ranking consistency — 2026-11-19
+- Work branch: `fix/market-logo-and-ranking-consistency`, created from verified `main` HEAD `ad8d52bf49027b20756242259b1de867c04d5ab9`.
+- Root cause confirmed from live Supabase Edge Function source: active `app-assets` v1 used only the SpotHQ cryptocurrency icon set; missing symbol files returned HTTP 404.
+- Branch changes: `index.html` now resolves curated HTTPS `image_url` metadata when available, then tries the existing `app-assets` route and a CoinCap fallback before the text fallback. The repository now contains `supabase/functions/app-assets/index.ts` with a two-provider logo fetcher; this source has **not** been deployed to Supabase.
+- Branch changes: one freshness-aware `getMarketChange24h` helper and deterministic `sortMarketRowsByChange` comparator now drive the market list, top gainers, top losers and volatility summary. Gainers sort descending; losers ascending; stale stored percentages are excluded; tie order is deterministic by symbol; summary gain/loss selects positive/negative values only.
+- Added regression tests to `tests/index-syntax.test.js` for helper ordering, stale data, shared view ranking and logo fallbacks.
+- Manual V8 check passed: all three inline scripts parsed; test sample returned descending `BTC, DOGE, ADA, SOL, ETH`, ascending `ETH, SOL, ADA, DOGE, BTC`; stale fallback was rejected and fresh fallback accepted.
+- No Supabase Production deployment, schema/migration/cron/RPC changes, or financial data changes were made.
+- Pending: open Draft PR, verify GitHub Actions `node --test tests/*.test.js` and the rest of the exact-decimal workflow, fix failures, then separately decide whether to deploy the Edge Function. Android visual QA and a live smoke test for previously missing symbols remain outstanding.
+
+## PR #13 opened — market logos and 24h ranking — 2026-11-19
+- Draft PR: https://github.com/shahram-adim/DigiArz/pull/13
+- Base: `main` at `ad8d52bf49027b20756242259b1de867c04d5ab9`; head branch: `fix/market-logo-and-ranking-consistency`.
+- Latest code/test head at this checkpoint: `693a598a0d51076e6c1981728725413074e57a6a`.
+- Follow-up audit found the dashboard market preview had a second independent percentage parser and comparator. It has now been aligned to `getMarketChange24h` / `compareMarketChange`, and regression assertions cover dashboard gainers/losers too.
+- GitHub Actions run `44475074226` on the latest code head: Node test step `node --test tests/*.test.js` completed successfully. PostgreSQL integration steps are still running; do not claim the whole workflow passed yet.
+- PR remains Draft, not merged. Production Supabase `app-assets` remains at its previously inspected v1; new two-provider Edge Function source exists only in the GitHub branch and has not been deployed.
+- Next action: verify the remaining exact-decimal workflow steps and PR checks, then decide separately whether the Edge Function is ready for deployment. No user financial data, DB schema, migrations, cron, RPC, wallets, balances, orders or trades were changed.
+
+
+### نتیجهٔ نهایی CI برای PR #13 — ۱۹ نوامبر ۲۰۲۶
+- GitHub Actions run `44475236966` روی head `209634cb797fcea379a728bf5bd4d23ad9f8e1e0` با نتیجهٔ نهایی `success` تکمیل شد.
+- همهٔ مراحل job از ۱ تا ۴۳ موفق شدند؛ تست‌های Node/browser و تمام مراحل PostgreSQL ایزوله برای arithmetic، widening/preflight/rollback، Market/Limit، رزرو و rounding، Stop-Limit، TP/SL، lifecycle و raceهای دو نشست مستقل موفق شدند.
+- PR #13 هنوز open و Draft است، merge نشده و base همچنان `main` با SHA `ad8d52bf49027b20756242259b1de867c04d5ab9` است.
+- CI سبز به معنی deploy یا تأیید Production نیست. Edge Function `app-assets` جدید هنوز deploy نشده؛ هیچ schema، migration، cron، RPC یا دادهٔ مالی Production تغییر نکرده است.
+- Android visual QA و live logo smoke test هنوز انجام نشده‌اند.
+
+**Next:** بازبینی نهایی PR و تکمیل تست بصری Android؛ merge و deploy را جداگانه و فقط پس از تأیید صریح انجام بده.
+
+
+### تأیید اجرای دوم CI — ۱۹ نوامبر ۲۰۲۶
+- Run `44475656448` روی commit `33eb1e5b94d5fb2a2019294e3be12a5afcc4cc58` با نتیجهٔ `success` تمام شد؛ تمام ۴۳ مرحله موفق شدند.
+- مراحل Node/browser و PostgreSQL ایزوله، از جمله widening، lock timeout، rollback، Market/Limit، Stop-Limit، TP/SL، rounding و رقابت دو نشست موفق شدند.
+- PR #13 باز و Draft است؛ merge نشده؛ main همچنان `ad8d52bf49027b20756242259b1de867c04d5ab9` است.
+- هیچ deploy یا تغییر دیتابیس Production انجام نشده؛ Edge Function لوگو هنوز deploy نشده و Android visual QA/live smoke test باقی است.
+
+**Next:** تست بصری در Android و تصمیم جداگانهٔ تأییدشده برای merge/deploy.
