@@ -419,7 +419,7 @@ test('login coins travel around the phone on a motion path and respect reduced-m
   const reducedStart = html.lastIndexOf('@media(prefers-reduced-motion:reduce)');
   const reducedEnd = html.indexOf('</style>', reducedStart);
   const reduced = html.slice(reducedStart, reducedEnd);
-  assert.match(reduced, /#authView \.login-orbit-coin\{animation:none!important\}/);
+  assert.match(reduced, /#authView \.login-orbit-coin\{animation:none!important;offset-distance:0!important\}/);
 });
 
 
@@ -427,5 +427,5 @@ test('orbiting login coins stop moving when reduced motion is requested', () => 
   const orbit=html.indexOf('@keyframes loginCoinOrbitTravel');
   const reduced=html.lastIndexOf('@media(prefers-reduced-motion:reduce)');
   assert.ok(orbit>=0&&reduced>orbit,'reduced-motion override follows the orbit animation');
-  assert.match(html.slice(reduced),/#authView \\.login-orbit-coin\\{animation:none!important;offset-distance:0!important\\}/);
+  assert.match(html.slice(reduced),/#authView \.login-orbit-coin\{animation:none!important;offset-distance:0!important\}/);
 });
