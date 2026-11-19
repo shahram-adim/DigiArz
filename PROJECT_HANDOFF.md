@@ -226,3 +226,9 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
   - Add regression tests for exact-ID metadata mapping, stale percentage rejection, partial batch retention and full-market coverage threshold.
 - CI has not yet been verified for this branch. No Production DB changes, migrations, schema changes, Edge Function deploys, financial data changes, merge or Production release were made.
 - Next: open/inspect a Draft PR to trigger CI, fix any test failures, then perform Android visual QA. Merge/deploy require separate user approval.
+
+## PR #14 state — 2026-11-19
+- PR #14: https://github.com/shahram-adim/DigiArz/pull/14 — open, ready for review, not merged.
+- Branch: `fix/market-logo-metadata-and-partial-ticker-batches`; latest code/test commit at this checkpoint: `be3b9c3841c7acf69bb122f7e103fd8b1c4d7613`.
+- GitHub Actions run `44479513790` (run 822) is in progress; do not claim CI success until final status is read.
+- No Supabase Production deployment, database changes, or financial data modifications. Merge and deploy still require separate user approval.
