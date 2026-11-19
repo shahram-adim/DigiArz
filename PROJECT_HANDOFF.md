@@ -237,3 +237,9 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - First CI run `44479513790` failed the inline-script parse test due to one extra closing `]` in the metadata loader. The issue was fixed in code commit `6d9b4be45a4706ef7d292eee60d3440f3bf1cee1`.
 - Follow-up run `44479671283`: the exact-decimal and browser integration test step passed. The overall workflow is still running; PostgreSQL integration steps have not yet completed.
 - Do not report overall CI success until the run has a final successful conclusion. PR #14 remains open and unmerged; no Production changes were made.
+
+## CI completed successfully — 2026-11-19
+- GitHub Actions run `44479671283` (run 824) for commit `6d9b4be45a4706ef7d292eee60d3440f3bf1cee1` completed with conclusion `success`.
+- All 43 job steps completed successfully: browser/market tests, PostgreSQL arithmetic and migration rehearsal tests, two-session Limit worker/cancellation races, TP-SL conditional execution/cancellation races, Stop-Limit child execution/cancellation races, and isolated lifecycle integrations.
+- The prior syntax regression was fixed before this run. The new CI run is green.
+- CI does not prove visual behavior on the Android device or successful live upstream image fetches. PR #14 remains unmerged; no Production deployment or database changes were made.
