@@ -814,3 +814,11 @@
 - [x] انیمیشن‌ها در prefers-reduced-motion متوقف می‌شوند و چیدمان موبایل/دسکتاپ قواعد واکنش‌گرا دارد.
 - [!] تغییرات روی شاخه مستقل feat/approved-login-screen-full-implementation ثبت شده‌اند؛ هنوز CI و بازبینی رندر نهایی اجرا نشده و PR ادغام نشده است.
 - [!] هیچ تغییری در Supabase Production، Auth، migration، جدول، policy، bucket یا داده‌های مالی انجام نشده است.
+
+
+### نتیجه نهایی CI برای صفحه ورود تأییدشده — ۱۹ نوامبر ۲۰۲۶
+- [x] اجرای workflow Exact decimal tests برای PR #25 و commit d4fe8ed263946aef62dced8f9490bfc8fa82578c با run ID 44579311107 و conclusion برابر success تکمیل شد.
+- [x] هر ۴۳ مرحلهٔ job موفق شدند؛ آزمون‌های Node/browser، parse همهٔ اسکریپت‌های inline، رگرسیون صفحه ورود، آزمون‌های PostgreSQL و سناریوهای هم‌زمانی Market/Limit/Stop-Limit/TP-SL موفق شدند.
+- [x] اصلاحات سازگاری selectorها و حالت پنهان‌شدن auth پس از ورود نیز در همین شاخه ثبت شده‌اند.
+- [!] PR شمارهٔ ۲۵ آمادهٔ بازبینی است، اما هنوز در main ادغام نشده؛ هیچ APK جدید یا انتشار Pages از این تغییر ساخته نشده است.
+- [!] هیچ تغییر Supabase Production یا Auth/DB/financial data انجام نشده است.
