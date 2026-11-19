@@ -397,7 +397,7 @@ test('approved DigiArz login reference is implemented as a real responsive verti
   assert.match(html,/loginEarthSpin/);
   assert.match(html,/loginOrbitSpin/);
   assert.match(html,/@media\(max-width:760px\)[\s\S]*?#authView \.login-market-layout\{grid-template-columns:1fr/);
-  assert.match(html,/@media\(prefers-reduced-motion:reduce\)[\s\S]*?loginEarthSvg/);
+  assert.match(html,/@media\(prefers-reduced-motion:reduce\)[\s\S]*?login-earth-svg/);
 });
 
 test('login password visibility control preserves the entered password and is accessible', () => {
