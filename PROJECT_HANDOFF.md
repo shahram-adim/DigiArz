@@ -211,3 +211,18 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - محدودیت تست: درخواست مستقیم به endpoint از محیط اجرا به علت DNS/شبکه ناموفق بود؛ smoke test واقعی تصویر و بررسی بصری روی Android هنوز باقی است.
 
 **Next:** برنامه DigiArz را refresh کن و چند نماد بدون لوگوی قبلی و ترتیب بخش‌های صعودی/نزولی را بررسی کن؛ اگر موردی باقی مانده، اسکرین‌شات بفرست.
+
+ 
+## Checkpoint: diagnose and fix market logos / 24h ranking — 2026-11-19
+- Live Supabase function logs for the Android client show 1,166 logo HTTP 404s versus 103 HTTP 200s in the last 24 hours. The v2 Edge Function is active, but its symbol-only SpotHQ/CoinCap fallback does not cover most of the market catalogue.
+- Read-only Production SQL confirms all 398 enabled `demo_trading_pairs` have an exact `base_coingecko_id` match in `crypto_assets`, and all 398 have a non-empty `image_url`. The UI loader was only reading `market_prices` plus `pair_symbol,is_enabled`; it never loaded the exact CoinGecko metadata. This is the confirmed logo root cause.
+- Market ticker logs show 1,155 HTTP 200 and 83 HTTP 502 calls over the last 24 hours. The browser loader used `Promise.all` for ticker batches, so one failed batch rejected the entire batch set, discarding successful responses. Its fallback coverage gate also checked only the first 12 market pairs despite 398 enabled pairs.
+- A safe work branch was created from current main: `fix/market-logo-metadata-and-partial-ticker-batches`.
+- Code changes on that branch:
+  - Load metadata only for enabled pairs, joined by exact `base_coingecko_id`, in chunks of 100; attach `image_url`, name and a separate `change_updated_at` timestamp.
+  - Keep stored 24h percentage fallback freshness tied to the crypto metadata timestamp, not the more frequently refreshed `market_prices.updated_at`.
+  - Collect fulfilled ticker batches with `Promise.allSettled`, preserving valid batches when one fails.
+  - Measure fallback coverage across the full enabled market and exclude null values from valid-change counts.
+  - Add regression tests for exact-ID metadata mapping, stale percentage rejection, partial batch retention and full-market coverage threshold.
+- CI has not yet been verified for this branch. No Production DB changes, migrations, schema changes, Edge Function deploys, financial data changes, merge or Production release were made.
+- Next: open/inspect a Draft PR to trigger CI, fix any test failures, then perform Android visual QA. Merge/deploy require separate user approval.
