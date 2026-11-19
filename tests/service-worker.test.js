@@ -67,10 +67,11 @@ test('install precaches the complete offline shell, including Android manifest i
   let installPromise;
   harness.listeners.get('install')({ waitUntil(value) { installPromise = Promise.resolve(value); } });
   await installPromise;
-  assert.equal(harness.added.length, 9);
+  assert.equal(harness.added.length, 10);
   assert.ok(harness.added.includes('https://app.example/DigiArz/icon-192.svg'));
   assert.ok(harness.added.includes('https://app.example/DigiArz/icon-512.svg'));
   assert.ok(harness.added.includes('https://app.example/DigiArz/src/market-holdings.js'));
+  assert.ok(harness.added.includes('https://app.example/DigiArz/src/daily-ads.js'));
   assert.ok(harness.added.includes('https://app.example/DigiArz/src/pwa-install.js'));
   assert.equal(harness.skipped, true);
 });
@@ -111,6 +112,6 @@ test('activation removes old shell caches and claims clients', async () => {
   let activatePromise;
   harness.listeners.get('activate')({ waitUntil(value) { activatePromise = Promise.resolve(value); } });
   await activatePromise;
-  assert.deepEqual(harness.deleted, ['digiarz-shell-v53', 'digiarz-shell-v54', 'digiarz-shell-v55']);
+  assert.deepEqual(harness.deleted, ['digiarz-shell-v53', 'digiarz-shell-v54', 'digiarz-shell-v55', 'digiarz-shell-v56']);
   assert.equal(harness.claimed, true);
 });

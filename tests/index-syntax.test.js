@@ -356,3 +356,17 @@ test('login screen has a complete branded header, market feature strip and a wor
     assert.match(html, new RegExp('id="' + id + '"'), 'existing auth control remains: ' + id);
   }
 });
+
+
+test('daily advertisement module parses and remains a non-clickable image/text display', () => {
+  const source = fs.readFileSync('src/daily-ads.js', 'utf8');
+  assert.doesNotThrow(() => new vm.Script(source, { filename: 'src/daily-ads.js' }));
+  assert.match(html, /id="loginDailyAd"/);
+  assert.match(html, /id="dashboardDailyAd"/);
+  assert.match(html, /id="adminDailyAdImage"/);
+  assert.match(html, /id="adminDailyAdBody"/);
+  assert.match(source, /getPublicUrl\(ad\.image_path\)/);
+  assert.match(source, /from\('daily_ads'\)/);
+  assert.match(source, /86400000/);
+  assert.doesNotMatch(source, /createElement\(['"]a['"]\)|\.href\s*=/, 'daily ads must not render clickable links');
+});
