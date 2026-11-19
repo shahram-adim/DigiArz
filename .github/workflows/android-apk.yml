@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - redesign/full-app-experience-v2
     paths:
       - "index.html"
       - "manifest.webmanifest"
