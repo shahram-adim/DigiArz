@@ -252,3 +252,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Regression assertions were added for URL propagation, market/dashboard rendering and server host allowlisting.
 - No merge, Pages publication or Supabase Production Edge Function deployment has been performed. CI and Android visual QA remain required.
 - Next: run the project test workflow, inspect the PR, then request separate approval before merge or Production deployment.
+
+## Production deploy: market logo proxy fallback — 2026-11-19
+- User explicitly approved deploying only the `app-assets` Edge Function to the DigiArz Production Supabase project.
+- Deployed the exact `supabase/functions/app-assets/index.ts` source from GitHub `main` (source blob `5a6d2c8dd1beac78cb51a45f368c02c9ff50be68`).
+- Supabase project: `gfoaubfilhttnwjykaox`; function `app-assets`; active version advanced from 2 to 3; status `ACTIVE`; `verify_jwt=false` preserved.
+- Post-deploy readback confirmed the active source contains the curated `image_url` proxy and CoinGecko host allowlist. Active SHA-256: `30e3d08801c9bfc651d88cfa867aeee4943a8b8cb359c16c6ae9cf6b3154ad17`.
+- No database migrations, schema, RPCs, cron jobs, wallets, balances, orders, trades, or financial data were changed.
+- A direct live HTTP image smoke test and Android visual QA have not yet been completed. Do not claim the logos are visually fixed until the user refreshes the app and confirms the previously missing symbols display.
+- Next: ask the user to fully refresh DigiArz and check ZRO, ICNT, ZKC, ASTER, and MANTA; capture a screenshot and symbol list if any remain broken.
