@@ -312,3 +312,17 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Next: once DB access is stable, verify recent cron run outcomes and test Auth; request separate user approval before merging PR #17 and building/releasing the next APK.
 
 - Follow-up logs at 09:30–09:31 UTC after the schedule adjustment still show startup timeouts for core FX/market-price jobs 2/3 and financial workers 8/9/12; request jobs 13/15 also timed out. A management pg_stat_statements query hit statement_timeout. The scheduling mitigation is verified as applied, but has not resolved the underlying DB availability issue; do not report Auth as recovered.
+
+
+## Verified premium login APK — 2026-11-19
+- PR #17 was explicitly approved by the user and squash-merged to `main`: `685e1eef2b530e0c565a09a8cfc0962a4a6a01fe`.
+- Android workflow run `44498554161` succeeded and uploaded artifact `DigiArz-Android-debug-APK` (artifact ID `14515334940`).
+- The APK was downloaded and extracted. Its Android package file type was verified and its SHA-256 matched BUILD-INFO: `79957474d406b6d8a0e148afe6472a44e30d3718faa31e251231fdee3182a539`.
+- BUILD-INFO identifies main commit `685e1eef2b530e0c565a09a8cfc0962a4a6a01fe`, ref `refs/heads/main`, workflow run `44498554161`, and build time `2026-11-19T09:41:34Z`.
+- GitHub Pages deployment for the same commit succeeded (run `44498553540`); exact-decimal workflow succeeded (run `44498554204`).
+- This is a debug APK, not a Play Store release-signed package.
+- The Auth HTTP 504 / PostgreSQL responsiveness incident remains unresolved/unverified. The UI-only merge and APK build do not establish backend recovery. Do not ask the user to repeatedly retry login.
+- PR #18 remains open and unmerged. These documentation updates are on `docs/cron-auth-incident-2026-11-19` only; no merge to `main`, Supabase deploy, database mutation, or financial-data change was made.
+
+### Next
+Wait for the user's installation/UI feedback. Investigate Auth recovery only with minimal read-only checks after DB access is stable. PR #18 merge requires separate explicit user approval.
