@@ -1682,6 +1682,36 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 @media(prefers-reduced-motion:reduce){
   #authView *{transition:none!important}
 }
+
+/* Live market preview embedded in the login-screen phone mockup. */
+#authView .auth-phone-preview{position:relative;z-index:1;width:min(100%,390px);margin:22px auto 8px;padding:13px 14px 11px;border:1px solid rgba(240,204,120,.42);border-radius:22px;background:linear-gradient(155deg,#0b1d3b,#102a50 62%,#0b1a34);box-shadow:0 15px 34px rgba(3,13,32,.28),inset 0 1px rgba(255,255,255,.1);color:#f4f7fc;overflow:hidden}
+#authView .auth-phone-top{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:9px;color:#cbd8ec}
+#authView .auth-phone-camera{width:32px;height:5px;border-radius:8px;background:#385273;box-shadow:0 0 0 2px rgba(255,255,255,.035)}
+#authView .auth-phone-live{display:flex;align-items:center;gap:5px;color:#8ee6bd;font-weight:800}
+#authView .auth-phone-live i{width:6px;height:6px;border-radius:50%;background:#39d995;box-shadow:0 0 0 4px rgba(57,217,149,.12)}
+#authView .auth-phone-pair{direction:ltr;font-weight:800;letter-spacing:.3px}
+#authView .auth-phone-price{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:10px 0 2px;direction:ltr}
+#authView .auth-phone-price strong{font-size:16px;color:#fff;font-variant-numeric:tabular-nums}
+#authView .auth-phone-price span{font-size:10px;font-weight:800;color:#8ee6bd}
+#authView #authMiniChart{width:100%;height:112px;overflow:hidden;border-radius:10px;background:rgba(255,255,255,.025)}
+#authView .auth-coin-track{display:flex;align-items:center;gap:7px;overflow:hidden;margin-top:9px;min-height:42px}
+#authView .auth-coin-chip{display:flex;align-items:center;gap:5px;flex:1 0 0;min-width:0;padding:7px 8px;border:1px solid rgba(255,255,255,.13);border-radius:10px;background:rgba(255,255,255,.065);animation:authCoinEnter .35s ease both}
+#authView .auth-coin-chip b{display:grid;place-items:center;width:21px;height:21px;flex:0 0 21px;border-radius:50%;background:rgba(240,204,120,.16);color:#f0cc78;font-size:12px}
+#authView .auth-coin-chip span{font-size:9px;color:#dce7f8;font-weight:800}
+#authView .auth-coin-chip strong{margin-inline-start:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;direction:ltr;font-size:9px;color:#fff;font-variant-numeric:tabular-nums}
+#authView .auth-phone-foot{display:flex;justify-content:space-between;gap:8px;margin-top:9px;padding-top:8px;border-top:1px solid rgba(255,255,255,.11);font-size:8px;color:#b9c9e1}
+@keyframes authCoinEnter{from{opacity:.25;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:700px){#authView .auth-phone-preview{width:min(100%,420px);margin:17px auto 5px;padding:12px}#authView #authMiniChart{height:104px}#authView .auth-coin-chip{padding:6px 6px;gap:4px}#authView .auth-phone-price strong{font-size:15px}}
+@media(prefers-reduced-motion:reduce){#authView .auth-coin-chip{animation:none}}
+body:not(.light-theme) #authView.auth{background:#101d32;border-color:#29405f;color:#eaf1fb;box-shadow:0 24px 70px rgba(0,0,0,.38)}
+body:not(.light-theme) #authView .auth-form{background:#14243b;color:#eaf1fb}
+body:not(.light-theme) #authView .auth-form h2{color:#f3f6fc}
+body:not(.light-theme) #authView .auth-intro,body:not(.light-theme) #authView .auth-form .field label{color:#b7c6dc}
+body:not(.light-theme) #authView .auth-form input{background:#0d1b30;border-color:#344b69;color:#f3f6fc}
+body:not(.light-theme) #authView .auth-form input::placeholder{color:#8ea2bf}
+body:not(.light-theme) #authView #signupBtn{background:#243a58;border-color:#3b5679;color:#eaf1fb}
+body:not(.light-theme) #authView #forgotBtn{border-color:#3b5679;color:#c3d3e9}
+body:not(.light-theme) #authView .auth-security,body:not(.light-theme) #authView #recoveryPanel{background:#1a2d47;border-color:#344b69;color:#c3d3e9}
 </style>
 <style>
 .pwa-install-banner{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 16px;margin:0 0 14px;border:1px solid rgba(240,185,11,.45);border-radius:14px;background:linear-gradient(110deg,rgba(240,185,11,.10),rgba(24,26,32,.96));box-shadow:0 8px 24px rgba(0,0,0,.12)}
@@ -1907,7 +1937,18 @@ body.light-theme #tab-markets .market-board-v34 .coin .price-toman{color:#805a0a
 <section id="authView" class="card auth">
  <div class="auth-visual">
   <div><div class="auth-brand">Digi<span>Arz</span></div><div class="auth-kicker">DEMO CRYPTO EXCHANGE</div><div class="auth-headline">بازار واقعی را تجربه کن؛<br>بدون ریسک پول واقعی</div><div class="auth-copy">با قیمت‌های بازار و سرمایه مجازی، خریدوفروش رمزارزها را تمرین کن و عملکرد خودت را بسنج.</div></div>
-  <div class="auth-benefits"><div class="auth-benefit"><i data-lucide="chart-candlestick"></i>نمودارهای حرفه‌ای بازار</div><div class="auth-benefit"><i data-lucide="wallet"></i>کیف پول آزمایشی</div><div class="auth-benefit"><i data-lucide="shield-check"></i>بدون واریز پول واقعی</div><div class="auth-benefit"><i data-lucide="newspaper"></i>اخبار و تحلیل رمزارزها</div></div>
+  <section class="auth-phone-preview" aria-label="نمای زنده بازار رمزارزها">
+  <div class="auth-phone-top"><span class="auth-phone-camera"></span><span class="auth-phone-live"><i></i> بازار زنده</span><span class="auth-phone-pair">BTC / USDT</span></div>
+  <div class="auth-phone-price"><strong id="authMiniPrice">در حال دریافت قیمت…</strong><span id="authMiniChange">—</span></div>
+  <div id="authMiniChart" role="img" aria-label="نمودار کندل‌استیک زنده بیت‌کوین"></div>
+  <div class="auth-coin-track" id="authCoinTrack" aria-live="polite">
+    <div class="auth-coin-chip" data-symbol="BTCUSDT"><b>₿</b><span>BTC</span><strong>—</strong></div>
+    <div class="auth-coin-chip" data-symbol="ETHUSDT"><b>Ξ</b><span>ETH</span><strong>—</strong></div>
+    <div class="auth-coin-chip" data-symbol="SOLUSDT"><b>◎</b><span>SOL</span><strong>—</strong></div>
+  </div>
+  <div class="auth-phone-foot"><span>قیمت‌های بازار واقعی</span><span>معاملات با پول مجازی</span></div>
+</section>
+<div class="auth-benefits"><div class="auth-benefit"><i data-lucide="chart-candlestick"></i>نمودارهای حرفه‌ای بازار</div><div class="auth-benefit"><i data-lucide="wallet"></i>کیف پول آزمایشی</div><div class="auth-benefit"><i data-lucide="shield-check"></i>بدون واریز پول واقعی</div><div class="auth-benefit"><i data-lucide="newspaper"></i>اخبار و تحلیل رمزارزها</div></div>
  </div>
  <div class="auth-form">
   <div class="auth-kicker">خوش آمدید به DigiArz</div><h2>ورود به حساب کاربری</h2><div class="auth-intro">برای ادامه وارد حساب خود شوید؛ اگر حساب ندارید، ثبت‌نام کنید.</div>
@@ -3275,6 +3316,14 @@ async function fetchBinanceResponse(urlOrPath){
   return {ok:true,status:200,json:async()=>payload,source:data.source||'DigiArz Market Gateway'};
 }
 async function fetchBinanceKlines(symbol,interval,limit){const response=await fetchBinanceResponse(`/api/v3/klines?symbol=${encodeURIComponent(symbol)}&interval=${encodeURIComponent(interval)}&limit=${encodeURIComponent(limit)}`);const rows=await response.json();if(!Array.isArray(rows)||!rows.length)throw new Error('برای این نماد کندل معتبر از منابع بازار دریافت نشد.');return rows}
+let authMiniChart=null,authMiniCandleSeries=null,authMiniResizeObserver=null,authMiniRefreshTimer=null,authCoinRotationTimer=null,authCoinOffset=0,authMiniBusy=false;
+const authMiniSymbols=[{symbol:'BTCUSDT',label:'BTC',glyph:'₿'},{symbol:'ETHUSDT',label:'ETH',glyph:'Ξ'},{symbol:'SOLUSDT',label:'SOL',glyph:'◎'},{symbol:'BNBUSDT',label:'BNB',glyph:'◆'},{symbol:'XRPUSDT',label:'XRP',glyph:'✕'},{symbol:'ADAUSDT',label:'ADA',glyph:'₳'}];
+function ensureAuthMiniChart(){const el=$('authMiniChart');if(authMiniChart||!el||!window.LightweightCharts)return;if(el.clientWidth<10)return;authMiniChart=LightweightCharts.createChart(el,{width:el.clientWidth,height:el.clientHeight,layout:{background:{color:'#10264a'},textColor:'#b9c9e1',fontSize:9},grid:{vertLines:{color:'rgba(255,255,255,.035)'},horzLines:{color:'rgba(255,255,255,.05)'}},rightPriceScale:{visible:false,borderVisible:false},leftPriceScale:{visible:false},timeScale:{visible:false,borderVisible:false},crosshair:{vertLine:{visible:false},horzLine:{visible:false}},handleScroll:false,handleScale:false});authMiniCandleSeries=authMiniChart.addCandlestickSeries({upColor:'#36cf91',downColor:'#f16b79',borderUpColor:'#36cf91',borderDownColor:'#f16b79',wickUpColor:'#36cf91',wickDownColor:'#f16b79',priceLineVisible:false,lastValueVisible:false});if(window.ResizeObserver){authMiniResizeObserver=new ResizeObserver(()=>{if(authMiniChart&&el.clientWidth>0)authMiniChart.applyOptions({width:el.clientWidth,height:el.clientHeight})});authMiniResizeObserver.observe(el)}}
+function renderAuthCoinTrack(){const root=$('authCoinTrack');if(!root)return;const visible=Array.from({length:3},(_,i)=>authMiniSymbols[(authCoinOffset+i)%authMiniSymbols.length]);root.replaceChildren();for(const coin of visible){const node=document.createElement('div');node.className='auth-coin-chip';node.dataset.symbol=coin.symbol;const glyph=document.createElement('b');glyph.textContent=coin.glyph;const label=document.createElement('span');label.textContent=coin.label;const price=document.createElement('strong');price.textContent='—';price.dataset.price='true';node.append(glyph,label,price);root.appendChild(node)}}
+async function refreshAuthCoinPrices(){if(!supabaseClient||authView.classList.contains('hidden'))return;const root=$('authCoinTrack');if(!root)return;const visible=Array.from(root.querySelectorAll('.auth-coin-chip'));await Promise.allSettled(visible.map(async node=>{const symbol=node.dataset.symbol;const response=await fetchBinanceResponse('/api/v3/ticker/24hr?symbol='+encodeURIComponent(symbol));const ticker=await response.json();const price=Number(ticker?.lastPrice),change=Number(ticker?.priceChangePercent);const target=node.querySelector('[data-price]');if(target&&Number.isFinite(price)&&price>0)target.textContent=price>=1000?formatNum(price,0):price>=1?formatNum(price,2):formatNum(price,5);if(symbol==='BTCUSDT'&&Number.isFinite(price)&&price>0){$('authMiniPrice').textContent=formatNum(price,2)+' USDT';const changeNode=$('authMiniChange');if(Number.isFinite(change)){changeNode.textContent=(change>0?'+':'')+formatNum(change,2)+'%';changeNode.style.color=change>=0?'#8ee6bd':'#ff9ba6'}}}))}
+async function refreshAuthMiniChart(){if(authMiniBusy||!supabaseClient||authView.classList.contains('hidden'))return;authMiniBusy=true;try{ensureAuthMiniChart();if(!authMiniChart||!authMiniCandleSeries)return;const rows=await fetchBinanceKlines('BTCUSDT','5m',36);const candles=rows.map(candleFromKline).filter(c=>[c.time,c.open,c.high,c.low,c.close].every(Number.isFinite));if(candles.length){authMiniCandleSeries.setData(candles);authMiniChart.timeScale().fitContent()}}catch(error){const price=$('authMiniPrice');if(price&&price.textContent==='در حال دریافت قیمت…')price.textContent='قیمت موقتاً در دسترس نیست';console.warn('DigiArz login market preview:',error)}finally{authMiniBusy=false}}
+function initAuthMarketPreview(){if(authMiniRefreshTimer||!$('authMiniChart'))return;renderAuthCoinTrack();const run=()=>{if(!document.hidden&&!authView.classList.contains('hidden')){refreshAuthMiniChart();refreshAuthCoinPrices()}};run();authMiniRefreshTimer=setInterval(run,60000);authCoinRotationTimer=setInterval(()=>{if(document.hidden||authView.classList.contains('hidden'))return;authCoinOffset=(authCoinOffset+1)%authMiniSymbols.length;renderAuthCoinTrack();refreshAuthCoinPrices()},4500)}
+
 function candleFromKline(k){return {time:Math.floor(Number(k[0])/1000),open:Number(k[1]),high:Number(k[2]),low:Number(k[3]),close:Number(k[4]),volume:Number(k[5]||0),quoteVolume:Number(k[7]||0)}}
 function calculateRsi(values,period=14){if(values.length<=period)return null;let gain=0,loss=0;for(let i=1;i<=period;i++){const d=values[i]-values[i-1];if(d>0)gain+=d;else loss-=d}let avgGain=gain/period,avgLoss=loss/period;for(let i=period+1;i<values.length;i++){const d=values[i]-values[i-1];avgGain=(avgGain*(period-1)+Math.max(d,0))/period;avgLoss=(avgLoss*(period-1)+Math.max(-d,0))/period}if(avgLoss===0)return avgGain===0?50:100;return 100-(100/(1+avgGain/avgLoss))}
 function emaSeries(values,period){if(values.length<period)return [];const out=Array(values.length).fill(null),k=2/(period+1);let ema=values.slice(0,period).reduce((a,b)=>a+b,0)/period;out[period-1]=ema;for(let i=period;i<values.length;i++){ema=values[i]*k+ema*(1-k);out[i]=ema}return out}
@@ -3369,7 +3418,7 @@ async function start(){
  const signupButton=$('signupBtn');
  if(signupButton)signupButton.addEventListener('click',signup);
  try{
- initTheme();initCurrencyMode();
+ initTheme();initCurrencyMode();initAuthMarketPreview();
  // Bind navigation before remote data clients so menu controls survive network failures.
  try{bindTabs()}catch(navError){console.error('DigiArz navigation initialization failed:',navError)}
  renderLucideIcons();
