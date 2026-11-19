@@ -281,3 +281,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Added a regression test in tests/index-syntax.test.js for the five-cell layout, 40px logos, borderless star, visible Persian name, and mobile grid.
 - Code is on the work branch only. No main merge, Pages deployment, APK publication, Supabase deployment, database migration, or financial-data change has occurred.
 - CI and Android visual QA are pending. Next: open PR to trigger CI, fix any failures, then ask the user to review the installed build. Merge and release require explicit approval.
+
+
+## 2026-11-19 — Market row fix merged; APK build pending
+- User explicitly approved merging PR #16 and building a new APK.
+- PR #16 merged successfully into main. Merge commit: 0ee8c9dbeb0c8229b2181acc2e9cb52544e6868b.
+- Pre-merge PR exact-decimal CI run 44485982288 succeeded.
+- Post-merge exact-decimal workflow run 44486985269 is still in progress.
+- Android APK workflow run 44486985383 was automatically triggered by the main push. Capacitor install, web build, Android project generation and sync completed successfully; Gradle assembleDebug is still running. Artifact not yet uploaded/available.
+- No Supabase deploy, schema migration, DB or financial-data change was performed.
+- Next: monitor both runs; when APK run succeeds, retrieve artifact and verify BUILD-INFO.txt commit matches 0ee8c9dbeb0c8229b2181acc2e9cb52544e6868b, then provide verified APK download.
