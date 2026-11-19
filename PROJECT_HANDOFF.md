@@ -211,3 +211,35 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - محدودیت تست: درخواست مستقیم به endpoint از محیط اجرا به علت DNS/شبکه ناموفق بود؛ smoke test واقعی تصویر و بررسی بصری روی Android هنوز باقی است.
 
 **Next:** برنامه DigiArz را refresh کن و چند نماد بدون لوگوی قبلی و ترتیب بخش‌های صعودی/نزولی را بررسی کن؛ اگر موردی باقی مانده، اسکرین‌شات بفرست.
+
+ 
+## Checkpoint: diagnose and fix market logos / 24h ranking — 2026-11-19
+- Live Supabase function logs for the Android client show 1,166 logo HTTP 404s versus 103 HTTP 200s in the last 24 hours. The v2 Edge Function is active, but its symbol-only SpotHQ/CoinCap fallback does not cover most of the market catalogue.
+- Read-only Production SQL confirms all 398 enabled `demo_trading_pairs` have an exact `base_coingecko_id` match in `crypto_assets`, and all 398 have a non-empty `image_url`. The UI loader was only reading `market_prices` plus `pair_symbol,is_enabled`; it never loaded the exact CoinGecko metadata. This is the confirmed logo root cause.
+- Market ticker logs show 1,155 HTTP 200 and 83 HTTP 502 calls over the last 24 hours. The browser loader used `Promise.all` for ticker batches, so one failed batch rejected the entire batch set, discarding successful responses. Its fallback coverage gate also checked only the first 12 market pairs despite 398 enabled pairs.
+- A safe work branch was created from current main: `fix/market-logo-metadata-and-partial-ticker-batches`.
+- Code changes on that branch:
+  - Load metadata only for enabled pairs, joined by exact `base_coingecko_id`, in chunks of 100; attach `image_url`, name and a separate `change_updated_at` timestamp.
+  - Keep stored 24h percentage fallback freshness tied to the crypto metadata timestamp, not the more frequently refreshed `market_prices.updated_at`.
+  - Collect fulfilled ticker batches with `Promise.allSettled`, preserving valid batches when one fails.
+  - Measure fallback coverage across the full enabled market and exclude null values from valid-change counts.
+  - Add regression tests for exact-ID metadata mapping, stale percentage rejection, partial batch retention and full-market coverage threshold.
+- CI has not yet been verified for this branch. No Production DB changes, migrations, schema changes, Edge Function deploys, financial data changes, merge or Production release were made.
+- Next: open/inspect a Draft PR to trigger CI, fix any test failures, then perform Android visual QA. Merge/deploy require separate user approval.
+
+## PR #14 state — 2026-11-19
+- PR #14: https://github.com/shahram-adim/DigiArz/pull/14 — open, ready for review, not merged.
+- Branch: `fix/market-logo-metadata-and-partial-ticker-batches`; latest code/test commit at this checkpoint: `be3b9c3841c7acf69bb122f7e103fd8b1c4d7613`.
+- GitHub Actions run `44479513790` (run 822) is in progress; do not claim CI success until final status is read.
+- No Supabase Production deployment, database changes, or financial data modifications. Merge and deploy still require separate user approval.
+
+## PR #14 CI correction — 2026-11-19
+- First CI run `44479513790` failed the inline-script parse test due to one extra closing `]` in the metadata loader. The issue was fixed in code commit `6d9b4be45a4706ef7d292eee60d3440f3bf1cee1`.
+- Follow-up run `44479671283`: the exact-decimal and browser integration test step passed. The overall workflow is still running; PostgreSQL integration steps have not yet completed.
+- Do not report overall CI success until the run has a final successful conclusion. PR #14 remains open and unmerged; no Production changes were made.
+
+## CI completed successfully — 2026-11-19
+- GitHub Actions run `44479671283` (run 824) for commit `6d9b4be45a4706ef7d292eee60d3440f3bf1cee1` completed with conclusion `success`.
+- All 43 job steps completed successfully: browser/market tests, PostgreSQL arithmetic and migration rehearsal tests, two-session Limit worker/cancellation races, TP-SL conditional execution/cancellation races, Stop-Limit child execution/cancellation races, and isolated lifecycle integrations.
+- The prior syntax regression was fixed before this run. The new CI run is green.
+- CI does not prove visual behavior on the Android device or successful live upstream image fetches. PR #14 remains unmerged; no Production deployment or database changes were made.

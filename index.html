@@ -1923,7 +1923,8 @@ async function fetchAllSupabaseRows(queryFactory,pageSize=1000){
  while(true){const {data,error}=await queryFactory().range(offset,offset+pageSize-1);if(error)throw error;const page=data||[];all.push(...page);if(page.length<pageSize)break;offset+=pageSize;}
  return all;
 }
-async function loadMarkets(forceTickerRefresh=false){const [marketData,pairData,fr]=await Promise.all([fetchAllSupabaseRows(()=>supabaseClient.from('market_prices').select('symbol,price,source,updated_at').order('symbol')),fetchAllSupabaseRows(()=>supabaseClient.from('demo_trading_pairs').select('pair_symbol,is_enabled').eq('is_enabled',true)),supabaseClient.from('market_fx_rates').select('price_toman,source,source_updated_at,is_stale').eq('symbol','USD_IRT').maybeSingle()]);const fx=fr.data;currentFxRate=null;currentFxIsValid=false;if(!fr.error&&fx){const rate=Number(fx.price_toman),updated=fx.source_updated_at?new Date(fx.source_updated_at).getTime():0,age=Date.now()-updated;if(Number.isFinite(rate)&&rate>0&&fx.is_stale===false&&updated>0&&age>=-120000&&age<=1200000){currentFxRate=rate;currentFxIsValid=true;$('fxRate').textContent=formatNum(rate,0)+' تومان';$('fxUpdated').textContent='منبع: '+safeText(fx.source||'نامشخص')+' · زمان منبع: '+new Date(fx.source_updated_at).toLocaleString('fa-IR')}else{$('fxRate').textContent='نرخ دلار قدیمی است';$('fxUpdated').textContent='منبع: '+safeText(fx.source||'نامشخص')+' · آخرین زمان منبع: '+(fx.source_updated_at?new Date(fx.source_updated_at).toLocaleString('fa-IR'):'نامشخص')+' · نرخ برای ارزش‌گذاری قابل اتکا نیست.'}}else{$('fxRate').textContent='نرخ دلار دریافت نشد';$('fxUpdated').textContent=fr.error?'خطا در دریافت نرخ دلار':'نرخ ثبت نشده است'}const enabledSymbols=new Set((pairData||[]).map(x=>x.pair_symbol));marketRows=(marketData||[]).filter(x=>enabledSymbols.has(x.symbol));renderMarketPriceFreshness();renderCategoryButtons();renderMarkets();renderDashboardSummary();refreshMarketTickers(forceTickerRefresh).catch(e=>console.warn('Market ticker refresh:',e))}
+function attachMarketAssetMetadata(marketData,pairData,metadataRows){const pairs=new Map((pairData||[]).filter(x=>x.is_enabled!==false).map(x=>[String(x.pair_symbol||'').toUpperCase(),x]));const assets=new Map((metadataRows||[]).map(x=>[String(x.coingecko_id||''),x]));return (marketData||[]).filter(x=>pairs.has(String(x.symbol||'').toUpperCase())).map(row=>{const pair=pairs.get(String(row.symbol||'').toUpperCase()),asset=assets.get(String(pair?.base_coingecko_id||''));return {...row,coingecko_id:pair?.base_coingecko_id||null,name:asset?.name||row.name||null,image_url:asset?.image_url||null,change:asset?.price_change_percentage_24h??null,change_updated_at:asset?.last_updated||null}})}
+async function loadMarkets(forceTickerRefresh=false){const [marketData,pairData,fr]=await Promise.all([fetchAllSupabaseRows(()=>supabaseClient.from('market_prices').select('symbol,price,source,updated_at').order('symbol')),fetchAllSupabaseRows(()=>supabaseClient.from('demo_trading_pairs').select('pair_symbol,is_enabled,base_coingecko_id').eq('is_enabled',true)),supabaseClient.from('market_fx_rates').select('price_toman,source,source_updated_at,is_stale').eq('symbol','USD_IRT').maybeSingle()]);const metadataIds=[...new Set((pairData||[]).map(x=>x.base_coingecko_id).filter(Boolean))],metadataChunks=[];for(let i=0;i<metadataIds.length;i+=100)metadataChunks.push(metadataIds.slice(i,i+100));const metadataRows=(await Promise.all(metadataChunks.map(ids=>fetchAllSupabaseRows(()=>supabaseClient.from('crypto_assets').select('coingecko_id,symbol,name,image_url,price_change_percentage_24h,last_updated').in('coingecko_id',ids))))).flat();const fx=fr.data;currentFxRate=null;currentFxIsValid=false;if(!fr.error&&fx){const rate=Number(fx.price_toman),updated=fx.source_updated_at?new Date(fx.source_updated_at).getTime():0,age=Date.now()-updated;if(Number.isFinite(rate)&&rate>0&&fx.is_stale===false&&updated>0&&age>=-120000&&age<=1200000){currentFxRate=rate;currentFxIsValid=true;$('fxRate').textContent=formatNum(rate,0)+' تومان';$('fxUpdated').textContent='منبع: '+safeText(fx.source||'نامشخص')+' · زمان منبع: '+new Date(fx.source_updated_at).toLocaleString('fa-IR')}else{$('fxRate').textContent='نرخ دلار قدیمی است';$('fxUpdated').textContent='منبع: '+safeText(fx.source||'نامشخص')+' · آخرین زمان منبع: '+(fx.source_updated_at?new Date(fx.source_updated_at).toLocaleString('fa-IR'):'نامشخص')+' · نرخ برای ارزش‌گذاری قابل اتکا نیست.'}}else{$('fxRate').textContent='نرخ دلار دریافت نشد';$('fxUpdated').textContent=fr.error?'خطا در دریافت نرخ دلار':'نرخ ثبت نشده است'}marketRows=attachMarketAssetMetadata(marketData,pairData,metadataRows);renderMarketPriceFreshness();renderCategoryButtons();renderMarkets();renderDashboardSummary();refreshMarketTickers(forceTickerRefresh).catch(e=>console.warn('Market ticker refresh:',e))}
 let marketExtrasLoaded=false,marketExtrasPromise=null;
 async function loadMarketExtras(force=false){if(marketExtrasLoaded&&!force)return;if(marketExtrasPromise)return marketExtrasPromise;marketExtrasPromise=(async()=>{await Promise.allSettled([loadFeaturedMarketAssets(),refreshAutoMarkets()]);await refreshMarketTickers();marketExtrasLoaded=true;renderCategoryButtons();renderMarkets();renderDashboardSummary()})();try{return await marketExtrasPromise}finally{marketExtrasPromise=null}}
 async function loadFeaturedMarketAssets(){
@@ -2173,21 +2174,24 @@ function showAllLosers(){activeMarketCategory='losers';$('marketSearch').value='
 function renderTopGainers(){const root=$('topGainersList');if(!root)return;const rows=sortMarketRowsByChange(marketRows,'desc').filter(item=>getMarketChange24h(item)>0).slice(0,5);if(!rows.length){root.innerHTML='<div class="muted small">اطلاعات رشد ۲۴ ساعته هنوز در دسترس نیست.</div>';return}root.innerHTML='';for(const item of rows){const base=String(item.symbol).replace(/USDT$/i,''),change=getMarketChange24h(item);const el=document.createElement('button');el.type='button';el.className='gainer-card';el.innerHTML=`${coinLogo(base)}<span><b>${safeText(persianCoinName(item.symbol))}</b><small>${safeText(base)}</small></span><strong>+${formatNum(change,2)}٪</strong><span class="muted small">مشاهده ←</span>`;el.addEventListener('click',()=>openChart(item.symbol));root.appendChild(el)}}
 function renderTopLosers(){const root=$('topLosersList');if(!root)return;const rows=sortMarketRowsByChange(marketRows,'asc').filter(item=>getMarketChange24h(item)<0).slice(0,5);if(!rows.length){root.innerHTML='<div class="muted small">اطلاعات کاهش ۲۴ ساعته هنوز در دسترس نیست.</div>';return}root.innerHTML='';for(const item of rows){const base=String(item.symbol).replace(/USDT$/i,''),change=getMarketChange24h(item);const el=document.createElement('button');el.type='button';el.className='gainer-card loser-card';el.innerHTML=`${coinLogo(base)}<span><b>${safeText(persianCoinName(item.symbol))}</b><small>${safeText(base)}</small></span><strong>${formatNum(change,2)}٪</strong><span class="muted small">مشاهده ←</span>`;el.addEventListener('click',()=>openChart(item.symbol));root.appendChild(el)}}
 function renderTopAssets(){const root=$('topAssetsList');if(!root)return;const rows=[...marketRows].map(item=>({item,t:getFreshMarketTicker(item)})).filter(x=>x.t&&Number.isFinite(x.t.quoteVolume)&&x.t.quoteVolume>0).sort((a,b)=>b.t.quoteVolume-a.t.quoteVolume).slice(0,10);if(!rows.length){root.innerHTML='<div class="muted small">اطلاعات حجم معاملات برای رتبه‌بندی در دسترس نیست.</div>';return}root.innerHTML='';for(const row of rows){const symbol=String(row.item.symbol),base=symbol.replace(/USDT$/i,''),liveUsd=Number(row.t.last),storedUsd=Number(row.item.price),usd=Number.isFinite(liveUsd)&&liveUsd>0?liveUsd:storedUsd,toman=Number.isFinite(usd)&&usd>0&&currentFxIsValid?usd*currentFxRate:null,change=getMarketChange24h(row.item),hasChange=change!==null;const el=document.createElement('button');el.type='button';el.className='top-asset-card';el.innerHTML=`${coinLogo(base)}<b>${safeText(persianCoinName(symbol))}</b><small>${safeText(base)}</small><span class="top-usd">${Number.isFinite(usd)&&usd>0?formatNum(usd,8)+' $':'—'}</span><span class="top-toman">${toman!==null?formatNum(toman,0)+' تومان':'نرخ تومان ناموجود'}</span><strong class="top-change ${hasChange?(change>0?'pos':change<0?'neg':''):''}">${hasChange?(change>0?'+':change<0?'−':'')+formatNum(Math.abs(change),2)+'٪':'—'}</strong><small style="direction:ltr">حجم: ${formatNum(row.t.quoteVolume,0)} USDT</small>`;el.addEventListener('click',()=>openChart(symbol));root.appendChild(el)}}
+function collectMarketTickerBatchResults(results){const rows=[],errors=[];for(const result of results||[]){if(result?.status==='fulfilled'&&Array.isArray(result.value))rows.push(...result.value);else if(result?.status==='rejected')errors.push(String(result.reason?.message||result.reason||'خطای نامشخص'))}return {rows,errors}}
 async function fetchBinance24hrTickerRows(){
   if(!supabaseClient)throw new Error('اتصال امن سرور بازار آماده نیست');
   const symbols=[...new Set(marketRows.map(item=>String(item.symbol||'').toUpperCase()).filter(symbol=>/^[A-Z0-9]{2,20}USDT$/.test(symbol)))];
   if(!symbols.length)throw new Error('فهرست نمادهای بازار خالی است');
   const batches=[];for(let i=0;i<symbols.length;i+=120)batches.push(symbols.slice(i,i+120));
-  const responses=await Promise.all(batches.map(async batch=>{
+  const results=await Promise.allSettled(batches.map(async batch=>{
     const {data,error}=await supabaseClient.functions.invoke('market-data',{body:{action:'ticker24',symbols:batch}});
     if(error)throw error;
     if(!data?.success||!Array.isArray(data.tickers))throw new Error(data?.error||'دریافت اطلاعات بازار از سرور ناموفق بود');
     return data.tickers;
   }));
-  const rows=responses.flat();
-  if(!rows.length)throw new Error('سرور هیچ اطلاعات ۲۴ ساعته‌ای برای نمادهای فعال برنگرداند');
-  return rows;
+  const collected=collectMarketTickerBatchResults(results);
+  if(!collected.rows.length)throw new Error('سرور هیچ اطلاعات ۲۴ ساعته‌ای برای نمادهای فعال برنگرداند'+(collected.errors.length?' · '+collected.errors.join('؛ '):''));
+  return collected.rows;
 }
+function isValidMarketChangeValue(value){return value!==null&&value!==undefined&&value!==''&&Number.isFinite(Number(value))}
+function getMarketTickerCoverageThreshold(total){return Math.max(0,Number(total)||0)}
 async function refreshMarketTickersUnlocked(){
  const stamp=$('marketTickerUpdated');let provider='Binance',failure='';
  try{
@@ -2200,8 +2204,8 @@ async function refreshMarketTickersUnlocked(){
   marketTickerMap=next;
   marketTickerLastFetchedAt=Date.now();
   const btc=marketTickerMap.get('BTCUSDT');
-  const validPrimaryCount=marketRows.filter(item=>{const value=marketTickerMap.get(item.symbol)?.change;return value!==null&&value!==undefined&&value!==''&&Number.isFinite(Number(value))}).length;
-  const coverageThreshold=Math.max(3,Math.ceil(Math.min(marketRows.length,12)*0.75));
+  const validPrimaryCount=marketRows.filter(item=>isValidMarketChangeValue(marketTickerMap.get(item.symbol)?.change)).length;
+  const coverageThreshold=getMarketTickerCoverageThreshold(marketRows.length);
   if(!btc||btc.change===null||validPrimaryCount<coverageThreshold){
    const fallback=await discoverMultiExchangeMarkets();
    let recovered=0;
@@ -2213,7 +2217,7 @@ async function refreshMarketTickersUnlocked(){
     }
    }
    if(recovered)provider='Binance + '+[...new Set(fallback.rows.filter(x=>Number.isFinite(Number(x.change))).map(x=>x.source.split(' · ')[0]))].join('، ');
-   const validAfterFallback=marketRows.filter(item=>Number.isFinite(Number(marketTickerMap.get(item.symbol)?.change))).length;
+   const validAfterFallback=marketRows.filter(item=>isValidMarketChangeValue(marketTickerMap.get(item.symbol)?.change)).length;
    if(validAfterFallback===0)failure='درصد تغییر از Binance و منابع جایگزین دریافت نشد';
    else if(validAfterFallback<marketRows.length)failure='درصد تغییر برای '+validAfterFallback+' از '+marketRows.length+' ارز دریافت شد';
   }
@@ -2250,7 +2254,7 @@ function getMarketChange24h(item){
  const ticker=getFreshMarketTicker(item),liveRaw=ticker?.change;
  if(liveRaw!==null&&liveRaw!==undefined&&liveRaw!==''&&Number.isFinite(Number(liveRaw)))return Number(liveRaw);
  const storedRaw=item?.change;
- if(isMarketTimestampFresh(item?.updated_at)&&storedRaw!==null&&storedRaw!==undefined&&storedRaw!==''&&Number.isFinite(Number(storedRaw)))return Number(storedRaw);
+ if(isMarketTimestampFresh(item?.change_updated_at??item?.updated_at)&&storedRaw!==null&&storedRaw!==undefined&&storedRaw!==''&&Number.isFinite(Number(storedRaw)))return Number(storedRaw);
  return null;
 }
 function compareMarketChange(a,b,direction='desc'){
