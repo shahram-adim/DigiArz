@@ -1638,3 +1638,13 @@
 - [!] مقایسهٔ زندهٔ شاخه با main اکنون `diverged` با ۳۲۷ commit جلو و ۲ commit عقب است. هیچ merge/rebase/sync انجام نشد.
 - [!] هیچ تغییر Production در Supabase انجام نشد؛ تست‌های PostgreSQL در محیط disposable workflow اجرا شدند.
 - گام بعد: نصب APK Debug روی گوشی و دریافت نتیجهٔ تست ظاهری واقعی؛ پس از گزارش کاربر، اصلاح UI و build مجدد در صورت نیاز.
+
+
+## پیگیری CI و تأیید مجدد APK — ۱۹ نوامبر ۲۰۲۶
+- [x] HEAD شاخه هنگام بررسی برابر `643f9ea77c5b92144bcae8fdcf0c95ae34559f5c` بود؛ اجرای Exact decimal tests شماره `44464855118` روی همین commit با نتیجه `success` پایان یافت. تمام مراحل job موفق شدند؛ از جمله تست‌های Node/browser، PostgreSQL دورریختنی، Stop-Limit، TP-SL، Futures، Oracle، Reduce-only، دفترکل و تست‌های هم‌زمانی.
+- [x] artifact APK با شناسه `14501125910` از run `44462777374` دوباره از GitHub دریافت شد؛ ZIP واقعی بررسی شد و شامل `app-debug.apk` و `BUILD-INFO.txt` است. SHA-256 آرشیو با digest ثبت‌شده در GitHub برابر `72559d155025cceef7e63f8a2fb6104ec80e2d7e53498c0a09fe4409668b5ba4` و SHA-256 APK برابر `105cfd866118ed1de55362179fde18670425870ac7406e53411d972c4538ab27` است.
+- [x] BUILD-INFO منشأ APK را commit `b58c272fd8a1e8a273d343b1412c0e567b5c8f3e` روی شاخه feature مشخص می‌کند. مقایسهٔ مستقیم آن تا HEAD `643f9ea...` نشان داد فقط `IMPLEMENTATION_STATUS.md` و `tests/market-mobile-layout.test.js` تغییر کرده‌اند؛ سورس برنامه و تنظیمات ساخت تغییر نکرده‌اند. APK از نظر کد برنامه با HEAD زمان بررسی هم‌ارز است، اما provenance ساخت آن به commit مذکور اشاره می‌کند.
+- [!] APK از نوع Debug و صرفاً برای نصب آزمایشی است؛ نصب و بازبینی واقعی روی گوشی کاربر هنوز تأیید نشده است.
+- [x] PR #12 باز، Draft و ادغام‌نشده است. HEAD آن `643f9ea...` بود. شاخه در compare فعلی با main برابر ۳۲۸ commit جلو و ۲ commit عقب و وضعیت `diverged` است؛ main روی `ad8d52bf49027b20756242259b1de867c04d5ab9` قرار دارد. هیچ merge/rebase/sync انجام نشد.
+- [!] هیچ تغییر یا migration در Supabase Production انجام نشد؛ تمام تست‌های دیتابیسی این run در PostgreSQL دورریختنی GitHub Actions اجرا شدند.
+- گام بعد: نصب APK Debug روی Android و بررسی ورود، بازار، قیمت‌ها، نوار شش‌بخشی پایین، اسکرول و تم روشن/تیره؛ اصلاح UI فقط بر اساس ایراد واقعی مشاهده‌شده روی گوشی.
