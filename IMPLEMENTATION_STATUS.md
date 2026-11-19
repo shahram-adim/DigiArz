@@ -965,3 +965,19 @@
 - [x] تغییرات روی همان شاخهٔ آزمایشی `redesign/full-app-experience-v2` ثبت شدند؛ main و Supabase Production دست‌نخورده‌اند و PR #30 همچنان Draft است.
 - [!] اجرای CIهای مرتبط با دو commit این اصلاح در زمان ثبت در حال اجرا بود: Run #940 و Run #941؛ نتیجهٔ نهایی و ساخت APK جدید هنوز تأیید نشده است.
 - [ ] گام بعد: دریافت نتیجهٔ نهایی CI؛ در صورت موفقیت، اجرای workflow ساخت APK روی همین شاخه و ارائهٔ Build جدید برای تست Android.
+
+
+
+### تأیید CI و انتشار APK پس از اصلاح ترتیب CSS — ۲۰ نوامبر ۲۰۲۶
+- [x] وضعیت زنده GitHub دوباره بررسی شد؛ PR شمارهٔ ۳۰ همچنان Open و Draft است، head برابر `ba28e1ab8e1342f68b9b972c68aa8592d3e48b7d`، مقصد `main`، و merge نشده است.
+- [x] Exact decimal CI run شمارهٔ ۹۴۰ با شناسهٔ `44616369319` روی commit اصلاح CSS یعنی `ad3bf972693beb0552ecd826875bbc84288892c8` موفق شد.
+- [x] Exact decimal CI run شمارهٔ ۹۴۱ با شناسهٔ `44616407351` روی commit تست ترتیب CSS یعنی `5316f03b1c4942da318e3e51001477f0634dd603` موفق شد.
+- [x] Exact decimal CI run شمارهٔ ۹۴۲ با شناسهٔ `44616562129` روی HEAD فعلی PR یعنی `ba28e1ab8e1342f68b9b972c68aa8592d3e48b7d` موفق شد.
+- [x] Android Build 72 با run شناسهٔ `44616357902` و شمارهٔ ۷۲ روی commit `ad3bf972693beb0552ecd826875bbc84288892c8` با نتیجهٔ نهایی `success` ساخته شد؛ تمام ۱۲ مرحلهٔ اصلی از build وب تا انتشار مستقیم APK موفق شدند.
+- [x] Artifact شمارهٔ `14575265596` با نام `DigiArz-Android-debug-APK`، حجم ZIP برابر 3,531,534 بایت و digest آرشیو `sha256:acdff5df2ffe46e20210ccd217292208b81ef28b2cc16a771d9cb455452d6077` ثبت شد.
+- [x] Release شمارهٔ ۷۲ با tag برابر `android-debug-72` منتشر شد. فایل `app-debug.apk` حجم 3,912,424 بایت و digest ثبت‌شدهٔ Release برابر `sha256:3dc6d5a5b07da1ae5e3dde7d8f6a7e62f43a637d58ebf3599f5f1af7f3b8a6de` است.
+- [x] لینک مستقیم APK: https://github.com/shahram-adim/DigiArz/releases/download/android-debug-72/app-debug.apk
+- [!] Build 72 شامل اصلاح نهایی cascade در `index.html` است؛ دو commit بعدی PR فقط تست رگرسیون و مستندسازی وضعیت را اضافه کردند و منطق/ظاهر برنامه را تغییر ندادند.
+- [!] Build 72 یک Debug APK آزمایشی است، نه نسخهٔ production-signed. موفقیت CI و صحت artifact کیفیت دیداری یا اجرای واقعی در Android WebView را اثبات نمی‌کند.
+- [x] هیچ merge به `main` و هیچ تغییری در Supabase Production انجام نشد.
+- [ ] گام بعد: نصب Build 72 روی Android و بررسی بازشدن برنامه، صفحه ورود، داشبورد، بازار، میز معامله، دارایی‌ها، سفارش‌ها و نوار پایین موبایل؛ سپس بازخورد دیداری کاربر برای اصلاحات دقیق دریافت شود.
