@@ -299,3 +299,17 @@ test('ticker fallback coverage is measured across the full enabled market, not o
   assert.equal(context.isValidMarketChangeValue('0'), true);
   assert.equal(context.isValidMarketChangeValue('-2.5'), true);
 });
+
+test('market list rows use five aligned cells, 40px logos, visible Persian names and an unboxed favorite star', () => {
+  const start = html.indexOf('function renderMarkets(){');
+  const end = html.indexOf('function renderDashboardPortfolio(', start);
+  const market = html.slice(start, end);
+  assert.match(market, /persianName=String\(item\.name_fa\|\|persianCoinName\(item\.symbol\)\)/);
+  assert.match(market, /class="coin-name-fa"/);
+  assert.match(html, /digiarz-market-row-fix-20261119/);
+  assert.match(html, /grid-template-columns:34px minmax\(0,1\.2fr\) minmax\(54px,\.55fr\) minmax\(82px,\.72fr\) minmax\(112px,\.86fr\)!important/);
+  assert.match(html, /coin-identity \.coin-icon\{[\s\S]{0,100}width:40px!important;height:40px!important/);
+  assert.match(html, /coin>\.favorite-btn\{[\s\S]{0,500}border:0!important/);
+  assert.match(html, /coin-name-fa\{[\s\S]{0,200}display:block!important/);
+  assert.match(html, /@media\(max-width:700px\)[\s\S]{0,900}grid-template-columns:30px minmax\(0,1fr\) minmax\(88px,auto\)!important/);
+});
