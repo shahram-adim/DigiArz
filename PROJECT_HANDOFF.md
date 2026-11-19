@@ -232,3 +232,8 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Branch: `fix/market-logo-metadata-and-partial-ticker-batches`; latest code/test commit at this checkpoint: `be3b9c3841c7acf69bb122f7e103fd8b1c4d7613`.
 - GitHub Actions run `44479513790` (run 822) is in progress; do not claim CI success until final status is read.
 - No Supabase Production deployment, database changes, or financial data modifications. Merge and deploy still require separate user approval.
+
+## PR #14 CI correction — 2026-11-19
+- First CI run `44479513790` failed the inline-script parse test due to one extra closing `]` in the metadata loader. The issue was fixed in code commit `6d9b4be45a4706ef7d292eee60d3440f3bf1cee1`.
+- Follow-up run `44479671283`: the exact-decimal and browser integration test step passed. The overall workflow is still running; PostgreSQL integration steps have not yet completed.
+- Do not report overall CI success until the run has a final successful conclusion. PR #14 remains open and unmerged; no Production changes were made.
