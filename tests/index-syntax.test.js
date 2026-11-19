@@ -164,3 +164,63 @@ test('Iranian exchange discovery RPC is read-only and excludes non-crypto tokeni
   assert.ok(migration.includes('public.demo_trading_pairs'));
   assert.ok(migration.includes('GRANT EXECUTE ON FUNCTION public.get_exchange_discovered_market_assets() TO anon, authenticated'));
 });
+
+
+test('market 24h ranking uses one freshness-aware comparator in both directions', () => {
+  const start = html.indexOf('function getMarketChange24h(item){');
+  const end = html.indexOf('function getTrustedMarketPrice(item){', start);
+  assert.ok(start >= 0 && end > start, 'shared 24h ranking helper boundaries found');
+  const context = {
+    getFreshMarketTicker: item => item.hasLiveTicker ? { change: item.liveChange } : null,
+    isMarketTimestampFresh: value => value === 'fresh'
+  };
+  vm.runInNewContext(
+    html.slice(start, end) +
+      '\nthis.sortMarketRowsByChange = sortMarketRowsByChange; this.getMarketChange24h = getMarketChange24h;',
+    context
+  );
+  const rows = [
+    { symbol: 'ETHUSDT', hasLiveTicker: true, liveChange: '-4.25' },
+    { symbol: 'BTCUSDT', hasLiveTicker: true, liveChange: '8.10' },
+    { symbol: 'ADAUSDT', hasLiveTicker: true, liveChange: '1.50' },
+    { symbol: 'SOLUSDT', hasLiveTicker: true, liveChange: '-0.75' },
+    { symbol: 'XRPUSDT', change: '99', updated_at: 'stale' },
+    { symbol: 'DOGEUSDT', change: '2.25', updated_at: 'fresh' }
+  ];
+  assert.deepEqual(
+    Array.from(context.sortMarketRowsByChange(rows, 'desc'), item => item.symbol),
+    ['BTCUSDT', 'DOGEUSDT', 'ADAUSDT', 'SOLUSDT', 'ETHUSDT']
+  );
+  assert.deepEqual(
+    Array.from(context.sortMarketRowsByChange(rows, 'asc'), item => item.symbol),
+    ['ETHUSDT', 'SOLUSDT', 'ADAUSDT', 'DOGEUSDT', 'BTCUSDT']
+  );
+  assert.equal(context.getMarketChange24h(rows[4]), null, 'stale stored percentages are excluded');
+  assert.equal(context.getMarketChange24h(rows[5]), 2.25, 'fresh stored fallback percentages are accepted');
+});
+
+test('gainer, loser, volatility and market-list views share the same ranking helpers', () => {
+  const gainersStart = html.indexOf('function renderTopGainers(){');
+  const losersStart = html.indexOf('function renderTopLosers(){', gainersStart);
+  const assetsStart = html.indexOf('function renderTopAssets(){', losersStart);
+  const gainers = html.slice(gainersStart, losersStart);
+  const losers = html.slice(losersStart, assetsStart);
+  const marketStart = html.indexOf('function renderMarkets(){');
+  const marketEnd = html.indexOf('function renderDashboardPortfolio(', marketStart);
+  const market = html.slice(marketStart, marketEnd);
+  assert.ok(gainers.includes("sortMarketRowsByChange(marketRows,'desc')"));
+  assert.ok(losers.includes("sortMarketRowsByChange(marketRows,'asc')"));
+  assert.ok(market.includes("compareMarketChange(a,b,'desc')"));
+  assert.ok(market.includes("compareMarketChange(a,b,'asc')"));
+  assert.ok(html.includes("const valid=sortMarketRowsByChange(marketRows,'desc')"));
+});
+
+test('coin logos try curated metadata, the primary icon set and an independent fallback', () => {
+  assert.match(html, /function getCoinLogoImageUrl\(symbol\)/);
+  assert.match(html, /data-custom-image-url=/);
+  assert.match(html, /assets\.coincap\.io\/assets\/icons/);
+  const edge = fs.readFileSync('supabase/functions/app-assets/index.ts', 'utf8');
+  assert.match(edge, /spothq\/cryptocurrency-icons/);
+  assert.match(edge, /assets\.coincap\.io\/assets\/icons/);
+  assert.match(edge, /fetchFirstAvailable/);
+});
