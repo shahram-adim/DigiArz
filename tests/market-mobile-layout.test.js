@@ -45,3 +45,15 @@ test('English DigiArz wordmark remains left-to-right inside the RTL header', () 
   assert.ok(html.includes('<div class="brand"><bdi dir="ltr">Digi<span>Arz</span></bdi><span class="tag">DEMO</span></div>'));
   assert.ok(style.includes('.brand>bdi{direction:ltr;unicode-bidi:isolate'));
 });
+
+test('dashboard market preview keeps long prices inside the card on mobile', () => {
+  assert.match(html, /#dashboardMarketPreview\.dashboard-market-preview\.da-v2-market-list>\.da-market-coin-card\{[\s\S]*?minmax\(120px,1\.4fr\)/);
+  assert.match(html, /#dashboardMarketPreview \.da-market-price,[\s\S]*?min-width:0!important;max-width:100%!important;overflow:hidden!important/);
+  assert.match(html, /@media\(max-width:390px\)[\s\S]*?minmax\(110px,1\.5fr\)/);
+});
+
+test('dashboard market preview has readable colors in light theme', () => {
+  assert.match(html, /body\.light-theme #dashboardMarketPreview \.da-market-name-wrap b\{color:#1c2938!important\}/);
+  assert.match(html, /body\.light-theme #dashboardMarketPreview \.da-market-price\{color:#26364b!important\}/);
+  assert.match(html, /body\.light-theme #dashboardMarketPreview \.da-market-toman\{color:#13835f!important\}/);
+});
