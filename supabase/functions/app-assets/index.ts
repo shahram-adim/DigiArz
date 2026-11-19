@@ -62,7 +62,7 @@ Deno.serve(async (req: Request) => {
         ...cors,
         "Content-Type": response.headers.get("content-type") || "image/png",
         "Cache-Control": "public, max-age=604800",
-        "X-DigiArz-Logo-Source": new URL(response.url).hostname
+        "X-DigiArz-Logo-Source": response.url ? new URL(response.url).hostname : "unknown"
       }
     });
   }
