@@ -1989,50 +1989,68 @@ body.light-theme #tab-markets .market-board-v34 .coin .price-toman{color:#805a0a
 </div>
 
 <section id="loginDailyAd" class="daily-ad-card hidden" aria-label="تبلیغ روزانه"></section>
-<section id="authView" class="card auth">
- <div class="auth-visual">
-  <div><div class="auth-brand">Digi<span>Arz</span></div><div class="auth-kicker">DEMO CRYPTO EXCHANGE</div><div class="auth-headline">بازار واقعی را تجربه کن؛<br>بدون ریسک پول واقعی</div><div class="auth-copy">با قیمت‌های بازار و سرمایه مجازی، خریدوفروش رمزارزها را تمرین کن و عملکرد خودت را بسنج.</div>
-  <div class="auth-quick-stats" aria-label="ویژگی‌های پلتفرم"><span><b>LIVE</b><small>قیمت زنده</small></span><span><b>۶+</b><small>رمزارز منتخب</small></span><span><b>۰</b><small>ریسک پول واقعی</small></span></div></div>
-  <div class="auth-scene" aria-label="نمایش سه‌بعدی بازار DigiArz">
- <div class="auth-earth" aria-hidden="true">
-  <svg viewBox="0 0 260 260" role="presentation">
-   <defs>
-    <radialGradient id="authEarthOcean" cx="34%" cy="27%" r="75%"><stop offset="0" stop-color="#83e8e0"/><stop offset=".24" stop-color="#248bba"/><stop offset=".62" stop-color="#15518b"/><stop offset="1" stop-color="#071a3b"/></radialGradient>
-    <linearGradient id="authEarthLand" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#b8e7b0"/><stop offset=".48" stop-color="#4eaa83"/><stop offset="1" stop-color="#246b68"/></linearGradient>
-    <radialGradient id="authEarthShade" cx="32%" cy="24%" r="75%"><stop offset=".45" stop-color="#06152d" stop-opacity="0"/><stop offset="1" stop-color="#020817" stop-opacity=".82"/></radialGradient>
-    <clipPath id="authEarthClip"><circle cx="130" cy="130" r="105"/></clipPath>
-    <filter id="authEarthGlow"><feGaussianBlur stdDeviation="5"/></filter>
-   </defs>
-   <circle cx="130" cy="130" r="111" fill="#46c7e7" opacity=".18" filter="url(#authEarthGlow)"/>
-   <g clip-path="url(#authEarthClip)">
-    <circle cx="130" cy="130" r="105" fill="url(#authEarthOcean)"/>
-    <path d="M43 73 58 53 78 48 91 57 108 52 120 63 114 79 98 86 92 103 76 111 65 99 50 101 39 88Z M113 111 130 105 145 116 151 137 143 155 139 180 127 199 117 178 111 155 101 137Z M158 58 178 48 199 58 213 76 207 93 188 98 180 116 163 108 154 90 143 80Z M169 133 191 124 211 137 219 159 205 176 187 172 176 157Z" fill="url(#authEarthLand)" stroke="#c5f1c7" stroke-opacity=".22" stroke-width="1.5"/>
-    <path d="M23 130Q130 93 237 130M23 130Q130 167 237 130M130 25Q95 130 130 235M130 25Q165 130 130 235" fill="none" stroke="#b7ecff" stroke-opacity=".2" stroke-width="1"/>
-    <circle cx="130" cy="130" r="105" fill="url(#authEarthShade)"/>
-   </g>
-   <circle cx="130" cy="130" r="106" fill="none" stroke="#8deaff" stroke-opacity=".65" stroke-width="1.5"/>
-   <ellipse cx="130" cy="130" rx="125" ry="42" transform="rotate(-24 130 130)" fill="none" stroke="#e4c879" stroke-opacity=".72" stroke-width="2"/>
-   <ellipse cx="130" cy="130" rx="119" ry="31" transform="rotate(37 130 130)" fill="none" stroke="#7bd9ed" stroke-opacity=".55" stroke-width="1.5"/>
-  </svg>
- </div>
- <div class="auth-floating-coin auth-floating-coin-btc" aria-hidden="true"><img src="https://assets.coincap.io/assets/icons/btc@2x.png" alt=""></div>
- <div class="auth-floating-coin auth-floating-coin-eth" aria-hidden="true"><img src="https://assets.coincap.io/assets/icons/eth@2x.png" alt=""></div>
- <div class="auth-floating-coin auth-floating-coin-bnb" aria-hidden="true"><img src="https://assets.coincap.io/assets/icons/bnb@2x.png" alt=""></div>
- <div class="auth-phone-device">
-  <section class="auth-phone-preview" aria-label="نمای زنده بازار رمزارزها">
-   <div class="auth-phone-top"><span class="auth-phone-camera"></span><span class="auth-phone-live"><i></i> بازار زنده</span><span class="auth-phone-pair">BTC / USDT</span></div>
-   <div class="auth-phone-price"><strong id="authMiniPrice">در حال دریافت قیمت…</strong><span id="authMiniChange">—</span></div>
-   <div id="authMiniChart" role="img" aria-label="نمودار کندلی زنده بیت‌کوین در بازه پنج دقیقه"></div>
-   <div class="auth-coin-track" id="authCoinTrack" aria-live="polite">
-    <div class="auth-coin-chip" data-symbol="BTCUSDT"><img src="https://assets.coincap.io/assets/icons/btc@2x.png" alt="Bitcoin"><span>BTC</span><strong>—</strong></div>
-    <div class="auth-coin-chip" data-symbol="ETHUSDT"><img src="https://assets.coincap.io/assets/icons/eth@2x.png" alt="Ethereum"><span>ETH</span><strong>—</strong></div>
-    <div class="auth-coin-chip" data-symbol="SOLUSDT"><img src="https://assets.coincap.io/assets/icons/sol@2x.png" alt="Solana"><span>SOL</span><strong>—</strong></div>
+<section id="authView" class="card auth auth-reference-layout">
+ <div class="auth-visual auth-reference-visual">
+  <header class="ref-brandbar">
+   <div class="ref-brand-lockup"><span class="ref-monogram">DA<small>▥</small></span><span><strong>DigiArz</strong><em>صرافی هوشمند رمزارزها</em></span></div>
+   <div class="ref-live-pill"><i></i><span>بازار زنده</span><b>⌁</b></div>
+  </header>
+  <div class="ref-hero-grid">
+   <div class="ref-market-copy">
+    <h1>معاملات حرفه‌ای<br><span>در دنیای کریپتو</span></h1>
+    <p>سریع، امن، مطمئن</p>
+    <div class="ref-coin-list" aria-label="رمزارزهای منتخب بازار">
+     <div class="ref-coin-row"><img src="https://assets.coincap.io/assets/icons/btc@2x.png" alt="Bitcoin"><b>BTC</b><span>بیت‌کوین</span><strong data-ref-market="BTCUSDT">—</strong></div>
+     <div class="ref-coin-row"><img src="https://assets.coincap.io/assets/icons/eth@2x.png" alt="Ethereum"><b>ETH</b><span>اتریوم</span><strong data-ref-market="ETHUSDT">—</strong></div>
+     <div class="ref-coin-row"><img src="https://assets.coincap.io/assets/icons/usdt@2x.png" alt="Tether"><b>USDT</b><span>تتر</span><strong data-ref-market="USDTUSDT">—</strong></div>
+     <div class="ref-coin-row"><img src="https://assets.coincap.io/assets/icons/sol@2x.png" alt="Solana"><b>SOL</b><span>سولانا</span><strong data-ref-market="SOLUSDT">—</strong></div>
+    </div>
    </div>
-   <div class="auth-phone-foot"><span>قیمت‌های واقعی بازار</span><span>معاملات با پول مجازی</span></div>
-  </section>
- </div>
-</div>
-<div class="auth-benefits"><div class="auth-benefit"><i data-lucide="chart-candlestick"></i>نمودارهای حرفه‌ای بازار</div><div class="auth-benefit"><i data-lucide="wallet"></i>کیف پول آزمایشی</div><div class="auth-benefit"><i data-lucide="shield-check"></i>بدون واریز پول واقعی</div><div class="auth-benefit"><i data-lucide="newspaper"></i>اخبار و تحلیل رمزارزها</div></div>
+   <div class="auth-scene ref-scene" aria-label="کره زمین دیجیتال، تلفن هوشمند و سکه‌های رمزارزی">
+    <div class="auth-earth ref-earth" aria-hidden="true">
+     <svg viewBox="0 0 520 520" role="presentation">
+      <defs>
+       <radialGradient id="refOcean" cx="34%" cy="25%" r="72%"><stop stop-color="#397db4"/><stop offset=".42" stop-color="#123d70"/><stop offset=".8" stop-color="#071c3e"/><stop offset="1" stop-color="#020b20"/></radialGradient>
+       <linearGradient id="refLand" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e3bd70"/><stop offset=".42" stop-color="#8d9e76"/><stop offset="1" stop-color="#315d69"/></linearGradient>
+       <radialGradient id="refShade" cx="32%" cy="24%" r="78%"><stop offset=".42" stop-color="#06152d" stop-opacity="0"/><stop offset="1" stop-color="#010817" stop-opacity=".88"/></radialGradient>
+       <clipPath id="refGlobeClip"><circle cx="260" cy="260" r="222"/></clipPath>
+       <filter id="refGlow"><feGaussianBlur stdDeviation="13"/></filter>
+      </defs>
+      <circle cx="260" cy="260" r="240" fill="#208eff" opacity=".27" filter="url(#refGlow)"/>
+      <g clip-path="url(#refGlobeClip)">
+       <circle cx="260" cy="260" r="222" fill="url(#refOcean)"/>
+       <path d="M52 128 92 92 137 83 170 105 199 96 222 119 211 151 184 167 171 205 139 218 112 194 79 198 55 170Z M206 226 240 205 273 219 297 252 286 289 276 333 249 389 224 353 218 314 194 278Z M296 92 337 76 384 91 423 126 414 161 379 181 366 215 333 203 306 169 282 142Z M332 278 378 259 422 279 447 321 422 358 384 350 355 319Z" fill="url(#refLand)" stroke="#f7d58a" stroke-opacity=".36" stroke-width="3"/>
+       <g fill="#ffd783" opacity=".95">
+        <circle cx="108" cy="145" r="3"/><circle cx="129" cy="164" r="2.5"/><circle cx="153" cy="137" r="2.2"/><circle cx="179" cy="157" r="3"/><circle cx="205" cy="132" r="2"/><circle cx="229" cy="247" r="3"/><circle cx="249" cy="272" r="2"/><circle cx="263" cy="305" r="3"/><circle cx="285" cy="340" r="2.5"/><circle cx="327" cy="120" r="3"/><circle cx="352" cy="145" r="2"/><circle cx="382" cy="125" r="3"/><circle cx="404" cy="153" r="2"/><circle cx="370" cy="291" r="3"/><circle cx="403" cy="313" r="2.5"/><circle cx="420" cy="335" r="2"/>
+       </g>
+       <g fill="none" stroke="#8fcfff" stroke-opacity=".2" stroke-width="2"><path d="M38 260Q260 165 482 260M38 260Q260 355 482 260M260 38Q165 260 260 482M260 38Q355 260 260 482"/><ellipse cx="260" cy="260" rx="110" ry="222"/><ellipse cx="260" cy="260" rx="178" ry="222"/></g>
+       <circle cx="260" cy="260" r="222" fill="url(#refShade)"/>
+      </g>
+      <circle cx="260" cy="260" r="224" fill="none" stroke="#a8d9ff" stroke-opacity=".72" stroke-width="3"/>
+      <ellipse cx="260" cy="260" rx="286" ry="92" transform="rotate(-24 260 260)" fill="none" stroke="#ffcf59" stroke-width="5" opacity=".92"/>
+      <ellipse cx="260" cy="260" rx="275" ry="73" transform="rotate(28 260 260)" fill="none" stroke="#54a9ff" stroke-width="3" opacity=".7"/>
+     </svg>
+    </div>
+    <div class="ref-platform" aria-hidden="true"></div>
+    <div class="auth-floating-coin auth-floating-coin-btc ref-gold-coin"><img src="https://assets.coincap.io/assets/icons/btc@2x.png" alt=""></div>
+    <div class="auth-floating-coin auth-floating-coin-eth ref-gold-coin"><img src="https://assets.coincap.io/assets/icons/eth@2x.png" alt=""></div>
+    <div class="auth-floating-coin auth-floating-coin-bnb ref-gold-coin"><img src="https://assets.coincap.io/assets/icons/sol@2x.png" alt=""></div>
+    <div class="ref-usdt-coin" aria-hidden="true"><img src="https://assets.coincap.io/assets/icons/usdt@2x.png" alt=""></div>
+    <div class="auth-phone-device ref-phone">
+     <section class="auth-phone-preview" aria-label="نمای زنده بازار رمزارزها">
+      <div class="auth-phone-top"><span class="auth-phone-camera"></span><span class="auth-phone-live"><i></i> بازار زنده</span><span class="auth-phone-pair">BTC / USDT</span></div>
+      <div class="auth-phone-price"><strong id="authMiniPrice">در حال دریافت قیمت…</strong><span id="authMiniChange">—</span></div>
+      <div id="authMiniChart" role="img" aria-label="نمودار کندلی زنده بیت‌کوین در بازه پنج دقیقه"></div>
+      <div class="auth-coin-track" id="authCoinTrack" aria-live="polite">
+       <div class="auth-coin-chip" data-symbol="BTCUSDT"><img src="https://assets.coincap.io/assets/icons/btc@2x.png" alt="Bitcoin"><span>BTC</span><strong>—</strong></div>
+       <div class="auth-coin-chip" data-symbol="ETHUSDT"><img src="https://assets.coincap.io/assets/icons/eth@2x.png" alt="Ethereum"><span>ETH</span><strong>—</strong></div>
+       <div class="auth-coin-chip" data-symbol="SOLUSDT"><img src="https://assets.coincap.io/assets/icons/sol@2x.png" alt="Solana"><span>SOL</span><strong>—</strong></div>
+      </div>
+      <div class="auth-phone-foot"><span>قیمت‌های واقعی بازار</span><span>معاملات با پول مجازی</span></div>
+     </section>
+    </div>
+   </div>
+  </div>
  </div>
  <div class="auth-form">
   <div class="auth-form-toolbar"><span class="auth-form-secure"><i data-lucide="shield-check"></i> ورود امن و آزمایشی</span><button id="authThemeToggle" type="button" aria-label="تغییر حالت نمایش"><span class="auth-theme-icon" aria-hidden="true">☾</span><span id="authThemeLabel">حالت روشن</span></button></div>
@@ -2052,6 +2070,10 @@ body.light-theme #tab-markets .market-board-v34 .coin .price-toman{color:#805a0a
   <div id="authMsg" class="notice hidden" role="status"></div>
   <div class="auth-security"><i data-lucide="lock-keyhole"></i><span>حساب کاربری برای ورود امن است؛ معاملات این نسخه صرفاً آزمایشی هستند و پول واقعی جابه‌جا نمی‌شود.</span></div>
  </div>
+ <div class="ref-daily-promo" aria-label="تبلیغ روزانه">
+  <div class="ref-gift">🎁</div><div class="ref-promo-tag">ویژه کاربران</div><div class="ref-promo-copy"><strong>تبلیغ روزانه</strong><span>فرصت استثنایی، فقط ۲۴ ساعت!</span></div><div class="ref-clock">◷<b>24</b></div>
+ </div>
+ <div class="ref-demo-footer">معاملات آزمایشی با پول مجازی</div>
 </section>
 
 <main id="appView" class="hidden">
@@ -3789,6 +3811,128 @@ body.luxury-theme #authView .auth-phone-device{border-color:rgba(232,218,183,.8)
  #authView .auth-coin-chip strong{font-size:7px}
 }
 @media(prefers-reduced-motion:reduce){#authView .auth-earth,#authView .auth-floating-coin{animation:none!important}#authView .auth-phone-device{transition:none!important}}
+ 
+/* Faithful reconstruction of the approved DigiArz login reference */
+#authView.auth-reference-layout{display:flex!important;flex-direction:column!important;max-width:1024px!important;min-height:0!important;margin:0 auto 24px!important;padding:0!important;overflow:visible!important;border:0!important;border-radius:0!important;background:#031127!important;box-shadow:0 20px 70px rgba(0,0,0,.35)!important;color:#f7f8fc!important;direction:rtl}
+#authView.auth-reference-layout .auth-reference-visual{display:block!important;position:relative!important;overflow:visible!important;isolation:isolate!important;padding:30px 34px 18px!important;border:0!important;background:radial-gradient(ellipse at 76% 47%,rgba(12,85,154,.32),transparent 48%),radial-gradient(ellipse at 8% 90%,rgba(12,78,139,.2),transparent 40%),linear-gradient(155deg,#03152e 0%,#020d22 60%,#061a37 100%)!important}
+#authView .ref-brandbar{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:112px;direction:ltr}
+#authView .ref-brand-lockup{display:flex;align-items:center;gap:22px;color:#ffd76a}
+#authView .ref-monogram{position:relative;display:grid;place-items:center;width:190px;height:100px;font:bold 76px Georgia,serif;letter-spacing:-12px;color:#ffda70;text-shadow:0 2px 2px #7b4d05,0 0 18px rgba(255,194,55,.75);border-bottom:4px solid #dba92f;transform:skew(-9deg)}
+#authView .ref-monogram:after{content:"";position:absolute;width:170px;height:32px;border:5px solid #e8bb48;border-left-color:transparent;border-right-color:transparent;border-radius:50%;transform:rotate(-24deg);bottom:10px}
+#authView .ref-monogram small{position:absolute;right:4px;bottom:-2px;font-size:25px;letter-spacing:0}
+#authView .ref-brand-lockup>span:last-child{display:flex;flex-direction:column;gap:2px}
+#authView .ref-brand-lockup strong{font-size:clamp(42px,7vw,78px);font-weight:900;line-height:1;letter-spacing:-3px;color:#ffdc76;text-shadow:0 3px 2px #815b16,0 0 18px rgba(255,190,56,.35)}
+#authView .ref-brand-lockup em{font-style:normal;font-size:clamp(16px,2.5vw,25px);font-weight:800;color:#f2cb67}
+#authView .ref-live-pill{display:flex;align-items:center;gap:10px;padding:10px 18px;border:1px solid #3a9c65;border-radius:28px;color:white;background:rgba(2,31,31,.75);font-size:17px;white-space:nowrap}
+#authView .ref-live-pill i{width:15px;height:15px;border-radius:50%;background:#11e76a;box-shadow:0 0 14px #11e76a}
+#authView .ref-live-pill b{color:#12d86d;font-size:23px}
+#authView .ref-hero-grid{display:grid;grid-template-columns:minmax(270px,.78fr) minmax(0,1.35fr);gap:12px;align-items:center;direction:ltr;min-height:520px}
+#authView .ref-market-copy{direction:rtl;align-self:center;position:relative;z-index:5;padding:8px 0 18px}
+#authView .ref-market-copy h1{margin:0 0 10px;font-size:clamp(28px,4vw,46px);line-height:1.55;font-weight:900;color:#fff}
+#authView .ref-market-copy h1 span{color:#ffd34f}
+#authView .ref-market-copy>p{margin:0 0 20px;color:#f1f3f8;font-size:23px}
+#authView .ref-coin-list{display:grid;gap:10px;max-width:340px}
+#authView .ref-coin-row{display:grid;grid-template-columns:52px 52px minmax(70px,1fr) auto;align-items:center;gap:9px;min-height:52px;color:#fff;font-size:16px}
+#authView .ref-coin-row img{width:48px;height:48px;object-fit:contain;border-radius:50%;filter:drop-shadow(0 3px 7px rgba(0,0,0,.4))}
+#authView .ref-coin-row b{font-size:17px;direction:ltr}
+#authView .ref-coin-row span{font-size:15px;white-space:nowrap}
+#authView .ref-coin-row strong{color:#16e47a;font-size:15px;direction:ltr;white-space:nowrap}
+#authView .ref-scene{height:520px;min-height:520px!important;margin:0!important;position:relative!important;display:block!important;overflow:visible!important;isolation:isolate}
+#authView .ref-earth{position:absolute!important;z-index:0!important;left:0!important;top:30px!important;width:min(100%,490px)!important;aspect-ratio:1!important;filter:drop-shadow(0 15px 25px rgba(0,0,0,.4))!important;animation:none!important;opacity:1!important;visibility:visible!important}
+#authView .ref-earth svg{display:block;width:100%;height:100%;overflow:visible}
+#authView .ref-phone{position:absolute!important;z-index:4!important;right:8%!important;top:62px!important;width:min(61%,300px)!important;margin:0!important;padding:8px!important;border-radius:38px!important;transform:rotate(10deg)!important;border:2px solid rgba(240,246,255,.9)!important;background:linear-gradient(110deg,#f2f4fa,#7f899a 10%,#14233a 19%,#e3e9f3 23%,#0a1930 28%,#020b1a 100%)!important;box-shadow:0 28px 55px rgba(0,0,0,.68),inset 0 1px 2px #fff!important}
+#authView .ref-phone .auth-phone-preview{padding:16px 12px 13px!important;border-radius:29px!important;background:linear-gradient(160deg,#102c52,#06152b 65%,#020b1b)!important}
+#authView .ref-phone #authMiniChart{height:150px!important}
+#authView .ref-platform{position:absolute;z-index:1;left:1%;right:0;bottom:2px;height:60px;border:4px solid #d7a93f;border-radius:50%;background:linear-gradient(180deg,rgba(255,219,114,.35),rgba(7,22,44,.92) 45%,#020a18);box-shadow:0 12px 26px rgba(0,0,0,.7),0 0 22px rgba(245,186,52,.4),inset 0 5px 12px rgba(255,224,145,.35)}
+#authView .ref-gold-coin{width:104px!important;height:104px!important;border:3px solid #ffdf83!important;background:radial-gradient(circle at 32% 25%,#fff8d9,#f1c65b 28%,#a96d14 65%,#583507)!important;box-shadow:0 12px 30px rgba(0,0,0,.55),inset 0 0 0 5px rgba(255,243,193,.5),inset 0 -7px 13px rgba(69,37,0,.5)!important;animation:none!important}
+#authView .ref-gold-coin:after{content:"";position:absolute;inset:8px;border:2px dashed rgba(255,246,202,.65);border-radius:50%}
+#authView .ref-gold-coin img{width:57px!important;height:57px!important;filter:drop-shadow(0 3px 3px rgba(0,0,0,.55))!important}
+#authView .ref-gold-coin.auth-floating-coin-btc{left:22%!important;top:53%!important}
+#authView .ref-gold-coin.auth-floating-coin-eth{left:0!important;bottom:19%!important;width:80px!important;height:80px!important}
+#authView .ref-gold-coin.auth-floating-coin-bnb{right:0!important;top:48%!important;width:84px!important;height:84px!important}
+#authView .ref-usdt-coin{position:absolute;z-index:5;left:6%;top:72%;display:grid;place-items:center;width:78px;height:78px;border-radius:50%;border:3px solid #d6b75b;background:linear-gradient(145deg,#e8f2e6,#157d75 55%,#073d45);box-shadow:0 10px 25px rgba(0,0,0,.6)}
+#authView .ref-usdt-coin img{width:49px;height:49px;object-fit:contain}
+#authView .auth-reference-visual .auth-benefits,#authView .auth-reference-visual .auth-quick-stats{display:none!important}
+#authView.auth-reference-layout .auth-form{margin:0 5.5% 20px!important;padding:24px 42px 28px!important;border:2px solid #d9a936!important;border-radius:34px!important;background:linear-gradient(145deg,#061a36,#031127 72%)!important;box-shadow:0 0 0 1px rgba(255,221,125,.12),0 16px 38px rgba(0,0,0,.42)!important;color:#fff!important}
+#authView .auth-form-toolbar{display:none!important}
+#authView .auth-form .auth-kicker{color:#e7bd51!important;text-align:center;font-size:14px!important}
+#authView .auth-form h2{font-size:clamp(24px,3.2vw,34px)!important;color:#ffd66a!important;text-align:center;margin:4px 0 8px!important}
+#authView .auth-form .auth-intro{color:#aebbd0!important;text-align:center}
+#authView .auth-form .field{margin:11px 0!important}
+#authView .auth-form .field label{color:#d5dfef!important}
+#authView .auth-form input{background:rgba(5,22,46,.85)!important;border:1px solid #586c8c!important;border-radius:19px!important;color:white!important;min-height:62px!important}
+#authView .auth-form input::placeholder{color:#8798b3!important}
+#authView .auth-form .auth-actions{grid-template-columns:1fr!important}
+#authView .auth-form .auth-actions button{min-height:66px!important;border-radius:18px!important;background:linear-gradient(110deg,#ffdf7a,#d99b1d 45%,#ffe18a)!important;color:#07152c!important;font-size:19px!important;font-weight:900!important;box-shadow:0 5px 16px rgba(236,178,44,.32)!important}
+#authView .auth-form .auth-actions #signupBtn{background:rgba(10,31,59,.9)!important;color:#d7e7ff!important;border:1px solid #536a8d!important}
+#authView .auth-form #forgotBtn{background:transparent!important;border:0!important;color:#d5dff0!important}
+#authView .auth-form .auth-security{justify-content:center;border-top:1px solid rgba(255,214,106,.2);color:#aebbd0!important}
+#authView .ref-daily-promo{display:flex;align-items:center;gap:22px;min-height:145px;margin:0 28px 18px;padding:18px 28px;border:2px solid #d8a739;border-radius:30px;background:radial-gradient(ellipse at 12% 50%,rgba(15,116,184,.38),transparent 32%),linear-gradient(110deg,#07172d,#06152d 58%,#09264b);box-shadow:inset 0 0 25px rgba(38,120,198,.15),0 12px 26px rgba(0,0,0,.35)}
+#authView .ref-gift{font-size:65px;filter:drop-shadow(0 7px 10px rgba(0,0,0,.5))}
+#authView .ref-promo-tag{padding:12px 15px;border-radius:8px;background:linear-gradient(120deg,#ffe18a,#dba32e);color:#17233a;font-weight:900;transform:rotate(-5deg)}
+#authView .ref-promo-copy{display:flex;flex-direction:column;gap:9px;flex:1;text-align:center}
+#authView .ref-promo-copy strong{font-size:clamp(22px,4vw,38px);color:#fff}
+#authView .ref-promo-copy span{font-size:16px;color:#f4d46f}
+#authView .ref-clock{position:relative;font-size:62px;color:#ffcf57;line-height:1}
+#authView .ref-clock b{position:absolute;inset:22px 0 0;text-align:center;font-size:24px;color:#fff}
+#authView .ref-demo-footer{text-align:center;padding:10px 20px 22px;color:#f2d26d;font-size:22px;font-weight:800;letter-spacing:.2px;background:#031127}
+@media(max-width:760px){
+ #authView.auth-reference-layout{margin:0 auto 18px!important}
+ #authView.auth-reference-layout .auth-reference-visual{padding:18px 15px 8px!important}
+ #authView .ref-brandbar{min-height:78px;gap:8px}
+ #authView .ref-monogram{width:80px;height:65px;font-size:43px;letter-spacing:-8px}
+ #authView .ref-monogram:after{width:76px;height:19px;border-width:3px;bottom:7px}
+ #authView .ref-monogram small{font-size:13px}
+ #authView .ref-brand-lockup{gap:8px}
+ #authView .ref-brand-lockup strong{font-size:clamp(31px,8vw,48px);letter-spacing:-2px}
+ #authView .ref-brand-lockup em{font-size:12px}
+ #authView .ref-live-pill{padding:7px 9px;font-size:11px;gap:6px}
+ #authView .ref-live-pill i{width:9px;height:9px}
+ #authView .ref-live-pill b{font-size:16px}
+ #authView .ref-hero-grid{grid-template-columns:minmax(118px,.72fr) minmax(0,1.28fr);gap:2px;min-height:320px}
+ #authView .ref-market-copy{padding:0 0 10px}
+ #authView .ref-market-copy h1{font-size:clamp(19px,5vw,29px);line-height:1.65}
+ #authView .ref-market-copy>p{font-size:15px;margin-bottom:12px}
+ #authView .ref-coin-list{gap:5px}
+ #authView .ref-coin-row{grid-template-columns:30px 33px minmax(34px,1fr);gap:4px;min-height:35px;font-size:11px}
+ #authView .ref-coin-row img{width:29px;height:29px}
+ #authView .ref-coin-row b{font-size:11px}
+ #authView .ref-coin-row span{font-size:10px}
+ #authView .ref-coin-row strong{display:none}
+ #authView .ref-scene{height:330px;min-height:330px!important}
+ #authView .ref-earth{left:-10px!important;top:38px!important;width:100%!important}
+ #authView .ref-phone{right:1%!important;top:55px!important;width:65%!important;padding:5px!important;border-radius:26px!important}
+ #authView .ref-phone .auth-phone-preview{padding:10px 7px 8px!important;border-radius:20px!important}
+ #authView .ref-phone #authMiniChart{height:90px!important}
+ #authView .ref-gold-coin{width:61px!important;height:61px!important}
+ #authView .ref-gold-coin img{width:34px!important;height:34px!important}
+ #authView .ref-gold-coin.auth-floating-coin-btc{left:17%!important;top:58%!important}
+ #authView .ref-gold-coin.auth-floating-coin-eth{left:-2%!important;bottom:15%!important;width:52px!important;height:52px!important}
+ #authView .ref-gold-coin.auth-floating-coin-bnb{right:-1%!important;top:49%!important;width:54px!important;height:54px!important}
+ #authView .ref-usdt-coin{left:2%;top:74%;width:48px;height:48px}
+ #authView .ref-usdt-coin img{width:30px;height:30px}
+ #authView.auth-reference-layout .auth-form{margin:0 4% 14px!important;padding:20px 16px 22px!important;border-radius:24px!important}
+ #authView .auth-form input{min-height:55px!important}
+ #authView .auth-form .auth-actions button{min-height:56px!important;font-size:16px!important}
+ #authView .ref-daily-promo{gap:8px;min-height:86px;margin:0 10px 10px;padding:9px;border-radius:18px}
+ #authView .ref-gift{font-size:36px}
+ #authView .ref-promo-tag{font-size:9px;padding:7px}
+ #authView .ref-promo-copy{gap:5px}
+ #authView .ref-promo-copy strong{font-size:17px}
+ #authView .ref-promo-copy span{font-size:10px}
+ #authView .ref-clock{font-size:38px}
+ #authView .ref-clock b{inset:14px 0 0;font-size:14px}
+ #authView .ref-demo-footer{font-size:16px;padding:8px 10px 18px}
+}
+@media(max-width:390px){
+ #authView .ref-hero-grid{grid-template-columns:112px minmax(0,1fr);min-height:290px}
+ #authView .ref-scene{height:300px;min-height:300px!important}
+ #authView .ref-phone{width:69%!important;right:-2%!important}
+ #authView .ref-market-copy h1{font-size:18px}
+ #authView .ref-coin-row{grid-template-columns:27px 29px minmax(30px,1fr)}
+ #authView .ref-coin-row img{width:26px;height:26px}
+}
+@media(prefers-reduced-motion:reduce){#authView .ref-earth,#authView .ref-gold-coin{animation:none!important;transition:none!important}}
 </style>
 
 </body>
