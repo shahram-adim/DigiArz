@@ -2191,7 +2191,7 @@ async function fetchBinance24hrTickerRows(){
   return collected.rows;
 }
 function isValidMarketChangeValue(value){return value!==null&&value!==undefined&&value!==''&&Number.isFinite(Number(value))}
-function getMarketTickerCoverageThreshold(total){return total>0?Math.min(total,Math.max(3,Math.ceil(total*0.75))):0}
+function getMarketTickerCoverageThreshold(total){return Math.max(0,Number(total)||0)}
 async function refreshMarketTickersUnlocked(){
  const stamp=$('marketTickerUpdated');let provider='Binance',failure='';
  try{
