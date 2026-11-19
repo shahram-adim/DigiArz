@@ -391,7 +391,7 @@ test('approved DigiArz login reference is implemented as a real responsive verti
   const ad=html.indexOf('id="loginDailyAd"',authStart);
   assert.ok(authStart>=0&&authEnd>authStart&&ad>authEnd,'daily ad is placed after the complete login card');
   const auth=html.slice(authStart,authEnd);
-  for(const token of ['class="login-brandbar"','class="login-hero"','class="login-globe-wrap"','class="login-orbit"','class="login-phone"','id="authMiniChart"','id="authCoinTrack"','class="login-card"']) assert.ok(auth.includes(token),'approved visual component exists: '+token);
+  for(const token of ['id="loginBrandbar"','class="login-hero"','class="login-globe-wrap"','class="login-orbit"','class="auth-phone-preview"','id="authMiniChart"','id="authCoinTrack"','class="login-card"']) assert.ok(auth.includes(token),'approved visual component exists: '+token);
   for(const symbol of ['BTCUSDT','ETHUSDT','BNBUSDT','XRPUSDT','SOLUSDT','TRXUSDT','DOGEUSDT','ADAUSDT','LINKUSDT','LTCUSDT']) assert.ok(html.includes("symbol:'"+symbol+"'"),'live ticker candidate exists: '+symbol);
   assert.match(html,/quoteVolume/,'visible market assets are ranked by returned 24h quote volume');
   assert.match(html,/loginEarthSpin/);
