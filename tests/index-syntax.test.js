@@ -420,6 +420,8 @@ test('unified professional UI stylesheet is loaded for every authenticated scree
     '#tab-admin', '#tab-settings', '.mobile-bottom-nav'
   ]) assert.ok(proUiCss.includes(selector), 'redesign covers ' + selector);
   assert.ok(proUiCss.includes('body.light-theme'));
+  assert.ok(proUiCss.includes('body:not(.auth-page-active)'));
+  assert.ok(proUiCss.includes('body.light-theme:not(.auth-page-active)'));
   assert.ok(proUiCss.includes('body.luxury-theme'));
   assert.ok(proUiCss.includes('@media(max-width:700px)'));
   assert.ok(proUiCss.includes('prefers-reduced-motion:reduce'));
