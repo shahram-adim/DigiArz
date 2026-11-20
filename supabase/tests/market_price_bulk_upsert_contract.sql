@@ -100,4 +100,55 @@ BEGIN
 END
 $test$;
 
+
+
+-- Cross-provider duplicate-key scenario: two upstream CoinGecko IDs and
+-- two exchange providers can all produce the same target symbol. This fixture
+-- intentionally does not choose a winner or encode Production precedence.
+CREATE TEMP TABLE provider_price_candidates (
+  symbol text NOT NULL,
+  price numeric NOT NULL,
+  source text NOT NULL,
+  upstream_key text NOT NULL
+) ON COMMIT DROP;
+
+CREATE TEMP TABLE provider_price_target (
+  symbol text PRIMARY KEY,
+  price numeric NOT NULL,
+  source text NOT NULL
+) ON COMMIT DROP;
+
+INSERT INTO provider_price_candidates(symbol, price, source, upstream_key)
+VALUES
+  ('SOL', 150, 'coingecko', 'coingecko-id-sol-a'),
+  ('SOL', 151, 'coingecko', 'coingecko-id-sol-b'),
+  ('SOL', 149, 'kucoin', 'SOL-USDT'),
+  ('SOL', 152, 'gateio', 'SOL_USDT');
+
+DO $test$
+BEGIN
+  IF (SELECT count(*) FROM provider_price_candidates WHERE symbol = 'SOL') <> 4 THEN
+    RAISE EXCEPTION 'expected four independent SOL provider candidates';
+  END IF;
+
+  -- A direct set-based upsert cannot consume all four candidates for one
+  -- unique target key. The failed statement must leave the target untouched.
+  BEGIN
+    INSERT INTO provider_price_target(symbol, price, source)
+    SELECT symbol, price, source
+    FROM provider_price_candidates
+    WHERE symbol = 'SOL'
+    ON CONFLICT (symbol) DO UPDATE
+      SET price = EXCLUDED.price, source = EXCLUDED.source;
+    RAISE EXCEPTION 'cross-provider duplicate target keys unexpectedly succeeded';
+  EXCEPTION
+    WHEN cardinality_violation THEN NULL;
+  END;
+
+  IF EXISTS (SELECT 1 FROM provider_price_target) THEN
+    RAISE EXCEPTION 'failed cross-provider upsert left a partial SOL row';
+  END IF;
+END
+$test$;
+
 ROLLBACK;
