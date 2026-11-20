@@ -2554,7 +2554,23 @@ const extraPersianNames={
  USDT:'تتر',USDC:'یو‌اس‌دی‌سی',FDUSD:'اف‌دی‌یو‌اس‌دی',TUSD:'ترویو‌اس‌دی',DAI:'دای',USDE:'اتنا یو‌اس‌دی',BTC:'بیت‌کوین',ETH:'اتریوم',BNB:'بایننس کوین',SOL:'سولانا',XRP:'ریپل',ADA:'کاردانو',DOGE:'دوج‌کوین',TRX:'ترون',TON:'تون‌کوین',LINK:'چین‌لینک',LTC:'لایت‌کوین',BCH:'بیت‌کوین کش',AVAX:'آوالانچ',DOT:'پولکادات',SHIB:'شیبا اینو',UNI:'یونی‌سواپ',AAVE:'آوه',NEAR:'نیر',ATOM:'کازماس',ETC:'اتریوم کلاسیک',XLM:'استلار',FIL:'فایل‌کوین',APT:'آپتوس',ARB:'آربیتروم',OP:'آپتیمیسم',SUI:'سویی',SEI:'سی',INJ:'اینجکتیو',ICP:'اینترنت کامپیوتر',RENDER:'رندر',FET:'فچ',TAO:'بیتنسور',PEPE:'پپه',FLOKI:'فلوکی',BONK:'بونک',WIF:'داگ‌ویف‌هت',MKR:'میکردائو',CRV:'کرو',LDO:'لیدو دائو',GALA:'گالا',SAND:'سندباکس',MANA:'دیسنترالند',AXS:'اکسی اینفینیتی',IMX:'ایمیوتبل',HBAR:'هدرا',VET:'وی‌چین',ALGO:'الگوراند',EGLD:'الروند',THETA:'تتا',KAS:'کاسپا',ONDO:'اوندو',PENDLE:'پندل',JUP:'ژوپیتر',WLD:'ورلدکوین',ENA:'اتنا',PYTH:'پایث',TIA:'سلسیا',STRK:'استارک‌نت',ZK:'زی‌کی‌سینک',NOT:'نات‌کوین',ORDI:'اوردینالز',BOME:'بوم',JTO:'جیتو',RUNE:'تورچین',XTZ:'تزوس',EOS:'ایاس',NEO:'نئو',IOTA:'آیوتا',ZEC:'زی‌کش',DASH:'دش',COMP:'کامپاند',SNX:'سینتتیکس',YFI:'یرن فایننس','1INCH':'وان‌اینچ',ENS:'اتریوم نیم سرویس',LRC:'لوپرینگ',ZRX:'زیرو ایکس',BAT:'بت',CHZ:'چیلیز',ENJ:'انجین',GRT:'گراف',MATIC:'پالیگان',POL:'پالیگان',FTM:'فانتوم',S:'سونیک',FLOW:'فلو',MINA:'مینا',ROSE:'اوسیس',CELO:'سلو',AR:'آرویو',STX:'استکس',KAVA:'کاوا',CFX:'کانفلاکس',IOTX:'آیوتکس',JASMY:'جاسمی',MASK:'مسک',GMT:'استپن',APE:'ایپ‌کوین',BLUR:'بلر',WOO:'وو نتورک',KNC:'کایبر نتورک',QTUM:'کوانتوم',ZIL:'زیلیکا',ONT:'آنتولوژی',ICX:'آیکون',RVN:'ریون‌کوین',DCR:'دیکرد',XMR:'مونرو',BTT:'بیت‌تورنت',HOT:'هولو',ANKR:'انکر',SKL:'اسکیل',API3:'ای‌پی‌آی۳',AUDIO:'آدیو',OCEAN:'اوشن',AGIX:'سینگولاریتی‌نت',RNDR:'رندر',FLOKI:'فلوکی',LUNA:'ترا',LUNC:'ترا کلاسیک',USTC:'یو‌اس‌تی‌سی',PEOPLE:'کانستیتوشن‌دائو',GMT:'استپن',ILV:'ایلوویوم',MAGIC:'مجیک',SUPER:'سوپر',HIGH:'های‌استریت',YGG:'ییلد گیلد گیمز',SSV:'اس‌اس‌وی',RPL:'راکت پول',FXS:'فرکس شیر',CVX:'کانوکس',BAL:'بالانسر',SUSHI:'سوشی‌سواپ',DYDX:'دی‌وای‌دی‌ایکس',GMX:'جی‌ام‌ایکس',STG:'استارگیت',ZETA:'زتاچین',OM:'مانترا',CORE:'کور',MANTA:'مانتا',ALT:'آلت‌لیر',AEVO:'ایوو',PIXEL:'پیکسلز',PORTAL:'پورتال',ETHFI:'اتر‌فای',LISTA:'لیستا',BANANA:'بانانا',CATI:'کتیزن',HMSTR:'همستر کامبت',EIGEN:'ایگن‌لیر',SCR:'اسکرول',MOVE:'موو',BERA:'برا',IP:'اینفینیت پرایم',TRUMP:'آفیشال ترامپ',MELANIA:'ملانیا'
 };
 
-function persianCoinName(symbol){const base=String(symbol||'').toUpperCase().replace(/USDT$/,'');return tomanAssetNames.get(base)||coinInfo[base]?.fa||extraPersianNames[base]||'دارایی دیجیتال'}
+function transliterateCoinName(value){
+ const digraphs={sh:'ش',ch:'چ',kh:'خ',gh:'غ',zh:'ژ',th:'ث',ph:'ف',oo:'و',ee:'ی',ou:'و',ai:'ای',qu:'کو'};
+ return String(value||'').trim().replace(/[A-Za-z]+|[0-9]+/g,token=>{
+  if(/^\d+$/.test(token))return token;
+  let word=token.toLowerCase();
+  for(const [latin,persian] of Object.entries(digraphs))word=word.replaceAll(latin,persian);
+  const letters={a:'ا',b:'ب',c:'ک',d:'د',e:'ی',f:'ف',g:'گ',h:'ه',i:'ی',j:'ج',k:'ک',l:'ل',m:'م',n:'ن',o:'و',p:'پ',q:'ق',r:'ر',s:'س',t:'ت',u:'و',v:'و',w:'و',x:'کس',y:'ی',z:'ز'};
+  return [...word].map(char=>letters[char]||char).join('');
+ }).replace(/\s+/g,' ').trim();
+}
+function persianCoinName(symbol,englishName=''){
+ const base=String(symbol||'').toUpperCase().replace(/USDT$/,'');
+ const known=tomanAssetNames.get(base)||coinInfo[base]?.fa||extraPersianNames[base];
+ if(known)return known;
+ const source=String(englishName||coinInfo[base]?.name||base).trim();
+ return transliterateCoinName(source)||transliterateCoinName(base)||base;
+}
 async function discoverMultiExchangeMarkets(){
   const {data,error}=await supabaseClient.functions.invoke('market-data',{body:{action:'discover'}});
   if(error)throw error;
@@ -2614,10 +2630,15 @@ function safeCoinImageUrl(value){const url=String(value||'').trim();return /^htt
 function getCoinLogoImageUrl(symbol){const clean=cleanCoinSymbol(symbol);const rows=[...(Array.isArray(featuredMarketRows)?featuredMarketRows:[]),...(Array.isArray(marketRows)?marketRows:[])];const match=rows.find(item=>cleanCoinSymbol(item.symbol||item.asset||'')===clean);return safeCoinImageUrl(match?.image_url)}
 function handleCoinLogoError(img){
  const symbol=cleanCoinSymbol(img.dataset.symbol||''),holder=img.parentElement,index=Number(img.dataset.fallbackIndex||0);
- const fallbacks=[logoUrl(symbol,img.dataset.imageUrl||''),`https://assets.coincap.io/assets/icons/${symbol.toLowerCase()}@2x.png`];
+ const custom=img.dataset.customImageUrl==='1';
+ const fallbacks=[...(custom?[logoUrl(symbol)]:[]),`https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/svg/color/${symbol.toLowerCase()}.svg`,`https://assets.coincap.io/assets/icons/${symbol.toLowerCase()}@2x.png`];
  if(index<fallbacks.length){img.dataset.fallbackIndex=String(index+1);img.src=fallbacks[index];return}
- if(img.classList.contains('asset-logo')&&holder?.classList.contains('asset-detail-head')){const fallback=document.createElement('span');fallback.className='asset-logo coin-logo-fallback';fallback.textContent=symbol.slice(0,1)||'؟';fallback.setAttribute('aria-label',`نماد ${symbol}`);img.replaceWith(fallback);return}
- img.style.display='none';if(holder){holder.classList.add('coin-logo-fallback');holder.textContent=symbol.slice(0,1)||'؟';holder.setAttribute('aria-label',`نماد ${symbol}`)}
+ const fallback=document.createElement('span');
+ fallback.className=(img.classList.contains('asset-logo')?'asset-logo ':'')+'coin-logo-fallback';
+ fallback.textContent=symbol.slice(0,1)||'؟';
+ fallback.setAttribute('role','img');fallback.setAttribute('aria-label',`نشان ${symbol}`);
+ if(img.classList.contains('asset-logo')&&holder?.classList.contains('asset-detail-head'))img.replaceWith(fallback);
+ else if(holder){img.remove();holder.classList.add('coin-logo-fallback');holder.replaceChildren(fallback);holder.setAttribute('aria-label',`نشان ${symbol}`)}
 }
 function coinLogo(symbol,sizeClass='coin-icon',imageUrl=''){const clean=cleanCoinSymbol(symbol),custom=safeCoinImageUrl(imageUrl)||getCoinLogoImageUrl(clean),initial=custom||logoUrl(clean);return `<span class="${sizeClass}" aria-label="لوگوی ${safeText(clean)}"><img src="${safeText(initial)}" data-symbol="${safeText(clean)}" data-custom-image-url="${custom?'1':'0'}" data-image-url="${safeText(custom)}" data-fallback-index="0" alt="${safeText(clean)}" loading="lazy" decoding="async" onerror="handleCoinLogoError(this)"></span>`}
 function updateQuickTradeEstimate(side){
@@ -2842,7 +2863,7 @@ function renderMarkets(){
   const ticker=getFreshMarketTicker(item),trustedPrice=getTrustedMarketPrice(item),usd=trustedPrice===null?NaN:trustedPrice,valid=Number.isFinite(usd)&&usd>0,toman=valid&&currentFxRateForDisplay>0?usd*currentFxRateForDisplay:null,div=document.createElement('div');
   div.className='coin'+(item.symbol===selectedSymbol?' selected':'');div.dataset.symbol=String(item.symbol).toUpperCase();
   const fullSymbol=String(item.symbol).toUpperCase(),base=fullSymbol.replace(/USDT$/i,'');
-  const change=changeOf(item),isFavorite=isFavoriteSymbol(item.symbol),persianName=String(item.name_fa||persianCoinName(item.symbol));
+  const change=changeOf(item),isFavorite=isFavoriteSymbol(item.symbol),persianName=String(item.name_fa||persianCoinName(item.symbol,item.name||coinInfo[base]?.name));
   div.setAttribute('role','group');div.setAttribute('tabindex','0');div.setAttribute('aria-label',`اطلاعات ${persianName} (${base})`);
   const usdMarkup=`<div class="price-usd"><strong>${valid?'$ '+formatNum(usd,10):'—'}</strong></div>`;
   const tomanMarkup=`<div class="price-toman"><strong>${toman!==null?formatNum(toman,0)+' تومان':'نرخ تومان ناموجود'}</strong></div>`;
