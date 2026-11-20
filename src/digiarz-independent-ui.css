@@ -1170,3 +1170,12 @@ body.dark-theme #dashboardMarketPreview .da-market-toman{color:#f0c85a!important
  #dashboardMarketPreview .da-market-price{font-size:9px!important}
  #dashboardMarketPreview .da-market-toman{font-size:7px!important}
 }
+
+/* Secure Passkey controls */
+#authView #passkeySignInBtn{display:flex;align-items:center;justify-content:center;gap:9px;min-height:48px;border:1px solid rgba(66,133,244,.32);border-radius:12px;font-weight:850}
+#authView #passkeySignInBtn[hidden]{display:none!important}
+#authView #passkeySignInBtn svg{width:19px;height:19px}
+#passkeySettingsRow{border-color:rgba(69,224,192,.28)}
+#passkeySettingsRow button{white-space:nowrap;min-height:42px}
+#passkeySettingsMsg{margin-top:9px}
+@media(max-width:520px){#passkeySettingsRow{align-items:flex-start;flex-direction:column}#passkeySettingsRow button{width:100%}}
