@@ -525,3 +525,127 @@ body.luxury-theme{--da-mint:#e6c477}
   #authView .ref-scene{height:190px!important}
   #authView .auth-form{padding:20px 16px!important}
 }
+
+
+/* Indigo glass theme — replace the former navy/gold luxury palette with luminous blue-indigo glass. */
+body.luxury-theme{
+  --da-bg:#080f2b;--da-bg2:rgba(23,35,82,.72);
+  --da-surface:rgba(34,48,111,.48);--da-surface2:rgba(55,72,151,.36);
+  --da-line:rgba(151,180,255,.25);--da-text:#f1f5ff;--da-muted:#b2c2ed;
+  --da-accent:#8da8ff;--da-accent-soft:rgba(116,145,255,.19);
+  --da-blue:#78c8ff;--da-green:#55dfbd;--da-red:#ff829e;--da-purple:#b9a0ff;
+  background:
+    radial-gradient(ellipse at 12% 4%,rgba(86,112,255,.32),transparent 36%),
+    radial-gradient(ellipse at 88% 18%,rgba(91,91,230,.25),transparent 32%),
+    radial-gradient(ellipse at 50% 100%,rgba(33,130,220,.17),transparent 42%),
+    linear-gradient(145deg,#080f2b 0%,#111b49 48%,#0a1538 100%)!important;
+  color:var(--da-text)!important;
+}
+body.luxury-theme .top,
+body.luxury-theme .mobile-bottom-nav,
+body.luxury-theme .tabs,
+body.luxury-theme #tab-dashboard,
+body.luxury-theme .card,body.luxury-theme .stat,
+body.luxury-theme .trade-box,body.luxury-theme .fx-box,
+body.luxury-theme .indicator-panel,
+body.luxury-theme .da-market-glass,
+body.luxury-theme .da-v2-account-card,
+body.luxury-theme .dashboard-activity-panel,
+body.luxury-theme .da-v2-quick-grid button,
+body.luxury-theme .da-v2-market-list>*,
+body.luxury-theme .da-v2-account-stats>div,
+body.luxury-theme .coin,body.luxury-theme .asset-row,
+body.luxury-theme .order-row,body.luxury-theme .history-row,
+body.luxury-theme .market-hero-v34,body.luxury-theme .trade-workspace-banner-v35{
+  background:linear-gradient(135deg,rgba(66,88,177,.27),rgba(25,39,101,.30))!important;
+  border:1px solid rgba(160,185,255,.24)!important;
+  box-shadow:0 12px 38px rgba(3,8,35,.22),inset 0 1px rgba(255,255,255,.10)!important;
+  -webkit-backdrop-filter:blur(22px) saturate(145%)!important;
+  backdrop-filter:blur(22px) saturate(145%)!important;
+}
+body.luxury-theme .top{background:rgba(20,32,82,.56)!important}
+body.luxury-theme .mobile-bottom-nav{background:rgba(13,24,67,.72)!important;border-color:rgba(157,183,255,.30)!important}
+body.luxury-theme .da-v2-hero{
+  background:radial-gradient(ellipse at 78% 25%,rgba(126,145,255,.30),transparent 42%),
+    linear-gradient(125deg,rgba(63,83,174,.52),rgba(21,35,91,.64) 60%,rgba(18,43,107,.48))!important;
+  border:1px solid rgba(169,190,255,.34)!important;
+  box-shadow:0 18px 48px rgba(4,9,42,.28),inset 0 1px rgba(255,255,255,.16)!important;
+  -webkit-backdrop-filter:blur(24px) saturate(150%)!important;backdrop-filter:blur(24px) saturate(150%)!important;
+}
+body.luxury-theme .da-v2-hero h1 em,
+body.luxury-theme .da-v2-eyebrow,
+body.luxury-theme .da-v2-hero-foot,
+body.luxury-theme .da-v2-kicker,
+body.luxury-theme .market-hero-kicker,
+body.luxury-theme .trade-workspace-kicker,
+body.luxury-theme .price-toman,
+body.luxury-theme .chart-price,
+body.luxury-theme .detail-price{color:#a9baff!important}
+body.luxury-theme .da-v2-hero p{color:#c4d1fa!important}
+body.luxury-theme .da-v2-orbit{border-color:rgba(151,177,255,.45)!important}
+body.luxury-theme .da-v2-coin{
+  background:linear-gradient(145deg,#b6c7ff,#647ff0 58%,#465bc5)!important;
+  color:#fff!important;box-shadow:0 14px 38px rgba(89,113,255,.30)!important
+}
+body.luxury-theme .da-v2-brand strong,
+body.luxury-theme .brand span:first-child{color:#aebeff!important}
+body.luxury-theme .da-v2-logo{
+  background:linear-gradient(145deg,rgba(122,151,255,.40),rgba(65,88,194,.30))!important;
+  border:1px solid rgba(177,197,255,.48)!important;color:#dce5ff!important;
+  box-shadow:0 0 24px rgba(111,137,255,.22)!important
+}
+body.luxury-theme .da-v2-demo,
+body.luxury-theme .tabs button.active,
+body.luxury-theme .mobile-bottom-nav button.active{
+  color:#c4d0ff!important;background:rgba(108,133,255,.20)!important;
+  border-color:rgba(166,187,255,.48)!important
+}
+body.luxury-theme button:not(.buy):not(.sell):not(.danger){
+  border-color:rgba(156,180,255,.25)!important
+}
+body.luxury-theme .da-v2-primary,
+body.luxury-theme .auth-actions button:first-child{
+  background:linear-gradient(125deg,#829bff,#6678e8 58%,#5363cf)!important;
+  color:#fff!important;border:1px solid rgba(199,211,255,.55)!important;
+  box-shadow:0 8px 26px rgba(91,112,235,.30)!important
+}
+body.luxury-theme input,body.luxury-theme select,body.luxury-theme textarea,
+body.luxury-theme .da-market-search,body.luxury-theme .da-market-sort{
+  background:rgba(9,18,57,.48)!important;color:#f1f5ff!important;
+  border:1px solid rgba(151,177,255,.30)!important;
+  -webkit-backdrop-filter:blur(14px)!important;backdrop-filter:blur(14px)!important
+}
+body.luxury-theme .coin-icon{background:rgba(126,150,255,.18)!important;color:#b5c5ff!important}
+body.luxury-theme th{background:rgba(76,96,180,.40)!important;color:#e1e9ff!important}
+body.luxury-theme td{color:#e1e9ff!important}
+body.luxury-theme #authView.auth-reference-layout{
+  background:rgba(15,27,75,.58)!important;border:1px solid rgba(162,186,255,.32)!important;
+  box-shadow:0 26px 80px rgba(3,8,36,.34),inset 0 1px rgba(255,255,255,.12)!important;
+  -webkit-backdrop-filter:blur(26px) saturate(145%)!important;backdrop-filter:blur(26px) saturate(145%)!important
+}
+body.luxury-theme #authView .auth-reference-visual{
+  background:radial-gradient(ellipse at 78% 28%,rgba(132,151,255,.28),transparent 43%),
+    radial-gradient(ellipse at 10% 90%,rgba(59,160,255,.20),transparent 42%),
+    linear-gradient(145deg,rgba(45,63,145,.58),rgba(13,26,76,.72) 68%,rgba(10,22,63,.74))!important
+}
+body.luxury-theme #authView .ref-brand-lockup strong,
+body.luxury-theme #authView .ref-brand-lockup em,
+body.luxury-theme #authView .ref-market-copy h1 span,
+body.luxury-theme #authView .ref-demo-footer{color:#b6c5ff!important}
+body.luxury-theme #authView .ref-live-pill{
+  background:rgba(80,215,190,.12)!important;border-color:rgba(99,230,207,.35)!important;color:#82ecd4!important
+}
+body.luxury-theme #authView .ref-coin-row{
+  background:rgba(105,129,222,.16)!important;border-color:rgba(167,188,255,.26)!important;
+  -webkit-backdrop-filter:blur(14px)!important;backdrop-filter:blur(14px)!important
+}
+body.luxury-theme #authView .auth-form{
+  background:linear-gradient(145deg,rgba(57,76,158,.48),rgba(17,31,88,.66))!important;
+  border:1px solid rgba(171,192,255,.34)!important;
+  box-shadow:0 18px 48px rgba(4,9,42,.24),inset 0 1px rgba(255,255,255,.12)!important;
+  -webkit-backdrop-filter:blur(24px) saturate(145%)!important;backdrop-filter:blur(24px) saturate(145%)!important
+}
+body.luxury-theme #authView .auth-form h2{color:#d0d9ff!important}
+body.luxury-theme #authView .auth-form input{background:rgba(8,17,54,.52)!important;border-color:rgba(164,187,255,.34)!important;color:#f1f5ff!important}
+body.luxury-theme .da-v2-trust-row i{color:#a9baff!important}
+body.luxury-theme .da-v2-quick-grid button i{color:#a9baff!important}
