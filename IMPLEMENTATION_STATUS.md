@@ -1385,3 +1385,7 @@
 - [!] فعال‌سازی سمت سرور Supabase هنوز انجام نشده است: در Dashboard باید Authentication → Passkeys فعال شود و `rp_id` و `rp_origins` با دامنهٔ واقعی PWA تنظیم شوند. ابزار متصل فعلی امکان خواندن/تغییر این تنظیمات Auth را ارائه نمی‌کند؛ تا فعال‌سازی، سرور درخواست Passkey را رد می‌کند.
 - [!] APK فعلی Capacitor 6 است و هنوز افزونهٔ Native Credential Manager یا Digital Asset Links (شامل اثرانگشت گواهی امضای APK) پیکربندی نشده است. کد WebAuthn استاندارد در WebView فقط در صورت پشتیبانی WebView قابل استفاده است؛ پشتیبانی APK روی دستگاه واقعی هنوز تأیید نشده و نباید به‌عنوان آماده اعلام شود.
 - [ ] گام بعد: اجرای CI و APK workflow روی head جدید؛ سپس فعال‌سازی تنظیمات Supabase Auth و اتصال دامنه/گواهی Android به Digital Asset Links. هیچ تغییری در schema، migration، کیف پول، موجودی، سفارش یا معاملهٔ Production انجام نشد.
+
+- [!] نخستین CI روی کد Passkey، run `44728562985`، در تست مرورگر ۵۹ از ۶۰ موفق شد؛ شکست فقط از assertion قدیمی نسخهٔ CSS در تست Service Worker بود (هنوز v16 را انتظار داشت، درحالی‌که CSS به v17 ارتقا یافته بود).
+- [x] assertion regex تست به v17 اصلاح شد؛ commit اصلاحی: `f898851a4c56ab3e36c32ac9d8c506b76fb3737d`.
+- [ ] اجرای CI تازه روی commit اصلاحی و نتیجهٔ ساخت APK هنوز باید بررسی شود.
