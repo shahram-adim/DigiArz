@@ -414,13 +414,13 @@ test('login mini chart renders real five-minute candles without depending on a c
 test('independent DigiArz UI stylesheet is loaded last without replacing app behavior', () => {
   const css = fs.readFileSync('src/digiarz-independent-ui.css', 'utf8');
   const sw = fs.readFileSync('sw.js', 'utf8');
-  const link = '<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=6">';
+  const link = '<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=7">';
   assert.ok(html.lastIndexOf(link) > html.lastIndexOf('</style>'), 'independent stylesheet loads after inline legacy styles');
   assert.ok(html.indexOf(link) < html.lastIndexOf('</body>'), 'stylesheet is loaded after inline styles and before body closes');
   for (const token of ['--da-bg:#07131c','--da-mint:#45e0c0','#authView','.mobile-bottom-nav','#tab-dashboard','#tab-markets','#tab-trade','#tab-assets','#tab-orders','#tab-history','prefers-reduced-motion']) {
     assert.ok(css.includes(token), 'new design token or page coverage exists: ' + token);
   }
-  assert.match(sw, /digiarz-shell-v63/);
+  assert.match(sw, /digiarz-shell-v64/);
   assert.match(sw, /digiarz-independent-ui\.css\?v=4/);
   for (const id of ['authView','appView','loginBtn','signupBtn','tradePairBadge','priceChart','assetList','allOrdersList','historyBody']) {
     assert.match(html, new RegExp('id="' + id + '"'), 'existing app behavior hook remains: ' + id);
