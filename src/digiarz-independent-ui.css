@@ -922,3 +922,85 @@ body.luxury-theme #authView .ref-usdt-coin{
 
 /* Ensure the login screen is actually removed after a successful sign-in. */
 #authView.hidden{display:none!important}
+
+
+/* Mobile market-card correction: readable prices, aligned 24h change and borderless marks. */
+#tab-markets .market-board-v34 .coin{
+  direction:rtl!important;
+  grid-template-columns:30px minmax(0,1fr) minmax(104px,auto)!important;
+  grid-template-rows:auto auto!important;
+  align-items:center!important;
+  gap:6px 9px!important;
+  min-width:0!important;
+  padding:11px 9px!important;
+}
+#tab-markets .market-board-v34 .coin>.favorite-btn{
+  grid-column:1!important;grid-row:1/3!important;
+  width:28px!important;height:32px!important;min-width:28px!important;
+  padding:0!important;margin:0!important;border:0!important;outline:0!important;
+  border-radius:0!important;background:transparent!important;box-shadow:none!important;
+}
+#tab-markets .market-board-v34 .coin>.favorite-btn:focus,
+#tab-markets .market-board-v34 .coin>.favorite-btn:focus-visible{
+  outline:0!important;box-shadow:none!important;
+}
+#tab-markets .market-board-v34 .coin-identity{
+  grid-column:2!important;grid-row:1!important;
+  min-width:0!important;gap:7px!important;
+}
+#tab-markets .market-board-v34 .coin-identity .coin-icon{
+  width:40px!important;height:40px!important;min-width:40px!important;
+  flex:0 0 40px!important;border:0!important;outline:0!important;
+  box-shadow:none!important;background:transparent!important;
+}
+#tab-markets .market-board-v34 .coin-name-fa{
+  color:var(--da-text,#17263b)!important;
+  font-size:13px!important;line-height:1.65!important;
+}
+#tab-markets .market-board-v34 .coin-sparkline{display:none!important}
+#tab-markets .market-board-v34 .coin-change-wrap{
+  grid-column:2!important;grid-row:2!important;
+  display:flex!important;flex-direction:row!important;align-items:center!important;
+  justify-content:flex-start!important;flex-wrap:wrap!important;
+  gap:4px 8px!important;min-width:0!important;text-align:right!important;
+}
+#tab-markets .market-board-v34 .coin-change-label{font-size:9px!important;color:var(--da-muted,#60718a)!important}
+#tab-markets .market-board-v34 .coin-change{font-size:11px!important;font-weight:900!important;padding:3px 6px!important;white-space:nowrap!important}
+#tab-markets .market-board-v34 .coin>.price-stack{
+  grid-column:3!important;grid-row:1/3!important;
+  align-self:center!important;justify-self:stretch!important;
+  align-items:flex-end!important;min-width:0!important;text-align:left!important;
+  gap:4px!important;
+}
+#tab-markets .market-board-v34 .coin .price-usd,
+#tab-markets .market-board-v34 .coin .price-usd strong{
+  color:#172b43!important;font-size:12px!important;font-weight:900!important;
+  opacity:1!important;visibility:visible!important;
+}
+#tab-markets .market-board-v34 .coin .price-toman,
+#tab-markets .market-board-v34 .coin .price-toman strong{
+  color:#087e65!important;font-size:11px!important;font-weight:900!important;
+  opacity:1!important;visibility:visible!important;
+}
+#tab-markets .market-board-v34 .coin-source{font-size:8px!important;line-height:1.45!important;color:#52677e!important}
+#tab-markets .market-board-v34 .coin-source.fresh{color:#087e65!important}
+body.dark-theme #tab-markets .market-board-v34 .coin .price-usd,
+body.dark-theme #tab-markets .market-board-v34 .coin .price-usd strong,
+body.luxury-theme #tab-markets .market-board-v34 .coin .price-usd,
+body.luxury-theme #tab-markets .market-board-v34 .coin .price-usd strong{color:#f4f7fc!important}
+body.dark-theme #tab-markets .market-board-v34 .coin .price-toman,
+body.dark-theme #tab-markets .market-board-v34 .coin .price-toman strong,
+body.luxury-theme #tab-markets .market-board-v34 .coin .price-toman,
+body.luxury-theme #tab-markets .market-board-v34 .coin .price-toman strong{color:#55dfbd!important}
+body.dark-theme #tab-markets .market-board-v34 .coin-source,
+body.luxury-theme #tab-markets .market-board-v34 .coin-source{color:#b9c8dc!important}
+body.dark-theme #tab-markets .market-board-v34 .coin-source.fresh,
+body.luxury-theme #tab-markets .market-board-v34 .coin-source.fresh{color:#55dfbd!important}
+
+/* The brand mark and market coin logos are clean, without decorative frames. */
+.da-v2-logo{
+  border:0!important;outline:0!important;box-shadow:none!important;
+}
+body.dark-theme .da-v2-logo,body.light-theme .da-v2-logo,body.luxury-theme .da-v2-logo{
+  border:0!important;outline:0!important;box-shadow:none!important;
+}
