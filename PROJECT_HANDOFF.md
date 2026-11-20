@@ -291,3 +291,33 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Android APK workflow run 44486985383 was automatically triggered by the main push. Capacitor install, web build, Android project generation and sync completed successfully; Gradle assembleDebug is still running. Artifact not yet uploaded/available.
 - No Supabase deploy, schema migration, DB or financial-data change was performed.
 - Next: monitor both runs; when APK run succeeds, retrieve artifact and verify BUILD-INFO.txt commit matches 0ee8c9dbeb0c8229b2181acc2e9cb52544e6868b, then provide verified APK download.
+
+
+## Experimental no-op matcher update guard — 2026-11-20
+- Created isolated branch `perf/iran-exchange-sync-noop-updates` from verified main HEAD `12f2cb84bb20a0a64890522836441763e4696ec4`.
+- Opened Draft PR #32: https://github.com/shahram-adim/DigiArz/pull/32; base `main`; current purpose is to suppress physical UPDATEs when matcher output is unchanged.
+- Added `supabase/drafts/2026-11-20_process_iran_exchange_asset_sync_noop_update_guard.sql`; it copies the current repository function source and adds `IS DISTINCT FROM` guards to the matched/ambiguous/pending UPDATE and the unmatched UPDATE.
+- Added a disposable PostgreSQL 17 regression fixture at `supabase/tests/iran_exchange_sync_noop_update_guard.sql` and a dedicated workflow at `.github/workflows/iran-exchange-sync-noop-update-guard.yml`.
+- The SQL fixture expects exactly four physical updates for four actual state transitions, and zero physical updates on a second identical pass. This fixture tests the guard predicates, not the full RPC.
+- Latest code head before this handoff update: `3e301e235afdd94ec486fc451a88033accf87104`; no workflow run or commit status was visible through the current GitHub Actions status helpers at the time of recording. Do not claim CI passed.
+- Important limitation: the observation upsert still refreshes `last_seen_at` on every successful sync. This heartbeat was intentionally preserved; it may account for a substantial share of write churn and requires separate analysis.
+- The independent queue-race draft remains in PR #8 and is not included or reconciled here.
+- No `supabase/migrations` file was changed. No Supabase Production function, schema, cron, ACL, migration history, wallet, balance, order, trade, or market data was modified.
+- Next: verify the PostgreSQL 17 workflow on this PR; if it passes, extend tests to the complete function in a disposable database and measure WAL/buffers/dead tuples before considering any Production rollout. Keep PR #32 Draft and do not merge or apply.
+
+
+## Additional read-only DB finding — CoinGecko catalog upsert — 2026-11-20
+- PR #33: https://github.com/shahram-adim/DigiArz/pull/33 on branch `perf/crypto-assets-noop-upserts` contains a separate experimental draft for `public.refresh_crypto_assets()` with an `ON CONFLICT DO UPDATE ... WHERE IS DISTINCT FROM` guard and PostgreSQL 17 fixture.
+- It intentionally preserves `price_toman` when the incoming computed value is NULL; all existing source/business fields remain part of the comparison, and unchanged rows do not advance `updated_at`.
+- Evidence: `crypto_assets` had 4,989,198 cumulative updates since database stats reset 2026-11-03 02:07:51 UTC (~284,275/day over 17.55 days). `refresh_crypto_assets()` pg_stat_statements: 14,859 calls, ~1.61M ms total, 105,704 shared blocks dirtied. pg_stat_statements reset 2026-11-06 03:05:58 UTC.
+- `refresh_crypto_assets_toman()` showed 14,845 calls, ~3.53M ms total and 632,164 shared blocks dirtied; its function already has a distinct-value guard. This needs a separate analysis of actual price/FX churn; do not remove its guard or reduce cadence without evidence.
+- `track_functions=none`, so `pg_stat_user_functions` returns no function rows. Do not claim function-level stats from that view.
+- PR #33 contains no handoff-file change to avoid a merge conflict with PR #32. CI has not been confirmed passing; keep both PRs Draft and do not apply to Production.
+
+
+### PostgreSQL 17 fixture CI results — 2026-11-20
+- PR #32 dedicated workflow run `44763082356` completed successfully; job `postgres-17-fixture` and step `Run disposable PostgreSQL 17 regression fixture` both succeeded.
+- PR #33 dedicated workflow run `44763074176` completed successfully; job `postgres-17-fixture` and step `Run disposable PostgreSQL 17 regression fixture` both succeeded.
+- This verifies only the two disposable guard fixtures. It does NOT verify full live-function equivalence, Production behavior, WAL reduction, or resource recovery.
+- The repository's separate `Exact decimal tests` workflows were still in progress at the time of this note; do not report the entire PR workflow suite as complete.
+- Both PRs remain Draft and unmerged. No Production database change was made.
