@@ -463,7 +463,7 @@ BEGIN
       parsed_symbol := replace(ticker ->> 'symbol', '-', '');
       parsed_price := NULLIF(ticker ->> 'last', '')::numeric;
 
-      IF parsed_symbol ~ '^[A-Z0-9]{2,24}USDT
+      IF parsed_symbol ~ '^[A-Z0-9]{2,24}USDT$'
          AND parsed_price > 0
          AND EXISTS (
            SELECT 1 FROM parser_enabled_pairs
@@ -490,7 +490,7 @@ BEGIN
       parsed_symbol := replace(ticker ->> 'currency_pair', '_', '');
       parsed_price := NULLIF(ticker ->> 'last', '')::numeric;
 
-      IF parsed_symbol ~ '^[A-Z0-9]{2,24}USDT
+      IF parsed_symbol ~ '^[A-Z0-9]{2,24}USDT$'
          AND parsed_price > 0
          AND EXISTS (
            SELECT 1 FROM parser_enabled_pairs
