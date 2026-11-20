@@ -403,8 +403,8 @@ test('reference login hero keeps the globe, handset and floating branded crypto 
 
 test('login mini chart renders real five-minute candles without depending on a chart CDN', () => {
   assert.match(html, /function renderAuthMiniChart\(candles\)/);
-  assert.match(html, /۳۶ کندل واقعی پنج دقیقه‌ای بیت‌کوین/);
-  assert.match(html, /renderAuthMiniChart\(candles\)/);
+  assert.match(html, /نمودار کندلی بیت‌کوین با قیمت لحظه‌ای بازار/);
+  assert.match(html, /renderAuthMiniChart\(authMiniCandles\)/);
   assert.match(html, /renderAuthMiniChart\(\[\]\)/);
   assert.match(html, /fetchBinanceKlines\('BTCUSDT','5m',36\)/);
   assert.match(html, /<svg viewBox=/);
@@ -421,7 +421,7 @@ test('independent DigiArz UI stylesheet is loaded last without replacing app beh
     assert.ok(css.includes(token), 'new design token or page coverage exists: ' + token);
   }
   assert.match(sw, /digiarz-shell-v64/);
-  assert.match(sw, /digiarz-independent-ui\.css\?v=4/);
+  assert.match(sw, /digiarz-independent-ui\.css\?v=7/);
   for (const id of ['authView','appView','loginBtn','signupBtn','tradePairBadge','priceChart','assetList','allOrdersList','historyBody']) {
     assert.match(html, new RegExp('id="' + id + '"'), 'existing app behavior hook remains: ' + id);
   }
