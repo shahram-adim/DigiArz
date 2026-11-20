@@ -463,6 +463,21 @@ test('market categories lead the market page and the selected category filters o
 });
 
 
+test('Passkey login and enrollment use Supabase server-verified WebAuthn sessions', () => {
+  assert.match(html, /id="passkeySignInBtn"[^>]*hidden/);
+  assert.match(html, /id="registerPasskeyBtn"/);
+  assert.match(html, /experimental:\{passkey:true\}/);
+  assert.match(html, /supabaseClient\.auth\.signInWithPasskey\(\)/);
+  assert.match(html, /supabaseClient\.auth\.registerPasskey\(\)/);
+  assert.match(html, /function supportsPasskeys\(\)/);
+  assert.match(html, /function updatePasskeyAvailability\(\)/);
+  assert.match(html, /passkeySettingsRow.*classList\.toggle\('hidden',!active\)/);
+  assert.match(html, /Passkey این دستگاه با موفقیت به حساب شما متصل شد/);
+  assert.match(html, /ورود امن تأیید شد/);
+  assert.ok(css.includes('#authView #passkeySignInBtn[hidden]'));
+});
+
+
 test('dashboard market uses the one-line market row with adjacent 24h sparkline and percentage', () => {
   assert.match(html, /name\.textContent=persianCoinName\(symbol,row\.item\.name\|\|coinInfo\[base\]\?\.name\)/);
   assert.ok(css.includes('grid-template-areas:"fav identity spark change price"!important'));
