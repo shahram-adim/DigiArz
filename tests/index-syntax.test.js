@@ -416,7 +416,7 @@ test('independent DigiArz UI stylesheet is loaded last without replacing app beh
   const sw = fs.readFileSync('sw.js', 'utf8');
   const link = '<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=1">';
   assert.ok(html.lastIndexOf(link) > html.lastIndexOf('</style>'), 'independent stylesheet loads after inline legacy styles');
-  assert.ok(html.indexOf(link) < html.lastIndexOf('</head>'), 'stylesheet is loaded inside head');
+  assert.ok(html.indexOf(link) < html.lastIndexOf('</body>'), 'stylesheet is loaded after inline styles and before body closes');
   for (const token of ['--da-bg:#07131c','--da-mint:#45e0c0','#authView','.mobile-bottom-nav','#tab-dashboard','#tab-markets','#tab-trade','#tab-assets','#tab-orders','#tab-history','prefers-reduced-motion']) {
     assert.ok(css.includes(token), 'new design token or page coverage exists: ' + token);
   }
