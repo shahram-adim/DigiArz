@@ -6,7 +6,6 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
       - redesign/independent-ui-2026
     paths:
       - "index.html"
@@ -19,7 +18,7 @@ on:
       - ".github/workflows/android-apk.yml"
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: digiarz-android-apk
@@ -46,6 +45,9 @@ jobs:
 
       - name: Install Capacitor
         run: npm install --no-audit --no-fund
+
+      - name: Run regression tests before APK build
+        run: node --test tests/technical-analysis.test.js tests/subscription-plans.test.js tests/service-worker.test.js tests/index-syntax.test.js
 
       - name: Prepare web assets
         run: npm run build:web
@@ -86,14 +88,3 @@ jobs:
             android/app/build/outputs/apk/debug/BUILD-INFO.txt
           if-no-files-found: error
           retention-days: 14
-
-      - name: Publish direct APK download
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: android-debug-${{ github.run_number }}
-          name: DigiArz Android Debug APK (Build ${{ github.run_number }})
-          body: |
-            Automatically built debug APK for commit ${{ github.sha }}.
-            This is a test build, not a production-signed release.
-          files: android/app/build/outputs/apk/debug/app-debug.apk
-          fail_on_unmatched_files: true
