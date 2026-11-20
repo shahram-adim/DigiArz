@@ -3655,7 +3655,6 @@ async function start(){
  window.DigiDailyAds?.init({client:supabaseClient,isAdmin:()=>isSuperAdmin,notify:(message,type)=>showMessage($('adminDailyAdMsg'),message,type)});
   initAuthMarketPreview();
  $('forgotBtn').addEventListener('click',forgotPassword);
- $('passkeySignInBtn')?.addEventListener('click',loginWithPasskey);
  $('registerPasskeyBtn')?.addEventListener('click',registerPasskey);
  updatePasskeyAvailability();
  $('saveNewPassword').addEventListener('click',saveNewPassword);
