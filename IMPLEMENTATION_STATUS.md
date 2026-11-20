@@ -1078,3 +1078,13 @@
 - [!] نتیجه نهایی CI و APK هنوز اعلام نشده و artifact تازه قابل دریافت تأیید نشده است.
 - [!] هیچ merge به main و هیچ تغییری در Supabase Production انجام نشد.
 - [ ] پس از پایان workflowها، نتیجهٔ تست‌ها و artifact APK بررسی شود؛ سپس نصب و مشاهدهٔ واقعی هر سه تم روی Android لازم است.
+
+
+### نتیجه ساخت APK و اصلاح assertion نهایی precache — ۲۰ نوامبر ۲۰۲۶
+- [x] خطای CI روی head `59720c00b5fbc8a4d215083c1b51c67c5f9360cb` ریشه‌یابی شد: تست `tests/service-worker.test.js` هنوز URL کش CSS با `v=2` را انتظار داشت، درحالی‌که `sw.js` به `v=4` ارتقا یافته بود. assertion به `v=4` اصلاح شد.
+- [x] اجرای جدید Exact Decimal Run `44696640456` روی commit `6cd9c0852957795ae2504d86a5c009a4b2b70d27` آغاز شد؛ مرحلهٔ exact-decimal/browser integration tests موفق شد و آزمون‌های PostgreSQL regression در حال اجرا بودند. نتیجه نهایی کل workflow هنگام ثبت این یادداشت هنوز pending بود.
+- [x] ساخت APK workflow `44696455653` روی commit برنامه `776b090129b7c6e4da3c39c0ecc277e91d1fde27` با نتیجه success کامل شد؛ artifact `14611445173` تولید و دریافت شد.
+- [x] آرشیو APK باز شد و وجود `app-debug.apk` و `BUILD-INFO.txt` تأیید شد؛ SHA-256 APK برابر `a090e5d4066447f6695dd2768efa58d977a03b6880e995f7f022e084bfaf8a6c` است. فایل APK در محیط گفتگو آماده ارائه به کاربر است.
+- [!] APK یک Debug/Test build است؛ هنوز نصب و بررسی دیداری روی گوشی کاربر تأیید نشده است. APK بر اساس commit برنامه `776b...` ساخته شده که شامل CSS `v4` و Service Worker cache `v61` است؛ commit بعدی فقط assertionهای تست را اصلاح کرده و منطق برنامه را تغییر نداده است.
+- [!] PR #31 همچنان Draft/ادغام‌نشده است؛ main و Supabase Production تغییر نکرده‌اند.
+- [ ] پس از پایان Exact Decimal Run `44696640456`، نتیجه کامل و هرگونه شکست احتمالی بررسی شود؛ سپس بازبینی دیداری Android با بازخورد کاربر ادامه یابد.
