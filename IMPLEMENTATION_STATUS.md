@@ -1004,3 +1004,14 @@
 - [x] گزارش `docs/FINANCIAL_RPC_AUDIT_2026-11-20.md` با تصحیح و یافته جدید به‌روزرسانی شد.
 - [x] هیچ تابع، migration، grant، policy، cron، سفارش، معامله، رزرو، کیف پول یا موجودی Production تغییر نکرد؛ cadence یک‌دقیقه‌ای حفظ شد.
 - [ ] گام بعد: ساخت تست منفی و bounded-retry regression در PostgreSQL 17 ایزوله و بازبینی باقی توابع authenticated؛ Production تا تأیید تست و مجوز انتشار دست‌نخورده بماند.
+
+
+## آزمون ایزولهٔ bounded retry برای TP/SL — ۲۰ نوامبر ۲۰۲۶
+- [x] شاخهٔ ایزوله `security/tp-sl-bounded-reservation-retry-2026-11-20` و PR پیش‌نویس #36 ساخته شد: https://github.com/shahram-adim/DigiArz/pull/36.
+- [x] کاندید CI پس از ۱۰ شکست اعتبارسنجی رزرو، parent و conditional را `rejected` با پیام `manual review required` می‌کند؛ رزرو مفقود/نامعتبر را خودکار آزاد یا بازنویسی نمی‌کند.
+- [x] regression در PostgreSQL 17 برای چهار حالت missing/released/wrong-asset/undersized reservation، مرز تلاش ۹ و ۱۰ و عدم retry بعد از rejection افزوده شد.
+- [x] اجرای نخست CI #1172 به‌علت دو parent order_id اشتباه در fixture تست fail شد؛ شناسه‌ها اصلاح شدند و اجرای کامل مجدد #1173 با نتیجهٔ success و هر ۲۲ گام موفق پایان یافت: https://github.com/shahram-adim/DigiArz/actions/runs/44786496205.
+- [!] محدودیت مهم: فایل SQL در `supabase/drafts/` از fixture موجود CI بر پایهٔ snapshot ۱۵ نوامبر اقتباس شده و drop-in replacement تعریف کامل Production در ۲۰ نوامبر نیست. پیش از هر migration باید فقط شاخهٔ bounded-retry روی تعریف دقیق و کامل زنده port شود، تفاوت‌های بین نسخه‌ها بررسی شوند و CI دوباره اجرا شود.
+- [x] PR #36 پیش‌نویس و ادغام‌نشده باقی مانده؛ هیچ migration یا تغییر تابع/cron/grant/policy/رزرو/موجودی در Production انجام نشد.
+- [x] cadence یک‌دقیقه‌ای بازار و worker بدون تغییر است.
+- [ ] گام بعد: بازیابی و نگهداری snapshot کامل تابع زندهٔ ۲۰ نوامبر، port حداقلی bounded-retry به همان بدنه، تست regression و بررسی diff دقیق پیش از هر تصمیم انتشار.
