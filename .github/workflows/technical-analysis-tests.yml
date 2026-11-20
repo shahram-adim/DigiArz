@@ -8,6 +8,7 @@ on:
       - 'src/technical-analysis.css'
       - 'index.html'
       - 'tests/technical-analysis.test.js'
+      - 'tests/subscription-plans.test.js'
       - '.github/workflows/technical-analysis-tests.yml'
   pull_request:
     branches: [main]
@@ -27,4 +28,4 @@ jobs:
         with:
           node-version: 20
       - name: Run indicator calculation tests
-        run: node --test tests/technical-analysis.test.js
+        run: node --test tests/technical-analysis.test.js tests/subscription-plans.test.js
