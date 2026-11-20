@@ -280,7 +280,7 @@ BEGIN
   gate_payload := '{"currency_pair":"BTC_USDT","last":"100"}'::jsonb;
   -- Isolate Gate.io parsing from KuCoin so the fixture does not encode
   -- an undocumented provider precedence or last-writer policy.
-  TRUNCATE parser_price_target;
+  TRUNCATE gated_response_target;
 
   IF jsonb_typeof(gate_payload) = 'array' THEN
     INSERT INTO gated_response_target VALUES ('GATE_BAD', 1);
