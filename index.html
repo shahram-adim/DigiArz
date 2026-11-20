@@ -3445,13 +3445,13 @@ function renderDashboardMarketPreview(){
  filters?.querySelectorAll('[data-dash-market-filter]').forEach(button=>{const active=button.dataset.dashMarketFilter===dashboardMarketFilter;button.classList.toggle('active',active);button.setAttribute('aria-pressed',active?'true':'false')});
  const q=String(search?.value||'').trim().toLocaleLowerCase('fa-IR'),sortMode=sort?.value||'volume';
  let rows=(marketRows||[]).map(item=>{const t=getFreshMarketTicker(item),live=Number(t?.last),price=getTrustedMarketPrice(item),change=getMarketChange24h(item),volume=Number(t?.quoteVolume);return {item,t,price,live:Number.isFinite(live)&&live>0,change,volume:Number.isFinite(volume)?volume:0}}).filter(x=>Number.isFinite(x.price)&&x.price>0);
- if(q)rows=rows.filter(x=>{const symbol=String(x.item.symbol||''),base=symbol.replace(/USDT$/i,''),fa=persianCoinName(symbol)||'',en=String(x.item.name||coinInfo[base]?.name||'');return (symbol+' '+base+' '+fa+' '+en).toLocaleLowerCase('fa-IR').includes(q)});
+ if(q)rows=rows.filter(x=>{const symbol=String(x.item.symbol||''),base=symbol.replace(/USDT$/i,''),fa=persianCoinName(symbol,x.item.name||coinInfo[base]?.name)||'',en=String(x.item.name||coinInfo[base]?.name||'');return (symbol+' '+base+' '+fa+' '+en).toLocaleLowerCase('fa-IR').includes(q)});
  if(dashboardMarketFilter==='gainers')rows=rows.filter(x=>x.change!==null&&x.change>0);
  else if(dashboardMarketFilter==='losers')rows=rows.filter(x=>x.change!==null&&x.change<0);
  else if(dashboardMarketFilter==='volume')rows=rows.filter(x=>x.volume>0);
  else if(dashboardMarketFilter==='favorites')rows=rows.filter(x=>isFavoriteSymbol(x.item.symbol));
  else if(dashboardMarketFilter==='mine'){const owned=new Set((assetRows||[]).filter(x=>Number(x.balance)>0).map(x=>String(x.asset||'').toUpperCase()));rows=rows.filter(x=>owned.has(String(x.item.symbol||'').replace(/USDT$/i,'')))}
- rows.sort((a,b)=>{if(sortMode==='change-up')return compareMarketChange(a.item,b.item,'desc');if(sortMode==='change-down')return compareMarketChange(a.item,b.item,'asc');if(sortMode==='price-high')return b.price-a.price;if(sortMode==='price-low')return a.price-b.price;if(sortMode==='name')return String(persianCoinName(a.item.symbol)||a.item.symbol).localeCompare(String(persianCoinName(b.item.symbol)||b.item.symbol),'fa');return b.volume-a.volume});
+ rows.sort((a,b)=>{if(sortMode==='change-up')return compareMarketChange(a.item,b.item,'desc');if(sortMode==='change-down')return compareMarketChange(a.item,b.item,'asc');if(sortMode==='price-high')return b.price-a.price;if(sortMode==='price-low')return a.price-b.price;if(sortMode==='name')return String(persianCoinName(a.item.symbol,a.item.name||coinInfo[String(a.item.symbol).replace(/USDT$/i,'')]?.name)||a.item.symbol).localeCompare(String(persianCoinName(b.item.symbol,b.item.name||coinInfo[String(b.item.symbol).replace(/USDT$/i,'')]?.name)||b.item.symbol),'fa');return b.volume-a.volume});
  const total=rows.length,visible=rows.slice(0,dashboardMarketLimit);root.replaceChildren();
  if(count)count.textContent=total.toLocaleString('fa-IR')+' ارز با قیمت معتبر · نمایش '+visible.length.toLocaleString('fa-IR');
  if(!visible.length){const empty=document.createElement('div');empty.className='da-market-empty';empty.textContent='با این جست‌وجو یا فیلتر، ارزی با قیمت معتبر پیدا نشد.';root.append(empty);if(more)more.hidden=true;if(stamp)stamp.textContent='برای نمایش قیمت، داده معتبر بازار لازم است.';return}
@@ -3461,7 +3461,7 @@ function renderDashboardMarketPreview(){
   const top=document.createElement('div');top.className='da-market-card-top';
   const identity=document.createElement('button');identity.type='button';identity.className='da-market-identity';identity.setAttribute('aria-label','نمایش نمودار '+base);identity.addEventListener('click',()=>openChart(symbol));
   const logo=document.createElement('span');logo.className='da-market-logo';logo.innerHTML=coinLogo(base,'da-market-logo-inner',row.item.image_url);
-  const nameWrap=document.createElement('span');nameWrap.className='da-market-name-wrap';const name=document.createElement('b');name.textContent=persianCoinName(symbol)||base;const ticker=document.createElement('small');ticker.textContent=base+'/USDT';nameWrap.append(name,ticker);identity.append(logo,nameWrap);
+  const nameWrap=document.createElement('span');nameWrap.className='da-market-name-wrap';const name=document.createElement('b');name.textContent=persianCoinName(symbol,row.item.name||coinInfo[base]?.name)||base;const ticker=document.createElement('small');ticker.textContent=base+'/USDT';nameWrap.append(name,ticker);identity.append(logo,nameWrap);
   const fav=document.createElement('button');fav.type='button';fav.className='da-market-favorite';const isFav=isFavoriteSymbol(symbol);fav.textContent=isFav?'★':'☆';fav.setAttribute('aria-label',isFav?'حذف از علاقه‌مندی‌ها':'افزودن به علاقه‌مندی‌ها');fav.setAttribute('aria-pressed',isFav?'true':'false');fav.addEventListener('click',()=>{toggleFavoriteSymbol(symbol);renderDashboardMarketPreview();renderMarkets()});
   top.append(fav,identity);
   const price=document.createElement('strong');price.className='da-market-price';price.textContent='$'+formatNum(row.price,12);
@@ -4007,7 +4007,7 @@ body.luxury-theme #authView .auth-phone-device{border-color:rgba(232,218,183,.8)
 }
 @media(prefers-reduced-motion:reduce){#authView .ref-earth,#authView .ref-gold-coin{animation:none!important;transition:none!important}}
 </style>
-<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=15">
+<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=16">
 
 
 </body>
