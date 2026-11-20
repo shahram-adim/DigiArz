@@ -684,3 +684,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Updated `docs/FINANCIAL_RPC_AUDIT_2026-11-20.md` with exact run ID, head SHA, full-success result, coverage, and limitations.
 - PR #37 remains Draft/open/unmerged. No rebase, merge, deployment, Production SQL/query/write, migration/RPC/cron/financial-data change, or `supabase db push`.
 - **Next action:** continue non-production source audit of financial reservation/order lifecycle and separately define an authoritative parity-reconciliation plan for Stop-Limit. Keep all PRs Draft; no Production change without explicit approval.
+
+
+## 2026-11-20 — بررسی فرضیهٔ race بین deactivate و ثبت مالی
+- Re-fetched handoff و audit report از `main` پیش از ویرایش؛ blobهای ورودی به‌ترتیب `11e3be0cf3cb052ded12816bab5ad51f70fdca9c` و `d2a75f5700a4e2225579b68a547186f641989bba` بودند.
+- منبع Migration نشان می‌دهد `execute_demo_trade`, `place_limit_order`, `place_conditional_exit_order`, و `place_stop_limit_order` در ابتدای مسیر `current_account_is_active()` را می‌خوانند؛ سپس عملیات مالی را انجام می‌دهند. `deactivate_my_account()` ابتدا `profiles.is_active=false` می‌نویسد و سپس رزروها/سفارش‌های باز را پاک‌سازی می‌کند.
+- در بدنهٔ entrypointهای بررسی‌شده، قفل صریح مشترک روی ردیف profile یا recheck انتهایی مشاهده نشد. این یک interleaving بالقوه برای آزمون دو‌نشستی است، نه نقص اثبات‌شده.
+- جست‌وجوی مخزن نام `guard_active_account_writes` را فقط در fixture widening یافت؛ بدنهٔ fixture no-op است و دربارهٔ Production چیزی ثابت نمی‌کند. فهرست authoritative triggerهای Production در این مرحله در دسترس نبود.
+- گزارش ممیزی با مرزبندی شواهد و طرح fixture دو‌نشستی به‌روزرسانی شد. هیچ تست race اجرا یا Migration/trigger/RPC/Production تغییر داده نشد.
+- **گام بعد:** ساخت fixture PostgreSQL 17 مستقل برای race بین deactivation و Market/Limit/TP-SL/Stop-Limit، با barrierهای قطعی و بررسی وضعیت نهایی order/trade/reservation. پیش از هر اصلاح، triggerها و قفل profile در schema authoritative باید تأیید شوند.
+- PRها Draft باقی می‌مانند؛ بدون Production change، merge/rebase/deploy یا `supabase db push`.
