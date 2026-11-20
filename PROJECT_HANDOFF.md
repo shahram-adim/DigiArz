@@ -511,3 +511,10 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - CI for corrected head must pass before calling this correction validated. This remains test-only/documentation-only on Draft PR #35.
 - No Production SQL, migration, cron, market data, orders, trades, wallets, or balances changed. No supabase db push; cadence unchanged.
 - Next: poll corrected-head PostgreSQL contract and exact-decimal CI; if green, continue static source and migration-reconciliation review. Preserve Draft status and avoid Production queries while DB instability persists.
+
+
+## 2026-11-20 — Corrected provider parser fixture CI
+- The corrected SQL fixture commit e3c826b97c1780fa3e2068db22c78e8b7f97a8b0 passed PostgreSQL 17 contract run 44807797106. The PR/push workflow triggered a duplicate contract run; run 44807787523 also completed success on the same fixture commit.
+- Exact-decimal workflow run 44807797093 on fixture commit e3c826b97c1780fa3e2068db22c78e8b7f97a8b0 was still in progress at this check. Two contract runs 44807862263 and 44807849603 on documentation-only head baa5a6381c381965037feb6ebe02f42894d69ad4 were also in progress; do not report those as complete.
+- PR #35 remains open Draft, unmerged. The fixture correction separates KuCoin and Gate.io parser targets and no longer asserts a Gate.io-over-KuCoin winner. The four-provider duplicate-target test remains a cardinality-mechanics test only.
+- No Production database/function/cron/migration or financial data changes. No supabase db push; one-minute cadence unchanged.
