@@ -211,3 +211,16 @@ Additional source recovery:
 - The current fixture setup itself defines base tables and helper functions (`auth.uid()`, `current_account_is_active()`, `get_demo_trading_fee_rate()`); those are candidate test scaffolding, not authoritative Production schema/helper sources.
 
 This narrows the recovery gap: conditional_orders and several engine-specific alterations/security policies are directly recoverable from migrations; authoritative base DDL and account/fee helper definitions plus complete trigger inventory remain unresolved in repository evidence. No tests/workflow/Production code changed and no Production query was run.
+
+
+## Backup artifact recovery status — 2026-11-21
+
+The prior successful backup workflow artifact was located and downloaded before its expiry:
+- Run `43848835281`, artifact `14217201032`, `DigiArz-database-backup`, GitHub-reported SHA-256 `555c1f7ebcad947e573dad659084bbcf94dc88d55fc0bc1a3b7de9608e4e5`.
+- ZIP contains `README-backup.txt` and `digiarz-database.dump.enc`. README states the dump is PostgreSQL 17.12 custom format encrypted with AES-256-CBC + PBKDF2; scope includes public/private schema, private queue table structures, and selected private admin/audit/control data. It reports encryption/decryption byte comparison and pg_restore archive-list validation, but explicitly says this was not a live restore drill.
+- The decryption key is not available in this working context. The dump was not decrypted/restored; no key was requested, printed, or placed in repository/chat/logs.
+- Previous archive inspection found no `supabase_migrations.schema_migrations` ledger in the backup artifact; schema recovery would not by itself prove applied migration history.
+- The artifact is a plausible authoritative schema source once handled in a secure authorized environment, but it is not currently usable as evidence for exact DDL/function/trigger parity.
+- No Production query/write, workflow/secrets change, Supabase mutation, migration/RPC/cron change, or PR action occurred.
+
+Next safe step: use an already-authorized secure workflow/restore environment where the encryption secret is consumed without being exposed in logs, or request a schema-only export through an approved secure channel. Do not ask the user to paste encryption keys into chat.
