@@ -55,8 +55,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: build
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    # Use an isolated preview environment so a default-branch-only rule on
+    # the standard github-pages environment cannot block this redesign branch.
+    # GitHub Pages supports a custom deployment environment name.
     environment:
-      name: github-pages
+      name: github-pages-preview
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy preview to GitHub Pages
