@@ -2648,7 +2648,7 @@ function updateTradeAssetPreview(side){const input=$(side+'Symbol'),root=$(side+
   });
   const quick={dark:['arrow-left-right','chart-no-axes-combined','wallet','refresh-cw'],light:['repeat-2','chart-column','wallet-cards','refresh-cw'],luxury:['candlestick-chart','chart-no-axes-combined','vault','refresh-cw']}[theme]||[];
   ['heroTradeBtn','heroMarketBtn'].forEach((id,index)=>{const icon=$(id)?.querySelector('[data-lucide]');if(icon&&quick[index])icon.setAttribute('data-lucide',quick[index])});
-  if(window.lucide?.createIcons)window.lucide.createIcons();
+  renderLucideIcons();
  }
 function applyTheme(theme){
  const selected=['light','dark','luxury'].includes(theme)?theme:'dark';
