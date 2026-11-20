@@ -440,8 +440,13 @@ test('independent DigiArz UI stylesheet is loaded last without replacing app beh
 });
 
 
-test('unknown market symbols still receive a Persian-language label and the market stylesheet is cache-busted', () => {
-  assert.ok(html.includes("||'دارایی دیجیتال'"));
+test('unknown market symbols receive Persian transliteration and coin logos have resilient visual fallbacks', () => {
+  assert.match(html, /function transliterateCoinName\(value\)/);
+  assert.match(html, /return transliterateCoinName\(source\)\|\|transliterateCoinName\(base\)\|\|base/);
+  assert.match(html, /persianCoinName\(item\.symbol,item\.name\|\|coinInfo\[base\]\?\.name\)/);
+  assert.match(html, /cryptocurrency-icons@master\/svg\/color/);
+  assert.match(html, /fallback\.className=.*coin-logo-fallback/);
+  assert.ok(!html.includes("||'دارایی دیجیتال'"), 'unknown symbols must not collapse to a generic label');
   assert.ok(html.includes('digiarz-independent-ui.css?v=15'));
 });
 
