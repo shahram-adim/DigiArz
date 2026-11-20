@@ -977,3 +977,17 @@
 - [x] شاخهٔ ایزوله `perf/market-price-bulk-upsert-draft` و PR پیش‌نویس #35 ایجاد شد: https://github.com/shahram-adim/DigiArz/pull/35. تنها فایل مستندات طراحی و ماتریس تست افزوده شده؛ هیچ SQL یا migration اضافه نشده است.
 - [ ] گام بعد: دریافت تعریف دقیق تابع زنده، مقایسهٔ رفتار providerها و سپس نوشتن fixture PostgreSQL 17 و پیاده‌سازی فقط در همین شاخه.
 - [x] cadence یک‌دقیقه‌ای، cron، دیتابیس Production، سفارش‌ها و معاملات بدون تغییر باقی ماندند.
+
+
+## ممیزی عمیق RPCهای مالی — ۲۰ نوامبر ۲۰۲۶
+- [x] وضعیت Supabase زنده دوباره بررسی شد: `ACTIVE_HEALTHY`، PostgreSQL `17.11.0.018`.
+- [x] بدنهٔ زنده و ACL توابع Market، Limit، لغو Limit، Conditional، Stop-Limit، workerها و helper مدیریتی کیف پول بازبینی شد.
+- [x] قیمت معامله Market از جدول سرور خوانده می‌شود و باید حداکثر یک دقیقه تازه باشد؛ قیمت ارسالی مرورگر مبنای اجرا نیست.
+- [x] workerهای پردازش سفارش به `service_role` محدودند؛ کنترل مالکیت، رزرو، قیمت تازه، جفت فعال و قفل ردیف‌ها در مسیرهای بررسی‌شده وجود دارد.
+- [x] هفت کنترل تجمیعی یکپارچگی داده همگی صفر مغایرت گزارش کردند: موجودی منفی، رزرو نامعتبر/یتیم، سفارش باز بدون رزرو، معامله یتیم و مقادیر نامعتبر سفارش.
+- [!] جداول orders/trades/order_reservations/asset_balances در snapshot خالی‌اند؛ صفر مغایرت اثبات آزمون runtime نیست.
+- [!] comment زندهٔ `process_limit_orders` از wallet-first می‌گوید، اما ترتیب واقعی قفل order → reservation → wallet است. deadlock اثبات نشده؛ اصلاح comment و تطبیق ماتریس قفل‌ها باید فقط در شاخهٔ ایزوله انجام شود.
+- [!] آزمون منفی runtime با JWTهای anon/authenticated و بررسی کامل همهٔ ۲۳ تابع authenticated هنوز انجام نشده؛ Security Advisor فعلی نیز به read timeout خورد.
+- [x] گزارش جزئیات در `docs/FINANCIAL_RPC_AUDIT_2026-11-20.md` ثبت شد.
+- [x] هیچ تغییر Production، Migration، cron، grant، policy، سفارش، معامله، رزرو، موجودی یا کیف پول انجام نشد.
+- [ ] گام بعد: تکمیل ماتریس ترتیب قفل تمام RPCها/workerها و تست هم‌زمانی و دسترسی منفی در PostgreSQL 17 ایزوله؛ سپس بازبینی باقی توابع authenticated. اجرای `supabase db push` همچنان ممنوع است.
