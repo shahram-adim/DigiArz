@@ -1179,3 +1179,12 @@
 - [!] اجرای CI جدید و ساخت APK شامل این اصلاحات هنوز تأیید نشده است؛ تست روی گوشی نیز لازم است.
 - [!] PR #31 باید باز و Draft بماند؛ این تغییرات به `main` منتقل نشده‌اند و Supabase Production دست‌نخورده است.
 - [ ] قدم بعدی: بررسی CI روی head جدید، ساخت APK تازه پس از سبزشدن تست‌ها، سپس نصب و تأیید رفتار ورود/داشبورد روی Android.
+
+
+### تأیید تست خودکار پس از اصلاح مخفی‌شدن صفحه ورود — ۲۰ نوامبر ۲۰۲۶
+- [x] تأیید شد commit اصلاح CSS صفحه ورود همان `a6600bdeddd0407437333a531223de2db0ea30a1` است؛ فایل CSS در انتهای خود قانون `#authView.hidden{display:none!important}` را دارد.
+- [x] اجرای Exact decimal tests شماره `44704931910` روی commit وضعیت `d34a4c1151cc6b9711d335a1c89b902f713e122c` بررسی شد؛ job `exact-decimal` با نتیجه `success` بسته شد و تمام مراحل آن موفق بودند.
+- [x] فایل workflow اندروید بازبینی شد: دارای `workflow_dispatch` است و push فقط با تغییر مسیرهای مشخص‌شده از جمله `index.html`، `sw.js` و `src/**` build را اجرا می‌کند.
+- [!] ابزار GitHub متصل در این نشست امکان اجرای مستقیم `workflow_dispatch` یا فهرست‌کردن تمام runهای push را ارائه نمی‌کند؛ بنابراین APK جدید شامل اصلاح auth/SW هنوز ساخته یا تأیید نشده است. APK قبلی run `44700246621` روی commit قدیمی `1269f6f205c7a146e1a7b047164fc16cab275864` است و شامل اصلاحات بعدی نیست.
+- [!] PR #31 باز و Draft باقی می‌ماند؛ شاخه مستقل طبق compare، ۷۴ commit جلوتر و صفر commit عقب‌تر از `main` است. هیچ merge یا تغییری در Supabase Production انجام نشده است.
+- [ ] قدم بعدی: از GitHub Actions، workflow «DigiArz Android APK» را با گزینهٔ Run workflow و شاخهٔ `redesign/independent-ui-2026` اجرا کن؛ پس از اتمام، artifact همان run باید با commit فعلی تطبیق داده شود و APK روی Android آزمایش شود.
