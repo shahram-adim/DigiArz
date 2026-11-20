@@ -1406,3 +1406,12 @@
 - [!] ورود Passkey در PWA و Android هنوز فعال‌شده/تأییدشدهٔ عملیاتی نیست؛ Supabase Auth Passkeys و دامنه RP تنظیم نشده‌اند و APK هنوز bridge بومی Credential Manager ندارد.
 - [ ] گام بعد: ابتدا دامنه canonical و امکان میزبانی فایل `/.well-known/assetlinks.json` در ریشه همان دامنه باید قطعی شود؛ سپس یک spike مهاجرت Capacitor 8 روی شاخه مستقل و جداگانه ساخته و CI/Android build آن ارزیابی شود. تا پیش از آن، افزونه ناسازگار یا منسوخ اضافه نشود.
 - [x] هیچ تغییری در main، Supabase Production، schema، داده‌های مالی، سفارش‌ها یا معاملات انجام نشد.
+
+
+## آماده‌سازی انتشار پیش‌نمایش GitHub Pages — ۲۰ نوامبر ۲۰۲۶
+- [x] گردش‌کار `.github/workflows/pages-preview.yml` روی شاخه `redesign/independent-ui-2026` اضافه شد؛ فقط همان شاخه را build/deploy می‌کند و به `main` یا Supabase دست نمی‌زند.
+- [x] فایل `docs/GITHUB_PAGES_PREVIEW.md` محدودیت‌های میزبانی و نیاز مستقل Digital Asset Links را مستند می‌کند.
+- [x] اجرای workflow انتشار با شناسه‌های `44731843261` و `44731847433` در GitHub Actions ایجاد شد؛ نتیجهٔ نهایی هنوز باید از Actions بررسی شود.
+- [!] ایجاد workflow به‌تنهایی اثبات انتشار نیست؛ تنظیم Pages روی GitHub Actions و موفقیت Deploy باید تأیید شود.
+- [!] آدرس project site به‌تنهایی مسیر ریشهٔ دامنه برای `/.well-known/assetlinks.json` را فراهم نمی‌کند؛ Passkey بومی APK هنوز فعال/تأیید نشده است.
+- [x] هیچ تغییری در `main`، PR#31 merge state، تنظیمات Supabase یا داده‌های مالی Production انجام نشد.
