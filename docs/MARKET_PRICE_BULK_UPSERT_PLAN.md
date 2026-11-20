@@ -142,3 +142,11 @@ Reduce the runtime and database write overhead of `public.refresh_market_prices(
 - Next: inspect the PostgreSQL 17 workflow result for this commit and review any failure output before expanding provider parsing coverage.
 
 - Follow-up coverage: malformed JSON text is caught inside the response boundary, and missing provider keys produce no target price write. These remain isolated payload-contract tests, not a substitute for exact deployed-function equivalence.
+
+
+### Numeric special-value compatibility finding — 2026-11-20
+- Repository schema history establishes `market_prices.price` as `numeric(38,18)`; the refresh migration's legacy acceptance predicate is only `v_price > 0`.
+- PostgreSQL numeric semantics mean `NaN > 0` is true, and NaN can be stored in `numeric(38,18)`. By contrast, positive Infinity cannot fit a precision-constrained `numeric(38,18)` column and raises `numeric_value_out_of_range` during the target write. In the current per-response exception scope, that error rolls back earlier writes from the same response and the response queue row is then deleted outside the exception block.
+- The existing bulk candidate fixture deliberately filters both NaN and Infinity. That is a stricter finite-positive policy, not exact legacy equivalence. Do not label it behavior-preserving until product requirements explicitly approve rejecting NaN, and the migration design documents the intended behavior change.
+- Added a separate PostgreSQL 17 characterization block using the actual `numeric(38,18)` target typmod to assert the legacy NaN predicate/storage behavior and Infinity overflow behavior. This test distinguishes legacy characterization from the proposed stricter candidate filter.
+- This is isolated fixture-only work. It does not query or change Production. The exact deployed function remains unverified, and repository migration source is not proof of the live body.
