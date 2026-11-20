@@ -130,3 +130,14 @@ Reduce the runtime and database write overhead of `public.refresh_market_prices(
 - Existing fixture gaps now explicitly include: (a) valid ticker followed by malformed numeric within one response, verifying response-level rollback; (b) queue-row deletion after caught processing exception; (c) separate response continues after one response fails; (d) malformed JSON shape and missing keys; (e) provider-specific status/code gates; (f) source/timestamp updates only for accepted positive prices.
 - No live function capture or Production query was attempted. These conclusions are based on the repository migration source only and must be checked against the exact deployed function before any implementation.
 - PR #35 remains open Draft and contains only the test workflow, isolated contract fixture, and design document. It remains 13 commits ahead / 11 behind main, with only those three files in the compare. No rebase, merge, deployment, Production DB change, cron change, or cadence change was made.
+
+### Response exception, queue, and provider-gate fixtures — 2026-11-20
+
+- Extended the disposable PostgreSQL 17 contract fixture to model the repository migration's per-response PL/pgSQL exception boundary.
+- Verifies that a valid write earlier in a response is rolled back when a later non-empty malformed numeric value raises; the response queue row is then deleted outside the caught exception block.
+- Verifies that a later independent queued response still processes after an earlier response fails, and that both processed queue rows are removed.
+- Adds isolated acceptance-gate checks for non-200 HTTP status, timed-out response, missing content, KuCoin non-success provider code, and a Gate.io payload with the wrong top-level JSON shape.
+- Adds source/price/timestamp assertions: a rejected non-positive price leaves the previous row unchanged, while an accepted positive price updates price, source, and timestamp.
+- These are behavioral fixtures based on repository migration semantics, not proof that the exact deployed Production function is byte-for-byte equivalent. The live function capture remains blocked by database instability. No Production SQL, migration, cron, market data, order, wallet, or balance was changed; one-minute cadence remains unchanged.
+- Next: inspect the PostgreSQL 17 workflow result for this commit and review any failure output before expanding provider parsing coverage.
+
