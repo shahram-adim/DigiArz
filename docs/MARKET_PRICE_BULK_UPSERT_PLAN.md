@@ -100,3 +100,10 @@ Reduce the runtime and database write overhead of `public.refresh_market_prices(
 - The fixture verifies that passing all four rows directly into one INSERT ... ON CONFLICT DO UPDATE raises PostgreSQL cardinality_violation and leaves the target table unchanged.
 - The test deliberately does not choose a winning provider or claim any production precedence. It proves only that duplicate target keys must be resolved before a single bulk upsert; the correct resolution policy still depends on exact live-function semantics.
 - This is an isolated SQL fixture change only. No live function, market price, cron schedule, order, wallet, or balance was touched. One-minute cadence remains unchanged.
+
+
+### CI and Production recheck — 2026-11-20 17:13 UTC
+- The latest PostgreSQL 17 cross-provider contract run `44781021310` on branch commit `c6bdc2edff9e48351aa1a1fae1046496295c21fc` completed successfully. It includes the four-candidate same-symbol scenario (two CoinGecko IDs, KuCoin, Gate.io), checks the expected `cardinality_violation`, and verifies no partial target write remains.
+- The exact-decimal workflow `44781021461` on the same commit was still in progress at the time of this check; do not report the full test matrix as complete until it finishes.
+- Supabase remains `ACTIVE_HEALTHY` on PostgreSQL 17.11.0.018, but bounded unified Postgres logs for 17:10–17:12 UTC still show repeated pg_cron `job startup timeout` events for jobs 2, 3, 8, 9, 12, and 16. The logs also show later job-start messages, so the timeouts alone do not prove every invocation failed. Root cause is not established.
+- Because startup timeouts persist, exact live-function capture remains blocked. No further heavy catalog query was attempted. No Production SQL, migrations, cron schedules, market data, orders, trades, wallets, or balances were changed. One-minute market/order cadence remains unchanged; PR #35 remains Draft.
