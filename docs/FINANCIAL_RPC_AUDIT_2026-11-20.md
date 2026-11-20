@@ -96,3 +96,14 @@ Workflow فعلی `.github/workflows/exact-decimal-tests.yml` (blob `50936f9c8b5
 Race script واقعاً دو نشست مجزا را اجرا می‌کند: worker-first و cancellation-first، سپس parent-sync در حالی که child worker ردیف فرزند را قفل کرده است باید `synced=0` بدهد؛ چرخهٔ بعدی باید پس از پایان worker وضعیت parent را به fill دوم child برساند. Verify script تعداد tradeها، filled/remaining، رزرو مصرف/آزادشده، wallet و asset balance را کنترل می‌کند.
 
 **مرزبندی شواهد:** تعریف Migration فعلی `20261113181827...` همچنان `FOR UPDATE OF c,parent SKIP LOCKED` دارد. Workflow به‌جای اجرای همین Migration، کاندید draft را در دیتابیس disposable نصب می‌کند. بنابراین سبز بودن این job (در صورت مشاهدهٔ run موفق) فقط رفتار کاندید را تأیید می‌کند؛ نه parity با Migration یا Production. این بررسی، تعریف Workflow و ورودی‌هایش را تأیید می‌کند، اما در این مرحله run ID تازه‌ای برای همین HEAD بازیابی نشد؛ پس وضعیت اجرای تازه را ادعا نمی‌کنیم.
+
+
+## Source-contract guard for Stop-Limit child locking (PR #37)
+
+- Added Draft PR #37: https://github.com/shahram-adim/DigiArz/pull/37
+- Branch: \`test/stop-limit-child-lock-source-contract\`; head commit \`d727a6593323bed5f8370da97b64281e3464a6e0\`.
+- Adds one Node source-contract regression to \`tests/exact-decimal-sql-drafts.test.js\`: extracts the first sync loop from the combined rollout candidate and checked-in migration, requires the candidate to lock \`c,parent,child\`, and explicitly asserts the checked-in migration still has only \`c,parent\`. This deliberately makes the known divergence visible; if the migration is later reconciled, the assertion must be updated intentionally.
+- The PR was created Draft and is unmerged. Immediately after creation, GitHub returned no workflow runs and no combined statuses for the head; CI has not yet been verified for PR #37.
+- Separately retrieved fresh PR #35 run #1233 (\`44807862279\`) on head \`baa5a6381c381965037feb6ebe02f42894d69ad4\`: PostgreSQL 17 job succeeded, all 22 named workflow steps succeeded, including combined rollout rehearsal and real two-session Stop-Limit child execution/cancellation race. This validates the candidate fixtures only, not the checked-in migration or Production.
+- PR #36 run #1177 (\`44787061755\`) remains successful for its distinct TP/SL bounded-retry fixture.
+- No Production changes, migration edits, merge/rebase/deploy, or \`supabase db push\`.
