@@ -562,4 +562,42 @@ BEGIN
   END IF;
 END
 $test$;
+
+-- Downstream source contract: curated activation is CoinGecko-only, while
+-- trading price consumers use positive/fresh price without a source predicate.
+CREATE TEMP TABLE market_price_consumer_fixture (
+  symbol text NOT NULL,
+  price numeric(38,18) NOT NULL,
+  source text NOT NULL,
+  updated_at timestamptz NOT NULL
+) ON COMMIT DROP;
+INSERT INTO market_price_consumer_fixture VALUES
+  ('CG_FRESH', 100, 'CoinGecko', now() - interval '1 minute'),
+  ('KUCOIN_FRESH', 101, 'KuCoin', now() - interval '1 minute'),
+  ('GATE_FRESH', 102, 'Gate.io', now() - interval '1 minute'),
+  ('CG_STALE', 100, 'CoinGecko', now() - interval '3 minutes'),
+  ('CG_ZERO', 0, 'CoinGecko', now() - interval '1 minute');
+
+DO $test$
+BEGIN
+  -- Mirrors get_admin_market_listings()/admin pair activation source+freshness gate.
+  IF (SELECT count(*) FROM market_price_consumer_fixture
+      WHERE price > 0
+        AND source = 'CoinGecko'
+        AND updated_at >= now() - interval '2 minutes') <> 1
+  THEN
+    RAISE EXCEPTION 'curated-market eligibility must require fresh positive CoinGecko price';
+  END IF;
+
+  -- Mirrors the reviewed order/conditional execution freshness predicate;
+  -- do not add a provider-source requirement to these consumers.
+  IF (SELECT count(*) FROM market_price_consumer_fixture
+      WHERE price > 0
+        AND updated_at >= now() - interval '1 minute') <> 3
+  THEN
+    RAISE EXCEPTION 'fresh positive trading prices must remain provider-agnostic';
+  END IF;
+END
+$test$;
+
 ROLLBACK;
