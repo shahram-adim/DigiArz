@@ -1149,3 +1149,11 @@
 - [x] PR #31 همچنان باز و Draft است؛ head شاخه با commit فوق تطابق دارد.
 - [!] هنوز artifact مربوط به APK جدید برای این commit تأیید نشده است. APK قدیمی run `44696455653` مربوط به commit قدیمی‌تر است و نباید به‌عنوان نسخهٔ شامل انیمیشن/نمودار زنده معرفی شود.
 - [!] merge به main و هرگونه تغییر Supabase Production همچنان متوقف است تا کاربر ظاهر را روی گوشی تأیید کند.
+
+
+### اجرای مجدد ساخت APK برای بازطراحی مستقل — ۲۰ نوامبر ۲۰۲۶
+- [x] فایل workflow اندروید در شاخه `redesign/independent-ui-2026` بازبینی شد؛ workflow دارای `workflow_dispatch` و trigger روی push همین شاخه و تغییر مسیرهای UI است.
+- [x] چون ابزار اتصال GitHub در این نشست عملیات مستقیم `workflow_dispatch` ارائه نمی‌کند، یک تغییر بی‌اثرِ توضیحی (comment-only) به فایل `.github/workflows/android-apk.yml` اضافه شد تا trigger مجاز push اجرا شود؛ هیچ دستور build یا تنظیم workflow تغییر نکرد.
+- [x] commit محرک build: `1269f6f205c7a146e1a7b047164fc16cab275864`.
+- [!] wrapper مشاهدهٔ runهای commit فقط اجراهای pull_request را برمی‌گرداند؛ بنابراین اجرای push-triggered و شناسه run هنوز از این مسیر قابل تأیید نیست. artifact APK جدید هنوز تأیید نشده است.
+- [!] PR #31 همچنان باید Draft و ادغام‌نشده بماند؛ هیچ تغییر در `main` یا Supabase Production انجام نشود.
