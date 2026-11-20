@@ -194,3 +194,20 @@ A genuinely source-faithful race harness is not a safe small extension of PR #38
 No weak replacement fixture was added. No PR #38 branch file, main migration, workflow, Supabase project, Production RPC, trigger, cron, financial row, or migration history was changed in this review. No Production query was performed. No merge/rebase/deploy or `supabase db push` occurred.
 
 **Next:** design a dependency-complete disposable PostgreSQL bootstrap from the migration source and run a static parity check first; only then add a race harness. If the required source schema cannot be reconstructed without broad stubbing, keep PR #38 as a clearly labeled concurrency primitive test and do not describe it as an integration test of the real four RPCs.
+
+
+## Workflow/source provenance clarification — 2026-11-21
+
+A closer read of the checked-in workflow confirms that the existing Market/Limit and TP/SL/Stop-Limit integration assertions are executed against the **draft exact-decimal candidate SQL**, not the current Production migration bodies:
+- Workflow lines 132–140 loads `exact_decimal_stop_limit_setup.sql`, then `supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql`, then `exact_decimal_market_limit_entrypoints.sql`.
+- Workflow lines 175–183 uses the same draft candidate for Stop-Limit and TP/SL placement tests.
+- Workflow lines 230–249 likewise uses the draft candidate for Stop-Limit and TP/SL lifecycle tests.
+- The entrypoint assertions are substantive: Market/Limit test blob `3d324573b8304cf1820a5be4bc958a50130b1551`; conditional entrypoint test blob `d520cb9bdecc255b743f0750d14900984fc457f6`. They assert exact 18-place quantities/prices, reservation values and invalid input rejection. They do not prove Production migration parity.
+
+Additional source recovery:
+- TP/SL migration `3360c21a69b7fae83a7f2494428367d1b7658e81` defines `conditional_orders` DDL, RLS, own-row SELECT policy, SELECT grant, write revokes, and real TP/SL/deactivation function bodies and grants.
+- Stop-Limit migration `3f421c6380630d74b846cd66dc7b121786237c0f` defines relevant ALTERs to orders/conditional_orders, Stop-Limit/cancel/worker/deactivation bodies and RPC grants.
+- Market/Limit migration `de09b1cd391790fcd9d94708a916cb41cd9ccc9f` defines the three Market/Limit functions but no base financial table DDL.
+- The current fixture setup itself defines base tables and helper functions (`auth.uid()`, `current_account_is_active()`, `get_demo_trading_fee_rate()`); those are candidate test scaffolding, not authoritative Production schema/helper sources.
+
+This narrows the recovery gap: conditional_orders and several engine-specific alterations/security policies are directly recoverable from migrations; authoritative base DDL and account/fee helper definitions plus complete trigger inventory remain unresolved in repository evidence. No tests/workflow/Production code changed and no Production query was run.
