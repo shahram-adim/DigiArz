@@ -568,3 +568,15 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - The current repository count remains 40 local migration files. Previously recorded inventory comparison (52 applied vs 40 local, 14 applied versions without local SQL source, 20 timestamp-prefix mismatches, and two local-only older KuCoin/Gate.io refresh definitions) remains a historical finding that cannot be revalidated from this archive. Do not present it as a fresh Production check. Exact version-by-version reconciliation is blocked until a low-impact read can safely run against Production or an authoritative migration-history export is obtained.
 - No Production SQL/query/write was performed in this continuation. No migration, function, index, cron, market data, orders, trades, wallets, or balances changed. No `supabase db push`; PR #35 remains Draft and unmerged.
 - Next safe step: build a deterministic local filename/version manifest and keep the applied-version side explicitly unknown until an authoritative export is available; never infer it from restored schema objects.
+
+
+## 2026-11-20 — Deterministic local migration manifest added
+- Re-fetched `PROJECT_HANDOFF.md` from `main` before editing (blob `8e94065555fed128dc63f719df27f9794bce0e4c`).
+- Enumerated the full recursive Git tree at prior main commit `f0f7ad7ae99be8033af25aa251e1eac48652865e`; confirmed exactly 40 current `supabase/migrations/*.sql` files.
+- Queried GitHub commit history scoped to `supabase/migrations/`: 44 commits. Inspected the four filename-correction commits and their diffs:
+  - Market-price batch source was added under the applied timestamp in `2b3c53776aa61d04286d1dc24532722eebad1bed`, then the duplicate timestamped file was removed in `7c756ed4e00de5640902196dbae874b9fe39f525`; surviving file is `20261116203709_limit_primary_coingecko_batch_to_515_ids.sql`.
+  - Stop-Limit retry-bound source was aligned in `eb8234f24ea32d468a6e297ced6074a1f8f38498`, then its duplicate timestamped file was removed in `db5c2ab2736f9c5d60e8faa05e2f7488d667e8`.
+- These four commits explain the difference between 44 path-history commits and 40 current files; they do not explain or resolve the previously reported applied-version/source gaps.
+- Added `docs/MIGRATION_SOURCE_INVENTORY.md` on `main` in commit `0d3527f0f74e66d89969482f72fd9e3f0d62096d`. It records all 40 exact local migration filenames, the two proven rename corrections, and the limits/requirements for authoritative applied-version reconciliation.
+- Applied Production migration ledger remains unknown in this step. No Production SQL/query/write, migration, function, index, cron, market data, orders, trades, wallets, or balances changed. No `supabase db push`; PR #35 remains Draft and unmerged.
+- Next safe step: inspect Git history and workflow artifacts for the missing source definitions without inferring applied status. If no trustworthy artifact exists, record each unrecoverable source as unresolved rather than fabricating or replaying SQL.
