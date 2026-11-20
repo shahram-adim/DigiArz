@@ -343,3 +343,25 @@ See \`docs/superpowers/reports/2026-11-15-exact-decimal-implementation-checkpoin
 1. Confirm a new main-branch GitHub Actions run for the install-controller commits and verify the APK build includes the new controller.
 2. Install the APK or PWA on Android Chrome and verify banner visibility, native prompt, standalone launch, and offline shell behavior.
 3. Keep Supabase Production untouched; retry read-only catalog and function inspection only after the database connection is stable.
+
+## وضعیت تازهٔ QA و مرز Production — ۲۰ نوامبر ۲۰۲۶
+
+### آخرین آزمون‌های ایزوله ثبت‌شده
+- [x] آخرین نتیجهٔ کامل Stop-Limit/TP-SL در تاریخ ۱۹ نوامبر از CI بازیابی شد: workflow run `44594127811` (Run #914) روی commit کد `577da09fb157307440c85a08b1f55308bb262e84` با نتیجهٔ `success`.
+- [x] طبق گزارش اجرایی همان run، آزمون‌های browser integration و exact-decimal، PostgreSQL arithmetic، preflight نامعتبر و atomicity، lock timeout و rollback، ورود Market/Limit، ثبت Stop-Limit و TP/SL، لغو سفارش و رقابت دو نشست مستقل برای Limit/Stop-Limit/TP-SL موفق بودند.
+- [x] اصلاح matcherهای آزمون صفحه ورود نیز در همان CI سبز شد؛ این بخش به منطق مالی تغییری نداد.
+- [!] این اجرا روی PostgreSQL 17 دورریختنی در CI انجام شده است؛ معادل Development Branch مستقل Supabase نیست و به‌تنهایی رفتار Production را اثبات نمی‌کند.
+
+### Snapshot تازهٔ Supabase در ۲۰ نوامبر
+- [x] پروژه `gfoaubfilhttnwjykaox` در وضعیت `ACTIVE_HEALTHY` و PostgreSQL `17.11.0.018` است.
+- [x] شمارش خواندنی جداول مالی: `orders=0`, `trades=0`, `transactions=0`, `asset_balances=0`, `order_reservations=0`, `conditional_orders=0`.
+- [x] فهرست Development Branchها خالی است؛ بنابراین محیط ایزولهٔ Supabase برای آزمون انتهابه‌انتها در دسترس نیست.
+- [!] صفر بودن ردیف‌ها به معنی عبور چرخه مالی از آزمون واقعی نیست. هیچ سفارش یا موجودی ساختگی در Production ایجاد نشد و هیچ Worker/RPC مالی برای تست روی کاربران واقعی اجرا نشد.
+
+### دروازه‌های باز
+1. تهیه/فعال‌سازی Development Branch یا پروژه Supabase جداگانه با کاربران و موجودی دورریختنی؛ هزینه و ایجاد محیط باید طبق تأیید/فرایند Supabase انجام شود.
+2. اجرای چرخه کامل parent Stop-Limit → child Limit شامل trigger، رزرو، اجرای جزئی/کامل، لغو، آزادسازی رزرو، idempotency و race لغو/پردازش.
+3. تطبیق نتیجهٔ هر مرحله با دفترکل USDT و مقدار دقیق دارایی پایه؛ quantization تسویه USDT باید ۸ رقم و مقدار/قیمت پایه مطابق قرارداد precision باشد.
+4. نگه‌داشتن Production بدون تغییر تا تکمیل آزمون ایزوله و بازبینی نهایی grants/RLS و برنامهٔ rollback.
+
+این به‌روزرسانی فقط مستندسازی نتیجهٔ CI و وضعیت خواندنی Production است؛ هیچ آزمون مالی روی Supabase Production اجرا نشده است.

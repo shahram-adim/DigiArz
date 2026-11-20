@@ -1431,3 +1431,30 @@
 - [!] این مانع از کد workflow یا ساخت PWA نیست؛ باید Build and deployment → Source در تنظیمات مخزن به `GitHub Actions` تغییر کند. اتصال GitHub موجود فقط ابزارهای GET و تغییر فایل/commit را در اختیار می‌گذارد و عملیات Update Pages site که به مجوزهای Pages write و Administration write نیاز دارد در دسترس نیست.
 - [ ] پس از تغییر Source به GitHub Actions، اجرای workflow از شاخه `redesign/independent-ui-2026` باید دوباره اجرا و URL نهایی بررسی شود.
 - [x] شاخه `main`، PR #31 (Draft)، Supabase Production و داده‌های مالی دست‌نخورده باقی ماندند.
+
+
+## همگام‌سازی مستندات main — ۲۰ نوامبر ۲۰۲۶
+
+## بازبینی مجوز دو RPC عمومی بازار — ۲۰ نوامبر ۲۰۲۶
+
+- [x] آخرین وضعیت واقعی main پیش از این بررسی خوانده شد: `af0022d2ee887fe101a2403b9d7d2c8f0b1fad4b`؛ فایل وضعیت، ماتریس QA، ساختار UI و وضعیت Supabase بازخوانی شدند.
+- [x] Supabase در وضعیت `ACTIVE_HEALTHY` و PostgreSQL `17.11.0.018` است؛ ۲۲ جدول عمومی، ۵۲ migration ثبت‌شده، ۸ Edge Function فعال و صفر Development Branch مشاهده شد.
+- [x] Security Advisor snapshot در `2026-11-20T10:58:49Z`: ۱۵ جدول RLS-enabled بدون policy، دو تابع SECURITY DEFINER قابل اجرا برای anon، ۲۳ تابع قابل اجرا برای authenticated و هشدار غیرفعال‌بودن leaked-password protection.
+- [x] بدنه و ACL زندهٔ `get_admin_market_listings()` و `get_exchange_discovered_market_assets()` با `pg_get_functiondef` و `has_function_privilege` بررسی شد. هر دو `STABLE SECURITY DEFINER` با `search_path` خالی و مالک postgres هستند؛ شمارش catalog با Advisor هم‌خوان بود.
+- [x] هر دو تابع فقط metadata عمومی بازار/کشف دارایی را می‌خوانند؛ هیچ جدول کاربر، کیف پول، سفارش، معامله یا تراکنشی در بدنه آن‌ها دیده نشد. migrationهای متناظر صریحاً PUBLIC را revoke و anon/authenticated را grant می‌کنند.
+- [x] محل فراخوانی در `index.html` بررسی شد: صفحه عمومی بازار از `loadFeaturedMarketAssets()` هر دو RPC را درخواست می‌کند؛ خروجی کشف‌شده با `catalogOnly: true` صرفاً نمایشی است و جفت معاملاتی ایجاد نمی‌کند. بنابراین anon برای این دو مسیر فعلی UI یک دسترسی عمومیِ موردنیاز است؛ revoke کورکورانه می‌تواند صفحه بازار را خراب کند.
+- [x] گزارش تفصیلی در `docs/SECURITY_REVIEW_2026-11-20.md` با commit `5a5756b5228993ca04b521a55168e8f608a82b70` ثبت شد.
+- [!] این بررسی فقط دو تابع anon را پوشش می‌دهد؛ ۲۳ تابع SECURITY DEFINER قابل اجرا برای authenticated و ۱۵ جدول RLS بدون policy هنوز به بررسی هدفمند نیاز دارند. هشدارها به‌تنهایی اثبات آسیب‌پذیری نیستند.
+- [!] هیچ grant، policy، تابع، migration، Edge Function، cron، داده مالی، سفارش، معامله، رزرو، کیف پول یا موجودی در Production تغییر نکرد. هیچ درخواست runtime ناشناس یا worker مالی اجرا نشد؛ آزمون چرخه مالی به علت نبود Supabase branch ایزوله انجام نشد.
+- [x] تغییر امروز مستندسازی/ممیزی فقط‌خواندنی است؛ آزمون اجرایی کد لازم نبود و اجرا نشد.
+- [ ] گام بعد: گروه‌بندی و بازبینی ۲۳ تابع authenticated، با اولویت توابع admin و هر تابع دارای اثر نوشتن؛ سپس افزودن تست رگرسیون ایستا برای قرارداد دو RPC عمومی، بدون تغییر مجوز تا آماده‌شدن جایگزین سازگار با UI و تأیید انتشار.
+
+### تکمیل ثبت QA Stop-Limit — ۲۰ نوامبر ۲۰۲۶
+- [x] ماتریس `docs/STOP_LIMIT_QA_MATRIX.md` با آخرین نتیجهٔ ایزولهٔ CI ثبت‌شده در ۱۹ نوامبر (run `44594127811`, Run #914) و snapshot فقط‌خواندنی Production به‌روز شد؛ commit: `6171e3fc5febee5705aa6c3e76dad1a7fde80eb2`.
+- [x] مرز آزمون روشن شد: CI روی PostgreSQL 17 دورریختنی موفق بوده، اما Development Branch مستقل Supabase وجود ندارد؛ صفر بودن ردیف‌های مالی Production جایگزین آزمون چرخه کامل نیست.
+- [!] هیچ سفارش/معامله/رزرو/موجودی آزمایشی در Production ایجاد نشد و هیچ Worker/RPC مالی روی کاربران واقعی اجرا نشد.
+
+### تکمیل ثبت QA Stop-Limit — ۲۰ نوامبر ۲۰۲۶
+- [x] ماتریس `docs/STOP_LIMIT_QA_MATRIX.md` با آخرین نتیجهٔ ایزولهٔ CI ثبت‌شده در ۱۹ نوامبر (run `44594127811`, Run #914) و snapshot فقط‌خواندنی Production به‌روز شد؛ commit: `6171e3fc5febee5705aa6c3e76dad1a7fde80eb2`.
+- [x] مرز آزمون روشن شد: CI روی PostgreSQL 17 دورریختنی موفق بوده، اما Development Branch مستقل Supabase وجود ندارد؛ صفر بودن ردیف‌های مالی Production جایگزین آزمون چرخه کامل نیست.
+- [!] هیچ سفارش/معامله/رزرو/موجودی آزمایشی در Production ایجاد نشد و هیچ Worker/RPC مالی روی کاربران واقعی اجرا نشد.
