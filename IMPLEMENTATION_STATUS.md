@@ -1294,3 +1294,14 @@
 - [x] ارتقای CSS به `v=12` و Service Worker cache به `digiarz-shell-v68`; تست نگهبان برای grid موبایل و selector واقعی قیمت اضافه شد.
 - [!] این تغییرات روی شاخه `redesign/independent-ui-2026` ثبت شده‌اند؛ هنوز CI تازه و APK ساخته‌شده از commit نهایی تأیید نشده‌اند. نسخه‌های قدیمی APK این اصلاح را ندارند.
 - [x] هیچ تغییری در منطق قیمت/معاملات، احراز هویت، Supabase Production یا شاخه `main` اعمال نشد؛ PR #31 باید باز و Draft بماند.
+
+
+### نتیجهٔ Build 108 و اصلاح انتظارهای تست رابط بازار — ۲۰ نوامبر ۲۰۲۶، حدود ۱۰:۰۸ UTC
+- [x] ریشهٔ شکست‌های تست قبلی مشخص شد: دو تست هنوز CSS `v=11` را انتظار داشتند، در حالی که فایل واقعی `v=12` بود؛ تست Service Worker نیز حذف cache قدیمی `v=67` را در فهرست انتظار نداشت.
+- [x] تست‌ها با نسخه‌های واقعی stylesheet و cache هماهنگ شدند؛ workflow تست Exact Decimal برای شاخه بازطراحی نیز فعال شد تا تغییرات شاخه به‌صورت مستقل تست شوند.
+- [x] اجرای جدید تست‌ها با run ID `44716464908` شروع شد؛ تست‌های JavaScript/مرورگر، PostgreSQL arithmetic، rehearsal تغییر precision، preflight منفی، lock-timeout و rollback تا مرحلهٔ فعلی موفق بوده‌اند؛ کل job هنوز در حال اجراست.
+- [x] Android Build 108 با run ID `44716074701` موفق شد؛ APK از commit `5e6e1ac014d79fb677ecafdef1c122595a314d3b` ساخته شده که شامل بازسازی صفحه بازار، CSS `v=12` و Service Worker `v68` است.
+- [x] Release مستقیم Build 108 تأیید شد: https://github.com/shahram-adim/DigiArz/releases/download/android-debug-108/app-debug.apk
+- [x] SHA-256 فایل APK طبق BUILD-INFO و digest دارایی Release یکسان است: `cf0fd0539fdccc4929e59f979143898497b7342c58405e1371b8e5182e42aaf7`.
+- [!] Build 108 نسخه Debug/Test است؛ نصب و ظاهر واقعی صفحه بازار روی گوشی کاربر هنوز تأیید نشده است. APK از commit قبل از آخرین اصلاح صرفاً تستی ساخته شده، اما شامل کد UI بازار v12 است.
+- [x] PR #31 همچنان باز و Draft است؛ هیچ merge، تغییر Production، Auth یا منطق مالی انجام نشده است.
