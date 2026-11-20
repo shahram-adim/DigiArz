@@ -304,3 +304,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - The independent queue-race draft remains in PR #8 and is not included or reconciled here.
 - No `supabase/migrations` file was changed. No Supabase Production function, schema, cron, ACL, migration history, wallet, balance, order, trade, or market data was modified.
 - Next: verify the PostgreSQL 17 workflow on this PR; if it passes, extend tests to the complete function in a disposable database and measure WAL/buffers/dead tuples before considering any Production rollout. Keep PR #32 Draft and do not merge or apply.
+
+
+## Additional read-only DB finding — CoinGecko catalog upsert — 2026-11-20
+- PR #33: https://github.com/shahram-adim/DigiArz/pull/33 on branch `perf/crypto-assets-noop-upserts` contains a separate experimental draft for `public.refresh_crypto_assets()` with an `ON CONFLICT DO UPDATE ... WHERE IS DISTINCT FROM` guard and PostgreSQL 17 fixture.
+- It intentionally preserves `price_toman` when the incoming computed value is NULL; all existing source/business fields remain part of the comparison, and unchanged rows do not advance `updated_at`.
+- Evidence: `crypto_assets` had 4,989,198 cumulative updates since database stats reset 2026-11-03 02:07:51 UTC (~284,275/day over 17.55 days). `refresh_crypto_assets()` pg_stat_statements: 14,859 calls, ~1.61M ms total, 105,704 shared blocks dirtied. pg_stat_statements reset 2026-11-06 03:05:58 UTC.
+- `refresh_crypto_assets_toman()` showed 14,845 calls, ~3.53M ms total and 632,164 shared blocks dirtied; its function already has a distinct-value guard. This needs a separate analysis of actual price/FX churn; do not remove its guard or reduce cadence without evidence.
+- `track_functions=none`, so `pg_stat_user_functions` returns no function rows. Do not claim function-level stats from that view.
+- PR #33 contains no handoff-file change to avoid a merge conflict with PR #32. CI has not been confirmed passing; keep both PRs Draft and do not apply to Production.
