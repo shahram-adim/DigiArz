@@ -473,3 +473,9 @@ body.dark-theme .notice.ok,body.light-theme .notice.ok,body.luxury-theme .notice
  body.dark-theme .da-v2-hero-foot,body.light-theme .da-v2-hero-foot,body.luxury-theme .da-v2-hero-foot{position:static!important;margin-top:15px!important}
 }
 @media(prefers-reduced-motion:reduce){body.dark-theme *,body.light-theme *,body.luxury-theme *{transition:none!important;animation:none!important}}
+
+/* Legacy accent alias: every remaining legacy mint token follows the selected theme. */
+:root{--da-mint:var(--da-accent)}
+body.dark-theme{--da-mint:#f0b90b}
+body.light-theme{--da-mint:#2868d7}
+body.luxury-theme{--da-mint:#e6c477}
