@@ -57,7 +57,6 @@ Reduce the runtime and database write overhead of `public.refresh_market_prices(
 
 - Added `supabase/tests/market_price_bulk_upsert_contract.sql` to prove PostgreSQL's duplicate-conflict-key cardinality failure, statement atomicity, explicit caller-ranked deduplication, and rejection of NULL, zero, negative, NaN, and positive Infinity prices.
 - Added `.github/workflows/market-price-bulk-upsert-tests.yml` to run the fixture against disposable PostgreSQL 17 on PR/push.
-- GitHub Actions run `44779426017` was created for commit `3b57ad647390669e1708a8ba19a1b95b079f1df6`; at last inspection its PostgreSQL job was still initializing, so no pass is claimed.
 - This fixture tests PostgreSQL mechanics only. It does not establish live CoinGecko/KuCoin/Gate.io precedence or equivalence with `public.refresh_market_prices()`.
 - The branch remains isolated and Draft. No Production database, migration, cron, price, order, trade, wallet, or balance was changed. One-minute cadence remains untouched.
 - Next: confirm this fixture CI result, then obtain the exact live function definition through a reliable read-only route before defining provider-specific ranking or writing replacement SQL.
@@ -71,3 +70,10 @@ Reduce the runtime and database write overhead of `public.refresh_market_prices(
 - Read-only Supabase unified logs for 16:55–17:05 UTC show six occurrences each of startup timeouts for cron jobs 2, 3, 8, 9, and 12; two observed `refresh_market_prices()` executions took 46.952 s and 50.744 s. A separate statement-timeout event was also logged. These observations are consistent with the previously reported resource/startup pressure; they do not identify a single root cause.
 - Project status reports `ACTIVE_HEALTHY`, PostgreSQL 17.11.0.018. However, repeated cron startup timeouts and long market refresh duration mean the live database is not a safe target for further catalog/function-definition reads right now. Do not retry the timed-out function-definition SQL while this pressure persists.
 - Next gate: wait for database/log stability, then capture the exact live `public.refresh_market_prices()` definition through a read-only path before authoring any provider-ranking or replacement SQL. No Production changes, cron changes, migration changes, or cadence changes were made. PR #35 remains Draft.
+
+
+### Current branch and stability check — 2026-11-20 17:08 UTC
+- GitHub Actions run `44779548999` is completed/successful; its test suite passed on code commit `7a895b4e0c46080813ec9c7958348de13960ad59`. Run `44779426017` also passed the isolated PostgreSQL contract fixture. The earlier initializing-only note above is superseded by these confirmed results.
+- The documentation-only branch head is `156f9ea5a37fd7510ec5d4dc4bf7cfbe55d15b7b`. Relative to current main `06a23cc9f6e45ba18dfa0c1d88785778e137da17`, compare reports diverged: 6 commits ahead and 2 behind, with merge base `8bbd3e228de3b342c1a07eb0ff18ec97c9d12353`. No rebase/merge performed.
+- Latest retrieved production logs through 17:08:10 UTC still contain repeated startup timeouts for jobs 2, 3, 8, 9, 11, and 12. The market refresh was starting at 17:08:02; no completion duration for that invocation is present in the retrieved slice. A postgres_exporter statement-timeout remains present at 17:06:52.
+- Because the startup-timeout pattern persists, do not retry heavyweight catalog/function-definition reads. No live changes or schedule changes. PR #35 stays Draft.
