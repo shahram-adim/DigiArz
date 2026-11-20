@@ -125,3 +125,16 @@
 - جست‌وجوی مخزن در این مرحله migration پایه‌ای که DDL اصلی `profiles/orders/wallets/asset_balances/order_reservations` و helperهای account/fee را ایجاد کند بازیابی نکرد. این صرفاً محدودیت evidence در نسخهٔ مخزن/جست‌وجوی انجام‌شده است؛ نه اثبات عدم وجود اشیاء در دیتابیس.
 - پس گام بعدی باید از Git history/commit tree یا snapshot مستند schema به دنبال base DDL برود. از fixture برای تولید schema parity استفاده نکنیم.
 - هیچ تست جدید یا workflow تغییر داده نشد؛ هیچ Production query/write انجام نشد.
+
+
+## بررسی آرشیو پشتیبان موجود — ۲۱ نوامبر ۲۰۲۶
+
+- GitHub Actions run: `43848835281`، branch `main`، head `e05ab44f94488bad942bf19aff031a27b2132230`.
+- Artifact: `DigiArz-database-backup`، ID `14217201032`، حجم `2,231,010` bytes، SHA-256 اعلام‌شده `555c1f7ebcad947e573dad659084bbcf94dc88d55fc0bc1a3b7de9608e4e5` (GitHub metadata: `sha256:555c1f7ebcad947e573dad659084bbcf94dc88d55fc0bc1a3b7de9608e4e5`)، انقضا `2026-11-23T10:26:46Z`.
+- Artifact دریافت شد و ZIP فهرست‌برداری شد. فقط `README-backup.txt` و `digiarz-database.dump.enc` دارد.
+- README می‌گوید pg_dump 17.12 از schemaهای public و private تهیه شده؛ ساختار جدول‌های صف private هم موجود است، داده‌های transient queue عمداً حذف شده و داده‌های private admin/audit/control نگهداری شده‌اند.
+- فایل dump با AES-256-CBC + PBKDF2 رمزگذاری شده است. README می‌گوید integrity/decryption byte comparison و pg_restore archive-list checks در زمان ساخت موفق بوده‌اند؛ اما این یک live restore drill نیست.
+- این محیط به کلید رمزگشایی امن پروژه دسترسی ندارد؛ بنابراین محتوای dump را باز یا restore نکردم و هیچ کلید/secretی درخواست یا افشا نشده است. در نتیجه این artifact مسیر بالقوهٔ authoritative schema recovery است، اما تا زمانی که در محیط امن و مجاز رمزگشایی/بازبینی نشود، نمی‌تواند مبنای parity قرار گیرد.
+- آرشیو شامل `supabase_migrations.schema_migrations` نیست طبق بررسی قبلی؛ بنابراین حتی پس از رمزگشایی، schema snapshot به‌تنهایی applied migration ledger را ثابت نمی‌کند.
+- هیچ تغییری در GitHub workflow، secrets، Supabase یا Production انجام نشده است.
+- Next safe step: اجرای بررسی/استخراج schema از این artifact فقط در محیط امنی که secret از قبل در اختیار GitHub Actions یا اپراتور مجاز است؛ secret نباید در چت، فایل repository یا log چاپ شود. اگر چنین محیطی در دسترس نیست، از مالک پروژه درخواست شود artifact unencrypted schema-only یا schema dump با کلید مدیریت‌شده را از مسیر امن ارائه کند.
