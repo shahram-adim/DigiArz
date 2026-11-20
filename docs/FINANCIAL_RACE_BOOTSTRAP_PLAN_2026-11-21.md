@@ -130,7 +130,7 @@
 ## بررسی آرشیو پشتیبان موجود — ۲۱ نوامبر ۲۰۲۶
 
 - GitHub Actions run: `43848835281`، branch `main`، head `e05ab44f94488bad942bf19aff031a27b2132230`.
-- Artifact: `DigiArz-database-backup`، ID `14217201032`، حجم `2,231,010` bytes، SHA-256 اعلام‌شده `555c1f7ebcad947e573dad659084bbcf94dc88d55fc0bc1a3b7de9608e4e5` (GitHub metadata: `sha256:555c1f7ebcad947e573dad659084bbcf94dc88d55fc0bc1a3b7de9608e4e5`)، انقضا `2026-11-23T10:26:46Z`.
+- Artifact: `DigiArz-database-backup`، ID `14217201032`، حجم `2,231,010` bytes، SHA-256 اعلام‌شده `555c1f7ebcad947e573dad659084bbcf94dc88d55fc0bc1a3b7de9606db8e4e5` (GitHub metadata: `sha256:555c1f7ebcad947e573dad659084bbcf94dc88d55fc0bc1a3b7de9606db8e4e5`)، انقضا `2026-11-23T10:26:46Z`.
 - Artifact دریافت شد و ZIP فهرست‌برداری شد. فقط `README-backup.txt` و `digiarz-database.dump.enc` دارد.
 - README می‌گوید pg_dump 17.12 از schemaهای public و private تهیه شده؛ ساختار جدول‌های صف private هم موجود است، داده‌های transient queue عمداً حذف شده و داده‌های private admin/audit/control نگهداری شده‌اند.
 - فایل dump با AES-256-CBC + PBKDF2 رمزگذاری شده است. README می‌گوید integrity/decryption byte comparison و pg_restore archive-list checks در زمان ساخت موفق بوده‌اند؛ اما این یک live restore drill نیست.
@@ -138,3 +138,22 @@
 - آرشیو شامل `supabase_migrations.schema_migrations` نیست طبق بررسی قبلی؛ بنابراین حتی پس از رمزگشایی، schema snapshot به‌تنهایی applied migration ledger را ثابت نمی‌کند.
 - هیچ تغییری در GitHub workflow، secrets، Supabase یا Production انجام نشده است.
 - Next safe step: اجرای بررسی/استخراج schema از این artifact فقط در محیط امنی که secret از قبل در اختیار GitHub Actions یا اپراتور مجاز است؛ secret نباید در چت، فایل repository یا log چاپ شود. اگر چنین محیطی در دسترس نیست، از مالک پروژه درخواست شود artifact unencrypted schema-only یا schema dump با کلید مدیریت‌شده را از مسیر امن ارائه کند.
+
+
+## تکمیل بازیابی schema از پروژه Recovery-Test — ۲۱ نوامبر ۲۰۲۶
+
+- پروژه ایزوله DigiArz-Recovery-Test با ref برابر zrriqwyolcjhbappocuw در زمان بررسی ACTIVE_HEALTHY و PostgreSQL 17.11.0.019 بود. اجرای restore قبلی 44298621534 با نتیجه success تأیید شد.
+- فقط metadata کاتالوگ در پروژه Recovery-Test خوانده شد: ۳۲ جدول، ۲۳۹ ستون، ۱۱۶ قید، ۶۳ ایندکس، ۵ trigger غیرسیستمی و ۲۱ policy در schemaهای public/private. ده جدول اصلی مالی/سفارش در snapshot همگی RLS-enabled هستند.
+- سه trigger مهم account guard روی INSERT جدول‌های orders، trades و transactions به private.guard_active_account_writes() متصل‌اند. دو trigger دیگر مربوط به فهرست بازار و مشاهده دارایی صرافی هستند.
+- تعریف و fingerprint توابع کمکی snapshot بازیابی شد: current_account_is_active() برابر d932cd1d0da21bb96bdc0a381f7dcbc3؛ get_demo_trading_fee_rate(text,text) برابر 546d80d7105228ed97da26c5ed0c7b7f؛ deactivate_my_account() برابر 2081e024a2b815aa2c6ebf6470fa2bce؛ و private.guard_active_account_writes() برابر 29b8e23c1de8eb4762a8cf1a9c9343ce. این fingerprintها متعلق به snapshot بازیابی هستند و تا مقایسه با Production نباید نسخه زنده فعلی تلقی شوند.
+- محدودیت ACL مهم: فایل .github/workflows/recovery-drill.yml در restore از pg_restore --no-owner --no-acl استفاده می‌کند. بنابراین ACLهای توابع عمداً به پروژه Recovery-Test منتقل نشده‌اند؛ proacl IS NULL و نتیجه has_function_privilege در این پروژه برای اثبات grantهای Production معتبر نیست. grant/revoke باید از migrationهای منبع و catalog زنده Production بازیابی شود.
+- پروژه Recovery-Test یک restore از backup دارای داده است؛ در این نوبت فقط metadata خوانده شد، محتوای ردیف‌های کاربران خوانده نشد و هیچ ردیفی برای تست استفاده نشد. این پروژه نباید به‌عنوان محیط آزمون مالی استفاده شود. هر harness باید در PostgreSQL 17 کاملاً تازه با DDL schema-only و داده‌های مصنوعی ساخته شود.
+- تلاش‌های فقط‌خواندنی execute_sql و list_tables روی Production در این نوبت با connection timeout شکست خوردند؛ بنابراین برابری schema snapshot با Production در ۲۱ نوامبر اثبات نشد. وضعیت مدیریتی پروژه همچنان ACTIVE_HEALTHY است. Security Advisor نیز به read timeout خورد؛ Health Advisor بدون یافته و Performance Advisor در snapshot ساعت 2026-11-20T22:59:05Z شامل ۹ FK بدون ایندکس پوششی، ۱۱ هشدار RLS initplan و ۷ ایندکس استفاده‌نشده بود.
+- GitHub API digest فعلی artifact برابر sha256:555c1f7ebcad947e573dad659084bbcf94dc88d55fc0bc1a3b7de9606db8e4e5 است؛ مقدار ۶۱ کاراکتری قبلی در این سند ناقص بود. artifact هنوز منقضی نشده و زمان انقضای اعلام‌شده 2026-11-23T10:26:46Z است.
+- PR #38 همچنان Draft و ادغام‌نشده است؛ آزمون آن در run 44811642137 موفق شد، اما فقط race primitive fixture را اعتبارسنجی می‌کند، نه چهار RPC واقعی.
+
+### گام بعدی اصلاح‌شده
+۱. پس از بازیابی اتصال read-only Production، fingerprint و ساختار ۱۰ جدول، constraints، indexes، triggers و policies را با snapshot Recovery-Test مقایسه کن.
+۲. ACLها را جداگانه از migrationهای منبع و catalog Production بازیابی کن؛ ACLهای Recovery-Test را نادیده بگیر.
+۳. فقط پس از اثبات parity، از DDL schema-only در PostgreSQL 17 تازه و بدون هیچ داده backup، harness منبع‌وفادار بساز. اگر parity به‌دلیل timeout یا منبع مفقود قابل اثبات نیست، PR #38 را صرفاً primitive test نگه دار.
+۴. هیچ تغییری در Production، migration history، cron، grants، policies یا داده مالی انجام نشود و supabase db push همچنان ممنوع بماند.
