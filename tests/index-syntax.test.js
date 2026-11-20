@@ -422,6 +422,7 @@ test('independent DigiArz UI stylesheet is loaded last without replacing app beh
   }
   assert.match(sw, /digiarz-shell-v65/);
   assert.match(sw, /digiarz-independent-ui\.css\?v=9/);
+  assert.ok(css.includes('#authView.hidden{display:none!important}'), 'login view must be hidden after successful authentication');
   for (const id of ['authView','appView','loginBtn','signupBtn','tradePairBadge','priceChart','assetList','allOrdersList','historyBody']) {
     assert.match(html, new RegExp('id="' + id + '"'), 'existing app behavior hook remains: ' + id);
   }
