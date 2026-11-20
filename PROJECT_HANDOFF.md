@@ -318,3 +318,17 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - No Production SQL, migration, function, index, cron, market data, order, trade, wallet, or balance changed. One-minute cadence unchanged. Live function definition capture remains blocked by database instability; no heavy Supabase query was retried.
 - Next: inspect run `44802705359`; if successful, review the latest PR diff and then continue with isolated provider-parser/equivalence cases. Keep PR Draft and do not rebase/merge/deploy.
 
+
+
+## 2026-11-20 — PR #35 latest CI and contract review
+- Rechecked the current main handoff before updating it; prior blob SHA was `5d01bad9975cd7d5ebd3ad25fed8a20ad4eadcfa`.
+- PR #35 remains open and Draft. Current PR head is `477b4415e245821507ae588fa7bda9d72a02739d`; changed files remain exactly the isolated PostgreSQL 17 workflow, `docs/MARKET_PRICE_BULK_UPSERT_PLAN.md`, and `supabase/tests/market_price_bulk_upsert_contract.sql`.
+- Latest PR-head PostgreSQL 17 contract workflow run `44802732909` completed successfully; job `postgres-17-contract` and step `Run isolated bulk-upsert contract fixture` both succeeded.
+- Latest PR-head exact-decimal workflow run `44802732606` completed successfully; all 43 substantive/setup/cleanup steps reported success, including arithmetic, schema-widening rehearsals, entrypoint integration, and two-session lifecycle/race tests.
+- The latest push-triggered contract run `44802705359` also completed successfully on fixture commit `daae30bd349f9a011381c3435a97c5bbe152573f`. The PR-head runs above validate the current docs-only head `477b4415e245821507ae588fa7bda9d72a02739d`.
+- Static fixture review confirms tests for PostgreSQL duplicate-key cardinality failure, explicit caller-ranked deduplication mechanics, non-positive/NULL/NaN/Infinity rejection, cross-provider duplicate target keys, per-response rollback and queue deletion, later-response continuation, provider HTTP/status/code/shape gates, source/timestamp behavior, malformed JSON, and missing provider keys.
+- These are isolated PostgreSQL contract tests and synthetic models based on repository migration source. They do not prove exact deployed-function equivalence, actual provider parser equivalence, or production performance.
+- PR branch compare against current main reports diverged: 19 commits ahead / 12 behind, merge base `8bbd3e228de3b342c1a07eb0ff18ec97c9d12353`. No rebase or merge was performed.
+- Exact live `public.refresh_market_prices()` definition capture remains blocked by earlier database instability and timeouts. Do not retry heavy catalog/function reads until stability is demonstrated. Do not invent provider precedence or duplicate-symbol winner semantics.
+- No Production function, migration, index, cron, market data, orders, trades, wallets, or balances were changed. One-minute market-price cadence remains unchanged. `supabase db push` remains prohibited while migration history is unreconciled.
+- Next: continue repository-only review and wait for a safe read-only route to capture the exact deployed function; then add tests against actual provider parsing and response ordering semantics before any implementation. Keep PR #35 Draft and do not merge/deploy without separate explicit approval.
