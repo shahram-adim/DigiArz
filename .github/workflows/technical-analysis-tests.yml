@@ -1,0 +1,27 @@
+name: DigiArz technical analysis tests
+on:
+  push:
+    branches: [redesign/independent-ui-2026]
+    paths:
+      - 'src/technical-analysis.js'
+      - 'tests/technical-analysis.test.js'
+      - '.github/workflows/technical-analysis-tests.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/technical-analysis.js'
+      - 'tests/technical-analysis.test.js'
+      - '.github/workflows/technical-analysis-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  technical-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run indicator calculation tests
+        run: node --test tests/technical-analysis.test.js
