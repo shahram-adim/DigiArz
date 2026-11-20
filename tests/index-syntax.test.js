@@ -443,7 +443,7 @@ test('unknown market symbols still receive a Persian-language label and the mark
 
 test('market categories lead the market page and the selected category filters owned assets', () => {
   const market = html.slice(html.indexOf('<section id="tab-markets"'), html.indexOf('<section id="tab-toman"'));
-  assert.ok(market.indexOf('id="marketCategories"') < market.indexOf('class="market-hero-v34"'), 'category rail appears before the hero');
+  assert.ok(market.indexOf('id="marketCategories"') < market.indexOf('<div class="section-title">'), 'category rail is the first content at the top of the market page');
   assert.doesNotMatch(market, /۵ ارز با بیشترین افزایش|۵ ارز با بیشترین کاهش|۱۰ ارز برتر بازار/);
   assert.match(html, /const selectedCategory=activeMarketCategory,categorySet=categorySymbols\[selectedCategory\]/);
   assert.match(html, /const categoryOwned=owned\.filter/);
