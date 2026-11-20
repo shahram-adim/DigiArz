@@ -148,3 +148,10 @@ Race script واقعاً دو نشست مجزا را اجرا می‌کند: wor
 - **محدودیت مهم:** این fixture یک مدل concurrency کوچک و مستقل است؛ بدنهٔ کامل چهار RPC واقعی را اجرا نمی‌کند و ثابت نمی‌کند Production فاقد trigger یا قفل دیگری است. Candidate profile-row locking فقط در fixture آزمایشی است؛ هیچ Migration/Production تغییر نکرده است.
 - PR ساخته شد ولی در اولین بررسی، `fetch_commit_workflow_runs` برای head `a6849671727fce10fe852bda607fd65b3fc2a351` هنوز runی برنگرداند. تا مشاهدهٔ run و بررسی نتیجه، تست را اجراشده/سبز اعلام نکن.
 - Next: monitor PR #38 CI; if it fails inspect exact job logs and repair only the Draft branch. If green, extend fixture toward full entrypoint bodies and establish authoritative trigger/profile-lock inventory from a safe schema snapshot before proposing any rollout.
+
+
+### PR #38 CI progress checkpoint — 2026-11-20
+- Run #1263 / ID `44811642137` is active on head `a6849671727fce10fe852bda607fd65b3fc2a351`.
+- Steps 1–18 have completed successfully, including exact-decimal, Market/Limit integration, Limit race, TP/SL execution/cancellation race, and completed rollout rehearsal checks. Step 19 (Stop-Limit child execution/cancellation race) is currently in progress; steps 20–22 (Stop-Limit lifecycle, TP/SL lifecycle, and new account-deactivation/order race) have not run yet. Therefore the new race test has **not** passed yet and the overall workflow is not complete.
+- Additional repository code searches for trigger declarations and references around `deactivate_my_account`, `current_account_is_active`, and financial tables did not produce authoritative evidence of all live triggers. This is only a repository-search observation, not proof that no Production trigger exists.
+- No Production query or change was made. PR #38 remains Draft.
