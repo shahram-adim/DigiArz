@@ -84,3 +84,15 @@
 تست دو نشست `supabase/tests/exact_decimal_stop_limit_cancel_race.sh` (blob `e88607d4afea2e41d25872f41fcdd3ed79f1fd85`) سه interleaving را پوشش می‌دهد: child worker-first سپس cancellation، cancellation-first سپس worker، و child partial-fill هم‌زمان با parent sync. فایل verify (blob `47e6f192b45715dd3f18c114b998d42904542ab2`) وضعیت parent/child، تعداد trade، مقدار مصرف/آزادسازی reservation و balances را بررسی می‌کند. مستند rollout نتیجهٔ این rehearsal را در disposable PostgreSQL ثبت کرده است؛ این شواهد به کاندید آزمایشی مربوط است، نه تعریف فعلی Migration در Production.
 
 **نتیجه:** تغییر لازم از نظر طراحی در مخزن و تست race موجود است؛ اما source Migration ثبت‌شده در `main` هنوز نسخهٔ بدون قفل child را دارد. بنابراین اختلاف candidate-vs-migration باید پیش از هر rollout با تطبیق کامل snapshot زنده و CI مجدد بسته شود. تست‌های قدیمی یا موفقیت قبلی کاندید، به‌تنهایی اثبات نمی‌کنند که Migration فعلی یا تابع زندهٔ امروز همین رفتار را دارد. هیچ Production query یا تغییر اجرایی در این مرحله انجام نشد.
+
+
+## راستی‌آزمایی منشأ تست Stop-Limit در Workflow فعلی
+
+Workflow فعلی `.github/workflows/exact-decimal-tests.yml` (blob `50936f9c8b59a44112ae59730092a91b0d2d17d8`) دو مسیر مجزا برای race دارد:
+
+1. مرحلهٔ «Rehearse the combined atomic exact-decimal rollout candidate» دیتابیس موقت `digiarz_rollout_stop_race_test` را از `exact_decimal_stop_limit_setup.sql` + کاندید ترکیبی `2026-11-16_exact_decimal_rollout_candidate.sql` + race setup می‌سازد و سپس `exact_decimal_stop_limit_cancel_race.sh` را اجرا می‌کند. این همان مسیر race است که تابع کاندید ترکیبی با قفل child را آزمایش می‌کند.
+2. مرحلهٔ قدیمی‌تر «Run real two-session Stop-Limit child execution and cancellation races» از entrypoint candidate مورخ ۱۵ نوامبر و فایل worker تست استفاده می‌کند؛ این نیز child lock دارد، اما از مسیر ترکیبی ۱۶ نوامبر مستقل است.
+
+Race script واقعاً دو نشست مجزا را اجرا می‌کند: worker-first و cancellation-first، سپس parent-sync در حالی که child worker ردیف فرزند را قفل کرده است باید `synced=0` بدهد؛ چرخهٔ بعدی باید پس از پایان worker وضعیت parent را به fill دوم child برساند. Verify script تعداد tradeها، filled/remaining، رزرو مصرف/آزادشده، wallet و asset balance را کنترل می‌کند.
+
+**مرزبندی شواهد:** تعریف Migration فعلی `20261113181827...` همچنان `FOR UPDATE OF c,parent SKIP LOCKED` دارد. Workflow به‌جای اجرای همین Migration، کاندید draft را در دیتابیس disposable نصب می‌کند. بنابراین سبز بودن این job (در صورت مشاهدهٔ run موفق) فقط رفتار کاندید را تأیید می‌کند؛ نه parity با Migration یا Production. این بررسی، تعریف Workflow و ورودی‌هایش را تأیید می‌کند، اما در این مرحله run ID تازه‌ای برای همین HEAD بازیابی نشد؛ پس وضعیت اجرای تازه را ادعا نمی‌کنیم.
