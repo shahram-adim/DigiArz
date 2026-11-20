@@ -709,3 +709,213 @@ body.luxury-theme #authView .ref-platform{border-color:#9eafff!important;box-sha
  #authView .ref-earth,#authView .ref-earth svg g[clip-path],#authView .ref-phone,
  #authView .ref-gold-coin,#authView .ref-usdt-coin{animation:none!important}
 }
+
+/* DigiArz third theme — Sky Blue (clear, bright and distinct from dark/light). */
+body.luxury-theme{
+  --da-bg:#e8f6ff;--da-bg2:#d9efff;
+  --da-surface:rgba(255,255,255,.88);--da-surface2:#dff2ff;
+  --da-line:#a9d8f4;--da-text:#12334b;--da-muted:#52758d;
+  --da-accent:#159fe8;--da-accent-soft:rgba(21,159,232,.13);
+  --da-mint:#159fe8;--da-blue:#168ed7;--da-green:#119b78;--da-red:#e34f70;
+  color-scheme:light;
+  background:
+    radial-gradient(ellipse at 10% 0%,rgba(78,190,255,.36),transparent 38%),
+    radial-gradient(ellipse at 92% 12%,rgba(26,153,230,.22),transparent 34%),
+    radial-gradient(ellipse at 50% 100%,rgba(133,218,255,.32),transparent 44%),
+    linear-gradient(145deg,#eaf8ff 0%,#d9f0ff 48%,#effaff 100%)!important;
+  color:var(--da-text)!important;
+}
+body.luxury-theme .top,
+body.luxury-theme .tabs,
+body.luxury-theme .mobile-bottom-nav{
+  background:rgba(239,249,255,.88)!important;
+  border:1px solid rgba(87,174,224,.35)!important;
+  box-shadow:0 12px 34px rgba(31,112,164,.10)!important;
+  -webkit-backdrop-filter:blur(20px) saturate(145%)!important;
+  backdrop-filter:blur(20px) saturate(145%)!important;
+}
+body.luxury-theme .brand,
+body.luxury-theme .da-v2-brand,
+body.luxury-theme .da-v2-brand strong{color:#123b58!important}
+body.luxury-theme .brand span:first-child,
+body.luxury-theme .da-v2-kicker,
+body.luxury-theme .da-v2-eyebrow,
+body.luxury-theme .da-v2-hero-foot,
+body.luxury-theme .section-title,
+body.luxury-theme .market-hero-kicker,
+body.luxury-theme .trade-workspace-kicker,
+body.luxury-theme .price-toman,
+body.luxury-theme .chart-price,
+body.luxury-theme .detail-price,
+body.luxury-theme .volatility-title{color:#078ed5!important}
+body.luxury-theme .card,
+body.luxury-theme .stat,
+body.luxury-theme .trade-box,
+body.luxury-theme .fx-box,
+body.luxury-theme .indicator-panel,
+body.luxury-theme .da-market-glass,
+body.luxury-theme .da-v2-account-card,
+body.luxury-theme .dashboard-activity-panel,
+body.luxury-theme .da-v2-quick-grid button,
+body.luxury-theme .da-v2-market-list>*,
+body.luxury-theme .da-v2-account-stats>div,
+body.luxury-theme .coin,
+body.luxury-theme .asset-row,
+body.luxury-theme .order-row,
+body.luxury-theme .history-row,
+body.luxury-theme .market-hero-v34,
+body.luxury-theme .trade-workspace-banner-v35,
+body.luxury-theme .volatility-panel,
+body.luxury-theme .gainers-panel,
+body.luxury-theme .top-assets-panel{
+  background:linear-gradient(145deg,rgba(255,255,255,.94),rgba(222,243,255,.92))!important;
+  border:1px solid rgba(112,187,229,.38)!important;
+  box-shadow:0 12px 34px rgba(35,119,170,.09),inset 0 1px rgba(255,255,255,.95)!important;
+  color:#173b55!important;
+  -webkit-backdrop-filter:blur(18px) saturate(135%)!important;
+  backdrop-filter:blur(18px) saturate(135%)!important;
+}
+body.luxury-theme .da-v2-hero,
+body.luxury-theme .hero{
+  background:
+    radial-gradient(ellipse at 82% 22%,rgba(255,255,255,.34),transparent 38%),
+    linear-gradient(120deg,#8bd5ff 0%,#48b6f1 52%,#168ed7 100%)!important;
+  border:1px solid rgba(31,142,207,.38)!important;
+  box-shadow:0 18px 42px rgba(29,137,198,.20),inset 0 1px rgba(255,255,255,.48)!important;
+  color:#073452!important;
+}
+body.luxury-theme .da-v2-hero h1,
+body.luxury-theme .da-v2-hero h1 em,
+body.luxury-theme .hero-title,
+body.luxury-theme .hero-label,
+body.luxury-theme .da-v2-hero p,
+body.luxury-theme .hero-sub{color:#073452!important}
+body.luxury-theme .da-v2-logo{
+  background:linear-gradient(145deg,#8bd5ff,#28a8ec)!important;
+  border:1px solid #69c5f5!important;color:#063c5d!important;
+  box-shadow:0 7px 22px rgba(28,151,214,.18)!important
+}
+body.luxury-theme .da-v2-demo,
+body.luxury-theme .tabs button.active,
+body.luxury-theme .mobile-bottom-nav button.active,
+body.luxury-theme .da-market-filters button.active,
+body.luxury-theme .history-date-presets button.active{
+  color:#087cbd!important;background:rgba(67,177,239,.17)!important;
+  border-color:rgba(34,151,216,.42)!important
+}
+body.luxury-theme button:not(.buy):not(.sell):not(.danger){
+  background:linear-gradient(135deg,#62c5f7,#239ee5)!important;
+  color:#073452!important;border:1px solid rgba(18,137,202,.24)!important;
+  box-shadow:0 7px 20px rgba(30,147,211,.15)!important
+}
+body.luxury-theme .secondary,
+body.luxury-theme .theme-switch,
+body.luxury-theme .chart-types button,
+body.luxury-theme .timeframes button,
+body.luxury-theme .da-v2-quick-grid button{
+  background:rgba(226,244,255,.95)!important;color:#24536f!important;
+  border:1px solid #b5def5!important;box-shadow:none!important
+}
+body.luxury-theme .da-v2-primary,
+body.luxury-theme .auth-actions button:first-child{
+  background:linear-gradient(125deg,#4bb9f2,#087fca)!important;
+  color:#fff!important;border:1px solid rgba(255,255,255,.55)!important;
+  box-shadow:0 9px 25px rgba(16,135,204,.24)!important
+}
+body.luxury-theme input,
+body.luxury-theme select,
+body.luxury-theme textarea,
+body.luxury-theme .da-market-search,
+body.luxury-theme .da-market-sort{
+  background:rgba(250,253,255,.96)!important;color:#173b55!important;
+  border:1px solid #a9d5ef!important;box-shadow:inset 0 1px 2px rgba(30,105,151,.04)!important
+}
+body.luxury-theme input::placeholder,
+body.luxury-theme textarea::placeholder{color:#7899ad!important}
+body.luxury-theme input:focus,
+body.luxury-theme select:focus,
+body.luxury-theme textarea:focus{
+  border-color:#159fe8!important;box-shadow:0 0 0 3px rgba(21,159,232,.14)!important
+}
+body.luxury-theme .coin-icon{background:#d8efff!important;color:#078ed5!important}
+body.luxury-theme th{background:#cceaff!important;color:#174b6c!important}
+body.luxury-theme td{color:#244b65!important}
+body.luxury-theme tr:nth-child(even) td{background:rgba(220,241,253,.56)!important}
+body.luxury-theme .market-announcement,
+body.luxury-theme .notice{background:#e0f2ff!important;border-color:#acd9f4!important;color:#285571!important}
+body.luxury-theme .notice.warn{background:#fff4d9!important;color:#805b12!important}
+body.luxury-theme .notice.err{background:#ffebef!important;color:#a52e4a!important}
+body.luxury-theme .notice.ok{background:#e3f8ef!important;color:#176b50!important}
+body.luxury-theme #authView.auth-reference-layout{
+  background:rgba(239,249,255,.92)!important;border:1px solid rgba(85,171,220,.42)!important;
+  box-shadow:0 26px 70px rgba(30,115,166,.17),inset 0 1px rgba(255,255,255,.95)!important;
+  -webkit-backdrop-filter:blur(24px) saturate(140%)!important;backdrop-filter:blur(24px) saturate(140%)!important
+}
+body.luxury-theme #authView .auth-reference-visual{
+  background:
+    radial-gradient(ellipse at 78% 28%,rgba(255,255,255,.38),transparent 43%),
+    radial-gradient(ellipse at 10% 90%,rgba(91,195,247,.30),transparent 42%),
+    linear-gradient(145deg,#9cddff 0%,#58baf0 54%,#238fce 100%)!important
+}
+body.luxury-theme #authView .ref-brand-lockup strong,
+body.luxury-theme #authView .ref-brand-lockup em,
+body.luxury-theme #authView .ref-market-copy h1,
+body.luxury-theme #authView .ref-market-copy h1 span,
+body.luxury-theme #authView .ref-market-copy p,
+body.luxury-theme #authView .ref-demo-footer{color:#073b5b!important}
+body.luxury-theme #authView .ref-live-pill{
+  background:rgba(255,255,255,.42)!important;border-color:rgba(255,255,255,.72)!important;color:#075783!important
+}
+body.luxury-theme #authView .ref-coin-row{
+  background:rgba(255,255,255,.38)!important;border-color:rgba(255,255,255,.62)!important;color:#123e5b!important;
+  -webkit-backdrop-filter:blur(14px)!important;backdrop-filter:blur(14px)!important
+}
+body.luxury-theme #authView .ref-coin-row b,
+body.luxury-theme #authView .ref-coin-row span{color:#174b6c!important}
+body.luxury-theme #authView .auth-form{
+  background:linear-gradient(145deg,rgba(255,255,255,.97),rgba(224,244,255,.96))!important;
+  border:1px solid rgba(112,187,229,.48)!important;
+  box-shadow:0 18px 44px rgba(29,120,173,.13),inset 0 1px rgba(255,255,255,.96)!important;
+  color:#173b55!important
+}
+body.luxury-theme #authView .auth-form h2,
+body.luxury-theme #authView .auth-form label{color:#174b6c!important}
+body.luxury-theme #authView .auth-form .auth-intro,
+body.luxury-theme #authView .auth-form .auth-security{color:#5b7d93!important}
+body.luxury-theme #authView .auth-form input{
+  background:#f8fcff!important;border-color:#acd5ee!important;color:#173b55!important
+}
+body.luxury-theme #authView .auth-form input::placeholder{color:#7899ad!important}
+body.luxury-theme #authView .auth-form .auth-actions #signupBtn{
+  background:#e5f4ff!important;color:#17608b!important;border:1px solid #b7ddf3!important
+}
+body.luxury-theme #authView .auth-form #forgotBtn{background:transparent!important;color:#39799e!important}
+body.luxury-theme .da-v2-trust-row i,
+body.luxury-theme .da-v2-quick-grid button i{color:#168fd0!important}
+body.luxury-theme .da-v2-coin{
+  background:linear-gradient(145deg,#a7e2ff,#35a9e8 62%,#137fc0)!important;
+  color:#fff!important;box-shadow:0 14px 36px rgba(26,143,204,.24)!important
+}
+body.luxury-theme .da-v2-orbit{border-color:rgba(35,145,205,.32)!important}
+body.luxury-theme .da-v2-balance-main strong{color:#078ed5!important}
+body.luxury-theme .mobile-bottom-nav button{color:#5c7e94!important}
+body.luxury-theme .mobile-bottom-nav button.active{color:#087fca!important;background:rgba(67,177,239,.17)!important}
+body.luxury-theme .auth-reference-visual .ref-platform{
+  border-color:#8bd5ff!important;box-shadow:0 12px 26px rgba(24,111,165,.24),0 0 25px rgba(67,177,239,.32),inset 0 5px 12px rgba(255,255,255,.48)!important
+}
+body.luxury-theme #authView .ref-gold-coin,
+body.luxury-theme #authView .ref-usdt-coin{
+  border-color:rgba(255,255,255,.92)!important;
+  box-shadow:0 14px 30px rgba(19,105,157,.30),0 0 22px rgba(72,181,240,.38),inset 0 0 0 4px rgba(255,255,255,.38)!important
+}
+body.luxury-theme #authView .ref-gold-coin{
+  background:radial-gradient(circle at 28% 20%,#ffffff 0%,#bfeaff 22%,#58bdf1 54%,#178acb 82%,#08639b 100%)!important
+}
+body.luxury-theme #authView .ref-usdt-coin{
+  background:radial-gradient(circle at 28% 20%,#ffffff 0%,#b7f1e6 24%,#35b9a2 70%,#147e78 100%)!important
+}
+@media(max-width:760px){
+  body.luxury-theme #tab-dashboard{background:transparent!important}
+  body.luxury-theme .da-v2-hero{box-shadow:0 15px 34px rgba(23,133,194,.18)!important}
+  body.luxury-theme #authView.auth-reference-layout{margin:8px auto 20px!important}
+}
