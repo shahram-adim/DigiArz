@@ -291,3 +291,15 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Android APK workflow run 44486985383 was automatically triggered by the main push. Capacitor install, web build, Android project generation and sync completed successfully; Gradle assembleDebug is still running. Artifact not yet uploaded/available.
 - No Supabase deploy, schema migration, DB or financial-data change was performed.
 - Next: monitor both runs; when APK run succeeds, retrieve artifact and verify BUILD-INFO.txt commit matches 0ee8c9dbeb0c8229b2181acc2e9cb52544e6868b, then provide verified APK download.
+
+
+## Experimental CoinGecko catalog no-op upsert guard — 2026-11-20
+- Created isolated branch `perf/crypto-assets-noop-upserts` from verified main HEAD `12f2cb84bb20a0a64890522836441763e4696ec4`.
+- Opened Draft PR #33: https://github.com/shahram-adim/DigiArz/pull/33.
+- Added `supabase/drafts/2026-11-20_refresh_crypto_assets_noop_upsert_guard.sql`, captured from the read-only live function definition. It adds a row-value `IS DISTINCT FROM` guard to the existing CoinGecko `ON CONFLICT DO UPDATE` clause.
+- The comparison includes every business field written by the existing upsert. It preserves existing `price_toman` if the incoming computed value is NULL and leaves `updated_at` unchanged when source/business values are identical. Queue handling, advisory lock, paging, retry, HTTP request, and sync cadence are unchanged.
+- Added disposable PostgreSQL 17 fixture `supabase/tests/crypto_assets_noop_upsert_guard.sql` covering identical-row no-op, NULL Toman preservation, and real price/source changes; added dedicated workflow `.github/workflows/crypto-assets-noop-upsert-guard.yml`.
+- Read-only database evidence at 2026-11-20 15:20 UTC: database stats reset `2026-11-03 02:07:51 UTC`; `crypto_assets` had 4,989,198 cumulative updates, 18,895 live rows, and 0 estimated dead rows. This averages approximately 284,275 updates/day over 17.55 days; cumulative counters, not per-run counts.
+- Read-only `pg_stat_statements` evidence: `refresh_crypto_assets()` 14,859 calls, ~1,607,278 ms total execution, 105,704 shared blocks dirtied; pg_stat_statements reset `2026-11-06 03:05:58 UTC`. `refresh_crypto_assets_toman()` 14,845 calls, ~3,528,124 ms total execution, 632,164 shared blocks dirtied. `pg_stat_user_functions` has no rows because `track_functions=none`; do not infer per-function stats from it.
+- Latest PR #33 head at handoff: `6f7f3c22f936b3df267a026ac3929db9e2b8e1d9`; workflow run/status helpers returned no checks, so CI is NOT verified as passing.
+- No migration file changed. No Production DB function/schema/cron/ACL/data was changed. Keep PR #33 Draft and do not merge or apply until CI, full-function equivalence, and WAL/buffer/latency measurements pass.
