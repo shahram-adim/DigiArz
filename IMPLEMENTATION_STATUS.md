@@ -928,3 +928,25 @@
 - [!] inventory مهاجرت هنوز 52 نسخهٔ اعمال‌شده در Supabase در برابر 40 فایل محلی، 14 source مفقود، 20 timestamp متفاوت و 2 فایل local-only را نشان می‌دهد. اجرای `supabase db push` همچنان ممنوع است.
 - [x] هیچ migration، تابع، grant، policy، cron schedule، index، سفارش، معامله، رزرو، موجودی، کیف پول یا سابقهٔ مالی در Production تغییر نکرد. تمام پرس‌وجوهای Supabase فقط‌خواندنی بودند.
 - [ ] گام بعد: منشأ تغییر schedule job 14 را از audit/deployment record معتبر بازیابی کن؛ سپس drift را فقط در منبع و PostgreSQL 17 دورریختنی reconciliate کن. هم‌زمان شواهد SSL reset و startup timeout را با Supabase Support و resource metrics تطبیق بده؛ تا اثبات علت، تابع/timeout/cron Production را تغییر نده.
+
+
+## بازطراحی مستقل DigiArz — ۲۰ نوامبر ۲۰۲۶، نوبت ادامه
+- [x] بنا به درخواست کاربر، طرح‌های قبلی مبنای طراحی تازه قرار نگرفتند؛ شاخهٔ مستقل redesign/independent-ui-2026 مستقیماً از main در commit af0022d2ee887fe101a2403b9d7d2c8f0b1fad4b ساخته شد.
+- [x] PR شمارهٔ ۳۱ به‌صورت Draft باز شد: https://github.com/shahram-adim/DigiArz/pull/31؛ مقصد main است و ادغام نشده است.
+- [x] فایل تازهٔ src/digiarz-independent-ui.css با هویت بصری مستقل deep-teal/mint، RTL و واکنش‌گرا افزوده شد. پوشش آن شامل صفحه ورود، داشبورد، بازارها، میز معامله، دارایی‌ها، سفارش‌ها، تاریخچه، تنظیمات و ناوبری موبایل است.
+- [x] stylesheet در انتهای head و پس از استایل‌های inline بارگذاری می‌شود تا لایهٔ تازه بر قواعد قدیمی غلبه کند؛ هیچ منطق احراز هویت، قیمت، معامله یا RPC تغییر نکرد.
+- [x] Service Worker به cache نسخهٔ digiarz-shell-v59 ارتقا یافت و stylesheet جدید با همان query string ?v=1 به app shell اضافه شد.
+- [x] آزمون رگرسیون برای ترتیب بارگذاری stylesheet، پوشش صفحات/رنگ‌های جدید، حفظ شناسه‌های کلیدی Auth/Trading و cache شدن فایل جدید افزوده شد.
+- [x] آخرین commit شاخه هنگام این ثبت: 60986a981a944765aa019b2e1dbbb895ed0c406b.
+- [x] PR #31 در CI اجرای Exact Decimal با run 44683461748 / Run #950 قرار گرفت؛ هنگام ثبت، job exact-decimal در مرحلهٔ آماده‌سازی container و هنوز بدون نتیجهٔ نهایی بود.
+- [!] ساخت APK مخصوص این بازطراحی هنوز تأیید نشده است؛ Build 72 متعلق به شاخه/طرح قبلی است و نباید به‌عنوان APK این طراحی معرفی شود.
+- [!] رندر واقعی Android/WebView هنوز بررسی نشده است؛ PR تا پایان CI و بررسی بصری Draft می‌ماند. main تغییر نکرده و هیچ تغییری در Supabase Production انجام نشده است.
+
+### بررسی 504 هم‌زمان با بازطراحی
+- [x] پروژهٔ Supabase gfoaubfilhttnwjykaox در زمان بررسی ACTIVE_HEALTHY و PostgreSQL 17.11.0.018 بود.
+- [x] در بازهٔ ۲۴ ساعت اخیر، رویدادهای 504 در Auth /token و /user با context deadline exceeded ثبت شده‌اند؛ آخرین مورد در 2026-11-19 21:51:37 UTC.
+- [x] در همان بازهٔ 21:45 تا 22:00 UTC، چندین cron job startup timeout برای jobهای متعدد و پیام‌های مکرر could not accept SSL connection: Connection reset by peer ثبت شده‌اند؛ این هم‌زمانی با اختلال گسترده‌تر مسیر اتصال/پاسخ‌گویی PostgreSQL سازگار است، اما علت ریشه‌ای زیرساختی را به‌تنهایی اثبات نمی‌کند.
+- [x] در پنجرهٔ ۶ ساعت منتهی به حدود 2026-11-20 05:44 UTC، رویداد تازه‌ای با متن 504، timeout، SSL reset یا EOF در منابع بررسی‌شده دیده نشد؛ این فقط نبود رویداد در آن پنجره است و اثبات رفع پایدار نیست.
+- [!] هیچ Auth setting، timeout، cron schedule، migration، RPC، policy، grant یا دادهٔ مالی در Production تغییر نکرد.
+- [ ] گام بعد 504: پایش مجدد Auth و Postgres در پنجرهٔ ۲۴ ساعته و تطبیق request idهای Auth با رویدادهای Postgres/PgBouncer؛ تا شناسایی علت قطعی، تغییر Production انجام نشود.
+- [ ] گام بعد UI: تکمیل CI، اصلاح شکست‌ها، اجرای build APK از همین شاخه و بررسی بصری نسخهٔ نصب‌شده؛ پس از آن دریافت بازخورد کاربر و تصمیم جداگانه برای merge.
