@@ -705,3 +705,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Evidence boundary: fixture models the concurrency primitive; it does not execute the full four production RPC bodies and cannot rule out unseen Production triggers/locks. No Production schema query/write, migration/RPC/cron/financial-data change, merge, rebase, deployment or `supabase db push`.
 - Next: monitor PR #38 CI, inspect logs if failure, and if green expand toward full entrypoint integration. Obtain authoritative trigger/profile-lock inventory from safe schema snapshot before any remediation proposal.
 - Keep PR #38 Draft and all prior PRs Draft; no Production changes without explicit user approval.
+
+
+## 2026-11-20 — PR #38 CI progress / trigger search checkpoint
+- Re-fetched current main handoff and audit before recording this checkpoint; input blobs: `4ab12723e306d3bed49ff4bfaa28a7b3aa6d08d5` and `d8992aedc4d99c0b35325892237fe74eee480ddd`.
+- Run #1263 (ID `44811642137`) on PR #38 head `a6849671727fce10fe852bda607fd65b3fc2a351` is in progress. Steps 1–18 succeeded; step 19 (Stop-Limit child execution/cancellation race) is running; steps 20–22 remain pending. The new account deactivation test is step 22 and has not run; do not report PR CI green.
+- Repository code searches for trigger declarations and relevant account-active/deactivation references did not surface an authoritative complete live trigger inventory. This is not evidence that Production has no trigger.
+- Audit report updated with this boundary. No Production DB query/write, RPC/Migration/cron/data change, merge/rebase/deploy, or db push.
+- Next: monitor run #1263 through steps 19–22 and inspect logs on failure; after completion record the exact result. Keep PR #38 Draft.
