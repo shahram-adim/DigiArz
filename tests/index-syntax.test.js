@@ -423,7 +423,7 @@ test('independent DigiArz UI stylesheet is loaded last without replacing app beh
     assert.ok(css.includes(token), 'new design token or page coverage exists: ' + token);
   }
   assert.match(sw, /digiarz-shell-v68/);
-  assert.match(sw, /digiarz-independent-ui\.css\?v=11/);
+  assert.match(sw, /digiarz-independent-ui\.css\?v=12/);
   assert.ok(css.includes('--da-blue:#78c8ff'), 'third theme uses a sky-blue accent');
   assert.ok(css.includes('grid-template-areas:"fav identity price" "fav change price"'), 'mobile market cards use one coherent responsive grid');
   assert.ok(css.includes('#tab-markets .market-list>.coin>.price-stack'), 'market prices are bound to the actual rendered coin row');
