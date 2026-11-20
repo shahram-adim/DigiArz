@@ -73,3 +73,14 @@
 **ریسک عملیاتی:** اگر رزروی با arithmetic نامعتبر (برای نمونه `consumed_amount > reserved_amount`) وجود داشته باشد، سفارش والد می‌تواند cancelled شود ولی رزرو همچنان `reserved` باقی بماند. این fail-closed از آزادسازی اشتباه جلوگیری می‌کند، اما ممکن است دارایی را برای همیشه در محاسبهٔ موجودی قابل‌استفاده بلوکه کند؛ فراخوانی مجدد همین RPC پس از غیرفعال‌شدن حساب نیز آن را پاک‌سازی نمی‌کند. در sourceهای بررسی‌شده مسیر اپراتوری/تطبیق دستی قابل اجرا یا گزارش شناسهٔ رزروهای جا‌مانده پیدا نشد.
 
 این یک نقص مشاهده‌شده در منبع است، نه اثبات وجود ردیف آسیب‌دیده در Production. هیچ query زنده یا تغییر داده‌ای برای سنجش وقوع آن انجام نشد. پیشنهاد ایمن: مسیر گزارش‌گیری فقط‌خواندنی برای رزروهای نامعتبر/یتیم و یک گردش‌کار اپراتوری با تأیید دوگانه و تطبیق دقیق دفترکل طراحی شود؛ آزادسازی خودکار یا تغییر ارقام رزرو ممنوع بماند. هر اصلاح تابع غیرفعال‌سازی باید رفتار idempotent و retry پس از inactive بودن را صریحاً پوشش دهد.
+
+
+## یافتهٔ تکمیلی: قفل فرزند در همگام‌سازی Stop-Limit
+
+بازبینی Migration فعلی `20261113181827_add_stop_limit_order_engine.sql` (blob `3f421c6380630d74b846cd66dc7b121786237c0f`) نشان داد حلقهٔ اول `process_stop_limit_orders()` وضعیت child را از طریق JOIN می‌خواند، اما قفل آن حلقه فقط `FOR UPDATE OF c,parent SKIP LOCKED` است؛ ردیف child قفل نمی‌شود. در همان migration، `cancel_stop_limit_order()` ترتیب قفل conditional → parent → child را اجرا می‌کند و سپس برای لغو child به `cancel_limit_order()` واگذار می‌کند. منبع fixture لغو Limit نیز ترتیب child order → reservation را نشان می‌دهد.
+
+در مقابل، کاندید ایزولهٔ موجود در `supabase/tests/exact_decimal_stop_limit_worker.sql` (blob `6ca50aae244a494a897dfcc71f495242dc44aac6`) و فایل کاندید rollout `supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql`، حلقهٔ sync را با `FOR UPDATE OF c,parent,child SKIP LOCKED` اجرا می‌کنند. یعنی child در کنار parent و conditional قفل می‌شود؛ اگر Limit worker child را در اختیار داشته باشد، sync آن را skip می‌کند و چرخهٔ بعدی همگام می‌سازد.
+
+تست دو نشست `supabase/tests/exact_decimal_stop_limit_cancel_race.sh` (blob `e88607d4afea2e41d25872f41fcdd3ed79f1fd85`) سه interleaving را پوشش می‌دهد: child worker-first سپس cancellation، cancellation-first سپس worker، و child partial-fill هم‌زمان با parent sync. فایل verify (blob `47e6f192b45715dd3f18c114b998d42904542ab2`) وضعیت parent/child، تعداد trade، مقدار مصرف/آزادسازی reservation و balances را بررسی می‌کند. مستند rollout نتیجهٔ این rehearsal را در disposable PostgreSQL ثبت کرده است؛ این شواهد به کاندید آزمایشی مربوط است، نه تعریف فعلی Migration در Production.
+
+**نتیجه:** تغییر لازم از نظر طراحی در مخزن و تست race موجود است؛ اما source Migration ثبت‌شده در `main` هنوز نسخهٔ بدون قفل child را دارد. بنابراین اختلاف candidate-vs-migration باید پیش از هر rollout با تطبیق کامل snapshot زنده و CI مجدد بسته شود. تست‌های قدیمی یا موفقیت قبلی کاندید، به‌تنهایی اثبات نمی‌کنند که Migration فعلی یا تابع زندهٔ امروز همین رفتار را دارد. هیچ Production query یا تغییر اجرایی در این مرحله انجام نشد.
