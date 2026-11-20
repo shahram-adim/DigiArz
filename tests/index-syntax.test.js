@@ -4,6 +4,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const html = fs.readFileSync('index.html', 'utf8');
+const css = fs.readFileSync('src/digiarz-independent-ui.css', 'utf8');
 
 test('all inline JavaScript blocks in index.html parse successfully', () => {
   const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
@@ -304,7 +305,7 @@ test('market list rows use five aligned cells, 40px logos, visible Persian names
   const start = html.indexOf('function renderMarkets(){');
   const end = html.indexOf('function renderDashboardPortfolio(', start);
   const market = html.slice(start, end);
-  assert.match(market, /persianName=String\(item\.name_fa\|\|persianCoinName\(item\.symbol\)\)/);
+  assert.match(market, /persianName=String\(item\.name_fa\|\|persianCoinName\(item\.symbol,item\.name\|\|coinInfo\[base\]\?\.name\)\)/);
   assert.match(market, /class="coin-name-fa"/);
   assert.match(html, /digiarz-market-row-fix-20261119/);
   assert.match(html, /grid-template-columns:34px minmax\(0,1\.2fr\) minmax\(54px,\.55fr\) minmax\(82px,\.72fr\) minmax\(112px,\.86fr\)!important/);
@@ -323,7 +324,8 @@ test('login screen uses the scoped premium light-blue-and-gold responsive design
   assert.match(html, /#authView #signupBtn[\s\S]*?background:#eef3fb/);
   assert.match(html, /@media\(max-width:700px\)[\s\S]*?#authView\.auth\{grid-template-columns:1fr/);
   assert.match(html, /@media\(prefers-reduced-motion:reduce\)[\s\S]*?#authView \*\{transition:none!important\}/);
-  for (const id of ['fullName','email','password','loginBtn','signupBtn','forgotBtn','authMsg','recoveryPanel','newPassword','confirmPassword','saveNewPassword']) {
+  assert.doesNotMatch(html, /id="fullName"|نام و نام خانوادگی/, 'name field is removed from the login screen');
+  for (const id of ['email','password','loginBtn','signupBtn','forgotBtn','authMsg','recoveryPanel','newPassword','confirmPassword','saveNewPassword']) {
     assert.match(html, new RegExp('id="' + id + '"'), 'existing auth control remains: ' + id);
   }
 });
@@ -355,7 +357,8 @@ test('reference login has its branded market header, live coin list and working 
   assert.match(html, /const authThemeButton=\$\('authThemeToggle'\)/);
   assert.match(html, /@media\(max-width:760px\)[\s\S]*?#authView\.auth\{display:flex;flex-direction:column/);
   assert.match(html, /body:not\(\.light-theme\) #authView \.auth-form\{background:linear-gradient\(155deg,#172b45,#122238\)/);
-  for (const id of ['fullName','email','password','loginBtn','signupBtn','forgotBtn','authMsg','recoveryPanel','newPassword','confirmPassword','saveNewPassword']) {
+  assert.doesNotMatch(html, /id="fullName"|نام و نام خانوادگی/, 'name field is removed from the login screen');
+  for (const id of ['email','password','loginBtn','signupBtn','forgotBtn','authMsg','recoveryPanel','newPassword','confirmPassword','saveNewPassword']) {
     assert.match(html, new RegExp('id="' + id + '"'), 'existing auth control remains: ' + id);
   }
 });
@@ -383,6 +386,8 @@ test('three visual themes are selectable, persisted, and backward-compatible', (
   assert.match(html, /\['light','dark','luxury'\]\.includes\(stored\)/);
   assert.match(html, /function cycleTheme\(\)/);
   assert.match(html, /body\.luxury-theme/);
+  assert.match(html, /luxury:'آبی آسمانی شیشه‌ای'/);
+  assert.match(html, /grid:'#174765',line:'#5b9bc7'/);
   assert.match(html, /@supports not \(\(backdrop-filter:blur\(1px\)\) or \(-webkit-backdrop-filter:blur\(1px\)\)\)/);
   assert.match(html, /prefers-reduced-motion:reduce/);
 });
@@ -403,9 +408,83 @@ test('reference login hero keeps the globe, handset and floating branded crypto 
 
 test('login mini chart renders real five-minute candles without depending on a chart CDN', () => {
   assert.match(html, /function renderAuthMiniChart\(candles\)/);
-  assert.match(html, /۳۶ کندل واقعی پنج دقیقه‌ای بیت‌کوین/);
-  assert.match(html, /renderAuthMiniChart\(candles\)/);
+  assert.match(html, /نمودار کندلی بیت‌کوین با قیمت لحظه‌ای بازار/);
+  assert.match(html, /renderAuthMiniChart\(authMiniCandles\)/);
   assert.match(html, /renderAuthMiniChart\(\[\]\)/);
   assert.match(html, /fetchBinanceKlines\('BTCUSDT','5m',36\)/);
   assert.match(html, /<svg viewBox=/);
+});
+
+
+test('independent DigiArz UI stylesheet is loaded last without replacing app behavior', () => {
+  const css = fs.readFileSync('src/digiarz-independent-ui.css', 'utf8');
+  const sw = fs.readFileSync('sw.js', 'utf8');
+  const link = '<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=17">';
+  assert.ok(html.lastIndexOf(link) > html.lastIndexOf('</style>'), 'independent stylesheet loads after inline legacy styles');
+  assert.ok(html.indexOf(link) < html.lastIndexOf('</body>'), 'stylesheet is loaded after inline styles and before body closes');
+  for (const token of ['--da-bg:#07131c','--da-mint:#45e0c0','#authView','.mobile-bottom-nav','#tab-dashboard','#tab-markets','#tab-trade','#tab-assets','#tab-orders','#tab-history','prefers-reduced-motion']) {
+    assert.ok(css.includes(token), 'new design token or page coverage exists: ' + token);
+  }
+  assert.match(sw, /digiarz-shell-v74/);
+  assert.match(sw, /digiarz-independent-ui\.css\?v=17/);
+  assert.ok(css.includes('--da-blue:#78c8ff'), 'third theme uses a sky-blue accent');
+  assert.ok(css.includes('#marketList>.coin{'), 'market rows are targeted through the actual marketList container');
+  assert.ok(css.includes('#marketList>.coin>.price-stack'), 'price stack is anchored to the actual market row');
+  assert.ok(css.includes('grid-template-areas:"fav identity change price"!important'), 'market row keeps favorite, identity, centered change and price on one line');
+  assert.ok(css.includes('.category-icon svg{width:27px!important;height:27px!important'), 'market category icons use the enlarged visual size');
+  assert.ok(css.includes('#tab-markets .market-hero-kicker{display:none!important}'), 'redundant global-market label is hidden');
+  assert.ok(html.includes("const freshnessMarkup='';"), 'market rows omit the freshness/source-age label');
+  assert.ok(!html.includes('زمان منبع حداکثر ۲ دقیقه'), 'market rows do not display the two-minute source-age claim');
+  
+  assert.ok(css.includes('#authView.hidden{display:none!important}'), 'login view must be hidden after successful authentication');
+  for (const id of ['authView','appView','loginBtn','signupBtn','tradePairBadge','priceChart','assetList','allOrdersList','historyBody']) {
+    assert.match(html, new RegExp('id="' + id + '"'), 'existing app behavior hook remains: ' + id);
+  }
+});
+
+
+test('unknown market symbols receive Persian transliteration and coin logos have resilient visual fallbacks', () => {
+  assert.match(html, /function transliterateCoinName\(value\)/);
+  assert.match(html, /return transliterateCoinName\(source\)\|\|transliterateCoinName\(base\)\|\|base/);
+  assert.match(html, /persianCoinName\(item\.symbol,item\.name\|\|coinInfo\[base\]\?\.name\)/);
+  assert.match(html, /cryptocurrency-icons@master\/svg\/color/);
+  assert.match(html, /fallback\.className=.*coin-logo-fallback/);
+  assert.ok(!html.includes("||'دارایی دیجیتال'"), 'unknown symbols must not collapse to a generic label');
+  assert.ok(html.includes('digiarz-independent-ui.css?v=17'));
+});
+
+
+test('market categories lead the market page and the selected category filters owned assets', () => {
+  const market = html.slice(html.indexOf('<section id="tab-markets"'), html.indexOf('<section id="tab-toman"'));
+  assert.ok(market.indexOf('id="marketCategories"') < market.indexOf('<div class="section-title">'), 'category rail is the first content at the top of the market page');
+  assert.doesNotMatch(market, /۵ ارز با بیشترین افزایش|۵ ارز با بیشترین کاهش|۱۰ ارز برتر بازار/);
+  assert.match(html, /const selectedCategory=activeMarketCategory,categorySet=categorySymbols\[selectedCategory\]/);
+  assert.match(html, /const categoryOwned=owned\.filter/);
+});
+
+
+test('Passkey login and enrollment use Supabase server-verified WebAuthn sessions', () => {
+  assert.match(html, /id="passkeySignInBtn"[^>]*hidden/);
+  assert.match(html, /id="registerPasskeyBtn"/);
+  assert.match(html, /experimental:\{passkey:true\}/);
+  assert.match(html, /supabaseClient\.auth\.signInWithPasskey\(\)/);
+  assert.match(html, /supabaseClient\.auth\.registerPasskey\(\)/);
+  assert.match(html, /function supportsPasskeys\(\)/);
+  assert.match(html, /function updatePasskeyAvailability\(\)/);
+  assert.match(html, /passkeySettingsRow.*classList\.toggle\('hidden',!active\)/);
+  assert.match(html, /Passkey این دستگاه با موفقیت به حساب شما متصل شد/);
+  assert.match(html, /ورود امن تأیید شد/);
+  assert.ok(css.includes('#authView #passkeySignInBtn[hidden]'));
+});
+
+
+test('dashboard market uses the one-line market row with adjacent 24h sparkline and percentage', () => {
+  assert.match(html, /name\.textContent=persianCoinName\(symbol,row\.item\.name\|\|coinInfo\[base\]\?\.name\)/);
+  assert.ok(css.includes('grid-template-areas:"fav identity spark change price"!important'));
+  assert.ok(css.includes('#dashboardMarketPreview .da-market-sparkline{grid-area:spark!important'));
+  assert.ok(css.includes('#dashboardMarketPreview .da-market-card-foot{grid-area:change!important'));
+  assert.ok(css.includes('body.light-theme #dashboardMarketPreview .da-market-name-wrap b,' ) && css.includes('color:#17263b!important'));
+  assert.ok(css.includes('body.luxury-theme #dashboardMarketPreview .da-market-name-wrap b,' ) && css.includes('color:#f2f7fb!important'));
+  assert.ok(css.includes('backdrop-filter:none!important;-webkit-backdrop-filter:none!important'));
+  assert.ok(html.includes('digiarz-independent-ui.css?v=17'));
 });

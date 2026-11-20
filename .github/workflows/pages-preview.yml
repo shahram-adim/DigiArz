@@ -1,0 +1,71 @@
+name: Publish DigiArz preview to GitHub Pages
+
+on:
+  push:
+    branches:
+      - redesign/independent-ui-2026
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Do not cancel an in-flight deployment when a documentation/status commit lands.
+concurrency:
+  group: github-pages-preview
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout redesign branch
+        uses: actions/checkout@v4
+        with:
+          ref: redesign/independent-ui-2026
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify runner and source files
+        run: |
+          node --version
+          test -f index.html
+          test -f manifest.webmanifest
+          test -f sw.js
+          test -d src
+      - name: Build static PWA files
+        run: |
+          npm run build:web
+          test -s www/index.html
+          test -s www/manifest.webmanifest
+          test -s www/sw.js
+          test -d www/src
+          find www -maxdepth 2 -type f | sort | head -80
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: www
+
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: build
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    # Use an isolated preview environment so a default-branch-only rule on
+    # the standard github-pages environment cannot block this redesign branch.
+    # GitHub Pages supports a custom deployment environment name.
+    environment:
+      name: github-pages-preview
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy preview to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
