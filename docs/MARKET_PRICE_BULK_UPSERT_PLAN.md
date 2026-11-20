@@ -61,3 +61,5 @@ Reduce the runtime and database write overhead of `public.refresh_market_prices(
 - This fixture tests PostgreSQL mechanics only. It does not establish live CoinGecko/KuCoin/Gate.io precedence or equivalence with `public.refresh_market_prices()`.
 - The branch remains isolated and Draft. No Production database, migration, cron, price, order, trade, wallet, or balance was changed. One-minute cadence remains untouched.
 - Next: confirm this fixture CI result, then obtain the exact live function definition through a reliable read-only route before defining provider-specific ranking or writing replacement SQL.
+
+- CI confirmation update: workflow run `44779426017` completed with conclusion `success` on PostgreSQL 17.12; the isolated contract-fixture step passed. This confirms only the fixture's PostgreSQL mechanics, not live provider precedence or production-function equivalence.
