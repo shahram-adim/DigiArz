@@ -1,8 +1,8 @@
 'use strict';
-const CACHE_NAME = 'digiarz-shell-v74';
+const CACHE_NAME = 'digiarz-shell-v75';
 const APP_ROOT = new URL('./', self.location.href);
 const APP_INDEX = new URL('index.html', APP_ROOT).href;
-const APP_SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.svg', './icon-512.svg', './src/decimal.js', './src/market-holdings.js', './src/daily-ads.js', './src/pwa-install.js', './src/digiarz-independent-ui.css?v=17'];
+const APP_SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.svg', './icon-512.svg', './src/decimal.js', './src/market-holdings.js', './src/daily-ads.js', './src/technical-analysis.js', './src/subscription-plans.js', './src/pwa-install.js', './src/technical-analysis.css?v=1', './src/digiarz-independent-ui.css?v=17'];
 
 self.addEventListener('install', event => {
   event.waitUntil(
