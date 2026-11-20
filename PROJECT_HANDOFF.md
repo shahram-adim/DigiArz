@@ -580,3 +580,15 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Added `docs/MIGRATION_SOURCE_INVENTORY.md` on `main` in commit `0d3527f0f74e66d89969482f72fd9e3f0d62096d`. It records all 40 exact local migration filenames, the two proven rename corrections, and the limits/requirements for authoritative applied-version reconciliation.
 - Applied Production migration ledger remains unknown in this step. No Production SQL/query/write, migration, function, index, cron, market data, orders, trades, wallets, or balances changed. No `supabase db push`; PR #35 remains Draft and unmerged.
 - Next safe step: inspect Git history and workflow artifacts for the missing source definitions without inferring applied status. If no trustworthy artifact exists, record each unrecoverable source as unresolved rather than fabricating or replaying SQL.
+
+
+## 2026-11-20 — GitHub Actions artifact provenance check
+- Re-fetched `PROJECT_HANDOFF.md` from `main` before editing (blob `27e34a232a9f9651e7aa25620966d429b0617cad`).
+- Queried artifacts for known successful backup workflow run `43848835281`: exactly one non-expired artifact was returned, `DigiArz-database-backup` (artifact ID `14217201032`, 2,231,010 bytes, created `2026-11-16T10:26:47Z`).
+- Queried artifacts for isolated recovery drill run `44298621534`: zero artifacts returned.
+- Queried artifacts for recent contract-test run `44807862263`: zero artifacts returned.
+- Recent Actions run listing (first 100 of 2,323) contained no workflow names matching backup/recovery/migration/schema; this is only a recent-page observation, not an exhaustive history search. The API wrapper does not expose a usable workflow-specific run listing in the current connection.
+- This confirms the known backup archive is the only artifact surfaced by the specifically inspected backup run; it does not prove that no older/other artifact exists. No new source SQL or applied migration ledger was recovered.
+- Do not download/restore the archive again solely to repeat already completed schema-source recovery. It excludes migration history and cannot prove applied versions.
+- No Production SQL/query/write, migration, function, index, cron, market data, orders, trades, wallets, or balances changed. No `supabase db push`; PR #35 remains Draft and unmerged.
+- Next safe step: obtain the exact list of missing applied version strings from a trusted migration-ledger export or previously retained audit evidence. Without those identifiers, searching Git history/artifacts for individual missing SQL sources is underdetermined; do not guess filenames or fabricate SQL.
