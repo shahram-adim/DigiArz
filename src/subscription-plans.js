@@ -7,10 +7,9 @@ const PLANS={
 };
 let activePlan='free';
 function getPlan(){return PLANS[activePlan]||PLANS.free}
-function setVerifiedPlan(tier,verified){if(verified!==true||!PLANS[tier])return false;activePlan=tier;return true}
 function canUse(feature){return getPlan().features.includes(feature)}
 function canUseInterval(interval){return getPlan().intervals==='all'||getPlan().intervals.includes(String(interval))}
 function alertLimit(){return getPlan().alertLimit}
 function render(container){if(!container)return;const current=getPlan();container.innerHTML=Object.values(PLANS).map(p=>'<article class="da-plan-card '+(p.id===current.id?'is-current':'')+'"><div class="da-plan-card-top"><strong>'+p.name+'</strong><span>'+(p.id===current.id?'طرح فعلی':p.id==='free'?'فعال':'به‌زودی')+'</span></div><small>'+p.badge+'</small><p>'+p.summary+'</p><ul>'+ (p.id==='free'?'<li>RSI و MACD</li><li>EMA20 و SMA20</li><li>۲ هشدار فعال</li><li>بازه‌های زمانی منتخب</li>':p.id==='pro'?'<li>تمام اندیکاتورهای پیشرفته</li><li>۲۰ هشدار فعال</li><li>تمام بازه‌های زمانی</li><li>گزارش تحلیل پیشرفته</li>':'<li>تمام امکانات Pro</li><li>تا ۱۰۰ هشدار فعال</li><li>دسترسی کامل به ابزارها</li><li>اولویت امکانات ویژه</li>')+'</ul><button type="button" class="secondary" disabled>'+(p.id===current.id?'طرح فعال': 'پس از اتصال پرداخت فعال می‌شود')+'</button></article>').join('')}
-return {plans:PLANS,getPlan,setVerifiedPlan,canUse,canUseInterval,alertLimit,render};
+return {plans:PLANS,getPlan,canUse,canUseInterval,alertLimit,render};
 });
