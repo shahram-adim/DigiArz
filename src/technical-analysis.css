@@ -1,0 +1,22 @@
+/* DigiArz technical-analysis tools */
+.da-indicator-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}
+.da-indicator-grid .performance-item{min-width:0}
+.da-indicator-grid .performance-item strong{font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.da-indicator-toggles{display:flex;flex-wrap:wrap;gap:9px 16px;margin:12px 0}
+.da-indicator-toggles label{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);cursor:pointer}
+.da-indicator-toggles input{width:16px;height:16px;accent-color:var(--yellow);padding:0}
+.da-analysis-summary{padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);font-size:11px;line-height:2;margin-top:10px}
+.da-alert-form{display:grid;grid-template-columns:minmax(0,1fr) 140px auto;gap:8px;margin-top:12px;align-items:end}
+.da-alert-form .field{margin:0}
+.da-alert-form label{display:block;color:var(--muted);font-size:10px;margin-bottom:5px}
+.da-alert-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.da-alert-list{display:grid;gap:7px;margin-top:12px}
+.da-alert-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);font-size:11px}
+.da-alert-item>div{display:grid;gap:4px;min-width:0}
+.da-alert-item small{color:var(--muted)}
+.da-alert-item button{padding:7px 10px;font-size:10px;flex:0 0 auto}
+.da-alert-toast{position:fixed;z-index:10050;inset:16px 16px auto;max-width:520px;margin:auto;padding:13px 16px;border-radius:12px;background:#0d3929;color:#c9ffe5;border:1px solid #16865c;box-shadow:0 12px 35px rgba(0,0,0,.25);font-size:12px;line-height:1.9}
+.da-alert-status{font-size:11px;color:var(--muted);line-height:1.8;margin-top:8px}
+@media(max-width:650px){.da-indicator-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.da-alert-form{grid-template-columns:1fr 1fr}.da-alert-form button{grid-column:1/-1;width:100%}}
+@media(max-width:360px){.da-indicator-grid{grid-template-columns:1fr 1fr}.da-alert-item{align-items:flex-start}}
+body.light-theme .da-analysis-summary,body.light-theme .da-alert-item{background:#f5f8fc;border-color:#e1e8f0}
