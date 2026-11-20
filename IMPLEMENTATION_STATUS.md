@@ -1430,3 +1430,10 @@
 - [!] APK فقط debug/test build است. چون autoShim=false مانده و RP origin، Android Digital Asset Links و Supabase Auth Passkeys هنوز پیکربندی نشده‌اند، ورود بیومتریک واقعی در APK تأیید نشده است.
 - [ ] گام بعد: تعیین دامنهٔ canonical قابل کنترل و مسیر میزبانی /.well-known/assetlinks.json در ریشهٔ آن؛ سپس پیکربندی دقیق RP ID/origins و گواهی امضای build نهایی و آزمون روی دستگاه واقعی.
 - [x] تغییر JDK و نتیجهٔ CI فقط در شاخهٔ آزمایشی انجام شد؛ main، PR #31، Supabase Production و داده‌های مالی دست‌نخورده‌اند.
+### بررسی وضعیت انتشار وب و میزبانی Passkey — ۲۰ نوامبر ۲۰۲۶
+- [x] متادیتای مخزن از GitHub بررسی شد: مخزن عمومی است و فیلد has_pages=true گزارش می‌شود، اما homepage خالی است؛ URL زندهٔ Pages از اطلاعات قابل دسترس تأیید نشد.
+- [x] هر دو درخت شاخه main و spike بررسی شدند: workflow انتشار GitHub Pages وجود ندارد و فایل .well-known/assetlinks.json نیز در هیچ‌کدام ثبت نشده است.
+- [!] بنابراین هنوز نمی‌توان گفت DigiArz منتشر شده است؛ نشانی https://shahram-adim.github.io/DigiArz/ صرفاً URL پیش‌فرض احتمالی است و باید پس از پیکربندی/انتشار واقعی تأیید شود.
+- [!] انتشار مستقیم شاخه spike/capacitor8-passkey مناسب نیست؛ این شاخه آزمایش فنی Capacitor 8 است و نباید به‌عنوان نسخهٔ عمومی اپ منتشر شود. شاخه بازطراحی مستقل نیز PR شماره 31 و Draft است.
+- [ ] پیش از انتشار عمومی باید شاخهٔ محتوای نهایی انتخاب و workflow انتشار امن Pages آماده شود. برای Passkey در APK علاوه بر Pages، میزبانی فایل assetlinks در ریشهٔ RP domain و تنظیم Supabase Auth origins لازم است.
+- [x] هیچ workflow انتشار یا تنظیم Pages/Production در این مرحله فعال یا تغییر داده نشد.
