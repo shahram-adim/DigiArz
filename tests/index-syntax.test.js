@@ -424,7 +424,7 @@ test('independent DigiArz UI stylesheet is loaded last without replacing app beh
     assert.ok(css.includes(token), 'new design token or page coverage exists: ' + token);
   }
   assert.match(sw, /digiarz-shell-v73/);
-  assert.match(sw, /digiarz-independent-ui\\.css\\?v=16/);
+  assert.match(sw, /digiarz-independent-ui\.css\?v=16/);
   assert.ok(css.includes('--da-blue:#78c8ff'), 'third theme uses a sky-blue accent');
   assert.ok(css.includes('#marketList>.coin{'), 'market rows are targeted through the actual marketList container');
   assert.ok(css.includes('#marketList>.coin>.price-stack'), 'price stack is anchored to the actual market row');
@@ -469,5 +469,5 @@ test('dashboard market uses the one-line market row with adjacent 24h sparkline 
   assert.ok(css.includes('body.light-theme #dashboardMarketPreview .da-market-name-wrap b,' ) && css.includes('color:#17263b!important'));
   assert.ok(css.includes('body.luxury-theme #dashboardMarketPreview .da-market-name-wrap b,' ) && css.includes('color:#f2f7fb!important'));
   assert.ok(css.includes('backdrop-filter:none!important;-webkit-backdrop-filter:none!important'));
-  assert.ok(css.includes('digiarz-independent-ui.css?v=16'));
+  assert.ok(html.includes('digiarz-independent-ui.css?v=16'));
 });
