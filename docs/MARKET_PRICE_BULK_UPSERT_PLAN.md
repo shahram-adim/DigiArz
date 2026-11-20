@@ -74,7 +74,7 @@ Reduce the runtime and database write overhead of `public.refresh_market_prices(
 
 ### Current branch and stability check — 2026-11-20 17:08 UTC
 - GitHub Actions run `44779548999` is completed/successful; its test suite passed on code commit `7a895b4e0c46080813ec9c7958348de13960ad59`. Run `44779426017` also passed the isolated PostgreSQL contract fixture. The earlier initializing-only note above is superseded by these confirmed results.
-- The documentation-only branch head is `156f9ea5a37fd7510ec5d4dc4bf7cfbe55d15b7b`. Relative to current main `06a23cc9f6e45ba18dfa0c1d88785778e137da17`, compare reports diverged: 6 commits ahead and 2 behind, with merge base `8bbd3e228de3b342c1a07eb0ff18ec97c9d12353`. No rebase/merge performed.
+- The documentation-only branch head was `156f9ea5a37fd7510ec5d4dc4bf7cfbe55d15b7b`. Relative to current main `06a23cc9f6e45ba18dfa0c1d88785778e137da17`, compare reported diverged: 6 commits ahead and 2 behind, with merge base `8bbd3e228de3b342c1a07eb0ff18ec97c9d12353`. No rebase/merge performed.
 - Latest retrieved production logs through 17:08:10 UTC still contain repeated startup timeouts for jobs 2, 3, 8, 9, 11, and 12. The market refresh was starting at 17:08:02; no completion duration for that invocation is present in the retrieved slice. A postgres_exporter statement-timeout remains present at 17:06:52.
 - Because the startup-timeout pattern persists, do not retry heavyweight catalog/function-definition reads. No live changes or schedule changes. PR #35 stays Draft.
 
@@ -85,3 +85,11 @@ Reduce the runtime and database write overhead of `public.refresh_market_prices(
 - Critical duplicate-key observation: the CoinGecko mapping uses `UNION` across `(symbol, coingecko_id)`, so it deduplicates identical pairs, not necessarily symbols. Two different CoinGecko IDs can still target one `market_prices.symbol` key.
 - Neither the queued-response loop nor the CoinGecko mapping loop specifies a deterministic `ORDER BY`. Therefore, a set-based bulk statement must not invent a provider or duplicate-symbol winner. A deterministic winner policy would change potentially observable behavior unless the live function and expected semantics establish it.
 - Static source review is sufficient to refine the test plan, but not to authorize a replacement. Exact live definition capture and runtime duplicate semantics remain blocked by Production startup timeouts. No SQL implementation or Production change was made.
+
+
+### Latest recheck — 2026-11-20 17:10 UTC
+- GitHub confirms PR #35 remains open and Draft, with head `8106042185f021b8183d9a4dd6b1511366d1e9f2`. Current `main` is `06a23cc9f6e45ba18dfa0c1d88785778e137da17`.
+- Fresh compare reports the branch is diverged: 8 commits ahead and 2 behind, merge base `8bbd3e228de3b342c1a07eb0ff18ec97c9d12353`. The compare lists only the three intended files: the isolated PostgreSQL 17 workflow, its contract fixture, and this design/verification plan. No rebase or merge was performed.
+- Supabase project status is `ACTIVE_HEALTHY`, PostgreSQL 17.11.0.018. However, unified Postgres logs retrieved through 17:10:12 UTC continue to show repeated `job startup timeout` events. At 17:10:11–17:10:12 UTC, timeouts were logged for cron jobs 2, 3, 8, 9, 12, and 13; at 17:09:14 UTC, timeouts also included job 18. The same log slice shows scheduled work starting again at 17:10:00–17:10:02 UTC, including `refresh_market_prices()` and the order processors. These logs establish continued startup failures, not the underlying root cause or whether every invocation failed.
+- The Production database remains an unsafe target for heavy catalog/function-definition reads while these startup timeouts persist. Do not retry the timed-out function capture yet. Continue offline/isolated fixture analysis only.
+- No Production SQL, migrations, cron schedules, market data, orders, trades, wallets, or balances were changed. One-minute market/order cadence remains unchanged; PR #35 remains Draft.
