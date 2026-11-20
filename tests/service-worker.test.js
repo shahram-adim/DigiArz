@@ -73,7 +73,7 @@ test('install precaches the complete offline shell, including Android manifest i
   assert.ok(harness.added.includes('https://app.example/DigiArz/src/market-holdings.js'));
   assert.ok(harness.added.includes('https://app.example/DigiArz/src/daily-ads.js'));
   assert.ok(harness.added.includes('https://app.example/DigiArz/src/pwa-install.js'));
-  assert.ok(harness.added.includes('https://app.example/DigiArz/src/digiarz-independent-ui.css?v=2'));
+  assert.ok(harness.added.includes('https://app.example/DigiArz/src/digiarz-independent-ui.css?v=4'));
   assert.equal(harness.skipped, true);
 });
 
