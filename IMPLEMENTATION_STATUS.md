@@ -1044,3 +1044,26 @@
 ۲. ACLها را از migrationهای منبع و catalog زنده بازیابی کن؛ ACLهای recovery به علت --no-acl کنار گذاشته شوند.
 ۳. فقط پس از اثبات schema parity، bootstrap تازه PostgreSQL 17 بدون داده backup بساز و source-faithful race test را اجرا کن؛ PR #38 را تا آن زمان primitive-only نگه دار.
 ۴. migration drift و اختلاف job 14 را جداگانه بررسی کن؛ supabase db push، merge، deploy و هر تغییر Production همچنان ممنوع است.
+
+## نوبت تضمین کیفیت شبانه — ۲۱ نوامبر ۲۰۲۶ (تطبیق دقیق Recovery)
+
+- HEAD واقعی پیش از این ثبت: `e251c6925615a1641e5267e4b339cf6bbd923f7b`. آخرین commitهای main از نوبت قبلی عمدتاً source-recovery/backup documentation بوده‌اند؛ commit برنامه یا migration تازه‌ای در top commits مشاهده نشد.
+- Production با `get_project` برابر `ACTIVE_HEALTHY` و PostgreSQL `17.11.0.018` است؛ فهرست Migrationها ۵۲ نسخه دارد و آخرین نسخه `20261116205451` است. پرس‌وجوی catalog موفق شد؛ query شمارش اجرای cron در ۲۴ ساعت به خطای داخلی ابزار خورد، بنابراین آمار success/failure جدید گزارش نمی‌شود.
+- زمان‌بندی زندهٔ `cron.job` دوباره تأیید شد: job 13=`*/10 * * * *`، job 14=`1-59/10 * * * *`، job 17=`5-59/10 * * * *`؛ هر سه active هستند. فایل محلی job 14 هنوز cadence هر دقیقه را ثبت می‌کند؛ منبع تغییر زنده هنوز پیدا نشده و `supabase db push` ممنوع می‌ماند.
+- یک مقایسهٔ فقط‌خواندنی catalog بین Production و پروژهٔ `DigiArz-Recovery-Test` (ref `zrriqwyolcjhbappocuw`, هر دو PostgreSQL 17 و ACTIVE_HEALTHY) انجام شد؛ هیچ ردیف کاربری یا محتوای backup خوانده نشد. در scopeهای public/private:
+  - Production: ۳۲ جدول، ۲۴۰ ستون، ۱۳۱ قید، ۶۳ ایندکس، ۵ trigger غیرسیستمی و ۲۱ policy.
+  - Recovery-Test: ۳۲ جدول، ۲۳۹ ستون، ۱۱۶ قید، ۶۳ ایندکس، ۵ trigger و ۲۱ policy.
+  - یک ستون فقط در Production وجود دارد: `private.market_price_sync_requests.provider text NOT NULL DEFAULT 'CoinGecko'`.
+  - ۱۵ قید فقط در Production وجود دارد و همگی FK به `auth.users(id)` هستند: `admin_users_granted_by_fkey`, `admin_users_user_id_fkey`, `admin_wallet_adjustments_admin_user_id_fkey`, `admin_wallet_adjustments_target_user_id_fkey`, `market_pair_admin_audit_admin_user_id_fkey`, `admin_market_listings_added_by_fkey`, `asset_balances_user_id_fkey`, `coin_review_reports_reporter_user_id_fkey`, `coin_reviews_user_id_fkey`, `conditional_orders_user_id_fkey`, `orders_user_id_fkey`, `profiles_id_fkey`, `trades_user_id_fkey`, `transactions_user_id_fkey`, `wallets_user_id_fkey`. هیچ قید اضافی در Recovery-Test نسبت به Production دیده نشد.
+- تعریف هر ۵ trigger و هر ۲۱ policy در دو پروژه دقیقاً یکسان بود. fingerprint بدنهٔ چهار helper حساس نیز برابر بود: `current_account_is_active=d932cd1d0da21bb96bdc0a381f7dcbc3`, `get_demo_trading_fee_rate=546d80d7105228ed97da26c5ed0c7b7f`, `deactivate_my_account=2081e024a2b815aa2c6ebf6470fa2bce`, `guard_active_account_writes=29b8e23c1de8eb4762a8cf1a9c9343ce`. این parity فقط همین چهار تابع را پوشش می‌دهد، نه تمام RPCها.
+- ACL تابع‌ها در Recovery-Test برابر NULL/default است، درحالی‌که Production grantهای صریح دارد؛ این با اجرای `pg_restore --no-acl` سازگار است. پس Recovery-Test برای اثبات grant/permission Production معتبر نیست، حتی با برابری بدنهٔ چهار تابع، triggerها و policyها.
+- PR #38 head برابر `a6849671727fce10fe852bda607fd65b3fc2a351` است و نسبت به main فعلی ۳ commit جلو و ۲۰ commit عقب است (diverged). diff فقط workflow و دو fixture تست race را تغییر می‌دهد. اسکریپت عمداً الگوی TOCTOU را با توابع fixture مدل می‌کند؛ RPCهای واقعی `deactivate_my_account` و سفارش‌گذاری Production را اجرا نمی‌کند. run موفق ثبت‌شده برای آن، primitive fixture را تأیید می‌کند نه source-faithful RPC parity؛ PR ادغام نشود.
+- Health Advisor بدون یافته بود؛ Performance Advisor شامل ۹ FK بدون ایندکس پوششی، ۱۱ هشدار RLS initplan و ۷ unused index بود. Security Advisor دوباره به connection timeout خورد؛ بنابراین وضعیت امنیتی تازه از Advisor قابل تأیید نشد. هیچ grant/policy/index تغییر نکرد.
+- محدودیت این نوبت: queryهای catalog فقط metadata بودند؛ هیچ SQL write، migration، worker/RPC، backup row، order، trade، reservation، balance یا wallet اجرا/تغییر نشد. تست PostgreSQL جدید در این نوبت اجرا نشد.
+
+### گام بعد
+1. علت اختلاف Recovery-Test را ریشه‌یابی کن: چرا ۱۵ FK به `auth.users` و ستون `provider` در restore موجود نیستند؛ مسیر dump/restore و schema source را بررسی کن، نه اینکه این اشیا را کورکورانه اضافه کنی.
+2. ACLهای Production را از migration/source معتبر بازسازی و جدا از Recovery-Test نگهداری کن؛ `--no-acl` برای آزمون مجوزها کافی نیست.
+3. یک PostgreSQL 17 کاملاً تازه با schema-only DDL و synthetic auth/users ایجاد کن؛ تمام FKها، triggerها، policyها و ACLهای منبع را صریحاً provision کن و سپس source-faithful race test را به RPCهای واقعی متصل کن.
+4. PR #38 را تا همگام‌سازی با main، تکمیل پوشش RPC واقعی و اثبات CI نگه دار؛ merge/deploy بدون تأیید صریح انجام نشود.
+5. migration drift و cadence job 14 را جداگانه حل کن؛ `supabase db push` و هر تغییر Production همچنان ممنوع است.
