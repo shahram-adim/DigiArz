@@ -103,9 +103,9 @@ const stopLimitMigration = read('supabase/migrations/20261113181827_add_stop_lim
 
 test('Stop-Limit rollout candidate locks the child while the checked-in migration divergence stays explicit', () => {
   const extractWorker = (sql, label) => {
-    const match = sql.match(/CREATE OR REPLACE FUNCTION public\.process_stop_limit_orders\(\)[\s\S]*?\$function\$/);
+    const match = sql.match(/CREATE OR REPLACE FUNCTION public\.process_stop_limit_orders\(\)[\s\S]*?AS \$function\$([\s\S]*?)\$function\$/);
     assert.ok(match, label + ' process_stop_limit_orders() definition is present');
-    return match[0];
+    return match[1];
   };
   const extractFirstSyncQuery = (sql, label) => {
     const workerSql = extractWorker(sql, label);
