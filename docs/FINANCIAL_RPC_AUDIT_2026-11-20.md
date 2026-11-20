@@ -155,3 +155,10 @@ Race script واقعاً دو نشست مجزا را اجرا می‌کند: wor
 - Steps 1–18 have completed successfully, including exact-decimal, Market/Limit integration, Limit race, TP/SL execution/cancellation race, and completed rollout rehearsal checks. Step 19 (Stop-Limit child execution/cancellation race) is currently in progress; steps 20–22 (Stop-Limit lifecycle, TP/SL lifecycle, and new account-deactivation/order race) have not run yet. Therefore the new race test has **not** passed yet and the overall workflow is not complete.
 - Additional repository code searches for trigger declarations and references around `deactivate_my_account`, `current_account_is_active`, and financial tables did not produce authoritative evidence of all live triggers. This is only a repository-search observation, not proof that no Production trigger exists.
 - No Production query or change was made. PR #38 remains Draft.
+
+
+### PR #38 CI final result — 2026-11-20
+- Run #1263 / ID `44811642137`, head `a6849671727fce10fe852bda607fd65b3fc2a351`: **success**. All 22 substantive steps passed; cleanup steps and job completion also passed.
+- Specifically, step 22 `Run isolated two-session account deactivation/order placement race` completed successfully. This validates the fixture's expected reproduction and candidate profile-row serialization behavior in disposable PostgreSQL 17.
+- Interpretation remains bounded: the fixture is a simplified concurrency model, not the full production Market/Limit/TP-SL/Stop-Limit RPC bodies, and cannot prove absence of other Production triggers/locks. It does not justify a Production change.
+- PR #38 remains Draft/open/unmerged. No Production query/write or deploy was performed.
