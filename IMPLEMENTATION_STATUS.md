@@ -1240,3 +1240,14 @@
 - [!] انتشار، Debug/Test است و نصب/رفتار واقعی آن روی گوشی کاربر هنوز تأیید نشده است.
 - [x] compare زنده همچنان شاخه را ۸۷ commit جلوتر و صفر commit عقب‌تر از main نشان می‌دهد؛ هیچ merge یا تغییر Supabase Production انجام نشد.
 - [ ] قدم بعد: ساخت APK تازه از head فعلی `e769055856653c457c691962affa5b43e4bbaec8` و سپس آزمایش روی Android؛ تا آن زمان Build 98 فقط نسخهٔ نزدیک و غیرهمسان با head است.
+
+
+
+### آغاز ساخت APK تازه از شاخهٔ بازطراحی — ۲۰ نوامبر ۲۰۲۶، ۰۹:۰۵ UTC
+- [x] برای ساخت نسخهٔ اندروید از head شاخه، یک تغییر صرفاً توضیحی در comment فایل workflow ثبت شد؛ دستورها و تنظیمات build دست‌نخورده ماندند.
+- [x] push روی شاخهٔ `redesign/independent-ui-2026` اجرای Android APK workflow شمارهٔ `44707584773` (Build 102) را آغاز کرد.
+- [x] commit منبع این اجرا `5143abfee3057ae6b63d93cea9a389015f1e3f8d` است؛ در زمان آغاز، این commit head شاخه بود و شامل CSS v10 و cache Service Worker v66 است.
+- [x] مراحل setup، نصب Capacitor، آماده‌سازی web assets، تولید پروژهٔ Android و sync اندروید موفق شدند.
+- [!] آخرین مشاهده: job ساخت APK هنوز در حال اجراست؛ مرحلهٔ `assembleDebug` تکمیل نشده، artifact و Release هنوز منتشر نشده‌اند. پس هنوز APK تازه‌ای برای دانلود/تأیید نداریم.
+- [!] PR #31 باز و Draft باقی می‌ماند؛ هیچ merge به `main` یا تغییری در Supabase Production انجام نشده است.
+- [ ] قدم بعد: پایش run شمارهٔ `44707584773`، دریافت artifact، تطبیق `BUILD-INFO.txt` با commit منبع و تأیید SHA-256 قبل از ارائهٔ لینک دانلود.
