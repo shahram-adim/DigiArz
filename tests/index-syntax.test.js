@@ -419,13 +419,13 @@ test('login mini chart renders real five-minute candles without depending on a c
 test('independent DigiArz UI stylesheet is loaded last without replacing app behavior', () => {
   const css = fs.readFileSync('src/digiarz-independent-ui.css', 'utf8');
   const sw = fs.readFileSync('sw.js', 'utf8');
-  const link = '<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=16">';
+  const link = '<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=17">';
   assert.ok(html.lastIndexOf(link) > html.lastIndexOf('</style>'), 'independent stylesheet loads after inline legacy styles');
   assert.ok(html.indexOf(link) < html.lastIndexOf('</body>'), 'stylesheet is loaded after inline styles and before body closes');
   for (const token of ['--da-bg:#07131c','--da-mint:#45e0c0','#authView','.mobile-bottom-nav','#tab-dashboard','#tab-markets','#tab-trade','#tab-assets','#tab-orders','#tab-history','prefers-reduced-motion']) {
     assert.ok(css.includes(token), 'new design token or page coverage exists: ' + token);
   }
-  assert.match(sw, /digiarz-shell-v73/);
+  assert.match(sw, /digiarz-shell-v74/);
   assert.match(sw, /digiarz-independent-ui\.css\?v=16/);
   assert.ok(css.includes('--da-blue:#78c8ff'), 'third theme uses a sky-blue accent');
   assert.ok(css.includes('#marketList>.coin{'), 'market rows are targeted through the actual marketList container');
@@ -450,7 +450,7 @@ test('unknown market symbols receive Persian transliteration and coin logos have
   assert.match(html, /cryptocurrency-icons@master\/svg\/color/);
   assert.match(html, /fallback\.className=.*coin-logo-fallback/);
   assert.ok(!html.includes("||'دارایی دیجیتال'"), 'unknown symbols must not collapse to a generic label');
-  assert.ok(html.includes('digiarz-independent-ui.css?v=16'));
+  assert.ok(html.includes('digiarz-independent-ui.css?v=17'));
 });
 
 
@@ -471,5 +471,5 @@ test('dashboard market uses the one-line market row with adjacent 24h sparkline 
   assert.ok(css.includes('body.light-theme #dashboardMarketPreview .da-market-name-wrap b,' ) && css.includes('color:#17263b!important'));
   assert.ok(css.includes('body.luxury-theme #dashboardMarketPreview .da-market-name-wrap b,' ) && css.includes('color:#f2f7fb!important'));
   assert.ok(css.includes('backdrop-filter:none!important;-webkit-backdrop-filter:none!important'));
-  assert.ok(html.includes('digiarz-independent-ui.css?v=16'));
+  assert.ok(html.includes('digiarz-independent-ui.css?v=17'));
 });
