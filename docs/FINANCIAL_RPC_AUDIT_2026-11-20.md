@@ -128,3 +128,14 @@ Race script واقعاً دو نشست مجزا را اجرا می‌کند: wor
 - The run validates the corrected source-contract guard and the draft combined rollout candidate in disposable PostgreSQL 17. It does not make the checked-in Stop-Limit migration equivalent to the candidate: main migration `20261113181827_add_stop_limit_order_engine.sql` remains recorded as locking only `c,parent`, while the candidate locks `c,parent,child`. It does not establish current Production function parity or authorize rollout.
 - PR #37 remains Draft and unmerged. No branch rebase, migration change, Production query/write, RPC/cron/financial data change, deployment, or `supabase db push` occurred.
 - Next: continue source-level financial lifecycle audit and separately plan authoritative Stop-Limit migration/Production parity reconciliation. Do not change the migration or Production without explicit approval.
+
+
+## بررسی تکمیلی: هم‌زمانی غیرفعال‌سازی حساب با ثبت معامله/سفارش
+
+در منبع Migrationهای فعلی، چهار مسیر کاربرمحور در ابتدای اجرا فعال‌بودن حساب را با `public.current_account_is_active()` بررسی می‌کنند: `execute_demo_trade()`، `place_limit_order()`، `place_conditional_exit_order()` و `place_stop_limit_order()`. سپس مسیرهای مالی قفل کیف پول/دارایی را می‌گیرند و عملیات را ادامه می‌دهند.
+
+در مقابل، `deactivate_my_account()` ابتدا ردیف `profiles` را به `is_active=false` تغییر می‌دهد و بعد رزروها و سفارش‌های باز را پاک‌سازی/لغو می‌کند. در بدنهٔ این چهار entrypoint، قفل صریح همان ردیف `profiles` یا بازبینی مجدد فعال‌بودن حساب در انتهای مسیر دیده نشد. بنابراین یک interleaving قابل بررسی وجود دارد: درخواست معامله/ثبت سفارش فعال‌بودن حساب را بخواند؛ درخواست غیرفعال‌سازی حساب را غیرفعال و پاک‌سازی خود را انجام دهد؛ سپس درخواست اول نوشتن مالی را commit کند. اگر هیچ trigger یا سازوکار هم‌زمان‌سازی دیگری در schema زنده مانع آن نباشد، ممکن است پس از غیرفعال‌شدن حساب یک معامله/سفارش جدید ثبت شود.
+
+**سطح اطمینان: فرضیهٔ منبعی، نه نقص اثبات‌شده.** جست‌وجوی مخزن، نام trigger `guard_active_account_writes` را فقط در fixture آزمون widening نشان داد؛ همان fixture بدنهٔ trigger را به‌صورت no-op تعریف می‌کند و مدرک Production نیست. این جست‌وجوی متنی نیز جای فهرست authoritative تمام triggerهای schema زنده را نمی‌گیرد. هیچ آزمون دو‌نشستی برای interleaving ثبت سفارش در برابر `deactivate_my_account()` در این مرحله اجرا نشده و هیچ Production query انجام نشده است.
+
+**گام ایمن بعدی:** ساخت fixture مستقل PostgreSQL 17 با دو نشست و barrierهای قطعی برای چهار حالت (Market، Limit، TP/SL، Stop-Limit) در برابر غیرفعال‌سازی؛ سپس بررسی triggerها و قفل واقعی profile در snapshot authoritative، پیش از هر پیشنهاد اصلاح. معیار قبولی: پس از commit غیرفعال‌سازی، هیچ entrypoint قدیمی/درحال‌اجرا نتواند order/trade/reservation تازه‌ای برای آن کاربر commit کند؛ و اگر عملیات مالی پیش از غیرفعال‌سازی برنده شد، cleanup باید همان عملیات را به‌طور کامل و اتمیک پوشش دهد. هیچ trigger، تابع، Migration یا Production تغییری در این بررسی انجام نشده است.
