@@ -313,3 +313,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - `refresh_crypto_assets_toman()` showed 14,845 calls, ~3.53M ms total and 632,164 shared blocks dirtied; its function already has a distinct-value guard. This needs a separate analysis of actual price/FX churn; do not remove its guard or reduce cadence without evidence.
 - `track_functions=none`, so `pg_stat_user_functions` returns no function rows. Do not claim function-level stats from that view.
 - PR #33 contains no handoff-file change to avoid a merge conflict with PR #32. CI has not been confirmed passing; keep both PRs Draft and do not apply to Production.
+
+
+### PostgreSQL 17 fixture CI results — 2026-11-20
+- PR #32 dedicated workflow run `44763082356` completed successfully; job `postgres-17-fixture` and step `Run disposable PostgreSQL 17 regression fixture` both succeeded.
+- PR #33 dedicated workflow run `44763074176` completed successfully; job `postgres-17-fixture` and step `Run disposable PostgreSQL 17 regression fixture` both succeeded.
+- This verifies only the two disposable guard fixtures. It does NOT verify full live-function equivalence, Production behavior, WAL reduction, or resource recovery.
+- The repository's separate `Exact decimal tests` workflows were still in progress at the time of this note; do not report the entire PR workflow suite as complete.
+- Both PRs remain Draft and unmerged. No Production database change was made.
