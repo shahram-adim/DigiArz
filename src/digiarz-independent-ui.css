@@ -649,3 +649,63 @@ body.luxury-theme #authView .auth-form h2{color:#d0d9ff!important}
 body.luxury-theme #authView .auth-form input{background:rgba(8,17,54,.52)!important;border-color:rgba(164,187,255,.34)!important;color:#f1f5ff!important}
 body.luxury-theme .da-v2-trust-row i{color:#a9baff!important}
 body.luxury-theme .da-v2-quick-grid button i{color:#a9baff!important}
+
+
+/* Login hero cinematic 3D motion — premium materials, depth and realistic lighting. */
+#authView .ref-scene{perspective:1100px!important;transform-style:preserve-3d!important;isolation:isolate!important}
+#authView .ref-earth{
+  transform-style:preserve-3d!important;filter:drop-shadow(0 24px 30px rgba(0,0,0,.42)) drop-shadow(0 0 22px rgba(74,145,255,.28))!important;
+  animation:daGlobeDrift 10s ease-in-out infinite!important
+}
+#authView .ref-earth svg{overflow:visible;filter:contrast(1.08) saturate(1.18)}
+#authView .ref-earth svg circle:first-child{filter:drop-shadow(0 0 15px rgba(79,164,255,.42))}
+#authView .ref-earth svg g[clip-path]{
+  transform-box:fill-box;transform-origin:center;animation:daGlobeSpin 34s linear infinite
+}
+#authView .ref-phone{
+  transform-origin:50% 55%!important;transform-style:preserve-3d!important;
+  animation:daPhoneFloat 7.5s cubic-bezier(.45,0,.55,1) infinite!important;
+  border:2px solid rgba(235,244,255,.9)!important;
+  box-shadow:0 34px 65px rgba(0,0,0,.62),0 0 34px rgba(87,145,255,.22),inset 0 1px 3px #fff,inset 0 -4px 9px rgba(0,0,0,.75)!important
+}
+#authView .ref-phone:after{
+  content:"";position:absolute;inset:3px;border-radius:32px;pointer-events:none;
+  background:linear-gradient(115deg,rgba(255,255,255,.24),transparent 16%,transparent 72%,rgba(124,174,255,.13));
+  z-index:5
+}
+#authView .ref-phone .auth-phone-preview{
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.1),inset 0 14px 28px rgba(111,167,255,.12),0 0 28px rgba(58,129,255,.22)!important
+}
+#authView .ref-gold-coin,#authView .ref-usdt-coin{
+  transform-style:preserve-3d;filter:drop-shadow(0 12px 14px rgba(0,0,0,.42));
+  animation:daCoinHover 5.8s ease-in-out infinite!important
+}
+#authView .ref-gold-coin:before,#authView .ref-usdt-coin:before{
+  content:"";position:absolute;inset:5px;border-radius:50%;pointer-events:none;
+  border:1px solid rgba(255,255,255,.46);box-shadow:inset 0 0 0 3px rgba(255,255,255,.09),inset 0 -5px 9px rgba(0,0,0,.22)
+}
+#authView .ref-gold-coin img,#authView .ref-usdt-coin img{
+  filter:drop-shadow(0 3px 3px rgba(0,0,0,.38));transform:translateZ(8px)
+}
+#authView .ref-gold-coin.auth-floating-coin-eth{animation-delay:-1.7s!important}
+#authView .ref-gold-coin.auth-floating-coin-bnb{animation-delay:-3.1s!important}
+#authView .ref-usdt-coin{animation-delay:-2.3s!important}
+#authView #authMiniChart{position:relative;overflow:hidden}
+#authView #authMiniChart svg{overflow:visible;filter:drop-shadow(0 0 4px rgba(79,190,255,.14))}
+#authView #authMiniChart svg .da-live-price-line{stroke:#8bd8ff;stroke-width:1;stroke-dasharray:3 3;opacity:.85}
+#authView #authMiniChart svg .da-live-price-dot{fill:#a8f5dc;stroke:#fff;stroke-width:1.2;filter:drop-shadow(0 0 5px #53e6bd)}
+#authView #authMiniChart svg .da-live-price-halo{fill:#53e6bd;opacity:.24}
+@keyframes daGlobeDrift{0%,100%{transform:translate3d(0,0,0) rotate(-1.5deg)}50%{transform:translate3d(0,-12px,8px) rotate(1.5deg)}}
+@keyframes daGlobeSpin{0%{transform:rotateY(-7deg) scale(1)}50%{transform:rotateY(7deg) scale(1.015)}100%{transform:rotateY(-7deg) scale(1)}}
+@keyframes daPhoneFloat{0%,100%{transform:translate3d(0,0,18px) rotate(9deg)}50%{transform:translate3d(0,-12px,28px) rotate(6.5deg)}}
+@keyframes daCoinHover{0%,100%{transform:translate3d(0,0,10px) rotateY(-12deg) rotateZ(-5deg)}50%{transform:translate3d(0,-13px,24px) rotateY(18deg) rotateZ(7deg)}}
+body.luxury-theme #authView .ref-gold-coin,body.luxury-theme #authView .ref-usdt-coin{
+  border-color:rgba(185,203,255,.9)!important;
+  box-shadow:0 14px 30px rgba(2,8,35,.55),0 0 22px rgba(115,145,255,.34),inset 0 0 0 4px rgba(235,241,255,.3)!important
+}
+body.luxury-theme #authView .ref-gold-coin{background:radial-gradient(circle at 28% 20%,#eff4ff 0%,#aebfff 18%,#667fe7 48%,#293d9b 78%,#111d58 100%)!important}
+body.luxury-theme #authView .ref-platform{border-color:#9eafff!important;box-shadow:0 12px 26px rgba(0,0,0,.6),0 0 25px rgba(105,135,255,.42),inset 0 5px 12px rgba(207,219,255,.32)!important}
+@media(prefers-reduced-motion:reduce){
+ #authView .ref-earth,#authView .ref-earth svg g[clip-path],#authView .ref-phone,
+ #authView .ref-gold-coin,#authView .ref-usdt-coin{animation:none!important}
+}
