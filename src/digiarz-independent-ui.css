@@ -479,3 +479,49 @@ body.dark-theme .notice.ok,body.light-theme .notice.ok,body.luxury-theme .notice
 body.dark-theme{--da-mint:#f0b90b}
 body.light-theme{--da-mint:#2868d7}
 body.luxury-theme{--da-mint:#e6c477}
+
+
+/* Mobile login composition repair — keep the hero and auth form in one readable column. */
+@media(max-width:760px){
+  #authView.auth-reference-layout{
+    display:flex!important;flex-direction:column!important;align-items:stretch!important;
+    width:calc(100% - 20px)!important;max-width:640px!important;min-width:0!important;
+    min-height:0!important;margin:10px auto calc(112px + env(safe-area-inset-bottom))!important;
+    overflow:hidden!important;
+  }
+  #authView .auth-reference-visual{
+    width:100%!important;min-width:0!important;box-sizing:border-box!important;
+    padding:clamp(16px,3.2vw,24px)!important;gap:14px!important;
+    border:0!important;border-bottom:1px solid var(--da-line)!important;
+  }
+  #authView .ref-brandbar{min-width:0!important;flex-wrap:wrap!important}
+  #authView .ref-brand-lockup{min-width:0!important}
+  #authView .ref-live-pill{flex:0 0 auto!important}
+  #authView .ref-hero-grid{
+    display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+    width:100%!important;min-width:0!important;min-height:0!important;gap:8px!important;
+  }
+  #authView .ref-market-copy{width:100%!important;min-width:0!important}
+  #authView .ref-market-copy h1{font-size:clamp(24px,5vw,32px)!important;line-height:1.45!important}
+  #authView .ref-coin-list{grid-template-columns:repeat(2,minmax(0,1fr))!important;min-width:0!important;gap:7px!important;margin-top:12px!important}
+  #authView .ref-coin-row{
+    grid-template-columns:24px 38px minmax(0,1fr)!important;min-width:0!important;
+    gap:5px!important;padding:7px!important;overflow:hidden!important;
+  }
+  #authView .ref-coin-row span{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+  #authView .ref-scene{width:100%!important;height:clamp(190px,38vw,250px)!important;min-height:0!important;margin:0!important;overflow:hidden!important}
+  #authView .ref-earth{max-width:76%!important;left:8%!important;top:0!important}
+  #authView .ref-phone{max-width:48%!important;right:8%!important;top:5%!important}
+  #authView .auth-form{
+    width:100%!important;min-width:0!important;box-sizing:border-box!important;
+    padding:clamp(20px,4vw,30px)!important;border-radius:0!important;
+  }
+  #authView .auth-form .field,#authView .auth-form input{width:100%!important;min-width:0!important;box-sizing:border-box!important}
+  .mobile-bottom-nav{padding-bottom:calc(8px + env(safe-area-inset-bottom))!important}
+  #appView{padding-bottom:calc(112px + env(safe-area-inset-bottom))!important}
+}
+@media(max-width:420px){
+  #authView .ref-coin-list{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #authView .ref-scene{height:190px!important}
+  #authView .auth-form{padding:20px 16px!important}
+}
