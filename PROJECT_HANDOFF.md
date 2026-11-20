@@ -654,3 +654,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Audit report updated in commit \`95869c29d9be639b585f973132916070345efd38\`.
 - No Production query/write, migration/RPC/cron/financial data change, merge, rebase, deployment, or \`supabase db push\`.
 - Next: retrieve PR #37 CI result; if it passes, continue with a separate parity review against the latest authoritative live Stop-Limit function snapshot and decide whether the draft candidate is safe to propose for migration reconciliation. Do not modify Production or merge any PR.
+
+
+## 2026-11-20 — PR #37 initial CI failure and correction
+- PR #37 first workflow run #1251, ID \`44810577661\`, failed at Node test step 5. The source-contract test could not extract the function body because its regex stopped at the opening \`$function$\` delimiter. All subsequent PostgreSQL steps were skipped; this was a test-harness bug, not a failure of the PostgreSQL Stop-Limit race fixture.
+- Corrected extractor in PR #37 commit \`bdb0c8f583a0596f1bf4b1a6982dba16b25d2df7\` to capture text between \`AS $function$\` and the closing delimiter. Re-fetched the updated test file and verified the corrected source.
+- Fresh workflow/status lookup for corrected head returned no run and no combined status yet. Do not claim CI pass. The original failing run remains attached to prior head \`d727a659...\`.
+- Branch comparison: 3 commits ahead / 2 behind main, because main audit/handoff docs changed after PR creation. Keep Draft; do not rebase or force-update.
+- Audit report update commit: \`521d0d8d768361b28e0d6391a341a63fd91cfbcc\`.
+- No Production changes, merge, rebase, deployment, or \`supabase db push\`.
+- Next: wait for/retrieve CI for corrected PR #37 head \`bdb0c8f...\`; if no run appears, diagnose Actions trigger/status retrieval without changing Production or synchronizing branches.
