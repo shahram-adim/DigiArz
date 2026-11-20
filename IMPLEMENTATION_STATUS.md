@@ -1228,3 +1228,15 @@
 - [!] workflow اندروید `.github/workflows/android-apk.yml` دارای `workflow_dispatch` است و job ساخت `assembleDebug` و artifact با نام `DigiArz-Android-debug-APK` را دارد؛ اجرای دستی آن از اتصال فعلی GitHub قابل آغاز نیست.
 - [ ] قدم بعد: اجرای دستی workflow اندروید روی شاخهٔ `redesign/independent-ui-2026`؛ سپس تطبیق `BUILD-INFO.txt` و commit artifact با head شاخه و بررسی SHA-256 APK، پیش از معرفی آن به‌عنوان نسخهٔ نهایی.
 - [!] هیچ merge به `main`، هیچ تغییر Supabase Production و هیچ تغییر در منطق مالی انجام نشد.
+
+
+
+### بازبینی مجدد CI و APK منتشرشده — ۲۰ نوامبر ۲۰۲۶، ۰۹:۰۰ UTC
+- [x] head زندهٔ شاخهٔ بازطراحی و PR #31 برابر `e769055856653c457c691962affa5b43e4bbaec8` تأیید شد؛ PR باز، Draft و ادغام‌نشده است.
+- [x] اجرای Exact Decimal با شناسهٔ `44706711576` روی همین head اجرا و با نتیجهٔ `success` بسته شد؛ تمام مراحل job از جمله تست‌های مرورگر، PostgreSQL، Market/Limit، Stop-Limit، TP/SL و رقابت‌های دو-نشستی موفق بودند.
+- [x] انتشار GitHub Release با نام `android-debug-98` پیدا شد؛ لینک APK: https://github.com/shahram-adim/DigiArz/releases/download/android-debug-98/app-debug.apk
+- [x] metadata انتشار، digest فایل APK را به‌صورت `sha256:665863b951209e8e1340aae821f1809260f0a0c93f3759302a02e973ed5ee7da` گزارش می‌کند.
+- [!] سورس Build 98 از commit `fbebf7d6a4108e0a9c4ce5a6f2d077e67892dc42` ساخته شده که ancestor head فعلی و ۱۰ commit عقب‌تر است. فایل CSS در هر دو نسخه شامل تم آبی آسمانی و قانون مخفی‌شدن auth است؛ اما APK Build 98 از ارجاع CSS نسخهٔ v9 و cache Service Worker نسخهٔ v65 استفاده می‌کند، نه نسخه‌های v10/v66 در head فعلی. تغییرات بین commit ساخت و head شامل index، sw، تست‌ها و مستندات است؛ بنابراین این APK را نباید build دقیق head فعلی معرفی کرد.
+- [!] انتشار، Debug/Test است و نصب/رفتار واقعی آن روی گوشی کاربر هنوز تأیید نشده است.
+- [x] compare زنده همچنان شاخه را ۸۷ commit جلوتر و صفر commit عقب‌تر از main نشان می‌دهد؛ هیچ merge یا تغییر Supabase Production انجام نشد.
+- [ ] قدم بعد: ساخت APK تازه از head فعلی `e769055856653c457c691962affa5b43e4bbaec8` و سپس آزمایش روی Android؛ تا آن زمان Build 98 فقط نسخهٔ نزدیک و غیرهمسان با head است.
