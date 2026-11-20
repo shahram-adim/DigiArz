@@ -216,7 +216,7 @@ This narrows the recovery gap: conditional_orders and several engine-specific al
 ## Backup artifact recovery status — 2026-11-21
 
 The prior successful backup workflow artifact was located and downloaded before its expiry:
-- Run `43848835281`, artifact `14217201032`, `DigiArz-database-backup`, GitHub-reported SHA-256 `555c1f7ebcad947e573dad659084bbcf94dc88d55fc0bc1a3b7de9608e4e5`.
+- Run `43848835281`, artifact `14217201032`, `DigiArz-database-backup`, GitHub-reported SHA-256 `555c1f7ebcad947e573dad659084bbcf94dc88d55fc0bc1a3b7de9606db8e4e5`.
 - ZIP contains `README-backup.txt` and `digiarz-database.dump.enc`. README states the dump is PostgreSQL 17.12 custom format encrypted with AES-256-CBC + PBKDF2; scope includes public/private schema, private queue table structures, and selected private admin/audit/control data. It reports encryption/decryption byte comparison and pg_restore archive-list validation, but explicitly says this was not a live restore drill.
 - The decryption key is not available in this working context. The dump was not decrypted/restored; no key was requested, printed, or placed in repository/chat/logs.
 - Previous archive inspection found no `supabase_migrations.schema_migrations` ledger in the backup artifact; schema recovery would not by itself prove applied migration history.
@@ -224,3 +224,13 @@ The prior successful backup workflow artifact was located and downloaded before 
 - No Production query/write, workflow/secrets change, Supabase mutation, migration/RPC/cron change, or PR action occurred.
 
 Next safe step: use an already-authorized secure workflow/restore environment where the encryption secret is consumed without being exposed in logs, or request a schema-only export through an approved secure channel. Do not ask the user to paste encryption keys into chat.
+
+
+## Recovery schema metadata follow-up — 2026-11-21
+
+- The isolated recovery project zrriqwyolcjhbappocuw is ACTIVE_HEALTHY on PostgreSQL 17.11.0.019. Read-only catalog inspection found 32 public/private tables, 239 columns, 116 constraints, 63 indexes, 5 non-system triggers and 21 policies. The three account-guard triggers protect INSERTs to orders, trades and transactions through private.guard_active_account_writes().
+- Snapshot helper fingerprints: current_account_is_active() d932cd1d0da21bb96bdc0a381f7dcbc3; get_demo_trading_fee_rate(text,text) 546d80d7105228ed97da26c5ed0c7b7f; deactivate_my_account() 2081e024a2b815aa2c6ebf6470fa2bce; private.guard_active_account_writes() 29b8e23c1de8eb4762a8cf1a9c9343ce. These are recovery-snapshot fingerprints, not verified current Production fingerprints.
+- Recovery restore uses pg_restore --no-owner --no-acl; its ACLs are intentionally absent and must not be used to infer Production grants. The restored project contains backup data, but this review queried catalog metadata only and did not inspect or use row contents.
+- Production read-only execute_sql and list_tables calls timed out during this review, so no current schema/function parity comparison could be completed. Production project metadata remains ACTIVE_HEALTHY; Health Advisor returned no findings, Performance Advisor returned 9 unindexed FKs, 11 RLS initplan warnings and 7 unused indexes (observed 2026-11-20T22:59:05Z), while Security Advisor timed out.
+- Corrected the artifact digest from the earlier truncated 61-character value to GitHub's current 64-character metadata value: sha256:555c1f7ebcad947e573dad659084bbcf94dc88d55fc0bc1a3b7de9606db8e4e5. Artifact 14217201032 is still unexpired at the time of this check and expires 2026-11-23T10:26:46Z.
+- No financial RPC, schema, trigger, ACL, policy, cron, order, reservation, wallet, balance or Production data was changed. No test used restored data.
