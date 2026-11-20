@@ -291,3 +291,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Android APK workflow run 44486985383 was automatically triggered by the main push. Capacitor install, web build, Android project generation and sync completed successfully; Gradle assembleDebug is still running. Artifact not yet uploaded/available.
 - No Supabase deploy, schema migration, DB or financial-data change was performed.
 - Next: monitor both runs; when APK run succeeds, retrieve artifact and verify BUILD-INFO.txt commit matches 0ee8c9dbeb0c8229b2181acc2e9cb52544e6868b, then provide verified APK download.
+
+
+## 2026-11-20 — Market-price refresh optimization investigation
+- User approved continuing the optimization investigation while retaining the one-minute market-price refresh cadence.
+- Rechecked live GitHub: main HEAD is 96866f6e023458f857734e30d8aff6a4051cc785. Existing PR #33 optimizes no-op writes in `refresh_crypto_assets()`; it is a separate function and does not implement the `refresh_market_prices()` optimization. PR #33 remains Draft; PostgreSQL 17 fixture and exact-decimal CI checks currently report success, but full-function review and representative performance measurements remain gates.
+- Live `refresh_market_prices()` source in the applied 515-ID migration confirms CoinGecko, KuCoin and Gate.io branches, advisory transaction lock, queue cleanup, and one CoinGecko upsert per mapped symbol in PL/pgSQL loops. The 515-ID cap must be preserved.
+- Read-only snapshot: 398 enabled demo pairs, 891 curated listings, 3 queued requests and none older than 2 minutes. Recent cron observations recorded ~43.7 s average and ~98.5 s maximum runtime for `refresh_market_prices()`.
+- Opened issue #34, https://github.com/shahram-adim/DigiArz/issues/34, to scope a set-based upsert design and PostgreSQL 17 regression fixture. It explicitly requires deterministic duplicate-symbol handling and preservation of provider/source semantics, permissions, precision, locking, queue behavior and one-minute cadence.
+- No Production function, index, cron schedule, migration history, market data, order, trade, wallet or balance was changed. Do not run `supabase db push`; migration reconciliation remains unresolved.
+- Next: implement the issue #34 work on an isolated branch only after the exact current live function and duplicate-symbol semantics can be captured and tested. Keep Production untouched until CI, equivalence review and representative benchmarks pass.
