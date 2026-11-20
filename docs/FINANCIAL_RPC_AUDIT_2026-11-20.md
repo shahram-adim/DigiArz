@@ -162,3 +162,35 @@ Race script واقعاً دو نشست مجزا را اجرا می‌کند: wor
 - Specifically, step 22 `Run isolated two-session account deactivation/order placement race` completed successfully. This validates the fixture's expected reproduction and candidate profile-row serialization behavior in disposable PostgreSQL 17.
 - Interpretation remains bounded: the fixture is a simplified concurrency model, not the full production Market/Limit/TP-SL/Stop-Limit RPC bodies, and cannot prove absence of other Production triggers/locks. It does not justify a Production change.
 - PR #38 remains Draft/open/unmerged. No Production query/write or deploy was performed.
+
+
+## Source-faithful feasibility review: account-deactivation race — 2026-11-21
+
+### Files re-fetched and provenance
+- Main handoff was re-fetched before this review; blob SHA: `68cf1ecd83e8b8d5ee404b32de7b9cf0bb7f9a61`.
+- Main workflow `.github/workflows/exact-decimal-tests.yml`, blob `50936f9c8b59a44112ae59730092a91b0d2d17d8`.
+- Main Market/Limit migration `20261113161641_enforce_active_accounts_in_demo_trade_and_limit_engine.sql`, blob `de09b1cd391790fcd9d94708a916cb41cd9ccc9f`.
+- Main TP/SL migration `20261113162051_add_demo_take_profit_stop_loss_engine.sql`, blob `3360c21a69b7fae83a7f2494428367d1b7658e81`.
+- Main Stop-Limit migration `20261113181827_add_stop_limit_order_engine.sql`, blob `3f421c6380630d74b846cd66dc7b121786237c0f`.
+- PR #38 branch files were separately fetched: `account_deactivation_race_setup.sql` blob `e12ec74f3baf845f0063bfea190f3e11530db921`, `account_deactivation_race.sh` blob `3c8a4df7e5847074ec673818619e6cd175b723e7`; they are on the Draft branch, not present on main.
+
+### Actual entrypoints and dependency surface
+- Market: `public.execute_demo_trade(text,text,numeric,numeric)`; direct table dependencies include profiles via `current_account_is_active()`, demo_trading_pairs, market_prices, wallets, asset_balances, order_reservations, orders, trades, and transactions; helper dependency includes `get_demo_trading_fee_rate()`.
+- Limit: `public.place_limit_order(text,text,numeric,numeric)`; depends on active-account helper, demo_trading_pairs, wallets, asset_balances, order_reservations, orders, and fee helper.
+- TP/SL: `public.place_conditional_exit_order(text,text,numeric,numeric)`; its implementation is in the TP/SL migration and depends on the active-account helper, order/conditional-order/reservation tables, wallet/asset balance, pair and fee helpers. Its companion cancellation/worker functions add lifecycle dependencies.
+- Stop-Limit: `public.place_stop_limit_order(text,text,numeric,numeric,numeric)`; depends on the active-account helper, demo_trading_pairs, wallets, asset_balances, order_reservations, orders, conditional_orders, and fee helper. The worker later delegates child creation to `place_limit_order()`.
+- Deactivation: `public.deactivate_my_account()`; mutates profiles, order_reservations, orders, and conditional_orders, and synchronizes Stop-Limit parent/child state.
+
+### Why PR #38 is not yet source-faithful
+1. The PR #38 setup creates a reduced schema with only profiles, orders, and order_reservations. Its two placement functions are newly authored miniature functions (`place_order_unlocked` and `place_order_profile_locked`), not any of the four migration-defined RPCs. Its deactivation function is likewise a fixture-only implementation.
+2. The fixture intentionally inserts a two-second sleep between active check and order write. That is a deterministic teaching/reproduction gate, not a synchronization point inside the production RPC bodies.
+3. The current main workflow's Market/Limit and conditional tests load draft exact-decimal candidate SQL, not the checked-in Production migrations. Passing those steps cannot be relabeled as execution of the current migration bodies.
+4. The shared setup files are also intentionally incomplete substitutes: e.g. the Stop-Limit setup defines a simplified profile, wallet, asset balance, order, trade, transaction and reservation schema and helper functions. The type-widening fixture even defines `current_account_is_active()` as `SELECT true` and a no-op trigger; that fixture is explicitly not evidence of Production account gating.
+5. The actual entrypoints share a substantial schema/helper surface and security context (auth.uid/JWT claims, roles, grants, SECURITY DEFINER/search_path, fee helper, financial tables, and in some cases worker/cancel dependencies). Reusing only the miniature tables or stubbing the tested gate would silently remove the very behavior this race test must validate.
+
+### Decision and next safe step
+A genuinely source-faithful race harness is not a safe small extension of PR #38. It requires a disposable database bootstrap from the actual migration-defined schemas and function bodies, plus a dependency manifest and explicit inventory of every substituted helper/trigger. The race barrier must be added through an external test-only coordination point without editing the RPC's business logic; fixed sleeps inside copied miniature functions are insufficient. Before claiming full fidelity, compare function definitions and schema objects byte-for-byte/structurally against the selected migration snapshot and list all intentional stubs.
+
+No weak replacement fixture was added. No PR #38 branch file, main migration, workflow, Supabase project, Production RPC, trigger, cron, financial row, or migration history was changed in this review. No Production query was performed. No merge/rebase/deploy or `supabase db push` occurred.
+
+**Next:** design a dependency-complete disposable PostgreSQL bootstrap from the migration source and run a static parity check first; only then add a race harness. If the required source schema cannot be reconstructed without broad stubbing, keep PR #38 as a clearly labeled concurrency primitive test and do not describe it as an integration test of the real four RPCs.
