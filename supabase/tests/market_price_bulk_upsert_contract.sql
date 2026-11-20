@@ -253,21 +253,19 @@ CREATE TEMP TABLE gated_response_target (
 
 DO $test$
 DECLARE
-  http_status integer;
-  timed_out boolean;
-  content_present boolean;
+  gate record;
   provider_code text;
   gate_payload jsonb;
 BEGIN
   -- CoinGecko/KuCoin/Gate.io shared HTTP acceptance gate.
-  FOR http_status, timed_out, content_present IN
+  FOR gate IN
     SELECT * FROM (VALUES
       (500, false, true),
       (200, true, true),
       (200, false, false)
     ) AS rejected(status, timeout_flag, has_content)
   LOOP
-    IF http_status = 200 AND NOT timed_out AND content_present THEN
+    IF gate.status = 200 AND NOT gate.timeout_flag AND gate.has_content THEN
       INSERT INTO gated_response_target VALUES ('SHOULD_NOT_APPEAR', 1);
     END IF;
   END LOOP;
