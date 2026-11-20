@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - redesign/independent-ui-2026
     paths:
       - "index.html"
       - "manifest.webmanifest"
