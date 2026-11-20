@@ -1419,3 +1419,14 @@
 - [!] هنوز نتیجه CI و Android Gradle build این شاخه دریافت نشده است؛ تا مشاهده نتیجه نباید سازگاری را تأییدشده اعلام کرد.
 - [ ] گام بعد: بررسی runهای Exact Decimal و Android APK روی head فعلی؛ در صورت خطا، فقط همین شاخه آزمایشی اصلاح شود.
 - [!] هیچ تنظیم Supabase Auth، migration، schema، RPC، موجودی، سفارش یا معاملهٔ Production تغییر نکرده است.
+
+### نتیجهٔ اجرای Capacitor 8 و ساخت APK — ۲۰ نوامبر ۲۰۲۶
+- [x] خطای نخست Gradle تشخیص داده شد: Capacitor 8 به Java source release 21 نیاز دارد، اما runner با JDK 17 اجرا می‌شد (invalid source release: 21).
+- [x] workflow اندروید فقط در شاخهٔ آزمایشی به JDK 21 تغییر کرد؛ commit: 7c9327365e3c0e2e326cf4990f26785446b06ec1.
+- [x] Android workflow run 44730418438 با نتیجه success کامل شد؛ Gradle BUILD SUCCESSFUL و وظایف assembleDebug برای ماژول capgo-capacitor-passkey نیز اجرا شدند.
+- [x] artifact آزمایشی DigiArz-Android-debug-APK با شناسه 14624949656 بارگذاری شد؛ لینک: https://github.com/shahram-adim/DigiArz/actions/runs/44730418438/artifacts/14624949656
+- [x] SHA-256 فایل APK ثبت‌شده در BUILD-INFO: 1faa0b6f390fd49d716422ca363c8993edea19a99cdec935e7c943f2403a33d3. digest فایل ZIP artifact: e8420f9a819d94d79c3346295aa923fcd017c2bd4c3ff7c4ea28ac873b29f60a.
+- [x] Exact Decimal workflow run 44730418556 نیز روی همان commit با نتیجه success کامل شد.
+- [!] APK فقط debug/test build است. چون autoShim=false مانده و RP origin، Android Digital Asset Links و Supabase Auth Passkeys هنوز پیکربندی نشده‌اند، ورود بیومتریک واقعی در APK تأیید نشده است.
+- [ ] گام بعد: تعیین دامنهٔ canonical قابل کنترل و مسیر میزبانی /.well-known/assetlinks.json در ریشهٔ آن؛ سپس پیکربندی دقیق RP ID/origins و گواهی امضای build نهایی و آزمون روی دستگاه واقعی.
+- [x] تغییر JDK و نتیجهٔ CI فقط در شاخهٔ آزمایشی انجام شد؛ main، PR #31، Supabase Production و داده‌های مالی دست‌نخورده‌اند.
