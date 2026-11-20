@@ -1036,3 +1036,15 @@ body.dark-theme #marketList>.coin .coin-source.stale,body.luxury-theme #marketLi
  #marketList>.coin .price-usd,#marketList>.coin .price-usd strong{font-size:10px!important}
  #marketList>.coin .price-toman,#marketList>.coin .price-toman strong{font-size:9px!important}
 }
+
+
+/* Market navigation: horizontal category rail at the top, vertical coin results. */
+#tab-markets>.section-title{order:0}
+#tab-markets>.market-categories{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:stretch!important;gap:8px!important;width:100%!important;max-width:100%!important;margin:10px 0 14px!important;padding:5px 2px 10px!important;overflow-x:auto!important;overflow-y:hidden!important;overscroll-behavior-x:contain;scrollbar-width:thin;direction:rtl}
+#tab-markets>.market-categories>.category-btn{flex:0 0 auto!important;min-width:88px!important;min-height:52px!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;gap:7px!important;padding:9px 13px!important;border-radius:12px!important;white-space:nowrap!important}
+#tab-markets>.market-categories>.category-btn .category-icon{display:inline-flex!important;align-items:center!important;justify-content:center!important}
+#tab-markets>.market-categories>.category-btn .category-icon svg{width:19px!important;height:19px!important}
+#tab-markets #marketList{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-auto-flow:row!important;gap:9px!important;width:100%!important;overflow:visible!important;padding:0!important}
+#tab-markets #marketList>.coin{width:100%!important;min-width:0!important;max-width:100%!important;flex:initial!important;scroll-snap-align:unset!important}
+#tab-markets .gainers-panel,#tab-markets .losers-panel,#tab-markets .top-assets-panel{display:none!important}
+@media(max-width:760px){#tab-markets>.market-categories{gap:6px!important;margin:8px 0 12px!important}#tab-markets>.market-categories>.category-btn{min-width:78px!important;min-height:46px!important;padding:7px 10px!important;font-size:10px!important}}
