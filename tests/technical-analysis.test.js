@@ -37,3 +37,9 @@ test('analyze returns chart-aligned overlays and indicator values',()=>{
  assert.equal(a.series.bbUpper.length,81);
  assert.equal(a.series.bbLower.length,81);
 });
+test('ADX returns a finite trend-strength value after sufficient history',()=>{
+ const c=candles(Array.from({length:80},(_,i)=>100+i*.7+Math.sin(i)));
+ const value=TA.adx(c,14);
+ assert.ok(Number.isFinite(value)&&value>=0&&value<=100);
+ assert.equal(TA.adx(c.slice(0,20),14),null);
+});
