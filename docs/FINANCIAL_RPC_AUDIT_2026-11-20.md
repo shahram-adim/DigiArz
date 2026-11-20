@@ -120,3 +120,11 @@ Race script واقعاً دو نشست مجزا را اجرا می‌کند: wor
 - Corrected head \`bdb0c8f583a0596f1bf4b1a6982dba16b25d2df7\` now has workflow run #1254, ID \`44810724098\`, in progress.
 - Node/browser integration step passed, including the new Stop-Limit source-contract regression. PostgreSQL arithmetic, schema widening rehearsal, negative preflight, and lock-timeout preflight setup have also passed; the lock-timeout atomicity step is still running at last check.
 - The full two-session Stop-Limit candidate race is a later step and has not yet run in this attempt. No overall CI success claim is justified yet.
+
+
+### PR #37 corrected-head CI — completed successfully
+- On 2026-11-20, corrected head `bdb0c8f583a0596f1bf4b1a6982dba16b25d2df7` completed workflow run #1254, ID `44810724098`, with overall conclusion `success`.
+- Retrieved the full job-step list: all 21 substantive steps completed successfully. This includes the Node/browser integration suite and source-contract regression; PostgreSQL arithmetic; schema-widening rehearsal; invalid-data, lock-timeout and mid-migration rollback atomicity checks; Market/Limit and Stop-Limit/TP-SL entrypoint integration; combined exact-decimal rollout-candidate rehearsal; cumulative per-fill rounding; Limit and TP-SL two-session races; the real two-session Stop-Limit child execution/cancellation race; and parent-child/conditional lifecycle integration.
+- The run validates the corrected source-contract guard and the draft combined rollout candidate in disposable PostgreSQL 17. It does not make the checked-in Stop-Limit migration equivalent to the candidate: main migration `20261113181827_add_stop_limit_order_engine.sql` remains recorded as locking only `c,parent`, while the candidate locks `c,parent,child`. It does not establish current Production function parity or authorize rollout.
+- PR #37 remains Draft and unmerged. No branch rebase, migration change, Production query/write, RPC/cron/financial data change, deployment, or `supabase db push` occurred.
+- Next: continue source-level financial lifecycle audit and separately plan authoritative Stop-Limit migration/Production parity reconciliation. Do not change the migration or Production without explicit approval.
