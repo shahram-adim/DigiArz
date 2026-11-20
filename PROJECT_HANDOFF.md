@@ -673,3 +673,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Audit report update commit: \`d9719b9846b806f55b84f2c32b50cfd06a194096\`.
 - No Production change, PR merge/rebase, deployment, or \`supabase db push\`.
 - Next: retrieve run #1254 again; only after all steps complete can PR #37 be described as passing.
+
+
+## 2026-11-20 — PR #37 corrected-head CI completed successfully
+- Re-fetched this handoff from `main` before update; verified current blob SHA `36140e324620a8e376b4dfd3a2c4fd53c7bc2741`.
+- Re-fetched `docs/FINANCIAL_RPC_AUDIT_2026-11-20.md` before update; verified current blob SHA `1bbfb0ba9ca8aca6b2f381591fba8a6bd773ad9f`.
+- Rechecked PR #37 corrected head `bdb0c8f583a0596f1bf4b1a6982dba16b25d2df7`: workflow run #1254, ID `44810724098`, completed with overall conclusion `success`.
+- Retrieved all job steps. All 21 substantive workflow steps completed successfully, including Node source-contract regression, PostgreSQL arithmetic/schema-widening/rollback checks, combined candidate rehearsal, Limit and TP-SL two-session races, real two-session Stop-Limit child execution/cancellation race, and lifecycle integration tests.
+- Evidence boundary unchanged: the tests install the combined draft rollout candidate in disposable PostgreSQL 17. The checked-in main Stop-Limit migration still has the recorded candidate-vs-migration child-lock divergence; CI success does not prove migration parity or live Production compatibility.
+- Updated `docs/FINANCIAL_RPC_AUDIT_2026-11-20.md` with exact run ID, head SHA, full-success result, coverage, and limitations.
+- PR #37 remains Draft/open/unmerged. No rebase, merge, deployment, Production SQL/query/write, migration/RPC/cron/financial-data change, or `supabase db push`.
+- **Next action:** continue non-production source audit of financial reservation/order lifecycle and separately define an authoritative parity-reconciliation plan for Stop-Limit. Keep all PRs Draft; no Production change without explicit approval.
