@@ -234,9 +234,9 @@ body.luxury-theme{
   color-scheme:dark!important;
   --da-bg:#071525;--da-bg2:#0b2034;--da-surface:rgba(14,37,59,.9);--da-surface2:rgba(21,51,76,.92);
   --da-line:rgba(164,190,211,.25);--da-text:#f0f4f8;--da-muted:#a6b7c9;
-  --da-accent:#e6c477;--da-accent-soft:rgba(230,196,119,.13);
+  --da-accent:#78c8ff;--da-accent-soft:rgba(120,200,255,.16);
   --da-blue:#83b9ed;--da-green:#62d6b1;--da-red:#ff8494;--da-purple:#c3a8f3;
-  background:radial-gradient(ellipse at 12% 0%,rgba(30,105,153,.24),transparent 34%),radial-gradient(ellipse at 90% 14%,rgba(205,161,83,.13),transparent 30%),linear-gradient(145deg,#061321,#0b263d 55%,#071525)!important;
+  background:radial-gradient(ellipse at 12% 0%,rgba(30,105,153,.24),transparent 34%),radial-gradient(ellipse at 90% 14%,rgba(88,174,235,.16),transparent 30%),linear-gradient(145deg,#061321,#0b263d 55%,#071525)!important;
   color:var(--da-text)!important;
 }
 html{background:var(--da-bg)!important}
@@ -312,7 +312,7 @@ body.light-theme .da-v2-quick-grid button:nth-child(1) i{color:#2868d7!important
 body.light-theme .da-v2-quick-grid button:nth-child(2) i{color:#7554c7!important}
 body.light-theme .da-v2-quick-grid button:nth-child(3) i{color:#13865e!important}
 body.light-theme .da-v2-quick-grid button:nth-child(4) i{color:#c07824!important}
-body.luxury-theme .da-v2-quick-grid button:nth-child(1) i{color:#e6c477!important}
+body.luxury-theme .da-v2-quick-grid button:nth-child(1) i{color:#a8ddff!important}
 body.luxury-theme .da-v2-quick-grid button:nth-child(2) i{color:#83b9ed!important}
 body.luxury-theme .da-v2-quick-grid button:nth-child(3) i{color:#62d6b1!important}
 body.luxury-theme .da-v2-quick-grid button:nth-child(4) i{color:#c3a8f3!important}
@@ -353,11 +353,11 @@ body.light-theme #authView .auth-form input{background:#f7faff!important;border-
 body.light-theme #authView .auth-form input::placeholder{color:#91a0b4!important}
 body.light-theme #authView .auth-form .auth-security{color:#64758c!important;border-color:#e1e8f1!important}
 body.luxury-theme #authView.auth-reference-layout{background:#071525!important;color:#f0f4f8!important}
-body.luxury-theme #authView .auth-reference-visual{background:radial-gradient(ellipse at 78% 38%,rgba(230,196,119,.18),transparent 44%),radial-gradient(ellipse at 10% 90%,rgba(42,125,171,.16),transparent 42%),linear-gradient(145deg,#0c2942,#071a2c 65%,#061321)!important}
+body.luxury-theme #authView .auth-reference-visual{background:radial-gradient(ellipse at 78% 38%,rgba(120,200,255,.20),transparent 44%),radial-gradient(ellipse at 10% 90%,rgba(42,125,171,.16),transparent 42%),linear-gradient(145deg,#0c2942,#071a2c 65%,#061321)!important}
 body.luxury-theme #authView .ref-brand-lockup strong,body.luxury-theme #authView .ref-brand-lockup em,
-body.luxury-theme #authView .ref-market-copy h1 span,body.luxury-theme #authView .ref-demo-footer{color:#e6c477!important}
-body.luxury-theme #authView .auth-form{background:linear-gradient(155deg,rgba(21,54,79,.94),rgba(8,29,47,.98))!important;border:1px solid rgba(230,196,119,.32)!important;border-radius:26px!important}
-body.luxury-theme #authView .auth-form h2{color:#f0d89e!important}
+body.luxury-theme #authView .ref-market-copy h1 span,body.luxury-theme #authView .ref-demo-footer{color:#a8ddff!important}
+body.luxury-theme #authView .auth-form{background:linear-gradient(155deg,rgba(21,54,79,.94),rgba(8,29,47,.98))!important;border:1px solid rgba(120,200,255,.38)!important;border-radius:26px!important}
+body.luxury-theme #authView .auth-form h2{color:#d9efff!important}
 body.luxury-theme #authView .auth-form input{background:rgba(4,20,34,.82)!important;border-color:rgba(147,177,198,.38)!important;color:#f0f4f8!important}
 body.dark-theme #authView .auth-form .auth-actions #signupBtn,
 body.light-theme #authView .auth-form .auth-actions #signupBtn,
@@ -377,22 +377,22 @@ body.dark-theme .da-v2-logo,body.light-theme .da-v2-logo,body.luxury-theme .da-v
 body.dark-theme .da-v2-demo,body.light-theme .da-v2-demo,body.luxury-theme .da-v2-demo{color:var(--da-accent)!important;background:var(--da-accent-soft)!important;border:1px solid var(--da-line)!important;border-radius:30px!important}
 body.dark-theme .da-v2-hero{background:radial-gradient(ellipse at 78% 35%,rgba(240,185,11,.15),transparent 38%),linear-gradient(120deg,#202630,#171d27 62%,#252a32)!important;border:1px solid #414a57!important}
 body.light-theme .da-v2-hero{background:radial-gradient(ellipse at 78% 35%,rgba(40,104,215,.15),transparent 38%),linear-gradient(120deg,#e5efff,#f7faff 62%,#e9f1fb)!important;border:1px solid #cbdcf2!important}
-body.luxury-theme .da-v2-hero{background:radial-gradient(ellipse at 78% 35%,rgba(230,196,119,.17),transparent 38%),linear-gradient(120deg,#102e49,#0b2238 62%,#0b1b2d)!important;border:1px solid rgba(230,196,119,.28)!important}
+body.luxury-theme .da-v2-hero{background:radial-gradient(ellipse at 78% 35%,rgba(120,200,255,.18),transparent 38%),linear-gradient(120deg,#102e49,#0b2238 62%,#0b1b2d)!important;border:1px solid rgba(120,200,255,.34)!important}
 body.dark-theme .da-v2-hero h1 em{color:#f0c44e!important}
 body.light-theme .da-v2-hero h1 em{color:#2868d7!important}
-body.luxury-theme .da-v2-hero h1 em{color:#e6c477!important}
+body.luxury-theme .da-v2-hero h1 em{color:#a8ddff!important}
 body.dark-theme .da-v2-hero p{color:#c1c8d2!important}
 body.light-theme .da-v2-hero p{color:#536781!important}
 body.luxury-theme .da-v2-hero p{color:#b8c9d8!important}
 body.dark-theme .da-v2-eyebrow,body.dark-theme .da-v2-hero-foot{color:#f0c44e!important}
 body.light-theme .da-v2-eyebrow,body.light-theme .da-v2-hero-foot{color:#2868d7!important}
-body.luxury-theme .da-v2-eyebrow,body.luxury-theme .da-v2-hero-foot{color:#e6c477!important}
+body.luxury-theme .da-v2-eyebrow,body.luxury-theme .da-v2-hero-foot{color:#a8ddff!important}
 body.dark-theme .da-v2-orbit{border-color:rgba(240,185,11,.27)!important}
 body.light-theme .da-v2-orbit{border-color:rgba(40,104,215,.25)!important}
-body.luxury-theme .da-v2-orbit{border-color:rgba(230,196,119,.32)!important}
+body.luxury-theme .da-v2-orbit{border-color:rgba(120,200,255,.38)!important}
 body.dark-theme .da-v2-coin{background:linear-gradient(145deg,#f7d66e,#b98414)!important;color:#332509!important;box-shadow:0 14px 35px rgba(240,185,11,.18)!important}
 body.light-theme .da-v2-coin{background:linear-gradient(145deg,#78a9f4,#2868d7)!important;color:#fff!important;box-shadow:0 14px 35px rgba(40,104,215,.18)!important}
-body.luxury-theme .da-v2-coin{background:linear-gradient(145deg,#f4dfaa,#a97e39)!important;color:#1a2c3d!important;box-shadow:0 14px 35px rgba(230,196,119,.18)!important}
+body.luxury-theme .da-v2-coin{background:linear-gradient(145deg,#d8f1ff,#3e8fc8)!important;color:#1a2c3d!important;box-shadow:0 14px 35px rgba(120,200,255,.20)!important}
 body.dark-theme .da-v2-quick-grid,body.light-theme .da-v2-quick-grid,body.luxury-theme .da-v2-quick-grid{gap:12px!important;margin:17px 0 24px!important}
 body.dark-theme .da-v2-quick-grid button,body.light-theme .da-v2-quick-grid button,body.luxury-theme .da-v2-quick-grid button{
   min-height:76px!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:12px!important;
@@ -438,10 +438,10 @@ body.light-theme .coin,body.light-theme .asset-row,body.light-theme .order-row,b
 body.luxury-theme .coin,body.luxury-theme .asset-row,body.luxury-theme .order-row,body.luxury-theme .history-row{background:var(--da-bg2)!important;border-color:var(--da-line)!important;color:var(--da-text)!important}
 body.dark-theme .coin-icon{background:#3a3018!important;color:#f0c44e!important}
 body.light-theme .coin-icon{background:#e4edfb!important;color:#2868d7!important}
-body.luxury-theme .coin-icon{background:rgba(230,196,119,.12)!important;color:#e6c477!important}
+body.luxury-theme .coin-icon{background:rgba(120,200,255,.14)!important;color:#a8ddff!important}
 body.dark-theme .price-toman,body.dark-theme .chart-price,body.dark-theme .detail-price{color:#f0c44e!important}
 body.light-theme .price-toman,body.light-theme .chart-price,body.light-theme .detail-price{color:#2868d7!important}
-body.luxury-theme .price-toman,body.luxury-theme .chart-price,body.luxury-theme .detail-price{color:#e6c477!important}
+body.luxury-theme .price-toman,body.luxury-theme .chart-price,body.luxury-theme .detail-price{color:#a8ddff!important}
 body.dark-theme th{background:#252c36!important;color:#c7d0dc!important}
 body.light-theme th{background:#e8eff8!important;color:#344d6c!important}
 body.luxury-theme th{background:#15344e!important;color:#d8e4ef!important}
@@ -478,7 +478,7 @@ body.dark-theme .notice.ok,body.light-theme .notice.ok,body.luxury-theme .notice
 :root{--da-mint:var(--da-accent)}
 body.dark-theme{--da-mint:#f0b90b}
 body.light-theme{--da-mint:#2868d7}
-body.luxury-theme{--da-mint:#e6c477}
+body.luxury-theme{--da-mint:#a8ddff}
 
 
 /* Mobile login composition repair — keep the hero and auth form in one readable column. */
