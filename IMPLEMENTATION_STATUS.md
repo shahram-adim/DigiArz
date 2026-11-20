@@ -1422,3 +1422,12 @@
 - [x] گردش‌کار `.github/workflows/pages-preview.yml` در commit `c53a8e7a3cb2fc985a5335650cfb7244685755e8` سخت‌سازی شد: لغو خودکار اجرای درحال‌انجام غیرفعال شد، برای build/deploy سقف زمان گذاشته شد، پیش‌نیازهای ورودی و خروجی build صریحاً بررسی می‌شوند و فایل‌های خروجی گزارش می‌شوند.
 - [ ] اجرای جدید پس از این commit باید از GitHub Actions بررسی شود؛ تا موفقیت deploy و بازشدن URL، انتشار تأییدشده نیست.
 - [!] این تغییر فقط روی شاخه `redesign/independent-ui-2026` است؛ PR#31 همچنان Draft است و هیچ تغییری در `main`، Supabase یا داده‌های مالی انجام نشده است.
+
+
+## مانع قطعی انتشار پیش‌نمایش GitHub Pages — ۲۰ نوامبر ۲۰۲۶
+- [x] workflow پیش‌نمایش در commit `912d349afb850f413584ba1e2076d1d588642caf` اصلاح شد تا از محیط مستقل `github-pages-preview` استفاده کند و مجوزهای Pages را در job انتشار صریح کند.
+- [x] اجرای Pages با شناسه `44732947274`: ساخت PWA، پیکربندی Pages و بارگذاری artifact همگی موفق شدند.
+- [x] لاگ مرحله Deploy علت قطعی را نشان داد: `Invalid deployment branch and no branch protection rules set in the environment. Deployments are only allowed from main`. بنابراین Pages مخزن هنوز از شاخه `main` به‌عنوان منبع انتشار استفاده می‌کند و انتشار شاخه بازطراحی مجاز نیست.
+- [!] این مانع از کد workflow یا ساخت PWA نیست؛ باید Build and deployment → Source در تنظیمات مخزن به `GitHub Actions` تغییر کند. اتصال GitHub موجود فقط ابزارهای GET و تغییر فایل/commit را در اختیار می‌گذارد و عملیات Update Pages site که به مجوزهای Pages write و Administration write نیاز دارد در دسترس نیست.
+- [ ] پس از تغییر Source به GitHub Actions، اجرای workflow از شاخه `redesign/independent-ui-2026` باید دوباره اجرا و URL نهایی بررسی شود.
+- [x] شاخه `main`، PR #31 (Draft)، Supabase Production و داده‌های مالی دست‌نخورده باقی ماندند.
