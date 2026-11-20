@@ -308,3 +308,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - The next attempt to capture the full live `public.refresh_market_prices()` definition timed out; no function rewrite was attempted.
 - Created isolated branch `perf/market-price-bulk-upsert-draft` and Draft PR #35: https://github.com/shahram-adim/DigiArz/pull/35. It adds only `docs/MARKET_PRICE_BULK_UPSERT_PLAN.md` (design, safety constraints and regression matrix); no SQL/migration or production change.
 - PR #35 must remain Draft until the exact live function is captured, source/provider semantics are compared, PostgreSQL 17 regression tests pass, and isolated performance benchmarks are reviewed.
+
+## 2026-11-20 — PR #35 response-boundary contract expansion
+- Revalidated PR #35: open Draft, branch `perf/market-price-bulk-upsert-draft`; latest head at handoff update: `477b4415e245821507ae588fa7bda9d72a02739d`. It remains three files only: isolated PostgreSQL 17 workflow, contract fixture, and design plan. Branch remains diverged from main; no rebase/merge.
+- Expanded the disposable PostgreSQL 17 fixture to cover per-response exception rollback, queue deletion after caught exceptions, processing of a later independent response, HTTP/status/timeout/content gates, KuCoin provider code gate, Gate.io top-level JSON shape, accepted/rejected price source/timestamp behavior, malformed JSON text, and missing provider keys.
+- Static review caught and corrected the PL/pgSQL loop target to use a record variable before the latest CI attempt.
+- CI run `44802410353` (contract fixture) passed on intermediate commit `4d45f048b87ed251a71ec4a83b3a4f272a18ff3d`; exact-decimal workflow `44802410457` also passed on that commit. These results validate only the then-current fixture and existing exact-decimal suite, not Production equivalence.
+- Latest fixture after malformed/missing-key additions is commit `daae30bd349f9a011381c3435a97c5bbe152573f`; PostgreSQL 17 run `44802705359` was still in progress at last check. The subsequent docs-only head is `477b4415e245821507ae588fa7bda9d72a02739d`. Do not claim latest fixture success until run 44802705359 completes and its job output is inspected.
+- No Production SQL, migration, function, index, cron, market data, order, trade, wallet, or balance changed. One-minute cadence unchanged. Live function definition capture remains blocked by database instability; no heavy Supabase query was retried.
+- Next: inspect run `44802705359`; if successful, review the latest PR diff and then continue with isolated provider-parser/equivalence cases. Keep PR Draft and do not rebase/merge/deploy.
+
