@@ -77,3 +77,11 @@ Reduce the runtime and database write overhead of `public.refresh_market_prices(
 - The documentation-only branch head is `156f9ea5a37fd7510ec5d4dc4bf7cfbe55d15b7b`. Relative to current main `06a23cc9f6e45ba18dfa0c1d88785778e137da17`, compare reports diverged: 6 commits ahead and 2 behind, with merge base `8bbd3e228de3b342c1a07eb0ff18ec97c9d12353`. No rebase/merge performed.
 - Latest retrieved production logs through 17:08:10 UTC still contain repeated startup timeouts for jobs 2, 3, 8, 9, 11, and 12. The market refresh was starting at 17:08:02; no completion duration for that invocation is present in the retrieved slice. A postgres_exporter statement-timeout remains present at 17:06:52.
 - Because the startup-timeout pattern persists, do not retry heavyweight catalog/function-definition reads. No live changes or schedule changes. PR #35 stays Draft.
+
+
+### Static source review from repository migrations — 2026-11-20
+- Read the repository's 515-ID migration `20261116203709_limit_primary_coingecko_batch_to_515_ids.sql` and the preceding KuCoin/Gate.io migrations. This is repository migration source, not proof of the exact currently deployed function body.
+- The source confirms: advisory transaction lock `(742019, 13)`; queued HTTP response processing; provider-specific CoinGecko, KuCoin, and Gate.io branches; CoinGecko ID aggregation ordered and capped at 515; request timeouts 20s/15s/15s; 10-minute queue cleanup; and execution restricted to postgres.
+- Critical duplicate-key observation: the CoinGecko mapping uses `UNION` across `(symbol, coingecko_id)`, so it deduplicates identical pairs, not necessarily symbols. Two different CoinGecko IDs can still target one `market_prices.symbol` key.
+- Neither the queued-response loop nor the CoinGecko mapping loop specifies a deterministic `ORDER BY`. Therefore, a set-based bulk statement must not invent a provider or duplicate-symbol winner. A deterministic winner policy would change potentially observable behavior unless the live function and expected semantics establish it.
+- Static source review is sufficient to refine the test plan, but not to authorize a replacement. Exact live definition capture and runtime duplicate semantics remain blocked by Production startup timeouts. No SQL implementation or Production change was made.
