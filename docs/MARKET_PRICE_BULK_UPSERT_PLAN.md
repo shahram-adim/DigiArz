@@ -51,3 +51,13 @@ Reduce the runtime and database write overhead of `public.refresh_market_prices(
 - Do not modify the Production function, indexes, cron jobs, market data, order/trade data, wallets, or balances during this investigation.
 - Do not alter the one-minute refresh cadence or order-processing schedules.
 - No merge or deployment without a separate explicit approval.
+
+
+## Isolated PostgreSQL 17 contract fixture — 2026-11-20
+
+- Added `supabase/tests/market_price_bulk_upsert_contract.sql` to prove PostgreSQL's duplicate-conflict-key cardinality failure, statement atomicity, explicit caller-ranked deduplication, and rejection of NULL, zero, negative, NaN, and positive Infinity prices.
+- Added `.github/workflows/market-price-bulk-upsert-tests.yml` to run the fixture against disposable PostgreSQL 17 on PR/push.
+- GitHub Actions run `44779426017` was created for commit `3b57ad647390669e1708a8ba19a1b95b079f1df6`; at last inspection its PostgreSQL job was still initializing, so no pass is claimed.
+- This fixture tests PostgreSQL mechanics only. It does not establish live CoinGecko/KuCoin/Gate.io precedence or equivalence with `public.refresh_market_prices()`.
+- The branch remains isolated and Draft. No Production database, migration, cron, price, order, trade, wallet, or balance was changed. One-minute cadence remains untouched.
+- Next: confirm this fixture CI result, then obtain the exact live function definition through a reliable read-only route before defining provider-specific ranking or writing replacement SQL.
