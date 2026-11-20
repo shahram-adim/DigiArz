@@ -20,3 +20,20 @@
 @media(max-width:650px){.da-indicator-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.da-alert-form{grid-template-columns:1fr 1fr}.da-alert-form button{grid-column:1/-1;width:100%}}
 @media(max-width:360px){.da-indicator-grid{grid-template-columns:1fr 1fr}.da-alert-item{align-items:flex-start}}
 body.light-theme .da-analysis-summary,body.light-theme .da-alert-item{background:#f5f8fc;border-color:#e1e8f0}
+
+/* Free / Pro / VIP plan comparison */
+.da-plan-section{margin:18px 0;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.da-plan-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+.da-plan-card{min-width:0;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}
+.da-plan-card.is-current{border-color:var(--yellow);box-shadow:inset 0 0 0 1px rgba(240,185,11,.15)}
+.da-plan-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.da-plan-card-top strong{font-size:17px}
+.da-plan-card-top span{font-size:10px;color:var(--green)}
+.da-plan-card>small{display:block;color:var(--muted);margin-top:7px}
+.da-plan-card p{font-size:11px;line-height:1.8;min-height:38px;color:var(--muted)}
+.da-plan-card ul{padding-right:18px;margin:10px 0;min-height:104px;font-size:11px;line-height:2.1}
+.da-plan-card button{width:100%;font-size:10px;padding:9px 7px}
+.da-plan-note{font-size:10px;line-height:1.9;color:var(--muted);margin-top:10px}
+.da-plan-locked{color:var(--muted)!important;font-size:11px!important}
+.da-plan-control-locked{opacity:.55;cursor:not-allowed}
+@media(max-width:650px){.da-plan-grid{grid-template-columns:1fr}.da-plan-card p,.da-plan-card ul{min-height:0}}
