@@ -422,8 +422,8 @@ test('independent DigiArz UI stylesheet is loaded last without replacing app beh
   for (const token of ['--da-bg:#07131c','--da-mint:#45e0c0','#authView','.mobile-bottom-nav','#tab-dashboard','#tab-markets','#tab-trade','#tab-assets','#tab-orders','#tab-history','prefers-reduced-motion']) {
     assert.ok(css.includes(token), 'new design token or page coverage exists: ' + token);
   }
-  assert.match(sw, /digiarz-shell-v66/);
-  assert.match(sw, /digiarz-independent-ui\.css\?v=10/);
+  assert.match(sw, /digiarz-shell-v67/);
+  assert.match(sw, /digiarz-independent-ui\.css\?v=11/);
   assert.ok(css.includes('--da-blue:#78c8ff'), 'third theme uses a sky-blue accent');
   assert.ok(css.includes('#authView.hidden{display:none!important}'), 'login view must be hidden after successful authentication');
   for (const id of ['authView','appView','loginBtn','signupBtn','tradePairBadge','priceChart','assetList','allOrdersList','historyBody']) {
