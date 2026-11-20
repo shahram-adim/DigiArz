@@ -1208,3 +1208,12 @@
 - [x] assertionهای نسخهٔ CSS و پاک‌سازی cache قدیمی در تست‌ها به‌روزرسانی شدند.
 - [!] این تغییرات هنوز باید در CI بررسی و APK تازه ساخته شوند؛ نمایش واقعی و رفتار ورود/داشبورد هنوز نیازمند آزمایش روی گوشی Android است.
 - [!] PR #31 همچنان باید باز و Draft بماند؛ هیچ merge به `main` و هیچ تغییری در Supabase Production انجام نشود.
+
+
+### پیگیری CI تم آبی آسمانی و کش PWA — ۲۰ نوامبر ۲۰۲۶
+- [x] اجرای قبلی Exact Decimal با شناسهٔ `44706380693` بررسی شد؛ شکست آن ناشی از assertion قدیمی در `tests/index-syntax.test.js` بود که هنوز انتظار `digiarz-shell-v65` داشت، درحالی‌که Service Worker به `v66` ارتقا یافته بود. این مورد در تست index به `v66` اصلاح شد.
+- [x] اجرای بعدی Exact Decimal با شناسهٔ `44706473268` روی commit `1a4c7d6e916c63bc8075eaa8f8fb1d9ce1b37529` بررسی شد؛ تست‌های exact-decimal/browser، PostgreSQL arithmetic، rehearsalهای migration و integration بازار/Limit تا زمان بررسی موفق بودند؛ job هنوز در حال اجرا بود و نتیجهٔ نهایی ثبت نشده است.
+- [x] fixture تست Service Worker به‌روزرسانی شد تا cache فعال جدید `digiarz-shell-v66` نیز در مجموعهٔ cacheهای موجود شبیه‌سازی شود؛ انتظار حذف cacheهای قدیمی تا `v65` حفظ شده است.
+- [!] این آخرین اصلاح تست بعد از شروع run شمارهٔ `44706473268` انجام شده؛ بنابراین باید اجرای CI جدید روی commit جدید `7e71e0b0323630015ce250176087f31f20197786` بررسی شود.
+- [!] هیچ APK تازه‌ای هنوز تأیید نشده؛ ساخت Android APK workflow جداگانه است و باید artifact و `BUILD-INFO.txt` با commit جدید تطبیق داده شوند.
+- [!] PR #31 باید باز و Draft بماند؛ هیچ merge به `main` و هیچ تغییر در Supabase Production انجام نشود.
