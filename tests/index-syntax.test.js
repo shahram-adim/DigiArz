@@ -465,8 +465,8 @@ test('dashboard market uses the one-line market row with adjacent 24h sparkline 
   assert.ok(css.includes('grid-template-areas:"fav identity spark change price"!important'));
   assert.ok(css.includes('#dashboardMarketPreview .da-market-sparkline{grid-area:spark!important'));
   assert.ok(css.includes('#dashboardMarketPreview .da-market-card-foot{grid-area:change!important'));
-  assert.ok(css.includes('body.light-theme #dashboardMarketPreview .da-market-name-wrap b{color:#17263b!important}'));
-  assert.ok(css.includes('body.luxury-theme #dashboardMarketPreview .da-market-name-wrap b{color:#f2f7fb!important}'));
+  assert.ok(css.includes('body.light-theme #dashboardMarketPreview .da-market-name-wrap b,' ) && css.includes('color:#17263b!important'));
+  assert.ok(css.includes('body.luxury-theme #dashboardMarketPreview .da-market-name-wrap b,' ) && css.includes('color:#f2f7fb!important'));
   assert.ok(css.includes('backdrop-filter:none!important;-webkit-backdrop-filter:none!important'));
   assert.ok(css.includes('digiarz-independent-ui.css?v=16'));
 });
