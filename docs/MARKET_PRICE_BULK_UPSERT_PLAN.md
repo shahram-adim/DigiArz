@@ -63,3 +63,11 @@ Reduce the runtime and database write overhead of `public.refresh_market_prices(
 - Next: confirm this fixture CI result, then obtain the exact live function definition through a reliable read-only route before defining provider-specific ranking or writing replacement SQL.
 
 - CI confirmation update: workflow run `44779426017` completed with conclusion `success` on PostgreSQL 17.12; the isolated contract-fixture step passed. This confirms only the fixture's PostgreSQL mechanics, not live provider precedence or production-function equivalence.
+
+
+### Follow-up verification — 2026-11-20
+- The isolated PostgreSQL 17 contract workflow `44779426017` completed successfully.
+- The full existing exact-decimal workflow `44779548999` completed successfully on code commit `7a895b4e0c46080813ec9c7958348de13960ad59`; all substantive test steps passed, including two-session Limit cancellation, TP-SL conditional execution/cancellation, Stop-Limit child execution/cancellation, and lifecycle integration. The branch head subsequently advanced to `74f2b3d188ae4d5d870766639c050090e0369a0a` for documentation only.
+- Read-only Supabase unified logs for 16:55–17:05 UTC show six occurrences each of startup timeouts for cron jobs 2, 3, 8, 9, and 12; two observed `refresh_market_prices()` executions took 46.952 s and 50.744 s. A separate statement-timeout event was also logged. These observations are consistent with the previously reported resource/startup pressure; they do not identify a single root cause.
+- Project status reports `ACTIVE_HEALTHY`, PostgreSQL 17.11.0.018. However, repeated cron startup timeouts and long market refresh duration mean the live database is not a safe target for further catalog/function-definition reads right now. Do not retry the timed-out function-definition SQL while this pressure persists.
+- Next gate: wait for database/log stability, then capture the exact live `public.refresh_market_prices()` definition through a read-only path before authoring any provider-ranking or replacement SQL. No Production changes, cron changes, migration changes, or cadence changes were made. PR #35 remains Draft.
