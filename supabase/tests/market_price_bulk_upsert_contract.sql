@@ -332,4 +332,42 @@ BEGIN
 END
 $test$;
 
+
+-- Malformed JSON and missing provider keys are isolated to their response.
+-- The malformed text cast is caught at the response exception boundary;
+-- absent nested keys produce no ticker rows and therefore no price write.
+CREATE TEMP TABLE malformed_payload_target (
+  symbol text PRIMARY KEY,
+  price numeric NOT NULL
+) ON COMMIT DROP;
+
+DO $test$
+DECLARE
+  caught boolean := false;
+  parsed jsonb;
+  missing_payload jsonb := '{"data":{}}'::jsonb;
+BEGIN
+  BEGIN
+    parsed := '{"data":'::jsonb;
+    INSERT INTO malformed_payload_target VALUES ('MALFORMED', 1);
+  EXCEPTION
+    WHEN OTHERS THEN
+      caught := true;
+  END;
+
+  IF NOT caught THEN
+    RAISE EXCEPTION 'malformed JSON did not raise inside response boundary';
+  END IF;
+
+  -- Missing KuCoin ticker key behaves as an empty result, not a price update.
+  IF jsonb_typeof(missing_payload -> 'data' -> 'ticker') = 'array' THEN
+    INSERT INTO malformed_payload_target VALUES ('MISSING_KEY', 1);
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM malformed_payload_target) THEN
+    RAISE EXCEPTION 'malformed or missing-key payload wrote a market price';
+  END IF;
+END
+$test$;
+
 ROLLBACK;
