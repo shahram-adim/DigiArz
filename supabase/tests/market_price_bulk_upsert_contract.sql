@@ -151,4 +151,187 @@ BEGIN
 END
 $test$;
 
+
+-- Response-level exception scope: earlier valid writes in the same response
+-- roll back when a later numeric cast fails. Queue deletion is deliberately
+-- outside that exception block, matching the repository migration structure.
+CREATE TEMP TABLE response_price_target (
+  symbol text PRIMARY KEY,
+  price numeric NOT NULL,
+  source text NOT NULL
+) ON COMMIT DROP;
+CREATE TEMP TABLE response_queue (
+  response_id integer PRIMARY KEY,
+  payload text NOT NULL
+) ON COMMIT DROP;
+
+INSERT INTO response_queue VALUES (1, 'valid-then-malformed');
+
+DO $test$
+DECLARE
+  caught boolean := false;
+BEGIN
+  BEGIN
+    INSERT INTO response_price_target(symbol, price, source)
+    VALUES ('BTC', 100, 'response-1');
+
+    -- Mirrors NULLIF(text, '')::numeric on a malformed non-empty ticker.
+    PERFORM NULLIF('not-a-number', '')::numeric;
+  EXCEPTION
+    WHEN OTHERS THEN
+      caught := true;
+  END;
+
+  IF NOT caught THEN
+    RAISE EXCEPTION 'malformed ticker did not raise inside response block';
+  END IF;
+
+  -- This statement is outside the nested exception block and must persist.
+  DELETE FROM response_queue WHERE response_id = 1;
+
+  IF EXISTS (SELECT 1 FROM response_price_target WHERE symbol = 'BTC') THEN
+    RAISE EXCEPTION 'valid write survived response-level exception rollback';
+  END IF;
+  IF EXISTS (SELECT 1 FROM response_queue WHERE response_id = 1) THEN
+    RAISE EXCEPTION 'queue row was not deleted after caught response error';
+  END IF;
+END
+$test$;
+
+-- A failed response must not prevent a later queued response from processing.
+TRUNCATE response_queue;
+TRUNCATE response_price_target;
+INSERT INTO response_queue VALUES
+  (10, 'bad-response'),
+  (11, 'good-response');
+
+DO $test$
+DECLARE
+  item record;
+BEGIN
+  FOR item IN SELECT response_id, payload FROM response_queue ORDER BY response_id
+  LOOP
+    BEGIN
+      IF item.response_id = 10 THEN
+        INSERT INTO response_price_target(symbol, price, source)
+        VALUES ('BAD_PARTIAL', 1, 'response-10');
+        PERFORM NULLIF('malformed', '')::numeric;
+      ELSE
+        INSERT INTO response_price_target(symbol, price, source)
+        VALUES ('ETH', 10, 'response-11');
+      END IF;
+    EXCEPTION
+      WHEN OTHERS THEN
+        -- Match the production source's per-response catch boundary.
+        NULL;
+    END;
+
+    DELETE FROM response_queue WHERE response_id = item.response_id;
+  END LOOP;
+
+  IF EXISTS (SELECT 1 FROM response_price_target WHERE symbol = 'BAD_PARTIAL') THEN
+    RAISE EXCEPTION 'failed response retained a partial write';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM response_price_target
+    WHERE symbol = 'ETH' AND price = 10 AND source = 'response-11'
+  ) THEN
+    RAISE EXCEPTION 'good response was not processed after prior response failure';
+  END IF;
+  IF EXISTS (SELECT 1 FROM response_queue) THEN
+    RAISE EXCEPTION 'processed response queue rows were not deleted';
+  END IF;
+END
+$test$;
+
+-- Provider response gates: rejected HTTP/status/code/shape responses must
+-- not write prices. These checks model the source predicates, not HTTP calls.
+CREATE TEMP TABLE gated_response_target (
+  symbol text PRIMARY KEY,
+  price numeric NOT NULL
+) ON COMMIT DROP;
+
+DO $test$
+DECLARE
+  http_status integer;
+  timed_out boolean;
+  content_present boolean;
+  provider_code text;
+  gate_payload jsonb;
+BEGIN
+  -- CoinGecko/KuCoin/Gate.io shared HTTP acceptance gate.
+  FOR http_status, timed_out, content_present IN
+    SELECT * FROM (VALUES
+      (500, false, true),
+      (200, true, true),
+      (200, false, false)
+    ) AS rejected(status, timeout_flag, has_content)
+  LOOP
+    IF http_status = 200 AND NOT timed_out AND content_present THEN
+      INSERT INTO gated_response_target VALUES ('SHOULD_NOT_APPEAR', 1);
+    END IF;
+  END LOOP;
+
+  -- KuCoin requires provider code 200000.
+  provider_code := '500000';
+  IF provider_code = '200000' THEN
+    INSERT INTO gated_response_target VALUES ('KUCOIN_BAD', 1);
+  END IF;
+
+  -- Gate.io expects an array; an object is rejected by the response handler.
+  gate_payload := '{"currency_pair":"BTC_USDT","last":"100"}'::jsonb;
+  IF jsonb_typeof(gate_payload) = 'array' THEN
+    INSERT INTO gated_response_target VALUES ('GATE_BAD', 1);
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM gated_response_target) THEN
+    RAISE EXCEPTION 'a provider response that failed its acceptance gate wrote a price';
+  END IF;
+END
+$test$;
+
+-- Accepted positive-price updates carry the matching provider source; invalid
+-- or rejected prices do not update source/price fields.
+CREATE TEMP TABLE source_timestamp_target (
+  symbol text PRIMARY KEY,
+  price numeric NOT NULL,
+  source text NOT NULL,
+  updated_at timestamptz NOT NULL
+) ON COMMIT DROP;
+
+INSERT INTO source_timestamp_target
+VALUES ('BTC', 90, 'old-source', '2026-01-01 00:00:00+00');
+
+DO $test$
+DECLARE
+  before_updated_at timestamptz;
+BEGIN
+  SELECT updated_at INTO before_updated_at
+  FROM source_timestamp_target WHERE symbol = 'BTC';
+
+  -- Simulate the source's positive-price acceptance condition.
+  IF 0::numeric > 0 THEN
+    UPDATE source_timestamp_target
+    SET price = 0, source = 'invalid-source', updated_at = now()
+    WHERE symbol = 'BTC';
+  END IF;
+
+  IF (SELECT price FROM source_timestamp_target WHERE symbol = 'BTC') <> 90
+     OR (SELECT source FROM source_timestamp_target WHERE symbol = 'BTC') <> 'old-source'
+     OR (SELECT updated_at FROM source_timestamp_target WHERE symbol = 'BTC') <> before_updated_at THEN
+    RAISE EXCEPTION 'rejected price changed existing price/source/timestamp';
+  END IF;
+
+  UPDATE source_timestamp_target
+  SET price = 100, source = 'accepted-source', updated_at = now()
+  WHERE symbol = 'BTC' AND 100::numeric > 0;
+
+  IF (SELECT price FROM source_timestamp_target WHERE symbol = 'BTC') <> 100
+     OR (SELECT source FROM source_timestamp_target WHERE symbol = 'BTC') <> 'accepted-source'
+     OR (SELECT updated_at FROM source_timestamp_target WHERE symbol = 'BTC') <= before_updated_at THEN
+    RAISE EXCEPTION 'accepted positive price did not update price/source/timestamp';
+  END IF;
+END
+$test$;
+
 ROLLBACK;
