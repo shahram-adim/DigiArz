@@ -416,17 +416,18 @@ test('login mini chart renders real five-minute candles without depending on a c
 test('independent DigiArz UI stylesheet is loaded last without replacing app behavior', () => {
   const css = fs.readFileSync('src/digiarz-independent-ui.css', 'utf8');
   const sw = fs.readFileSync('sw.js', 'utf8');
-  const link = '<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=12">';
+  const link = '<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=13">';
   assert.ok(html.lastIndexOf(link) > html.lastIndexOf('</style>'), 'independent stylesheet loads after inline legacy styles');
   assert.ok(html.indexOf(link) < html.lastIndexOf('</body>'), 'stylesheet is loaded after inline styles and before body closes');
   for (const token of ['--da-bg:#07131c','--da-mint:#45e0c0','#authView','.mobile-bottom-nav','#tab-dashboard','#tab-markets','#tab-trade','#tab-assets','#tab-orders','#tab-history','prefers-reduced-motion']) {
     assert.ok(css.includes(token), 'new design token or page coverage exists: ' + token);
   }
-  assert.match(sw, /digiarz-shell-v68/);
+  assert.match(sw, /digiarz-shell-v69/);
   assert.match(sw, /digiarz-independent-ui\.css\?v=12/);
   assert.ok(css.includes('--da-blue:#78c8ff'), 'third theme uses a sky-blue accent');
-  assert.ok(css.includes('grid-template-areas:"fav identity price" "fav change price"'), 'mobile market cards use one coherent responsive grid');
-  assert.ok(css.includes('#tab-markets .market-list>.coin>.price-stack'), 'market prices are bound to the actual rendered coin row');
+  assert.ok(css.includes('#marketList>.coin{'), 'market rows are targeted through the actual marketList container');
+  assert.ok(css.includes('#marketList>.coin>.price-stack'), 'price stack is anchored to the actual market row');
+  
   assert.ok(css.includes('#authView.hidden{display:none!important}'), 'login view must be hidden after successful authentication');
   for (const id of ['authView','appView','loginBtn','signupBtn','tradePairBadge','priceChart','assetList','allOrdersList','historyBody']) {
     assert.match(html, new RegExp('id="' + id + '"'), 'existing app behavior hook remains: ' + id);
@@ -436,5 +437,5 @@ test('independent DigiArz UI stylesheet is loaded last without replacing app beh
 
 test('unknown market symbols still receive a Persian-language label and the market stylesheet is cache-busted', () => {
   assert.ok(html.includes("||'دارایی دیجیتال'"));
-  assert.ok(html.includes('digiarz-independent-ui.css?v=12'));
+  assert.ok(html.includes('digiarz-independent-ui.css?v=13'));
 });
