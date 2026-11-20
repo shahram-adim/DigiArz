@@ -422,7 +422,7 @@ test('independent DigiArz UI stylesheet is loaded last without replacing app beh
   for (const token of ['--da-bg:#07131c','--da-mint:#45e0c0','#authView','.mobile-bottom-nav','#tab-dashboard','#tab-markets','#tab-trade','#tab-assets','#tab-orders','#tab-history','prefers-reduced-motion']) {
     assert.ok(css.includes(token), 'new design token or page coverage exists: ' + token);
   }
-  assert.match(sw, /digiarz-shell-v69/);
+  assert.match(sw, /digiarz-shell-v70/);
   assert.match(sw, /digiarz-independent-ui\.css\?v=14/);
   assert.ok(css.includes('--da-blue:#78c8ff'), 'third theme uses a sky-blue accent');
   assert.ok(css.includes('#marketList>.coin{'), 'market rows are targeted through the actual marketList container');
