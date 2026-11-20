@@ -1188,3 +1188,14 @@
 - [!] ابزار GitHub متصل در این نشست امکان اجرای مستقیم `workflow_dispatch` یا فهرست‌کردن تمام runهای push را ارائه نمی‌کند؛ بنابراین APK جدید شامل اصلاح auth/SW هنوز ساخته یا تأیید نشده است. APK قبلی run `44700246621` روی commit قدیمی `1269f6f205c7a146e1a7b047164fc16cab275864` است و شامل اصلاحات بعدی نیست.
 - [!] PR #31 باز و Draft باقی می‌ماند؛ شاخه مستقل طبق compare، ۷۴ commit جلوتر و صفر commit عقب‌تر از `main` است. هیچ merge یا تغییری در Supabase Production انجام نشده است.
 - [ ] قدم بعدی: از GitHub Actions، workflow «DigiArz Android APK» را با گزینهٔ Run workflow و شاخهٔ `redesign/independent-ui-2026` اجرا کن؛ پس از اتمام، artifact همان run باید با commit فعلی تطبیق داده شود و APK روی Android آزمایش شود.
+
+
+### ادامه بررسی DigiArz — ۲۰ نوامبر ۲۰۲۶
+- [x] وضعیت واقعی PR #31 بررسی شد: باز، Draft و ادغام‌نشده؛ head فعلی هنگام بررسی `1a643cf06c33e0e14e102d0b9608102a75c06410` است.
+- [x] مقایسهٔ شاخه با `main` نشان داد `redesign/independent-ui-2026` تعداد ۷۵ commit جلوتر و صفر commit عقب‌تر است؛ `main` بدون تغییر مانده است.
+- [x] اجرای جدید Exact Decimal Run #1005 با شناسهٔ `44705173586` روی head فعلی بررسی شد؛ job `exact-decimal` با نتیجهٔ `success` کامل شد.
+- [x] تأیید شد اصلاحات صفحه ورود و PWA هنوز در شاخه حاضرند: CSS دارای `#authView.hidden{display:none!important}` است، HTML از CSS `v=9` استفاده می‌کند و Service Worker cache `digiarz-shell-v65` را به‌کار می‌برد.
+- [!] APK تأییدشدهٔ موجود هنوز artifact اجرای Android APK شمارهٔ 73 / run `44686197402` روی commit `09e16659bab3b4e4ddd71892e8aa8e72ce014d2f` است؛ این build پیش از اصلاحات نهایی ورود و cache ساخته شده و نباید نسخهٔ حاوی آن اصلاحات معرفی شود.
+- [!] اجرای مستقیم workflow دستی Android APK از ابزار GitHub متصل در دسترس نیست و run تازه‌ای برای head فعلی قابل تأیید نشده است. workflow از `workflow_dispatch` پشتیبانی می‌کند؛ باید از GitHub Actions به‌صورت دستی روی شاخهٔ مستقل اجرا شود.
+- [ ] قدم بعد: اجرای دستی workflow «DigiArz Android APK» روی شاخهٔ `redesign/independent-ui-2026`، تطبیق `BUILD-INFO.txt` با commit همان اجرا، سپس نصب APK و آزمایش ورود/داشبورد روی Android.
+- [!] هیچ merge به `main`، هیچ تغییر در Supabase Production و هیچ تغییر در منطق مالی انجام نشد.
