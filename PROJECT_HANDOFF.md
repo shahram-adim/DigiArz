@@ -756,7 +756,7 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 
 
 ## 2026-11-21 — encrypted database backup located; source recovery boundary
-- Located and downloaded still-valid GitHub Actions artifact from run `43848835281`: `DigiArz-database-backup`, artifact ID `14217201032`, GitHub-reported archive SHA-256 `555c1f7ebcad947e573dad659084bbcf94dc88d55fc0bc1a3b7de9608e4e5`; expiry `2026-11-23T10:26:46Z`.
+- Located and downloaded still-valid GitHub Actions artifact from run `43848835281`: `DigiArz-database-backup`, artifact ID `14217201032`, GitHub-reported archive SHA-256 `555c1f7ebcad947e573dad659084bbcf94dc88d55fc0bc1a3b7de9606db8e4e5`; expiry `2026-11-23T10:26:46Z`.
 - ZIP inspection shows `README-backup.txt` plus `digiarz-database.dump.enc`. README describes PostgreSQL 17.12 custom dump of public/private schemas, encrypted AES-256-CBC + PBKDF2; includes private queue table structures and selected private admin/audit/control data. It reports archive integrity and pg_restore list checks but not a live restore drill.
 - Decryption key is not available in this working context. No decryption/restore was attempted; no key was requested, exposed, or written to repository/logs. Do not ask the user to paste secrets into chat.
 - Prior archive review found no `supabase_migrations.schema_migrations` ledger in the artifact, so even a restored schema snapshot would not establish applied migration history.
@@ -764,3 +764,15 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Updated financial audit: commit `34a7bf7a0aa581975d7e24a1153e2096b19b95e8`, blob `4a65139a09bdfe95137a554124e2cef071c1bd0f`.
 - No workflow/secrets changes, Supabase/Production access, schema/RPC/trigger/cron/data mutation, PR branch edit, merge/rebase/deploy, or `supabase db push`.
 - Next: use a secure already-authorized environment that can consume the encryption secret without logging it, or request an approved schema-only export. Do not expose the key in chat/repository.
+
+
+## 2026-11-21 — recovery schema metadata and Production read-timeout checkpoint
+- Reconfirmed main HEAD before this update: c868ffe3349ee25abbc74499169db355e7b4fc3e. Recent main commits since the prior checkpoint are documentation-only source-recovery, backup, and PR #38 evidence notes; no application code or migration was changed.
+- Recovery project DigiArz-Recovery-Test (zrriqwyolcjhbappocuw) is ACTIVE_HEALTHY on PostgreSQL 17.11.0.019; isolated restore run 44298621534 is success. Read-only catalog inventory: 32 tables, 239 columns, 116 constraints, 63 indexes, 5 non-system triggers, 21 policies. Core account-guard triggers on orders/trades/transactions and helper function definitions were identified.
+- Important limitation: recovery-drill.yml restores with --no-owner --no-acl. Recovery project ACLs are not source-of-truth; use migrations and live Production catalog for grants. The recovery project contains restored data; only schema metadata was queried, no row contents were inspected or used for tests.
+- Production remains ACTIVE_HEALTHY by project metadata, but direct read-only execute_sql and list_tables calls timed out; Security Advisor also timed out. Health Advisor returned no lints; Performance Advisor snapshot 2026-11-20T22:59:05Z reports 9 unindexed FKs, 11 RLS initplan warnings, 7 unused indexes. Logs over 2026-11-19 22:48:46Z–2026-11-20 22:48:46Z show 575 SSL resets, 93 EOF, 152 statement timeouts and startup-timeout events across multiple cron jobs.
+- Live market schedules rechecked: job 13 */10, job 14 1-59/10, job 17 5-59/10. The current cron run-details query timed out, so no fresh 24-hour success/failure totals are claimed.
+- PR #38 remains open Draft, head a6849671727fce10fe852bda607fd65b3fc2a351; its exact-decimal run 44811642137 succeeded, but the fixture remains a concurrency-primitive model, not full execution of the four production RPCs.
+- Artifact 14217201032 remains unexpired at this check and expires 2026-11-23T10:26:46Z. GitHub API reports the exact 64-character digest sha256:555c1f7ebcad947e573dad659084bbcf94dc88d55fc0bc1a3b7de9606db8e4e5; earlier notes contained a truncated 61-character digest and have been corrected in the bootstrap plan.
+- Bootstrap plan updated in commit 6ccfa3c68c47e00518508e930dc97428231c4019; it records schema metadata, ACL exclusion, Production parity blocker and next safe step.
+- No Production migration/RPC/trigger/cron/grant/policy/schema/data change, no test with restored records, no merge/rebase/deploy, and no supabase db push.
