@@ -592,3 +592,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Do not download/restore the archive again solely to repeat already completed schema-source recovery. It excludes migration history and cannot prove applied versions.
 - No Production SQL/query/write, migration, function, index, cron, market data, orders, trades, wallets, or balances changed. No `supabase db push`; PR #35 remains Draft and unmerged.
 - Next safe step: obtain the exact list of missing applied version strings from a trusted migration-ledger export or previously retained audit evidence. Without those identifiers, searching Git history/artifacts for individual missing SQL sources is underdetermined; do not guess filenames or fabricate SQL.
+
+
+## 2026-11-20 — Migration manifest formatting correction and live PR inventory
+- Re-fetched `PROJECT_HANDOFF.md` from `main` before work (blob `d72a8885ce7fcb511681e6156da326962f8fed00`).
+- Re-read `docs/MIGRATION_SOURCE_INVENTORY.md` (blob `a2442039f397a930ab5e54cfa3d6a964744272ad`) and found a formatting defect: all 40 entries displayed the literal prefix `202` instead of the full 14-digit migration version. The underlying filenames were intact, but the manifest was not usable for exact version comparison.
+- Corrected all 40 manifest entries to show the full 14-digit version extracted from each exact filename. Guard check confirmed exactly 40 versioned entries. Inventory update commit: `1767b8843b1a81a92b920d0071cc60c2b5c42d77`.
+- Rechecked live open PR inventory. In addition to previously tracked PRs, PR #36 is now open: “Draft: bound TP/SL retries for invalid reservations”. PR #35 remains open; do not infer draft/head/check state from the title-only search result. Existing PR #32/#33 remain open as well. No PR was modified.
+- Applied Production migration ledger remains unavailable in this safe offline step; do not treat the corrected local manifest as the applied ledger. No Production SQL/query/write, migration, function, index, cron, market data, orders, trades, wallets, or balances changed. No `supabase db push`.
+- Next: use the corrected 14-digit local version list only when an authoritative applied-version export becomes available; otherwise continue bounded offline source recovery and verify PR #36/#35 live details before relying on their status.
