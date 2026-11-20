@@ -1,5 +1,5 @@
--- Pinned from read-only Production definition on 2026-11-15.
--- Disposable CI database only; never execute this fixture against Production.
+-- Exact 2026-11-20 live Production function snapshot with only bounded reservation-validation retry added.
+-- Disposable PostgreSQL 17 CI only. Do not deploy without a separate reviewed migration.
 CREATE OR REPLACE FUNCTION public.process_conditional_orders()
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -21,6 +21,7 @@ BEGIN
   IF NOT pg_catalog.pg_try_advisory_xact_lock(739201127) THEN
     RETURN jsonb_build_object('success',true,'message','Another conditional cycle is running','processed',0);
   END IF;
+
   FOR v_cond IN
     SELECT c.id,c.order_id,c.user_id,c.symbol,c.order_kind,c.trigger_price,c.amount,
            o.filled_amount,o.remaining_amount
@@ -34,23 +35,23 @@ BEGIN
     IF v_cond.symbol IS NULL OR v_cond.symbol !~ '^[A-Z0-9]{2,15}USDT$'
        OR v_cond.amount IS NULL OR v_cond.amount<=0
        OR v_cond.trigger_price IS NULL OR v_cond.trigger_price<=0 THEN
-      RAISE NOTICE 'conditional skip invalid params id=% kind=% symbol=% amount=% trigger=%',v_cond.id,v_cond.order_kind,v_cond.symbol,v_cond.amount,v_cond.trigger_price;
       v_skipped:=v_skipped+1; CONTINUE;
     END IF;
+
     SELECT mp.price INTO v_market_price
     FROM public.market_prices mp
     WHERE mp.symbol=v_cond.symbol
       AND mp.updated_at>=now()-interval '1 minute'
     FOR SHARE;
     IF NOT FOUND OR v_market_price IS NULL OR v_market_price<=0 THEN
-      RAISE NOTICE 'conditional skip market id=% found=% price=%',v_cond.id,FOUND,v_market_price;
       v_skipped:=v_skipped+1; CONTINUE;
     END IF;
+
     IF (v_cond.order_kind='take_profit' AND v_market_price<v_cond.trigger_price)
        OR (v_cond.order_kind='stop_loss' AND v_market_price>v_cond.trigger_price) THEN
-      RAISE NOTICE 'conditional skip trigger id=% kind=% market=% trigger=%',v_cond.id,v_cond.order_kind,v_market_price,v_cond.trigger_price;
       v_skipped:=v_skipped+1; CONTINUE;
     END IF;
+
     SELECT * INTO v_res
     FROM public.order_reservations r
     WHERE r.order_id=v_cond.order_id AND r.user_id=v_cond.user_id
@@ -60,13 +61,11 @@ BEGIN
        OR v_res.reserved_amount<v_cond.amount
        OR v_res.consumed_amount<0
        OR v_res.consumed_amount+v_res.released_amount>v_res.reserved_amount THEN
-      RAISE NOTICE 'conditional skip reservation id=% found=% status=% asset=% expected=% reserved=% amount=% consumed=% released=%',v_cond.id,FOUND,v_res.status,v_res.asset,left(v_cond.symbol,length(v_cond.symbol)-4),v_res.reserved_amount,v_cond.amount,v_res.consumed_amount,v_res.released_amount;
       UPDATE public.conditional_orders
       SET attempt_count=attempt_count+1,last_error='Reservation validation failed',updated_at=now()
       WHERE id=v_cond.id;
 
-      -- Invalid reservations are never released or rewritten automatically.
-      -- Bound retries and reject the parent/conditional order for operator review.
+      -- Keep invalid reservation rows untouched; reject the order after 10 failed checks.
       IF (SELECT attempt_count FROM public.conditional_orders WHERE id=v_cond.id)>=10 THEN
         UPDATE public.orders
         SET status='rejected',remaining_amount=amount-filled_amount
@@ -87,29 +86,38 @@ BEGIN
       END IF;
       CONTINUE;
     END IF;
+
     BEGIN
+      -- Release this order's own reservation inside the same transaction before
+      -- calling the market engine; if execution fails, this subtransaction rolls back.
       UPDATE public.order_reservations
-      SET released_amount=reserved_amount-consumed_amount,status='released',updated_at=now()
+      SET released_amount=reserved_amount-consumed_amount,
+          status='released',updated_at=now()
       WHERE id=v_res.id AND status='reserved';
+
       PERFORM pg_catalog.set_config('request.jwt.claim.sub',v_cond.user_id::text,true);
       PERFORM pg_catalog.set_config('request.jwt.claims',
         pg_catalog.jsonb_build_object('sub',v_cond.user_id::text,'role','authenticated')::text,true);
+
       v_result:=public.execute_demo_trade(v_cond.symbol,'sell',v_cond.amount,v_market_price);
       IF COALESCE((v_result->>'success')::boolean,false) IS NOT TRUE THEN
         RAISE EXCEPTION 'Market engine did not confirm conditional execution';
       END IF;
       v_execution_order_id:=(v_result->>'order_id')::uuid;
+
       UPDATE public.order_reservations
       SET consumed_amount=reserved_amount,released_amount=0,status='consumed',updated_at=now()
       WHERE id=v_res.id AND status='released'
         AND consumed_amount=0 AND released_amount=reserved_amount;
       GET DIAGNOSTICS v_rows=ROW_COUNT;
       IF v_rows<>1 THEN RAISE EXCEPTION 'Conditional reservation consumption update failed'; END IF;
-      UPDATE public.orders AS o
-      SET status='filled',filled_amount=o.amount,remaining_amount=0
-      WHERE o.id=v_cond.order_id AND o.user_id=v_cond.user_id AND o.status='pending';
+
+      UPDATE public.orders
+      SET status='filled',filled_amount=amount,remaining_amount=0
+      WHERE id=v_cond.order_id AND user_id=v_cond.user_id AND status='pending';
       GET DIAGNOSTICS v_rows=ROW_COUNT;
       IF v_rows<>1 THEN RAISE EXCEPTION 'Conditional parent order update failed'; END IF;
+
       UPDATE public.conditional_orders
       SET status='filled',execution_order_id=v_execution_order_id,
           executed_price=(v_result->>'price')::numeric,
@@ -117,19 +125,19 @@ BEGIN
       WHERE id=v_cond.id AND status='pending';
       GET DIAGNOSTICS v_rows=ROW_COUNT;
       IF v_rows<>1 THEN RAISE EXCEPTION 'Conditional order completion update failed'; END IF;
+
       PERFORM pg_catalog.set_config('request.jwt.claim.sub','',true);
       PERFORM pg_catalog.set_config('request.jwt.claims','',true);
       v_processed:=v_processed+1;
       v_triggered:=v_triggered+1;
     EXCEPTION WHEN OTHERS THEN
-      RAISE NOTICE 'conditional execution exception id=% kind=% error=% state=%',v_cond.id,v_cond.order_kind,SQLERRM,SQLSTATE;
       PERFORM pg_catalog.set_config('request.jwt.claim.sub','',true);
       PERFORM pg_catalog.set_config('request.jwt.claims','',true);
+      -- The failed execution block rolled back the reservation release.
       UPDATE public.conditional_orders
       SET attempt_count=attempt_count+1,last_error=left(SQLERRM,500),updated_at=now()
       WHERE id=v_cond.id;
-      SELECT * INTO v_res FROM public.order_reservations
-      WHERE order_id=v_cond.order_id AND user_id=v_cond.user_id FOR UPDATE;
+      SELECT * INTO v_res FROM public.order_reservations WHERE order_id=v_cond.order_id AND user_id=v_cond.user_id FOR UPDATE;
       IF FOUND AND (SELECT attempt_count FROM public.conditional_orders WHERE id=v_cond.id)>=10
          AND v_res.status='reserved'
          AND v_res.consumed_amount>=0
@@ -137,9 +145,10 @@ BEGIN
         UPDATE public.order_reservations
         SET released_amount=reserved_amount-consumed_amount,status='released',updated_at=now()
         WHERE id=v_res.id;
-        UPDATE public.orders AS o SET status='rejected',remaining_amount=o.amount-o.filled_amount
-        WHERE o.id=v_cond.order_id AND o.user_id=v_cond.user_id AND o.status='pending';
-        UPDATE public.conditional_orders SET status='rejected',updated_at=now()
+        UPDATE public.orders SET status='rejected',remaining_amount=amount-filled_amount
+        WHERE id=v_cond.order_id AND user_id=v_cond.user_id AND status='pending';
+        UPDATE public.conditional_orders
+        SET status='rejected',updated_at=now()
         WHERE id=v_cond.id AND status='pending';
         v_rejected:=v_rejected+1;
       ELSE
@@ -147,7 +156,8 @@ BEGIN
       END IF;
     END;
   END LOOP;
+
   RETURN jsonb_build_object('success',true,'processed',v_processed,
     'triggered',v_triggered,'rejected',v_rejected,'skipped',v_skipped);
 END;
-$function$;
+$function$
