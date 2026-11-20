@@ -4,6 +4,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const html = fs.readFileSync('index.html', 'utf8');
+const css = fs.readFileSync('src/digiarz-independent-ui.css', 'utf8');
 
 test('all inline JavaScript blocks in index.html parse successfully', () => {
   const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
