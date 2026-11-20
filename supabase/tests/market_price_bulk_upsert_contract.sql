@@ -278,6 +278,10 @@ BEGIN
 
   -- Gate.io expects an array; an object is rejected by the response handler.
   gate_payload := '{"currency_pair":"BTC_USDT","last":"100"}'::jsonb;
+  -- Isolate Gate.io parsing from KuCoin so the fixture does not encode
+  -- an undocumented provider precedence or last-writer policy.
+  TRUNCATE parser_price_target;
+
   IF jsonb_typeof(gate_payload) = 'array' THEN
     INSERT INTO gated_response_target VALUES ('GATE_BAD', 1);
   END IF;
@@ -416,9 +420,9 @@ $test$;
 
 
 
--- Characterize the provider-specific symbol parsing and sequential upsert
--- behavior from the repository migration source. This models the parser logic;
--- it does not make an assertion about the exact deployed function body.
+-- Characterize provider-specific symbol parsing and enabled-pair filtering
+-- independently. Do not assert duplicate-ticker or cross-provider winner order:
+-- the repository cursors do not specify ORDER BY, and this is not live-function equivalence.
 CREATE TEMP TABLE parser_enabled_pairs (
   pair_symbol text PRIMARY KEY,
   is_enabled boolean NOT NULL
@@ -441,7 +445,6 @@ DECLARE
     "code":"200000",
     "data":{"ticker":[
       {"symbol":"BTC-USDT","last":"65000"},
-      {"symbol":"BTC-USDT","last":"65001.25"},
       {"symbol":"ETH-USDT","last":""},
       {"symbol":"SOL-USDT","last":"0"},
       {"symbol":"NOPE-USDT","last":"10"},
@@ -478,9 +481,9 @@ BEGIN
 
     IF NOT EXISTS (
       SELECT 1 FROM parser_price_target
-      WHERE symbol = 'BTCUSDT' AND price = 65001.25 AND source = 'KuCoin'
+      WHERE symbol = 'BTCUSDT' AND price = 65000 AND source = 'KuCoin'
     ) THEN
-      RAISE EXCEPTION 'KuCoin sequential ticker processing did not preserve the later duplicate';
+      RAISE EXCEPTION 'KuCoin parser did not normalize an enabled BTC-USDT ticker';
     END IF;
   END IF;
 
