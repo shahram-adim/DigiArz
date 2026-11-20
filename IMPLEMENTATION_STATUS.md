@@ -1251,3 +1251,14 @@
 - [!] آخرین مشاهده: job ساخت APK هنوز در حال اجراست؛ مرحلهٔ `assembleDebug` تکمیل نشده، artifact و Release هنوز منتشر نشده‌اند. پس هنوز APK تازه‌ای برای دانلود/تأیید نداریم.
 - [!] PR #31 باز و Draft باقی می‌ماند؛ هیچ merge به `main` یا تغییری در Supabase Production انجام نشده است.
 - [ ] قدم بعد: پایش run شمارهٔ `44707584773`، دریافت artifact، تطبیق `BUILD-INFO.txt` با commit منبع و تأیید SHA-256 قبل از ارائهٔ لینک دانلود.
+
+
+### تکمیل ساخت و تأیید APK تم آبی آسمانی — ۲۰ نوامبر ۲۰۲۶، ۰۹:۰۶ UTC
+- [x] اجرای Android APK workflow شماره `44707584773` (Build 102) روی شاخه `redesign/independent-ui-2026` با نتیجه نهایی `success` بسته شد؛ تمام ۱۲ مرحله اصلی job از جمله `assembleDebug`، ثبت provenance، آپلود artifact و انتشار لینک مستقیم موفق بودند.
+- [x] artifact با نام `DigiArz-Android-debug-APK` و شناسه `14616046395` دریافت شد؛ تا ۴ دسامبر ۲۰۲۶ معتبر است.
+- [x] فایل ZIP بررسی شد و شامل `app-debug.apk` و `BUILD-INFO.txt` است. provenance، commit منبع `5143abfee3057ae6b63d93cea9a389015f1e3f8d`، شاخه بازطراحی و run ID را تأیید می‌کند.
+- [x] SHA-256 فایل APK استخراج‌شده با مقدار ثبت‌شده در BUILD-INFO و digest فایل Release دقیقاً تطبیق دارد: `819a774f18781748613dae71ce8e5dfc80b9fe22a3f010ce636f4960cda89631`.
+- [x] GitHub Release `android-debug-102` موجود و لینک مستقیم APK فعال است: https://github.com/shahram-adim/DigiArz/releases/download/android-debug-102/app-debug.apk
+- [!] این نسخه Debug/Test است؛ نصب و رفتار واقعی آن روی گوشی Android کاربر هنوز تأیید نشده است. به‌ویژه نمایش صحیح صفحه ورود، مخفی‌شدن آن پس از ورود و سلامت داشبورد باید روی گوشی بررسی شود.
+- [x] PR #31 همچنان باز و Draft است؛ شاخه ۹۰ commit جلوتر و صفر commit عقب‌تر از `main` است. هیچ merge به `main` و هیچ تغییری در Supabase Production یا منطق مالی انجام نشد.
+- [ ] قدم بعد: نصب APK Build 102 روی گوشی Android و بررسی صفحه ورود، انتقال به داشبورد و تفاوت واقعی هر سه تم؛ سپس اصلاح فقط بر اساس نتیجه مشاهده‌شده.
