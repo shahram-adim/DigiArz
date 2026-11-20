@@ -550,7 +550,7 @@ CREATE TEMP TABLE coingecko_request_id_fixture (coingecko_id text NOT NULL) ON C
 INSERT INTO coingecko_request_id_fixture SELECT 'asset-' || lpad(n::text, 4, '0') FROM generate_series(1, 516) AS n;
 CREATE TEMP TABLE coingecko_selected_ids ON COMMIT DROP AS
 SELECT coingecko_id FROM coingecko_request_id_fixture
-WHERE coingecko_id ~ '^[a-z0-9-]+
+WHERE coingecko_id ~ '^[a-z0-9-]+' AND coingecko_id !~ '[^a-z0-9-]'
 ORDER BY coingecko_id LIMIT 515;
 DO $test$
 BEGIN
