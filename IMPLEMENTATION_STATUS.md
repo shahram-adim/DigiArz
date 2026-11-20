@@ -1015,3 +1015,12 @@
 - [x] PR #36 پیش‌نویس و ادغام‌نشده باقی مانده؛ هیچ migration یا تغییر تابع/cron/grant/policy/رزرو/موجودی در Production انجام نشد.
 - [x] cadence یک‌دقیقه‌ای بازار و worker بدون تغییر است.
 - [ ] گام بعد: بازیابی و نگهداری snapshot کامل تابع زندهٔ ۲۰ نوامبر، port حداقلی bounded-retry به همان بدنه، تست regression و بررسی diff دقیق پیش از هر تصمیم انتشار.
+
+
+### نتیجهٔ نهایی کاندید بر پایهٔ تابع زنده — ۲۰ نوامبر ۲۰۲۶
+- [x] تعریف کامل زندهٔ `public.process_conditional_orders()` دوباره با `pg_get_functiondef` بازیابی شد؛ کاندید PR #36 اکنون از همین snapshot دقیق ۲۰ نوامبر ساخته شده و فقط شاخهٔ invalid-reservation retry را تغییر می‌دهد.
+- [x] مرحلهٔ regression در workflow از اجرای worker fixture قدیمی حذف شد؛ تست مستقیماً تعریف زندهٔ ۲۰ نوامبر را با patch محدود در دیتابیس موقت اجرا می‌کند.
+- [x] اجرای نهایی full CI، run #1177، روی head `d0da205cce649faa23e9bcc50d2c840f0bf1fe6f` با نتیجهٔ success تکمیل شد؛ هر ۲۲ گام از جمله bounded retry regression موفق شدند: https://github.com/shahram-adim/DigiArz/actions/runs/44787061755.
+- [!] run #1173 (نسخهٔ fixture-based) superseded است؛ نتیجهٔ مرجع برای کاندید دقیق، run #1177 است. run #1172 شکست fixture-ID داشت و پس از اصلاح superseded شد.
+- [x] PR #36 همچنان Draft و ادغام‌نشده است. کاندید فقط در `supabase/drafts/` قرار دارد؛ هیچ Migration، RPC، Cron، grant، policy یا داده‌ای در Production تغییر نکرد.
+- [ ] گام بعد: بررسی نهایی diff و طرح migration قابل rollback؛ قبل از هر rollout، تأیید صریح انتشار لازم است.
