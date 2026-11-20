@@ -301,3 +301,10 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Opened issue #34, https://github.com/shahram-adim/DigiArz/issues/34, to scope a set-based upsert design and PostgreSQL 17 regression fixture. It explicitly requires deterministic duplicate-symbol handling and preservation of provider/source semantics, permissions, precision, locking, queue behavior and one-minute cadence.
 - No Production function, index, cron schedule, migration history, market data, order, trade, wallet or balance was changed. Do not run `supabase db push`; migration reconciliation remains unresolved.
 - Next: implement the issue #34 work on an isolated branch only after the exact current live function and duplicate-symbol semantics can be captured and tested. Keep Production untouched until CI, equivalence review and representative benchmarks pass.
+
+
+## 2026-11-20 — Market-price bulk-upsert design PR opened
+- Rechecked duplicate mappings with a bounded read-only query across enabled demo pairs and active curated listings: no symbol had more than one distinct CoinGecko ID in this snapshot. This is not a permanent uniqueness guarantee.
+- The next attempt to capture the full live `public.refresh_market_prices()` definition timed out; no function rewrite was attempted.
+- Created isolated branch `perf/market-price-bulk-upsert-draft` and Draft PR #35: https://github.com/shahram-adim/DigiArz/pull/35. It adds only `docs/MARKET_PRICE_BULK_UPSERT_PLAN.md` (design, safety constraints and regression matrix); no SQL/migration or production change.
+- PR #35 must remain Draft until the exact live function is captured, source/provider semantics are compared, PostgreSQL 17 regression tests pass, and isolated performance benchmarks are reviewed.
