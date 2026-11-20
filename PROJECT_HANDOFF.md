@@ -713,3 +713,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Repository code searches for trigger declarations and relevant account-active/deactivation references did not surface an authoritative complete live trigger inventory. This is not evidence that Production has no trigger.
 - Audit report updated with this boundary. No Production DB query/write, RPC/Migration/cron/data change, merge/rebase/deploy, or db push.
 - Next: monitor run #1263 through steps 19–22 and inspect logs on failure; after completion record the exact result. Keep PR #38 Draft.
+
+
+## 2026-11-20 — PR #38 CI final success
+- Re-fetched main handoff and audit before this update; current input blobs: `e423482f53e73928345a4364bae985f55390577d` and `e2584bf826c38dd8860fcaf66e897f4662b323d9`.
+- PR #38 run #1263 / ID `44811642137` on head `a6849671727fce10fe852bda607fd65b3fc2a351` completed with conclusion `success`. All 22 substantive workflow steps passed; cleanup and job completion passed too.
+- Step 22, `Run isolated two-session account deactivation/order placement race`, passed. The isolated fixture reproduced the unlocked TOCTOU scenario and validated the profile-row serialization protocol in both lock orderings.
+- Evidence boundary unchanged: this is a simplified disposable PostgreSQL concurrency fixture, not full execution of the four Production financial RPCs; repository searches are not an authoritative live trigger inventory. No Production change/query, migration, cron, financial data, merge/rebase/deploy, or `supabase db push`.
+- PR #38 remains Draft/open/unmerged. Next safe task: strengthen fixture to run the actual source-faithful entrypoint function bodies and/or obtain authoritative schema snapshot trigger inventory before any remediation design. No Production changes without explicit approval.
