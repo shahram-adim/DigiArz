@@ -1048,3 +1048,53 @@ body.dark-theme #marketList>.coin .coin-source.stale,body.luxury-theme #marketLi
 #tab-markets #marketList>.coin{width:100%!important;min-width:0!important;max-width:100%!important;flex:initial!important;scroll-snap-align:unset!important}
 #tab-markets .gainers-panel,#tab-markets .losers-panel,#tab-markets .top-assets-panel{display:none!important}
 @media(max-width:760px){#tab-markets>.market-categories{gap:6px!important;margin:8px 0 12px!important}#tab-markets>.market-categories>.category-btn{min-width:78px!important;min-height:46px!important;padding:7px 10px!important;font-size:10px!important}}
+
+
+/* Market polish v15: compact one-line rows, centered 24h change, clearer category icons. */
+#tab-markets .market-hero-kicker{display:none!important}
+.hero .hero-label{display:none!important}
+#tab-markets>.market-categories>.category-btn{min-height:58px!important;min-width:96px!important;padding:10px 15px!important;gap:9px!important;border-radius:14px!important;font-weight:800!important}
+#tab-markets>.market-categories>.category-btn .category-icon{width:30px!important;height:30px!important;flex:0 0 30px!important}
+#tab-markets>.market-categories>.category-btn .category-icon svg{width:27px!important;height:27px!important;stroke-width:2.2!important}
+#tab-markets #marketList>.coin{
+ display:grid!important;
+ grid-template-columns:30px minmax(0,1fr) minmax(76px,auto) minmax(112px,auto)!important;
+ grid-template-rows:minmax(56px,auto)!important;
+ grid-template-areas:"fav identity change price"!important;
+ align-items:center!important;gap:7px!important;padding:10px 12px!important;
+}
+#tab-markets #marketList>.coin>.favorite-btn{grid-area:fav!important}
+#tab-markets #marketList>.coin>.coin-identity{grid-area:identity!important;min-width:0!important}
+#tab-markets #marketList>.coin>.coin-sparkline{display:none!important}
+#tab-markets #marketList>.coin>.coin-change-wrap{
+ grid-area:change!important;display:flex!important;flex-direction:column!important;
+ align-items:center!important;justify-content:center!important;gap:0!important;
+ min-width:0!important;text-align:center!important;
+}
+#tab-markets #marketList>.coin .coin-change-label{display:none!important}
+#tab-markets #marketList>.coin .coin-change{font-size:13px!important;font-weight:900!important;padding:6px 8px!important;min-width:0!important}
+#tab-markets #marketList>.coin .coin-volume{display:none!important}
+#tab-markets #marketList>.coin>.price-stack{grid-area:price!important;align-items:flex-end!important;justify-content:center!important;gap:2px!important}
+#tab-markets #marketList>.coin .coin-source{display:none!important}
+#tab-markets #marketList>.coin .coin-icon{width:44px!important;height:44px!important;min-width:44px!important;max-width:44px!important;flex-basis:44px!important}
+#tab-markets #marketList>.coin .coin-name-fa{font-size:14px!important}
+#tab-markets #marketList>.coin .coin-symbol-en{font-size:10px!important}
+@media(max-width:760px){
+ #tab-markets>.market-categories>.category-btn{min-width:88px!important;min-height:54px!important;padding:8px 11px!important}
+ #tab-markets>.market-categories>.category-btn .category-icon{width:28px!important;height:28px!important;flex-basis:28px!important}
+ #tab-markets>.market-categories>.category-btn .category-icon svg{width:25px!important;height:25px!important}
+ #tab-markets #marketList>.coin{grid-template-columns:24px minmax(0,1fr) minmax(62px,auto) minmax(92px,auto)!important;grid-template-rows:minmax(50px,auto)!important;gap:5px!important;padding:8px 6px!important}
+ #tab-markets #marketList>.coin .coin-icon{width:36px!important;height:36px!important;min-width:36px!important;max-width:36px!important;flex-basis:36px!important}
+ #tab-markets #marketList>.coin .coin-name-fa{font-size:12px!important}
+ #tab-markets #marketList>.coin .coin-symbol-en{font-size:9px!important}
+ #tab-markets #marketList>.coin .coin-change{font-size:11px!important;padding:4px 5px!important}
+ #tab-markets #marketList>.coin .price-usd,#tab-markets #marketList>.coin .price-usd strong{font-size:11px!important}
+ #tab-markets #marketList>.coin .price-toman,#tab-markets #marketList>.coin .price-toman strong{font-size:9px!important}
+}
+@media(max-width:360px){
+ #tab-markets #marketList>.coin{grid-template-columns:21px minmax(0,1fr) 54px 82px!important;gap:3px!important;padding:7px 4px!important}
+ #tab-markets #marketList>.coin .coin-icon{width:31px!important;height:31px!important;min-width:31px!important;max-width:31px!important;flex-basis:31px!important}
+ #tab-markets #marketList>.coin .coin-name-fa{font-size:11px!important}
+ #tab-markets #marketList>.coin .coin-change{font-size:10px!important}
+ #tab-markets #marketList>.coin .price-usd,#tab-markets #marketList>.coin .price-usd strong{font-size:10px!important}
+}
