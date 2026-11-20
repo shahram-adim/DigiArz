@@ -93,3 +93,10 @@ Reduce the runtime and database write overhead of `public.refresh_market_prices(
 - Supabase project status is `ACTIVE_HEALTHY`, PostgreSQL 17.11.0.018. However, unified Postgres logs retrieved through 17:10:12 UTC continue to show repeated `job startup timeout` events. At 17:10:11–17:10:12 UTC, timeouts were logged for cron jobs 2, 3, 8, 9, 12, and 13; at 17:09:14 UTC, timeouts also included job 18. The same log slice shows scheduled work starting again at 17:10:00–17:10:02 UTC, including `refresh_market_prices()` and the order processors. These logs establish continued startup failures, not the underlying root cause or whether every invocation failed.
 - The Production database remains an unsafe target for heavy catalog/function-definition reads while these startup timeouts persist. Do not retry the timed-out function capture yet. Continue offline/isolated fixture analysis only.
 - No Production SQL, migrations, cron schedules, market data, orders, trades, wallets, or balances were changed. One-minute market/order cadence remains unchanged; PR #35 remains Draft.
+
+
+### Cross-provider duplicate-symbol contract — 2026-11-20
+- Extended the disposable PostgreSQL 17 fixture with a single target symbol receiving four candidate rows: two distinct CoinGecko upstream IDs, one KuCoin row, and one Gate.io row.
+- The fixture verifies that passing all four rows directly into one INSERT ... ON CONFLICT DO UPDATE raises PostgreSQL cardinality_violation and leaves the target table unchanged.
+- The test deliberately does not choose a winning provider or claim any production precedence. It proves only that duplicate target keys must be resolved before a single bulk upsert; the correct resolution policy still depends on exact live-function semantics.
+- This is an isolated SQL fixture change only. No live function, market price, cron schedule, order, wallet, or balance was touched. One-minute cadence remains unchanged.
