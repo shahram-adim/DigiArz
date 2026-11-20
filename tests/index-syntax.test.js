@@ -304,7 +304,7 @@ test('market list rows use five aligned cells, 40px logos, visible Persian names
   const start = html.indexOf('function renderMarkets(){');
   const end = html.indexOf('function renderDashboardPortfolio(', start);
   const market = html.slice(start, end);
-  assert.match(market, /persianName=String\(item\.name_fa\|\|persianCoinName\(item\.symbol\)\)/);
+  assert.match(market, /persianName=String\(item\.name_fa\|\|persianCoinName\(item\.symbol,item\.name\|\|coinInfo\[base\]\?\.name\)\)/);
   assert.match(market, /class="coin-name-fa"/);
   assert.match(html, /digiarz-market-row-fix-20261119/);
   assert.match(html, /grid-template-columns:34px minmax\(0,1\.2fr\) minmax\(54px,\.55fr\) minmax\(82px,\.72fr\) minmax\(112px,\.86fr\)!important/);
