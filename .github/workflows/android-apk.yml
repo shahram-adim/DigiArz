@@ -1,5 +1,6 @@
 name: DigiArz Android APK
 # Rebuild trigger: regenerate the debug APK from the latest independent UI branch head.
+# Build requested for the synchronized independent redesign commit.
 
 on:
   workflow_dispatch:
