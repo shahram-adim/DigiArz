@@ -214,3 +214,10 @@ Reduce the runtime and database write overhead of `public.refresh_market_prices(
 - New isolated PostgreSQL assertions characterize two distinct consumer rules from checked-in source: curated listing/pair activation requires a positive CoinGecko price no older than 2 minutes; the reviewed trading/conditional consumers require a positive price no older than 1 minute but do not filter by provider source.
 - The fixture includes fresh CoinGecko, KuCoin, Gate.io, stale CoinGecko, and zero-price rows. It does not rank providers, change the writer, or claim a global precedence policy.
 - CI for this fixture commit must complete successfully before considering the test validated.
+
+
+### Parser-fixture isolation correction — 2026-11-20
+- Review found the parser characterization used one shared temporary target table for both KuCoin and Gate.io and asserted the Gate.io row overwrote the KuCoin BTC row. That accidentally encoded a sequential cross-provider winner in the fixture even though the production response queue has no ORDER BY.
+- Corrected the fixture in commit e3c826b97c1780fa3e2068db22c78e8b7f97a8b0: KuCoin and Gate.io parser cases now write to separate temporary target tables and assert their own parsing/filtering outputs independently. No assertion now implies one provider wins across responses.
+- The separate four-candidate cardinality test remains intentionally provider-agnostic and still proves only PostgreSQL's duplicate-key behavior.
+- Await CI on the corrected branch head before treating this fixture correction as validated. No Production changes; PR remains Draft.
