@@ -991,3 +991,16 @@
 - [x] گزارش جزئیات در `docs/FINANCIAL_RPC_AUDIT_2026-11-20.md` ثبت شد.
 - [x] هیچ تغییر Production، Migration، cron، grant، policy، سفارش، معامله، رزرو، موجودی یا کیف پول انجام نشد.
 - [ ] گام بعد: تکمیل ماتریس ترتیب قفل تمام RPCها/workerها و تست هم‌زمانی و دسترسی منفی در PostgreSQL 17 ایزوله؛ سپس بازبینی باقی توابع authenticated. اجرای `supabase db push` همچنان ممنوع است.
+
+
+## ادامهٔ ممیزی قفل‌ها و TP/SL — ۲۰ نوامبر ۲۰۲۶
+- [x] تعریف زندهٔ ۱۰ RPC/worker مالی از Supabase Production دوباره خط‌به‌خط بررسی شد: Market، Limit، لغو Limit، Stop-Limit، TP/SL و لغوهای متناظر.
+- [x] تصحیح ثبت قبلی: در `process_limit_orders` ترتیب واقعی قفل‌ها order → reservation → wallet است و کیف پول پیش از تغییر `asset_balances` قفل می‌شود؛ comment «wallet-first» به ترتیب منابع مالی اشاره دارد. ناسازگاری قبلی comment پس گرفته شد؛ وارونگی قطعی wallet/asset در مسیرهای بررسی‌شده اثبات نشد.
+- [!] یافته جدید در `process_conditional_orders()`: شاخهٔ اعتبارسنجی رزرو نامعتبر فقط `attempt_count` و `last_error` را به‌روز می‌کند و بدون سقف تلاش `CONTINUE` می‌زند. سقف ۱۰ تلاش فقط در بلوک exception است و این شاخه را پوشش نمی‌دهد؛ با cron هر دقیقه، سفارش معیوب می‌تواند نامحدود pending بماند.
+- [x] cron زندهٔ job 9 با نام `digiarz-conditional-orders` فعال و دارای schedule یک‌دقیقه‌ای تأیید شد.
+- [x] snapshot فقط‌خواندنی: ۰ سفارش شرطی pending، ۰ سفارش pending با رزرو نامعتبر و ۰ سفارش pending با ۱۰ تلاش یا بیشتر.
+- [x] تابع `deactivate_my_account()` نیز بررسی شد؛ مسیرهای Limit و conditional pending را لغو و رزروهای معتبرشان را آزاد می‌کند و وضعیت Stop-Limit triggered را با child sync می‌کند.
+- [!] پیشنهاد اصلاح فقط در شاخهٔ ایزوله: bounded retry برای شاخهٔ reservation-validation در TP/SL؛ پس از ۱۰ بار parent/conditional به rejected/manual review بروند، ولی رزرو نامعتبر خودکار تغییر نکند. تست PostgreSQL 17 برای missing/released/wrong-asset/invalid arithmetic و تکرار worker لازم است.
+- [x] گزارش `docs/FINANCIAL_RPC_AUDIT_2026-11-20.md` با تصحیح و یافته جدید به‌روزرسانی شد.
+- [x] هیچ تابع، migration، grant، policy، cron، سفارش، معامله، رزرو، کیف پول یا موجودی Production تغییر نکرد؛ cadence یک‌دقیقه‌ای حفظ شد.
+- [ ] گام بعد: ساخت تست منفی و bounded-retry regression در PostgreSQL 17 ایزوله و بازبینی باقی توابع authenticated؛ Production تا تأیید تست و مجوز انتشار دست‌نخورده بماند.
