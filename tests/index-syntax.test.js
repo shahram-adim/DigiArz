@@ -430,3 +430,9 @@ test('independent DigiArz UI stylesheet is loaded last without replacing app beh
     assert.match(html, new RegExp('id="' + id + '"'), 'existing app behavior hook remains: ' + id);
   }
 });
+
+
+test('unknown market symbols still receive a Persian-language label and the market stylesheet is cache-busted', () => {
+  assert.match(html, /function persianCoinName\(symbol\)[^\\n]*\|\|'دارایی دیجیتال'/);
+  assert.match(html, /digiarz-independent-ui\\.css\\?v=11/);
+});
