@@ -4,6 +4,9 @@ on:
     branches: [redesign/independent-ui-2026]
     paths:
       - 'src/technical-analysis.js'
+      - 'src/subscription-plans.js'
+      - 'src/technical-analysis.css'
+      - 'index.html'
       - 'tests/technical-analysis.test.js'
       - '.github/workflows/technical-analysis-tests.yml'
   pull_request:
