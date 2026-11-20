@@ -114,3 +114,9 @@ Race script واقعاً دو نشست مجزا را اجرا می‌کند: wor
 - Corrected the extractor to capture the body between \`AS $function$\` and the closing \`$function$\` in commit \`bdb0c8f583a0596f1bf4b1a6982dba16b25d2df7\` (same Draft PR #37).
 - After the correction, the GitHub connector returned no workflow run or combined status for the new head at the time of recheck. Therefore the fix is not yet CI-validated.
 - Branch comparison now reports 3 commits ahead / 2 behind main because documentation-only handoff/audit commits landed after PR creation. Do not rebase or update branch automatically; PR remains Draft.
+
+
+### PR #37 corrected-head CI progress
+- Corrected head \`bdb0c8f583a0596f1bf4b1a6982dba16b25d2df7\` now has workflow run #1254, ID \`44810724098\`, in progress.
+- Node/browser integration step passed, including the new Stop-Limit source-contract regression. PostgreSQL arithmetic, schema widening rehearsal, negative preflight, and lock-timeout preflight setup have also passed; the lock-timeout atomicity step is still running at last check.
+- The full two-session Stop-Limit candidate race is a later step and has not yet run in this attempt. No overall CI success claim is justified yet.
