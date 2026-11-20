@@ -742,3 +742,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - No new harness code was written or run because a dependency-complete, source-faithful bootstrap cannot yet be proven. PR #38 remains only a concurrency-primitive demonstration; do not label it a full RPC integration test.
 - No Production query/write, Supabase project change, migration/RPC/trigger/cron/financial-data change, PR branch edit, merge/rebase/deploy, or `supabase db push`.
 - Next: recover the foundational migration history/DDL and exact helper/trigger sources (including renamed/removed Git history) before implementing the disposable bootstrap. If source parity cannot be established, stop at a documented partial harness.
+
+
+## 2026-11-21 — workflow provenance and schema source recovery refined
+- Re-read the exact-decimal workflow and entrypoint assertion SQL. Existing Market/Limit integration loads the fixture plus `supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql`; Stop-Limit/TP-SL placement and lifecycle steps also load draft candidate SQL. These are useful disposable PostgreSQL candidate integration tests, but not executions of the current Production migration RPC bodies.
+- Verified the assertion scripts do substantive precision/reservation/rejection checks: Market/Limit test blob `3d324573b8304cf1820a5be4bc958a50130b1551`; conditional entrypoint test blob `d520cb9bdecc255b743f0750d14900984fc457f6`.
+- Refined recoverable source inventory: TP/SL migration defines `conditional_orders` DDL/RLS/policy/grants and its real RPCs; Stop-Limit migration defines related ALTERs, RPCs and grants; Market/Limit migration defines its three RPCs but not base table DDL. Current fixtures themselves define base financial tables and helper functions, so those fixture definitions are not authoritative Production schema sources.
+- Remaining evidence gap: authoritative base DDL for profiles/orders/wallets/asset_balances/order_reservations, actual account/fee helper definitions, and complete trigger inventory. Continue recovering these from Git history or an authoritative schema snapshot; do not infer them from fixtures.
+- Updated bootstrap plan: commit `c1854310dbe2506e1e0043a552839bdd513de108`, blob `97a5bc8c093d7b31d1c12309ee66ad516b9ae760`.
+- Updated financial audit: commit `d3180ab2c588a786cfac5e2d6ea9018b6895ff3c`, blob `1204e6dabca3c59ca76e73a0cd008338f83bc791`.
+- No test/workflow/migration/PR branch changes, no Production query/write, no Supabase mutation, no merge/rebase/deploy, no `supabase db push`.
+- Next: continue source recovery through historical commits/tree and existing schema snapshots, then build only if schema/helper/trigger parity is provable.
