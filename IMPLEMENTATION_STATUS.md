@@ -1024,3 +1024,23 @@
 - [!] run #1173 (نسخهٔ fixture-based) superseded است؛ نتیجهٔ مرجع برای کاندید دقیق، run #1177 است. run #1172 شکست fixture-ID داشت و پس از اصلاح superseded شد.
 - [x] PR #36 همچنان Draft و ادغام‌نشده است. کاندید فقط در `supabase/drafts/` قرار دارد؛ هیچ Migration، RPC، Cron، grant، policy یا داده‌ای در Production تغییر نکرد.
 - [ ] گام بعد: بررسی نهایی diff و طرح migration قابل rollback؛ قبل از هر rollout، تأیید صریح انتشار لازم است.
+
+
+## نوبت تضمین کیفیت شبانه — ۲۱ نوامبر ۲۰۲۶
+
+- HEAD واقعی main پیش از ثبت این نوبت: acafbfbedc297a8c42fc1bb54140c8dadba839e4. کامیت‌های جدید از checkpoint قبلی عمدتاً مستندات source-recovery، backup و PR #38 هستند؛ در این نوبت هیچ کد برنامه یا migration تغییر نکرد.
+- PR #38 با head a6849671727fce10fe852bda607fd65b3fc2a351 همچنان open/Draft و ادغام‌نشده است. Exact-decimal run 44811642137 موفق شد؛ بااین‌حال fixture فقط interleaving primitive را مدل می‌کند و چهار RPC واقعی Market/Limit/TP-SL/Stop-Limit را اجرا نمی‌کند.
+- پروژهٔ Production با get_project برابر ACTIVE_HEALTHY و PostgreSQL 17.11.0.018 است؛ ۵۲ migration ثبت‌شده باقی است. schedule زنده: job 13 هر ۱۰ دقیقه، job 14 در دقیقه‌های ۱،۱۱،۲۱،۳۱،۴۱،۵۱ و job 17 در دقیقه‌های ۵،۱۵،۲۵،۳۵،۴۵،۵۵. پرس‌وجوی تازهٔ cron.job_run_details با connection timeout شکست خورد؛ آمار success/failure تازه ادعا نمی‌شود.
+- unified logs برای 2026-11-19 22:48:46Z تا 2026-11-20 22:48:46Z: تعداد ۵۷۵ SSL connection reset، ۹۳ EOF، ۱۵۲ statement timeout؛ startup-timeout رویدادها در jobهای 8/9/12/2/3 به‌ترتیب 455/455/452/450/444 و در jobهای 11/17/5/16/14/13/18/4/15 به‌ترتیب 87/52/48/46/46/46/43/41/18 ثبت شدند. این‌ها شمارش log event هستند، نه شمارش قطعی اجرای یکتای cron.
+- direct read-only execute_sql و list_tables روی Production هر دو connection timeout دادند؛ Security Advisor نیز read timeout داد. Health Advisor بدون یافته بود. Performance Advisor در observed_at برابر 2026-11-20T22:59:05.512Z شامل ۹ FK بدون ایندکس پوششی، ۱۱ هشدار RLS initplan و ۷ unused index بود. هیچ grant/policy/index تغییر نکرد.
+- پروژهٔ جداگانهٔ DigiArz-Recovery-Test با ref zrriqwyolcjhbappocuw ACTIVE_HEALTHY و PostgreSQL 17.11.0.019 است؛ restore run 44298621534 موفق. فقط catalog metadata خوانده شد: ۳۲ جدول، ۲۳۹ ستون، ۱۱۶ قید، ۶۳ ایندکس، ۵ trigger غیرسیستمی و ۲۱ policy. سه account-guard trigger روی INSERT orders/trades/transactions به private.guard_active_account_writes() وصل‌اند.
+- fingerprintهای helper در recovery snapshot: current_account_is_active=d932cd1d0da21bb96bdc0a381f7dcbc3؛ get_demo_trading_fee_rate=546d80d7105228ed97da26c5ed0c7b7f؛ deactivate_my_account=2081e024a2b815aa2c6ebf6470fa2bce؛ guard_active_account_writes=29b8e23c1de8eb4762a8cf1a9c9343ce. این‌ها فقط snapshot Nov 18 هستند و parity با Production اثبات نشده.
+- recovery-drill.yml از pg_restore --no-owner --no-acl استفاده می‌کند؛ ACLهای پروژهٔ recovery برای اثبات grantهای Production معتبر نیستند. پروژهٔ recovery دارای دادهٔ backup است؛ محتوای ردیف‌ها خوانده نشد و هیچ داده‌ای برای تست استفاده نشد. محیط آزمون بعدی باید PostgreSQL 17 تازه با schema-only DDL و دادهٔ مصنوعی باشد.
+- artifact پشتیبان ID 14217201032 هنوز expired=false است و در 2026-11-23T10:26:46Z منقضی می‌شود. GitHub API digest صحیح ۶۴ کاراکتری sha256:555c1f7ebcad947e573dad659084bbcf94dc88d55fc0bc1a3b7de9606db8e4e5 است؛ digest ۶۱ کاراکتری قبلی در سه سند اصلاح شد. این artifact فاقد migration ledger است.
+- اسناد به‌روز شدند: bootstrap plan commit 6ccfa3c68c47e00518508e930dc97428231c4019؛ handoff commit 8e6047f4dc357916b619581746e8c2b5419c13f5؛ financial audit commit acafbfbedc297a8c42fc1bb54140c8dadba839e4. هر فایل پس از commit مجدداً fetch و SHA/content تأیید شد.
+- محدودیت اجرا: در این نوبت تست PostgreSQL جدید اجرا نشد؛ فقط CI موجود PR #38 با نتیجه success مشاهده شد و queryهای catalog روی Recovery-Test فقط خواندنی بودند. Production و Recovery-Test هیچ داده/ساختار/ACL/cron تغییر ندادند.
+### گام بعد
+۱. پس از رفع connection timeout، metadata schema/function/triggers/policies Production را با snapshot Recovery-Test مقایسه کن؛ اختلافات Nov 18 تا Nov 21 را مشخص کن.
+۲. ACLها را از migrationهای منبع و catalog زنده بازیابی کن؛ ACLهای recovery به علت --no-acl کنار گذاشته شوند.
+۳. فقط پس از اثبات schema parity، bootstrap تازه PostgreSQL 17 بدون داده backup بساز و source-faithful race test را اجرا کن؛ PR #38 را تا آن زمان primitive-only نگه دار.
+۴. migration drift و اختلاف job 14 را جداگانه بررسی کن؛ supabase db push، merge، deploy و هر تغییر Production همچنان ممنوع است.
