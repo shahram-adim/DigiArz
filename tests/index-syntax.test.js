@@ -421,7 +421,7 @@ test('independent DigiArz UI stylesheet is loaded last without replacing app beh
     assert.ok(css.includes(token), 'new design token or page coverage exists: ' + token);
   }
   assert.match(sw, /digiarz-shell-v60/);
-  assert.match(sw, /digiarz-independent-ui\.css\?v=1/);
+  assert.match(sw, /digiarz-independent-ui\.css\?v=2/);
   for (const id of ['authView','appView','loginBtn','signupBtn','tradePairBadge','priceChart','assetList','allOrdersList','historyBody']) {
     assert.match(html, new RegExp('id="' + id + '"'), 'existing app behavior hook remains: ' + id);
   }
