@@ -195,3 +195,6 @@ body.light-theme td{color:#213b47!important}
  .volatility-stat strong{font-size:12px!important}
 }
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Explicit page-surface coverage for the primary app sections. */
+#tab-markets,#tab-trade,#tab-assets,#tab-orders,#tab-history,#tab-settings{scroll-margin-top:96px}
