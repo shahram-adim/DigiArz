@@ -370,4 +370,48 @@ BEGIN
 END
 $test$;
 
+
+
+-- Characterize the legacy numeric predicate against the real market-price
+-- column typmod. PostgreSQL numeric NaN compares greater than ordinary values,
+-- and NaN is storable in numeric(38,18); Infinity exceeds the typmod and
+-- raises numeric_value_out_of_range on assignment. This is intentionally
+-- separate from the candidate's stricter finite-positive input policy above.
+CREATE TEMP TABLE legacy_numeric_target (
+  symbol text PRIMARY KEY,
+  price numeric(38,18) NOT NULL
+) ON COMMIT DROP;
+
+DO $test$
+DECLARE
+  infinity_rejected boolean := false;
+BEGIN
+  IF NOT ('NaN'::numeric > 0) THEN
+    RAISE EXCEPTION 'expected PostgreSQL numeric NaN to satisfy legacy price > 0 predicate';
+  END IF;
+
+  INSERT INTO legacy_numeric_target(symbol, price)
+  VALUES ('NAN_LEGACY', 'NaN'::numeric);
+
+  IF NOT EXISTS (
+    SELECT 1 FROM legacy_numeric_target
+    WHERE symbol = 'NAN_LEGACY' AND price = 'NaN'::numeric
+  ) THEN
+    RAISE EXCEPTION 'numeric(38,18) did not preserve the legacy NaN value';
+  END IF;
+
+  BEGIN
+    INSERT INTO legacy_numeric_target(symbol, price)
+    VALUES ('INF_LEGACY', 'Infinity'::numeric);
+  EXCEPTION
+    WHEN numeric_value_out_of_range THEN
+      infinity_rejected := true;
+  END;
+
+  IF NOT infinity_rejected THEN
+    RAISE EXCEPTION 'numeric(38,18) unexpectedly accepted Infinity';
+  END IF;
+END
+$test$;
+
 ROLLBACK;
