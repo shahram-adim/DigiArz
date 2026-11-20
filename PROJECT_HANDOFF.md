@@ -501,3 +501,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - GitHub code search for `refresh_crypto_assets` found only a reference in the recovery migration and status documentation; full function body is not present in the checked-in migration source located. Do not claim complete crypto_assets symbol-write-path coverage.
 - No Supabase SQL, migrations, cron, indexes, financial data, orders, trades, wallets, or balances were changed. `supabase db push` remains prohibited.
 - Next: poll exact-decimal run `44807302227`; then investigate response deletion-on-error using isolated PostgreSQL fixtures and continue recovering missing applied migration/function source from authoritative backup/source artifacts. Keep PR #35 Draft and do not implement provider precedence without verified invariant or explicit product decision.
+
+
+## 2026-11-20 — CI completion and parser-fixture correction
+- Rechecked exact-decimal workflow run 44807302227 on PR #35 head 56c4ea64525bbb35265f673ab4d97d92a0cc3ad0: completed success. Its two-session Limit, TP-SL, and Stop-Limit race/lifecycle steps all completed successfully. Both PostgreSQL 17 contract runs 44807302190 and 44807291120 also completed success.
+- PR #35 remains open, Draft, unmerged. No Production action.
+- A source review of the parser fixture found that KuCoin and Gate.io were being written sequentially into one temporary table, with an assertion that Gate.io overwrote KuCoin BTC. This inadvertently encoded an unapproved cross-provider precedence in a test intended only to characterize each parser.
+- Corrected supabase/tests/market_price_bulk_upsert_contract.sql on the PR branch in commit e3c826b97c1780fa3e2068db22c78e8b7f97a8b0 (new blob 6442d939c577e65ba78217b9e6c6f6ee4710e906): KuCoin and Gate.io now use separate temporary target tables and independently assert parsing/filtering. Four-candidate duplicate-key cardinality test remains provider-neutral. Updated PR design note in a subsequent docs-only branch commit.
+- CI for corrected head must pass before calling this correction validated. This remains test-only/documentation-only on Draft PR #35.
+- No Production SQL, migration, cron, market data, orders, trades, wallets, or balances changed. No supabase db push; cadence unchanged.
+- Next: poll corrected-head PostgreSQL contract and exact-decimal CI; if green, continue static source and migration-reconciliation review. Preserve Draft status and avoid Production queries while DB instability persists.
