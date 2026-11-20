@@ -694,3 +694,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - گزارش ممیزی با مرزبندی شواهد و طرح fixture دو‌نشستی به‌روزرسانی شد. هیچ تست race اجرا یا Migration/trigger/RPC/Production تغییر داده نشد.
 - **گام بعد:** ساخت fixture PostgreSQL 17 مستقل برای race بین deactivation و Market/Limit/TP-SL/Stop-Limit، با barrierهای قطعی و بررسی وضعیت نهایی order/trade/reservation. پیش از هر اصلاح، triggerها و قفل profile در schema authoritative باید تأیید شوند.
 - PRها Draft باقی می‌مانند؛ بدون Production change، merge/rebase/deploy یا `supabase db push`.
+
+
+## 2026-11-20 — PR #38 fixture account-deactivation/order race
+- Re-fetched `PROJECT_HANDOFF.md` and audit from `main` before edits; current input blobs were `3e2a1a5d3be8ce99c7b53d87f84d994dc4c6a5e2` and `f02d588a415934857aeaf9e9013cd69bd4ab1e59`.
+- Created Draft PR #38: https://github.com/shahram-adim/DigiArz/pull/38, branch `test/account-deactivation-order-race`, head `a6849671727fce10fe852bda607fd65b3fc2a351`.
+- Added disposable PostgreSQL 17 setup and two-session shell race fixture. Case 1 reproduces the stale active-check / later-write pattern and verifies a pending order plus reserved funds can appear after deactivation in the deliberately unlocked model. Cases 2/3 exercise candidate profile-row serialization in both orderings: placement-first is cleaned up after deactivation waits; deactivation-first rejects placement.
+- Added the fixture to `.github/workflows/exact-decimal-tests.yml`. Re-fetched all three branch files and verified the workflow step and fixture content.
+- First CI lookup for PR head returned no workflow runs; CI is **not yet confirmed**, do not report test pass until run appears and all relevant steps are inspected.
+- Evidence boundary: fixture models the concurrency primitive; it does not execute the full four production RPC bodies and cannot rule out unseen Production triggers/locks. No Production schema query/write, migration/RPC/cron/financial-data change, merge, rebase, deployment or `supabase db push`.
+- Next: monitor PR #38 CI, inspect logs if failure, and if green expand toward full entrypoint integration. Obtain authoritative trigger/profile-lock inventory from safe schema snapshot before any remediation proposal.
+- Keep PR #38 Draft and all prior PRs Draft; no Production changes without explicit user approval.
