@@ -732,3 +732,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Updated `docs/FINANCIAL_RPC_AUDIT_2026-11-20.md` with the dependency map, fixture limitations, and next safe design step; audit commit `222830ca3024df77a3ec2b438e90af670ed2394f`, blob `85ad216ac50374bd42d10b6121f24135326619b5`.
 - No PR branch edits, main migration/workflow changes, Supabase/Production queries or writes, trigger/RPC/cron/financial-data changes, merge/rebase/deploy, or `supabase db push`. PR #38 remains Draft and must not be merged.
 - Next: design and statically verify a dependency-complete disposable PostgreSQL bootstrap from the migration source before adding a race harness. If full source fidelity cannot be achieved without stubbing the tested behavior, retain PR #38 only as a concurrency-primitive demonstration and label it accordingly.
+
+
+## 2026-11-21 — dependency-complete PostgreSQL race bootstrap plan
+- Re-fetched current `PROJECT_HANDOFF.md` before update; input blob `1dbfa77e4f1554e0e3768e49bffc34e29e8e6985`.
+- Re-fetched the actual Market/Limit, TP/SL, Stop-Limit migration sources, the current workflow, both relevant shared setup fixtures, and PR #38 setup on its own branch.
+- Created `docs/FINANCIAL_RACE_BOOTSTRAP_PLAN_2026-11-21.md` (commit `757c14155f448fe79aaf6087615c6fd138afd931`). It maps the four real entrypoints and deactivation dependencies, identifies existing fixture substitutions, defines source recovery/bootstrap/parity gates, and sets both race orderings and financial lifecycle assertions.
+- Key blocker: checked-in financial migrations contain the RPC bodies but do not provide a complete authoritative base schema/helper/trigger/role inventory. Repository code search in this pass did not recover the complete original DDL for profiles/orders/wallets/asset_balances/order_reservations, `current_account_is_active()`, `get_demo_trading_fee_rate()`, or all relevant triggers/grants. This is a repository-evidence gap, not proof those objects do not exist.
+- No new harness code was written or run because a dependency-complete, source-faithful bootstrap cannot yet be proven. PR #38 remains only a concurrency-primitive demonstration; do not label it a full RPC integration test.
+- No Production query/write, Supabase project change, migration/RPC/trigger/cron/financial-data change, PR branch edit, merge/rebase/deploy, or `supabase db push`.
+- Next: recover the foundational migration history/DDL and exact helper/trigger sources (including renamed/removed Git history) before implementing the disposable bootstrap. If source parity cannot be established, stop at a documented partial harness.
