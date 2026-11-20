@@ -642,3 +642,15 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Added this provenance clarification to `docs/FINANCIAL_RPC_AUDIT_2026-11-20.md`; commit `0d9ff26c47aaa0a90db3546c6d2cc728be583373`.
 - No Production query/write, migration, RPC, cron, financial data, or deployment. No PR merged; no `supabase db push`.
 - Next: determine whether an isolated source-contract check can assert candidate lock behavior and explicitly report migration divergence without making the main CI fail; separately recover a fresh workflow run record before stating current green status.
+
+
+## 2026-11-20 — Stop-Limit source-contract guard PR #37
+- Re-fetched this handoff from \`main\` before updating (blob \`34f2b2626a6b0a89bbc5bbdb367de4ed170e5d53\`).
+- Created Draft PR #37: https://github.com/shahram-adim/DigiArz/pull/37, branch \`test/stop-limit-child-lock-source-contract\`, head \`d727a6593323bed5f8370da97b64281e3464a6e0\`.
+- New source-contract test in \`tests/exact-decimal-sql-drafts.test.js\` extracts the first sync loop from the combined rollout candidate and the checked-in Stop-Limit migration. It requires candidate child locking (\`c,parent,child\`) and explicitly records that the checked-in migration still lacks child locking (\`c,parent\`). This is a visibility/anti-drift guard, not a migration fix. If the migration is deliberately reconciled, update the test's expected divergence.
+- PR #37 is open, Draft, unmerged. At first status retrieval after creation, no workflow run or combined status had appeared for head \`d727a659...\`; do not claim its CI passed until a run is retrieved.
+- Retrieved PR #35 exact-decimal run #1233, run ID \`44807862279\`, on head \`baa5a638...\`: PostgreSQL 17 job success; all 22 workflow steps succeeded, including combined candidate rehearsal and real two-session Stop-Limit race. This validates disposable candidate test path only, not migration parity or Production.
+- PR #36 exact-decimal run #1177 (\`44787061755\`) remains successful for the separate TP/SL retry fixture.
+- Audit report updated in commit \`95869c29d9be639b585f973132916070345efd38\`.
+- No Production query/write, migration/RPC/cron/financial data change, merge, rebase, deployment, or \`supabase db push\`.
+- Next: retrieve PR #37 CI result; if it passes, continue with a separate parity review against the latest authoritative live Stop-Limit function snapshot and decide whether the draft candidate is safe to propose for migration reconciliation. Do not modify Production or merge any PR.
