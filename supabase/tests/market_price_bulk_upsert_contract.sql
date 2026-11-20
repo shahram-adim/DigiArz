@@ -432,7 +432,12 @@ INSERT INTO parser_enabled_pairs VALUES
   ('ETHUSDT', true),
   ('SOLUSDT', true);
 
-CREATE TEMP TABLE parser_price_target (
+CREATE TEMP TABLE kucoin_parser_price_target (
+  symbol text PRIMARY KEY,
+  price numeric(38,18) NOT NULL,
+  source text NOT NULL
+) ON COMMIT DROP;
+CREATE TEMP TABLE gate_parser_price_target (
   symbol text PRIMARY KEY,
   price numeric(38,18) NOT NULL,
   source text NOT NULL
@@ -472,7 +477,7 @@ BEGIN
            SELECT 1 FROM parser_enabled_pairs
            WHERE is_enabled IS TRUE AND pair_symbol = parsed_symbol
          ) THEN
-        INSERT INTO parser_price_target(symbol, price, source)
+        INSERT INTO kucoin_parser_price_target(symbol, price, source)
         VALUES (parsed_symbol, parsed_price, 'KuCoin')
         ON CONFLICT (symbol) DO UPDATE
         SET price = EXCLUDED.price, source = EXCLUDED.source;
@@ -480,7 +485,7 @@ BEGIN
     END LOOP;
 
     IF NOT EXISTS (
-      SELECT 1 FROM parser_price_target
+      SELECT 1 FROM kucoin_parser_price_target
       WHERE symbol = 'BTCUSDT' AND price = 65000 AND source = 'KuCoin'
     ) THEN
       RAISE EXCEPTION 'KuCoin parser did not normalize an enabled BTC-USDT ticker';
@@ -499,7 +504,7 @@ BEGIN
            SELECT 1 FROM parser_enabled_pairs
            WHERE is_enabled IS TRUE AND pair_symbol = parsed_symbol
          ) THEN
-        INSERT INTO parser_price_target(symbol, price, source)
+        INSERT INTO gate_parser_price_target(symbol, price, source)
         VALUES (parsed_symbol, parsed_price, 'Gate.io')
         ON CONFLICT (symbol) DO UPDATE
         SET price = EXCLUDED.price, source = EXCLUDED.source;
@@ -507,23 +512,23 @@ BEGIN
     END LOOP;
   END IF;
 
-  IF (SELECT count(*) FROM parser_price_target) <> 2 THEN
+  IF (SELECT count(*) FROM gate_parser_price_target) <> 2 THEN
     RAISE EXCEPTION 'provider parser wrote an unexpected number of enabled symbols';
   END IF;
   IF NOT EXISTS (
-    SELECT 1 FROM parser_price_target
+    SELECT 1 FROM gate_parser_price_target
     WHERE symbol = 'BTCUSDT' AND price = 65002.5 AND source = 'Gate.io'
   ) THEN
-    RAISE EXCEPTION 'Gate.io parser did not normalize symbol or preserve later source update';
+    RAISE EXCEPTION 'Gate.io parser did not normalize enabled BTC-USDT symbol';
   END IF;
   IF NOT EXISTS (
-    SELECT 1 FROM parser_price_target
+    SELECT 1 FROM gate_parser_price_target
     WHERE symbol = 'SOLUSDT' AND price = 99.75 AND source = 'Gate.io'
   ) THEN
     RAISE EXCEPTION 'Gate.io parser did not write the enabled SOL pair';
   END IF;
   IF EXISTS (
-    SELECT 1 FROM parser_price_target
+    SELECT 1 FROM gate_parser_price_target
     WHERE symbol NOT IN ('BTCUSDT', 'SOLUSDT')
   ) THEN
     RAISE EXCEPTION 'provider parser wrote a disabled, unknown, or malformed symbol';
