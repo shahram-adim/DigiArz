@@ -919,3 +919,6 @@ body.luxury-theme #authView .ref-usdt-coin{
   body.luxury-theme .da-v2-hero{box-shadow:0 15px 34px rgba(23,133,194,.18)!important}
   body.luxury-theme #authView.auth-reference-layout{margin:8px auto 20px!important}
 }
+
+/* Ensure the login screen is actually removed after a successful sign-in. */
+#authView.hidden{display:none!important}
