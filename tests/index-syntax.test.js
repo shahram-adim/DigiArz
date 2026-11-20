@@ -416,17 +416,22 @@ test('login mini chart renders real five-minute candles without depending on a c
 test('independent DigiArz UI stylesheet is loaded last without replacing app behavior', () => {
   const css = fs.readFileSync('src/digiarz-independent-ui.css', 'utf8');
   const sw = fs.readFileSync('sw.js', 'utf8');
-  const link = '<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=14">';
+  const link = '<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=15">';
   assert.ok(html.lastIndexOf(link) > html.lastIndexOf('</style>'), 'independent stylesheet loads after inline legacy styles');
   assert.ok(html.indexOf(link) < html.lastIndexOf('</body>'), 'stylesheet is loaded after inline styles and before body closes');
   for (const token of ['--da-bg:#07131c','--da-mint:#45e0c0','#authView','.mobile-bottom-nav','#tab-dashboard','#tab-markets','#tab-trade','#tab-assets','#tab-orders','#tab-history','prefers-reduced-motion']) {
     assert.ok(css.includes(token), 'new design token or page coverage exists: ' + token);
   }
-  assert.match(sw, /digiarz-shell-v70/);
+  assert.match(sw, /digiarz-shell-v71/);
   assert.match(sw, /digiarz-independent-ui\.css\?v=14/);
   assert.ok(css.includes('--da-blue:#78c8ff'), 'third theme uses a sky-blue accent');
   assert.ok(css.includes('#marketList>.coin{'), 'market rows are targeted through the actual marketList container');
   assert.ok(css.includes('#marketList>.coin>.price-stack'), 'price stack is anchored to the actual market row');
+  assert.ok(css.includes('grid-template-areas:"fav identity change price"!important'), 'market row keeps favorite, identity, centered change and price on one line');
+  assert.ok(css.includes('.category-icon svg{width:27px!important;height:27px!important'), 'market category icons use the enlarged visual size');
+  assert.ok(css.includes('#tab-markets .market-hero-kicker{display:none!important}'), 'redundant global-market label is hidden');
+  assert.ok(html.includes("const freshnessMarkup='';"), 'market rows omit the freshness/source-age label');
+  assert.ok(!html.includes('زمان منبع حداکثر ۲ دقیقه'), 'market rows do not display the two-minute source-age claim');
   
   assert.ok(css.includes('#authView.hidden{display:none!important}'), 'login view must be hidden after successful authentication');
   for (const id of ['authView','appView','loginBtn','signupBtn','tradePairBadge','priceChart','assetList','allOrdersList','historyBody']) {
@@ -437,7 +442,7 @@ test('independent DigiArz UI stylesheet is loaded last without replacing app beh
 
 test('unknown market symbols still receive a Persian-language label and the market stylesheet is cache-busted', () => {
   assert.ok(html.includes("||'دارایی دیجیتال'"));
-  assert.ok(html.includes('digiarz-independent-ui.css?v=14'));
+  assert.ok(html.includes('digiarz-independent-ui.css?v=15'));
 });
 
 
