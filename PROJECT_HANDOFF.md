@@ -664,3 +664,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Audit report update commit: \`521d0d8d768361b28e0d6391a341a63fd91cfbcc\`.
 - No Production changes, merge, rebase, deployment, or \`supabase db push\`.
 - Next: wait for/retrieve CI for corrected PR #37 head \`bdb0c8f...\`; if no run appears, diagnose Actions trigger/status retrieval without changing Production or synchronizing branches.
+
+
+## 2026-11-20 — PR #37 corrected CI is running
+- Rechecked corrected head \`bdb0c8f583a0596f1bf4b1a6982dba16b25d2df7\`: workflow run #1254, ID \`44810724098\`, is in progress.
+- Confirmed Node/browser test step passed, including new Stop-Limit source-contract test. PostgreSQL arithmetic, widening rehearsal, negative preflight, and lock-timeout preflight setup passed; lock-timeout atomicity step remained in progress at last check.
+- Combined rollout candidate rehearsal and the two-session Stop-Limit race occur later in the workflow and have not yet run in this attempt. Do not claim full CI success.
+- Audit report update commit: \`d9719b9846b806f55b84f2c32b50cfd06a194096\`.
+- No Production change, PR merge/rebase, deployment, or \`supabase db push\`.
+- Next: retrieve run #1254 again; only after all steps complete can PR #37 be described as passing.
