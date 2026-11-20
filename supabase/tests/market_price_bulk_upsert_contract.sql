@@ -475,6 +475,13 @@ BEGIN
         SET price = EXCLUDED.price, source = EXCLUDED.source;
       END IF;
     END LOOP;
+
+    IF NOT EXISTS (
+      SELECT 1 FROM parser_price_target
+      WHERE symbol = 'BTCUSDT' AND price = 65001.25 AND source = 'KuCoin'
+    ) THEN
+      RAISE EXCEPTION 'KuCoin sequential ticker processing did not preserve the later duplicate';
+    END IF;
   END IF;
 
   IF jsonb_typeof(gate_payload) = 'array' THEN
