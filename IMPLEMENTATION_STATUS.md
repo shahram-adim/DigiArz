@@ -1217,3 +1217,14 @@
 - [!] این آخرین اصلاح تست بعد از شروع run شمارهٔ `44706473268` انجام شده؛ بنابراین باید اجرای CI جدید روی commit جدید `7e71e0b0323630015ce250176087f31f20197786` بررسی شود.
 - [!] هیچ APK تازه‌ای هنوز تأیید نشده؛ ساخت Android APK workflow جداگانه است و باید artifact و `BUILD-INFO.txt` با commit جدید تطبیق داده شوند.
 - [!] PR #31 باید باز و Draft بماند؛ هیچ merge به `main` و هیچ تغییر در Supabase Production انجام نشود.
+
+
+### نتیجهٔ اجرای CI و وضعیت نهایی بررسی این نوبت — ۲۰ نوامبر ۲۰۲۶
+- [x] اجرای Exact Decimal با run ID برابر `44706473268` و commit `1a4c7d6e916c63bc8075eaa8f8fb1d9ce1b37529` با نتیجهٔ نهایی `success` بسته شد؛ تمام مراحل job از جمله تست‌های exact-decimal/browser، PostgreSQL، Market/Limit، Stop-Limit، TP-SL و تست‌های race دو-جلسه‌ای موفق بودند.
+- [x] این run هیچ artifactای نداشت و workflow آن Android APK نبود؛ بنابراین موفقیت این تست به‌معنای ساخته‌شدن APK نیست.
+- [x] پس از اجرای فوق، fixture تست Service Worker برای حضور cache جدید `digiarz-shell-v66` تکمیل شد. آخرین commit شاخه در زمان ثبت این یادداشت `970e13c956366d76a61781c6a4edee14a527fab3` است.
+- [x] وضعیت PR #31 در آخرین بررسی: open و Draft؛ شاخه `redesign/independent-ui-2026` برابر ۸۶ commit جلوتر و صفر commit عقب‌تر از `main` بود.
+- [!] اجرای CI جدیدی که commit نهایی `970e13c956366d76a61781c6a4edee14a527fab3` را پوشش دهد از ابزار فعلی قابل تأیید نیست؛ run موفق بالا روی commit قبلی است.
+- [!] workflow اندروید `.github/workflows/android-apk.yml` دارای `workflow_dispatch` است و job ساخت `assembleDebug` و artifact با نام `DigiArz-Android-debug-APK` را دارد؛ اجرای دستی آن از اتصال فعلی GitHub قابل آغاز نیست.
+- [ ] قدم بعد: اجرای دستی workflow اندروید روی شاخهٔ `redesign/independent-ui-2026`؛ سپس تطبیق `BUILD-INFO.txt` و commit artifact با head شاخه و بررسی SHA-256 APK، پیش از معرفی آن به‌عنوان نسخهٔ نهایی.
+- [!] هیچ merge به `main`، هیچ تغییر Supabase Production و هیچ تغییر در منطق مالی انجام نشد.
