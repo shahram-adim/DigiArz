@@ -141,3 +141,4 @@ Reduce the runtime and database write overhead of `public.refresh_market_prices(
 - These are behavioral fixtures based on repository migration semantics, not proof that the exact deployed Production function is byte-for-byte equivalent. The live function capture remains blocked by database instability. No Production SQL, migration, cron, market data, order, wallet, or balance was changed; one-minute cadence remains unchanged.
 - Next: inspect the PostgreSQL 17 workflow result for this commit and review any failure output before expanding provider parsing coverage.
 
+- Follow-up coverage: malformed JSON text is caught inside the response boundary, and missing provider keys produce no target price write. These remain isolated payload-contract tests, not a substitute for exact deployed-function equivalence.
