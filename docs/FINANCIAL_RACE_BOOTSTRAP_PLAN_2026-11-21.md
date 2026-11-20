@@ -101,3 +101,27 @@
 
 ## تصمیم فعلی
 در ۲۱ نوامبر هنوز migration پایهٔ authoritative برای schema مشترک و helperهای حساب/fee، و trigger inventory کامل در این مرور بازیابی نشده است. بنابراین هنوز کد harness جدیدی نوشته یا اجرا نمی‌شود. گام بعد فقط فاز A است: بازیابی migrationهای پایه از Git history و تعیین blockerهای دقیق. هیچ Production query/write، migration، RPC، trigger، cron، financial row، merge/rebase/deploy یا `supabase db push` در این مرحله انجام نشده است.
+
+
+## تکمیل بازیابی منبع — ۲۱ نوامبر ۲۰۲۶
+
+### شواهد دقیق Workflow و تست‌ها
+- Workflow `.github/workflows/exact-decimal-tests.yml` (blob `50936f9c8b59a44112ae59730092a91b0d2d17d8`) در خطوط 132–140 برای تست Market/Limit این ترتیب را اجرا می‌کند: `exact_decimal_stop_limit_setup.sql`، سپس `supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql`، سپس `exact_decimal_market_limit_entrypoints.sql`.
+- همان Workflow در خطوط 175–183 برای Stop-Limit و TP/SL نیز setup fixture و همان draft candidate را پیش از تست entrypoint اجرا می‌کند.
+- در خطوط 230–249 نیز تست‌های Stop-Limit و TP/SL lifecycle از draft candidate استفاده می‌کنند. بنابراین این تست‌ها تست‌های integration روی PostgreSQL موقت هستند، اما توابع اجرایی آن‌ها نسخهٔ candidate در drafts است، نه توابع Production migrationهای 13 نوامبر.
+- فایل‌های assertion واقعی entrypoint موجودند:
+  - `supabase/tests/exact_decimal_market_limit_entrypoints.sql` blob `3d324573b8304cf1820a5be4bc958a50130b1551`
+  - `supabase/tests/exact_decimal_conditional_entrypoints.sql` blob `d520cb9bdecc255b743f0750d14900984fc457f6`
+  این تست‌ها مقادیر دقیق 18 رقم اعشار، کارمزد/رزرو و رد ورودی‌های نامعتبر را assert می‌کنند؛ اما به‌تنهایی parity با Production function را ثابت نمی‌کنند.
+
+### بخشی از schema که از Migration منبع قابل بازیابی است
+- TP/SL migration `20261113162051_add_demo_take_profit_stop_loss_engine.sql` blob `3360c21a69b7fae83a7f2494428367d1b7658e81` در خطوط 5 به بعد DDL کامل `public.conditional_orders`، RLS، policy خواندن رکوردهای خود کاربر، grant SELECT و revoke مجوزهای نوشتن از anon/authenticated را دارد؛ پس این جدول نباید از روی fixture حدس زده شود.
+- همین migration بدنهٔ `place_conditional_exit_order`، `cancel_conditional_exit_order`، `process_conditional_orders` و `deactivate_my_account` را دارد و grant/revoke entrypointهای مربوطه را مشخص می‌کند.
+- Stop-Limit migration `20261113181827_add_stop_limit_order_engine.sql` blob `3f421c6380630d74b846cd66dc7b121786237c0f` ستون‌های افزوده‌شده به orders و conditional_orders را با ALTER مشخص می‌کند و بدنهٔ Stop-Limit/cancel/worker/deactivation و مجوزهای RPC را دارد.
+- Market/Limit migration `20261113161641_enforce_active_accounts_in_demo_trade_and_limit_engine.sql` blob `de09b1cd391790fcd9d94708a916cb41cd9ccc9f` در این فایل فقط سه function definition دارد: `execute_demo_trade`, `place_limit_order`, `process_limit_orders`; DDL پایهٔ جداول مالی در این migration نیست.
+
+### نتیجهٔ بازیابی
+- Setup fixture فعلی، جدول‌های پایهٔ `profiles`, `orders`, `demo_trading_pairs`, `market_prices`, `order_reservations`, `wallets`, `asset_balances`, `trades`, `transactions`, `conditional_orders` و helperهای `auth.uid()`, `current_account_is_active()`, `get_demo_trading_fee_rate()` را خودش تعریف می‌کند. این setup برای candidate integration مفید است، اما منبع authoritative Production schema/helper نیست.
+- جست‌وجوی مخزن در این مرحله migration پایه‌ای که DDL اصلی `profiles/orders/wallets/asset_balances/order_reservations` و helperهای account/fee را ایجاد کند بازیابی نکرد. این صرفاً محدودیت evidence در نسخهٔ مخزن/جست‌وجوی انجام‌شده است؛ نه اثبات عدم وجود اشیاء در دیتابیس.
+- پس گام بعدی باید از Git history/commit tree یا snapshot مستند schema به دنبال base DDL برود. از fixture برای تولید schema parity استفاده نکنیم.
+- هیچ تست جدید یا workflow تغییر داده نشد؛ هیچ Production query/write انجام نشد.
