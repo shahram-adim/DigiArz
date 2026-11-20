@@ -150,3 +150,9 @@ Reduce the runtime and database write overhead of `public.refresh_market_prices(
 - The existing bulk candidate fixture deliberately filters both NaN and Infinity. That is a stricter finite-positive policy, not exact legacy equivalence. Do not label it behavior-preserving until product requirements explicitly approve rejecting NaN, and the migration design documents the intended behavior change.
 - Added a separate PostgreSQL 17 characterization block using the actual `numeric(38,18)` target typmod to assert the legacy NaN predicate/storage behavior and Infinity overflow behavior. This test distinguishes legacy characterization from the proposed stricter candidate filter.
 - This is isolated fixture-only work. It does not query or change Production. The exact deployed function remains unverified, and repository migration source is not proof of the live body.
+
+
+### Provider parser characterization — 2026-11-20
+- Extended the disposable PostgreSQL 17 fixture to model the repository migration's KuCoin and Gate.io parsing paths: `symbol` hyphen removal, `currency_pair` underscore removal, uppercase USDT regex, enabled-pair membership, positive numeric value, empty-string-to-NULL behavior, KuCoin success code, and Gate.io top-level array gate.
+- Added a duplicate KuCoin ticker for the same symbol and asserted sequential processing leaves the later ticker's price/source, matching the current row-by-row loop's observable last-write behavior for an ordered JSON array. A subsequent Gate.io response then overwrites that symbol in the separate response loop; this fixture does not define response queue order or cross-response precedence.
+- This parser fixture is a direct model of repository migration predicates, not a call to external providers and not proof of exact deployed-function equivalence. CoinGecko duplicate mapping/order semantics remain unresolved; exact live-function capture remains a release gate.
