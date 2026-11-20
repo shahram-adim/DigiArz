@@ -414,4 +414,111 @@ BEGIN
 END
 $test$;
 
+
+
+-- Characterize the provider-specific symbol parsing and sequential upsert
+-- behavior from the repository migration source. This models the parser logic;
+-- it does not make an assertion about the exact deployed function body.
+CREATE TEMP TABLE parser_enabled_pairs (
+  pair_symbol text PRIMARY KEY,
+  is_enabled boolean NOT NULL
+) ON COMMIT DROP;
+INSERT INTO parser_enabled_pairs VALUES
+  ('BTCUSDT', true),
+  ('ETHUSDT', true),
+  ('SOLUSDT', true);
+
+CREATE TEMP TABLE parser_price_target (
+  symbol text PRIMARY KEY,
+  price numeric(38,18) NOT NULL,
+  source text NOT NULL
+) ON COMMIT DROP;
+
+DO $test$
+DECLARE
+  ticker jsonb;
+  kucoin_payload jsonb := '{
+    "code":"200000",
+    "data":{"ticker":[
+      {"symbol":"BTC-USDT","last":"65000"},
+      {"symbol":"BTC-USDT","last":"65001.25"},
+      {"symbol":"ETH-USDT","last":""},
+      {"symbol":"SOL-USDT","last":"0"},
+      {"symbol":"NOPE-USDT","last":"10"},
+      {"symbol":"btc-usdt","last":"1"}
+    ]}
+  }'::jsonb;
+  gate_payload jsonb := '[
+    {"currency_pair":"BTC_USDT","last":"65002.5"},
+    {"currency_pair":"SOL_USDT","last":"99.75"},
+    {"currency_pair":"NOPE_USDT","last":"10"}
+  ]'::jsonb;
+  parsed_symbol text;
+  parsed_price numeric;
+BEGIN
+  IF kucoin_payload ->> 'code' = '200000' THEN
+    FOR ticker IN
+      SELECT value FROM jsonb_array_elements(kucoin_payload -> 'data' -> 'ticker')
+    LOOP
+      parsed_symbol := replace(ticker ->> 'symbol', '-', '');
+      parsed_price := NULLIF(ticker ->> 'last', '')::numeric;
+
+      IF parsed_symbol ~ '^[A-Z0-9]{2,24}USDT
+         AND parsed_price > 0
+         AND EXISTS (
+           SELECT 1 FROM parser_enabled_pairs
+           WHERE is_enabled IS TRUE AND pair_symbol = parsed_symbol
+         ) THEN
+        INSERT INTO parser_price_target(symbol, price, source)
+        VALUES (parsed_symbol, parsed_price, 'KuCoin')
+        ON CONFLICT (symbol) DO UPDATE
+        SET price = EXCLUDED.price, source = EXCLUDED.source;
+      END IF;
+    END LOOP;
+  END IF;
+
+  IF jsonb_typeof(gate_payload) = 'array' THEN
+    FOR ticker IN SELECT value FROM jsonb_array_elements(gate_payload)
+    LOOP
+      parsed_symbol := replace(ticker ->> 'currency_pair', '_', '');
+      parsed_price := NULLIF(ticker ->> 'last', '')::numeric;
+
+      IF parsed_symbol ~ '^[A-Z0-9]{2,24}USDT
+         AND parsed_price > 0
+         AND EXISTS (
+           SELECT 1 FROM parser_enabled_pairs
+           WHERE is_enabled IS TRUE AND pair_symbol = parsed_symbol
+         ) THEN
+        INSERT INTO parser_price_target(symbol, price, source)
+        VALUES (parsed_symbol, parsed_price, 'Gate.io')
+        ON CONFLICT (symbol) DO UPDATE
+        SET price = EXCLUDED.price, source = EXCLUDED.source;
+      END IF;
+    END LOOP;
+  END IF;
+
+  IF (SELECT count(*) FROM parser_price_target) <> 2 THEN
+    RAISE EXCEPTION 'provider parser wrote an unexpected number of enabled symbols';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM parser_price_target
+    WHERE symbol = 'BTCUSDT' AND price = 65002.5 AND source = 'Gate.io'
+  ) THEN
+    RAISE EXCEPTION 'Gate.io parser did not normalize symbol or preserve later source update';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM parser_price_target
+    WHERE symbol = 'SOLUSDT' AND price = 99.75 AND source = 'Gate.io'
+  ) THEN
+    RAISE EXCEPTION 'Gate.io parser did not write the enabled SOL pair';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM parser_price_target
+    WHERE symbol NOT IN ('BTCUSDT', 'SOLUSDT')
+  ) THEN
+    RAISE EXCEPTION 'provider parser wrote a disabled, unknown, or malformed symbol';
+  END IF;
+END
+$test$;
+
 ROLLBACK;
