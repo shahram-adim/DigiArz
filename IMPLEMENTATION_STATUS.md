@@ -1389,3 +1389,8 @@
 - [!] نخستین CI روی کد Passkey، run `44728562985`، در تست مرورگر ۵۹ از ۶۰ موفق شد؛ شکست فقط از assertion قدیمی نسخهٔ CSS در تست Service Worker بود (هنوز v16 را انتظار داشت، درحالی‌که CSS به v17 ارتقا یافته بود).
 - [x] assertion regex تست به v17 اصلاح شد؛ commit اصلاحی: `f898851a4c56ab3e36c32ac9d8c506b76fb3737d`.
 - [ ] اجرای CI تازه روی commit اصلاحی و نتیجهٔ ساخت APK هنوز باید بررسی شود.
+
+- [x] بازبینی رویداد کلیک نشان داد دکمهٔ ورود Passkey هم‌زمان از bridge و listener مستقیم فراخوانی می‌شد؛ listener تکراری حذف شد تا WebAuthn ceremony فقط یک‌بار اجرا شود. آخرین commit کد: `106e510782b2608017edfc360868b8bd85e05b53`.
+- [x] Exact Decimal run `44728854536` روی commit کد، تست‌های Node/browser را با موفقیت گذراند؛ مراحل PostgreSQL ایزوله در زمان این ثبت هنوز در حال اجرا هستند و نتیجهٔ کامل workflow تأیید نشده است.
+- [x] Android debug APK workflow run `44728854393` روی همان commit، مرحلهٔ Gradle را با `BUILD SUCCESSFUL` تمام کرد و artifact `14625641065` را بارگذاری کرد. BUILD-INFO: SHA-256 برابر `1726f3d8cbf08a18d59c2f70e5076faa47ceecd8299379be971f94e20c567cbd`.
+- [!] این APK فقط build کد فعلی روی شاخهٔ Draft است؛ فعال‌سازی Auth Passkey سمت Supabase و پشتیبانی Native Credential Manager/Domain Association برای APK هنوز کامل نشده است. آن را نسخهٔ آمادهٔ ورود اثر انگشتی معرفی نکن.
