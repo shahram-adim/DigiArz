@@ -107,3 +107,10 @@ Race script واقعاً دو نشست مجزا را اجرا می‌کند: wor
 - Separately retrieved fresh PR #35 run #1233 (\`44807862279\`) on head \`baa5a6381c381965037feb6ebe02f42894d69ad4\`: PostgreSQL 17 job succeeded, all 22 named workflow steps succeeded, including combined rollout rehearsal and real two-session Stop-Limit child execution/cancellation race. This validates the candidate fixtures only, not the checked-in migration or Production.
 - PR #36 run #1177 (\`44787061755\`) remains successful for its distinct TP/SL bounded-retry fixture.
 - No Production changes, migration edits, merge/rebase/deploy, or \`supabase db push\`.
+
+
+### PR #37 first CI attempt and correction
+- First PR #37 workflow run #1251 (\`44810577661\`) failed at Node test step 5. The new test failed before reaching its lock assertions because the extractor stopped at the opening \`$function$\` delimiter instead of reading the function body. All later PostgreSQL steps were skipped; this was a test-harness defect, not a PostgreSQL race-test failure.
+- Corrected the extractor to capture the body between \`AS $function$\` and the closing \`$function$\` in commit \`bdb0c8f583a0596f1bf4b1a6982dba16b25d2df7\` (same Draft PR #37).
+- After the correction, the GitHub connector returned no workflow run or combined status for the new head at the time of recheck. Therefore the fix is not yet CI-validated.
+- Branch comparison now reports 3 commits ahead / 2 behind main because documentation-only handoff/audit commits landed after PR creation. Do not rebase or update branch automatically; PR remains Draft.
