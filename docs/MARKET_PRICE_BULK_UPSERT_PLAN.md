@@ -207,3 +207,10 @@ Reduce the runtime and database write overhead of `public.refresh_market_prices(
 - Design consequence: any set-based rewrite must preserve the CoinGecko-source contract for curated listings/activation and cannot simply rank KuCoin or Gate.io above CoinGecko globally. A provider policy must distinguish symbol universe / eligibility semantics, or keep the existing source-specific behavior explicit. The current queue order is unspecified, so no current deterministic global winner exists to preserve.
 - This is a static repository-source review only. No live RPC/database reads or writes were performed. The PR remains a Draft; no provider precedence was selected.
 - Latest PR head `73b50c9e1f2c1665543607f3af831356e6aae7c1` has both current-head CI workflows successful: PostgreSQL 17 contract run `44805784202`; exact-decimal workflow run `44805784195`. These validate the isolated fixture and broader regression suite, not Production behavior or the unresolved policy.
+
+
+### Regression coverage for downstream source contracts (2026-11-20)
+- Extended `supabase/tests/market_price_bulk_upsert_contract.sql` in commit `a747734bb67da5ef5384cf5509608a5aca1da7e7` (fixture blob `dd9a1a5ca456b89d09ee54c26dc8dcc499bff7e0`).
+- New isolated PostgreSQL assertions characterize two distinct consumer rules from checked-in source: curated listing/pair activation requires a positive CoinGecko price no older than 2 minutes; the reviewed trading/conditional consumers require a positive price no older than 1 minute but do not filter by provider source.
+- The fixture includes fresh CoinGecko, KuCoin, Gate.io, stale CoinGecko, and zero-price rows. It does not rank providers, change the writer, or claim a global precedence policy.
+- CI for this fixture commit must complete successfully before considering the test validated.
