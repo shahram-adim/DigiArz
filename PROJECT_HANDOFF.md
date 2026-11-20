@@ -465,3 +465,15 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - CI for fixture commit `a747734bb67da5ef5384cf5509608a5aca1da7e7`: PR contract run `44806172205`, push contract run `44806163615`, exact-decimal PR run `44806172263` were in progress at handoff update. Documentation head `1c81d1e3c2b799faf998bbffcbe46e7e6b224c0c` also had contract push run `44806194362` in progress and exact-decimal PR run `44806202179` queued. No claim of success until all relevant jobs finish.
 - PR #35 remains Draft/open/unmerged; latest head `1c81d1e3c2b799faf998bbffcbe46e7e6b224c0c`; three changed files only. No Production SQL/query, migration, cron, merge, rebase or deploy. One-minute cadence unchanged; `supabase db push` remains prohibited.
 - Next: inspect run IDs above, diagnose any failure from job logs, and only then proceed with further source/provider equivalence work. Do not implement a bulk writer or infer source precedence while duplicate mapping and queue ordering remain unresolved.
+
+
+
+## 2026-11-20 — Removed unspecified ticker/provider winner assumptions from PR #35 fixture
+- Re-fetched live main handoff before update; prior blob SHA `ac10ee14e0030140ab69b0451f8bf8875624d86c`.
+- Re-fetched PR #35 and confirmed it remains open, Draft, unmerged; current head before this test-only correction was `1c81d1e3c2b799faf998bbffcbe46e7e6b224c0c`.
+- Static review of `supabase/tests/market_price_bulk_upsert_contract.sql` found the parser characterization asserted that the later duplicate KuCoin ticker must win, and then asserted Gate.io must overwrite KuCoin. The repository migration's provider ticker loops and queued-response cursor have no `ORDER BY`; those winner assertions were stronger than the source contract and contradicted the explicit unresolved-precedence analysis.
+- Corrected only the isolated fixture on PR #35: removed the duplicate KuCoin BTC ticker assumption, asserted the single accepted KuCoin ticker's normalization, and truncated the fixture target before the independent Gate.io parser test so it no longer encodes cross-provider precedence. No production SQL or behavior was changed.
+- Test-only commit: `2f69eda1578d005e0887d3ef9a75a0dd42a943e2`; changed fixture blob SHA `779210a402782169cf984a24c443b25e067de88d`.
+- CI on corrected head: PostgreSQL 17 contract push run `44806791079` (in progress at handoff update); PR contract run `44806801853` (in progress); exact-decimal PR run `44806801857` (in progress). Do not claim corrected fixture green until all complete.
+- PR #35 remains Draft and unmerged. GitHub reports `mergeable=true` at this check, which is metadata only. No Supabase SQL, Production query, migration, cron, index, market data, order, trade, wallet, or balance was changed. `supabase db push` remains prohibited; one-minute cadence unchanged.
+- Next: poll the three CI runs above, inspect any failures, and retain the unresolved duplicate-ID/provider precedence gate. Do not implement a bulk writer or choose a winner without verified invariant or explicit product approval.
