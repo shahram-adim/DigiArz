@@ -7,6 +7,7 @@ on:
     branches:
       - main
       - redesign/independent-ui-2026
+      - spike/capacitor8-passkey
     paths:
       - "index.html"
       - "manifest.webmanifest"
@@ -35,7 +36,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -87,6 +88,7 @@ jobs:
           retention-days: 14
 
       - name: Publish direct APK download
+        if: github.ref != 'refs/heads/spike/capacitor8-passkey'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: android-debug-${{ github.run_number }}
