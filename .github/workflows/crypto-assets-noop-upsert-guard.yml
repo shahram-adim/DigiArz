@@ -1,0 +1,36 @@
+name: Crypto assets no-op upsert guard tests
+
+on:
+  push:
+    branches:
+      - perf/crypto-assets-noop-upserts
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  postgres-17-fixture:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: digiarz_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d digiarz_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run disposable PostgreSQL 17 regression fixture
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h 127.0.0.1 -U postgres -d digiarz_test -v ON_ERROR_STOP=1 -f supabase/tests/crypto_assets_noop_upsert_guard.sql
