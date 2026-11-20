@@ -1406,3 +1406,16 @@
 - [!] ورود Passkey در PWA و Android هنوز فعال‌شده/تأییدشدهٔ عملیاتی نیست؛ Supabase Auth Passkeys و دامنه RP تنظیم نشده‌اند و APK هنوز bridge بومی Credential Manager ندارد.
 - [ ] گام بعد: ابتدا دامنه canonical و امکان میزبانی فایل `/.well-known/assetlinks.json` در ریشه همان دامنه باید قطعی شود؛ سپس یک spike مهاجرت Capacitor 8 روی شاخه مستقل و جداگانه ساخته و CI/Android build آن ارزیابی شود. تا پیش از آن، افزونه ناسازگار یا منسوخ اضافه نشود.
 - [x] هیچ تغییری در main، Supabase Production، schema، داده‌های مالی، سفارش‌ها یا معاملات انجام نشد.
+
+
+### آغاز آزمایش ایزوله Capacitor 8 برای Passkey — ۲۰ نوامبر ۲۰۲۶
+- [x] شاخه مستقل و جداگانه `spike/capacitor8-passkey` از آخرین head شاخه بازطراحی مستقل (08d8dc4c19c044d3afccfada865193669ae2a956) ساخته شد؛ PR #31 و main دست‌نخورده ماندند.
+- [x] وابستگی‌های spike به Capacitor 8.6.2 ارتقا یافتند: `@capacitor/core`، `@capacitor/android` و `@capacitor/cli`.
+- [x] افزونهٔ Native Passkey سازگار و نگهداری‌شدهٔ `@capgo/capacitor-passkey@8.5.10` فقط به همین شاخه اضافه شد. این افزونه shim استاندارد WebAuthn را به Android Credential Manager متصل می‌کند.
+- [x] پیکربندی افزونه در `capacitor.config.json` ثبت شد، اما `autoShim:false` عمداً باقی ماند؛ تا تعیین دامنهٔ RP و فایل Digital Asset Links، ورود Native فعال نمی‌شود و هیچ دامنه/اثر انگشت حدس زده نشده است.
+- [x] هر دو workflow آزمایش روی این شاخه فعال شدند. Node به نسخه 22 ارتقا یافت، چون Capacitor 8 به Node 22 یا بالاتر نیاز دارد.
+- [x] workflow ساخت APK برای این شاخه فقط artifact آزمایشی تولید می‌کند و مرحله انتشار GitHub Release را اجرا نمی‌کند.
+- [x] سند `docs/CAPACITOR8_PASSKEY_SPIKE.md` با نسخه‌های دقیق، دلایل ارتقا، محدودیت‌ها و معیارهای پذیرش ثبت شد.
+- [!] هنوز نتیجه CI و Android Gradle build این شاخه دریافت نشده است؛ تا مشاهده نتیجه نباید سازگاری را تأییدشده اعلام کرد.
+- [ ] گام بعد: بررسی runهای Exact Decimal و Android APK روی head فعلی؛ در صورت خطا، فقط همین شاخه آزمایشی اصلاح شود.
+- [!] هیچ تنظیم Supabase Auth، migration، schema، RPC، موجودی، سفارش یا معاملهٔ Production تغییر نکرده است.
