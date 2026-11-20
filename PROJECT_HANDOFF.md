@@ -753,3 +753,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Updated financial audit: commit `d3180ab2c588a786cfac5e2d6ea9018b6895ff3c`, blob `1204e6dabca3c59ca76e73a0cd008338f83bc791`.
 - No test/workflow/migration/PR branch changes, no Production query/write, no Supabase mutation, no merge/rebase/deploy, no `supabase db push`.
 - Next: continue source recovery through historical commits/tree and existing schema snapshots, then build only if schema/helper/trigger parity is provable.
+
+
+## 2026-11-21 — encrypted database backup located; source recovery boundary
+- Located and downloaded still-valid GitHub Actions artifact from run `43848835281`: `DigiArz-database-backup`, artifact ID `14217201032`, GitHub-reported archive SHA-256 `555c1f7ebcad947e573dad659084bbcf94dc88d55fc0bc1a3b7de9608e4e5`; expiry `2026-11-23T10:26:46Z`.
+- ZIP inspection shows `README-backup.txt` plus `digiarz-database.dump.enc`. README describes PostgreSQL 17.12 custom dump of public/private schemas, encrypted AES-256-CBC + PBKDF2; includes private queue table structures and selected private admin/audit/control data. It reports archive integrity and pg_restore list checks but not a live restore drill.
+- Decryption key is not available in this working context. No decryption/restore was attempted; no key was requested, exposed, or written to repository/logs. Do not ask the user to paste secrets into chat.
+- Prior archive review found no `supabase_migrations.schema_migrations` ledger in the artifact, so even a restored schema snapshot would not establish applied migration history.
+- Updated bootstrap plan: commit `a883effeb2ed3e425e9576ffa2907b7fa4a4f104`, blob `ecf0cee9a97d55bda008ca4dd4e913b42c22c773`.
+- Updated financial audit: commit `34a7bf7a0aa581975d7e24a1153e2096b19b95e8`, blob `4a65139a09bdfe95137a554124e2cef071c1bd0f`.
+- No workflow/secrets changes, Supabase/Production access, schema/RPC/trigger/cron/data mutation, PR branch edit, merge/rebase/deploy, or `supabase db push`.
+- Next: use a secure already-authorized environment that can consume the encryption secret without logging it, or request an approved schema-only export. Do not expose the key in chat/repository.
