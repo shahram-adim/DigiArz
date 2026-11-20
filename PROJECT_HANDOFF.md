@@ -485,3 +485,19 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - New head checks observed in progress: PostgreSQL contract PR check `136534577946` / run `44807302190`; PostgreSQL contract push check `136534542201` / run `44807291120`; exact-decimal check `136534578992` / run `44807302227`. Poll before claiming success.
 - PR #35 still Draft, open, unmerged; current head `56c4ea64525bbb35265f673ab4d97d92a0cc3ad0`. GitHub mergeable metadata true at this observation; do not merge.
 - No Production changes. Next: poll the three checks, inspect failure logs if needed, then resume migration/source reconciliation. No DB SQL against unstable Supabase, no migration replay or `supabase db push`.
+
+
+## 2026-11-20 — PR #35 CI and source-level market-price audit
+- Re-fetched PR #35 live head: `56c4ea64525bbb35265f673ab4d97d92a0cc3ad0`; PR remains open, Draft, unmerged. No production actions.
+- Corrected fixture PostgreSQL runs both passed: PR run `44807302190` and push run `44807291120`.
+- Exact-decimal run `44807302227` remains in progress at this check. All completed steps passed, including browser/exact-decimal, PostgreSQL arithmetic, widening rehearsal and rollback/preflight checks, market/limit/stop-limit/TP-SL entrypoint tests, and limit cancellation lifecycle. Three two-session race/lifecycle steps remain running or pending; do not call this run green yet.
+- Re-read source migrations on main:
+  - `20261116203709_limit_primary_coingecko_batch_to_515_ids.sql` confirms the CoinGecko mapping UNION is over (symbol, coingecko_id), so distinct IDs can map to the same market_prices.symbol. Its mapping cursor has no ORDER BY; response queue cursor also has no ORDER BY.
+  - CoinGecko, KuCoin, and Gate.io each write market_prices by symbol with ON CONFLICT DO UPDATE. Therefore both duplicate target symbols within a provider response and cross-provider winner order remain undefined; no safe bulk conflict winner can be inferred.
+  - Response processing is wrapped in EXCEPTION WHEN OTHERS, then queue row is deleted after the block. A response-level SQL error can therefore be converted to a warning and the queued response removed; this is an additional reliability concern to analyze in an isolated fixture before proposing any change.
+  - `get_admin_market_listings()`, `admin_review_market_listings()`, and `admin_enable_market_pair()` explicitly require positive fresh CoinGecko source (2-minute window) for curated market visibility/activation. KuCoin/Gate.io overwrites can make those consumers ineligible.
+  - Trading/conditional price consumers use positive freshness checks but no provider source predicate, per earlier source audit. A single global provider precedence policy would not preserve both contracts.
+  - Existing ticker collision trigger protects curated-listing insert/update paths and checks current curated assets plus demo pairs; it does not prove uniqueness across all crypto_assets symbol mutation paths.
+- GitHub code search for `refresh_crypto_assets` found only a reference in the recovery migration and status documentation; full function body is not present in the checked-in migration source located. Do not claim complete crypto_assets symbol-write-path coverage.
+- No Supabase SQL, migrations, cron, indexes, financial data, orders, trades, wallets, or balances were changed. `supabase db push` remains prohibited.
+- Next: poll exact-decimal run `44807302227`; then investigate response deletion-on-error using isolated PostgreSQL fixtures and continue recovering missing applied migration/function source from authoritative backup/source artifacts. Keep PR #35 Draft and do not implement provider precedence without verified invariant or explicit product decision.
