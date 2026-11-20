@@ -477,3 +477,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - CI on corrected head: PostgreSQL 17 contract push run `44806791079` (in progress at handoff update); PR contract run `44806801853` (in progress); exact-decimal PR run `44806801857` (in progress). Do not claim corrected fixture green until all complete.
 - PR #35 remains Draft and unmerged. GitHub reports `mergeable=true` at this check, which is metadata only. No Supabase SQL, Production query, migration, cron, index, market data, order, trade, wallet, or balance was changed. `supabase db push` remains prohibited; one-minute cadence unchanged.
 - Next: poll the three CI runs above, inspect any failures, and retain the unresolved duplicate-ID/provider precedence gate. Do not implement a bulk writer or choose a winner without verified invariant or explicit product approval.
+
+
+## 2026-11-20 — PR #35 fixture correction follow-up
+- CI for test-only commit `2f69eda1578d005e0887d3ef9a75a0dd42a943e2`: PostgreSQL 17 contract runs `44806791079` and `44806801853` failed at fixture line 293 because the previous edit mistakenly truncated nonexistent relation `parser_price_target`. Exact error confirmed in both logs; not a production/database failure. Exact-decimal run `44806801857` passed, including PostgreSQL arithmetic, schema widening rehearsal/rollback checks, market/limit/stop-limit/TP-SL integration, and two-session race tests.
+- Corrected the fixture relation to `gated_response_target` on PR #35 branch. New commit `56c4ea64525bbb35265f673ab4d97d92a0cc3ad0`, blob SHA `d3048961f182fc8bbe3c2b27f1cc46197fd71194`.
+- New head checks observed in progress: PostgreSQL contract PR check `136534577946` / run `44807302190`; PostgreSQL contract push check `136534542201` / run `44807291120`; exact-decimal check `136534578992` / run `44807302227`. Poll before claiming success.
+- PR #35 still Draft, open, unmerged; current head `56c4ea64525bbb35265f673ab4d97d92a0cc3ad0`. GitHub mergeable metadata true at this observation; do not merge.
+- No Production changes. Next: poll the three checks, inspect failure logs if needed, then resume migration/source reconciliation. No DB SQL against unstable Supabase, no migration replay or `supabase db push`.
