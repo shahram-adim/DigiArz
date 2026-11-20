@@ -7,10 +7,11 @@
     "build:web": "mkdir -p www && cp index.html manifest.webmanifest sw.js icon.svg icon-192.svg icon-512.svg www/ && rm -rf www/src && cp -R src www/src"
   },
   "dependencies": {
-    "@capacitor/android": "6.2.1",
-    "@capacitor/core": "6.2.1"
+    "@capacitor/android": "8.6.2",
+    "@capacitor/core": "8.6.2",
+    "@capgo/capacitor-passkey": "8.5.10"
   },
   "devDependencies": {
-    "@capacitor/cli": "6.2.1"
+    "@capacitor/cli": "8.6.2"
   }
 }
