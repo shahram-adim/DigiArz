@@ -1394,3 +1394,15 @@
 - [x] Exact Decimal run `44728854536` روی commit کد، تست‌های Node/browser را با موفقیت گذراند؛ مراحل PostgreSQL ایزوله در زمان این ثبت هنوز در حال اجرا هستند و نتیجهٔ کامل workflow تأیید نشده است.
 - [x] Android debug APK workflow run `44728854393` روی همان commit، مرحلهٔ Gradle را با `BUILD SUCCESSFUL` تمام کرد و artifact `14625641065` را بارگذاری کرد. BUILD-INFO: SHA-256 برابر `1726f3d8cbf08a18d59c2f70e5076faa47ceecd8299379be971f94e20c567cbd`.
 - [!] این APK فقط build کد فعلی روی شاخهٔ Draft است؛ فعال‌سازی Auth Passkey سمت Supabase و پشتیبانی Native Credential Manager/Domain Association برای APK هنوز کامل نشده است. آن را نسخهٔ آمادهٔ ورود اثر انگشتی معرفی نکن.
+
+
+### بررسی سازگاری Passkey اندروید و ثبت گام بعد — ۲۰ نوامبر ۲۰۲۶
+- [x] وضعیت زنده PR #31 بررسی شد؛ همچنان Open و Draft است، مقصد main است و ادغام نشده. آخرین checkpoint ثبت‌شده روی شاخه مستقل: 0ff66a92f6a32de69a3948d48d9048703e3c4045.
+- [x] Exact Decimal workflow run 44729095438 روی commit checkpoint با نتیجه success کامل شد.
+- [x] Android APK workflow run 44728854393 با نتیجه success و Build 132 روی commit کد Passkey 106e510782b2608017edfc360868b8bd85e05b53 کامل شد؛ این build debug است و موفقیت build به‌تنهایی اثبات‌کنندهٔ کارکرد بیومتریک نیست.
+- [x] workflow اندروید بررسی شد: پروژه native در CI با `npx cap add android` ساخته و سپس با `npx cap sync android` همگام می‌شود؛ بنابراین نصب افزونه باید از package dependency و Capacitor config قابل بازتولید باشد و نیازی به تغییر فایل Android تولیدشده در مخزن نیست.
+- [x] سازگاری رسمی افزونه‌ها بررسی شد: Capgo `@capgo/capacitor-passkey` نسخه 6 برای Capacitor 6 دیگر نگهداری نمی‌شود؛ نسخه 7 برای Capacitor 7 فقط on-demand و نسخه 8 برای Capacitor 8 فعالانه نگهداری می‌شود. افزونه Capawesome نیز اکنون Capacitor 8+ را پشتیبانی می‌کند. افزودن نسخه قدیمی و بدون نگهداری برای احراز هویت امن پذیرفته نیست.
+- [x] سند فنی `docs/PASSKEY_ANDROID_READINESS.md` ایجاد شد و پیش‌نیازهای دامنه RP، فایل Digital Asset Links در ریشه دامنه، اثرانگشت واقعی گواهی امضا، پیکربندی Supabase Auth و آزمون روی دستگاه واقعی را ثبت کرد.
+- [!] ورود Passkey در PWA و Android هنوز فعال‌شده/تأییدشدهٔ عملیاتی نیست؛ Supabase Auth Passkeys و دامنه RP تنظیم نشده‌اند و APK هنوز bridge بومی Credential Manager ندارد.
+- [ ] گام بعد: ابتدا دامنه canonical و امکان میزبانی فایل `/.well-known/assetlinks.json` در ریشه همان دامنه باید قطعی شود؛ سپس یک spike مهاجرت Capacitor 8 روی شاخه مستقل و جداگانه ساخته و CI/Android build آن ارزیابی شود. تا پیش از آن، افزونه ناسازگار یا منسوخ اضافه نشود.
+- [x] هیچ تغییری در main، Supabase Production، schema، داده‌های مالی، سفارش‌ها یا معاملات انجام نشد.
