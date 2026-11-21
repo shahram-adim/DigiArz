@@ -76,3 +76,11 @@ No Production/Supabase changes, no main merge, no release publication, no change
 2. Verify plugin 8.9.3 exact API and generated Android manifest/Keystore access-control behavior.
 3. Implement a native-only async Auth storage adapter with explicit unlock lifecycle and in-memory session cache; do not write tokens to localStorage/Preferences.
 4. Add automated tests for refresh-token rotation, app process death, background/resume, recovery callbacks, logout, cancellation, biometric lockout, and enrollment changes before any merge or device-testing claim.
+
+
+## 2026-11-21 — APK-only Supabase SDK pinning experiment
+- Added `scripts/prepare-android-web.sh` and `npm run build:android` on the isolated branch. The script downloads the exact UMD asset for `@supabase/supabase-js@2.119.2` from jsDelivr and unpkg, requires byte-for-byte equality, copies it to `www/vendor/supabase-2.119.2.js`, and rewrites only the generated `www/index.html` loader. The tracked source `index.html` and web/PWA loader are not modified.
+- Android workflow now invokes `npm run build:android`; it does not change the deployed Production `app-assets` function.
+- The two-source equality check is a consistency check, not a cryptographic publisher signature or committed SHA-256 pin. The workflow logs the resulting bundle SHA-256. A committed lockfile / verified npm provenance and stable bundle digest remain required before production adoption.
+- CI triggered on commit `205430991573d73e584f208b70f14529b19f626e`: Android run `44877219663` is pending at the last check; exact-decimal run `44877219671` is queued/in progress. No success is claimed for these new runs yet.
+- No Auth adapter, runtime biometric prompt, local session changes, Production changes, merge, or release.
