@@ -48,3 +48,31 @@ Status: investigation checkpoint; no runtime biometric behavior enabled.
 
 ## Explicit non-actions
 No Production/Supabase changes, no main merge, no release publication, no change to the existing web login, and no claim that fingerprint unlock is implemented. This file records the safe implementation boundary only.
+
+
+## 2026-11-21 — CI build passed; Auth storage review findings
+
+### CI evidence
+- Android workflow run [44876814094](https://github.com/shahram-adim/DigiArz/actions/runs/44876814094) completed successfully. All steps passed, including clean Capacitor install, web asset preparation, generated Android project, Capacitor sync, Gradle debug APK build, provenance recording, and artifact upload.
+- Artifact: `DigiArz-Android-debug-APK`, artifact ID `14696063423`, size 6,100,929 bytes, SHA-256 `c2a4006bb9ef5205322585f92ff64b3f0032c687791ac21c27d48bb66d039d05`, expires 2026-12-05T06:44:18Z.
+- Exact-decimal regression workflow run [44876814102](https://github.com/shahram-adim/DigiArz/actions/runs/44876814102) completed successfully; all 21 substantive test steps passed, including DDL rollback/lock-timeout checks and real two-session order/cancel race tests.
+- The APK workflow artifact records head SHA `30a73ec504945d36ae7d186924c74804b99db33a`; PR #41 currently points to `d628796fb27c32d02ad1ef0e7d8bcb2c73ee6a7e`. The later commit only updates the package description; nevertheless, artifact provenance must not be described as a build of the newer SHA.
+
+### Auth bootstrap and dependency findings
+- The current client initializer is at `index.html:2263`; it calls `createClient(..., {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})` and does not supply custom storage.
+- Auth boot sequence registers `onAuthStateChange` first, then awaits `getSession()` (around lines 3595–3630). It explicitly handles `PASSWORD_RECOVERY`, `SIGNED_OUT`, `SIGNED_IN`, and recovery query/hash parameters. Preserve this ordering and all recovery behavior when introducing native storage.
+- Existing login/signup, password reset/update, logout, account reactivation, and dashboard entrypoints must remain functional; do not replace the auth flow wholesale.
+- The active Production Edge Function `app-assets` is version 3 and currently serves Supabase JS from unpinned URLs `@supabase/supabase-js@2` on jsDelivr with an unpinned unpkg fallback. This means the exact Auth SDK version can change independently of Git commits. **Do not modify/deploy this Production function as part of the spike.** Before implementing a custom Auth storage adapter, pin and vendor/bundle a reviewed SDK version within this Android-only branch/build path so APK tests are reproducible and web behavior remains unchanged.
+- Supabase current docs confirm custom Auth storage may implement async `getItem`, `setItem`, and `removeItem`; refresh tokens are single-use with a reuse interval, so rotation writes and concurrency must be handled carefully. See [Supabase sessions](https://supabase.com/docs/guides/auth/sessions) and [custom storage example](https://supabase.com/docs/guides/auth/sessions#using-http-only-cookies-to-store-access-and-refresh-tokens).
+- Supabase JS changelog shows current release 2.119.0 (2026-11-04); no Auth-specific breaking change relevant to custom storage was identified in the latest 2026 changelog review. Pinning remains mandatory rather than relying on a floating major tag.
+
+### Current implementation status
+- Capacitor 8.6.2 + native biometric plugin 8.9.3 clean Android build is validated by CI.
+- The generated debug APK is a build artifact only. No biometric prompt, biometric-protected storage adapter, manifest inspection, or real-device verification has been completed.
+- No Supabase Production function, Auth settings, database, secrets, main branch, merge, or release was changed.
+
+### Next safe implementation step
+1. Add a pinned Supabase JS dependency and reproducible lockfile to this isolated branch; serve the pinned UMD bundle locally for this APK build without changing the browser/PWA path on main or the deployed `app-assets` function.
+2. Verify plugin 8.9.3 exact API and generated Android manifest/Keystore access-control behavior.
+3. Implement a native-only async Auth storage adapter with explicit unlock lifecycle and in-memory session cache; do not write tokens to localStorage/Preferences.
+4. Add automated tests for refresh-token rotation, app process death, background/resume, recovery callbacks, logout, cancellation, biometric lockout, and enrollment changes before any merge or device-testing claim.
