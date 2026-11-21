@@ -1100,3 +1100,17 @@
 - Run #1446 (ID `44895500537`) نیز روی نسخهٔ قبل از اصلاح assertion قدیمی fail شده بود.
 - تست palette با assertionهای رشته‌ای مستقیم بازنویسی شد تا از regex escape شکننده جلوگیری شود؛ کنترل‌های Auth، ثبت‌نام email/password-only و حفظ چیدمان موبایل همچنان بررسی می‌شوند.
 - Commit اصلاح جدید: `2f67a54b0cb7416aaa01f13e959248b59b701ac7`. اجرای CI جدید باید روی همین commit یا descendant آن بررسی شود؛ نتیجه هنوز نامشخص است.
+
+
+### جلوگیری از انتشار خودکار APK — ۲۱ نوامبر ۲۰۲۶
+- بررسی workflow زندهٔ `.github/workflows/android-apk.yml` نشان داد push به `index.html` علاوه بر artifact، مرحلهٔ `softprops/action-gh-release` را نیز اجرا می‌کند؛ بنابراین commit رابط کاربری `87c171a77958b6c1ba2605813525ea61d15a20a4` باعث ساخت و انتشار خودکار GitHub Release شد.
+- شواهد GitHub: Android workflow run `44895476010` / Build 187 با نتیجهٔ success؛ artifact ID `14704305123`، digest `sha256:811b75a73d90bb0f2cfb402ea38c3594853a6c325bfb6a5886caf072e019444e`؛ Release `android-debug-187` با asset `app-debug.apk`، SHA-256 `083706dec8319975f9ed6863e1944e0ed235ec5c5f45397a637d57f637979585`. این یک debug/test APK است و امضای production ندارد؛ نصب فیزیکی روی گوشی تأیید نشده.
+- این انتشار خودکار با مرز «عدم انتشار نسخه بدون تأیید صریح» سازگار نبود. هیچ حذف/ویرایش Release یا asset انجام نشد تا بدون اجازه عملیات برگشت‌ناپذیر صورت نگیرد.
+- برای جلوگیری از تکرار، workflow به‌صورت محافظتی اصلاح شد: مجوز contents به read محدود و مرحلهٔ GitHub Release حذف شد؛ buildهای بعدی فقط artifact ۱۴روزه تولید می‌کنند و tag/release عمومی نمی‌سازند. workflow هنوز روی تغییرات main می‌تواند APK artifact بسازد.
+- Commit محافظتی workflow: `e227a4235b92a1e87a99cb62b648faa319b98620`. این تغییر به معنی حذف Release قبلی نیست؛ Release قبلی دست‌نخورده باقی مانده است.
+- CI کامل اصلاحات Auth در Run #1449 و #1450 در زمان این ثبت هنوز در حال اجرا بود؛ test step در هر دو success شده بود، اما نتیجهٔ تمام مراحل PostgreSQL/Stop-Limit هنوز قطعی نبود.
+
+### گام بعد
+1. تأیید نهایی CI کامل Run #1450 و artifact-only Android build ناشی از تغییر workflow.
+2. آزمایش APK روی گوشی Android؛ فقط پس از نصب واقعی می‌توان سازگاری device را تأیید کرد.
+3. از این پس هیچ Release/tag جدیدی بدون اجازهٔ جداگانه ساخته نشود؛ ساخت artifact برای QA به‌تنهایی کافی است.
