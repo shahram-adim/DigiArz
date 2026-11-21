@@ -1102,3 +1102,4 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Validation: CI has not yet run on this follow-up branch; no APK has been built for this branch and no physical-device visual QA has been performed. Do not claim the changes are validated or present in the installed APK.
 - No merge, release, deployment, Supabase/database, authentication, or financial trading logic changes. Keep isolated for review.
 - Regression test source has been corrected and included in Draft PR #49; it has not yet run in CI. PR #49 is intentionally based on PR #48's candidate branch to avoid duplicating its full change set. Next: merge/review PR #48 first; then retarget PR #49 to `main`, inspect CI for its exact head, and build a matching review APK only if CI passes.
+- Added a white override for neutral informational notices as well; warning/error/success notices keep their meaningful status colors.
