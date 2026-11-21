@@ -109,3 +109,22 @@ This report is an inventory and safety analysis only. It changes no database obj
 - [x] آمار اجرای ۲۴ ساعت اخیر نشان می‌دهد job 14 در مجموع 563 موفق و 136 ناموفق داشته (106 startup timeout و 30 statement timeout). این آمار شامل اجرای قبل از تغییر cadence نیز هست؛ بنابراین نباید از آن برای استنتاج cadence فعلی استفاده کرد. در شش ساعت اخیر 36 اجرا ثبت شده که با cadence فعلی 6 بار در ساعت سازگار است.
 - [!] هیچ‌یک از scheduleها تغییر داده نشدند و تاریخچهٔ migration نیز دست‌کاری نشد. تا بازیابی منبع canonical و تعیین cadence مورد انتظار، `supabase db push` همچنان ممنوع است.
 - [ ] اقدام بعدی: منبع معتبر تغییر job 14 به `1-59/10` را از deployment/audit record بازیابی کن؛ سپس نسخهٔ local و remote را با مقایسهٔ کامل SQL reconciliate و در PostgreSQL 17 دورریختنی replay کن. هیچ اصلاح Production بدون تأیید صریح کاربر انجام نشود.
+
+## ممیزی تازه ۲۲ نوامبر ۲۰۲۶ — منبع Migrationها و بازیابی worker
+- [x] Supabase migration ledger دوباره خوانده شد: ۵۵ Migration اعمال‌شده؛ آخرین نسخه `20261121050216` با نام `temporarily_throttle_exchange_asset_processors_20261121`.
+- [x] در درخت واقعی شاخه `main` تعداد ۴۰ فایل SQL در `supabase/migrations/` وجود دارد. سه Migration جدید ledger در این شاخه فایل SQL متناظر ندارند:
+  - `20261121045434` — `digiarz_backpressure_and_exchange_sync_bloat_guards`
+  - `20261121045531` — `snapshot_pg_net_unlogged_queue_before_recovery`
+  - `20261121050216` — `temporarily_throttle_exchange_asset_processors_20261121`
+- [!] بنابراین شمار منابع اعمال‌شدهٔ فاقد SQL محلی نسبت به inventory قبلی از ۱۴ به ۱۷ افزایش یافته است (با فرض حفظ همان ۱۴ مورد قبلی). جست‌وجوی commit با نام دقیق این سه Migration نتیجه‌ای نداد؛ این بررسی نبود فایل در `main` را ثابت می‌کند، نه نبود هر نسخهٔ معتبر در تمام backupها یا شاخه‌های دیگر. محتوای Migrationها از روی نام حدس زده نشده است.
+- [x] زمان‌بندی زندهٔ `cron.job` در snapshot ساعت ۲۲:۳۲ UTC دوباره تأیید شد:
+  - job 13: `*/10 * * * *` — `request_iran_exchange_asset_sync()`
+  - job 14: `1,31 * * * *` — `process_iran_exchange_asset_sync()` (هر ۳۰ دقیقه)
+  - job 17: `5-59/10 * * * *` — `private.request_market_price_overflow()`
+- [!] فایل محلی `20261117130000_stagger_market_price_overflow_and_refresh_exchange_discovery.sql` هنوز job 14 را با `* * * * *` تعریف می‌کند و با cadence زنده یکسان نیست. آخرین Migration ثبت‌شدهٔ `20261121050216` منبع محتملِ تغییر موقت است، اما چون SQL آن در `main` موجود نیست، رابطهٔ دقیق تغییر با این Migration اثبات نشده است.
+- [x] پنجرهٔ شش‌ساعتهٔ `2026-11-21 16:34–22:33 UTC`: job 14 دوازده اجرای موفق و صفر شکست داشت؛ median زمان اجرا `21.392s` بود. jobهای 13 و 17 هرکدام ۳۶ اجرای موفق و صفر شکست داشتند. در همان پنجره سایر jobهای مشاهده‌شده نیز فقط موفق بودند.
+- [x] در ۲۴ ساعت کامل، job 14 هنوز ۴۰ شکست و ۳۴ موفقیت دارد؛ این پنجره شکست‌های قبل از throttling را هم شامل می‌شود. آخرین شکست ثبت‌شدهٔ job 14 در `05:31 UTC` بود؛ بنابراین آمار ۲۴ساعته را نباید با پنجرهٔ شش‌ساعتهٔ پس از بازیابی یکی دانست.
+- [x] صف `exchange_asset_sync_requests` در snapshot فعلی ۲٬۳۷۰ درخواست تاریخی، صفر درخواست pending و صفر درخواست pending قدیمی‌تر از ۳۰ دقیقه داشت. برای هر هفت exchange نیز pending برابر صفر بود؛ آخرین پردازش ثبت‌شده `22:31 UTC` بود.
+- [!] این داده‌ها نشانهٔ پایداری بهتر worker در پنجرهٔ اخیرند، اما علت ریشه‌ای شکست‌های قبلی یا اثر مستقل هر Migration را اثبات نمی‌کنند. زمان اجرای job 14 همچنان حدود ۲۰ تا ۲۸ ثانیه است و باید در محیط ایزوله تحلیل شود.
+- [x] هیچ cron، Migration، تابع، schema، grant، queue، سفارش، معامله، رزرو، کیف پول، موجودی یا سابقهٔ مالی در Production تغییر نکرد.
+- [ ] اقدام بعدی: SQL سه Migration جدید را از deployment artifact/backup معتبر بازیابی کن؛ با محتوای live function و schedule تطبیق بده؛ سپس مجموعهٔ بازسازی‌شده را در PostgreSQL 17 دورریختنی replay کن. تا آن زمان `supabase db push` ممنوع بماند.
