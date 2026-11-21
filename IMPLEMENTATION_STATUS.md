@@ -1093,3 +1093,10 @@
 - این اصلاح فقط test expectation است؛ هیچ HTML، منطق Auth، schema یا داده‌ای تغییر نکرد.
 - Commit هم‌زمان دیگری روی main با SHA `e5bd65b3460ec7ed85857fa51b092cd681322409` فقط workflow دستیِ artifact-only برای APK بازبینی Android را ثبت کرده است؛ طبق handoff، PR #45 همچنان Draft و ادغام‌نشده است و این نوبت آن را اجرا/merge نکرد.
 - Run شمارهٔ 1446 با ID `44895500537` برای commit `e5bd65b3460ec7ed85857fa51b092cd681322409` هنگام بررسی در حال اجرا بود؛ نتیجهٔ نهایی هنوز قابل اعلام نیست. پس از اصلاح assertion، اجرای جدید main باید جداگانه بررسی شود.
+
+
+### CI regression test correction — ۲۱ نوامبر ۲۰۲۶
+- اجرای main Run #1447 با ID `44895566312` مشخص کرد test جدید به‌علت escape اضافی در regex literal حتی parse نمی‌شود؛ 29 تست دیگر در آن job موفق بودند و فایل `tests/index-syntax.test.js` به‌عنوان یک فایل test fail شد. این یک شکست واقعی CI است و موفقیت اعلام نمی‌شود.
+- Run #1446 (ID `44895500537`) نیز روی نسخهٔ قبل از اصلاح assertion قدیمی fail شده بود.
+- تست palette با assertionهای رشته‌ای مستقیم بازنویسی شد تا از regex escape شکننده جلوگیری شود؛ کنترل‌های Auth، ثبت‌نام email/password-only و حفظ چیدمان موبایل همچنان بررسی می‌شوند.
+- Commit اصلاح جدید: `2f67a54b0cb7416aaa01f13e959248b59b701ac7`. اجرای CI جدید باید روی همین commit یا descendant آن بررسی شود؛ نتیجه هنوز نامشخص است.
