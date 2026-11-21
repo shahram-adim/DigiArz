@@ -446,3 +446,14 @@ test('approved indigo glass, separated page shells, and repaired borderless mark
   assert.match(html, /body\.luxury-theme #appView \.da-v2-market-list \.coin[\s\S]*?border:0!important/);
   assert.match(html, /body\.luxury-theme #appView \.mobile-bottom-nav[\s\S]*?background:rgba\(250,252,255,\.82\)/);
 });
+
+test('final theme overrides remain inside the stylesheet rather than leaking into document text', () => {
+  const finalStyleClose = html.lastIndexOf('</style>');
+  const bodyClose = html.indexOf('</body>', finalStyleClose);
+  assert.ok(finalStyleClose >= 0 && bodyClose > finalStyleClose, 'final stylesheet and body boundaries exist');
+  assert.equal(
+    html.slice(finalStyleClose + '</style>'.length, bodyClose).trim(),
+    '',
+    'no CSS or raw style declarations may appear outside the final style element'
+  );
+});
