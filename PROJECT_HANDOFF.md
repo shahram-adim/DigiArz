@@ -1041,3 +1041,10 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Exact-decimal/UI workflow run `44935311575` was in progress at handoff update. Android APK workflow/artifact for this head is not yet verified. Do not claim the white-screen symptom is fixed until the authenticated dashboard is inspected and the matching APK is built and tested on-device.
 - Further diagnosis is still required for the fully white post-login screen: inspect the authenticated shell's visible section state and failure path around the initial `profiles` lookup / admin-role RPC. No changes to authentication, Supabase, database, merge, deployment, signing, or release were made. PR #48 remains Draft/open/unmerged.
 - Next action: complete CI for this head, inspect the Android review build/artifact provenance, then continue targeted diagnosis of the white dashboard screen without asking the user for a screenshot.
+
+
+### CI correction follow-up — 2026-11-21
+- Exact-decimal workflow run `44935311575` failed before running the suite because the newly added test's closing-style regex was over-escaped and caused a JavaScript SyntaxError. This was a test-source issue, not an application runtime failure; 29 unrelated subtests passed and the rest were skipped after the test process failed.
+- Corrected the regression guard to count literal opening/closing style tags without regex escaping in commit `380a2474b9e003f669efd1b249beb3290b5bd10f`.
+- As of this update, no matching workflow run/status has yet been returned for corrected head `380a2474b9e003f669efd1b249beb3290b5bd10f`; do not report CI as passing. Android APK build/artifact for the latest app commit is also unverified.
+- The initial code inspection also found that the auth-listener error handler only displays the load failure in the login message if the login view is still visible; showApp() hides it before the profile query. Continue tracing this path and ensure a profile/RPC failure produces a visible in-dashboard error instead of a silent white/empty state. Do not weaken account-active gating or expose restricted tabs before the profile check.
