@@ -428,12 +428,12 @@ test('login mini chart renders real five-minute candles without depending on a c
 
 test('approved indigo glass, separated page shells, and repaired borderless market rows stay scoped', () => {
   assert.match(html, /id="digiarz-approved-layout-20261121"/);
-  assert.match(html, /body\.luxury-theme\s*\{[^}]*--bg:#0c1024/s);
+  assert.match(html, /body\.luxury-theme\s*\{[^}]*--bg:#eaf3ff/s);
   assert.match(html, /body\.light-theme #appView \.card[^\{]*\{[^}]*backdrop-filter:blur\(18px\)/s);
   assert.match(html, /#authView\.auth\s*\{[^}]*max-width:1080px/s);
   assert.match(html, /#appView\.app-view-active\s*\{[^}]*max-width:1320px/s);
   assert.match(html, /#tab-markets \.coin\s*\{[^}]*grid-template-columns:minmax\(0,1\.25fr\)/s);
   assert.match(html, /#tab-markets \.coin>\.favorite-btn[^\{]*\{display:none!important\}/);
   assert.match(html, /#tab-markets \.coin\s*\{[^}]*border:0!important/s);
-  assert.match(html, /luxury:'نیلی شیشه‌ای'/);
+  assert.match(html, /luxury:'نیلی شیشه‌ای'/);\n  assert.match(html, /linear-gradient\(135deg,#e9e5ff 0%,#e3f1ff 48%,#dff2fb 100%\)/);\n  assert.match(html, /body\.light-theme #appView \.card[^\\{]*\\{[^}]*background:rgba\\(255,255,255,\\.58\\)/s);\n  assert.match(html, /@media\\(max-width:430px\\)[\\s\\S]*?grid-template-columns:minmax\\(0,1fr\\) 42px 66px 88px/);
 });
