@@ -1071,3 +1071,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - The earlier note saying latest-head CI was unverified is superseded for this exact head. This does not constitute physical Android UI QA or prove the white/black screen issue is resolved on the user's phone.
 - The Android review APK workflow has not produced a verified artifact for this exact head; the only matching run found is the exact-decimal workflow. No APK build/download, merge, release, deployment, or Supabase/database changes were performed.
 - Next: obtain a review APK built from this exact PR #48 head, then perform phone-level visual checks of login, dashboard, all three themes and market rows; separately test fingerprint enrollment/unlock and logout/background relock. Keep PR Draft and do not merge without explicit user approval.
+
+
+### Android review APK provenance verified — 2026-11-21
+- Follow-up artifact lookup found the Android review build that was omitted from the first run query: workflow run `44935779185`, job `136942446649`, conclusion `success`.
+- All build steps succeeded: APK biometric storage tests, visual/application regression tests, Capacitor generation/sync/runtime verification, debug APK build, merged biometric permission verification, provenance recording and artifact upload.
+- Artifact: `DigiArz-Pale-Blue-Glass-Biometric-APK`, artifact ID `14719965866`, expires 2026-12-05 18:32:48 UTC. Artifact BUILD-INFO confirms exact source commit `b0b2d5346e538b0f947dd911736391e94145ded2` and run `44935779185`.
+- Extracted APK SHA-256: `57300ad934b3f5e4bde48b059765de621afe5a70215bc348f9d5d3544edf35e8` (7,303,534 bytes). This is a debug review APK, not a production-signed release.
+- The earlier statement above that no APK artifact was verified for the app code head is superseded by this artifact provenance check. Current PR head advanced afterward only because of the handoff documentation commit `a4bb9ff62c8e24e9aee70e8b06013693ac757490`; app source remains at the APK-verified code commit `b0b2d534...`.
+- Physical Android installation, visual review of all three themes and fingerprint enrollment/login/logout/background-relock tests remain outstanding. PR #48 remains Draft/open/unmerged; no release, deployment or Supabase/database changes.
