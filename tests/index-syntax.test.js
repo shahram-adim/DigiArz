@@ -527,3 +527,14 @@ test('all inline style elements are balanced and the mobile market stylesheet is
   assert.ok(html.lastIndexOf('</style>', mobileOpen) > heroOpen, 'hero stylesheet closes before the mobile stylesheet opens');
   assert.ok(html.includes('body.luxury-theme{min-height:100vh;background:radial-gradient(ellipse at 12% 8%'), 'theme 3 keeps its pale-blue full-page canvas');
 });
+
+
+test('account-load failures remain visible in the authenticated dashboard after login is hidden', () => {
+  const start = html.indexOf('supabaseClient.auth.onAuthStateChange');
+  const end = html.indexOf('let sessionData', start);
+  assert.ok(start >= 0 && end > start, 'auth listener boundaries exist');
+  const listener = html.slice(start, end);
+  assert.ok(listener.includes("const status=$('adminRoleStatus')"), 'dashboard status region receives the failure');
+  assert.ok(listener.includes("showMessage(status,'ورود انجام شد، اما بارگذاری حساب کامل نشد:"), 'the error is rendered in the visible dashboard');
+  assert.doesNotMatch(listener, /if\(!authView\.classList\.contains\('hidden'\)\)/, 'the error is not suppressed just because login is hidden');
+});
