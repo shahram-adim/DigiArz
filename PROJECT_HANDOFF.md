@@ -786,11 +786,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Next: create a Draft PR targeting main, inspect its diff, and run available CI. Do not merge or deploy without explicit authorization.
 
 
-## 2026-11-21 — registration PR validation follow-up
+## 2026-11-21 — registration PR validation completed
 - PR #42 remains Draft/open and unmerged: https://github.com/shahram-adim/DigiArz/pull/42.
-- First CI run 44880960263 failed because two existing UI assertions in `tests/index-syntax.test.js` still required `id="fullName"`; 53/55 Node tests passed. This was a stale expectation, not a runtime signup failure. The failed run did not reach PostgreSQL tests.
-- Updated both login-screen assertions to require email/password and the other existing auth controls, explicitly assert that `fullName` is absent, and assert signup submits only `{email,password,emailRedirectTo}` with no `full_name` metadata.
-- Test changes committed on the isolated branch: `f738e576219f70d58095416ee0d3db8fd6d9d461` (intermediate test commit `ceadbbd70b76026a099948e65431cb399b7e8383`).
-- Re-run 44881094818 was triggered by PR synchronize and was still in `Initialize containers` at the latest check; no test result is claimed yet.
-- No main-branch changes, merge, deployment, database schema/data changes, or physical-device test.
-- Next: re-check run 44881094818; if green, inspect final PR diff and keep Draft pending user authorization to merge.
+- Latest branch head: c63b307ba50b35ae5ea07b5def9a7488ae56a8ca. Branch is 5 commits ahead of base main 1c2ba0f9449d64cebc6d511f646fc8857dad1f89, with no divergence behind main.
+- Latest full CI run 44881136326 completed with conclusion SUCCESS on the current branch head. Node/browser integration tests, PostgreSQL arithmetic/regression tests, exact-decimal schema widening rehearsals, atomic rollback/lock-timeout/preflight checks, Market/Limit/Stop-Limit/TP-SL entrypoint and lifecycle integrations, and two-session race/cancellation tests all passed. Run: https://github.com/shahram-adim/DigiArz/actions/runs/44881136326.
+- Previous full CI run 44881104402 also completed SUCCESS on the preceding test commit f738e576219f70d58095416ee0d3db8fd6d9d461. The first two failed runs were stale test assertions expecting the removed fullName field; those assertions were corrected.
+- Final PR diff inspected: exactly three files changed — PROJECT_HANDOFF.md, index.html, tests/index-syntax.test.js. The application change removes the registration name input and stops sending full_name metadata. Login and dashboard behavior/code remain unchanged; no database/schema/account data changes.
+- No main-branch changes, merge, deployment, production database changes, or physical-device test. PR remains Draft pending explicit user authorization to merge. Do not mark it ready or merge automatically.
+- Next: wait for the user's explicit merge authorization; otherwise leave the validated Draft PR untouched.
