@@ -4987,6 +4987,46 @@ body.light-theme #authView .auth-form .auth-actions #signupBtn{
  #tab-markets .market-board-v34 .coin .price-usd{font-size:10px!important}
  #tab-markets .market-board-v34 .coin .price-toman{font-size:9px!important}
 }
+/* Stable market-row columns: the favorite button is intentionally absent from the visual grid. */
+#tab-markets .market-board-v34 .coin{
+ grid-template-columns:minmax(0,1.45fr) minmax(34px,.42fr) minmax(0,.78fr) minmax(0,1.12fr)!important;
+ grid-template-areas:"identity spark change price"!important;
+ align-items:center!important;
+}
+#tab-markets .market-board-v34 .coin>.favorite-btn{display:none!important}
+#tab-markets .market-board-v34 .coin>.coin-identity{grid-area:identity!important}
+#tab-markets .market-board-v34 .coin>.coin-sparkline{grid-area:spark!important}
+#tab-markets .market-board-v34 .coin>.coin-change-wrap{grid-area:change!important}
+#tab-markets .market-board-v34 .coin>.price-stack{grid-area:price!important}
+#tab-markets .market-board-v34 .coin-identity{display:flex!important;align-items:center!important;gap:8px!important;padding:0!important;text-align:right!important}
+#tab-markets .market-board-v34 .coin-name-stack{display:flex!important;flex:1 1 auto!important;flex-direction:column!important;gap:2px!important;overflow:hidden!important}
+#tab-markets .market-board-v34 .coin-name-fa,#tab-markets .market-board-v34 .coin-symbol-en,#tab-markets .market-board-v34 .coin-english-name{display:block!important;min-width:0!important;white-space:normal!important;line-height:1.45!important}
+#tab-markets .market-board-v34 .coin-change-wrap{align-items:center!important;text-align:center!important;overflow-wrap:anywhere!important}
+#tab-markets .market-board-v34 .coin-change-wrap>*{max-width:100%!important;overflow-wrap:anywhere!important}
+#tab-markets .market-board-v34 .price-stack{min-width:0!important;gap:3px!important}
+@media(max-width:760px){
+ #tab-markets .market-board-v34 .coin{
+  grid-template-columns:minmax(0,1fr) minmax(0,42%)!important;
+  grid-template-areas:"identity price" "change price"!important;
+  grid-template-rows:minmax(34px,auto) minmax(24px,auto)!important;
+  align-items:center!important;column-gap:8px!important;row-gap:3px!important;
+  padding:9px 7px!important;
+ }
+ #tab-markets .market-board-v34 .coin-identity{grid-column:auto!important;grid-row:auto!important;gap:6px!important}
+ #tab-markets .market-board-v34 .coin-sparkline{display:none!important}
+ #tab-markets .market-board-v34 .coin-change-wrap{grid-column:auto!important;grid-row:auto!important;justify-content:flex-start!important;flex-direction:row!important;flex-wrap:wrap!important;gap:3px 6px!important;text-align:right!important}
+ #tab-markets .market-board-v34 .coin>.price-stack{grid-column:auto!important;grid-row:auto!important;align-self:center!important;text-align:right!important}
+}
+@media(max-width:380px){
+ #tab-markets .market-board-v34 .coin{grid-template-columns:minmax(0,1fr) minmax(0,40%)!important;column-gap:5px!important;padding-inline:5px!important}
+ #tab-markets .market-board-v34 .coin-identity{gap:5px!important}
+ #tab-markets .market-board-v34 .coin-identity .coin-icon{width:27px!important;height:27px!important;min-width:27px!important;flex-basis:27px!important}
+ #tab-markets .market-board-v34 .coin-name-fa{font-size:10px!important}
+ #tab-markets .market-board-v34 .coin-symbol-en,#tab-markets .market-board-v34 .coin-english-name{font-size:9px!important}
+ #tab-markets .market-board-v34 .coin-change-wrap{font-size:9px!important}
+ #tab-markets .market-board-v34 .coin .price-usd{font-size:9px!important}
+ #tab-markets .market-board-v34 .coin .price-toman{font-size:9px!important}
+}
 /* Dashboard preview: shrink every grid track instead of forcing a row wider than a phone. */
 #dashboardMarketPreview.dashboard-market-preview.da-v2-market-list{
  box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;
