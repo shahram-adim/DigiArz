@@ -101,6 +101,8 @@
           return cachedValue;
         } catch (error) {
           lastError = error;
+          cachedValue = null;
+          locked = true;
           onState('locked', error);
           // Cancellation/failure never deletes the encrypted record.
           return null;
@@ -129,8 +131,10 @@
         }
         if (typeof value !== 'string') return Promise.reject(new TypeError('Supabase storage value must be a string.'));
         return enqueue(async function () {
-          cachedValue = value;
-          locked = false;
+          // Never repopulate decrypted memory after the app has been locked.
+          // A password login while locked still persists through native secure storage,
+          // but the next foreground restoration must perform a fresh biometric read.
+          if (!locked) cachedValue = value;
           readAttempted = true;
           if (byteLength(value) > maxBytes) {
             lastError = new Error('اندازه نشست از حد امن ذخیره‌سازی اندروید بیشتر است.');
@@ -188,7 +192,12 @@
       async unlock() {
         locked = false;
         readAttempted = false;
-        return readSecure(true);
+        const value = await readSecure(true);
+        if (value === null) {
+          cachedValue = null;
+          locked = true;
+        }
+        return value;
       },
 
       lock() {
