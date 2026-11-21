@@ -1019,3 +1019,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Commits: CSS `78ae9826c9b704fd7ac847bf7387db1be90d9d1e`; regression test `921915de675dd6c22af9f00a8786c051e2c43176`; assertion correction `ba3a426a315214c1104f2607331ca79f55e9ed31`.
 - Exact-decimal/UI test and Android review APK workflows are running/queued for these commits. Do not share an APK until the latest build completes and artifact provenance is verified.
 - No Supabase/database changes, merge, production deployment, or release. PR #48 remains Draft/open/unmerged. Physical device viewport verification is still pending.
+
+
+## 2026-11-21 — dashboard remains visible during profile/auth role checks
+- User reported that the authenticated dashboard does not open.
+- Source inspection found showApp(session) switched the body to dashboard mode but did not reveal #appView until after two network operations: profiles lookup and, for active accounts, is_current_user_super_admin RPC. A slow/failed Supabase request (including the previously observed timeout/504 class of incident) could therefore leave the user on the login screen even with a valid auth session.
+- Patched index.html on the existing isolated PR #48 branch redesign/indigo-glass-layout-fix-2026-11-21: after validating the session object, reveal #appView.app-view-active, hide #authView, show logout and user identity immediately; then perform the existing profile/account-status and super-admin checks. Authorization/account gating and dashboard data loading remain in place.
+- Added a regression test in tests/index-syntax.test.js asserting that the dashboard shell is revealed before the profile lookup.
+- Fix commits: 0fd5b351cfa574dfc79ce6390c298987e5a3d273 (application) and 3254e0a3ddf65bd8754097e294b9c81588d10398 (test).
+- No CI run has yet been returned for the test commit; do not claim automated validation passed. No merge, deployment, release, or Supabase/database change was performed. PR #48 remains isolated for review.
+- Next: verify the CI run for the latest PR #48 head, then build/review an APK or deploy only after the user's explicit approval. Confirm actual dashboard open on Android after installing the matching build.
