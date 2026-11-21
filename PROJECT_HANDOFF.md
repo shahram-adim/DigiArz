@@ -859,3 +859,10 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Plugin Web mock always succeeds and is in-memory only. Native calls must be strictly gated behind `Capacitor.isNativePlatform()`; browser/PWA must retain default localStorage behavior.
 - Supabase JS v2.107+ uses lockless refresh coordination by default (same-client single-flight and server-side cross-client race handling); legacy custom `lock` option is deprecated. Do not add it reflexively. Test serialized adapter writes and refresh response loss/races.
 - No runtime implementation has been added. Next: verify pinned Supabase 2.119.2 initialization options and native Capacitor bridge availability, then implement native-only protected storage with lifecycle gating and comprehensive tests. Preserve web/PWA and recovery flows. No Production changes, merge or release.
+
+
+## 2026-11-21 — pinned Auth bootstrap controls verified
+- Inspected exact `supabase-js@2.119.2` source commit `02d2e8f12079955a28901d95e8513846d01a3c3e`: supports async custom Auth storage, `skipAutoInitialize: true`, explicit `auth.initialize()`, and `startAutoRefresh()/stopAutoRefresh()`. These can support controlled initial biometric unlock and Android background/resume refresh gating while retaining URL recovery handling.
+- Capacitor 8 runtime exposes `window.Capacitor.registerPlugin`; plugin's published source registers `NativeBiometric` via Capacitor's native bridge. As app is plain HTML/no bundler, validate the minimal bridge in generated APK before committing runtime integration. Do not invoke the plugin's Web mock.
+- Still verify exact `onAuthStateChange` behavior with `skipAutoInitialize` before changing startup; preserve listener order, password recovery URL processing, and web/PWA initialization unchanged.
+- No runtime biometric or Auth adapter code is committed at this checkpoint.
