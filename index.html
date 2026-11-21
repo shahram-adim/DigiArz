@@ -1878,6 +1878,32 @@ body.luxury-theme .tag{background:rgba(129,174,220,.12)!important;border-color:r
  #tab-markets .market-board-v34 .coin-symbol-en,#tab-markets .coin-symbol-en{font-size:9px!important}
 }
 
+
+/* Strictly isolate authentication and dashboard page shells. */
+body.auth-page-active #appView,
+body.auth-page-active #dashboardDailyAd,
+body.auth-page-active .market-announcement,
+body.auth-page-active .mobile-bottom-nav,
+body.auth-page-active #logoutBtn{display:none!important}
+body.auth-page-active #authView:not(.hidden){display:flex!important}
+body.auth-page-active #loginDailyAd{display:block}
+body.dashboard-page-active #authView,
+body.dashboard-page-active #loginDailyAd,
+body.dashboard-page-active .auth-top-banner,
+body.dashboard-page-active .ref-daily-promo,
+body.dashboard-page-active .ref-demo-footer{display:none!important}
+body.dashboard-page-active #appView.app-view-active{display:block!important}
+body.dashboard-page-active #appView.hidden,
+body.auth-page-active #appView.hidden,
+#authView.hidden,
+#appView.hidden{display:none!important}
+body.auth-page-active .wrap>.top{display:none!important}
+body.dashboard-page-active .wrap>.top{display:flex!important}
+body.auth-page-active #appView,
+body.dashboard-page-active #authView{visibility:hidden!important;pointer-events:none!important}
+body.auth-page-active #authView:not(.hidden),
+body.dashboard-page-active #appView.app-view-active{visibility:visible!important;pointer-events:auto!important}
+
 </style>
 <style>
 .pwa-install-banner{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 16px;margin:0 0 14px;border:1px solid rgba(240,185,11,.45);border-radius:14px;background:linear-gradient(110deg,rgba(240,185,11,.10),rgba(24,26,32,.96));box-shadow:0 8px 24px rgba(0,0,0,.12)}
