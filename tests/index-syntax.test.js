@@ -551,3 +551,20 @@ test('market coin rows use fixed named grid areas and do not allocate a favorite
   assert.match(css, /grid-template-columns:minmax\(0,1fr\) minmax\(0,42%\)!important/);
   assert.match(css, /max-width:380px/);
 });
+
+test('final dashboard and market layouts remain contained and responsive on phones', () => {
+  const marker = 'digiarz-dashboard-market-final-layout-20261121';
+  const start = html.lastIndexOf(marker);
+  const end = html.lastIndexOf('</style>');
+  assert.ok(start >= 0 && end > start, 'final dashboard/market layout stylesheet exists');
+  const css = html.slice(start, end);
+  assert.match(css, /#tab-dashboard \.da-v2-quick-grid\{display:grid;grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
+  assert.match(css, /#dashboardMarketPreview\.dashboard-market-preview\.da-v2-market-list\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+  assert.match(css, /#tab-dashboard \.dashboard-activity-grid\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+  assert.match(css, /#tab-markets \.market-board-v34 \.coin\{[^}]*grid-template-areas:"identity spark change price"/s);
+  assert.match(css, /#tab-markets \.market-board-v34 \.coin>\.favorite-btn\{display:none!important\}/);
+  assert.match(css, /@media\(max-width:760px\)[\s\S]*?#dashboardMarketPreview\.dashboard-market-preview\.da-v2-market-list\{grid-template-columns:minmax\(0,1fr\)\}/);
+  assert.match(css, /@media\(max-width:760px\)[\s\S]*?grid-template-areas:"identity price" "change price"/);
+  assert.match(css, /@media\(max-width:390px\)/);
+  assert.match(css, /min-width:0/);
+});
