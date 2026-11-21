@@ -46,6 +46,17 @@ jobs:
       - name: Install Capacitor
         run: npm install --no-audit --no-fund
 
+      - name: Verify and upload generated npm lockfile
+        run: test -s package-lock.json
+
+      - name: Upload npm lockfile for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: DigiArz-npm-lockfile
+          path: package-lock.json
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Prepare Android web assets with pinned Supabase SDK
         run: npm run build:android
 
