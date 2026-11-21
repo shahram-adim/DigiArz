@@ -814,3 +814,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - CI on commit `205430991573d73e584f208b70f14529b19f626e`: Android run `44877219663` pending; exact-decimal run `44877219671` queued/in progress at last check. Do not claim success until polled.
 - Documentation updated in `docs/ANDROID_BIOMETRIC_LOCK_SPIKE.md`; next doc commit `1c87a7fc68cfa8540546bfaf8fcc6c43f6de3742`.
 - No native biometric runtime code or Supabase Auth storage adapter yet; no merge/release/Production/main change.
+
+
+## 2026-11-21 — Android biometric spike CI checkpoint
+- Isolated branch: `spike/android-biometric-capacitor8-2026-11-21`; Draft PR #41: https://github.com/shahram-adim/DigiArz/pull/41. Latest known baseline before this checkpoint: PR head `1f7494609fb081c2bbc3017218bb5ced5bd44b66`; all work remains isolated from main.
+- Android workflow run [44877219663](https://github.com/shahram-adim/DigiArz/actions/runs/44877219663) completed successfully on commit `205430991573d73e584f208b70f14529b19f626e`. APK preparation with pinned Supabase JS 2.119.2, clean Capacitor generation/sync, Gradle build, provenance, and artifact upload all passed. Exact-decimal run `44877219671` also passed.
+- Pinned UMD SHA-256: `8816af04d9915dbba1882d6f84f0b402dc40268063a63d9c66d24f52f371c263`; APK SHA-256: `fd4d57e62a85fc8cd51606f292a43e82f2ad44b29d23fb29dee9fb4b1c3acddd`. Artifact ID `14696064416`, name `DigiArz-Android-debug-APK`, size 6,172,011 bytes.
+- The build script now verifies both CDN mirror equality and the exact SDK SHA-256 before packaging. This is not a substitute for npm provenance or a committed lockfile.
+- Plugin 8.9.3 documentation confirms biometric-protected arbitrary data requires `setData` with `BIOMETRY_CURRENT_SET` or `BIOMETRY_ANY`, then `getSecureData`; Android requires `USE_BIOMETRIC`. The build log did not prove the merged manifest permission, so verify it in generated APK/manifest before proceeding.
+- No Auth adapter, biometric runtime flow, Production change, main merge, or release. Do not present this APK as having fingerprint unlock.
+- **Next action:** verify merged Android manifest permission; then add pinned Supabase JS dependency + lockfile/provenance in this branch and test a native-only Auth storage adapter with refresh rotation, recovery, cancellation, logout, background/resume, and process-death cases.
