@@ -30,6 +30,13 @@ jobs:
           node-version: 20
       - name: Run exact decimal and browser integration tests
         run: node --test tests/*.test.js
+      - name: Run Bit24 deduplication SQL regressions
+        env:
+          PGPASSWORD: postgres
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          psql -h localhost -U postgres -d digiarz_test -v ON_ERROR_STOP=1 -f supabase/tests/bit24_deduplicate_regression.sql
       - name: Run PostgreSQL arithmetic regression tests
         env:
           PGPASSWORD: postgres
