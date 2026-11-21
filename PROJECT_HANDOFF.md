@@ -1089,3 +1089,36 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Added regression assertions for the dashboard and market breakpoints/areas in `tests/index-syntax.test.js` (commit/current branch head `23c1d7d36c21dfb3856cb4641bbbfe8074836d63`).
 - Validation boundary: the source changes are committed on the isolated PR #48 branch. A matching GitHub Actions run has not yet been returned for this exact head; do not report tests as passed. No physical-device screenshot/viewport test has been performed. Do not claim the installed APK has these changes.
 - No merge, release, deployment, Supabase/database changes, or real-money functionality changes. Keep PR #48 Draft/unmerged pending CI and visual review.
+
+
+## 2026-11-21 — pure-white glass theme 2 and dashboard/market finishing pass
+- A follow-up source audit found additional legacy grey-tinted secondary surfaces (market toolbar/header, orderbook mid, detail sections, history hover rows and auth security banner). Added a final explicit white-surface override and regression assertions for these areas; no semantic green/red status indicators or theme 1/theme 3 selectors are changed.
+- User clarified that theme 2 must be white throughout, with no grey anywhere; the dashboard and market layouts must remain professional and orderly.
+- Inspected the current PR #48 source and found remaining grey-tinted theme-2 surfaces: page gradient variables, card borders, hero gradient, grey primary buttons, grey active tabs, and grey form borders/buttons.
+- Created isolated follow-up branch `fix/pure-white-glass-dashboard-market-2026-11-21` from the PR #48 candidate, preserving the existing responsive dashboard/market layout and theme 1/theme 3 separation.
+- Added a final theme-2 CSS override: pure-white page canvas and white glass panels throughout login/dashboard/market, blue-tinted borders and controls instead of grey, navy/blue text, and preserved borderless market coin rows. Added regression assertions to guard the white palette and prevent the known grey hex colors from returning.
+- Source commits: `2f0a5ce9e7224abdda25eb208f5888d2d0fac4b3` (CSS) and `5932038814ec22496cfed1de2bf5d21969137aa0` (initial test; test regex is corrected in the follow-up commit).
+- Dashboard/market responsive grid corrections remain inherited from PR #48: shrink-safe dashboard cards, named market-row grid areas, no favorite-button column, wrap-safe values, and narrow-phone breakpoints.
+- Validation: CI has not yet run on this follow-up branch; no APK has been built for this branch and no physical-device visual QA has been performed. Do not claim the changes are validated or present in the installed APK.
+- No merge, release, deployment, Supabase/database, authentication, or financial trading logic changes. Keep isolated for review.
+- Regression test source has been corrected and included in Draft PR #49; it has not yet run in CI. PR #49 is intentionally based on PR #48's candidate branch to avoid duplicating its full change set. Next: merge/review PR #48 first; then retarget PR #49 to `main`, inspect CI for its exact head, and build a matching review APK only if CI passes.
+- Added a white override for neutral informational notices as well; warning/error/success notices keep their meaningful status colors.
+
+## 2026-11-21 — white theme secondary-surface audit and follow-up PR consolidation
+- Audited all legacy `body.light-theme` background rules in `index.html`; found additional grey-tinted surfaces beyond the main cards, including market toolbar/header, orderbook mid, detail sections, history hover, auth security, category controls and neutral notices.
+- Added a final override to make these surfaces white, retain blue accents and readable navy text, and preserve semantic warning/error/success colors. Theme 1 and theme 3 selectors are not modified by the white-theme override.
+- Added regression assertions for secondary white surfaces and expanded the grey-token guard.
+- Ran source-level verification against the exact candidate head: 14 checks passed (white page/panels, blue controls, market toolbar/header, history hover, auth security, neutral notices, no known grey hex values in the final override, balanced style tags, test presence, and candidate-specific workflow checkout).
+- Parent PR #48 UI suite passed 66/66 tests after correcting an overly strict assertion for the existing mobile grid's `gap:0` declaration. Parent exact-decimal/PostgreSQL/Market/Limit/Stop-Limit/TP-SL/concurrency workflow run 44943748586 completed SUCCESS on parent head `e9673c944bfd325296ee5476ad548d86315b67af`.
+- Consolidated the white-theme follow-up on fresh branch `fix/pure-white-glass-dashboard-market-2026-11-21-v2` from the latest PR #48 head. Draft PR #50 is open and mergeable, based on PR #48. Obsolete PR #49 was closed unmerged as superseded.
+- Candidate head: `49bc1909b66c81a8d662f74e7c1a2e1a00a02d5b`. The candidate-specific Android review workflow is configured to check out the pushed branch and upload a debug artifact only; no run ID or APK artifact for this exact head has been verified yet.
+- No merge to main, release, deployment, Supabase/database change, authentication change, or trading/wallet logic change. No physical Android visual review has been performed.
+- Next: wait for and inspect the candidate-specific Android workflow, review PR #48 then PR #50, and only after explicit approval merge PR #48 and retarget PR #50 to main; install the matching review APK and visually verify all three themes and phone-width layouts.
+
+
+## 2026-11-21 — white glass candidate Android APK verified
+- Android review workflow run 44944044169 completed SUCCESS for the white-glass follow-up branch. All steps passed: locked dependency install and npm signature verification, biometric storage tests, visual/application regression tests, Android web preparation, Capacitor generation/sync/runtime verification, debug APK build, merged biometric permission verification, provenance recording, and artifact upload.
+- Downloaded and inspected artifact ID 14722937253 (DigiArz-White-Glass-Review-APK), 7,306,634-byte APK. Embedded BUILD-INFO records source commit 49bc1909b66c81a8d662f74e7c1a2e1a00a02d5b, run 44944044169, and APK SHA-256 c6812bb42b7fff0bc6ee763767801b3ab71f95321e4f587062155699c08cf946. Artifact expires 2026-12-05T20:03:39Z.
+- Current PR #50 branch tip is 6c915af8e2b653ad90f18ea40a6567780965254b. GitHub compare confirms it is exactly one documentation-only commit ahead of the APK source commit (only PROJECT_HANDOFF.md changed); therefore app source and tests in the APK match the current candidate code. Run 44944044169's event SHA is 445222fa41abc2dfa9a5ea997810b4b3fd1ae5fa; workflow provenance is taken from the actual checked-out source commit as recorded in BUILD-INFO.
+- PR #50 remains Draft/open/unmerged and based on PR #48. PR #48 remains Draft/open/unmerged. No merge to main, release, production deployment, Supabase/database/auth/trading changes were made.
+- Validation boundary: automated CI/build and APK packaging succeeded, but no physical Android install or visual QA has been performed. User should install this debug review APK and verify login, dashboard, market row containment, and all themes on the phone; report any mismatch before any merge.

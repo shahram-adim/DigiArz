@@ -4901,6 +4901,157 @@ body.light-theme #authView .auth-form .auth-actions #signupBtn{
 
 
 
+/* DIGIARZ-PURE-WHITE-GLASS-THEME-20261121 */
+/* Theme 2 is white throughout: no grey canvas, panels, controls, or neutral-grey surfaces. */
+body.light-theme{
+ color-scheme:light!important;
+ --bg:#fff!important;--panel:rgba(255,255,255,.94)!important;--panel2:rgba(255,255,255,.98)!important;
+ --line:rgba(105,174,229,.20)!important;
+ background:#fff!important;background-image:none!important;color:#203a58!important;
+}
+body.light-theme::before{background:#fff!important;opacity:1!important}
+body.light-theme #appView,
+body.light-theme #appView.app-view-active,
+body.light-theme #appView .wrap{background:transparent!important;color:#203a58!important}
+body.light-theme #appView .top,
+body.light-theme #appView .tabs,
+body.light-theme #appView .mobile-bottom-nav,
+body.light-theme #appView .card,
+body.light-theme #appView .stat,
+body.light-theme #appView .trade-box,
+body.light-theme #appView .performance-item,
+body.light-theme #appView .indicator-panel,
+body.light-theme #appView .fx-box,
+body.light-theme #appView .orderbook-side,
+body.light-theme #appView .setting-row,
+body.light-theme #appView .gainer-card,
+body.light-theme #appView .asset-row,
+body.light-theme #appView .digiarz-v2-dashboard,
+body.light-theme #appView .da-v2-market-list,
+body.light-theme #appView .hero,
+body.light-theme #appView .market-board-v34,
+body.light-theme #appView .market-list,
+body.light-theme #appView .chart-card,
+body.light-theme #appView .wallet-card,
+body.light-theme #appView .order-card,
+body.light-theme #appView .history-card,
+body.light-theme #appView .profile-card,
+body.light-theme #appView .security-card,
+body.light-theme #appView .support-card,
+body.light-theme #appView .filter-bar{
+ background:rgba(255,255,255,.92)!important;color:#203a58!important;
+ border:1px solid rgba(105,174,229,.18)!important;
+ box-shadow:0 10px 30px rgba(73,139,194,.075),inset 0 1px 0 #fff!important;
+ backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;
+}
+body.light-theme #appView .hero{background:#fff!important}
+body.light-theme #appView .brand,
+body.light-theme #appView h1,body.light-theme #appView h2,body.light-theme #appView h3,
+body.light-theme #appView .section-title,
+body.light-theme #appView .price-stack,
+body.light-theme #appView .muted,
+body.light-theme #appView .hint,
+body.light-theme #appView .subtle,
+body.light-theme #appView .secondary-text,
+body.light-theme #appView .text-muted,
+body.light-theme #appView .description,
+body.light-theme #appView .meta{color:#54799d!important}
+body.light-theme #appView button:not(.secondary){
+ background:linear-gradient(135deg,#eaf6ff,#d8edff)!important;color:#174a78!important;
+ border:1px solid rgba(105,174,229,.32)!important;box-shadow:0 5px 14px rgba(73,139,194,.10)!important;
+}
+body.light-theme #appView button.secondary,
+body.light-theme #appView .tabs button,
+body.light-theme #appView .timeframes button{
+ background:#fff!important;color:#41688e!important;
+ border:1px solid rgba(105,174,229,.22)!important;box-shadow:none!important;
+}
+body.light-theme #appView .tabs button.active,
+body.light-theme #appView .timeframes button.active{
+ background:#e7f4ff!important;color:#174a78!important;border-color:#acd5f5!important;
+}
+body.light-theme #appView input,
+body.light-theme #appView select,
+body.light-theme #appView textarea,
+body.light-theme #authView .auth-form input,
+body.light-theme #authView .auth-form select,
+body.light-theme #authView .auth-form textarea{
+ background:#fff!important;color:#203a58!important;border:1px solid rgba(105,174,229,.30)!important;
+}
+body.light-theme #appView #tab-markets .coin,
+body.light-theme #appView .da-v2-market-list .coin{
+ background:transparent!important;border:0!important;box-shadow:none!important;
+}
+body.light-theme #authView,
+body.light-theme #authView .auth-form,
+body.light-theme #authView.auth-reference-layout{
+ background:#fff!important;color:#203a58!important;
+ border-color:rgba(105,174,229,.20)!important;
+}
+body.light-theme #authView .auth-form .auth-actions #loginBtn,
+body.light-theme #authView .auth-form .auth-actions #signupBtn{
+ background:linear-gradient(135deg,#eaf6ff,#d8edff)!important;color:#174a78!important;
+ border:1px solid rgba(105,174,229,.30)!important;box-shadow:0 6px 16px rgba(73,139,194,.09)!important;
+}
+
+
+/* Final white-only coverage for authentication, table headers and market controls. */
+body.light-theme #authView .auth-reference-visual,
+body.light-theme #authView .auth-form,
+body.light-theme #authView.auth-reference-layout,
+body.light-theme #appView .market-toolbar,
+body.light-theme #appView .market-header,
+body.light-theme #appView .table-wrap,
+body.light-theme #appView .table-container,
+body.light-theme #appView table,
+body.light-theme #appView thead,
+body.light-theme #appView th,
+body.light-theme #appView .market-search,
+body.light-theme #appView .market-filters{
+ background:#fff!important;color:#203a58!important;
+ border-color:rgba(105,174,229,.20)!important;
+}
+body.light-theme #appView tr,
+body.light-theme #appView td{border-color:rgba(105,174,229,.14)!important}
+
+
+
+/* Remove remaining neutral-grey legacy surfaces from theme 2 across secondary screens. */
+body.light-theme #appView .market-tools,
+body.light-theme #appView .market-board-v34 .market-head,
+body.light-theme #appView .toman-table th,
+body.light-theme #appView .orderbook-mid,
+body.light-theme #appView .detail-section,
+body.light-theme #appView .dashboard-panel>.detail-section,
+body.light-theme #appView .market-categories .category-btn,
+body.light-theme #appView .category-icon,
+body.light-theme #appView .reference-market-strip,
+body.light-theme #appView .market-announcement,
+body.light-theme #appView .market-hero-v34,
+body.light-theme #appView .trade-workspace-banner-v35,
+body.light-theme #appView .orders-center-v36,
+body.light-theme #appView .advanced-order-list-v36,
+body.light-theme #appView .digiarz-home-hero,
+body.light-theme #appView .review-row,
+body.light-theme #appView .news-item,
+body.light-theme #appView #tab-orders .order-history-card,
+body.light-theme #appView #tab-orders .open-order-row,
+body.light-theme #appView #tab-orders .open-order-details small:nth-of-type(1),
+body.light-theme #appView #tab-history tbody tr:hover,
+body.light-theme #appView #tab-chart .asset-detail-head,
+body.light-theme #appView #tab-chart .detail-section,
+body.light-theme #authView .auth-security,
+body.light-theme #authView .auth-top-banner{
+ background:#fff!important;color:#203a58!important;
+ border-color:rgba(105,174,229,.18)!important;
+}
+
+
+body.light-theme #appView .notice:not(.warn):not(.err):not(.ok){
+ background:#fff!important;color:#203a58!important;
+ border-color:rgba(105,174,229,.18)!important;
+}
+
 </style>
 
 <style id="digiarz-mobile-market-row-containment-20261121">
