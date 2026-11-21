@@ -776,3 +776,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Artifact 14217201032 remains unexpired at this check and expires 2026-11-23T10:26:46Z. GitHub API reports the exact 64-character digest sha256:555c1f7ebcad947e573dad659084bbcf94dc88d55fc0bc1a3b7de9606db8e4e5; earlier notes contained a truncated 61-character digest and have been corrected in the bootstrap plan.
 - Bootstrap plan updated in commit 6ccfa3c68c47e00518508e930dc97428231c4019; it records schema metadata, ACL exclusion, Production parity blocker and next safe step.
 - No Production migration/RPC/trigger/cron/grant/policy/schema/data change, no test with restored records, no merge/rebase/deploy, and no supabase db push.
+
+
+## 2026-11-21 — Android biometric lock compatibility checkpoint
+- Created isolated branch `spike/android-biometric-capacitor8-2026-11-21` from main; first commit `cb476231c03912f08dde738523e83578b2db0c81` adds `docs/ANDROID_BIOMETRIC_LOCK_SPIKE.md`.
+- Verified main is Capacitor Android/Core/CLI 6.2.1. The existing Capacitor 8 Passkey spike is 184 commits ahead and 88 behind main, so it is not a safe implementation base and was not merged/cherry-picked.
+- Current native biometric plugin docs map plugin v8 to Capacitor 8; plugin v6 is compatible with Capacitor 6 but no longer maintained. Candidate for evaluation is pinned `@capgo/capacitor-native-biometric@8.9.3` after Capacitor 8 compatibility/build checks.
+- Verified `index.html` currently uses default Supabase Auth persistence (`persistSession:true`, `autoRefreshToken:true`), registers `onAuthStateChange`, and restores via `getSession()`. A secure APK-only implementation must gate restoration and use biometric-protected Keystore reads; `verifyIdentity()` alone is not sufficient.
+- Existing APK workflow generates Android project from scratch. No generated Android files were edited.
+- Run `44876112814` completed successfully; all 45 job steps completed, including `Run Bit24 deduplication SQL regressions`.
+- No biometric runtime code, dependency upgrade, APK build, Production/Supabase change, merge, or release has been made. Next: build an isolated Capacitor 8 + biometric-plugin compatibility spike with lockfile and clean CI build, then implement the native secure-storage adapter only after validating SDK refresh/session lifecycle. Browser/PWA path must remain byte-for-byte behaviorally unchanged.
