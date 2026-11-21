@@ -538,3 +538,16 @@ test('account-load failures remain visible in the authenticated dashboard after 
   assert.ok(listener.includes("showMessage(status,'ورود انجام شد، اما بارگذاری حساب کامل نشد:"), 'the error is rendered in the visible dashboard');
   assert.doesNotMatch(listener, /if\(!authView\.classList\.contains\('hidden'\)\)/, 'the error is not suppressed just because login is hidden');
 });
+
+
+test('market coin rows use fixed named grid areas and do not allocate a favorite-button column', () => {
+  const start = html.indexOf('/* Stable market-row columns:');
+  const end = html.indexOf('/* Dashboard preview:', start);
+  assert.ok(start >= 0 && end > start, 'final market-row layout override exists');
+  const css = html.slice(start, end);
+  assert.match(css, /\.coin>\.favorite-btn\{display:none!important\}/);
+  assert.match(css, /grid-template-areas:"identity spark change price"!important/);
+  assert.match(css, /grid-template-areas:"identity price" "change price"!important/);
+  assert.match(css, /grid-template-columns:minmax\(0,1fr\) minmax\(0,42%\)!important/);
+  assert.match(css, /max-width:380px/);
+});
