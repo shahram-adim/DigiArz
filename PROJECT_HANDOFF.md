@@ -786,11 +786,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Next: create a Draft PR targeting main, inspect its diff, and run available CI. Do not merge or deploy without explicit authorization.
 
 
-## 2026-11-21 — registration PR validation completed
-- PR #42 remains Draft/open and unmerged: https://github.com/shahram-adim/DigiArz/pull/42.
-- Latest branch head: c63b307ba50b35ae5ea07b5def9a7488ae56a8ca. Branch is 5 commits ahead of base main 1c2ba0f9449d64cebc6d511f646fc8857dad1f89, with no divergence behind main.
-- Latest full CI run 44881136326 completed with conclusion SUCCESS on the current branch head. Node/browser integration tests, PostgreSQL arithmetic/regression tests, exact-decimal schema widening rehearsals, atomic rollback/lock-timeout/preflight checks, Market/Limit/Stop-Limit/TP-SL entrypoint and lifecycle integrations, and two-session race/cancellation tests all passed. Run: https://github.com/shahram-adim/DigiArz/actions/runs/44881136326.
-- Previous full CI run 44881104402 also completed SUCCESS on the preceding test commit f738e576219f70d58095416ee0d3db8fd6d9d461. The first two failed runs were stale test assertions expecting the removed fullName field; those assertions were corrected.
-- Final PR diff inspected: exactly three files changed — PROJECT_HANDOFF.md, index.html, tests/index-syntax.test.js. The application change removes the registration name input and stops sending full_name metadata. Login and dashboard behavior/code remain unchanged; no database/schema/account data changes.
-- No main-branch changes, merge, deployment, production database changes, or physical-device test. PR remains Draft pending explicit user authorization to merge. Do not mark it ready or merge automatically.
-- Next: wait for the user's explicit merge authorization; otherwise leave the validated Draft PR untouched.
+## 2026-11-21 — registration form change merged
+- User explicitly authorized merge after the final CI run succeeded.
+- PR #42 was marked ready for review and squash-merged successfully: https://github.com/shahram-adim/DigiArz/pull/42.
+- Merge commit on main: f8fda32c35a529f4719681a91fe800d056514db0. Verified PR state is closed/merged and main points to the same merge commit.
+- Final pre-merge CI run 44881264590 completed SUCCESS on exact PR head 1c73251a991448e54b5f39d8e71b3eb499ef5c34: https://github.com/shahram-adim/DigiArz/actions/runs/44881264590.
+- Application change: registration form no longer asks for first/last name and signup submits email/password only. Existing login, dashboard, stored account metadata, and database schema/data were not changed. Tests assert name field absence and email/password-only signup.
+- No production database migration, schema/data update, release, or deployment was performed. No physical-device test has been performed. The separate APK-only biometric PR #41 remains separate and unaffected.
+- Next: verify the hosted/PWA registration form after the normal deployment pipeline when deployment is separately authorized; do not deploy automatically.
