@@ -64,7 +64,7 @@ a = html.index(listener_start)
 b = html.index(listener_end, a) + len("\n });")
 block = html[a:b]
 callback = block[len(" // Register the auth listener before reading the session so recovery events are not missed.\n supabaseClient.auth.onAuthStateChange("):-len("\n });")]
-bind = "function bindAuthStateListener(){\n if(!supabaseClient)return;\n supabaseClient.auth.onAuthStateChange(" + callback + "\n );\n}\n"
+bind = "function bindAuthStateListener(){\n if(!supabaseClient)return;\n supabaseClient.auth.onAuthStateChange(" + callback + "\n });\n}\n"
 html = html[:a] + " bindAuthStateListener();" + html[b:]
 
 start = "async function start(){"
