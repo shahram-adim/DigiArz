@@ -2,7 +2,7 @@
   "name": "digiarz-android",
   "version": "1.0.0",
   "private": true,
-  "description": "DigiArz demo exchange Android wrapper",
+  "description": "DigiArz demo exchange Android wrapper — isolated native biometric compatibility spike",
   "scripts": {
     "build:web": "mkdir -p www && cp index.html manifest.webmanifest sw.js icon.svg icon-192.svg icon-512.svg www/ && rm -rf www/src && cp -R src www/src"
   },
