@@ -5059,5 +5059,99 @@ body.light-theme #authView .auth-form .auth-actions #signupBtn{
 </style>
 
 
+
+<style id="digiarz-dashboard-market-final-layout-20261121">
+/* Final responsive composition: dashboard and market page stay inside the phone viewport. */
+#appView,#appView>.wrap,#tab-dashboard,#tab-markets{box-sizing:border-box;min-width:0;max-width:100%;width:100%}
+#tab-dashboard,#tab-markets{overflow-x:clip}
+#tab-dashboard .digiarz-v2-dashboard{box-sizing:border-box;width:100%;max-width:100%;min-width:0;margin-inline:auto}
+#tab-dashboard .da-v2-topline,#tab-dashboard .da-v2-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;flex-wrap:wrap}
+#tab-dashboard .da-v2-hero{box-sizing:border-box;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);min-width:0;max-width:100%;overflow:hidden}
+#tab-dashboard .da-v2-hero-copy,#tab-dashboard .da-v2-hero-art{min-width:0;max-width:100%}
+#tab-dashboard .da-v2-quick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;min-width:0}
+#tab-dashboard .da-v2-quick-grid>*{box-sizing:border-box;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+#tab-dashboard .da-market-glass,#tab-dashboard .da-v2-account-card,#tab-dashboard .dashboard-activity-center{box-sizing:border-box;width:100%;max-width:100%;min-width:0;overflow:hidden}
+#tab-dashboard .da-market-toolbar{display:grid;grid-template-columns:minmax(0,1fr) minmax(145px,.42fr);gap:9px;min-width:0}
+#tab-dashboard .da-market-search,#tab-dashboard .da-market-sort{box-sizing:border-box;min-width:0;max-width:100%}
+#tab-dashboard .da-market-search input,#tab-dashboard .da-market-sort select{box-sizing:border-box;width:100%;min-width:0;max-width:100%}
+#tab-dashboard .da-market-filters{display:flex;gap:7px;max-width:100%;min-width:0;overflow-x:auto;overscroll-behavior-inline:contain;padding:3px 1px 8px;scrollbar-width:thin}
+#tab-dashboard .da-market-filters button{flex:0 0 auto;white-space:nowrap}
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;width:100%;max-width:100%;min-width:0;overflow:visible}
+#dashboardMarketPreview .da-market-coin-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.85fr);grid-template-areas:"top top" "price toman" "foot foot";align-content:start;gap:7px;box-sizing:border-box;width:100%;max-width:100%;min-width:0;overflow:hidden;padding:12px}
+#dashboardMarketPreview .da-market-card-top{grid-area:top;display:flex;min-width:0;max-width:100%;gap:7px;margin:0;overflow:hidden}
+#dashboardMarketPreview .da-market-identity{flex:1 1 auto;min-width:0;max-width:100%;overflow:hidden}
+#dashboardMarketPreview .da-market-name-wrap,#dashboardMarketPreview .da-market-name-wrap b{min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+#dashboardMarketPreview .da-market-favorite{flex:0 0 28px;width:28px;height:28px}
+#dashboardMarketPreview .da-market-price{grid-area:price;min-width:0;max-width:100%;font-size:clamp(11px,2.8vw,15px);overflow-wrap:anywhere;word-break:break-word}
+#dashboardMarketPreview .da-market-toman{grid-area:toman;align-self:center;min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:break-word;font-size:clamp(9px,2.3vw,11px)}
+#dashboardMarketPreview .da-market-card-foot{grid-area:foot;min-width:0;max-width:100%;flex-wrap:wrap;margin:2px 0 0;padding-top:7px}
+#dashboardMarketPreview .da-market-change,#dashboardMarketPreview .da-market-chart-btn{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+#tab-dashboard .da-v2-account-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;min-width:0}
+#tab-dashboard .da-v2-account-stats>div{box-sizing:border-box;min-width:0;max-width:100%;overflow:hidden}
+#tab-dashboard .da-v2-account-stats b{display:block;max-width:100%;overflow-wrap:anywhere;word-break:break-word}
+#tab-dashboard .dashboard-activity-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;min-width:0}
+#tab-dashboard .dashboard-activity-panel{box-sizing:border-box;min-width:0;max-width:100%;overflow:hidden}
+#tab-markets .market-hero-v34{box-sizing:border-box;display:grid;grid-template-columns:minmax(0,1fr) minmax(130px,.42fr);gap:16px;width:100%;max-width:100%;min-width:0;overflow:hidden}
+#tab-markets .market-hero-copy,#tab-markets .market-hero-mark{min-width:0;max-width:100%}
+#tab-markets .market-board-v34{box-sizing:border-box;width:100%;max-width:100%;min-width:0;overflow:hidden}
+#tab-markets .market-board-head{display:flex;align-items:center;justify-content:space-between;gap:9px;min-width:0;flex-wrap:wrap}
+#tab-markets .market-board-head>div{min-width:0;max-width:100%}
+#tab-markets .market-head{max-width:100%;overflow-wrap:anywhere}
+#tab-markets .market-board-v34 .market-list{display:grid;grid-template-columns:minmax(0,1fr);gap:0;width:100%;max-width:100%;min-width:0}
+#tab-markets .market-board-v34 .coin{box-sizing:border-box;display:grid;direction:rtl;grid-template-columns:minmax(0,1.4fr) minmax(45px,.48fr) minmax(0,.72fr) minmax(0,1.05fr);grid-template-areas:"identity spark change price";align-items:center;gap:8px;width:100%;max-width:100%;min-width:0;margin:0;padding:12px 8px;overflow:hidden;border:0;border-bottom:1px solid var(--line);border-radius:0;box-shadow:none}
+#tab-markets .market-board-v34 .coin>*{box-sizing:border-box;min-width:0;max-width:100%}
+#tab-markets .market-board-v34 .coin>.favorite-btn{display:none!important}
+#tab-markets .market-board-v34 .coin>.coin-identity{grid-area:identity;display:flex;align-items:center;gap:8px;overflow:hidden}
+#tab-markets .market-board-v34 .coin-sparkline{grid-area:spark;width:100%;min-width:0;overflow:hidden}
+#tab-markets .market-board-v34 .coin-change-wrap{grid-area:change;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;text-align:center;overflow:hidden}
+#tab-markets .market-board-v34 .coin>.price-stack{grid-area:price;display:flex;flex-direction:column;align-items:flex-end;gap:3px;width:100%;min-width:0;overflow:hidden;text-align:right}
+#tab-markets .market-board-v34 .coin-name-stack,#tab-markets .market-board-v34 .coin-name-fa,#tab-markets .market-board-v34 .coin-symbol-en,#tab-markets .market-board-v34 .coin-english-name{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:break-word}
+#tab-markets .market-board-v34 .price-usd,#tab-markets .market-board-v34 .price-toman,#tab-markets .market-board-v34 .coin-source{display:block;width:100%;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+#tab-markets .market-tools,#tab-markets .market-tools-primary{box-sizing:border-box;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;width:100%;max-width:100%;min-width:0}
+#tab-markets .market-tools>* ,#tab-markets .market-tools-primary>*{box-sizing:border-box;min-width:0;max-width:100%}
+#tab-markets .market-tools input{grid-column:1/-1;width:100%;max-width:100%;min-width:0}
+#tab-markets .market-categories{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;min-width:0}
+#tab-markets .market-categories>*{box-sizing:border-box;min-width:0;max-width:100%;overflow-wrap:anywhere}
+@media(max-width:760px){
+ #tab-dashboard .digiarz-v2-dashboard{padding:12px!important;border-radius:18px!important}
+ #tab-dashboard .da-v2-hero{grid-template-columns:minmax(0,1fr) 96px!important;min-height:0!important;padding:17px 12px 55px!important;gap:6px!important}
+ #tab-dashboard .da-v2-hero h1{font-size:clamp(19px,5vw,24px)!important;overflow-wrap:anywhere}
+ #tab-dashboard .da-v2-hero-art{height:118px!important;min-width:0}
+ #tab-dashboard .da-v2-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ #tab-dashboard .da-market-toolbar{grid-template-columns:minmax(0,1fr)}
+ #dashboardMarketPreview.dashboard-market-preview.da-v2-market-list{grid-template-columns:minmax(0,1fr);gap:0}
+ #dashboardMarketPreview .da-market-coin-card{grid-template-columns:minmax(0,1fr) minmax(0,.9fr);padding:10px 8px;border-radius:0;border-width:0 0 1px}
+ #tab-dashboard .da-v2-account-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #tab-dashboard .da-v2-account-stats>div:last-child{grid-column:1/-1}
+ #tab-dashboard .dashboard-activity-grid{grid-template-columns:minmax(0,1fr)}
+ #tab-markets{padding:12px!important}
+ #tab-markets .market-hero-v34{grid-template-columns:minmax(0,1fr) 88px;gap:7px;padding:17px 12px}
+ #tab-markets .market-hero-mark{min-height:100px}
+ #tab-markets .market-categories{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+ #tab-markets .market-board-v34{padding:9px 7px}
+ #tab-markets .market-board-v34 .coin{grid-template-columns:minmax(0,1fr) minmax(0,.88fr);grid-template-areas:"identity price" "change price";grid-template-rows:minmax(34px,auto) minmax(24px,auto);gap:4px 8px;padding:9px 5px}
+ #tab-markets .market-board-v34 .coin-sparkline{display:none!important}
+ #tab-markets .market-board-v34 .coin>.coin-identity{grid-area:identity;gap:6px}
+ #tab-markets .market-board-v34 .coin-change-wrap{grid-area:change;flex-direction:row;flex-wrap:wrap;justify-content:flex-start;gap:3px 6px;text-align:right;overflow:visible}
+ #tab-markets .market-board-v34 .coin>.price-stack{grid-area:price;align-self:center}
+ #tab-markets .market-board-v34 .price-usd{font-size:11px;line-height:1.5}
+ #tab-markets .market-board-v34 .price-toman{font-size:10px;line-height:1.5}
+}
+@media(max-width:390px){
+ #tab-dashboard .da-v2-hero{grid-template-columns:minmax(0,1fr) 76px!important;padding-inline:9px!important}
+ #tab-dashboard .da-v2-hero-art{height:100px!important}
+ #tab-dashboard .da-v2-quick-grid button{min-height:68px!important;padding:8px 5px!important;font-size:10px!important}
+ #dashboardMarketPreview .da-market-price{font-size:11px}
+ #tab-markets .market-hero-v34{grid-template-columns:minmax(0,1fr) 68px;padding:14px 9px}
+ #tab-markets .market-hero-mark{transform:scale(.88);transform-origin:center}
+ #tab-markets .market-categories{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #tab-markets .market-board-v34 .coin{column-gap:5px;padding-inline:3px}
+ #tab-markets .market-board-v34 .coin-icon{width:28px;height:28px;min-width:28px;flex-basis:28px}
+ #tab-markets .market-board-v34 .coin-name-fa{font-size:10px}
+ #tab-markets .market-board-v34 .price-usd{font-size:10px}
+ #tab-markets .market-board-v34 .price-toman{font-size:9px}
+}
+</style>
+
 </body>
 </html>
