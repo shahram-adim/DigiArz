@@ -75,8 +75,19 @@ lifecycle = """async function unlockSavedSession(autoTriggered){
  if(button)button.disabled=true;
  try{
   if(!androidBiometricStorage)throw new Error('ذخیره‌ساز امن اندروید آماده نیست.');
-  await androidBiometricStorage.unlock();
-  if(!supabaseClient){initClient();bindAuthStateListener();}
+  const unlockedSession=await androidBiometricStorage.unlock();
+  if(!unlockedSession)throw new Error('نشست امن با اثر انگشت باز نشد.');
+  // Supabase caches the first initialize() result. After a cancelled cold-start
+  // biometric prompt, dispose that empty client and recreate it so the newly
+  // unlocked native session is actually loaded from secure storage.
+  if(supabaseClient){
+   const previousClient=supabaseClient;
+   await previousClient.auth.stopAutoRefresh();
+   await previousClient.auth.dispose();
+   if(supabaseClient===previousClient)supabaseClient=null;
+  }
+  initClient();
+  bindAuthStateListener();
   await supabaseClient.auth.initialize();
   const result=await supabaseClient.auth.getSession();
   if(result.error)throw result.error;
