@@ -1,3 +1,4 @@
+# Review-only build for Indigo Glass + APK-only Android biometrics; artifact upload only, no publishing.
 name: DigiArz Android APK — Indigo Glass biometric review
 
 on:
