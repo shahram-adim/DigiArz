@@ -832,3 +832,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - The pinned-SDK build script now checks expected UMD SHA-256 `8816af04d9915dbba1882d6f84f0b402dc40268063a63d9c66d24f52f371c263` as well as CDN mirror equality. Await CI result before claiming the digest-pinned build passes.
 - PR #41 remains open Draft; no merge, Production/Supabase mutation, or release.
 - Next: inspect run `44877584070` including the merged-manifest assertion, then proceed to a pinned Supabase JS dependency/lockfile and carefully test the native-only storage adapter. Do not add runtime biometric behavior before these checks.
+
+
+## 2026-11-21 — Android biometric permission check passed
+- Android workflow run [44877584070](https://github.com/shahram-adim/DigiArz/actions/runs/44877584070) completed successfully on commit `ed3496188ca8241f4230974d40f299a7f5f6d9d1`. Capacitor generation/sync, Gradle debug APK build, explicit merged-manifest assertion, APK provenance, and artifact upload all passed.
+- The CI assertion verified `android.permission.USE_BIOMETRIC` in the generated merged debug manifest. This confirms permission packaging only; it does not implement biometric unlocking or prove device behavior.
+- Direct GitHub Release publication was skipped by design on the isolated spike branch. PR #41 remains Draft/unmerged; no main, production Supabase, Auth settings, or secrets changed.
+- Supabase docs confirm the custom Auth storage adapter may use async `getItem`, `setItem`, and `removeItem`. Refresh tokens are single-use, so adapter writes/rotation must be serialized. Current Supabase JS 2.119.2 patch notes contain a Storage URL-boundary fix, no Auth-specific patch change.
+- Remaining supply-chain prerequisite: branch `package.json` pins Capacitor and biometric plugin, but does not declare `@supabase/supabase-js` directly and no `package-lock.json` is committed. The APK UMD bundle has a fixed SHA-256, but this is not a complete npm dependency lock/provenance. Do not implement or enable the Auth adapter until the lockfile and SDK dependency strategy are made reproducible.
+- Next: generate and commit a reproducible lockfile for the Android branch, add a pinned direct Supabase JS dependency if compatible with the APK bundle strategy, verify npm provenance/signatures, then implement and test the native-only async Auth storage adapter. Preserve browser/PWA storage unchanged. No production changes or merge without explicit approval.
