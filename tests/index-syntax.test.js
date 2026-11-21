@@ -499,7 +499,7 @@ test('light theme uses a clean white background and neutral white frosted cards,
   assert.ok(guard > html.indexOf('body.light-theme #appView .card'), 'final light guard follows earlier theme rules');
   const tail = html.slice(guard, html.lastIndexOf('</style>'));
   assert.match(tail, /body\.light-theme\s*\{[^}]*background:#fff!important/s);
-  assert.match(tail, /body\.light-theme #appView\s*,[\s\S]*?background:linear-gradient\(180deg,#fff 0%,#fcfdff 65%,#f8fafc 100%\)!important/);
+  assert.match(tail, /body\.light-theme #appView\s*,[\s\S]*?background:transparent!important/);
   assert.match(tail, /body\.light-theme #appView \.card[\s\S]*?background:rgba\(255,255,255,\.88\)!important/);
   assert.match(tail, /body\.light-theme #authView\s*\{[^}]*linear-gradient\(180deg,#fff 0%,#fbfcfe 100%\)!important/s);
   assert.doesNotMatch(tail, /#eaf3ff|#b8ddf8|#8fc7ef/);
@@ -514,4 +514,16 @@ test('authenticated dashboard shell is revealed before profile and admin-role ne
   const hideLogin = html.indexOf("authView.classList.add('hidden')", start);
   assert.ok(reveal > start && reveal < profileLookup, 'dashboard is made visible before waiting for profile lookup');
   assert.ok(hideLogin > start && hideLogin < profileLookup, 'login is hidden before waiting for profile lookup');
+});
+
+
+test('all inline style elements are balanced and the mobile market stylesheet is independent', () => {
+  const opens = [...html.matchAll(/<style\\b[^>]*>/gi)];
+  const closes = [...html.matchAll(/<\\/style>/gi)];
+  assert.equal(opens.length, closes.length, 'every style element has exactly one closing tag');
+  const heroOpen = html.indexOf('<style id="digiarz-login-hero-premium-v1">');
+  const mobileOpen = html.indexOf('<style id="digiarz-mobile-market-row-containment-20261121">');
+  assert.ok(heroOpen >= 0 && mobileOpen > heroOpen, 'hero and mobile styles are separate ordered blocks');
+  assert.ok(html.lastIndexOf('</style>', mobileOpen) > heroOpen, 'hero stylesheet closes before the mobile stylesheet opens');
+  assert.match(html, /body\\.luxury-theme\\s*\\{[^}]*background:radial-gradient\\(ellipse at 12% 8%/s);
 });
