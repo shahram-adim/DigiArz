@@ -518,12 +518,12 @@ test('authenticated dashboard shell is revealed before profile and admin-role ne
 
 
 test('all inline style elements are balanced and the mobile market stylesheet is independent', () => {
-  const opens = [...html.matchAll(/<style\\b[^>]*>/gi)];
-  const closes = [...html.matchAll(/<\\/style>/gi)];
-  assert.equal(opens.length, closes.length, 'every style element has exactly one closing tag');
+  const opens = html.split('<style').length - 1;
+  const closes = html.split('</style>').length - 1;
+  assert.equal(opens, closes, 'every style element has exactly one closing tag');
   const heroOpen = html.indexOf('<style id="digiarz-login-hero-premium-v1">');
   const mobileOpen = html.indexOf('<style id="digiarz-mobile-market-row-containment-20261121">');
   assert.ok(heroOpen >= 0 && mobileOpen > heroOpen, 'hero and mobile styles are separate ordered blocks');
   assert.ok(html.lastIndexOf('</style>', mobileOpen) > heroOpen, 'hero stylesheet closes before the mobile stylesheet opens');
-  assert.match(html, /body\\.luxury-theme\\s*\\{[^}]*background:radial-gradient\\(ellipse at 12% 8%/s);
+  assert.ok(html.includes('body.luxury-theme{min-height:100vh;background:radial-gradient(ellipse at 12% 8%'), 'theme 3 keeps its pale-blue full-page canvas');
 });
