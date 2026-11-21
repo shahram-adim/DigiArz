@@ -826,3 +826,10 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Workflow dispatch constraint verified against GitHub documentation: a workflow using workflow_dispatch must exist on the default branch for the Run workflow UI/API event to be available. Therefore PR #46 (one workflow file only) is the required safe prerequisite. Its workflow checks out the candidate branch and has no Release/publish action; do not run the existing main android-apk.yml because it has contents:write and publishes a GitHub Release.
 - PR #46 is Draft/open/mergeable and changes only .github/workflows/android-review-apk.yml. It is not merged. Explicit user approval is required before merge.
 - Latest PR #45 candidate remains Draft/open/unmerged. The biometric-specific Node tests and combined APK build have not yet run on a successful Android workflow; the prior Android run 44895135324 was cancelled before job allocation. The separate exact-decimal/browser integration run 44895135448 passed.
+
+
+## 2026-11-21 — user correction: restore third theme as Sky Blue Glass
+- User explicitly rejected the Indigo Glass/indigo-purple third theme and clarified that the third theme must be sky blue; the three themes must remain distinct and must not bleed into one another.
+- Updated only the third theme's scoped `body.luxury-theme` visual palette in `index.html` to Sky Blue Glass, using `#78c8ff` as its signature sky-blue accent. Updated the visible theme selector label and accessible/cycle labels. The existing `light`, `dark`, and `luxury-theme` storage/class identifiers remain compatible.
+- Updated the matching UI regression assertion to check Sky Blue Glass and the sky-blue palette. Login/authentication, dashboard business logic, APK biometric implementation, and Supabase were not edited by this correction.
+- Changes are on the existing isolated Draft PR #45 branch `build/indigo-glass-biometric-apk-2026-11-21`; not merged to main. CI has not yet reported a run for the latest theme-correction head; APK rebuild and physical-device review remain pending.
