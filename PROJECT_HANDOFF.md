@@ -885,3 +885,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Latest tested code head: `8ef8ff72d6710013fd15e3d427da99187b984de8`.
 - New exact-decimal workflow run `44907443764` is in progress; no passing result claimed yet.
 - PR #48 remains open, Draft, unmerged; mergeability last reported true. No APK build yet; physical device visual QA remains pending.
+
+
+## 2026-11-21 — PR #48 Indigo Glass + Android biometric review integration
+- Preserved PR #48's latest UI-only work and ported the previously tested APK-only biometric implementation onto the same fresh-from-main branch: pinned Capacitor 8 dependencies, native biometric session storage module, injection/preparation scripts, Capacitor config, and biometric unit tests.
+- Verified the Android injection anchors occur exactly once in the PR #48 index: decimal script, recovery button, original Supabase initClient, auth-state listener block, and start() function. The build injection is designed to modify only the generated `www/index.html`, not the repository source index.
+- Updated `.github/workflows/android-review-apk.yml` to build from `redesign/indigo-glass-layout-fix-2026-11-21`, trigger on relevant pushes to that branch, verify the Capacitor runtime and merged `USE_BIOMETRIC` permission, and upload only a 14-day debug review APK artifact named `DigiArz-Indigo-Glass-Biometric-APK`.
+- PR #48 branch is now 17 commits ahead of main and 0 behind. Changed files include the UI, test suite, Android build config, biometric module/scripts and artifact-only workflow. PR remains Draft/open/unmerged.
+- Exact-decimal/PostgreSQL/market/order/concurrency workflow run `44916926921` completed SUCCESS before the Android port. The latest exact-decimal run `44917421087` is running after the integration commits; do not claim its result until verified.
+- The APK workflow is configured for the integrated PR #48 branch. A matching Android workflow run/artifact has not yet been verified; do not provide an old Sky Blue APK as the Indigo build.
+- No merge, release, production deployment, Supabase/database changes, or real-money functionality changes. Physical Android install and biometric enrollment/login/logout/relock checks remain outstanding.
+- Next: verify the latest exact-decimal run, then verify the Indigo Glass biometric Android workflow and artifact provenance before sharing any APK.
