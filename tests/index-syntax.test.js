@@ -315,22 +315,25 @@ test('market list rows use five aligned cells, 40px logos, visible Persian names
 });
 
 
-test('login screen uses the scoped premium light-blue-and-gold responsive design', () => {
-  assert.match(html, /DigiArz premium authentication refresh/);
-  assert.match(html, /#authView\.auth[\s\S]*?background:#fff/);
-  assert.match(html, /#authView \.auth-visual[\s\S]*?linear-gradient\(145deg,#102b60 0%,#17458f 52%,#10234a 100%\)/);
-  assert.match(html, /#authView #loginBtn[\s\S]*?linear-gradient\(135deg,#1746a2,#2864c7\)/);
-  assert.match(html, /#authView #signupBtn[\s\S]*?background:#eef3fb/);
-  assert.match(html, /@media\(max-width:700px\)[\s\S]*?#authView\.auth\{grid-template-columns:1fr/);
-  assert.match(html, /@media\(prefers-reduced-motion:reduce\)[\s\S]*?#authView \*\{transition:none!important\}/);
+test('login screen uses the selected Binance-inspired black-and-yellow palette without changing auth behavior', () => {
+  const marker = '/* DigiArz selected Binance-inspired black-and-yellow auth palette — 2026-11-21 */';
+  const paletteStart = html.lastIndexOf(marker);
+  const styleEnd = html.lastIndexOf('</style>');
+  assert.ok(paletteStart >= 0 && styleEnd > paletteStart, 'final brand override is present at the end of the stylesheet');
+  const palette = html.slice(paletteStart, styleEnd);
+  assert.match(palette, /#authView\\.auth-reference-layout\\{[\\s\\S]*?background:#0b0e11!important/);
+  assert.match(palette, /linear-gradient\\(155deg,#181a20 0%,#0b0e11 60%,#11151c 100%\\)!important/);
+  assert.match(palette, /linear-gradient\\(145deg,#181a20,#0b0e11 72%\\)!important/);
+  assert.match(palette, /#authView \\.auth-form \\.auth-actions button\\{[\\s\\S]*?#f0b90b/);
+  assert.match(palette, /#authView \\.auth-form \\.auth-actions #signupBtn\\{[\\s\\S]*?background:#252a33!important/);
+  assert.match(html, /@media\\(max-width:760px\\)[\\s\\S]*?#authView\\.auth-reference-layout/);
   for (const id of ['email','password','loginBtn','signupBtn','forgotBtn','authMsg','recoveryPanel','newPassword','confirmPassword','saveNewPassword']) {
     assert.match(html, new RegExp('id="' + id + '"'), 'existing auth control remains: ' + id);
   }
   assert.doesNotMatch(html, /id="fullName"/, 'registration no longer asks for first or last name');
-  assert.match(html, /async function signup\(\)[\s\S]*?auth\.signUp\(\{email,password,emailRedirectTo:/, 'signup uses email and password only');
-  assert.doesNotMatch(html, /full_name:name|\$\('fullName'\)/, 'signup does not read or submit a name');
+  assert.match(html, /async function signup\\(\\)[\\s\\S]*?auth\\.signUp\\(\\{email,password,emailRedirectTo:/, 'signup uses email and password only');
+  assert.doesNotMatch(html, /full_name:name|\\$\\('fullName'\\)/, 'signup does not read or submit a name');
 });
-
 
 test('login screen embeds a live market phone preview with rotating crypto tickers', () => {
   assert.match(html, /class="auth-phone-preview"/);
