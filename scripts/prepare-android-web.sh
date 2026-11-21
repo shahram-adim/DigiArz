@@ -8,6 +8,15 @@ TMP_B="$(mktemp)"
 trap 'rm -f "$TMP_A" "$TMP_B"' EXIT
 
 mkdir -p www/vendor
+
+# Capacitor 8 no longer generates capacitor.js for plain-script apps when bundledWebRuntime is false.
+# This project has no bundler, so copy the pinned Capacitor Core global runtime explicitly.
+CAPACITOR_RUNTIME="node_modules/@capacitor/core/dist/capacitor.js"
+if [[ ! -s "$CAPACITOR_RUNTIME" ]]; then
+  echo "Pinned Capacitor Core runtime is missing: $CAPACITOR_RUNTIME" >&2
+  exit 1
+fi
+install -m 0644 "$CAPACITOR_RUNTIME" "www/capacitor.js"
 curl --fail --silent --show-error --location --retry 3 \
   "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@${VERSION}/dist/umd/supabase.js" \
   --output "$TMP_A"
