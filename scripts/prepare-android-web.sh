@@ -40,5 +40,7 @@ if html.count(old) != 1:
 p.write_text(html.replace(old, new, 1))
 PY
 
+python3 scripts/inject-android-biometric.py
+
 sha256sum "$DEST"
 echo "Android APK web bundle now uses pinned Supabase JS ${VERSION}; source index.html is unchanged."
