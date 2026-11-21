@@ -12,6 +12,7 @@ on:
       - "sw.js"
       - "icon*.svg"
       - "src/**"
+      - "scripts/**"
       - "package.json"
       - "capacitor.config.json"
       - ".github/workflows/android-apk.yml"
@@ -45,8 +46,8 @@ jobs:
       - name: Install Capacitor
         run: npm install --no-audit --no-fund
 
-      - name: Prepare web assets
-        run: npm run build:web
+      - name: Prepare Android web assets with pinned Supabase SDK
+        run: npm run build:android
 
       - name: Generate Android project
         run: npx cap add android
