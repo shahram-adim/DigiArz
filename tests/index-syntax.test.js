@@ -465,3 +465,14 @@ test('third theme controls and chart palette consistently use pale blue glass', 
   assert.match(html, /luxury\?\{bg:'#eaf3ff',text:'#183b5c',grid:'#d7eafa',line:'#b8d5eb'\}/);
   assert.doesNotMatch(html, /luxury:'نیلی شیشه‌ای'/);
 });
+
+
+test('final pale-blue glass cascade overrides legacy indigo dashboard and login controls', () => {
+  const guard = html.lastIndexOf('/* Final cascade guard: pale sky-blue glass');
+  assert.ok(guard > html.indexOf('body.luxury-theme #appView .digiarz-v2-dashboard'), 'final cascade guard follows legacy indigo rules');
+  const tail = html.slice(guard, html.lastIndexOf('</style>'));
+  assert.match(tail, /body\.luxury-theme #appView \.card[\s\S]*?background:rgba\(255,255,255,\.64\)!important/);
+  assert.match(tail, /body\.luxury-theme #appView #tab-markets \.coin[\s\S]*?border:0!important/);
+  assert.match(tail, /body\.luxury-theme #authView \.auth-form \.auth-actions #loginBtn[\s\S]*?linear-gradient\(135deg,#b8ddf8,#8fc7ef\)!important/);
+  assert.doesNotMatch(tail, /#9862f4|#9587e8|#090d20/);
+});
