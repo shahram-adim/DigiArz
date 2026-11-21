@@ -5,12 +5,14 @@
   "description": "DigiArz demo exchange Android wrapper — isolated native biometric compatibility spike",
   "scripts": {
     "build:web": "mkdir -p www && cp index.html manifest.webmanifest sw.js icon.svg icon-192.svg icon-512.svg www/ && rm -rf www/src && cp -R src www/src",
-    "build:android": "npm run build:web && bash scripts/prepare-android-web.sh"
+    "build:android": "npm run build:web && bash scripts/prepare-android-web.sh",
+    "test": "node --test scripts/test-android-biometric.js"
   },
   "dependencies": {
     "@capacitor/android": "8.6.2",
     "@capacitor/core": "8.6.2",
-    "@capgo/capacitor-native-biometric": "8.9.3"
+    "@capgo/capacitor-native-biometric": "8.9.3",
+    "@capacitor/app": "8.1.2"
   },
   "devDependencies": {
     "@capacitor/cli": "8.6.2"
