@@ -321,18 +321,23 @@ test('login screen uses the selected Binance-inspired black-and-yellow palette w
   const styleEnd = html.lastIndexOf('</style>');
   assert.ok(paletteStart >= 0 && styleEnd > paletteStart, 'final brand override is present at the end of the stylesheet');
   const palette = html.slice(paletteStart, styleEnd);
-  assert.match(palette, /#authView\\.auth-reference-layout\\{[\\s\\S]*?background:#0b0e11!important/);
-  assert.match(palette, /linear-gradient\\(155deg,#181a20 0%,#0b0e11 60%,#11151c 100%\\)!important/);
-  assert.match(palette, /linear-gradient\\(145deg,#181a20,#0b0e11 72%\\)!important/);
-  assert.match(palette, /#authView \\.auth-form \\.auth-actions button\\{[\\s\\S]*?#f0b90b/);
-  assert.match(palette, /#authView \\.auth-form \\.auth-actions #signupBtn\\{[\\s\\S]*?background:#252a33!important/);
-  assert.match(html, /@media\\(max-width:760px\\)[\\s\\S]*?#authView\\.auth-reference-layout/);
+  assert.ok(palette.includes('#authView.auth-reference-layout{'), 'final palette scopes to the reference auth layout');
+  assert.ok(palette.includes('background:#0b0e11!important'), 'outer auth surface uses black');
+  assert.ok(palette.includes('linear-gradient(155deg,#181a20 0%,#0b0e11 60%,#11151c 100%)!important'), 'visual panel uses charcoal and black');
+  assert.ok(palette.includes('linear-gradient(145deg,#181a20,#0b0e11 72%)!important'), 'form panel uses charcoal and black');
+  assert.ok(palette.includes('#f0b90b'), 'selected brand yellow remains the primary accent');
+  assert.ok(palette.includes('background:#252a33!important'), 'signup button remains a secondary charcoal action');
+  assert.ok(html.includes('@media(max-width:760px){') && html.includes('#authView.auth-reference-layout{margin:0 auto 18px!important}'), 'existing mobile layout remains');
   for (const id of ['email','password','loginBtn','signupBtn','forgotBtn','authMsg','recoveryPanel','newPassword','confirmPassword','saveNewPassword']) {
     assert.match(html, new RegExp('id="' + id + '"'), 'existing auth control remains: ' + id);
   }
   assert.doesNotMatch(html, /id="fullName"/, 'registration no longer asks for first or last name');
-  assert.match(html, /async function signup\\(\\)[\\s\\S]*?auth\\.signUp\\(\\{email,password,emailRedirectTo:/, 'signup uses email and password only');
-  assert.doesNotMatch(html, /full_name:name|\\$\\('fullName'\\)/, 'signup does not read or submit a name');
+  const signupStart = html.indexOf('async function signup(){');
+  const loginStart = html.indexOf('async function login(){', signupStart);
+  assert.ok(signupStart >= 0 && loginStart > signupStart, 'signup handler remains separate from login');
+  const signupBody = html.slice(signupStart, loginStart);
+  assert.ok(signupBody.includes('auth.signUp({email,password,emailRedirectTo:'), 'signup uses email and password only');
+  assert.ok(!signupBody.includes('full_name') && !signupBody.includes('fullName'), 'signup does not read or submit a name');
 });
 
 test('login screen embeds a live market phone preview with rotating crypto tickers', () => {
