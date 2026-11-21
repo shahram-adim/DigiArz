@@ -24,17 +24,17 @@ BEGIN
   END IF;
 
   -- The JSONB text tie-breaker must choose the same payload regardless of input order.
-  WITH rows(requested_at, request_id, asset_name, source_payload) AS (
+  WITH rows(market_symbol, requested_at, request_id, asset_name, source_payload) AS (
     VALUES
-      (timestamptz '2026-01-01 00:00:00+00', 7::bigint, 'Alpha'::text, '{"z":1,"a":2}'::jsonb),
-      (timestamptz '2026-01-01 00:00:00+00', 7::bigint, 'Alpha'::text, '{"z":2,"a":1}'::jsonb)
+      ('AAA_USDT'::text, timestamptz '2026-01-01 00:00:00+00', 7::bigint, 'Alpha'::text, '{"z":1,"a":2}'::jsonb),
+      ('AAA_USDT'::text, timestamptz '2026-01-01 00:00:00+00', 7::bigint, 'Alpha'::text, '{"z":2,"a":1}'::jsonb)
   )
   SELECT source_payload INTO v_selected
   FROM (
-    SELECT DISTINCT ON ('AAA_USDT')
+    SELECT DISTINCT ON (market_symbol)
       source_payload
     FROM rows
-    ORDER BY 'AAA_USDT', requested_at DESC, request_id DESC,
+    ORDER BY market_symbol, requested_at DESC, request_id DESC,
              (asset_name IS NOT NULL) DESC, source_payload::text DESC
   ) chosen;
 
