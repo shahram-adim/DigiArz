@@ -476,3 +476,15 @@ test('final pale-blue glass cascade overrides legacy indigo dashboard and login 
   assert.match(tail, /body\.luxury-theme #authView \.auth-form \.auth-actions #loginBtn[\s\S]*?linear-gradient\(135deg,#b8ddf8,#8fc7ef\)!important/);
   assert.doesNotMatch(tail, /#9862f4|#9587e8|#090d20/);
 });
+
+
+test('light theme uses a clean white background and neutral white frosted cards, distinct from blue glass', () => {
+  const guard = html.lastIndexOf('/* Final light-theme guard: clean white');
+  assert.ok(guard > html.indexOf('body.light-theme #appView .card'), 'final light guard follows earlier theme rules');
+  const tail = html.slice(guard, html.lastIndexOf('</style>'));
+  assert.match(tail, /body\.light-theme\s*\{[^}]*background:#fff!important/s);
+  assert.match(tail, /body\.light-theme #appView\s*,[\s\S]*?background:linear-gradient\(180deg,#fff 0%,#fcfdff 65%,#f8fafc 100%\)!important/);
+  assert.match(tail, /body\.light-theme #appView \.card[\s\S]*?background:rgba\(255,255,255,\.88\)!important/);
+  assert.match(tail, /body\.light-theme #authView\s*\{[^}]*linear-gradient\(180deg,#fff 0%,#fbfcfe 100%\)!important/s);
+  assert.doesNotMatch(tail, /#eaf3ff|#b8ddf8|#8fc7ef/);
+});
