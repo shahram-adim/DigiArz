@@ -1,25 +1,27 @@
-name: DigiArz Android APK
+name: DigiArz Android APK — Indigo Glass biometric review
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - build/indigo-glass-biometric-apk-2026-11-21
     paths:
       - "index.html"
       - "manifest.webmanifest"
       - "sw.js"
       - "icon*.svg"
       - "src/**"
+      - "scripts/**"
       - "package.json"
       - "capacitor.config.json"
+      - "tests/**"
       - ".github/workflows/android-apk.yml"
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: digiarz-android-apk
+  group: digiarz-indigo-glass-biometric-review
   cancel-in-progress: false
 
 jobs:
@@ -33,19 +35,36 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
 
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: "21"
 
-      - name: Install Capacitor
-        run: npm install --no-audit --no-fund
+      - name: Install exact locked dependencies
+        run: npm ci --no-audit --no-fund
 
-      - name: Prepare web assets
-        run: npm run build:web
+      - name: Verify npm package signatures
+        run: npm audit signatures
+
+      - name: Run Android biometric storage unit tests
+        run: npm test
+
+      - name: Verify and upload generated npm lockfile
+        run: test -s package-lock.json
+
+      - name: Upload npm lockfile for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: DigiArz-npm-lockfile
+          path: package-lock.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Prepare Android web assets with pinned Supabase SDK
+        run: npm run build:android
 
       - name: Generate Android project
         run: npx cap add android
@@ -53,11 +72,33 @@ jobs:
       - name: Sync Android project
         run: npx cap sync android
 
+      - name: Verify Capacitor runtime is packaged
+        run: |
+          RUNTIME="android/app/src/main/assets/public/capacitor.js"
+          test -s "$RUNTIME"
+          grep -q "registerPlugin" "$RUNTIME"
+          echo "Verified Capacitor global runtime and registerPlugin bridge: $RUNTIME"
+
       - name: Build installable debug APK
         run: |
           cd android
           chmod +x gradlew
           ./gradlew --no-daemon assembleDebug
+
+      - name: Verify merged biometric permission
+        run: |
+          MANIFEST="$(find android/app/build/intermediates -type f -path '*/merged_manifest/*/processDebugMainManifest/AndroidManifest.xml' -print -quit)"
+          if [[ -z "$MANIFEST" ]]; then
+            echo "Merged Android manifest not found; cannot verify biometric permission." >&2
+            find android/app/build/intermediates -type f -name AndroidManifest.xml -print >&2
+            exit 1
+          fi
+          if ! grep -q 'android.permission.USE_BIOMETRIC' "$MANIFEST"; then
+            echo "Merged Android manifest is missing android.permission.USE_BIOMETRIC." >&2
+            cat "$MANIFEST" >&2
+            exit 1
+          fi
+          echo "Verified android.permission.USE_BIOMETRIC in $MANIFEST"
 
       - name: Record APK build provenance
         run: |
@@ -77,20 +118,9 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DigiArz-Android-debug-APK
+          name: DigiArz-Indigo-Glass-Biometric-APK
           path: |
             android/app/build/outputs/apk/debug/app-debug.apk
             android/app/build/outputs/apk/debug/BUILD-INFO.txt
           if-no-files-found: error
           retention-days: 14
-
-      - name: Publish direct APK download
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: android-debug-${{ github.run_number }}
-          name: DigiArz Android Debug APK (Build ${{ github.run_number }})
-          body: |
-            Automatically built debug APK for commit ${{ github.sha }}.
-            This is a test build, not a production-signed release.
-          files: android/app/build/outputs/apk/debug/app-debug.apk
-          fail_on_unmatched_files: true
