@@ -794,3 +794,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Application change: registration form no longer asks for first/last name and signup submits email/password only. Existing login, dashboard, stored account metadata, and database schema/data were not changed. Tests assert name field absence and email/password-only signup.
 - No production database migration, schema/data update, release, or deployment was performed. No physical-device test has been performed. The separate APK-only biometric PR #41 remains separate and unaffected.
 - Next: verify the hosted/PWA registration form after the normal deployment pipeline when deployment is separately authorized; do not deploy automatically.
+
+ 
+## 2026-11-21 — restore 11:26 Indigo Glass visual specification (isolated)
+- Recovered the user's 2026-11-20 07:56 UTC / 11:26 Iran-time visual preference from prior conversation context: third theme is **Indigo Glass** (deep indigo, glassy/transparent blue, icy blue, soft purple, mint); existing black/dark and light themes must remain unchanged.
+- User also specified a premium login hero with animated globe, moving phone, floating crypto coins, and a live BTC chart. The current main branch had the third theme styled as teal/gold luxury glass, while the globe/coins were forced static by later CSS overrides. The existing login mini chart refreshed candles every 60 seconds; rotating coin tickers already refresh every 4.5 seconds.
+- Created isolated branch ui/restore-indigo-glass-1126-2026-11-20 from current main; no changes to main, PR #43, or the separate APK-only biometric PR #41.
+- Updated index.html on the isolated branch: replaced only the third theme's visual palette with Indigo Glass, renamed its visible label while preserving the existing luxury storage key/class for backward compatibility, restored globe/coin motion, added a gentle phone float, and updated the current five-minute BTC candle every 4 seconds from the real Binance ticker (reusing the existing market gateway; no synthetic price generation). Dark and light theme CSS/values were not edited.
+- Added regression assertions in tests/index-syntax.test.js for Indigo Glass, theme-key compatibility, motion/reduced-motion, and 4-second real-ticker candle updates. CI has not yet run; Android device testing has not been performed.
+- No auth, registration, dashboard business logic, wallet, orders, trading, Supabase, database, or deployment changes were made. The merged PR #42 registration simplification remains intact. No merge/release/deploy performed.
+- Next: open a Draft PR for this isolated visual branch, inspect exact diff and run CI; then review an APK build without merging or publishing.
