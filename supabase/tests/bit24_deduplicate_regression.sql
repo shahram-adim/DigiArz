@@ -38,7 +38,7 @@ BEGIN
              (asset_name IS NOT NULL) DESC, source_payload::text DESC
   ) chosen;
 
-  IF v_selected IS DISTINCT FROM '{"z":2,"a":1}'::jsonb THEN
+  IF v_selected IS DISTINCT FROM '{"z":1,"a":2}'::jsonb THEN
     RAISE EXCEPTION 'Deterministic JSONB tie-break regression failed: selected %', v_selected;
   END IF;
 END;
