@@ -794,3 +794,15 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Application change: registration form no longer asks for first/last name and signup submits email/password only. Existing login, dashboard, stored account metadata, and database schema/data were not changed. Tests assert name field absence and email/password-only signup.
 - No production database migration, schema/data update, release, or deployment was performed. No physical-device test has been performed. The separate APK-only biometric PR #41 remains separate and unaffected.
 - Next: verify the hosted/PWA registration form after the normal deployment pipeline when deployment is separately authorized; do not deploy automatically.
+
+
+## 2026-11-21 — unified UI shell repair (PR #43)
+- User requested a global correction after reporting the old login screen, simultaneous login/dashboard visibility, and unwanted side margins across app pages.
+- Live audit found the independent redesign CSS existed only on the highly diverged Draft branch redesign/independent-ui-2026 (PR #31), while main already contained the newer auth/dashboard markup but did not load that stylesheet. The CSS selector #authView{display:grid!important} also overrode the generic .hidden class due to ID specificity, explaining why the login screen could remain visible beside the dashboard.
+- Created clean branch fix/unified-mobile-ui-auth-layout-2026-11-21 from current main and Draft PR #43: https://github.com/shahram-adim/DigiArz/pull/43.
+- Added the isolated responsive deep-teal/mint stylesheet, explicit auth/app hidden-state overrides, full-width shell rules with safe mobile gutters, five-item mobile navigation (Home, Market, Trade, Wallet, Services), and services shortcuts for orders/history/chart/Toman market.
+- Added stylesheet to Service Worker precache and bumped shell cache v58 to v59. Added regression assertions for hidden-state specificity, stylesheet ordering/cache, five nav items and services shortcuts; updated offline-shell count to 11.
+- First CI run 44882539327 caught only a stale Service Worker test count (10 vs 11); updated the test to assert the new stylesheet is precached.
+- Full CI run 44882595290 completed SUCCESS on commit 77dc52a5cbd0f769c3420e6c5fdd376855b36f69; UI/browser tests, PostgreSQL arithmetic, migration rehearsal/rollback/lock-timeout checks, Market/Limit, Stop-Limit/TP-SL lifecycle and concurrency tests all passed.
+- No auth logic, trading logic, balances, database/schema/migrations, Supabase settings/secrets, deployment, release, or APK build was changed. No physical Android visual/device test has been performed.
+- PR #43 remains Draft and unmerged. Main remains unchanged. Next: revalidate the final PR head/checks after this handoff update; then await explicit authorization before merge. After merge, a separate approved build/deployment and device test are still required before calling the app fixed on the user's phone.
