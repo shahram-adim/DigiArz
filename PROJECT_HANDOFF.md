@@ -784,3 +784,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Updated `index.html` in commit `10429774dd9115508141e1b11001e399a555a322`: removed the combined name input from the shared auth form and removed the `full_name` signup metadata payload. Registration now submits email and password only. Existing login, dashboard, profile/database columns, and existing users' stored metadata were not changed.
 - Static exact-string verification in the edit step confirmed the signup form no longer contains `id="fullName"`, the signup handler no longer reads `$('fullName')`, and no longer submits `full_name:name`. No CI or browser/device test has yet been run for this change.
 - Next: create a Draft PR targeting main, inspect its diff, and run available CI. Do not merge or deploy without explicit authorization.
+
+
+## 2026-11-21 — registration PR validation follow-up
+- PR #42 remains Draft/open and unmerged: https://github.com/shahram-adim/DigiArz/pull/42.
+- First CI run 44880960263 failed because two existing UI assertions in `tests/index-syntax.test.js` still required `id="fullName"`; 53/55 Node tests passed. This was a stale expectation, not a runtime signup failure. The failed run did not reach PostgreSQL tests.
+- Updated both login-screen assertions to require email/password and the other existing auth controls, explicitly assert that `fullName` is absent, and assert signup submits only `{email,password,emailRedirectTo}` with no `full_name` metadata.
+- Test changes committed on the isolated branch: `f738e576219f70d58095416ee0d3db8fd6d9d461` (intermediate test commit `ceadbbd70b76026a099948e65431cb399b7e8383`).
+- Re-run 44881094818 was triggered by PR synchronize and was still in `Initialize containers` at the latest check; no test result is claimed yet.
+- No main-branch changes, merge, deployment, database schema/data changes, or physical-device test.
+- Next: re-check run 44881094818; if green, inspect final PR diff and keep Draft pending user authorization to merge.
