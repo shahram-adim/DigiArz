@@ -1092,6 +1092,7 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 
 
 ## 2026-11-21 — pure-white glass theme 2 and dashboard/market finishing pass
+- A follow-up source audit found additional legacy grey-tinted secondary surfaces (market toolbar/header, orderbook mid, detail sections, history hover rows and auth security banner). Added a final explicit white-surface override and regression assertions for these areas; no semantic green/red status indicators or theme 1/theme 3 selectors are changed.
 - User clarified that theme 2 must be white throughout, with no grey anywhere; the dashboard and market layouts must remain professional and orderly.
 - Inspected the current PR #48 source and found remaining grey-tinted theme-2 surfaces: page gradient variables, card borders, hero gradient, grey primary buttons, grey active tabs, and grey form borders/buttons.
 - Created isolated follow-up branch `fix/pure-white-glass-dashboard-market-2026-11-21` from the PR #48 candidate, preserving the existing responsive dashboard/market layout and theme 1/theme 3 separation.
