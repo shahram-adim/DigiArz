@@ -877,3 +877,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - No authentication/trading JavaScript intentionally changed; no Supabase/database edits, merge, release, deployment, or publishing.
 - Physical visual QA on the Android device remains outstanding. Current PR #47 (Sky Blue) remains separate and unmerged; do not merge either PR without explicit approval.
 - Next: wait for/verify PR #48 CI, review the exact rendered login/dashboard/market layouts at mobile width, correct any visual regressions, then produce a review APK only after build provenance and biometric scope are validated.
+
+
+### PR #48 CI correction — 2026-11-21
+- First exact-decimal workflow run `44907362540` failed only in the newly added UI regression test: its assertion expected a standalone light-theme selector, while the actual valid CSS grouped the light-theme card selectors. Existing tests 1–38 passed, including the three-theme and login-hero checks.
+- Corrected the test selector assertion without changing app CSS or behavior.
+- Latest tested code head: `8ef8ff72d6710013fd15e3d427da99187b984de8`.
+- New exact-decimal workflow run `44907443764` is in progress; no passing result claimed yet.
+- PR #48 remains open, Draft, unmerged; mergeability last reported true. No APK build yet; physical device visual QA remains pending.
