@@ -794,3 +794,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Application change: registration form no longer asks for first/last name and signup submits email/password only. Existing login, dashboard, stored account metadata, and database schema/data were not changed. Tests assert name field absence and email/password-only signup.
 - No production database migration, schema/data update, release, or deployment was performed. No physical-device test has been performed. The separate APK-only biometric PR #41 remains separate and unaffected.
 - Next: verify the hosted/PWA registration form after the normal deployment pipeline when deployment is separately authorized; do not deploy automatically.
+
+
+## 2026-11-21 — safe Android review workflow enabled
+- User explicitly authorized PR #46 merge with “خودت انجام بده”.
+- PR #46 was marked ready and squash-merged into main as commit `e5265e1fd34f0134f132402e592954c1b306e25c`. It adds only `.github/workflows/android-review-apk.yml`.
+- Reverified PR #46 closed/merged and PR #45 remains Draft/open/unmerged at head `a0c90240bcf785e1307bacadd40d203384debf6d`; no app code was merged.
+- The safe workflow is read-only, manually dispatched, checks out the isolated PR #45 candidate branch, runs biometric and UI regression tests, builds a debug APK, verifies `USE_BIOMETRIC`, and uploads a 14-day artifact only. No release, deployment, or Supabase/database operation.
+- The available GitHub connection supports workflow-run inspection and artifact download but does not expose the workflow-dispatch action. Therefore no build run has been triggered from this session and no APK artifact is claimed. Next action: trigger “DigiArz Android Review APK — artifact only” from the repository Actions page, then inspect the run and artifact. Do not merge PR #45 or publish a release without separate explicit approval.
