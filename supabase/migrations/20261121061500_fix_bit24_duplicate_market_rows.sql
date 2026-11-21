@@ -38,8 +38,7 @@ BEGIN
     SELECT market_symbol
     FROM rows
     GROUP BY market_symbol
-    HAVING count(DISTINCT base_symbol) > 1
-        OR count(DISTINCT quote_symbol) > 1
+    HAVING count(DISTINCT (base_symbol, quote_symbol)) > 1
   ) conflicts;
 
   IF v_conflicts > 0 THEN
@@ -72,7 +71,8 @@ BEGIN
     SELECT DISTINCT ON (market_symbol)
       market_symbol, base_symbol, quote_symbol, asset_name, source_payload
     FROM rows
-    ORDER BY market_symbol, requested_at DESC, request_id DESC, (asset_name IS NOT NULL) DESC
+    ORDER BY market_symbol, requested_at DESC, request_id DESC,
+             (asset_name IS NOT NULL) DESC, source_payload::text DESC
   )
   INSERT INTO public.exchange_asset_observations(
     exchange, market_symbol, base_symbol, quote_symbol, asset_name,
