@@ -103,3 +103,13 @@ No Production/Supabase changes, no main merge, no release publication, no change
 - This verifies manifest permission inclusion, not that biometric unlock is implemented or device-tested. There is still no runtime biometric prompt or Auth storage adapter.
 - Current package manifest still has no direct `@supabase/supabase-js` dependency and no committed `package-lock.json`. The local APK bundle is SHA-pinned, but dependency-tree lockfile and npm provenance remain prerequisites before Auth adapter implementation.
 - Supabase JS 2.119.2 release notes show only a Storage URL-boundary validation fix; no Auth change in that patch. Supabase docs explicitly support async custom Auth storage methods `getItem`, `setItem`, and `removeItem`. Refresh tokens are single-use, so session rotation must be serialized and tested. References: https://github.com/supabase/supabase-js/releases and https://supabase.com/docs/guides/auth/sessions.
+
+
+## 2026-11-21 — reproducible debug APK build passed
+- Run [44878126615](https://github.com/shahram-adim/DigiArz/actions/runs/44878126615) completed successfully on source commit `95e5ab4501ff9f95cc8122ff2ddc02f32fec0c7e`.
+- Workflow-generated `package-lock.json` was committed to the isolated branch in commit `11e8c79ce9ddb93ee99d744a30d4dab4260219b8`. Exact `npm ci` and `npm audit signatures` both passed.
+- APK-only pinned Supabase SDK preparation, Capacitor Android project generation/sync, Gradle debug build, and CI verification of `android.permission.USE_BIOMETRIC` in the merged manifest all passed.
+- APK artifact ID: `14697097236`; size: 6,172,010 bytes; expiry: 2026-12-05T07:02:33Z. Extracted APK SHA-256: `6fc1ebe8f73dcd9e5552bff729352c245166e7adfafd172bc1225c4d9441eaa8`. Provenance file identifies workflow run 44878126615 and source commit 95e5ab4501ff9f95cc8122ff2ddc02f32fec0c7e.
+- Lockfile artifact ID: `14697200642`; artifact digest: `sha256:bf2ecc0a7b55860804eac2481e44ae3e857c58b6c2a4670f7d3102ecdaaf0d92`.
+- Important: this is only a debug compatibility APK. The fingerprint UI and biometric-protected Supabase Auth session adapter are **not implemented**; no real-device installation/test is claimed. PR #41 remains Draft/open/unmerged; release step was skipped. Main/PWA and Production Supabase are unchanged.
+- Next: implement the native-only secure session storage adapter behind Capacitor native-platform detection; serialize token refresh writes; test cold start, process death, background/resume, recovery URL, logout, cancellation/lockout, and biometric enrollment changes before enabling the feature.
