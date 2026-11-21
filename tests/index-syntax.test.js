@@ -429,6 +429,8 @@ test('third theme is Sky Blue Glass and remains scoped independently from light 
   assert.ok(html.includes('آبی آسمانی شیشه‌ای · Sky Blue Glass'));
   assert.ok(html.includes('body.luxury-theme{color-scheme:dark;--bg:#061a2b'));
   assert.ok(html.includes('--yellow:#78c8ff'));
+  assert.ok(html.includes('auth-form{background:#0b2c43}'));
+  assert.ok(!html.includes('#1b245f'), 'third theme must not retain indigo fallback colors');
   assert.ok(html.includes('linear-gradient(135deg,#8bd4ff,#42a9e5)'));
   assert.ok(html.includes("localStorage.setItem('digiArzTheme',selected)"));
   assert.ok(html.includes("id=\"digiarz-sky-blue-glass-motion\""));
