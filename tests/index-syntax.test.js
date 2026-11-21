@@ -435,7 +435,7 @@ test('approved indigo glass, separated page shells, and repaired borderless mark
   assert.match(html, /#tab-markets \.coin\s*\{[^}]*grid-template-columns:minmax\(0,1\.25fr\)/s);
   assert.match(html, /#tab-markets \.coin>\.favorite-btn[^\{]*\{display:none!important\}/);
   assert.match(html, /#tab-markets \.coin\s*\{[^}]*border:0!important/s);
-  assert.match(html, /luxury:'نیلی شیشه‌ای'/);
+  assert.match(html, /luxury:'آبی شیشه‌ای'/);
   assert.match(html, /body\.auth-page-active #appView[\s\S]*?display:none!important/);
   assert.match(html, /body\.dashboard-page-active #authView[\s\S]*?display:none!important/);
   assert.match(html, /#authView\.hidden,\s*#appView\.hidden\{display:none!important\}/);
@@ -456,4 +456,12 @@ test('final theme overrides remain inside the stylesheet rather than leaking int
     '',
     'no CSS or raw style declarations may appear outside the final style element'
   );
+});
+
+test('third theme controls and chart palette consistently use pale blue glass', () => {
+  assert.match(html, /data-theme-choice="luxury"[^>]*>✧ آبی شیشه‌ای/);
+  assert.match(html, /document\.documentElement\.style\.colorScheme=light\|\|luxury\?'light':'dark'/);
+  assert.match(html, /luxury\?'#eaf3ff':'#080d1b'/);
+  assert.match(html, /luxury\?\{bg:'#eaf3ff',text:'#183b5c',grid:'#d7eafa',line:'#b8d5eb'\}/);
+  assert.doesNotMatch(html, /luxury:'نیلی شیشه‌ای'/);
 });
