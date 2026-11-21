@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
-      - name: Checkout approved Indigo Glass biometric candidate
+      - name: Checkout approved pale-blue glass biometric candidate
         uses: actions/checkout@v4
         with:
           ref: redesign/indigo-glass-layout-fix-2026-11-21
@@ -110,7 +110,7 @@ jobs:
       - name: Upload review APK artifact only
         uses: actions/upload-artifact@v4
         with:
-          name: DigiArz-Indigo-Glass-Biometric-APK
+          name: DigiArz-Pale-Blue-Glass-Biometric-APK
           path: |
             android/app/build/outputs/apk/debug/app-debug.apk
             android/app/build/outputs/apk/debug/BUILD-INFO.txt
