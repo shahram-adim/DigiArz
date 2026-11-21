@@ -447,6 +447,22 @@ test('approved indigo glass, separated page shells, and repaired borderless mark
   assert.match(html, /body\.luxury-theme #appView \.mobile-bottom-nav[\s\S]*?background:rgba\(250,252,255,\.82\)/);
 });
 
+test('crypto market rows stay inside the viewport on narrow phones in every theme', () => {
+  const marker = '/* DIGIARZ-MOBILE-MARKET-ROW-CONTAINMENT-20261121 */';
+  const start = html.lastIndexOf(marker);
+  const end = html.lastIndexOf('</style>');
+  assert.ok(start >= 0 && end > start, 'final mobile row containment override exists');
+  const css = html.slice(start, end);
+  assert.match(css, /#tab-markets \.market-board-v34 \.coin\s*\{[^}]*box-sizing:border-box!important/s);
+  assert.match(css, /#tab-markets \.market-board-v34 \.coin\s*\{[^}]*width:100%!important;min-width:0!important;max-width:100%!important/s);
+  assert.match(css, /@media\(max-width:760px\)[\s\S]*?grid-template-columns:minmax\(0,1fr\) minmax\(0,42%\)!important/);
+  assert.match(css, /@media\(max-width:380px\)[\s\S]*?grid-template-columns:minmax\(0,1fr\) minmax\(0,44%\)!important/);
+  assert.match(css, /coin\\.price-usd[\s\S]*?overflow-wrap:anywhere!important/);
+  assert.match(css, /#dashboardMarketPreview\.dashboard-market-preview\.da-v2-market-list>\.da-market-coin-card\s*\{[^}]*min-width:0!important;max-width:100%!important/s);
+  assert.match(css, /#dashboardMarketPreview \.da-market-price[\s\S]*?word-break:break-word!important/);
+  assert.match(css, /border:0!important;border-radius:0!important;outline:0!important;box-shadow:none!important/);
+});
+
 test('final theme overrides remain inside the stylesheet rather than leaking into document text', () => {
   const finalStyleClose = html.lastIndexOf('</style>');
   const bodyClose = html.indexOf('</body>', finalStyleClose);
