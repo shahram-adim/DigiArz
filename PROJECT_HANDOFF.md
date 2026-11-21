@@ -1029,3 +1029,15 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Fix commits: 0fd5b351cfa574dfc79ce6390c298987e5a3d273 (application) and 3254e0a3ddf65bd8754097e294b9c81588d10398 (test).
 - No CI run has yet been returned for the test commit; do not claim automated validation passed. No merge, deployment, release, or Supabase/database change was performed. PR #48 remains isolated for review.
 - Next: verify the CI run for the latest PR #48 head, then build/review an APK or deploy only after the user's explicit approval. Confirm actual dashboard open on Android after installing the matching build.
+
+
+## 2026-11-21 — Full-page light/blue-glass backgrounds and stylesheet boundary repair
+- User confirmed the installed APK shows a completely white screen after login (symptom category 1). They also clarified: remove the grey page background; the light theme must use its own white glass appearance across the full page, and theme 3 must carry its own pale-blue glass background across the full page.
+- Re-inspected the current PR #48 branch and confirmed the light-theme final override still used a subtle grey-tinted gradient behind the dashboard. Changed the light page pseudo-background to pure white and made the dashboard shell transparent so the page canvas remains white while the frosted cards stay translucent.
+- Reasserted the existing pale sky-blue glass gradient on the entire theme-3 body canvas; the dashboard shell remains transparent so it does not cover the theme background.
+- Found a malformed stylesheet boundary: `digiarz-login-hero-premium-v1` was not closed before the mobile market containment stylesheet opened, and an extra closing style tag remained at EOF. Separated the two style blocks and balanced all 8 style open/close tags.
+- Added regression coverage for balanced style elements, independent hero/mobile style blocks, theme-3 full-page canvas, and the light-theme transparent dashboard shell.
+- App change commit: `301d5159590ad99a7a577be902dd2c2a867c8685`; test commit/current head at time of check: `52e9ddd41326cae541f5e3c329f015af17edbd39`.
+- Exact-decimal/UI workflow run `44935311575` was in progress at handoff update. Android APK workflow/artifact for this head is not yet verified. Do not claim the white-screen symptom is fixed until the authenticated dashboard is inspected and the matching APK is built and tested on-device.
+- Further diagnosis is still required for the fully white post-login screen: inspect the authenticated shell's visible section state and failure path around the initial `profiles` lookup / admin-role RPC. No changes to authentication, Supabase, database, merge, deployment, signing, or release were made. PR #48 remains Draft/open/unmerged.
+- Next action: complete CI for this head, inspect the Android review build/artifact provenance, then continue targeted diagnosis of the white dashboard screen without asking the user for a screenshot.
