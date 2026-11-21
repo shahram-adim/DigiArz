@@ -1103,3 +1103,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - No merge, release, deployment, Supabase/database, authentication, or financial trading logic changes. Keep isolated for review.
 - Regression test source has been corrected and included in Draft PR #49; it has not yet run in CI. PR #49 is intentionally based on PR #48's candidate branch to avoid duplicating its full change set. Next: merge/review PR #48 first; then retarget PR #49 to `main`, inspect CI for its exact head, and build a matching review APK only if CI passes.
 - Added a white override for neutral informational notices as well; warning/error/success notices keep their meaningful status colors.
+
+## 2026-11-21 — white theme secondary-surface audit and follow-up PR consolidation
+- Audited all legacy `body.light-theme` background rules in `index.html`; found additional grey-tinted surfaces beyond the main cards, including market toolbar/header, orderbook mid, detail sections, history hover, auth security, category controls and neutral notices.
+- Added a final override to make these surfaces white, retain blue accents and readable navy text, and preserve semantic warning/error/success colors. Theme 1 and theme 3 selectors are not modified by the white-theme override.
+- Added regression assertions for secondary white surfaces and expanded the grey-token guard.
+- Ran source-level verification against the exact candidate head: 14 checks passed (white page/panels, blue controls, market toolbar/header, history hover, auth security, neutral notices, no known grey hex values in the final override, balanced style tags, test presence, and candidate-specific workflow checkout).
+- Parent PR #48 UI suite passed 66/66 tests after correcting an overly strict assertion for the existing mobile grid's `gap:0` declaration. Parent exact-decimal/PostgreSQL/Market/Limit/Stop-Limit/TP-SL/concurrency workflow run 44943748586 completed SUCCESS on parent head `e9673c944bfd325296ee5476ad548d86315b67af`.
+- Consolidated the white-theme follow-up on fresh branch `fix/pure-white-glass-dashboard-market-2026-11-21-v2` from the latest PR #48 head. Draft PR #50 is open and mergeable, based on PR #48. Obsolete PR #49 was closed unmerged as superseded.
+- Candidate head: `49bc1909b66c81a8d662f74e7c1a2e1a00a02d5b`. The candidate-specific Android review workflow is configured to check out the pushed branch and upload a debug artifact only; no run ID or APK artifact for this exact head has been verified yet.
+- No merge to main, release, deployment, Supabase/database change, authentication change, or trading/wallet logic change. No physical Android visual review has been performed.
+- Next: wait for and inspect the candidate-specific Android workflow, review PR #48 then PR #50, and only after explicit approval merge PR #48 and retarget PR #50 to main; install the matching review APK and visually verify all three themes and phone-width layouts.
