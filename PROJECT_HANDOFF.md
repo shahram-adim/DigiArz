@@ -1008,3 +1008,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Commits: secure storage `20a7b20ccb1eee74acc42f772cee4f09feeeb422`; test `5f39b2c9023c80d97bc6a52c9da22e6801e60260`; Android injection `eb0855d48982544faee3b6fd8e4796c76ec5f590`.
 - CI for these commits has not yet been verified. A new Android review build and test run must complete before sharing an APK.
 - PR #48 remains Draft/open/unmerged. No merge, production deployment, Supabase/database changes, or real-money features. Physical Android fingerprint enrollment and end-to-end device acceptance remain unverified.
+
+
+## 2026-11-21 — Crypto market row overflow correction
+- User reported that cryptocurrency rows were misaligned and overflowing their container.
+- Inspected the actual market-row renderer: each row contains favorite, identity, sparkline, 24h-change/volume, and price cells. Existing CSS had several conflicting desktop/tablet/mobile grid definitions (including 5-column, 4-column, and two-column overrides), plus fixed minimum widths that could exceed narrow phone content width.
+- Added a final scoped CSS correction after the legacy styles. Market board and row now use border-box sizing and strict 100%/min-width:0 constraints; desktop rows use four shrinkable columns; phones use a two-column identity/price layout with 24h change beneath the identity; sub-380px screens receive tighter tracks and typography. Long price/name/source values can wrap rather than push the row outside the viewport. Existing borderless row and logo treatment is preserved across all three themes.
+- Also constrained dashboard market-preview rows and their text columns so the compact preview cannot force horizontal overflow on small phones.
+- Added regression coverage in `tests/index-syntax.test.js` for the final mobile row containment cascade, narrow viewport breakpoints, wrapping behavior, and borderless treatment.
+- Commits: CSS `78ae9826c9b704fd7ac847bf7387db1be90d9d1e`; regression test `921915de675dd6c22af9f00a8786c051e2c43176`; assertion correction `ba3a426a315214c1104f2607331ca79f55e9ed31`.
+- Exact-decimal/UI test and Android review APK workflows are running/queued for these commits. Do not share an APK until the latest build completes and artifact provenance is verified.
+- No Supabase/database changes, merge, production deployment, or release. PR #48 remains Draft/open/unmerged. Physical device viewport verification is still pending.
