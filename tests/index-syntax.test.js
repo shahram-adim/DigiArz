@@ -323,9 +323,12 @@ test('login screen uses the scoped premium light-blue-and-gold responsive design
   assert.match(html, /#authView #signupBtn[\s\S]*?background:#eef3fb/);
   assert.match(html, /@media\(max-width:700px\)[\s\S]*?#authView\.auth\{grid-template-columns:1fr/);
   assert.match(html, /@media\(prefers-reduced-motion:reduce\)[\s\S]*?#authView \*\{transition:none!important\}/);
-  for (const id of ['fullName','email','password','loginBtn','signupBtn','forgotBtn','authMsg','recoveryPanel','newPassword','confirmPassword','saveNewPassword']) {
+  for (const id of ['email','password','loginBtn','signupBtn','forgotBtn','authMsg','recoveryPanel','newPassword','confirmPassword','saveNewPassword']) {
     assert.match(html, new RegExp('id="' + id + '"'), 'existing auth control remains: ' + id);
   }
+  assert.doesNotMatch(html, /id="fullName"/, 'registration no longer asks for first or last name');
+  assert.match(html, /async function signup\(\)[\\s\\S]*?auth\.signUp\(\{email,password,emailRedirectTo:/, 'signup uses email and password only');
+  assert.doesNotMatch(html, /full_name:name|\$\('fullName'\)/, 'signup does not read or submit a name');
 });
 
 
@@ -355,9 +358,12 @@ test('reference login has its branded market header, live coin list and working 
   assert.match(html, /const authThemeButton=\$\('authThemeToggle'\)/);
   assert.match(html, /@media\(max-width:760px\)[\s\S]*?#authView\.auth\{display:flex;flex-direction:column/);
   assert.match(html, /body:not\(\.light-theme\) #authView \.auth-form\{background:linear-gradient\(155deg,#172b45,#122238\)/);
-  for (const id of ['fullName','email','password','loginBtn','signupBtn','forgotBtn','authMsg','recoveryPanel','newPassword','confirmPassword','saveNewPassword']) {
+  for (const id of ['email','password','loginBtn','signupBtn','forgotBtn','authMsg','recoveryPanel','newPassword','confirmPassword','saveNewPassword']) {
     assert.match(html, new RegExp('id="' + id + '"'), 'existing auth control remains: ' + id);
   }
+  assert.doesNotMatch(html, /id="fullName"/, 'registration no longer asks for first or last name');
+  assert.match(html, /async function signup\(\)[\\s\\S]*?auth\.signUp\(\{email,password,emailRedirectTo:/, 'signup uses email and password only');
+  assert.doesNotMatch(html, /full_name:name|\$\('fullName'\)/, 'signup does not read or submit a name');
 });
 
 
