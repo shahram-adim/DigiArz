@@ -929,3 +929,18 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - CI exact-decimal suite for source commit `420d0cba` passed (run `44919865047`).
 - Build remains an unsigned debug/review APK. Physical-device testing of theme appearance, login/dashboard isolation, biometric enrollment/authentication, logout and relock is still pending.
 - No production deploy, merge, Supabase/database changes, or production signing.
+
+
+
+## 2026-11-21 — Pale blue/lavender glass correction and CSS-boundary regression guard
+- User's latest explicit visual direction takes precedence over the earlier Indigo label: theme 3 must be pale blue/lavender glass with a light sky-blue accent, not saturated navy/deep indigo. Theme 2 remains genuinely light with a light frosted background; theme 1 remains black/gold.
+- Found that the previous theme override block had been appended after the final `</style>`, so the browser treated it as document text rather than active CSS. Corrected the stylesheet placement and restored the approved compact login composition (570px maximum width on theme 3, hero hidden in that theme) without changing authentication or dashboard business logic.
+- Added the theme-3 pale glass dashboard/login palette and kept the existing v2 dashboard layout, login/dashboard separation, borderless market rows, and logo-frame removal.
+- Added a regression test in `tests/index-syntax.test.js` to fail if any CSS declarations appear after the final style element.
+- Updated Android review artifact naming to `DigiArz-Pale-Blue-Glass-Biometric-APK`.
+- Updated PR #48 title and description to match the latest approved pale-blue/lavender design: https://github.com/shahram-adim/DigiArz/pull/48
+- Current branch: `redesign/indigo-glass-layout-fix-2026-11-21`. Latest branch head after index, test, and workflow naming changes: `c07657e2ed80578e00900351daf194dd8d5cfcc1`. Files changed in this correction: `index.html`, `tests/index-syntax.test.js`, `.github/workflows/android-review-apk.yml`, and this handoff file.
+- A live Actions query for the latest test commit returned zero workflow runs. Therefore the new regression test and current APK build are **not yet CI-verified**. Earlier CI/APK results belong to older commits and must not be presented as validating this head.
+- PR #48 remains open and Draft, unmerged; GitHub's latest PR metadata reported `mergeable=false`. No merge, release, deployment, production signing, Supabase/database changes, or real-money functionality changes were made.
+- Physical Android visual QA and fingerprint enrollment/login/logout/background-relock acceptance tests remain outstanding.
+- Next: obtain a CI run for current head `c07657e2...`, verify the Android artifact provenance matches that exact head, and only then share a review APK. Do not merge without explicit user approval.
