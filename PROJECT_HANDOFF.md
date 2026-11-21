@@ -896,3 +896,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - The APK workflow is configured for the integrated PR #48 branch. A matching Android workflow run/artifact has not yet been verified; do not provide an old Sky Blue APK as the Indigo build.
 - No merge, release, production deployment, Supabase/database changes, or real-money functionality changes. Physical Android install and biometric enrollment/login/logout/relock checks remain outstanding.
 - Next: verify the latest exact-decimal run, then verify the Indigo Glass biometric Android workflow and artifact provenance before sharing any APK.
+
+
+## 2026-11-21 — Indigo Glass Android APK verified
+- Android workflow run `44917416392` completed SUCCESS on commit `d2b6598bb27377b77391f990d10fe9c02ebb290a`.
+- All Android review-build steps passed: biometric storage tests, prepare web assets/native bridge, Gradle debug APK build, merged `USE_BIOMETRIC` permission check, provenance and artifact upload.
+- Artifact: `DigiArz-Indigo-Glass-Biometric-APK`, artifact ID `14712600080`, expires 2026-12-05 15:08:12 UTC.
+- Downloaded and extracted the artifact for verification. APK path in the model runtime: `/mnt/data/digiarz-apk/app-debug.apk`; size 7,291,522 bytes.
+- APK SHA-256 verified against BUILD-INFO.txt: `1fad5736346a1504c5adf9c4a67f23ae45349ce803bd6350a51b1ef146af4d25`.
+- This is an installable Android debug review APK, not a production-signed release. Physical device biometric enrollment/login/logout/background relock and full visual review are still required.
+- PR #48 remains Draft/open/unmerged; branch remains isolated from main. No production deployment or database changes.
