@@ -776,3 +776,113 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Artifact 14217201032 remains unexpired at this check and expires 2026-11-23T10:26:46Z. GitHub API reports the exact 64-character digest sha256:555c1f7ebcad947e573dad659084bbcf94dc88d55fc0bc1a3b7de9606db8e4e5; earlier notes contained a truncated 61-character digest and have been corrected in the bootstrap plan.
 - Bootstrap plan updated in commit 6ccfa3c68c47e00518508e930dc97428231c4019; it records schema metadata, ACL exclusion, Production parity blocker and next safe step.
 - No Production migration/RPC/trigger/cron/grant/policy/schema/data change, no test with restored records, no merge/rebase/deploy, and no supabase db push.
+
+
+## 2026-11-21 — Android biometric lock compatibility checkpoint
+- Created isolated branch `spike/android-biometric-capacitor8-2026-11-21` from main; first commit `cb476231c03912f08dde738523e83578b2db0c81` adds `docs/ANDROID_BIOMETRIC_LOCK_SPIKE.md`.
+- Verified main is Capacitor Android/Core/CLI 6.2.1. The existing Capacitor 8 Passkey spike is 184 commits ahead and 88 behind main, so it is not a safe implementation base and was not merged/cherry-picked.
+- Current native biometric plugin docs map plugin v8 to Capacitor 8; plugin v6 is compatible with Capacitor 6 but no longer maintained. Candidate for evaluation is pinned `@capgo/capacitor-native-biometric@8.9.3` after Capacitor 8 compatibility/build checks.
+- Verified `index.html` currently uses default Supabase Auth persistence (`persistSession:true`, `autoRefreshToken:true`), registers `onAuthStateChange`, and restores via `getSession()`. A secure APK-only implementation must gate restoration and use biometric-protected Keystore reads; `verifyIdentity()` alone is not sufficient.
+- Existing APK workflow generates Android project from scratch. No generated Android files were edited.
+- Run `44876112814` completed successfully; all 45 job steps completed, including `Run Bit24 deduplication SQL regressions`.
+- No biometric runtime code, dependency upgrade, APK build, Production/Supabase change, merge, or release has been made. Next: build an isolated Capacitor 8 + biometric-plugin compatibility spike with lockfile and clean CI build, then implement the native secure-storage adapter only after validating SDK refresh/session lifecycle. Browser/PWA path must remain byte-for-byte behaviorally unchanged.
+
+
+## 2026-11-21 — isolated native biometric dependency/build spike
+- On branch `spike/android-biometric-capacitor8-2026-11-21`, pinned `@capacitor/core`, `@capacitor/android`, and `@capacitor/cli` to `8.6.2`, and added `@capgo/capacitor-native-biometric@8.9.3`. Removed the unrelated Passkey plugin config from this isolated branch.
+- Updated the Android CI branch filter to include this spike, Node.js 22 / Java 21, and suppressed GitHub Release publication for this branch. Added the branch to exact-decimal regression workflow push filters.
+- Repository has no package-lock.json on main or the old Passkey spike. Current workflow uses `npm install`, not `npm ci`; dependency versions are exact-pinned but a committed lockfile remains an improvement required before production adoption.
+- This is dependency/build compatibility only. No JS calls to the biometric plugin and no Supabase storage/session behavior changes have been made. No fingerprint flow is enabled yet.
+- Next: run clean Android CI and regression tests on this branch; inspect Gradle/Capacitor/plugin errors. If build succeeds, implement and test the APK-only protected session storage adapter in a separate, reviewable step. No merge/release/Production changes.
+
+
+## 2026-11-21 — biometric spike CI completion and next gate
+- Branch: `spike/android-biometric-capacitor8-2026-11-21`; PR #41 remains Draft/open and unmerged. PR head before this handoff update: `d628796fb27c32d02ad1ef0e7d8bcb2c73ee6a7e`.
+- Android CI run `44876814094` completed successfully. Artifact `DigiArz-Android-debug-APK` (ID `14696063423`) uploaded; size 6,100,929 bytes; SHA-256 `c2a4006bb9ef5205322585f92ff64b3f0032c687791ac21c27d48bb66d039d05`; expires 2026-12-05T06:44:18Z. Artifact provenance records build head `30a73ec504945d36ae7d186924c74804b99db33a`, not the later package-description-only PR head.
+- Exact-decimal workflow run `44876814102` completed successfully; all 21 substantive test steps passed, including rollback/lock-timeout checks and two-session order/cancellation races.
+- Re-read current auth bootstrap on the spike branch: `initClient()` uses default Supabase persistence with `persistSession:true`, `autoRefreshToken:true`, `detectSessionInUrl:true`; startup registers auth listener before `getSession()`; recovery events and URL handling must be preserved.
+- Read-only inspection of active Production Edge Function `app-assets` version 3 found Supabase JS served from floating `@supabase/supabase-js@2` URLs. Do not change/deploy this function. Pin and vendor/bundle a reviewed Supabase JS version in the Android-only branch before implementing the custom storage adapter, keeping browser/PWA path unchanged.
+- Updated `docs/ANDROID_BIOMETRIC_LOCK_SPIKE.md` with run IDs, artifact digest/provenance, auth bootstrap findings, floating SDK finding, and next safe steps. Documentation commit: `7900d2a549a82aaa196a2c6ef295c975fc7a28d3`.
+- No biometric runtime implementation, no Supabase Production changes, no mainline change, no merge/release, and no real-device test claim.
+- **Next action:** pin Supabase JS in the isolated branch and establish a local, reproducible APK-only bundle before designing/implementing the native-only async storage adapter. Then validate plugin APIs/manifest and write lifecycle/race tests.
+
+
+## 2026-11-21 — APK-only pinned Supabase SDK build step
+- Added `scripts/prepare-android-web.sh`; package script `build:android` now runs existing web copy then obtains exact `@supabase/supabase-js@2.119.2` UMD bundle from jsDelivr and unpkg, requires byte-identical files, copies to `www/vendor/supabase-2.119.2.js`, and rewrites only generated `www/index.html` to load the local bundle. Source `index.html` remains unchanged, so web/PWA source loader remains the existing Production asset endpoint.
+- Android workflow now uses `npm run build:android`. No Production Edge Function deployment or Auth setting changes.
+- Important limitation: mirror equality is not publisher provenance or a committed SHA-256 pin. The build logs the computed SHA-256. A verified lockfile/provenance and pinned bundle digest are still required before production adoption.
+- CI on commit `205430991573d73e584f208b70f14529b19f626e`: Android run `44877219663` pending; exact-decimal run `44877219671` queued/in progress at last check. Do not claim success until polled.
+- Documentation updated in `docs/ANDROID_BIOMETRIC_LOCK_SPIKE.md`; next doc commit `1c87a7fc68cfa8540546bfaf8fcc6c43f6de3742`.
+- No native biometric runtime code or Supabase Auth storage adapter yet; no merge/release/Production/main change.
+
+
+## 2026-11-21 — Android biometric spike CI checkpoint
+- Isolated branch: `spike/android-biometric-capacitor8-2026-11-21`; Draft PR #41: https://github.com/shahram-adim/DigiArz/pull/41. Latest known baseline before this checkpoint: PR head `1f7494609fb081c2bbc3017218bb5ced5bd44b66`; all work remains isolated from main.
+- Android workflow run [44877219663](https://github.com/shahram-adim/DigiArz/actions/runs/44877219663) completed successfully on commit `205430991573d73e584f208b70f14529b19f626e`. APK preparation with pinned Supabase JS 2.119.2, clean Capacitor generation/sync, Gradle build, provenance, and artifact upload all passed. Exact-decimal run `44877219671` also passed.
+- Pinned UMD SHA-256: `8816af04d9915dbba1882d6f84f0b402dc40268063a63d9c66d24f52f371c263`; APK SHA-256: `fd4d57e62a85fc8cd51606f292a43e82f2ad44b29d23fb29dee9fb4b1c3acddd`. Artifact ID `14696064416`, name `DigiArz-Android-debug-APK`, size 6,172,011 bytes.
+- The build script now verifies both CDN mirror equality and the exact SDK SHA-256 before packaging. This is not a substitute for npm provenance or a committed lockfile.
+- Plugin 8.9.3 documentation confirms biometric-protected arbitrary data requires `setData` with `BIOMETRY_CURRENT_SET` or `BIOMETRY_ANY`, then `getSecureData`; Android requires `USE_BIOMETRIC`. The build log did not prove the merged manifest permission, so verify it in generated APK/manifest before proceeding.
+- No Auth adapter, biometric runtime flow, Production change, main merge, or release. Do not present this APK as having fingerprint unlock.
+- **Next action:** verify merged Android manifest permission; then add pinned Supabase JS dependency + lockfile/provenance in this branch and test a native-only Auth storage adapter with refresh rotation, recovery, cancellation, logout, background/resume, and process-death cases.
+
+
+### Android biometric follow-up — merged manifest verification queued — 2026-11-21
+- Added a CI step in commit `ed3496188ca8241f4230974d40f299a7f5f6d9d1` to locate the generated merged debug manifest and fail unless it contains `android.permission.USE_BIOMETRIC`.
+- Android workflow run `44877584070` is pending on that commit; exact-decimal run `44877587377` is in progress. Earlier run `44877539074` on commit `af7144aefdb0493e96be300cbb9f296f282b2c43` had already passed pinned-SDK asset preparation and was still building when last checked; it does not include the new manifest assertion.
+- The pinned-SDK build script now checks expected UMD SHA-256 `8816af04d9915dbba1882d6f84f0b402dc40268063a63d9c66d24f52f371c263` as well as CDN mirror equality. Await CI result before claiming the digest-pinned build passes.
+- PR #41 remains open Draft; no merge, Production/Supabase mutation, or release.
+- Next: inspect run `44877584070` including the merged-manifest assertion, then proceed to a pinned Supabase JS dependency/lockfile and carefully test the native-only storage adapter. Do not add runtime biometric behavior before these checks.
+
+
+## 2026-11-21 — Android biometric permission check passed
+- Android workflow run [44877584070](https://github.com/shahram-adim/DigiArz/actions/runs/44877584070) completed successfully on commit `ed3496188ca8241f4230974d40f299a7f5f6d9d1`. Capacitor generation/sync, Gradle debug APK build, explicit merged-manifest assertion, APK provenance, and artifact upload all passed.
+- The CI assertion verified `android.permission.USE_BIOMETRIC` in the generated merged debug manifest. This confirms permission packaging only; it does not implement biometric unlocking or prove device behavior.
+- Direct GitHub Release publication was skipped by design on the isolated spike branch. PR #41 remains Draft/unmerged; no main, production Supabase, Auth settings, or secrets changed.
+- Supabase docs confirm the custom Auth storage adapter may use async `getItem`, `setItem`, and `removeItem`. Refresh tokens are single-use, so adapter writes/rotation must be serialized. Current Supabase JS 2.119.2 patch notes contain a Storage URL-boundary fix, no Auth-specific patch change.
+- Remaining supply-chain prerequisite: branch `package.json` pins Capacitor and biometric plugin, but does not declare `@supabase/supabase-js` directly and no `package-lock.json` is committed. The APK UMD bundle has a fixed SHA-256, but this is not a complete npm dependency lock/provenance. Do not implement or enable the Auth adapter until the lockfile and SDK dependency strategy are made reproducible.
+- Next: generate and commit a reproducible lockfile for the Android branch, add a pinned direct Supabase JS dependency if compatible with the APK bundle strategy, verify npm provenance/signatures, then implement and test the native-only async Auth storage adapter. Preserve browser/PWA storage unchanged. No production changes or merge without explicit approval.
+
+
+## 2026-11-21 — reproducible Android biometric spike build passed
+- Android workflow run [44878126615](https://github.com/shahram-adim/DigiArz/actions/runs/44878126615) completed with conclusion **success** on source commit `95e5ab4501ff9f95cc8122ff2ddc02f32fec0c7e`; branch head advanced by the workflow lockfile commit to `11e8c79ce9ddb93ee99d744a30d4dab4260219b8`.
+- Workflow generated and committed `package-lock.json` in commit `11e8c79ce9ddb93ee99d744a30d4dab4260219b8`; `npm ci`, `npm audit signatures`, APK-only pinned Supabase SDK preparation, clean `npx cap add android`, `npx cap sync android`, Gradle `assembleDebug`, merged-manifest `USE_BIOMETRIC` assertion, provenance, and artifact uploads all passed.
+- APK artifact: `DigiArz-Android-debug-APK`, artifact ID `14697097236`, size 6,172,010 bytes, expires 2026-12-05T07:02:33Z. Verified extracted APK SHA-256: `6fc1ebe8f73dcd9e5552bff729352c245166e7adfafd172bc1225c4d9441eaa8`. Build provenance records run `44878126615`, source commit `95e5ab4501ff9f95cc8122ff2ddc02f32fec0c7e`, and the same APK SHA-256.
+- Lockfile artifact ID `14697200642`, digest `sha256:bf2ecc0a7b55860804eac2481e44ae3e857c58b6c2a4670f7d3102ecdaaf0d92`.
+- This is a **debug compatibility APK only**. It does not yet implement fingerprint prompt/session protection and has not been installed or tested on the user's physical Android device. The PR remains Draft/open/unmerged; release publication was skipped. No main/PWA or Production Supabase change occurred.
+- Next safe work: inspect current Auth lifecycle and implement an isolated native-only secure session storage adapter with serialized refresh-token rotation, cold-start/background-resume/process-death/recovery/logout/cancel/enrollment-change tests. Keep browser storage and login flow unchanged. Do not merge or release without explicit approval.
+
+
+## 2026-11-21 — biometric secure-storage design review
+- Exact plugin tag `@capgo/capacitor-native-biometric@8.9.3` source reviewed at commit `59a8e93c78af729bfd189ac1d78d0174c83e481d`. Android `setData` with biometric access control and `authValidityDuration: 0` encrypts using a Keystore public key without prompting; `getSecureData` prompts and decrypts with a Keystore private key through BiometricPrompt. This permits encrypted writes during Supabase refresh rotation and one biometric-protected disk read per unlock, with session cached only in memory while unlocked.
+- Plugin docs recommend keeping Android secure data under approximately 8 KB; measure serialized Supabase session size and fail closed rather than falling back to plaintext if it exceeds limits.
+- `BIOMETRY_CURRENT_SET` invalidates stored data when biometric enrollment changes; `BIOMETRY_ANY` survives changes. Decision still pending security/product review.
+- Plugin Web mock always succeeds and is in-memory only. Native calls must be strictly gated behind `Capacitor.isNativePlatform()`; browser/PWA must retain default localStorage behavior.
+- Supabase JS v2.107+ uses lockless refresh coordination by default (same-client single-flight and server-side cross-client race handling); legacy custom `lock` option is deprecated. Do not add it reflexively. Test serialized adapter writes and refresh response loss/races.
+- No runtime implementation has been added. Next: verify pinned Supabase 2.119.2 initialization options and native Capacitor bridge availability, then implement native-only protected storage with lifecycle gating and comprehensive tests. Preserve web/PWA and recovery flows. No Production changes, merge or release.
+
+
+## 2026-11-21 — pinned Auth bootstrap controls verified
+- Inspected exact `supabase-js@2.119.2` source commit `02d2e8f12079955a28901d95e8513846d01a3c3e`: supports async custom Auth storage, `skipAutoInitialize: true`, explicit `auth.initialize()`, and `startAutoRefresh()/stopAutoRefresh()`. These can support controlled initial biometric unlock and Android background/resume refresh gating while retaining URL recovery handling.
+- Capacitor 8 runtime exposes `window.Capacitor.registerPlugin`; plugin's published source registers `NativeBiometric` via Capacitor's native bridge. As app is plain HTML/no bundler, validate the minimal bridge in generated APK before committing runtime integration. Do not invoke the plugin's Web mock.
+- Still verify exact `onAuthStateChange` behavior with `skipAutoInitialize` before changing startup; preserve listener order, password recovery URL processing, and web/PWA initialization unchanged.
+- No runtime biometric or Auth adapter code is committed at this checkpoint.
+
+
+### 2026-11-21 — Supabase eager storage read / native bridge review
+- Exact Supabase JS 2.119.2 source review confirms `skipAutoInitialize:true` disables only constructor auto-`initialize()`; it does not suppress the internal `onAuthStateChange` listener's `INITIAL_SESSION` storage read. That path calls custom storage `getItem()` before an explicit `initialize()` because `initializePromise` is null and the listener proceeds to `_emitInitialSession()`. The native adapter must therefore be fully registered before `createClient()` and safely coordinate this first read. Do not assume skipAutoInitialize alone is a biometric gate.
+- Current app boot calls `initClient()`, then registers its app Auth listener, then calls `getSession()`. Preserve listener ordering, password flows, and recovery callback processing in the APK-only transformation.
+- Capacitor 8.6.2 runtime exposes `window.Capacitor.registerPlugin`; the exact biometric package JS entry registers plugin name `NativeBiometric`. A direct native proxy is a no-bundler candidate, subject to CI verification of plugin headers and native calls. Android plugin source confirms `getSecureData` uses AuthActivity/Keystore-protected decrypt and `isDataSaved` is a non-decrypting presence check. Do not substitute `verifyIdentity()` for protected session reads.
+- Adapter must use a shared first-read promise, preserve encrypted data on cancellation, support explicit retry, and clear only decrypted memory on background after refresh/write coordination. No runtime code or production changes made. PR #41 remains Draft.
+- Next action: implement the native-only storage adapter and lifecycle integration in the isolated branch, with mocked unit tests for multi-key storage, cancellation/retry, size limit, logout deletion, and lock/background behavior before running a fresh Android build.
+
+
+### 2026-11-21 — native biometric session adapter implemented; CI APK built
+- Added `src/android-biometric-lock.js`, a native-only Supabase storage adapter keyed to `digiarz.auth.session.v1`. The session is protected with plugin `AccessControl.BIOMETRY_CURRENT_SET` (strong biometric); protected reads use `getSecureData`. No plaintext session fallback is allowed.
+- Session payload cap is 7,168 UTF-8 bytes. If strong biometric is not available, the write fails, or the payload is oversized, the session remains memory-only and the protected record is cleared; password sign-in remains possible but does not persist across lock/restart.
+- Cancellation preserves the encrypted session and supports an explicit retry button. PKCE/auxiliary storage keys use WebView localStorage; only the main long-lived Auth session is encrypted in the native store.
+- Added `@capacitor/app@8.1.2` and APK-only app lifecycle hooks. Background handling stops refresh, waits for session/write activity, disposes the Auth client, clears decrypted memory and hides the dashboard; foreground handling requires biometric secure-read before recreating the Auth client and restoring the session. Native biometric AuthActivity pauses are ignored while a secure read is in progress.
+- Build injection adds `capacitor.js`, adapter and retry button to generated APK web assets only. Source `index.html`, hosted PWA and main branch are untouched.
+- Six storage adapter unit tests passed in the Android workflow. APK workflow run **44879704692** completed successfully: npm install/signature checks, tests, APK web preparation, Capacitor add/sync, Gradle assembleDebug, merged `USE_BIOMETRIC` permission assertion, provenance and artifact upload all passed.
+- Artifact `DigiArz-Android-debug-APK` ID `14697825702`; size 6,178,401 bytes; expiry 2026-12-05T07:22:09Z. Build commit `7d13d1911500785b8775e57650accc424ef575ef`; SHA-256 `b034a4ce5e58c8870671341feaf73076633a44d7fbc4eadbfde06f9336c63a00`.
+- Not yet tested on a physical device. Do not call fingerprint lock production-ready until cold-start, cancellation/retry, password fallback, background/resume, explicit logout, enrollment-change behavior, and actual session-size tests pass on the user's Android phone. PR #41 remains Draft/open/unmerged. No release or production Supabase changes.
+- Next: guide the user to download/install the Actions artifact from a phone and run the real-device acceptance checklist; record outcomes before any merge.
