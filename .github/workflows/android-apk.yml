@@ -61,6 +61,21 @@ jobs:
           chmod +x gradlew
           ./gradlew --no-daemon assembleDebug
 
+      - name: Verify merged biometric permission
+        run: |
+          MANIFEST="$(find android/app/build/intermediates -type f -path '*/merged_manifest/*/processDebugMainManifest/AndroidManifest.xml' -print -quit)"
+          if [[ -z "$MANIFEST" ]]; then
+            echo "Merged Android manifest not found; cannot verify biometric permission." >&2
+            find android/app/build/intermediates -type f -name AndroidManifest.xml -print >&2
+            exit 1
+          fi
+          if ! grep -q 'android.permission.USE_BIOMETRIC' "$MANIFEST"; then
+            echo "Merged Android manifest is missing android.permission.USE_BIOMETRIC." >&2
+            cat "$MANIFEST" >&2
+            exit 1
+          fi
+          echo "Verified android.permission.USE_BIOMETRIC in $MANIFEST"
+
       - name: Record APK build provenance
         run: |
           APK="android/app/build/outputs/apk/debug/app-debug.apk"
