@@ -3973,96 +3973,125 @@ body.luxury-theme #authView .auth-phone-device{border-color:rgba(173,226,255,.84
 @media(prefers-reduced-motion:reduce){#authView .ref-earth,#authView .ref-gold-coin{animation:none!important;transition:none!important}}
 
 
-/* DigiArz selected Binance-inspired black-and-yellow auth palette — 2026-11-21 */
-#authView.auth-reference-layout{
-  background:#0b0e11!important;color:#f5f5f5!important;
-  border:1px solid #f0b90b!important;
+/* Theme-specific palettes for the same complete reference login layout. */
+body.dark-theme #authView.auth-reference-layout{
+  background:#0b0e11!important;color:#f5f5f5!important;border:1px solid #f0b90b!important;
   box-shadow:0 20px 62px rgba(0,0,0,.52)!important;
 }
-#authView.auth-reference-layout .auth-reference-visual{
-  background:
-    radial-gradient(ellipse at 76% 47%,rgba(240,185,11,.14),transparent 48%),
-    radial-gradient(ellipse at 8% 90%,rgba(240,185,11,.08),transparent 40%),
-    linear-gradient(155deg,#181a20 0%,#0b0e11 60%,#11151c 100%)!important;
+body.dark-theme #authView.auth-reference-layout .auth-reference-visual{
+  background:radial-gradient(ellipse at 76% 47%,rgba(240,185,11,.14),transparent 48%),radial-gradient(ellipse at 8% 90%,rgba(240,185,11,.08),transparent 40%),linear-gradient(155deg,#181a20 0%,#0b0e11 60%,#11151c 100%)!important;
 }
-#authView .ref-brand-lockup{color:#f0b90b!important}
-#authView .ref-monogram{
-  color:#f0b90b!important;text-shadow:0 2px 2px #5f4800,0 0 18px rgba(240,185,11,.28)!important;
-  border-bottom-color:#f0b90b!important;
-}
-#authView .ref-monogram:after{
-  border-color:#f0b90b!important;border-left-color:transparent!important;border-right-color:transparent!important;
-}
-#authView .ref-brand-lockup strong{
-  color:#f0b90b!important;text-shadow:0 2px 2px #5f4800,0 0 18px rgba(240,185,11,.22)!important;
-}
-#authView .ref-brand-lockup em{color:#f6d76b!important}
-#authView .ref-live-pill{
-  border-color:rgba(240,185,11,.55)!important;background:rgba(24,26,32,.92)!important;color:#f5f5f5!important;
-}
-#authView .ref-live-pill i{background:#0ecb81!important;box-shadow:0 0 14px rgba(14,203,129,.75)!important}
-#authView .ref-live-pill b{color:#0ecb81!important}
-#authView .ref-market-copy h1 span{color:#f0b90b!important}
-#authView .ref-market-copy>p{color:#c5c8ce!important}
-#authView .ref-coin-row{color:#f5f5f5!important}
-#authView .ref-coin-row strong{color:#0ecb81!important}
-#authView .ref-earth{
-  filter:grayscale(.42) sepia(.24) saturate(.88) brightness(.86) drop-shadow(0 15px 25px rgba(0,0,0,.48))!important;
-}
-#authView .ref-phone{
-  border-color:rgba(240,185,11,.88)!important;
-  background:linear-gradient(110deg,#514018,#252a33 12%,#0b0e11 28%,#181a20 100%)!important;
-}
-#authView .ref-phone .auth-phone-preview{
-  background:linear-gradient(160deg,#252a33,#11151c 65%,#0b0e11)!important;
-}
-#authView .ref-platform{
-  border-color:#f0b90b!important;
-  background:linear-gradient(180deg,rgba(240,185,11,.3),rgba(24,26,32,.94) 45%,#0b0e11)!important;
-  box-shadow:0 12px 26px rgba(0,0,0,.7),0 0 22px rgba(240,185,11,.25),inset 0 5px 12px rgba(255,224,145,.2)!important;
-}
-#authView.auth-reference-layout .auth-form{
-  background:linear-gradient(145deg,#181a20,#0b0e11 72%)!important;
-  border:2px solid #f0b90b!important;
-  box-shadow:0 0 0 1px rgba(240,185,11,.12),0 16px 38px rgba(0,0,0,.48)!important;
-  color:#f5f5f5!important;
-}
-#authView .auth-form .auth-kicker{color:#f0b90b!important}
-#authView .auth-form h2{color:#f0b90b!important}
-#authView .auth-form .auth-intro{color:#aeb5c0!important}
-#authView .auth-form .field label{color:#d1d4dc!important}
-#authView .auth-form input{
-  background:#0b0e11!important;border:1px solid #3a414c!important;color:#f5f5f5!important;
-}
-#authView .auth-form input:focus{
-  border-color:#f0b90b!important;box-shadow:0 0 0 3px rgba(240,185,11,.14)!important;
-}
-#authView .auth-form input::placeholder{color:#78818e!important}
-#authView .auth-form .auth-actions button{
-  background:linear-gradient(110deg,#ffe066,#f0b90b 45%,#d99b1d)!important;
-  color:#111!important;box-shadow:0 5px 16px rgba(240,185,11,.22)!important;
-}
-#authView .auth-form .auth-actions #signupBtn{
-  background:#252a33!important;color:#f5f5f5!important;border:1px solid #51431a!important;
-}
-#authView .auth-form #forgotBtn{
-  color:#f0b90b!important;border:1px solid rgba(240,185,11,.24)!important;
-}
-#authView .auth-form .auth-security{
-  border-top:1px solid rgba(240,185,11,.2)!important;color:#aeb5c0!important;
-}
-#authView .ref-daily-promo{
-  border-color:#f0b90b!important;
-  background:radial-gradient(ellipse at 12% 50%,rgba(240,185,11,.12),transparent 32%),linear-gradient(110deg,#181a20,#0b0e11 58%,#11151c)!important;
-  box-shadow:inset 0 0 25px rgba(240,185,11,.06),0 12px 26px rgba(0,0,0,.4)!important;
-}
-#authView .ref-promo-copy span{color:#f6d76b!important}
-#authView .ref-clock{color:#f0b90b!important}
-#authView .ref-demo-footer{color:#f0b90b!important;background:#0b0e11!important}
-@media(prefers-reduced-motion:reduce){
-  #authView .ref-earth,#authView .ref-gold-coin{animation:none!important;transition:none!important}
-}
+body.dark-theme #authView .ref-brand-lockup{color:#f0b90b!important}
+body.dark-theme #authView .ref-monogram{color:#f0b90b!important;text-shadow:0 2px 2px #5f4800,0 0 18px rgba(240,185,11,.28)!important;border-bottom-color:#f0b90b!important}
+body.dark-theme #authView .ref-monogram:after{border-color:#f0b90b!important;border-left-color:transparent!important;border-right-color:transparent!important}
+body.dark-theme #authView .ref-brand-lockup strong{color:#f0b90b!important;text-shadow:0 2px 2px #5f4800,0 0 18px rgba(240,185,11,.22)!important}
+body.dark-theme #authView .ref-brand-lockup em{color:#f6d76b!important}
+body.dark-theme #authView .ref-live-pill{border-color:rgba(240,185,11,.55)!important;background:rgba(24,26,32,.92)!important;color:#f5f5f5!important}
+body.dark-theme #authView .ref-live-pill i{background:#0ecb81!important;box-shadow:0 0 14px rgba(14,203,129,.75)!important}
+body.dark-theme #authView .ref-live-pill b{color:#0ecb81!important}
+body.dark-theme #authView .ref-market-copy h1 span{color:#f0b90b!important}
+body.dark-theme #authView .ref-market-copy>p{color:#c5c8ce!important}
+body.dark-theme #authView .ref-coin-row{color:#f5f5f5!important}
+body.dark-theme #authView .ref-coin-row strong{color:#0ecb81!important}
+body.dark-theme #authView .ref-earth{filter:grayscale(.42) sepia(.24) saturate(.88) brightness(.86) drop-shadow(0 15px 25px rgba(0,0,0,.48))!important}
+body.dark-theme #authView .ref-phone{border-color:rgba(240,185,11,.88)!important;background:linear-gradient(110deg,#514018,#252a33 12%,#0b0e11 28%,#181a20 100%)!important}
+body.dark-theme #authView .ref-phone .auth-phone-preview{background:linear-gradient(160deg,#252a33,#11151c 65%,#0b0e11)!important}
+body.dark-theme #authView .ref-platform{border-color:#f0b90b!important;background:linear-gradient(180deg,rgba(240,185,11,.3),rgba(24,26,32,.94) 45%,#0b0e11)!important;box-shadow:0 12px 26px rgba(0,0,0,.7),0 0 22px rgba(240,185,11,.25),inset 0 5px 12px rgba(255,224,145,.2)!important}
+body.dark-theme #authView.auth-reference-layout .auth-form{background:linear-gradient(145deg,#181a20,#0b0e11 72%)!important;border:2px solid #f0b90b!important;box-shadow:0 0 0 1px rgba(240,185,11,.12),0 16px 38px rgba(0,0,0,.48)!important;color:#f5f5f5!important}
+body.dark-theme #authView .auth-form .auth-kicker,body.dark-theme #authView .auth-form h2{color:#f0b90b!important}
+body.dark-theme #authView .auth-form .auth-intro{color:#aeb5c0!important}
+body.dark-theme #authView .auth-form .field label{color:#d1d4dc!important}
+body.dark-theme #authView .auth-form input{background:#0b0e11!important;border:1px solid #3a414c!important;color:#f5f5f5!important}
+body.dark-theme #authView .auth-form input:focus{border-color:#f0b90b!important;box-shadow:0 0 0 3px rgba(240,185,11,.14)!important}
+body.dark-theme #authView .auth-form input::placeholder{color:#78818e!important}
+body.dark-theme #authView .auth-form .auth-actions button{background:linear-gradient(110deg,#ffe066,#f0b90b 45%,#d99b1d)!important;color:#111!important;box-shadow:0 5px 16px rgba(240,185,11,.22)!important}
+body.dark-theme #authView .auth-form .auth-actions #signupBtn{background:#252a33!important;color:#f5f5f5!important;border:1px solid #51431a!important}
+body.dark-theme #authView .auth-form #forgotBtn{color:#f0b90b!important;border:1px solid rgba(240,185,11,.24)!important}
+body.dark-theme #authView .auth-form .auth-security{border-top:1px solid rgba(240,185,11,.2)!important;color:#aeb5c0!important}
+body.dark-theme #authView .ref-daily-promo{border-color:#f0b90b!important;background:radial-gradient(ellipse at 12% 50%,rgba(240,185,11,.12),transparent 32%),linear-gradient(110deg,#181a20,#0b0e11 58%,#11151c)!important;box-shadow:inset 0 0 25px rgba(240,185,11,.06),0 12px 26px rgba(0,0,0,.4)!important}
+body.dark-theme #authView .ref-promo-copy span{color:#f6d76b!important}
+body.dark-theme #authView .ref-clock{color:#f0b90b!important}
+body.dark-theme #authView .ref-demo-footer{color:#f0b90b!important;background:#0b0e11!important}
 
+/* Light theme keeps the same layout but restores a genuinely light surface and controls. */
+body.light-theme #authView.auth-reference-layout{background:#f7faff!important;color:#20334c!important;border:1px solid #dce7f2!important;box-shadow:0 18px 52px rgba(31,65,105,.14)!important}
+body.light-theme #authView.auth-reference-layout .auth-reference-visual{background:radial-gradient(ellipse at 76% 47%,rgba(113,184,235,.24),transparent 48%),radial-gradient(ellipse at 8% 90%,rgba(255,211,111,.16),transparent 40%),linear-gradient(155deg,#eaf4ff,#dcecff 60%,#f5f9ff)!important;color:#20334c!important}
+body.light-theme #authView .ref-brand-lockup,body.light-theme #authView .ref-brand-lockup strong{color:#245c96!important;text-shadow:none!important}
+body.light-theme #authView .ref-monogram{color:#245c96!important;text-shadow:none!important;border-bottom-color:#7ba9d5!important}
+body.light-theme #authView .ref-monogram:after{border-color:#7ba9d5!important;border-left-color:transparent!important;border-right-color:transparent!important}
+body.light-theme #authView .ref-brand-lockup em{color:#527da8!important}
+body.light-theme #authView .ref-live-pill{border-color:#9bc7b3!important;background:rgba(255,255,255,.86)!important;color:#244c3d!important}
+body.light-theme #authView .ref-live-pill i{background:#0aa66a!important}
+body.light-theme #authView .ref-live-pill b{color:#078653!important}
+body.light-theme #authView .ref-market-copy h1,body.light-theme #authView .ref-market-copy>p{color:#203b5a!important}
+body.light-theme #authView .ref-market-copy h1 span{color:#2674b8!important}
+body.light-theme #authView .ref-coin-row{color:#20334c!important}
+body.light-theme #authView .ref-coin-row strong{color:#078653!important}
+body.light-theme #authView .ref-phone{border-color:#8ab6df!important;background:linear-gradient(110deg,#f8fbff,#b9cce0 18%,#345b82 30%,#e8f2fc 36%,#24486c 100%)!important}
+body.light-theme #authView .ref-phone .auth-phone-preview{background:linear-gradient(160deg,#f8fbff,#e5f1fc 65%,#d5e8f8)!important;color:#20334c!important}
+body.light-theme #authView .ref-phone .auth-phone-top,body.light-theme #authView .ref-phone .auth-phone-foot{color:#52708e!important}
+body.light-theme #authView .ref-phone .auth-phone-price strong{color:#20334c!important}
+body.light-theme #authView .ref-phone .auth-coin-chip{background:rgba(255,255,255,.78)!important;border-color:#c8d9e9!important}
+body.light-theme #authView .ref-phone .auth-coin-chip span,body.light-theme #authView .ref-phone .auth-coin-chip strong{color:#294966!important}
+body.light-theme #authView .ref-platform{border-color:#8ab6df!important;background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(190,216,240,.95) 45%,#8eb5dc)!important;box-shadow:0 12px 26px rgba(46,91,137,.2),inset 0 5px 12px rgba(255,255,255,.7)!important}
+body.light-theme #authView .ref-gold-coin{border-color:#9bc5e8!important;background:radial-gradient(circle at 32% 25%,#fff,#b9dcf6 35%,#5d9bcf 72%,#326b9d)!important;box-shadow:0 10px 25px rgba(35,74,112,.24)!important}
+body.light-theme #authView .ref-usdt-coin{border-color:#9bc5e8!important}
+body.light-theme #authView.auth-reference-layout .auth-form{background:linear-gradient(145deg,#fff,#f4f8fd)!important;border:2px solid #c7d9eb!important;box-shadow:0 12px 32px rgba(40,78,119,.12)!important;color:#20334c!important}
+body.light-theme #authView .auth-form .auth-kicker,body.light-theme #authView .auth-form h2{color:#245c96!important}
+body.light-theme #authView .auth-form .auth-intro{color:#667d96!important}
+body.light-theme #authView .auth-form .field label{color:#344d68!important}
+body.light-theme #authView .auth-form input{background:#f6f9fd!important;border:1px solid #d1deeb!important;color:#20334c!important}
+body.light-theme #authView .auth-form input:focus{border-color:#6aa5d8!important;box-shadow:0 0 0 3px rgba(80,145,204,.14)!important}
+body.light-theme #authView .auth-form input::placeholder{color:#8b9db0!important}
+body.light-theme #authView .auth-form .auth-actions button{background:linear-gradient(110deg,#438dca,#2466a7)!important;color:#fff!important;box-shadow:0 5px 16px rgba(44,103,161,.18)!important}
+body.light-theme #authView .auth-form .auth-actions #signupBtn{background:#edf4fb!important;color:#315c84!important;border:1px solid #cbdbea!important}
+body.light-theme #authView .auth-form #forgotBtn{color:#326a9e!important;border:1px solid #d7e3ef!important}
+body.light-theme #authView .auth-form .auth-security{border-top:1px solid #e1eaf3!important;color:#667d96!important}
+body.light-theme #authView .ref-daily-promo{border-color:#b8d2eb!important;background:linear-gradient(110deg,#f4f9ff,#e6f1fc 58%,#f8fbff)!important;box-shadow:0 10px 24px rgba(46,91,137,.12)!important}
+body.light-theme #authView .ref-promo-copy strong{color:#274d72!important}
+body.light-theme #authView .ref-promo-copy span,body.light-theme #authView .ref-clock{color:#3979b5!important}
+body.light-theme #authView .ref-demo-footer{color:#315f8d!important;background:#f0f6fc!important}
+
+/* Third theme: Sky Blue Glass. Every auth element follows the same sky-blue palette. */
+body.luxury-theme #authView.auth-reference-layout{background:#061a2b!important;color:#eff9ff!important;border:1px solid rgba(120,200,255,.42)!important;box-shadow:0 20px 62px rgba(0,0,0,.42)!important}
+body.luxury-theme #authView.auth-reference-layout .auth-reference-visual{background:radial-gradient(ellipse at 76% 47%,rgba(120,200,255,.2),transparent 48%),radial-gradient(ellipse at 8% 90%,rgba(74,181,232,.2),transparent 40%),linear-gradient(155deg,#0a3048,#08283e 60%,#0b3852)!important}
+body.luxury-theme #authView .ref-brand-lockup,body.luxury-theme #authView .ref-brand-lockup strong{color:#78c8ff!important;text-shadow:0 0 18px rgba(120,200,255,.22)!important}
+body.luxury-theme #authView .ref-monogram{color:#78c8ff!important;text-shadow:0 2px 2px #164d70,0 0 18px rgba(120,200,255,.28)!important;border-bottom-color:#78c8ff!important}
+body.luxury-theme #authView .ref-monogram:after{border-color:#78c8ff!important;border-left-color:transparent!important;border-right-color:transparent!important}
+body.luxury-theme #authView .ref-brand-lockup em{color:#bfe7ff!important}
+body.luxury-theme #authView .ref-live-pill{border-color:rgba(120,200,255,.55)!important;background:rgba(5,34,54,.88)!important;color:#eff9ff!important}
+body.luxury-theme #authView .ref-live-pill i{background:#35d6a4!important}
+body.luxury-theme #authView .ref-live-pill b{color:#59dfc2!important}
+body.luxury-theme #authView .ref-market-copy h1 span{color:#78c8ff!important}
+body.luxury-theme #authView .ref-market-copy>p{color:#d5edfb!important}
+body.luxury-theme #authView .ref-coin-row{color:#eff9ff!important}
+body.luxury-theme #authView .ref-coin-row strong{color:#59dfc2!important}
+body.luxury-theme #authView .ref-earth{filter:drop-shadow(0 15px 25px rgba(0,0,0,.4))!important}
+body.luxury-theme #authView .ref-phone{border-color:rgba(120,200,255,.9)!important;background:linear-gradient(110deg,#9bdcff,#326b8d 12%,#0b2c43 28%,#174b69 100%)!important}
+body.luxury-theme #authView .ref-phone .auth-phone-preview{background:linear-gradient(160deg,#17415d,#0b2c43 65%,#061a2b)!important}
+body.luxury-theme #authView .ref-platform{border-color:#78c8ff!important;background:linear-gradient(180deg,rgba(120,200,255,.3),rgba(8,43,67,.94) 45%,#061a2b)!important;box-shadow:0 12px 26px rgba(0,0,0,.5),0 0 22px rgba(120,200,255,.22),inset 0 5px 12px rgba(220,244,255,.2)!important}
+body.luxury-theme #authView .ref-gold-coin{border-color:#b7e6ff!important;background:radial-gradient(circle at 32% 25%,#f2fbff,#83cfff 32%,#2777a6 68%,#124362)!important;box-shadow:0 12px 30px rgba(0,0,0,.4),inset 0 0 0 5px rgba(230,247,255,.35)!important}
+body.luxury-theme #authView .ref-usdt-coin{border-color:#78c8ff!important}
+body.luxury-theme #authView.auth-reference-layout .auth-form{background:linear-gradient(145deg,rgba(17,57,82,.94),rgba(5,29,47,.98))!important;border:2px solid rgba(120,200,255,.65)!important;box-shadow:0 0 0 1px rgba(120,200,255,.12),0 16px 38px rgba(0,0,0,.42)!important;color:#eff9ff!important}
+body.luxury-theme #authView .auth-form .auth-kicker,body.luxury-theme #authView .auth-form h2{color:#78c8ff!important}
+body.luxury-theme #authView .auth-form .auth-intro{color:#c0dfef!important}
+body.luxury-theme #authView .auth-form .field label{color:#d9effb!important}
+body.luxury-theme #authView .auth-form input{background:rgba(4,27,44,.9)!important;border:1px solid rgba(120,200,255,.48)!important;color:#f3faff!important}
+body.luxury-theme #authView .auth-form input:focus{border-color:#78c8ff!important;box-shadow:0 0 0 3px rgba(120,200,255,.16)!important}
+body.luxury-theme #authView .auth-form input::placeholder{color:#91b8ce!important}
+body.luxury-theme #authView .auth-form .auth-actions button{background:linear-gradient(110deg,#9bdcff,#78c8ff 48%,#42a9e5)!important;color:#06243a!important;box-shadow:0 5px 16px rgba(62,166,220,.24)!important}
+body.luxury-theme #authView .auth-form .auth-actions #signupBtn{background:rgba(19,62,88,.88)!important;color:#e8f6ff!important;border:1px solid rgba(120,200,255,.42)!important}
+body.luxury-theme #authView .auth-form #forgotBtn{color:#a8ddff!important;border:1px solid rgba(120,200,255,.3)!important}
+body.luxury-theme #authView .auth-form .auth-security{border-top:1px solid rgba(120,200,255,.25)!important;color:#c0dfef!important}
+body.luxury-theme #authView .ref-daily-promo{border-color:rgba(120,200,255,.58)!important;background:radial-gradient(ellipse at 12% 50%,rgba(120,200,255,.14),transparent 32%),linear-gradient(110deg,#0c2e47,#08283e 58%,#0b3852)!important;box-shadow:inset 0 0 25px rgba(120,200,255,.07),0 12px 26px rgba(0,0,0,.38)!important}
+body.luxury-theme #authView .ref-promo-copy strong{color:#eff9ff!important}
+body.luxury-theme #authView .ref-promo-copy span,body.luxury-theme #authView .ref-clock{color:#78c8ff!important}
+body.luxury-theme #authView .ref-demo-footer{color:#9cddff!important;background:#061a2b!important}
+@media(prefers-reduced-motion:reduce){
+  body.dark-theme #authView .ref-earth,body.dark-theme #authView .ref-gold-coin,
+  body.light-theme #authView .ref-earth,body.light-theme #authView .ref-gold-coin,
+  body.luxury-theme #authView .ref-earth,body.luxury-theme #authView .ref-gold-coin{animation:none!important;transition:none!important}
+}
 </style>
 
 </body>
