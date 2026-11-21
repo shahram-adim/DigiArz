@@ -1973,6 +1973,164 @@ body.light-theme #tab-markets .market-board-v34 .coin .price-toman{color:#805a0a
 
 </style>
 
+
+<style id="digiarz-approved-layout-20261121">
+/* Approved visual correction: distinct auth/dashboard shells, stable page gutters and repaired market rows. */
+html{overflow-x:hidden}
+body{overflow-x:hidden}
+.wrap{width:100%;max-width:1440px;margin-inline:auto;padding:18px clamp(12px,2.4vw,30px) 52px;overflow-x:clip}
+.top{width:100%;min-width:0}
+#appView.app-view-active{width:100%;max-width:1320px;margin:0 auto;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+#appView .hero,#appView .card,#appView .market-announcement,#appView .tabs{max-width:100%;min-width:0}
+#appView .grid,#appView .trade-grid,#appView .market-summary,#appView .performance-grid{min-width:0}
+#appView .card{margin:14px 0;padding:clamp(14px,2vw,22px)}
+/* Login is its own centered page: do not reuse the dashboard's top header. */
+.wrap:has(#authView:not(.hidden))>.top{display:none!important}
+.wrap:has(#authView:not(.hidden))>.auth-top-banner{display:none!important}
+#authView.auth{width:min(1080px,100%);max-width:1080px;margin:clamp(14px,4vh,42px) auto 34px;min-height:0;overflow:hidden;border-radius:24px}
+#authView .auth-visual,#authView .auth-form{min-width:0}
+#authView .auth-form{padding:clamp(22px,3.6vw,46px)}
+#authView .ref-monogram{background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important;width:auto!important;height:auto!important;padding:0!important;color:inherit!important}
+#authView .ref-monogram small{display:none!important}
+#authView .ref-monogram:before,#authView .ref-monogram:after{display:none!important;content:none!important}
+#authView .auth-visual:after{pointer-events:none}
+/* The app shell receives its own spacing and header only after authentication. */
+#appView.app-view-active~.mobile-bottom-nav{display:flex}
+#appView .market-announcement{border-radius:14px;margin:8px 0 14px}
+#appView .tabs{max-width:100%;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin}
+#appView .tabs button{flex:0 0 auto}
+#appView .section-title{min-width:0}
+#appView .section-title>*{min-width:0}
+/* Market list: remove the broken five-cell/favorite frame and align the four useful columns. */
+#tab-markets .market-board-v34 .coin,
+#tab-markets .coin{
+ direction:rtl!important;display:grid!important;
+ grid-template-columns:minmax(0,1.25fr) minmax(48px,.55fr) minmax(88px,.72fr) minmax(112px,.92fr)!important;
+ grid-template-rows:auto!important;align-items:center!important;gap:10px!important;
+ min-width:0!important;width:100%!important;padding:12px 8px!important;margin:0!important;
+ border:0!important;border-radius:0!important;outline:0!important;box-shadow:none!important;
+ background:transparent!important;color:var(--text)!important;
+ border-bottom:0!important;
+}
+#tab-markets .market-board-v34 .coin+.coin,#tab-markets .coin+.coin{margin-top:0!important}
+#tab-markets .market-board-v34 .coin>.favorite-btn,
+#tab-markets .coin>.favorite-btn,.favorite-btn{display:none!important}
+#tab-markets .market-board-v34 .coin-identity,#tab-markets .coin-identity{
+ grid-column:1!important;grid-row:1!important;display:flex!important;min-width:0!important;
+ flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;
+ gap:9px!important;overflow:hidden!important;text-align:right!important;
+}
+#tab-markets .market-board-v34 .coin-identity .coin-icon,#tab-markets .coin-identity .coin-icon{
+ width:36px!important;height:36px!important;min-width:36px!important;flex:0 0 36px!important;margin:0!important;
+}
+#tab-markets .market-board-v34 .coin-name-stack,#tab-markets .coin-name-stack{display:grid!important;gap:1px!important;min-width:0!important}
+#tab-markets .market-board-v34 .coin-name-fa,#tab-markets .coin-name-fa{display:block!important;white-space:normal!important;overflow-wrap:anywhere!important;font-size:12px!important;line-height:1.55!important}
+#tab-markets .market-board-v34 .coin-symbol-en,#tab-markets .coin-symbol-en{font-size:10px!important;line-height:1.45!important}
+#tab-markets .market-board-v34 .coin-english-name,#tab-markets .coin-english-name{font-size:9px!important;line-height:1.4!important}
+#tab-markets .market-board-v34 .coin-sparkline,#tab-markets .coin-sparkline{
+ grid-column:2!important;grid-row:1!important;display:block!important;width:100%!important;min-width:0!important;height:26px!important;overflow:hidden!important
+}
+#tab-markets .market-board-v34 .coin-change-wrap,#tab-markets .coin-change-wrap{
+ grid-column:3!important;grid-row:1!important;display:flex!important;flex-direction:column!important;
+ align-items:center!important;justify-content:center!important;gap:3px!important;min-width:0!important;text-align:center!important
+}
+#tab-markets .market-board-v34 .coin>.price-stack,#tab-markets .coin>.price-stack{
+ grid-column:4!important;grid-row:1!important;display:flex!important;flex-direction:column!important;
+ align-items:flex-end!important;justify-content:center!important;gap:4px!important;min-width:0!important;text-align:right!important
+}
+#tab-markets .market-board-v34 .coin .price-usd,#tab-markets .coin .price-usd{font-size:11px!important;white-space:normal!important;overflow-wrap:anywhere!important}
+#tab-markets .market-board-v34 .coin .price-toman,#tab-markets .coin .price-toman{font-size:11px!important;white-space:normal!important;overflow-wrap:anywhere!important}
+#tab-markets .market-board-v34 .coin-source,#tab-markets .coin-source{font-size:8px!important;line-height:1.4!important;white-space:normal!important}
+#tab-markets .market-board-v34 .coin-volume,#tab-markets .coin-volume{font-size:8px!important;white-space:normal!important;line-height:1.4!important}
+#tab-markets .market-board-v34 .coin-change-label,#tab-markets .coin-change-label{font-size:9px!important}
+#tab-markets .market-board-v34 .coin-change,#tab-markets .coin-change{min-width:0!important;padding:4px 6px!important;font-size:10px!important}
+#tab-markets .market-board-v34 .coin:hover,#tab-markets .market-board-v34 .coin.selected,
+#tab-markets .coin:hover,#tab-markets .coin.selected{background:rgba(120,130,150,.06)!important;border:0!important;box-shadow:none!important}
+/* Light glass: translucent page, panels and dashboard surfaces without opaque boxes. */
+body.light-theme{--bg:#edf3f7;--panel:rgba(255,255,255,.68);--panel2:rgba(255,255,255,.52);--line:rgba(164,184,199,.32);background:radial-gradient(ellipse at 10% 0%,rgba(255,255,255,.96),transparent 42%),linear-gradient(145deg,#edf4f8,#e7eef5 55%,#f8fbfd)!important}
+body.light-theme .wrap{background:transparent!important}
+body.light-theme .top,body.light-theme #appView .card,body.light-theme #appView .stat,
+body.light-theme #appView .trade-box,body.light-theme #appView .performance-item,
+body.light-theme #appView .indicator-panel,body.light-theme #appView .fx-box,
+body.light-theme #appView .hero,body.light-theme #appView .tabs{
+ background:rgba(255,255,255,.58)!important;border:1px solid rgba(255,255,255,.78)!important;
+ box-shadow:0 12px 34px rgba(62,91,112,.08),inset 0 1px 0 rgba(255,255,255,.8)!important;
+ backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)
+}
+body.light-theme #authView{background:rgba(255,255,255,.58)!important;border:1px solid rgba(255,255,255,.82)!important;box-shadow:0 22px 64px rgba(62,91,112,.12)!important;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
+body.light-theme #authView .auth-visual{background:linear-gradient(145deg,rgba(222,239,247,.88),rgba(240,247,250,.7))!important;border-color:rgba(255,255,255,.8)!important}
+body.light-theme #authView .auth-form{background:rgba(255,255,255,.44)!important}
+body.light-theme #authView .auth-form h2,body.light-theme #authView .auth-form label{color:#203447!important}
+body.light-theme #authView .auth-copy,body.light-theme #authView .auth-intro{color:#5c7181!important}
+body.light-theme #tab-markets .coin{background:transparent!important;border:0!important;box-shadow:none!important}
+body.light-theme #appView .hero{background:linear-gradient(120deg,rgba(255,255,255,.8),rgba(229,241,247,.62))!important}
+body.light-theme input,body.light-theme select,body.light-theme textarea{background:rgba(255,255,255,.8)!important;color:#1d3040!important}
+/* Third theme: deep indigo glass, scoped to luxury-theme only. */
+body.luxury-theme{
+ color-scheme:dark;--bg:#0c1024;--panel:rgba(24,31,67,.76);--panel2:rgba(33,42,83,.72);
+ --line:rgba(145,157,220,.26);--text:#f0f1ff;--muted:#aeb5d3;--field:rgba(13,19,48,.86);
+ --soft:rgba(26,35,76,.72);--yellow:#c7b8ff;--green:#55d9b2;--red:#ff8298;
+ background:radial-gradient(ellipse at 14% 4%,rgba(73,83,169,.38),transparent 36%),
+ radial-gradient(ellipse at 88% 16%,rgba(123,94,190,.22),transparent 32%),
+ linear-gradient(145deg,#090d20,#151b3c 54%,#0b1026)!important;color:var(--text)!important
+}
+body.luxury-theme .top,body.luxury-theme #appView .tabs{
+ background:rgba(13,18,43,.78)!important;border:1px solid rgba(145,157,220,.24)!important;
+ box-shadow:0 12px 34px rgba(0,0,0,.2)!important;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)
+}
+body.luxury-theme #appView .card,body.luxury-theme #appView .stat,body.luxury-theme #appView .trade-box,
+body.luxury-theme #appView .performance-item,body.luxury-theme #appView .indicator-panel,
+body.luxury-theme #appView .fx-box,body.luxury-theme #appView .orderbook-side,
+body.luxury-theme #appView .asset-row{
+ background:linear-gradient(145deg,rgba(34,43,91,.72),rgba(16,23,55,.78))!important;
+ border:1px solid rgba(145,157,220,.24)!important;border-radius:17px!important;
+ box-shadow:0 14px 38px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.045)!important;
+ backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)
+}
+body.luxury-theme #appView .hero{background:radial-gradient(circle at 12% 10%,rgba(120,112,207,.28),transparent 38%),linear-gradient(125deg,rgba(34,43,91,.92),rgba(17,24,58,.9) 68%,rgba(59,47,101,.56))!important;border:1px solid rgba(165,155,235,.32)!important}
+body.luxury-theme #appView button:not(.secondary){background:linear-gradient(135deg,#c9bdff,#9587e8)!important;color:#17152f!important;border-color:rgba(226,220,255,.5)!important}
+body.luxury-theme #appView button.secondary,body.luxury-theme #appView .tabs button{background:rgba(35,44,88,.76)!important;color:#e6e8ff!important;border:1px solid rgba(145,157,220,.24)!important;box-shadow:none!important}
+body.luxury-theme #appView .tabs button.active{background:linear-gradient(135deg,#c9bdff,#9587e8)!important;color:#17152f!important}
+body.luxury-theme input,body.luxury-theme select,body.luxury-theme textarea{background:rgba(13,19,48,.82)!important;color:#f0f1ff!important;border-color:rgba(145,157,220,.34)!important}
+body.luxury-theme #authView{background:rgba(20,27,64,.72)!important;border:1px solid rgba(145,157,220,.3)!important;box-shadow:0 24px 72px rgba(0,0,0,.34)!important;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+body.luxury-theme #authView .auth-visual{background:radial-gradient(circle at 18% 12%,rgba(114,106,202,.32),transparent 38%),linear-gradient(145deg,#202958,#111936 72%,#0e1530)!important;border:0!important}
+body.luxury-theme #authView .auth-form{background:linear-gradient(145deg,rgba(29,37,82,.82),rgba(15,22,54,.9))!important}
+body.luxury-theme #authView .auth-form h2,body.luxury-theme #authView .auth-headline{color:#f1f0ff!important}
+body.luxury-theme #authView .auth-kicker,body.luxury-theme #authView .auth-brand span{color:#c7b8ff!important}
+body.luxury-theme #authView .auth-security{background:rgba(33,42,86,.58)!important;border-color:rgba(145,157,220,.25)!important;color:#c6cbea!important}
+body.luxury-theme #tab-markets .coin{background:transparent!important;border:0!important;box-shadow:none!important}
+body.luxury-theme #appView .mobile-bottom-nav{background:rgba(11,16,38,.92)!important;border-color:rgba(145,157,220,.28)!important}
+body.luxury-theme .brand span:first-child,body.luxury-theme .hero-mark{color:#c7b8ff!important}
+body.luxury-theme .tag{background:rgba(199,184,255,.12)!important;border-color:rgba(199,184,255,.32)!important;color:#ddd6ff!important}
+@media(max-width:760px){
+ .wrap{padding:10px 12px calc(108px + env(safe-area-inset-bottom))!important}
+ #appView.app-view-active{padding-bottom:12px}
+ #authView.auth{width:100%;margin:12px auto 22px;border-radius:20px}
+ #authView .auth-visual{border-radius:0 0 18px 18px}
+ #appView .tabs{display:none!important}
+ #tab-markets .market-board-v34 .coin,#tab-markets .coin{
+  grid-template-columns:minmax(0,1fr) minmax(105px,.72fr)!important;
+  grid-template-rows:auto auto!important;gap:6px 10px!important;padding:10px 2px!important
+ }
+ #tab-markets .market-board-v34 .coin-identity,#tab-markets .coin-identity{grid-column:1!important;grid-row:1!important}
+ #tab-markets .market-board-v34 .coin-sparkline,#tab-markets .coin-sparkline{display:none!important}
+ #tab-markets .market-board-v34 .coin-change-wrap,#tab-markets .coin-change-wrap{
+  grid-column:1!important;grid-row:2!important;flex-direction:row!important;align-items:center!important;
+  justify-content:flex-start!important;flex-wrap:wrap!important;gap:4px 7px!important;text-align:right!important
+ }
+ #tab-markets .market-board-v34 .coin>.price-stack,#tab-markets .coin>.price-stack{
+  grid-column:2!important;grid-row:1/3!important;align-items:flex-end!important
+ }
+ #tab-markets .market-board-v34 .coin .price-usd,#tab-markets .coin .price-usd{font-size:11px!important}
+ #tab-markets .market-board-v34 .coin .price-toman,#tab-markets .coin .price-toman{font-size:10px!important}
+}
+@media(max-width:380px){
+ .wrap{padding-inline:9px!important}
+ #tab-markets .market-board-v34 .coin,#tab-markets .coin{grid-template-columns:minmax(0,1fr) minmax(94px,.68fr)!important;gap:5px 7px!important}
+ #tab-markets .market-board-v34 .coin-identity .coin-icon,#tab-markets .coin-identity .coin-icon{width:32px!important;height:32px!important;min-width:32px!important;flex-basis:32px!important}
+}
+@media(prefers-reduced-motion:reduce){#authView *,#appView *{transition:none!important;animation:none!important}}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -2604,7 +2762,7 @@ function applyTheme(theme){
  document.body.classList.toggle('luxury-theme',luxury);
  document.body.classList.toggle('dark-theme',dark);
  document.documentElement.style.colorScheme=light?'light':'dark';
- const labels={light:'روشن',dark:'تاریک',luxury:'لوکس شیشه‌ای'};
+ const labels={light:'روشن',dark:'تاریک',luxury:'نیلی شیشه‌ای'};
  const authThemeButton=$('authThemeToggle');
  const next={light:'dark',dark:'luxury',luxury:'light'}[selected];
  const actionLabels={light:'رفتن به تم تاریک',dark:'رفتن به تم لوکس شیشه‌ای',luxury:'رفتن به تم روشن'};
@@ -2619,8 +2777,8 @@ function applyTheme(theme){
   el.classList.toggle('active',active);el.setAttribute('aria-pressed',active?'true':'false');
  });
  const meta=document.querySelector('meta[name="theme-color"]');
- if(meta)meta.content=light?'#f4f7fb':luxury?'#071b2b':'#080d1b';
- const palette=light?{bg:'#ffffff',text:'#263244',grid:'#edf0f4',line:'#dce1e8'}:luxury?{bg:'#0b2235',text:'#e8f3f8',grid:'#18384b',line:'#376078'}:{bg:'#101318',text:'#c7cbd1',grid:'#202630',line:'#30343d'};
+ if(meta)meta.content=light?'#f4f7fb':luxury?'#111936':'#080d1b';
+ const palette=light?{bg:'#ffffff',text:'#263244',grid:'#edf0f4',line:'#dce1e8'}:luxury?{bg:'#111936',text:'#eef0ff',grid:'#252e55',line:'#59659a'}:{bg:'#101318',text:'#c7cbd1',grid:'#202630',line:'#30343d'};
  const options={layout:{background:{color:palette.bg},textColor:palette.text},grid:{vertLines:{color:palette.grid},horzLines:{color:palette.grid}},rightPriceScale:{borderColor:palette.line},timeScale:{borderColor:palette.line}};
  if(chart)chart.applyOptions(options);
  if(volumeChart)volumeChart.applyOptions(options);
