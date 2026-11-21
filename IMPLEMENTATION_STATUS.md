@@ -1144,3 +1144,31 @@
 1. بررسی بصری APK artifact-only Build #188 روی گوشی Android؛ هیچ تست دستگاهی هنوز انجام نشده.
 2. اگر biometric مدنظر باقی است، تغییرات biometric PR #45 را از طرح Indigo Glass جدا و فقط با حفظ تم مشکی/زرد بازبینی کن؛ PR فعلی Draft بماند.
 3. ادامهٔ QA منبع‌وفادار Stop-Limit در PostgreSQL 17 تازه با schema/ACL دقیق؛ Supabase Production و Recovery-Test دارای backup data دست‌نخورده بمانند.
+
+## نوبت تضمین کیفیت شبانه — ۲۲ نوامبر ۲۰۲۶
+
+### GitHub و وضعیت UI
+- HEAD شاخه `main` پیش از ثبت این نوبت: `b4fa332532f3b19e4fdb42bc84eecfc970113310`؛ جدیدترین تغییرات main عمدتاً handoff و مستندات بازبینی Sky Blue Glass/APK بودند.
+- Exact decimal CI روی همین HEAD با run `44903225604` موفق شد. اجرای تازهٔ Pages برای همین HEAD در فهرست runهای بررسی‌شده مشاهده نشد؛ موفقیت Pages برای این HEAD ادعا نمی‌شود.
+- PR #47 هنوز Draft و ادغام‌نشده است. candidate head `d6a8773af4b6efb0e2afc283d11822c8eaae0931` با Android review run `44902932362` موفق شد: تست biometric storage، تست‌های visual/application، نصب وابستگی‌ها و signature check، ساخت APK و بررسی `USE_BIOMETRIC` همگی موفق بودند. Artifact ID `14706801177`، SHA-256 `6f0adea22f1e9f645e161c21a10419b85284c08a8d7f30a1bc6e78ea3406450c`؛ APK فقط Debug review است و نصب فیزیکی/ثبت اثرانگشت/ورود و relock روی گوشی هنوز تأیید نشده.
+- اجرای قبلی review APK با run `44901688326` روی commit قدیمی‌تر `5ff57bf` در مرحلهٔ visual/application regression شکست خورد و build را متوقف کرد؛ این شکست پنهان نشده است. اجرای بعدی روی candidate اصلاح‌شدهٔ `d6a8773` موفق شد.
+- PR #48 (Pale Blue/Lavender Glass) و PR #50 (Pure-white Glass theme 2) همچنان Draft هستند؛ PR #50 بر پایهٔ شاخهٔ PR #48 است. هیچ‌کدام در main ادغام نشده‌اند؛ بنابراین نباید ظاهر آن‌ها را وضعیت live برنامه معرفی کرد.
+
+### Supabase Production — فقط‌خواندنی
+- پروژه `gfoaubfilhttnwjykaox` در `ACTIVE_HEALTHY` و PostgreSQL `17.11.0.018` است.
+- Migration ledger اکنون ۵۵ نسخه دارد؛ آخرین نسخه `20261121050216`. در `main` فقط ۴۰ فایل SQL در `supabase/migrations/` موجود است و سه Migration جدید ۲۱ نوامبر SQL متناظر ندارند؛ inventory قبلی ۱۴ منبع مفقود داشت و شمار شناخته‌شده اکنون ۱۷ است. جزئیات و محدودیت شمارش در `supabase/MIGRATION_RECONCILIATION.md` ثبت شد.
+- زمان‌بندی زنده: job 13 هر ۱۰ دقیقه؛ job 14 در دقیقه‌های ۱ و ۳۱ هر ساعت (هر ۳۰ دقیقه)؛ job 17 از دقیقهٔ ۵ و سپس هر ۱۰ دقیقه. فایل محلی migration `20261117130000` هنوز job 14 را هر دقیقه تعریف می‌کند؛ اختلاف منبع پابرجاست.
+- در پنجرهٔ ۶ساعتهٔ `16:34–22:33 UTC`، job 14 دوازده اجرای موفق و صفر شکست داشت (median `21.392s`)، و jobهای 13 و 17 هرکدام ۳۶ اجرای موفق و صفر شکست داشتند. آمار ۲۴ساعتهٔ job 14 شامل ۴۰ شکست قدیمی و ۳۴ موفقیت است؛ آخرین شکست `05:31 UTC` بود.
+- صف درخواست همگام‌سازی ۲٬۳۷۰ ردیف تاریخی، صفر pending و صفر pending قدیمی‌تر از ۳۰ دقیقه داشت؛ هر هفت exchange در snapshot بدون pending بودند.
+- Health Advisor بدون یافته؛ Security Advisor: ۱۵ جدول RLS-enabled بدون policy (INFO)، دو SECURITY DEFINER قابل اجرا برای anon و ۲۳ برای authenticated (WARN)، و leaked-password protection خاموش (WARN). Performance Advisor: ۹ FK بدون index پوششی، ۱۱ RLS initplan، ۲ جدول backup بدون PK و ۱۴ unused index.
+
+### تست، اقدام و مرز ایمنی
+- این نوبت هیچ تست runtime یا SQL تغییردهنده‌ای روی Production اجرا نکرد؛ بررسی‌های Supabase فقط SELECT/catalog/Advisor بودند. نتایج CI فوق از GitHub Actions خوانده شدند، نه اینکه در این نشست دوباره اجرا شوند.
+- تنها اقدام نوشتنی این نوبت، ثبت مستندات در `supabase/MIGRATION_RECONCILIATION.md` و همین فایل وضعیت است. هیچ Migration، cron، function، grant، policy، index، سفارش، معامله، رزرو، موجودی، کیف پول یا سابقهٔ مالی تغییر نکرد.
+- `supabase db push` همچنان ممنوع است تا ۱۷ منبع Migration و ۲۰ timestamp mismatch با منبع معتبر حل و replay در PostgreSQL 17 دورریختنی موفق شود.
+
+### گام بعد
+1. بازیابی SQL سه Migration جدید از artifact/deployment record معتبر؛ از روی نام یا تعریف فعلی تابع SQL بازسازی حدسی نشود.
+2. تعیین رابطهٔ Migration `20261121050216` با schedule زندهٔ job 14 و ثبت منبع canonical آن.
+3. replay کامل migration set بازسازی‌شده در PostgreSQL 17 ایزوله و بررسی نهایی schedule، worker، ACL و RLS.
+4. ادامهٔ QA candidateهای UI/APK فقط در PRهای Draft؛ تست فیزیکی Android هنوز لازم است و merge یا انتشار بدون تأیید صریح انجام نشود.
