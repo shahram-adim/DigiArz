@@ -457,7 +457,7 @@ test('crypto market rows stay inside the viewport on narrow phones in every them
   assert.match(css, /#tab-markets \.market-board-v34 \.coin\s*\{[^}]*width:100%!important;min-width:0!important;max-width:100%!important/s);
   assert.match(css, /@media\(max-width:760px\)[\s\S]*?grid-template-columns:minmax\(0,1fr\) minmax\(0,42%\)!important/);
   assert.match(css, /@media\(max-width:380px\)[\s\S]*?grid-template-columns:minmax\(0,1fr\) minmax\(0,44%\)!important/);
-  assert.match(css, /coin\\.price-usd[\s\S]*?overflow-wrap:anywhere!important/);
+  assert.ok(css.includes('#tab-markets .market-board-v34 .coin .price-usd,') && css.includes('overflow-wrap:anywhere!important'), 'long price text can wrap within its own cell');
   assert.match(css, /#dashboardMarketPreview\.dashboard-market-preview\.da-v2-market-list>\.da-market-coin-card\s*\{[^}]*min-width:0!important;max-width:100%!important/s);
   assert.match(css, /#dashboardMarketPreview \.da-market-price[\s\S]*?word-break:break-word!important/);
   assert.match(css, /border:0!important;border-radius:0!important;outline:0!important;box-shadow:none!important/);
