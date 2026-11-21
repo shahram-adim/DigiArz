@@ -1067,3 +1067,22 @@
 3. یک PostgreSQL 17 کاملاً تازه با schema-only DDL و synthetic auth/users ایجاد کن؛ تمام FKها، triggerها، policyها و ACLهای منبع را صریحاً provision کن و سپس source-faithful race test را به RPCهای واقعی متصل کن.
 4. PR #38 را تا همگام‌سازی با main، تکمیل پوشش RPC واقعی و اثبات CI نگه دار؛ merge/deploy بدون تأیید صریح انجام نشود.
 5. migration drift و cadence job 14 را جداگانه حل کن؛ `supabase db push` و هر تغییر Production همچنان ممنوع است.
+
+
+## اصلاح هماهنگی هویت بصری صفحه ورود — ۲۱ نوامبر ۲۰۲۶
+
+- HEAD زنده پیش از این تغییر: `6b31da97f36be8c7f9e3c2f3e63728c759322c09`. آخرین تغییر محصولی پیش از این نوبت، merge شدن PR #42 با commit `f8fda32c35a529f4719681a91fe800d056514db0` بود؛ ثبت نام و نام خانوادگی از فرم حذف شده و signup فقط email/password می‌فرستد. login، recovery و schema حساب دست‌نخورده مانده‌اند.
+- بازبینی CSS نهایی نشان داد آخرین override صفحه ورود هنوز پس‌زمینه navy/آبی داشت و با انتخاب ثبت‌شدهٔ کاربر (ظاهر شبیه Binance، مشکی و زرد) کاملاً هماهنگ نبود.
+- `index.html`: فقط رنگ‌های لایهٔ نهایی صفحه ورود به charcoal/black و زرد `#f0b90b` تغییر کرد؛ چیدمان، فرم email/password، شناسه‌های کنترل، منطق login/signup/recovery، پیش‌نمایش بازار و breakpointهای موبایل تغییر نکردند.
+- `tests/index-syntax.test.js`: آزمون قدیمیِ انتظاردهندهٔ رنگ‌بندی آبی با آزمون palette نهایی مشکی/زرد جایگزین شد؛ حفظ کنترل‌های ورود/ثبت‌نام/بازیابی، حذف فیلد نام، و ارسال email/password-only همچنان assert می‌شود.
+- اجرای CI برای commitهای تازه در لحظهٔ ثبت هنوز از status endpoint قابل تأیید نبود؛ نتیجهٔ تست موفق ادعا نمی‌شود تا workflow run متناظر با HEAD جدید دیده شود.
+- بررسی فقط‌خواندنی Supabase در 2026-11-21 حدود 10:36 UTC: پروژه `ACTIVE_HEALTHY`، PostgreSQL `17.11.0.018`؛ هشت Edge Function فعال؛ Development Branch خالی؛ سه migration تازهٔ ثبت‌شده شامل `20261121045434`, `20261121045531`, `20261121050216`. هیچ migration یا داده‌ای اعمال/تغییر نشد.
+- snapshot جداول عمومی: دادهٔ مالی `orders/trades/transactions/asset_balances/order_reservations/conditional_orders` در شمارش connector صفر گزارش شد؛ این snapshot به‌تنهایی اثبات تست runtime نیست. قیمت بازار 898 ردیف، دارایی‌های بازار 18,911 ردیف و مشاهدات فهرست صرافی 4,962 ردیف گزارش شدند.
+- Security Advisor در این snapshot: 2 هشدار RPC نوع SECURITY DEFINER قابل اجرا برای anon، 23 هشدار برای authenticated، 15 جدول RLS-enabled بدون policy (عمدتاً schema خصوصی/صف/کنترل)، و leaked-password protection غیرفعال. Health Advisor بدون lint؛ Performance Advisor شامل 9 FK بدون index پوششی، 11 هشدار RLS initplan، 15 unused index و 2 جدول backup بدون primary key. هیچ grant، policy، index، Auth setting یا RPC تغییر نکرد.
+- محدودیت: Development Branch ایزولهٔ Supabase در پروژهٔ اصلی موجود نیست. آزمون کامل Stop-Limit همچنان باید در PostgreSQL 17 تازه با DDL و دادهٔ مصنوعی، پس از اثبات parity منبع، انجام شود. PR #38 و recovery snapshot به‌تنهایی اثبات source-faithful parity نیستند.
+- هیچ سفارش، معامله، رزرو، کیف پول، موجودی، سابقه مالی، Worker، cron، RPC مالی یا Migration در Production برای تست اجرا/تغییر نشد.
+
+### گام بعد
+1. تأیید GitHub Actions برای HEAD جدید و بررسی اجرای آزمون palette و regression کامل.
+2. پس از تأیید CI، بررسی بصری فرم ورود/ثبت‌نام در Android و اطمینان از حفظ نام‌نویسی email/password-only.
+3. ادامهٔ QA Stop-Limit فقط روی PostgreSQL 17 تازه و synthetic؛ Production و Recovery-Test دارای backup data دست‌نخورده بمانند.
