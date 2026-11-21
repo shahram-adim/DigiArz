@@ -4177,7 +4177,7 @@ async function start(){
    hideRecoveryForm();
   }else if(event==='SIGNED_IN'&&session&&!isRecoveryMode){
    document.body.classList.add('auth-page-active');document.body.classList.remove('dashboard-page-active');
-   setTimeout(()=>{showApp(session).catch(error=>{console.error('DigiArz account loading failed:',error);if(!authView.classList.contains('hidden'))showMessage(authMsg,'ورود انجام شد، اما بارگذاری حساب کامل نشد: '+(error?.message||String(error)),'err')})},0);
+   setTimeout(()=>{showApp(session).catch(error=>{console.error('DigiArz account loading failed:',error);const status=$('adminRoleStatus');if(status)showMessage(status,'ورود انجام شد، اما بارگذاری حساب کامل نشد: '+(error?.message||String(error))+'؛ اتصال را بررسی کنید و دوباره تلاش کنید.','err')})},0);
   }
  });
  let sessionData;
