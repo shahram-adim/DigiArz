@@ -321,7 +321,9 @@ test('login screen uses the selected Binance-inspired black-and-yellow palette w
   const styleEnd = html.lastIndexOf('</style>');
   assert.ok(paletteStart >= 0 && styleEnd > paletteStart, 'final brand override is present at the end of the stylesheet');
   const palette = html.slice(paletteStart, styleEnd);
-  assert.ok(palette.includes('#authView.auth-reference-layout{'), 'final palette scopes to the reference auth layout');
+  assert.ok(palette.includes('body.dark-theme #authView.auth-reference-layout{'), 'black-and-yellow auth palette is scoped to the dark theme only');
+  assert.doesNotMatch(palette, /(^|[,{]\\s*)#authView/m, 'no unscoped auth palette selector can leak into other themes');
+  assert.doesNotMatch(palette, /ref-monogram:after|border-bottom-color/, 'the logo monogram has no decorative frame or ring');
   assert.ok(palette.includes('background:#0b0e11!important'), 'outer auth surface uses black');
   assert.ok(palette.includes('linear-gradient(155deg,#181a20 0%,#0b0e11 60%,#11151c 100%)!important'), 'visual panel uses charcoal and black');
   assert.ok(palette.includes('linear-gradient(145deg,#181a20,#0b0e11 72%)!important'), 'form panel uses charcoal and black');
