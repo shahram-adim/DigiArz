@@ -794,3 +794,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Repository has no package-lock.json on main or the old Passkey spike. Current workflow uses `npm install`, not `npm ci`; dependency versions are exact-pinned but a committed lockfile remains an improvement required before production adoption.
 - This is dependency/build compatibility only. No JS calls to the biometric plugin and no Supabase storage/session behavior changes have been made. No fingerprint flow is enabled yet.
 - Next: run clean Android CI and regression tests on this branch; inspect Gradle/Capacitor/plugin errors. If build succeeds, implement and test the APK-only protected session storage adapter in a separate, reviewable step. No merge/release/Production changes.
+
+
+## 2026-11-21 — biometric spike CI completion and next gate
+- Branch: `spike/android-biometric-capacitor8-2026-11-21`; PR #41 remains Draft/open and unmerged. PR head before this handoff update: `d628796fb27c32d02ad1ef0e7d8bcb2c73ee6a7e`.
+- Android CI run `44876814094` completed successfully. Artifact `DigiArz-Android-debug-APK` (ID `14696063423`) uploaded; size 6,100,929 bytes; SHA-256 `c2a4006bb9ef5205322585f92ff64b3f0032c687791ac21c27d48bb66d039d05`; expires 2026-12-05T06:44:18Z. Artifact provenance records build head `30a73ec504945d36ae7d186924c74804b99db33a`, not the later package-description-only PR head.
+- Exact-decimal workflow run `44876814102` completed successfully; all 21 substantive test steps passed, including rollback/lock-timeout checks and two-session order/cancellation races.
+- Re-read current auth bootstrap on the spike branch: `initClient()` uses default Supabase persistence with `persistSession:true`, `autoRefreshToken:true`, `detectSessionInUrl:true`; startup registers auth listener before `getSession()`; recovery events and URL handling must be preserved.
+- Read-only inspection of active Production Edge Function `app-assets` version 3 found Supabase JS served from floating `@supabase/supabase-js@2` URLs. Do not change/deploy this function. Pin and vendor/bundle a reviewed Supabase JS version in the Android-only branch before implementing the custom storage adapter, keeping browser/PWA path unchanged.
+- Updated `docs/ANDROID_BIOMETRIC_LOCK_SPIKE.md` with run IDs, artifact digest/provenance, auth bootstrap findings, floating SDK finding, and next safe steps. Documentation commit: `7900d2a549a82aaa196a2c6ef295c975fc7a28d3`.
+- No biometric runtime implementation, no Supabase Production changes, no mainline change, no merge/release, and no real-device test claim.
+- **Next action:** pin Supabase JS in the isolated branch and establish a local, reproducible APK-only bundle before designing/implementing the native-only async storage adapter. Then validate plugin APIs/manifest and write lifecycle/race tests.
