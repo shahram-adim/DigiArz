@@ -960,3 +960,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Android review build run `44924975787` completed **SUCCESS** on app-code commit `e3e30f5a8f492565f1f728587dfe9e99b7ecfe53`. Its artifact label predates the pale-blue naming correction, so it is not the final artifact to share.
 - Final-label Android review run `44925030730` is queued/pending on `c07657e2ed80578e00900351daf194dd8d5cfcc1`; wait for its completion and verify artifact provenance before sharing.
 - Exact-decimal runs `44925034185` (code/workflow head) and `44925058935` (latest handoff head) were still in progress at this check. The passing run above is already on the exact same application code and regression-test content.
+
+
+
+### APK artifact delivered — 2026-11-21
+- Android review workflow `44925030730` completed **SUCCESS** on source commit `56d049f315d1ce3ee03bccb83bf9eb5e43a61f67`. All workflow steps passed, including biometric storage tests, visual/application regression tests, Capacitor packaging, debug APK build, merged biometric permission verification, provenance recording, and artifact upload.
+- GitHub artifact ID: `14714519615`, name `DigiArz-Pale-Blue-Glass-Biometric-APK`, ZIP size 6,194,783 bytes. It contains `app-debug.apk` (7,299,806 bytes) and `BUILD-INFO.txt`.
+- APK SHA-256: `a836222ce3463a35cf8c74908826c95f307adc4197dcecaae5ccd3300c438763`.
+- Downloaded and locally verified the ZIP archive and embedded APK with `unzip -t`; no archive corruption was reported. Build-info source commit is the current handoff commit and includes the app code from `c07657e2...` unchanged.
+- APK is a **debug/review build**, not a production-signed release. Real-device installation, biometric enrollment and login/logout/background-relock checks remain to be completed by user/device testing. Do not merge or publish without explicit user approval.
