@@ -94,3 +94,12 @@ No Production/Supabase changes, no main merge, no release publication, no change
 - Official plugin 8.9.3 API review confirms `setData({accessControl: BIOMETRY_CURRENT_SET|BIOMETRY_ANY})` and `getSecureData()` are the appropriate arbitrary-data APIs. Android requires `USE_BIOMETRIC`; this CI build log did not expose the merged manifest, so permission presence remains unverified. `authValidityDuration` defaults to 0, requiring fresh biometric authentication for every protected key operation; any nonzero window is a deliberate security/convenience tradeoff.
 - No runtime Auth adapter or biometric lock was implemented. No production Supabase changes, merge, or release occurred. PR #41 remains Draft.
 - Next: verify the generated merged Android manifest includes `USE_BIOMETRIC`; add pinned `@supabase/supabase-js` dependency and lockfile/provenance; then design and test the native-only Auth storage adapter before enabling runtime behavior.
+
+
+## 2026-11-21 — merged biometric permission verified
+- Android workflow run [44877584070](https://github.com/shahram-adim/DigiArz/actions/runs/44877584070) completed successfully on commit `ed3496188ca8241f4230974d40f299a7f5f6d9d1`.
+- Clean Capacitor 8 project generation, sync, Gradle debug APK build, and the explicit **Verify merged biometric permission** step all passed. The CI check located the generated merged debug manifest and confirmed `android.permission.USE_BIOMETRIC` is present.
+- APK artifact and build provenance were uploaded successfully. Direct GitHub Release publication was intentionally skipped because this is the isolated biometric spike branch.
+- This verifies manifest permission inclusion, not that biometric unlock is implemented or device-tested. There is still no runtime biometric prompt or Auth storage adapter.
+- Current package manifest still has no direct `@supabase/supabase-js` dependency and no committed `package-lock.json`. The local APK bundle is SHA-pinned, but dependency-tree lockfile and npm provenance remain prerequisites before Auth adapter implementation.
+- Supabase JS 2.119.2 release notes show only a Storage URL-boundary validation fix; no Auth change in that patch. Supabase docs explicitly support async custom Auth storage methods `getItem`, `setItem`, and `removeItem`. Refresh tokens are single-use, so session rotation must be serialized and tested. References: https://github.com/supabase/supabase-js/releases and https://supabase.com/docs/guides/auth/sessions.
