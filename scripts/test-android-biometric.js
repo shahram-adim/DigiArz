@@ -60,6 +60,7 @@ test('cancellation preserves encrypted data and explicit retry can unlock', asyn
   plugin.state.failRead = true;
   storage.lock();
   assert.equal(await storage.getItem('digiarz.auth.session.v1'), null);
+  assert.equal(storage.isLocked(), true);
   assert.equal(plugin.state.saved, true);
   plugin.state.failRead = false;
   assert.equal(await storage.unlock(), value);
@@ -102,4 +103,40 @@ test('auxiliary Supabase PKCE keys stay separate from the encrypted session', as
   await storage.setItem('digiarz.auth.session.v1-code-verifier', 'verifier');
   assert.equal(await storage.getItem('digiarz.auth.session.v1-code-verifier'), 'verifier');
   assert.equal(plugin.calls.includes('setData'), false);
+});
+test('writes arriving after a background lock never repopulate decrypted memory', async () => {
+  const plugin = makePlugin();
+  const storage = makeStorage(plugin);
+  const key = 'digiarz.auth.session.v1';
+  await storage.setItem(key, '{"access_token":"before","refresh_token":"before"}');
+  storage.lock();
+  const rotated = '{"access_token":"after","refresh_token":"rotated"}';
+  await storage.setItem(key, rotated);
+  assert.equal(storage.isLocked(), true);
+  assert.equal(storage.hasCachedSession(), false);
+  assert.equal(plugin.state.saved, true);
+  assert.equal(plugin.state.value, rotated);
+  assert.equal(await storage.unlock(), rotated);
+  assert.equal(storage.isLocked(), false);
+});
+
+test('a write already in flight cannot undo a background lock', async () => {
+  let releaseWrite;
+  const gate = new Promise(resolve => { releaseWrite = resolve; });
+  const plugin = makePlugin();
+  const originalSetData = plugin.setData;
+  plugin.setData = async ({ value }) => {
+    await gate;
+    return originalSetData({ value });
+  };
+  const storage = makeStorage(plugin);
+  const key = 'digiarz.auth.session.v1';
+  const write = storage.setItem(key, '{"access_token":"late","refresh_token":"late"}');
+  await Promise.resolve();
+  storage.lock();
+  releaseWrite();
+  await write;
+  assert.equal(storage.isLocked(), true);
+  assert.equal(storage.hasCachedSession(), false);
+  assert.equal(plugin.state.saved, true);
 });
