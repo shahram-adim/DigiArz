@@ -820,3 +820,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - PR #45 rechecked open, Draft, unmerged at the same head. No merge, release, deployment, or Supabase/database change.
 - Validation boundary: CI verifies packaging, test suite and biometric permission; it does not replace physical installation/biometric enrolment/login testing on the user's Android phone. APK is a debug review build, not a signed production release.
 - Next: provide the APK for user installation and, after the user's device test, inspect any observed issue. Keep PR #45 unmerged until explicit approval.
+
+## Live handoff — 2026-11-21 14:05 Asia/Tehran
+- Latest verified main HEAD before this handoff update: 31ebb934b55d7c3610950081df0ed4483de2e672.
+- Auth screen final override now matches selected charcoal/black + yellow palette; signup remains email/password-only; login and recovery handlers preserved. Full CI Run #1454 (44895814215) succeeded on that HEAD, including all isolated PostgreSQL 17 Stop-Limit/TP-SL/Market/Limit integration and race tests.
+- Android Build #188 (44895810345) succeeded and uploaded artifact 14703574136; workflow is now artifact-only (no automatic GitHub Release). An earlier automatic Release android-debug-187 was created by the old workflow; it was not deleted. Physical Android install remains unverified.
+- PR #45 remains Draft/open/unmerged. It combines Indigo Glass styling with APK-only biometric unlock; do not merge as-is because its visual direction differs from the currently selected black/yellow design. Review artifact #4 (14704480013) exists for isolated testing.
+- Production Supabase gfoaubfilhttnwjykaox is ACTIVE_HEALTHY, PostgreSQL 17.11.0.018, 55 migrations through 20261121050216, 8 active Edge Functions, zero development branches. Financial tables showed zero rows in the read-only connector snapshot; no financial RPC/worker was run.
+- No Production schema, migration, grants, RLS, cron, user data, wallet, order, trade or balance changed. Next: device APK verification, separate review of APK-only biometric without Indigo Glass, and source-faithful Stop-Limit QA in a fresh PostgreSQL 17 harness.
