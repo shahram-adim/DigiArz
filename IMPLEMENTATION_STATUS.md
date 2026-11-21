@@ -1114,3 +1114,33 @@
 1. تأیید نهایی CI کامل Run #1450 و artifact-only Android build ناشی از تغییر workflow.
 2. آزمایش APK روی گوشی Android؛ فقط پس از نصب واقعی می‌توان سازگاری device را تأیید کرد.
 3. از این پس هیچ Release/tag جدیدی بدون اجازهٔ جداگانه ساخته نشود؛ ساخت artifact برای QA به‌تنهایی کافی است.
+
+## نتیجهٔ نهایی اجرای روزانه — ۲۱ نوامبر ۲۰۲۶
+
+### وضعیت GitHub و رابط کاربری
+- HEAD پیش از این ثبت: 31ebb934b55d7c3610950081df0ed4483de2e672.
+- صفحه ورود در index.html به رنگ‌بندی منتخب کاربر، مشکی/ذغالی و زرد Binance-inspired، هماهنگ شد. فرم ثبت‌نام همچنان فقط ایمیل/رمز دارد؛ login، recovery، شناسه‌های کنترل، نمایش بازار و breakpointهای موبایل تغییر رفتاری نکردند.
+- Commit رابط: 87c171a77958b6c1ba2605813525ea61d15a20a4؛ آزمون palette در 2f67a54b0cb7416aaa01f13e959248b59b701ac7 با اصلاح matcherهای قدیمی ثبت شد.
+- Full CI Run #1454، ID 44895814215، روی HEAD 31ebb934 با نتیجهٔ SUCCESS پایان یافت؛ همهٔ مراحل Node/browser و PostgreSQL 17، از جمله Market/Limit/Stop-Limit/TP-SL، workerها، لغو هم‌زمان و parent-child lifecycle موفق شدند.
+- اجرای اولیهٔ آزمون palette به‌دلیل matcherهای قدیمی/escape اضافی fail شد (Runهای #1444–#1448). علت پیدا و اصلاح شد؛ Run #1454 سبز است. این شکست‌ها پنهان یا به‌عنوان موفقیت ثبت نمی‌شوند.
+
+### Android/APK و مرز انتشار
+- Android Build #188، run ID 44895810345، روی workflow artifact-only با نتیجهٔ SUCCESS پایان یافت؛ artifact ID 14703574136، digest sha256:4cb617cb85e7a8b849bd69332159e5511c139a676e89429f700b121db5f7aed4، انقضا 2026-12-05T10:46:43Z. این APK debug است؛ نصب فیزیکی روی گوشی هنوز تأیید نشده.
+- workflow .github/workflows/android-apk.yml در commit e227a4235b92a1e87a99cb62b648faa319b98620 اصلاح شد: مجوز contents به read محدود و مرحلهٔ auto GitHub Release حذف شد. buildهای بعدی فقط artifact آپلود می‌کنند.
+- رویداد ناخواستهٔ قابل‌توجه: پیش از این محافظ، اجرای Android Build #187 (run 44895476010) به‌طور خودکار Release android-debug-187 را منتشر کرد؛ asset debug APK SHA-256 برابر 083706dec8319975f9ed6863e1944e0ed235ec5c5f45397a637d57f637979585. این release دست‌نخورده باقی ماند؛ هیچ حذف یا تغییر برگشت‌ناپذیری انجام نشد. این build production-signed نیست.
+- PR #45 با عنوان [Draft] Indigo Glass design + APK-only biometric unlock هنوز Draft/open و merge نشده است. workflow review run #4 (44895774772) موفق شد و artifact ID 14704480013 با انقضای 2026-12-05 تولید کرد؛ این candidate شامل Indigo Glass و biometric APK-only است و با انتخاب فعلی مشکی/زرد از نظر طراحی متفاوت است. بدون تأیید جداگانه merge نمی‌شود.
+- هیچ Release/tag جدیدی در Build #188 ایجاد نشد.
+
+### Supabase Production — فقط‌خواندنی
+- پروژه gfoaubfilhttnwjykaox: ACTIVE_HEALTHY، PostgreSQL 17.11.0.018.
+- Migration ledger: 55 نسخه؛ آخرین نسخه 20261121050216 (temporarily_throttle_exchange_asset_processors_20261121).
+- هشت Edge Function فعال؛ Development Branchها: صفر.
+- شمارش connector برای جداول مالی orders/trades/transactions/asset_balances/order_reservations/conditional_orders صفر بود؛ این snapshot، آزمون runtime نیست.
+- Security Advisor: 2 SECURITY DEFINER RPC برای anon، 23 برای authenticated، 15 جدول RLS-enabled بدون policy و leaked-password protection خاموش. دو RPC عمومی anon یعنی get_admin_market_listings() و get_exchange_discovered_market_assets() با pg_get_functiondef بررسی شدند: هر دو STABLE/SQL/SECURITY DEFINER با search_path خالی و SELECT-only روی متادیتای عمومی بازار هستند؛ هیچ دادهٔ خصوصی/مالی کاربر برنمی‌گردانند. ACL فعلی anon/authenticated/service_role را مجاز می‌کند؛ مجوزها در این نوبت تغییر نکردند.
+- Health Advisor بدون یافته؛ Performance Advisor: 9 FK بدون index پوششی، 11 هشدار RLS initplan، 15 unused index و 2 جدول backup بدون PK. هیچ index/RLS/grant/Auth setting تغییر نکرد.
+- فقط خواندن catalog/metadata و تعریف دو RPC انجام شد؛ هیچ worker/RPC مالی اجرا نشد و هیچ سفارش، معامله، رزرو، کیف پول، موجودی، سابقه مالی، cron، migration یا schema Production تغییر نکرد.
+
+### گام بعد
+1. بررسی بصری APK artifact-only Build #188 روی گوشی Android؛ هیچ تست دستگاهی هنوز انجام نشده.
+2. اگر biometric مدنظر باقی است، تغییرات biometric PR #45 را از طرح Indigo Glass جدا و فقط با حفظ تم مشکی/زرد بازبینی کن؛ PR فعلی Draft بماند.
+3. ادامهٔ QA منبع‌وفادار Stop-Limit در PostgreSQL 17 تازه با schema/ACL دقیق؛ Supabase Production و Recovery-Test دارای backup data دست‌نخورده بمانند.
