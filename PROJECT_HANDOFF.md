@@ -997,3 +997,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Added a regression test ensuring the light theme remains neutral white and does not inherit theme-3 blue colors.
 - App CSS commit: `9674be0c4cbfb1de5a15f8d33eda92edf2c8deab`; test commit/current head: `cdd6076ec34cae2a8bc3e5b4c433824e20486e34`.
 - Android review build triggered for these commits; do not share an APK until it completes and artifact provenance is verified. PR #48 remains Draft/open/unmerged; no production, Supabase, merge, or release changes.
+
+
+## 2026-11-21 — Explicit email-or-fingerprint login choice
+- User requested that the login screen let them choose between email/password and fingerprint.
+- Reused the existing Android-only NativeBiometric + encrypted Supabase session adapter; did not introduce a second authentication provider or change Supabase policies.
+- Updated `src/android-biometric-lock.js` with an opt-in deferred biometric prompt. During cold startup, Supabase reads no session until the user taps the fingerprint option; this keeps email/password immediately available without triggering the biometric dialog automatically. Tapping the option explicitly unlocks the encrypted session, then reinitializes Supabase so the authenticated session is restored.
+- Updated `scripts/inject-android-biometric.py` so generated Android APK login screens show a clearly labeled **ورود با اثر انگشت** button only when a protected session exists. Email/password login remains visible and unchanged. Logout hides/removes the saved-session option; cancellation keeps the encrypted record and leaves email login available.
+- Added regression test `scripts/test-android-biometric.js` verifying deferred startup does not call the native biometric prompt and explicit user selection unlocks the saved session.
+- Commits: secure storage `20a7b20ccb1eee74acc42f772cee4f09feeeb422`; test `5f39b2c9023c80d97bc6a52c9da22e6801e60260`; Android injection `eb0855d48982544faee3b6fd8e4796c76ec5f590`.
+- CI for these commits has not yet been verified. A new Android review build and test run must complete before sharing an APK.
+- PR #48 remains Draft/open/unmerged. No merge, production deployment, Supabase/database changes, or real-money features. Physical Android fingerprint enrollment and end-to-end device acceptance remain unverified.
