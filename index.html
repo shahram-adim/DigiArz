@@ -4642,7 +4642,7 @@ body.light-theme #authView.auth-reference-layout .auth-security{
 /* Third theme: pale Sky Blue Glass, deliberately distinct from the light neutral theme. */
 body.luxury-theme{
  color-scheme:light!important;
- --bg:#eaf6ff;--panel:rgba(255,255,255,.64);--panel2:rgba(241,249,255,.72);
+ --bg:#eaf3ff;--panel:rgba(255,255,255,.64);--panel2:rgba(241,249,255,.72);
  --line:rgba(111,177,224,.28);--text:#183b5c;--muted:#6686a2;--field:rgba(255,255,255,.76);
  --soft:rgba(225,242,255,.72);--yellow:#4b9ed7;--green:#159b83;--red:#d85d78;
  background:radial-gradient(ellipse at 12% 8%,rgba(120,200,255,.36),transparent 36%),radial-gradient(ellipse at 88% 84%,rgba(183,215,255,.42),transparent 40%),linear-gradient(135deg,#f0f9ff 0%,#e2f2ff 52%,#d9edff 100%)!important;
@@ -4686,9 +4686,11 @@ body.luxury-theme .coin,body.luxury-theme #tab-markets .coin{
  background:transparent!important;border:0!important;box-shadow:none!important;
 }
 body.luxury-theme #authView.auth-reference-layout{
+ display:flex!important;flex-direction:column!important;max-width:570px!important;min-height:0!important;margin:22px auto 34px!important;padding:0!important;overflow:hidden!important;border-radius:30px!important;
  color:#183b5c!important;background:rgba(255,255,255,.48)!important;
  border:1px solid rgba(255,255,255,.88)!important;box-shadow:0 24px 68px rgba(64,127,176,.14),inset 0 1px 0 #fff!important;
 }
+body.luxury-theme #authView .ref-hero-grid{display:none!important}
 body.luxury-theme #authView.auth-reference-layout .auth-reference-visual{
  background:radial-gradient(circle at 84% 20%,rgba(120,200,255,.34) 0 76px,transparent 78px),radial-gradient(circle at 14% 42%,rgba(155,213,255,.48) 0 20px,transparent 22px),radial-gradient(circle at 74% 94%,rgba(170,220,255,.42) 0 155px,transparent 157px),linear-gradient(135deg,#eff9ff 0%,#e3f3ff 55%,#d9efff 100%)!important;
  color:#183b5c!important;border:0!important;
