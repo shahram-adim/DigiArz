@@ -824,3 +824,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Plugin 8.9.3 documentation confirms biometric-protected arbitrary data requires `setData` with `BIOMETRY_CURRENT_SET` or `BIOMETRY_ANY`, then `getSecureData`; Android requires `USE_BIOMETRIC`. The build log did not prove the merged manifest permission, so verify it in generated APK/manifest before proceeding.
 - No Auth adapter, biometric runtime flow, Production change, main merge, or release. Do not present this APK as having fingerprint unlock.
 - **Next action:** verify merged Android manifest permission; then add pinned Supabase JS dependency + lockfile/provenance in this branch and test a native-only Auth storage adapter with refresh rotation, recovery, cancellation, logout, background/resume, and process-death cases.
+
+
+### Android biometric follow-up — merged manifest verification queued — 2026-11-21
+- Added a CI step in commit `ed3496188ca8241f4230974d40f299a7f5f6d9d1` to locate the generated merged debug manifest and fail unless it contains `android.permission.USE_BIOMETRIC`.
+- Android workflow run `44877584070` is pending on that commit; exact-decimal run `44877587377` is in progress. Earlier run `44877539074` on commit `af7144aefdb0493e96be300cbb9f296f282b2c43` had already passed pinned-SDK asset preparation and was still building when last checked; it does not include the new manifest assertion.
+- The pinned-SDK build script now checks expected UMD SHA-256 `8816af04d9915dbba1882d6f84f0b402dc40268063a63d9c66d24f52f371c263` as well as CDN mirror equality. Await CI result before claiming the digest-pinned build passes.
+- PR #41 remains open Draft; no merge, Production/Supabase mutation, or release.
+- Next: inspect run `44877584070` including the merged-manifest assertion, then proceed to a pinned Supabase JS dependency/lockfile and carefully test the native-only storage adapter. Do not add runtime biometric behavior before these checks.
