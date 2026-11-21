@@ -443,6 +443,19 @@ test('login hero animation respects reduced-motion preferences', () => {
   assert.ok(html.includes('@media(prefers-reduced-motion:reduce)'));
 });
 
+test('all three complete login themes have isolated, non-leaking palettes', () => {
+  const paletteStart = html.indexOf('/* Theme-specific palettes for the same complete reference login layout. */');
+  assert.ok(paletteStart >= 0, 'theme isolation palette block exists');
+  const palette = html.slice(paletteStart);
+  assert.match(palette, /body\\.dark-theme #authView\\.auth-reference-layout/);
+  assert.match(palette, /body\\.light-theme #authView\\.auth-reference-layout/);
+  assert.match(palette, /body\\.luxury-theme #authView\\.auth-reference-layout/);
+  assert.match(palette, /body\\.luxury-theme #authView \\.ref-brand-lockup[^\\n]*#78c8ff/);
+  assert.match(palette, /body\\.light-theme #authView \\.auth-form input[^\\n]*#f6f9fd/);
+  assert.match(palette, /body\\.dark-theme #authView \\.auth-form input[^\\n]*#0b0e11/);
+  assert.doesNotMatch(palette, /^#authView/m, 'no unscoped auth palette overrides can leak between themes');
+});
+ 
 test('login BTC preview refreshes the current candle from the live Binance ticker', () => {
   assert.ok(html.includes('function refreshAuthLiveCandle()'));
   assert.ok(html.includes('/api/v3/ticker/price?symbol=BTCUSDT'));
