@@ -4,9 +4,18 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - redesign/indigo-glass-layout-fix-2026-11-21
     paths:
       - .github/workflows/android-review-apk.yml
+      - index.html
+      - package.json
+      - package-lock.json
+      - capacitor.config.json
+      - src/android-biometric-lock.js
+      - scripts/inject-android-biometric.py
+      - scripts/prepare-android-web.sh
+      - scripts/test-android-biometric.js
+      - tests/**
 
 permissions:
   contents: read
@@ -20,10 +29,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
-      - name: Checkout isolated Sky Blue Glass biometric candidate
+      - name: Checkout approved Indigo Glass biometric candidate
         uses: actions/checkout@v4
         with:
-          ref: build/indigo-glass-biometric-apk-2026-11-21
+          ref: redesign/indigo-glass-layout-fix-2026-11-21
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -90,7 +99,7 @@ jobs:
           APK="android/app/build/outputs/apk/debug/app-debug.apk"
           {
             echo "app=DigiArz"
-            echo "source_branch=build/indigo-glass-biometric-apk-2026-11-21"
+            echo "source_branch=redesign/indigo-glass-layout-fix-2026-11-21"
             echo "source_commit=$(git rev-parse HEAD)"
             echo "workflow_run_id=$GITHUB_RUN_ID"
             echo "built_at_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -101,7 +110,7 @@ jobs:
       - name: Upload review APK artifact only
         uses: actions/upload-artifact@v4
         with:
-          name: DigiArz-Sky-Blue-Glass-Biometric-APK
+          name: DigiArz-Indigo-Glass-Biometric-APK
           path: |
             android/app/build/outputs/apk/debug/app-debug.apk
             android/app/build/outputs/apk/debug/BUILD-INFO.txt
