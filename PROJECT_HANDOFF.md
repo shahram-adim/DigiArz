@@ -836,3 +836,16 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - PR #46 (safe artifact-only review workflow) is merged. Updated the default-branch `.github/workflows/android-review-apk.yml` labels from Indigo to Sky Blue Glass in commit `5ff57bf63b6ff14e0a13a67fa8c8d8e947d4bf18`; it checks out the isolated candidate branch and has read-only permissions/artifact-only output.
 - CI status lookup for candidate head returned no status checks; no verified successful Android workflow run or APK artifact for this exact Sky Blue Glass head is available. Prior artifacts/runs must not be represented as this build. The physical Android biometric test is still outstanding.
 - No app candidate merge, release, deployment, or Supabase/database modification was performed. Next safe step: reconcile the 18-commit divergence by porting only the intended visual + APK biometric changes onto a fresh branch from current main, then run full UI/biometric tests and build a new artifact before presenting an APK.
+
+
+## 2026-11-21 — rebuilt Sky Blue Glass + APK-only biometric candidate verified
+- Closed obsolete PR #45 (unmerged) because its branch was divergent and its original Indigo design direction was wrong. PR #47 supersedes it.
+- Created fresh branch `rebuild/sky-blue-glass-apk-only-2026-11-21` directly from main; compare showed 0 commits behind main when created. PR #47 remains Draft/open/unmerged.
+- Ported only the intended Sky Blue Glass third-theme CSS, login motion and real Binance BTC candle refresh, plus isolated Android biometric build/runtime files. Corrected the non-backdrop fallback to deep blue `#0b2c43` and added a regression assertion that rejects the old indigo `#1b245f` fallback.
+- Latest candidate head: `8436ae3fa31ccdf52930c6fcda41276900ee3812`.
+- Exact decimal / PostgreSQL / Market / Limit / Stop-Limit / TP-SL / race regression workflow run 44902216135 completed SUCCESS.
+- Android review workflow run 44902212400 completed SUCCESS. Biometric unit tests, visual/application tests, pinned dependency/signature checks, Android packaging, and merged `android.permission.USE_BIOMETRIC` verification all passed.
+- Artifact `DigiArz-Sky-Blue-Glass-Biometric-APK`, ID 14706487128, expires 2026-12-05T12:08:09Z. Extracted `app-debug.apk` size 7,289,502 bytes; SHA-256 `82cda7ca3382de806a59b00186cede65d42a2a02a47981f89895c5d435da0698`. Provenance records source head above and run 44902212400.
+- Validation boundary: APK is a debug review build; CI verifies build/package/permission and automated tests, but physical Android installation, biometric enrollment, login, logout and relock behavior remain unverified.
+- No PR #47 merge, production deployment, GitHub release, publishing, Supabase/database changes, or user financial data changes.
+- Next: user installs and tests the review APK on Android; investigate any observed issue. Keep PR #47 Draft/unmerged until explicit approval.
