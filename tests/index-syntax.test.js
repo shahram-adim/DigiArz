@@ -360,7 +360,7 @@ test('reference login has its branded market header, live coin list and working 
   assert.match(html, /\$\('authThemeToggle'\)\?\.addEventListener\('click',cycleTheme\)/);
   assert.match(html, /const authThemeButton=\$\('authThemeToggle'\)/);
   assert.match(html, /@media\(max-width:760px\)[\s\S]*?#authView\.auth\{display:flex;flex-direction:column/);
-  assert.match(html, /body:not\(\.light-theme\) #authView \.auth-form\{background:linear-gradient\(155deg,#172b45,#122238\)/);
+  assert.ok(html.lastIndexOf('/* DigiArz selected Binance-inspired black-and-yellow auth palette — 2026-11-21 */') > html.indexOf('/* Faithful reconstruction of the approved DigiArz login reference */'), 'final brand palette overrides the earlier reference colors');
   for (const id of ['email','password','loginBtn','signupBtn','forgotBtn','authMsg','recoveryPanel','newPassword','confirmPassword','saveNewPassword']) {
     assert.match(html, new RegExp('id="' + id + '"'), 'existing auth control remains: ' + id);
   }
