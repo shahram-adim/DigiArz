@@ -776,3 +776,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Artifact 14217201032 remains unexpired at this check and expires 2026-11-23T10:26:46Z. GitHub API reports the exact 64-character digest sha256:555c1f7ebcad947e573dad659084bbcf94dc88d55fc0bc1a3b7de9606db8e4e5; earlier notes contained a truncated 61-character digest and have been corrected in the bootstrap plan.
 - Bootstrap plan updated in commit 6ccfa3c68c47e00518508e930dc97428231c4019; it records schema metadata, ACL exclusion, Production parity blocker and next safe step.
 - No Production migration/RPC/trigger/cron/grant/policy/schema/data change, no test with restored records, no merge/rebase/deploy, and no supabase db push.
+
+
+## 2026-11-21 — PR #39 Bit24 deduplication regression CI passed
+- Rechecked GitHub Actions run #1318 / ID `44875705618` on the PR head `ed4b44bd6f04cb7a6186ec5d045031010c17a474`.
+- The `exact-decimal` job completed with conclusion `success`; all 22 substantive steps passed, including `Run Bit24 deduplication SQL regressions` (step 6), exact-decimal/browser tests, PostgreSQL arithmetic, schema-widening rehearsals, rollback/lock-timeout checks, and Market/Limit/Stop-Limit/TP-SL lifecycle and two-session race tests.
+- PR #39 remains open, Draft, unmerged, and mergeable; current head is `ed4b44bd6f04cb7a6186ec5d045031010c17a474`, base `main`. No merge or deployment performed.
+- Evidence boundary: this CI pass validates the SQL regression fixture in disposable PostgreSQL, not the Production function/schema or a live Production rollout. Production Bit24 worker remains unchanged; no Production SQL or Supabase settings/data were changed.
+- Next: perform final diff/source review for PR #39 and separately establish a controlled Production compatibility/deployment plan. Do not merge or apply to Production without explicit user approval.
