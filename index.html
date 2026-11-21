@@ -4729,6 +4729,81 @@ body.luxury-theme #authView .auth-security{
 body.luxury-theme .mobile-bottom-nav{background:rgba(255,255,255,.86)!important;border-color:rgba(111,177,224,.26)!important;color:#315b7b!important}
 body.luxury-theme .tag{background:rgba(120,200,255,.16)!important;border-color:rgba(75,158,215,.25)!important;color:#315b7b!important}
 
+
+/* Final cascade guard: pale sky-blue glass must win over earlier indigo theme rules. */
+body.luxury-theme #appView,
+body.luxury-theme #appView.app-view-active{background:transparent!important;color:#183b5c!important}
+body.luxury-theme #appView .top,
+body.luxury-theme #appView .tabs,
+body.luxury-theme #appView .mobile-bottom-nav{
+ background:rgba(255,255,255,.76)!important;border:1px solid rgba(111,177,224,.28)!important;
+ color:#315b7b!important;box-shadow:0 10px 30px rgba(64,127,176,.09)!important;
+ backdrop-filter:blur(20px)!important;-webkit-backdrop-filter:blur(20px)!important;
+}
+body.luxury-theme #appView .card,
+body.luxury-theme #appView .stat,
+body.luxury-theme #appView .trade-box,
+body.luxury-theme #appView .performance-item,
+body.luxury-theme #appView .indicator-panel,
+body.luxury-theme #appView .fx-box,
+body.luxury-theme #appView .orderbook-side,
+body.luxury-theme #appView .setting-row,
+body.luxury-theme #appView .gainer-card,
+body.luxury-theme #appView .asset-row,
+body.luxury-theme #appView .digiarz-v2-dashboard,
+body.luxury-theme #appView .da-v2-market-list{
+ background:rgba(255,255,255,.64)!important;border:1px solid rgba(111,177,224,.22)!important;
+ color:#183b5c!important;box-shadow:0 12px 34px rgba(64,127,176,.08),inset 0 1px 0 rgba(255,255,255,.82)!important;
+ backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;
+}
+body.luxury-theme #appView .hero{
+ background:linear-gradient(120deg,rgba(255,255,255,.9),rgba(224,242,255,.84),rgba(244,250,255,.92))!important;
+ border:1px solid rgba(111,177,224,.28)!important;box-shadow:0 14px 36px rgba(64,127,176,.09)!important;
+ color:#183b5c!important;
+}
+body.luxury-theme #appView .brand,
+body.luxury-theme #appView h1,body.luxury-theme #appView h2,body.luxury-theme #appView h3,
+body.luxury-theme #appView .stat,body.luxury-theme #appView .performance-item,
+body.luxury-theme #appView .section-title,
+body.luxury-theme #appView .price-stack{color:#183b5c!important}
+body.luxury-theme #appView .brand span:first-child,
+body.luxury-theme #appView .hero-mark{color:#398fc9!important}
+body.luxury-theme #appView button:not(.secondary){
+ background:linear-gradient(135deg,#b8ddf8,#8fc7ef)!important;color:#153b5b!important;
+ border:1px solid rgba(255,255,255,.9)!important;box-shadow:0 5px 16px rgba(64,127,176,.14)!important;
+}
+body.luxury-theme #appView button.secondary,
+body.luxury-theme #appView .tabs button,
+body.luxury-theme #appView .timeframes button{
+ background:rgba(255,255,255,.64)!important;color:#315b7b!important;
+ border:1px solid rgba(111,177,224,.22)!important;box-shadow:none!important;
+}
+body.luxury-theme #appView .tabs button.active,
+body.luxury-theme #appView .timeframes button.active{
+ background:linear-gradient(135deg,#c5e4fb,#9dcef1)!important;color:#153b5b!important;
+ border-color:rgba(255,255,255,.92)!important;
+}
+body.luxury-theme #appView input,
+body.luxury-theme #appView select,
+body.luxury-theme #appView textarea{
+ background:rgba(255,255,255,.84)!important;color:#183b5c!important;
+ border:1px solid rgba(111,177,224,.3)!important;
+}
+body.luxury-theme #appView #tab-markets .coin,
+body.luxury-theme #appView .da-v2-market-list .coin{
+ background:transparent!important;border:0!important;box-shadow:none!important;
+}
+body.luxury-theme #appView .tag{background:rgba(120,200,255,.16)!important;border-color:rgba(75,158,215,.25)!important;color:#315b7b!important}
+body.luxury-theme #authView .auth-form .auth-actions #loginBtn,
+body.luxury-theme #authView .auth-form .auth-actions #signupBtn{
+ background:linear-gradient(135deg,#b8ddf8,#8fc7ef)!important;color:#153b5b!important;
+ border:1px solid rgba(255,255,255,.92)!important;box-shadow:0 7px 18px rgba(64,127,176,.14)!important;
+}
+body.luxury-theme #authView .auth-form,
+body.luxury-theme #authView .auth-form .auth-security{
+ color:#183b5c!important;
+}
+
 </style>
 
 
