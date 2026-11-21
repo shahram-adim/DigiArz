@@ -563,7 +563,7 @@ test('final dashboard and market layouts remain contained and responsive on phon
   assert.match(css, /#tab-dashboard \.dashboard-activity-grid\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
   assert.match(css, /#tab-markets \.market-board-v34 \.coin\{[^}]*grid-template-areas:"identity spark change price"/s);
   assert.match(css, /#tab-markets \.market-board-v34 \.coin>\.favorite-btn\{display:none!important\}/);
-  assert.match(css, /@media\(max-width:760px\)[\s\S]*?#dashboardMarketPreview\.dashboard-market-preview\.da-v2-market-list\{grid-template-columns:minmax\(0,1fr\)\}/);
+  assert.match(css, /@media\(max-width:760px\)[\s\S]*?#dashboardMarketPreview\.dashboard-market-preview\.da-v2-market-list\{grid-template-columns:minmax\(0,1fr\)(?:;gap:0)?\}/);
   assert.match(css, /@media\(max-width:760px\)[\s\S]*?grid-template-areas:"identity price" "change price"/);
   assert.match(css, /@media\(max-width:390px\)/);
   assert.match(css, /min-width:0/);
