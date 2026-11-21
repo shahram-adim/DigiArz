@@ -418,11 +418,11 @@ test('login mini chart renders real five-minute candles without depending on a c
 
 
 
-test('third theme restores the approved Indigo Glass palette without changing theme storage keys', () => {
-  assert.ok(html.includes('نیلی شیشه‌ای · Indigo Glass'));
-  assert.ok(html.includes('body.luxury-theme{color-scheme:dark;--bg:#080d33'));
-  assert.ok(html.includes('backdrop-filter:blur(18px)'));
-  assert.ok(html.includes("luxury?{bg:'#10194b'"));
+test('third theme is isolated Sky Blue Glass and leaves light/dark themes and storage keys intact', () => {
+  assert.ok(html.includes('آبی آسمانی شیشه‌ای · Sky Blue Glass'));
+  assert.ok(html.includes('body.luxury-theme{color-scheme:dark;--bg:#061a2b'));
+  assert.ok(html.includes('--yellow:#78c8ff'));
+  assert.ok(html.includes('linear-gradient(135deg,#8bd4ff,#42a9e5)'));
   assert.ok(html.includes("localStorage.setItem('digiArzTheme',selected)"));
 });
 
