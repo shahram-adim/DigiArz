@@ -43,8 +43,25 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      - name: Install Capacitor
-        run: npm install --no-audit --no-fund
+      - name: Generate npm dependency lockfile
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+
+      - name: Commit lockfile on isolated biometric branch
+        if: github.ref == 'refs/heads/spike/android-biometric-capacitor8-2026-11-21'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          if ! git diff --cached --quiet; then
+            git commit -m "build(android): lock npm dependency tree"
+            git push origin HEAD:spike/android-biometric-capacitor8-2026-11-21
+          fi
+
+      - name: Install exact locked dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Verify npm package signatures
+        run: npm audit signatures
 
       - name: Verify and upload generated npm lockfile
         run: test -s package-lock.json
