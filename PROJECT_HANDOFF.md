@@ -952,3 +952,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Android artifact-only workflow run `44925030730` is queued/pending on `c07657e2...`. An earlier Android run `44924975787` is still building the prior `e3e30f5a...` head and uses the older artifact label; do not distribute that artifact as the final pale-blue build.
 - The latest static verification confirms: CSS declarations are now inside the final stylesheet; no raw CSS remains between `</style>` and `</body>`; the three target palette selectors, compact third-theme login, hero visibility, borderless market rows, and login/dashboard visibility selectors are present; all three inline scripts pass V8 syntax compilation. These are static checks, not a substitute for CI or Android visual QA.
 - Wait for exact-decimal and the queued Android run; only share an APK after the artifact provenance source commit is checked against `c07657e2...` and the build completes successfully.
+
+
+
+### CI completion update — 2026-11-21
+- Exact-decimal/PostgreSQL/market/order/concurrency CI run `44924996393` completed **SUCCESS** on commit `b42e5fa5c7b839a0d985b1d876ca2b7c13168295`. This commit includes the current app CSS correction and the new stylesheet-boundary regression test.
+- Android review build run `44924975787` completed **SUCCESS** on app-code commit `e3e30f5a8f492565f1f728587dfe9e99b7ecfe53`. Its artifact label predates the pale-blue naming correction, so it is not the final artifact to share.
+- Final-label Android review run `44925030730` is queued/pending on `c07657e2ed80578e00900351daf194dd8d5cfcc1`; wait for its completion and verify artifact provenance before sharing.
+- Exact-decimal runs `44925034185` (code/workflow head) and `44925058935` (latest handoff head) were still in progress at this check. The passing run above is already on the exact same application code and regression-test content.
