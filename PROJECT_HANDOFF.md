@@ -1063,3 +1063,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Added a final scoped layout override on PR #48: hide the visual favorite button (consistent with the approved no-star/no-favorite-column design), use named CSS grid areas for identity/sparkline/change/price on desktop, and a two-column/two-row mobile arrangement (identity + change on the first column, price on the second; sparkline hidden). Added min-width:0, bounded icon/name tracks, wrap-safe text and a narrower <=380px profile.
 - App commit: `7afd979478be29fb0710c1107002a685bd38d1c2`; regression test commit/current branch head at this note: `200460c997fabfea50d303aa773333319a55c9cc`.
 - This is a source-level correction based on verified DOM child order, not a physical-device visual confirmation. Matching CI and APK artifact for this latest head are still unverified; do not say it is already fixed in the user's installed APK. No merge/deployment/release or Supabase/database changes.
+
+
+### PR #48 latest-head CI verification — 2026-11-21
+- Rechecked live PR #48: Draft/open/unmerged, mergeable=true; head `b0b2d5346e538b0f947dd911736391e94145ded2`.
+- Matching GitHub Actions run `44935795408` completed with conclusion `success` for that exact head. Job `exact-decimal` (`136942011133`) and all listed steps completed successfully, including exact-decimal/browser integration tests and the PostgreSQL 17 disposable integration/concurrency suites.
+- The earlier note saying latest-head CI was unverified is superseded for this exact head. This does not constitute physical Android UI QA or prove the white/black screen issue is resolved on the user's phone.
+- The Android review APK workflow has not produced a verified artifact for this exact head; the only matching run found is the exact-decimal workflow. No APK build/download, merge, release, deployment, or Supabase/database changes were performed.
+- Next: obtain a review APK built from this exact PR #48 head, then perform phone-level visual checks of login, dashboard, all three themes and market rows; separately test fingerprint enrollment/unlock and logout/background relock. Keep PR Draft and do not merge without explicit user approval.
