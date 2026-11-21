@@ -415,3 +415,27 @@ test('login mini chart renders real five-minute candles without depending on a c
   assert.match(html, /fetchBinanceKlines\('BTCUSDT','5m',36\)/);
   assert.match(html, /<svg viewBox=/);
 });
+
+
+test('third theme restores the approved Indigo Glass palette without changing theme storage keys', () => {
+  assert.match(html, /نیلی شیشه‌ای · Indigo Glass/);
+  assert.match(html, /body\\.luxury-theme\\{color-scheme:dark;--bg:#080d33/);
+  assert.match(html, /backdrop-filter:blur\\(18px\\)/);
+  assert.match(html, /luxury\\?\\{bg:'#10194b'/);
+  assert.match(html, /localStorage\\.setItem\\('digiArzTheme',selected\\)/);
+});
+
+test('login hero animates globe, phone and floating crypto coins with reduced-motion support', () => {
+  assert.match(html, /id="digiarz-indigo-glass-motion"/);
+  assert.match(html, /animation:digiarzGlobeSpin 48s linear infinite!important/);
+  assert.match(html, /animation:digiarzPhoneFloat 7s ease-in-out infinite!important/);
+  assert.match(html, /animation:digiarzOrbitA 13s linear infinite!important/);
+  assert.match(html, /prefers-reduced-motion:reduce[\\s\\S]*?#authView \\.ref-phone\\{animation:none!important/);
+});
+
+test('login preview updates the current BTC candle from a live ticker every four seconds', () => {
+  assert.match(html, /function refreshAuthLiveCandle\\(\\)/);
+  assert.match(html, /api\\/v3\\/ticker\\/price\\?symbol=BTCUSDT/);
+  assert.match(html, /last\\.close=price/);
+  assert.match(html, /authMiniTickerTimer=setInterval\\([\\s\\S]*?4000\\)/);
+});
