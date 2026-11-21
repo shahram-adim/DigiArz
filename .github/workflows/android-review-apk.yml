@@ -2,6 +2,11 @@ name: DigiArz Android Review APK — artifact only
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/android-review-apk.yml
 
 permissions:
   contents: read
