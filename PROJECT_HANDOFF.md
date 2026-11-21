@@ -989,3 +989,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - An earlier run on the preceding UI commit, 44927812247, failed only because the existing regression assertion still expected the obsolete label نیلی شیشه‌ای; the assertion was updated to the new approved label آبی شیشه‌ای, and the latest run passed.
 - Android review workflow/artifact for the new biometric lifecycle fix has not yet been independently located/verified. Do not distribute the previous APK as a fix for the reported dashboard issue.
 - PR #48 remains Draft/open/unmerged. No Production or Supabase changes.
+
+
+### Theme separation correction — 2026-11-21
+- User explicitly clarified that the **light theme must have a white/light background**, not the pale-blue background reserved for theme 3.
+- Added a final high-specificity light-theme cascade: white-to-near-white page background, neutral white frosted dashboard cards, restrained grey borders/shadows, white login shell and neutral controls. Kept the pale sky-blue glass palette exclusive to theme 3.
+- Added a regression test ensuring the light theme remains neutral white and does not inherit theme-3 blue colors.
+- App CSS commit: `9674be0c4cbfb1de5a15f8d33eda92edf2c8deab`; test commit/current head: `cdd6076ec34cae2a8bc3e5b4c433824e20486e34`.
+- Android review build triggered for these commits; do not share an APK until it completes and artifact provenance is verified. PR #48 remains Draft/open/unmerged; no production, Supabase, merge, or release changes.
