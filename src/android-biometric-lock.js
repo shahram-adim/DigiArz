@@ -49,6 +49,8 @@
     let preserveDelete = false;
     let secureSaved = false;
     let lastError = null;
+    // Android APK startup may defer biometric prompting until the user explicitly chooses it.
+    let deferBiometricPrompt = opts.deferBiometricPrompt === true;
 
     function enqueue(task) {
       const next = pendingWrites.then(task, task);
@@ -121,6 +123,7 @@
     return {
       async getItem(key) {
         if (key !== storageKey) return local ? local.getItem(key) : null;
+        if (deferBiometricPrompt && cachedValue === null) return null;
         return readSecure(false);
       },
 
@@ -196,6 +199,7 @@
       },
 
       async unlock() {
+        deferBiometricPrompt = false;
         locked = false;
         readAttempted = false;
         const value = await readSecure(true);
