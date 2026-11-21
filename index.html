@@ -4804,6 +4804,99 @@ body.luxury-theme #authView .auth-form .auth-security{
  color:#183b5c!important;
 }
 
+
+/* Final light-theme guard: clean white and neutral frosted glass, distinct from pale-blue glass. */
+body.light-theme{
+ color-scheme:light!important;--bg:#ffffff;--panel:rgba(255,255,255,.88);
+ --panel2:rgba(250,252,255,.92);--line:rgba(190,204,220,.22);
+ background:#fff!important;color:#24364b!important;
+}
+body.light-theme::before{background:linear-gradient(180deg,#fff 0%,#fbfcfe 58%,#f7f9fc 100%)!important;opacity:1!important}
+body.light-theme #appView,
+body.light-theme #appView.app-view-active{
+ background:linear-gradient(180deg,#fff 0%,#fcfdff 65%,#f8fafc 100%)!important;
+ color:#24364b!important;
+}
+body.light-theme #appView .top,
+body.light-theme #appView .tabs,
+body.light-theme #appView .mobile-bottom-nav{
+ background:rgba(255,255,255,.94)!important;color:#40536a!important;
+ border:1px solid rgba(190,204,220,.24)!important;
+ box-shadow:0 8px 26px rgba(38,58,82,.045)!important;
+ backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;
+}
+body.light-theme #appView .card,
+body.light-theme #appView .stat,
+body.light-theme #appView .trade-box,
+body.light-theme #appView .performance-item,
+body.light-theme #appView .indicator-panel,
+body.light-theme #appView .fx-box,
+body.light-theme #appView .orderbook-side,
+body.light-theme #appView .setting-row,
+body.light-theme #appView .gainer-card,
+body.light-theme #appView .asset-row,
+body.light-theme #appView .digiarz-v2-dashboard,
+body.light-theme #appView .da-v2-market-list{
+ background:rgba(255,255,255,.88)!important;color:#24364b!important;
+ border:1px solid rgba(190,204,220,.20)!important;
+ box-shadow:0 9px 28px rgba(38,58,82,.045),inset 0 1px 0 #fff!important;
+ backdrop-filter:blur(16px)!important;-webkit-backdrop-filter:blur(16px)!important;
+}
+body.light-theme #appView .hero{
+ background:linear-gradient(120deg,#fff 0%,#fbfcfe 58%,#f6f8fb 100%)!important;
+ color:#24364b!important;border:1px solid rgba(190,204,220,.22)!important;
+ box-shadow:0 10px 30px rgba(38,58,82,.045)!important;
+}
+body.light-theme #appView .brand,
+body.light-theme #appView h1,body.light-theme #appView h2,body.light-theme #appView h3,
+body.light-theme #appView .stat,body.light-theme #appView .performance-item,
+body.light-theme #appView .section-title,body.light-theme #appView .price-stack{
+ color:#24364b!important;
+}
+body.light-theme #appView button:not(.secondary){
+ background:linear-gradient(135deg,#f5f7fa,#e9eef4)!important;color:#2c4058!important;
+ border:1px solid rgba(190,204,220,.28)!important;box-shadow:0 4px 12px rgba(38,58,82,.05)!important;
+}
+body.light-theme #appView button.secondary,
+body.light-theme #appView .tabs button,
+body.light-theme #appView .timeframes button{
+ background:rgba(255,255,255,.9)!important;color:#52657b!important;
+ border:1px solid rgba(190,204,220,.2)!important;box-shadow:none!important;
+}
+body.light-theme #appView .tabs button.active,
+body.light-theme #appView .timeframes button.active{
+ background:#edf1f6!important;color:#263d56!important;border-color:#e0e6ee!important;
+}
+body.light-theme #appView input,
+body.light-theme #appView select,
+body.light-theme #appView textarea{
+ background:#fff!important;color:#24364b!important;border:1px solid #e4e9ef!important;
+}
+body.light-theme #appView #tab-markets .coin,
+body.light-theme #appView .da-v2-market-list .coin{
+ background:transparent!important;border:0!important;box-shadow:none!important;
+}
+body.light-theme #authView{
+ background:linear-gradient(180deg,#fff 0%,#fbfcfe 100%)!important;color:#24364b!important;
+}
+body.light-theme #authView .auth-form,
+body.light-theme #authView.auth-reference-layout{
+ background:rgba(255,255,255,.94)!important;color:#24364b!important;
+ border:1px solid rgba(190,204,220,.22)!important;
+ box-shadow:0 18px 48px rgba(38,58,82,.07)!important;
+ backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;
+}
+body.light-theme #authView .auth-form input,
+body.light-theme #authView .auth-form select,
+body.light-theme #authView .auth-form textarea{
+ background:#fff!important;color:#24364b!important;border:1px solid #e4e9ef!important;
+}
+body.light-theme #authView .auth-form .auth-actions #loginBtn,
+body.light-theme #authView .auth-form .auth-actions #signupBtn{
+ background:linear-gradient(135deg,#f1f4f8,#e5ebf2)!important;color:#263d56!important;
+ border:1px solid #fff!important;box-shadow:0 6px 16px rgba(38,58,82,.07)!important;
+}
+
 </style>
 
 
