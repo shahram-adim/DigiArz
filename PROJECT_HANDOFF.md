@@ -809,3 +809,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - This commit is intended to trigger the same read-only, artifact-only build; it still checks out the isolated PR #45 candidate branch and does not publish a release or deploy.
 - Workflow trigger update commit: `a50eafefcaa6a38bb3d91336ef2f81c2ac5b84a5`.
 - Must verify the Actions run and artifact before claiming an APK exists. PR #45 remains unmerged.
+
+
+## 2026-11-21 — Android Indigo Glass biometric review APK built and verified
+- Automatic push-triggered Android review workflow run `44895774772` completed with conclusion **success** on main trigger commit `a50eafefcaa6a38bb3d91336ef2f81c2ac5b84a5`.
+- Job `build-review-apk` (`136820990007`) succeeded. All steps passed, including biometric storage tests, UI/application regression tests, Android debug APK build, and merged-manifest verification of `android.permission.USE_BIOMETRIC`.
+- Artifact `DigiArz-Indigo-Glass-Biometric-APK`, ID `14704480013`, downloaded and archive SHA-256 verified: `90f352c8275fffe95b550abba8c9aacdabf1eac72919fb630a86fa5e3dee62f2`. Artifact expires `2026-12-05T10:46:13Z`.
+- Extracted APK: `app-debug.apk`, size 7,288,590 bytes; SHA-256 verified against `BUILD-INFO.txt`: `df5481c5cb44fc89557dd1de8fd290a122aebb7098bb431348ec73c46e6e3c75`.
+- APK provenance identifies candidate source commit `a0c90240bcf785e1307bacadd40d203384debf6d` on `build/indigo-glass-biometric-apk-2026-11-21`.
+- PR #45 rechecked open, Draft, unmerged at the same head. No merge, release, deployment, or Supabase/database change.
+- Validation boundary: CI verifies packaging, test suite and biometric permission; it does not replace physical installation/biometric enrolment/login testing on the user's Android phone. APK is a debug review build, not a signed production release.
+- Next: provide the APK for user installation and, after the user's device test, inspect any observed issue. Keep PR #45 unmerged until explicit approval.
