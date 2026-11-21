@@ -327,7 +327,7 @@ test('login screen uses the scoped premium light-blue-and-gold responsive design
     assert.match(html, new RegExp('id="' + id + '"'), 'existing auth control remains: ' + id);
   }
   assert.doesNotMatch(html, /id="fullName"/, 'registration no longer asks for first or last name');
-  assert.match(html, /async function signup\(\)[\\s\\S]*?auth\.signUp\(\{email,password,emailRedirectTo:/, 'signup uses email and password only');
+  assert.match(html, /async function signup\(\)[\s\S]*?auth\.signUp\(\{email,password,emailRedirectTo:/, 'signup uses email and password only');
   assert.doesNotMatch(html, /full_name:name|\$\('fullName'\)/, 'signup does not read or submit a name');
 });
 
@@ -362,7 +362,7 @@ test('reference login has its branded market header, live coin list and working 
     assert.match(html, new RegExp('id="' + id + '"'), 'existing auth control remains: ' + id);
   }
   assert.doesNotMatch(html, /id="fullName"/, 'registration no longer asks for first or last name');
-  assert.match(html, /async function signup\(\)[\\s\\S]*?auth\.signUp\(\{email,password,emailRedirectTo:/, 'signup uses email and password only');
+  assert.match(html, /async function signup\(\)[\s\S]*?auth\.signUp\(\{email,password,emailRedirectTo:/, 'signup uses email and password only');
   assert.doesNotMatch(html, /full_name:name|\$\('fullName'\)/, 'signup does not read or submit a name');
 });
 
