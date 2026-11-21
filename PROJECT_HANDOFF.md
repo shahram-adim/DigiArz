@@ -802,3 +802,10 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Reverified PR #46 closed/merged and PR #45 remains Draft/open/unmerged at head `a0c90240bcf785e1307bacadd40d203384debf6d`; no app code was merged.
 - The safe workflow is read-only, manually dispatched, checks out the isolated PR #45 candidate branch, runs biometric and UI regression tests, builds a debug APK, verifies `USE_BIOMETRIC`, and uploads a 14-day artifact only. No release, deployment, or Supabase/database operation.
 - The available GitHub connection supports workflow-run inspection and artifact download but does not expose the workflow-dispatch action. Therefore no build run has been triggered from this session and no APK artifact is claimed. Next action: trigger “DigiArz Android Review APK — artifact only” from the repository Actions page, then inspect the run and artifact. Do not merge PR #45 or publish a release without separate explicit approval.
+
+
+## 2026-11-21 — automatic safe APK build trigger
+- The GitHub connection did not expose the workflow_dispatch action. To avoid asking the user to press Run workflow, updated `.github/workflows/android-review-apk.yml` on main to retain manual dispatch and additionally trigger on pushes to main only when that workflow file itself changes.
+- This commit is intended to trigger the same read-only, artifact-only build; it still checks out the isolated PR #45 candidate branch and does not publish a release or deploy.
+- Workflow trigger update commit: `a50eafefcaa6a38bb3d91336ef2f81c2ac5b84a5`.
+- Must verify the Actions run and artifact before claiming an APK exists. PR #45 remains unmerged.
