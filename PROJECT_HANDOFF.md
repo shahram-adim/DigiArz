@@ -944,3 +944,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - PR #48 remains open and Draft, unmerged; GitHub's latest PR metadata reported `mergeable=false`. No merge, release, deployment, production signing, Supabase/database changes, or real-money functionality changes were made.
 - Physical Android visual QA and fingerprint enrollment/login/logout/background-relock acceptance tests remain outstanding.
 - Next: obtain a CI run for current head `c07657e2...`, verify the Android artifact provenance matches that exact head, and only then share a review APK. Do not merge without explicit user approval.
+
+
+
+### Actions status refresh — 2026-11-21 16:32 UTC
+- Follow-up live Actions query supersedes the earlier zero-runs snapshot: exact-decimal workflow run `44925058935` is in progress on handoff head `304eb34cebd214a7c1ab8cb74e350328b21a250b`; a second exact-decimal run `44925034185` is in progress on code/workflow head `c07657e2ed80578e00900351daf194dd8d5cfcc1`.
+- Android artifact-only workflow run `44925030730` is queued/pending on `c07657e2...`. An earlier Android run `44924975787` is still building the prior `e3e30f5a...` head and uses the older artifact label; do not distribute that artifact as the final pale-blue build.
+- The latest static verification confirms: CSS declarations are now inside the final stylesheet; no raw CSS remains between `</style>` and `</body>`; the three target palette selectors, compact third-theme login, hero visibility, borderless market rows, and login/dashboard visibility selectors are present; all three inline scripts pass V8 syntax compilation. These are static checks, not a substitute for CI or Android visual QA.
+- Wait for exact-decimal and the queued Android run; only share an APK after the artifact provenance source commit is checked against `c07657e2...` and the build completes successfully.
