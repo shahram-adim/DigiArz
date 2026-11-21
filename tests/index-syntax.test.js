@@ -580,7 +580,7 @@ test('theme 2 is pure white glass with blue accents and no grey surface palette'
   assert.match(css, /body\.light-theme #appView \.card[\s\S]*?background:rgba\(255,255,255,\.92\)!important/);
   assert.match(css, /body\.light-theme #appView button:not\(\.secondary\)[\s\S]*?linear-gradient\(135deg,#eaf6ff,#d8edff\)!important/);
   assert.match(css, /body\.light-theme #appView \.tabs button\.active[\s\S]*?background:#e7f4ff!important/);
-  assert.doesNotMatch(css, /#f5f7fa|#e9eef4|#edf1f6|#e0e6ee|#e4e9ef|#fbfcfe|#f6f8fb/);
+  assert.doesNotMatch(css, /#f5f7fa|#e9eef4|#edf1f6|#e0e6ee|#e4e9ef|#fbfcfe|#f6f8fb|#f2f5fa|#edf2f8|#eef3f9|#f7f9fc|#f9fbff|#f5f8fc/);
   assert.match(css, /body\.light-theme #appView \.market-tools,[\s\S]*?body\.light-theme #authView \.auth-top-banner\{[\s\S]*?background:#fff!important/);
   assert.match(css, /body\.light-theme #appView \.market-board-v34 \.market-head/);
   assert.match(css, /body\.light-theme #appView #tab-history tbody tr:hover/);
