@@ -4805,16 +4805,18 @@ body.luxury-theme #authView .auth-form .auth-security{
 }
 
 
+/* Keep the entire theme-3 page on its own pale-blue glass canvas; no grey app shell. */
+body.luxury-theme{min-height:100vh;background:radial-gradient(ellipse at 12% 8%,rgba(120,200,255,.36),transparent 36%),radial-gradient(ellipse at 88% 84%,rgba(183,215,255,.42),transparent 40%),linear-gradient(135deg,#f0f9ff 0%,#e2f2ff 52%,#d9edff 100%)!important}
 /* Final light-theme guard: clean white and neutral frosted glass, distinct from pale-blue glass. */
 body.light-theme{
  color-scheme:light!important;--bg:#ffffff;--panel:rgba(255,255,255,.88);
  --panel2:rgba(250,252,255,.92);--line:rgba(190,204,220,.22);
  background:#fff!important;color:#24364b!important;
 }
-body.light-theme::before{background:linear-gradient(180deg,#fff 0%,#fbfcfe 58%,#f7f9fc 100%)!important;opacity:1!important}
+body.light-theme::before{background:#fff!important;opacity:1!important}
 body.light-theme #appView,
 body.light-theme #appView.app-view-active{
- background:linear-gradient(180deg,#fff 0%,#fcfdff 65%,#f8fafc 100%)!important;
+ background:transparent!important;
  color:#24364b!important;
 }
 body.light-theme #appView .top,
@@ -4898,6 +4900,8 @@ body.light-theme #authView .auth-form .auth-actions #signupBtn{
 }
 
 
+
+</style>
 
 <style id="digiarz-mobile-market-row-containment-20261121">
 /* DIGIARZ-MOBILE-MARKET-ROW-CONTAINMENT-20261121 */
@@ -5012,7 +5016,6 @@ body.light-theme #authView .auth-form .auth-actions #signupBtn{
  #dashboardMarketPreview .da-market-price{font-size:9px!important}
  #dashboardMarketPreview .da-market-toman{font-size:9px!important}
 }
-</style>
 </style>
 
 
