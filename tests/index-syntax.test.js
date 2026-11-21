@@ -504,3 +504,14 @@ test('light theme uses a clean white background and neutral white frosted cards,
   assert.match(tail, /body\.light-theme #authView\s*\{[^}]*linear-gradient\(180deg,#fff 0%,#fbfcfe 100%\)!important/s);
   assert.doesNotMatch(tail, /#eaf3ff|#b8ddf8|#8fc7ef/);
 });
+
+
+test('authenticated dashboard shell is revealed before profile and admin-role network checks', () => {
+  const start = html.indexOf('async function showApp(session)');
+  const profileLookup = html.indexOf("from('profiles').select('is_active,deactivated_at')", start);
+  assert.ok(start >= 0 && profileLookup > start, 'authenticated session handler and profile lookup exist');
+  const reveal = html.indexOf("appView.classList.add('app-view-active')", start);
+  const hideLogin = html.indexOf("authView.classList.add('hidden')", start);
+  assert.ok(reveal > start && reveal < profileLookup, 'dashboard is made visible before waiting for profile lookup');
+  assert.ok(hideLogin > start && hideLogin < profileLookup, 'login is hidden before waiting for profile lookup');
+});
