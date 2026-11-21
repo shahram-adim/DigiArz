@@ -423,3 +423,15 @@ test('login mini chart renders real five-minute candles without depending on a c
   assert.match(html, /fetchBinanceKlines\('BTCUSDT','5m',36\)/);
   assert.match(html, /<svg viewBox=/);
 });
+
+test('approved indigo glass, separated page shells, and repaired borderless market rows stay scoped', () => {
+  assert.match(html, /id="digiarz-approved-layout-20261121"/);
+  assert.match(html, /body\.luxury-theme\s*\{[^}]*--bg:#0c1024/s);
+  assert.match(html, /body\.light-theme\s+\.card[^\{]*\{[^}]*backdrop-filter:blur\(18px\)/s);
+  assert.match(html, /#authView\.auth\s*\{[^}]*max-width:1080px/s);
+  assert.match(html, /#appView\.app-view-active\s*\{[^}]*max-width:1320px/s);
+  assert.match(html, /#tab-markets \.coin\s*\{[^}]*grid-template-columns:minmax\(0,1\.25fr\)/s);
+  assert.match(html, /#tab-markets \.coin>\.favorite-btn[^\{]*\{display:none!important\}/);
+  assert.match(html, /#tab-markets \.coin\s*\{[^}]*border:0!important/s);
+  assert.match(html, /luxury:'نیلی شیشه‌ای'/);
+});
