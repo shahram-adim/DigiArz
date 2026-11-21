@@ -573,13 +573,13 @@ test('final dashboard and market layouts remain contained and responsive on phon
 test('theme 2 is pure white glass with blue accents and no grey surface palette', () => {
   const marker = '/* DIGIARZ-PURE-WHITE-GLASS-THEME-20261121 */';
   const start = html.lastIndexOf(marker);
-  const end = html.lastIndexOf('</style>');
+  const end = html.indexOf('</style>', start);
   assert.ok(start >= 0 && end > start, 'final pure-white theme override exists');
   const css = html.slice(start, end);
-  assert.match(css, /body\\.light-theme\\s*\\{[^}]*background:#fff!important;background-image:none!important/s);
-  assert.match(css, /--panel:rgba\\(255,255,255,\\.94\\)!important/);
-  assert.match(css, /body\\.light-theme #appView \\.card[\\s\\S]*?background:rgba\\(255,255,255,\\.92\\)!important/);
-  assert.match(css, /body\\.light-theme #appView button:not\\(\\.secondary\\)[\\s\\S]*?linear-gradient\\(135deg,#eaf6ff,#d8edff\\)!important/);
-  assert.match(css, /body\\.light-theme #appView \\.tabs button\\.active[\\s\\S]*?background:#e7f4ff!important/);
+  assert.match(css, /body\.light-theme\s*\{[^}]*background:#fff!important;background-image:none!important/s);
+  assert.match(css, /--panel:rgba\(255,255,255,\.94\)!important/);
+  assert.match(css, /body\.light-theme #appView \.card[\s\S]*?background:rgba\(255,255,255,\.92\)!important/);
+  assert.match(css, /body\.light-theme #appView button:not\(\.secondary\)[\s\S]*?linear-gradient\(135deg,#eaf6ff,#d8edff\)!important/);
+  assert.match(css, /body\.light-theme #appView \.tabs button\.active[\s\S]*?background:#e7f4ff!important/);
   assert.doesNotMatch(css, /#f5f7fa|#e9eef4|#edf1f6|#e0e6ee|#e4e9ef|#fbfcfe|#f6f8fb/);
 });
