@@ -862,3 +862,18 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - PR #47 remains Draft/open/unmerged and mergeable. Physical Android installation, fingerprint enrollment, and login/logout/background-relock acceptance tests remain outstanding. APK is a debug review build, not production-signed.
 - No app code was merged to main; no release/deployment/publishing or Supabase/database/user-financial-data changes were made. This handoff entry is documentation-only.
 - Next: user installs the new APK and checks all three themes, password login, fingerprint enrollment/unlock, logout and relock. Fix only observed issues on PR #47; do not merge without explicit user approval.
+
+
+## Live UI correction — 2026-11-21 (PR #48)
+- User explicitly selected **Indigo Glass / نیلی شیشه‌ای** for theme three and requested page-edge spacing, repair of cryptocurrency row layout, and separation of login from dashboard.
+- Fresh branch created from current main: `redesign/indigo-glass-layout-fix-2026-11-21`.
+- Draft PR: https://github.com/shahram-adim/DigiArz/pull/48
+- Current implementation files: `index.html`, `tests/index-syntax.test.js`.
+- Added a final, explicitly scoped visual override: separate centered login/recovery composition and authenticated app shell; hide the shared dashboard header while the login screen is active; consistent max widths/gutters and responsive padding; four-column desktop and two-row mobile coin-row layout; no star/favorite column and no outer row frames/borders; removed logo monogram frame/ring; light frosted-glass surfaces; deep Indigo Glass palette scoped to `body.luxury-theme`; retained dark black/yellow theme.
+- Updated third-theme display label to نیلی شیشه‌ای and chart palette to indigo.
+- Added regression assertions for the approved theme/layout.
+- Latest branch commit at handoff update time: `b845638c3ce7bb42702add88174f9d4f4d02bf6c` (before this handoff-only commit). PR #48 open, Draft, unmerged; GitHub reported mergeable true on latest metadata read.
+- Automated workflow results for this head were not yet returned by the workflow-run lookup at handoff time; do not claim tests passed until confirmed.
+- No authentication/trading JavaScript intentionally changed; no Supabase/database edits, merge, release, deployment, or publishing.
+- Physical visual QA on the Android device remains outstanding. Current PR #47 (Sky Blue) remains separate and unmerged; do not merge either PR without explicit approval.
+- Next: wait for/verify PR #48 CI, review the exact rendered login/dashboard/market layouts at mobile width, correct any visual regressions, then produce a review APK only after build provenance and biometric scope are validated.
