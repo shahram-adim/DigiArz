@@ -438,5 +438,5 @@ test('login preview updates the current BTC candle from a live ticker every four
   assert.ok(html.includes('function refreshAuthLiveCandle()'));
   assert.ok(html.includes('/api/v3/ticker/price?symbol=BTCUSDT'));
   assert.ok(html.includes('last.close=price'));
-  assert.ok(html.includes('authMiniTickerTimer=setInterval(()=>{if(!document.hidden&&!authView.classList.contains(\'hidden\'))refreshAuthLiveCandle()},4000)'));
+  assert.ok(html.includes("authMiniTickerTimer=setInterval(()=>{if(!document.hidden&&!authView.classList.contains('hidden'))refreshAuthLiveCandle()},4000)"));
 });
