@@ -17,26 +17,11 @@ on:
       - "capacitor.config.json"
       - "tests/**"
       - ".github/workflows/android-apk.yml"
-  push:
-    branches:
-      - build/indigo-glass-biometric-apk-2026-11-21
-    paths:
-      - "index.html"
-      - "manifest.webmanifest"
-      - "sw.js"
-      - "icon*.svg"
-      - "src/**"
-      - "scripts/**"
-      - "package.json"
-      - "capacitor.config.json"
-      - "tests/**"
-      - ".github/workflows/android-apk.yml"
-
 permissions:
   contents: read
 
 concurrency:
-  group: digiarz-indigo-glass-biometric-review
+  group: digiarz-indigo-glass-biometric-review-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
