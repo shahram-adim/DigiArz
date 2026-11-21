@@ -439,4 +439,10 @@ test('approved indigo glass, separated page shells, and repaired borderless mark
   assert.match(html, /body\.auth-page-active #appView[\s\S]*?display:none!important/);
   assert.match(html, /body\.dashboard-page-active #authView[\s\S]*?display:none!important/);
   assert.match(html, /#authView\.hidden,\s*#appView\.hidden\{display:none!important\}/);
+  assert.match(html, /body\.luxury-theme #authView\.auth-reference-layout[\s\S]*?max-width:570px/);
+  assert.match(html, /body\.luxury-theme #authView \.ref-hero-grid\{display:none!important\}/);
+  assert.match(html, /body\.luxury-theme #authView \.auth-form \.auth-actions #loginBtn[\s\S]*?linear-gradient\(105deg,#9862f4/);
+  assert.match(html, /body\.luxury-theme #appView \.digiarz-v2-dashboard[\s\S]*?background:rgba\(255,255,255,\.22\)/);
+  assert.match(html, /body\.luxury-theme #appView \.da-v2-market-list \.coin[\s\S]*?border:0!important/);
+  assert.match(html, /body\.luxury-theme #appView \.mobile-bottom-nav[\s\S]*?background:rgba\(250,252,255,\.82\)/);
 });
