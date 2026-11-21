@@ -808,3 +808,5 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Follow-up static review corrected the newly added test assertions to use exact string checks rather than over-escaped regular expressions; latest test-file commit: ffaf257e66fa40c4f9657eb189b0e8e5b7bb3099.
 
 - CI run 44894088506 was observed in progress after the first PR update. Static review caught a quoting issue in the new 4-second ticker assertion; corrected the test string in commit 929fde5a051fa1dc4709a79437e72e1ea80c5c5e. Await the latest-head CI result before treating validation as complete.
+
+- Added .github/workflows/android-review-apk.yml in commit 9929f9acb9100a8fe57ea8c12802ee367aac2222. It builds a debug APK from this isolated branch, runs npm test, and uploads a short-lived GitHub Actions artifact only; it has no GitHub Release or publish step. The branch-specific push trigger allows review APK generation without merging to main.
