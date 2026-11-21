@@ -140,3 +140,25 @@ test('a write already in flight cannot undo a background lock', async () => {
   assert.equal(storage.hasCachedSession(), false);
   assert.equal(plugin.state.saved, true);
 });
+
+test('native biometric session writes mark the prompt active until secure storage completes', async () => {
+  let releaseWrite;
+  let startedWrite;
+  const gate = new Promise(resolve => { releaseWrite = resolve; });
+  const started = new Promise(resolve => { startedWrite = resolve; });
+  const plugin = makePlugin();
+  const originalSetData = plugin.setData;
+  plugin.setData = async ({ value }) => {
+    startedWrite();
+    await gate;
+    return originalSetData({ value });
+  };
+  const storage = makeStorage(plugin);
+  const write = storage.setItem('digiarz.auth.session.v1', '{"access_token":"a","refresh_token":"r"}');
+  await started;
+  assert.equal(storage.isPromptInProgress(), true);
+  releaseWrite();
+  await write;
+  assert.equal(storage.isPromptInProgress(), false);
+  assert.equal(plugin.state.saved, true);
+});
