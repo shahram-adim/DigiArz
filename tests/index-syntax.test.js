@@ -423,3 +423,27 @@ test('login mini chart renders real five-minute candles without depending on a c
   assert.match(html, /fetchBinanceKlines\('BTCUSDT','5m',36\)/);
   assert.match(html, /<svg viewBox=/);
 });
+
+
+test('third theme is Sky Blue Glass and remains scoped independently from light and dark themes', () => {
+  assert.ok(html.includes('آبی آسمانی شیشه‌ای · Sky Blue Glass'));
+  assert.ok(html.includes('body.luxury-theme{color-scheme:dark;--bg:#061a2b'));
+  assert.ok(html.includes('--yellow:#78c8ff'));
+  assert.ok(html.includes('linear-gradient(135deg,#8bd4ff,#42a9e5)'));
+  assert.ok(html.includes("localStorage.setItem('digiArzTheme',selected)"));
+  assert.ok(html.includes("id=\"digiarz-sky-blue-glass-motion\""));
+});
+
+test('login hero animation respects reduced-motion preferences', () => {
+  assert.ok(html.includes('animation:digiarzGlobeSpin 48s linear infinite!important'));
+  assert.ok(html.includes('animation:digiarzPhoneFloat 7s ease-in-out infinite!important'));
+  assert.ok(html.includes('animation:digiarzOrbitA 13s linear infinite!important'));
+  assert.ok(html.includes('@media(prefers-reduced-motion:reduce)'));
+});
+
+test('login BTC preview refreshes the current candle from the live Binance ticker', () => {
+  assert.ok(html.includes('function refreshAuthLiveCandle()'));
+  assert.ok(html.includes('/api/v3/ticker/price?symbol=BTCUSDT'));
+  assert.ok(html.includes('last.close=price'));
+  assert.ok(html.includes('authMiniTickerTimer=setInterval'));
+});
