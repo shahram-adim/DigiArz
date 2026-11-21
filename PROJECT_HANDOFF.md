@@ -804,3 +804,5 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Added regression assertions in tests/index-syntax.test.js for Indigo Glass, theme-key compatibility, motion/reduced-motion, and 4-second real-ticker candle updates. CI has not yet run; Android device testing has not been performed.
 - No auth, registration, dashboard business logic, wallet, orders, trading, Supabase, database, or deployment changes were made. The merged PR #42 registration simplification remains intact. No merge/release/deploy performed.
 - Next: open a Draft PR for this isolated visual branch, inspect exact diff and run CI; then review an APK build without merging or publishing.
+
+- Follow-up static review corrected the newly added test assertions to use exact string checks rather than over-escaped regular expressions; latest test-file commit: ffaf257e66fa40c4f9657eb189b0e8e5b7bb3099.
