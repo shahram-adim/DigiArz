@@ -918,3 +918,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Commits: UI `c41777eb28fd9e9e31c4905db11e5acfc756aa38`; tests `420d0cba7ec7cc5a717253ec0ec59058fa6088e1`.
 - CI and Android review APK runs for the latest commits are pending/in progress at handoff time. Do not distribute an APK until the run for latest tested commit succeeds.
 - PR #48 remains draft/open/unmerged. Physical-device visual acceptance is still required.
+
+
+## 2026-11-21 — Approved pale-blue glass theme APK built
+- Android review APK workflow succeeded: run `44919847545`.
+- Artifact: `DigiArz-Indigo-Glass-Biometric-APK`, artifact ID `14712908852`, expires 2026-12-05 15:35:22 UTC.
+- APK source commit: `420d0cba7ec7cc5a717253ec0ec59058fa6088e1` (contains approved third-theme styling and strict login/dashboard isolation); subsequent `c0a9b5e4` commit only updates this handoff note.
+- Extracted APK path in assistant runtime: `/mnt/data/digiarz-apk-latest/app-debug.apk`.
+- APK SHA-256: `f9bbd3d4d1a4c6dab082b05b9243fa88b578fe76f2dc1da020a6f975164b0056`.
+- CI exact-decimal suite for source commit `420d0cba` passed (run `44919865047`).
+- Build remains an unsigned debug/review APK. Physical-device testing of theme appearance, login/dashboard isolation, biometric enrollment/authentication, logout and relock is still pending.
+- No production deploy, merge, Supabase/database changes, or production signing.
