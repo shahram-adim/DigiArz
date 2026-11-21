@@ -52,6 +52,23 @@ test('stores the Supabase session using strong biometric protection', async () =
   assert.ok(plugin.calls.includes('setData'));
 });
 
+test('deferred startup leaves email login available until the user chooses fingerprint', async () => {
+  const plugin = makePlugin();
+  const original = makeStorage(plugin);
+  const value = JSON.stringify({ access_token: 'saved-access', refresh_token: 'saved-refresh' });
+  await original.setItem('digiarz.auth.session.v1', value);
+  const callsBeforeChoice = plugin.calls.filter(call => call === 'getSecureData').length;
+  const deferred = makeStorage(plugin, { deferBiometricPrompt: true });
+
+  assert.equal(await deferred.getItem('digiarz.auth.session.v1'), null);
+  assert.equal(plugin.calls.filter(call => call === 'getSecureData').length, callsBeforeChoice);
+  assert.equal(await deferred.hasSecureSession(), true);
+
+  assert.equal(await deferred.unlock(), value);
+  assert.equal(plugin.calls.filter(call => call === 'getSecureData').length, callsBeforeChoice + 1);
+  assert.equal(await deferred.getItem('digiarz.auth.session.v1'), value);
+});
+
 test('cancellation preserves encrypted data and explicit retry can unlock', async () => {
   const plugin = makePlugin();
   const storage = makeStorage(plugin);
