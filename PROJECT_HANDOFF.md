@@ -786,3 +786,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Existing APK workflow generates Android project from scratch. No generated Android files were edited.
 - Run `44876112814` completed successfully; all 45 job steps completed, including `Run Bit24 deduplication SQL regressions`.
 - No biometric runtime code, dependency upgrade, APK build, Production/Supabase change, merge, or release has been made. Next: build an isolated Capacitor 8 + biometric-plugin compatibility spike with lockfile and clean CI build, then implement the native secure-storage adapter only after validating SDK refresh/session lifecycle. Browser/PWA path must remain byte-for-byte behaviorally unchanged.
+
+
+## 2026-11-21 — isolated native biometric dependency/build spike
+- On branch `spike/android-biometric-capacitor8-2026-11-21`, pinned `@capacitor/core`, `@capacitor/android`, and `@capacitor/cli` to `8.6.2`, and added `@capgo/capacitor-native-biometric@8.9.3`. Removed the unrelated Passkey plugin config from this isolated branch.
+- Updated the Android CI branch filter to include this spike, Node.js 22 / Java 21, and suppressed GitHub Release publication for this branch. Added the branch to exact-decimal regression workflow push filters.
+- Repository has no package-lock.json on main or the old Passkey spike. Current workflow uses `npm install`, not `npm ci`; dependency versions are exact-pinned but a committed lockfile remains an improvement required before production adoption.
+- This is dependency/build compatibility only. No JS calls to the biometric plugin and no Supabase storage/session behavior changes have been made. No fingerprint flow is enabled yet.
+- Next: run clean Android CI and regression tests on this branch; inspect Gradle/Capacitor/plugin errors. If build succeeds, implement and test the APK-only protected session storage adapter in a separate, reviewable step. No merge/release/Production changes.
