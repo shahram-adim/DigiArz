@@ -1089,3 +1089,15 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Added regression assertions for the dashboard and market breakpoints/areas in `tests/index-syntax.test.js` (commit/current branch head `23c1d7d36c21dfb3856cb4641bbbfe8074836d63`).
 - Validation boundary: the source changes are committed on the isolated PR #48 branch. A matching GitHub Actions run has not yet been returned for this exact head; do not report tests as passed. No physical-device screenshot/viewport test has been performed. Do not claim the installed APK has these changes.
 - No merge, release, deployment, Supabase/database changes, or real-money functionality changes. Keep PR #48 Draft/unmerged pending CI and visual review.
+
+
+## 2026-11-21 — pure-white glass theme 2 and dashboard/market finishing pass
+- User clarified that theme 2 must be white throughout, with no grey anywhere; the dashboard and market layouts must remain professional and orderly.
+- Inspected the current PR #48 source and found remaining grey-tinted theme-2 surfaces: page gradient variables, card borders, hero gradient, grey primary buttons, grey active tabs, and grey form borders/buttons.
+- Created isolated follow-up branch `fix/pure-white-glass-dashboard-market-2026-11-21` from the PR #48 candidate, preserving the existing responsive dashboard/market layout and theme 1/theme 3 separation.
+- Added a final theme-2 CSS override: pure-white page canvas and white glass panels throughout login/dashboard/market, blue-tinted borders and controls instead of grey, navy/blue text, and preserved borderless market coin rows. Added regression assertions to guard the white palette and prevent the known grey hex colors from returning.
+- Source commits: `2f0a5ce9e7224abdda25eb208f5888d2d0fac4b3` (CSS) and `5932038814ec22496cfed1de2bf5d21969137aa0` (initial test; test regex is corrected in the follow-up commit).
+- Dashboard/market responsive grid corrections remain inherited from PR #48: shrink-safe dashboard cards, named market-row grid areas, no favorite-button column, wrap-safe values, and narrow-phone breakpoints.
+- Validation: CI has not yet run on this follow-up branch; no APK has been built for this branch and no physical-device visual QA has been performed. Do not claim the changes are validated or present in the installed APK.
+- No merge, release, deployment, Supabase/database, authentication, or financial trading logic changes. Keep isolated for review.
+- Regression test source has been corrected and included in Draft PR #49; it has not yet run in CI. PR #49 is intentionally based on PR #48's candidate branch to avoid duplicating its full change set. Next: merge/review PR #48 first; then retarget PR #49 to `main`, inspect CI for its exact head, and build a matching review APK only if CI passes.
