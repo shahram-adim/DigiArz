@@ -415,3 +415,32 @@ test('login mini chart renders real five-minute candles without depending on a c
   assert.match(html, /fetchBinanceKlines\('BTCUSDT','5m',36\)/);
   assert.match(html, /<svg viewBox=/);
 });
+
+
+test('unified UI stylesheet is loaded after legacy styles and included in the app shell', () => {
+  assert.match(html, /<link rel="stylesheet" href="\.\/src\/digiarz-independent-ui\.css\?v=20261121-1">/);
+  const css = fs.readFileSync('src/digiarz-independent-ui.css', 'utf8');
+  assert.match(css, /#authView\.hidden,#authView\[hidden\]\{display:none!important/);
+  assert.match(css, /#appView\.hidden,#appView:not\(\.app-view-active\)\{display:none!important/);
+  assert.match(css, /body\.dashboard-page-active #authView\{display:none!important/);
+  assert.match(css, /\.wrap\{width:100%!important;max-width:none!important/);
+  assert.match(fs.readFileSync('sw.js', 'utf8'), /'\.\/src\/digiarz-independent-ui\.css'/);
+});
+
+test('mobile primary navigation has exactly five user-facing destinations and services expose secondary pages', () => {
+  const start = html.indexOf('<nav class="mobile-bottom-nav"');
+  const end = html.indexOf('</nav>', start);
+  assert.ok(start >= 0 && end > start, 'mobile navigation boundaries found');
+  const nav = html.slice(start, end);
+  for (const tab of ['dashboard', 'markets', 'trade', 'assets', 'settings']) {
+    assert.match(nav, new RegExp('data-tab="' + tab + '"'));
+  }
+  assert.doesNotMatch(nav, /data-tab="orders"|data-tab="admin"/);
+  assert.match(nav, /<span>خدمات<\/span>/);
+  const settingsStart = html.indexOf('<section id="tab-settings"');
+  const settingsEnd = html.indexOf('</section>', settingsStart);
+  const settings = html.slice(settingsStart, settingsEnd);
+  for (const tab of ['orders', 'history', 'chart', 'toman']) {
+    assert.match(settings, new RegExp('data-dashboard-tab="' + tab + '"'));
+  }
+});
