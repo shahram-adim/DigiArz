@@ -365,3 +365,13 @@ See \`docs/superpowers/reports/2026-11-15-exact-decimal-implementation-checkpoin
 4. نگه‌داشتن Production بدون تغییر تا تکمیل آزمون ایزوله و بازبینی نهایی grants/RLS و برنامهٔ rollback.
 
 این به‌روزرسانی فقط مستندسازی نتیجهٔ CI و وضعیت خواندنی Production است؛ هیچ آزمون مالی روی Supabase Production اجرا نشده است.
+
+## Main CI verification — 2026-11-21
+
+- [x] Exact-decimal workflow Run #1454 (44895814215) completed with success on main HEAD 31ebb934b55d7c3610950081df0ed4483de2e672.
+- [x] Node/browser regression step passed, including the new final auth palette test (Binance-inspired black/yellow), preservation of email/password-only signup, login/recovery controls, and existing responsive layout.
+- [x] PostgreSQL 17 disposable CI passed arithmetic, schema-widening preflight, lock-timeout and atomic rollback checks.
+- [x] Market/Limit entrypoints, combined exact-decimal candidate, per-fill USDT reservation rounding, Stop-Limit/TP-SL placement, Limit worker, Limit cancellation, two-session Limit/TP-SL/Stop-Limit cancellation races, and parent-child/conditional lifecycle tests all passed.
+- [!] This is an isolated GitHub Actions PostgreSQL service, not the production Supabase database or a dedicated Supabase Development Branch. Workflow tests use the repository's draft candidate SQL; they do not prove full Production migration/ACL parity.
+- [x] Production Supabase was not used for any test. No orders, trades, reservations, wallets, balances, migrations, grants, policies, cron jobs, or financial RPCs were changed.
+- [ ] Still required: a fresh schema-only PostgreSQL 17 harness with exact Production DDL/ACL parity, then source-faithful Stop-Limit tests. Supabase project currently has no Development Branch; the separate Recovery-Test project contains backup data and is not a disposable financial test database.
