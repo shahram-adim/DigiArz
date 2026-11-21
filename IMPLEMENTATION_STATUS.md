@@ -1086,3 +1086,10 @@
 1. تأیید GitHub Actions برای HEAD جدید و بررسی اجرای آزمون palette و regression کامل.
 2. پس از تأیید CI، بررسی بصری فرم ورود/ثبت‌نام در Android و اطمینان از حفظ نام‌نویسی email/password-only.
 3. ادامهٔ QA Stop-Limit فقط روی PostgreSQL 17 تازه و synthetic؛ Production و Recovery-Test دارای backup data دست‌نخورده بمانند.
+
+
+### اصلاح matcher قدیمی آزمون رنگ‌بندی — ۲۱ نوامبر ۲۰۲۶
+- پس از commit آزمون جدید، بازخوانی فایل تست نشان داد یک assertion قدیمی در تست «reference login» هنوز پس‌زمینهٔ navy قبلی را انتظار می‌کشید؛ این assertion با بررسی ترتیب cascade و وجود override نهایی مشکی/زرد جایگزین شد.
+- این اصلاح فقط test expectation است؛ هیچ HTML، منطق Auth، schema یا داده‌ای تغییر نکرد.
+- Commit هم‌زمان دیگری روی main با SHA `e5bd65b3460ec7ed85857fa51b092cd681322409` فقط workflow دستیِ artifact-only برای APK بازبینی Android را ثبت کرده است؛ طبق handoff، PR #45 همچنان Draft و ادغام‌نشده است و این نوبت آن را اجرا/merge نکرد.
+- Run شمارهٔ 1446 با ID `44895500537` برای commit `e5bd65b3460ec7ed85857fa51b092cd681322409` هنگام بررسی در حال اجرا بود؛ نتیجهٔ نهایی هنوز قابل اعلام نیست. پس از اصلاح assertion، اجرای جدید main باید جداگانه بررسی شود.
