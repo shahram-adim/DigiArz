@@ -84,3 +84,13 @@ No Production/Supabase changes, no main merge, no release publication, no change
 - The two-source equality check is a consistency check, not a cryptographic publisher signature or committed SHA-256 pin. The workflow logs the resulting bundle SHA-256. A committed lockfile / verified npm provenance and stable bundle digest remain required before production adoption.
 - CI triggered on commit `205430991573d73e584f208b70f14529b19f626e`: Android run `44877219663` is pending at the last check; exact-decimal run `44877219671` is queued/in progress. No success is claimed for these new runs yet.
 - No Auth adapter, runtime biometric prompt, local session changes, Production changes, merge, or release.
+
+
+## 2026-11-21 — pinned SDK build verified
+- Android workflow run [44877219663](https://github.com/shahram-adim/DigiArz/actions/runs/44877219663) completed successfully on commit `205430991573d73e584f208b70f14529b19f626e`. The pinned-Supabase preparation step, generated Android project, Capacitor sync, Gradle debug APK build, provenance, and artifact upload all passed.
+- Supabase JS UMD asset `www/vendor/supabase-2.119.2.js` SHA-256 observed in CI: `8816af04d9915dbba1882d6f84f0b402dc40268063a63d9c66d24f52f371c263`. APK SHA-256: `fd4d57e62a85fc8cd51606f292a43e82f2ad44b29d23fb29dee9fb4b1c3acddd`.
+- Artifact `DigiArz-Android-debug-APK`, ID `14696064416`, size 6,172,011 bytes. Exact-decimal workflow run `44877219671` also completed successfully.
+- The Android preparation script now checks both CDN byte equality and the observed SHA-256 digest before packaging. This is a pinned-content integrity check; npm publisher provenance and a committed dependency lockfile are still separate supply-chain requirements.
+- Official plugin 8.9.3 API review confirms `setData({accessControl: BIOMETRY_CURRENT_SET|BIOMETRY_ANY})` and `getSecureData()` are the appropriate arbitrary-data APIs. Android requires `USE_BIOMETRIC`; this CI build log did not expose the merged manifest, so permission presence remains unverified. `authValidityDuration` defaults to 0, requiring fresh biometric authentication for every protected key operation; any nonzero window is a deliberate security/convenience tradeoff.
+- No runtime Auth adapter or biometric lock was implemented. No production Supabase changes, merge, or release occurred. PR #41 remains Draft.
+- Next: verify the generated merged Android manifest includes `USE_BIOMETRIC`; add pinned `@supabase/supabase-js` dependency and lockfile/provenance; then design and test the native-only Auth storage adapter before enabling runtime behavior.
