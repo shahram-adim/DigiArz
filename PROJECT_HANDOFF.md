@@ -1080,3 +1080,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Extracted APK SHA-256: `57300ad934b3f5e4bde48b059765de621afe5a70215bc348f9d5d3544edf35e8` (7,303,534 bytes). This is a debug review APK, not a production-signed release.
 - The earlier statement above that no APK artifact was verified for the app code head is superseded by this artifact provenance check. Current PR head advanced afterward only because of the handoff documentation commit `a4bb9ff62c8e24e9aee70e8b06013693ac757490`; app source remains at the APK-verified code commit `b0b2d534...`.
 - Physical Android installation, visual review of all three themes and fingerprint enrollment/login/logout/background-relock tests remain outstanding. PR #48 remains Draft/open/unmerged; no release, deployment or Supabase/database changes.
+
+
+## 2026-11-21 — dashboard and market responsive layout correction
+- User explicitly reiterated that both the authenticated dashboard and the market page must be laid out correctly; this is part of the deliverable, not an optional follow-up.
+- Inspected the actual dashboard DOM and market-row DOM on the existing isolated PR #48 branch before changing styles.
+- Added a final responsive CSS layer in `index.html` (commit `6e0efde56367e570a48b72d9e1bf3e1b68f4f667`): dashboard quick actions and account stats use shrink-safe grids; dashboard market cards are organized into bounded identity/price/change areas; search/filter controls and activity panels wrap without forcing horizontal overflow. The market page now has a contained hero, stable market-list grid areas, no extra favorite-button column in market rows, and a two-column mobile row arrangement with price aligned separately from identity/change. Added tighter <=390px sizing.
+- Added regression assertions for the dashboard and market breakpoints/areas in `tests/index-syntax.test.js` (commit/current branch head `23c1d7d36c21dfb3856cb4641bbbfe8074836d63`).
+- Validation boundary: the source changes are committed on the isolated PR #48 branch. A matching GitHub Actions run has not yet been returned for this exact head; do not report tests as passed. No physical-device screenshot/viewport test has been performed. Do not claim the installed APK has these changes.
+- No merge, release, deployment, Supabase/database changes, or real-money functionality changes. Keep PR #48 Draft/unmerged pending CI and visual review.
