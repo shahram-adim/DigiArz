@@ -776,3 +776,21 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Artifact 14217201032 remains unexpired at this check and expires 2026-11-23T10:26:46Z. GitHub API reports the exact 64-character digest sha256:555c1f7ebcad947e573dad659084bbcf94dc88d55fc0bc1a3b7de9606db8e4e5; earlier notes contained a truncated 61-character digest and have been corrected in the bootstrap plan.
 - Bootstrap plan updated in commit 6ccfa3c68c47e00518508e930dc97428231c4019; it records schema metadata, ACL exclusion, Production parity blocker and next safe step.
 - No Production migration/RPC/trigger/cron/grant/policy/schema/data change, no test with restored records, no merge/rebase/deploy, and no supabase db push.
+
+
+## 2026-11-21 — registration form simplification
+- User explicitly clarified that the first-name/last-name removal applies to the registration form.
+- Created isolated branch `ui/remove-signup-name-fields-2026-11-21` from main `1c2ba0f9449d64cebc6d511f646fc8857dad1f89`; did not modify the APK biometric spike branch or main.
+- Updated `index.html` in commit `10429774dd9115508141e1b11001e399a555a322`: removed the combined name input from the shared auth form and removed the `full_name` signup metadata payload. Registration now submits email and password only. Existing login, dashboard, profile/database columns, and existing users' stored metadata were not changed.
+- Static exact-string verification in the edit step confirmed the signup form no longer contains `id="fullName"`, the signup handler no longer reads `$('fullName')`, and no longer submits `full_name:name`. No CI or browser/device test has yet been run for this change.
+- Next: create a Draft PR targeting main, inspect its diff, and run available CI. Do not merge or deploy without explicit authorization.
+
+
+## 2026-11-21 — registration PR validation completed
+- PR #42 remains Draft/open and unmerged: https://github.com/shahram-adim/DigiArz/pull/42.
+- Latest branch head: c63b307ba50b35ae5ea07b5def9a7488ae56a8ca. Branch is 5 commits ahead of base main 1c2ba0f9449d64cebc6d511f646fc8857dad1f89, with no divergence behind main.
+- Latest full CI run 44881136326 completed with conclusion SUCCESS on the current branch head. Node/browser integration tests, PostgreSQL arithmetic/regression tests, exact-decimal schema widening rehearsals, atomic rollback/lock-timeout/preflight checks, Market/Limit/Stop-Limit/TP-SL entrypoint and lifecycle integrations, and two-session race/cancellation tests all passed. Run: https://github.com/shahram-adim/DigiArz/actions/runs/44881136326.
+- Previous full CI run 44881104402 also completed SUCCESS on the preceding test commit f738e576219f70d58095416ee0d3db8fd6d9d461. The first two failed runs were stale test assertions expecting the removed fullName field; those assertions were corrected.
+- Final PR diff inspected: exactly three files changed — PROJECT_HANDOFF.md, index.html, tests/index-syntax.test.js. The application change removes the registration name input and stops sending full_name metadata. Login and dashboard behavior/code remain unchanged; no database/schema/account data changes.
+- No main-branch changes, merge, deployment, production database changes, or physical-device test. PR remains Draft pending explicit user authorization to merge. Do not mark it ready or merge automatically.
+- Next: wait for the user's explicit merge authorization; otherwise leave the validated Draft PR untouched.
