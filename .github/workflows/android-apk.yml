@@ -86,6 +86,13 @@ jobs:
       - name: Sync Android project
         run: npx cap sync android
 
+      - name: Verify Capacitor runtime is packaged
+        run: |
+          RUNTIME="android/app/src/main/assets/public/capacitor.js"
+          test -s "$RUNTIME"
+          grep -q "registerPlugin" "$RUNTIME"
+          echo "Verified Capacitor global runtime and registerPlugin bridge: $RUNTIME"
+
       - name: Build installable debug APK
         run: |
           cd android
