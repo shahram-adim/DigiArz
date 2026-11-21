@@ -809,3 +809,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - The prior PR #41 APK build is not the combined visual version and must not be presented as the final APK. Physical-device biometric acceptance testing remains outstanding.
 
 - Triggered the isolated Android review APK workflow by a workflow-file-only commit 64ab87d97e4461662dd9989df2ca0ae0dad9a7fc; this is a branch-scoped push trigger, not a main merge or release. Awaiting Android build result and APK artifact.
+
+ 
+## 2026-11-21 — biometric retry and background-write race hardening
+- Static review identified two runtime defects in the first combined implementation: (1) after a cancelled cold-start biometric prompt, Supabase caches its completed empty initialization result, so simply calling initialize() again does not reload the newly unlocked session; (2) a late session-storage write arriving after app lock could repopulate the decrypted in-memory cache.
+- Fixed unlock flow: after a successful secure read, dispose the empty Supabase Auth client and recreate it against the now-unlocked secure adapter, then register the auth listener and initialize once. Cancellation leaves the existing password-login client intact.
+- Fixed secure adapter: failed/cancelled biometric reads clear cached plaintext and set locked=true. Writes received while locked persist only through native secure storage and do not repopulate decrypted memory. Normal writes while unlocked continue to update the in-memory cache.
+- Added two automated tests: writes arriving after background lock do not repopulate memory; a write already in flight cannot undo the lock. Existing cancellation/retry test now asserts locked state and verifies explicit retry.
+- New workflow runs triggered from the latest PR head: Android review APK run 44895135324 is pending/queued; exact-decimal regression run 44895135448 is in progress. No outcome or APK artifact is claimed yet.
+- Current candidate remains PR #45 Draft/open/unmerged. No main merge, Production/Supabase change, release, or physical-device test.
