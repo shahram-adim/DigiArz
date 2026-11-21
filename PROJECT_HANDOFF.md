@@ -849,3 +849,16 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Validation boundary: APK is a debug review build; CI verifies build/package/permission and automated tests, but physical Android installation, biometric enrollment, login, logout and relock behavior remain unverified.
 - No PR #47 merge, production deployment, GitHub release, publishing, Supabase/database changes, or user financial data changes.
 - Next: user installs and tests the review APK on Android; investigate any observed issue. Keep PR #47 Draft/unmerged until explicit approval.
+
+
+## 2026-11-21 — final Sky Blue Glass palette isolation and APK rebuild
+- Investigated the reported theme mixing in the rebuilt PR #47 candidate and found a final auth palette override that was not scoped to an individual theme.
+- Replaced that override with three explicit palette blocks on the same login layout: dark black/yellow only under `body.dark-theme`, light surfaces only under `body.light-theme`, and Sky Blue Glass only under `body.luxury-theme` using accent `#78c8ff`. No unscoped auth palette overrides remain.
+- Added a regression test asserting all three selectors and checking that no unscoped auth palette rule leaks between themes. Updated the earlier dark-palette test to reflect the isolated selector structure.
+- Final candidate head: `d6a8773af4b6efb0e2afc283d11822c8eaae0931`.
+- Android review APK workflow run `44902932362` completed SUCCESS. Biometric storage tests, visual/application regression tests, dependency/signature checks, Android packaging, debug APK build and merged `android.permission.USE_BIOMETRIC` verification all passed.
+- Exact decimal/PostgreSQL/Market/Limit/Stop-Limit/TP-SL/concurrency integration workflow run `44902937134` completed SUCCESS.
+- Artifact `DigiArz-Sky-Blue-Glass-Biometric-APK`, ID `14706801177`, expires `2026-12-05T12:16:34Z`. Extracted `app-debug.apk` size 7,291,554 bytes; SHA-256 `6f0adea22f1e9f645e161c21a10419b85284c08a8d7f30a1bc6e78ea3406450c`. Build provenance confirms source head and workflow run.
+- PR #47 remains Draft/open/unmerged and mergeable. Physical Android installation, fingerprint enrollment, and login/logout/background-relock acceptance tests remain outstanding. APK is a debug review build, not production-signed.
+- No app code was merged to main; no release/deployment/publishing or Supabase/database/user-financial-data changes were made. This handoff entry is documentation-only.
+- Next: user installs the new APK and checks all three themes, password login, fingerprint enrollment/unlock, logout and relock. Fix only observed issues on PR #47; do not merge without explicit user approval.
