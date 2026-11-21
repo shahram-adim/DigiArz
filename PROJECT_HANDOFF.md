@@ -776,3 +776,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Artifact 14217201032 remains unexpired at this check and expires 2026-11-23T10:26:46Z. GitHub API reports the exact 64-character digest sha256:555c1f7ebcad947e573dad659084bbcf94dc88d55fc0bc1a3b7de9606db8e4e5; earlier notes contained a truncated 61-character digest and have been corrected in the bootstrap plan.
 - Bootstrap plan updated in commit 6ccfa3c68c47e00518508e930dc97428231c4019; it records schema metadata, ACL exclusion, Production parity blocker and next safe step.
 - No Production migration/RPC/trigger/cron/grant/policy/schema/data change, no test with restored records, no merge/rebase/deploy, and no supabase db push.
+
+
+## 2026-11-21 — registration form simplification
+- User explicitly clarified that the first-name/last-name removal applies to the registration form.
+- Created isolated branch `ui/remove-signup-name-fields-2026-11-21` from main `1c2ba0f9449d64cebc6d511f646fc8857dad1f89`; did not modify the APK biometric spike branch or main.
+- Updated `index.html` in commit `10429774dd9115508141e1b11001e399a555a322`: removed the combined name input from the shared auth form and removed the `full_name` signup metadata payload. Registration now submits email and password only. Existing login, dashboard, profile/database columns, and existing users' stored metadata were not changed.
+- Static exact-string verification in the edit step confirmed the signup form no longer contains `id="fullName"`, the signup handler no longer reads `$('fullName')`, and no longer submits `full_name:name`. No CI or browser/device test has yet been run for this change.
+- Next: create a Draft PR targeting main, inspect its diff, and run available CI. Do not merge or deploy without explicit authorization.
