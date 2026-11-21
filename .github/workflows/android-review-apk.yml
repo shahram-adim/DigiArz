@@ -1,18 +1,16 @@
-name: DigiArz Android Review APK — artifact only
+name: DigiArz Indigo Glass Android Review APK — artifact only
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - main
-    paths:
-      - .github/workflows/android-review-apk.yml
+      - build/indigo-glass-biometric-review-2026-11-21
 
 permissions:
   contents: read
 
 concurrency:
-  group: digiarz-safe-review-apk-${{ github.ref }}
+  group: digiarz-indigo-biometric-review-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
