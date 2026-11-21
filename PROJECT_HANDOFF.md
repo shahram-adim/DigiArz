@@ -805,3 +805,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Updated `docs/ANDROID_BIOMETRIC_LOCK_SPIKE.md` with run IDs, artifact digest/provenance, auth bootstrap findings, floating SDK finding, and next safe steps. Documentation commit: `7900d2a549a82aaa196a2c6ef295c975fc7a28d3`.
 - No biometric runtime implementation, no Supabase Production changes, no mainline change, no merge/release, and no real-device test claim.
 - **Next action:** pin Supabase JS in the isolated branch and establish a local, reproducible APK-only bundle before designing/implementing the native-only async storage adapter. Then validate plugin APIs/manifest and write lifecycle/race tests.
+
+
+## 2026-11-21 — APK-only pinned Supabase SDK build step
+- Added `scripts/prepare-android-web.sh`; package script `build:android` now runs existing web copy then obtains exact `@supabase/supabase-js@2.119.2` UMD bundle from jsDelivr and unpkg, requires byte-identical files, copies to `www/vendor/supabase-2.119.2.js`, and rewrites only generated `www/index.html` to load the local bundle. Source `index.html` remains unchanged, so web/PWA source loader remains the existing Production asset endpoint.
+- Android workflow now uses `npm run build:android`. No Production Edge Function deployment or Auth setting changes.
+- Important limitation: mirror equality is not publisher provenance or a committed SHA-256 pin. The build logs the computed SHA-256. A verified lockfile/provenance and pinned bundle digest are still required before production adoption.
+- CI on commit `205430991573d73e584f208b70f14529b19f626e`: Android run `44877219663` pending; exact-decimal run `44877219671` queued/in progress at last check. Do not claim success until polled.
+- Documentation updated in `docs/ANDROID_BIOMETRIC_LOCK_SPIKE.md`; next doc commit `1c87a7fc68cfa8540546bfaf8fcc6c43f6de3742`.
+- No native biometric runtime code or Supabase Auth storage adapter yet; no merge/release/Production/main change.
