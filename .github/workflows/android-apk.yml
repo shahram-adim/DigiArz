@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - spike/android-biometric-capacitor8-2026-11-21
     paths:
       - "index.html"
       - "manifest.webmanifest"
@@ -85,6 +86,7 @@ jobs:
           retention-days: 14
 
       - name: Publish direct APK download
+        if: github.ref != 'refs/heads/spike/android-biometric-capacitor8-2026-11-21'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: android-debug-${{ github.run_number }}
