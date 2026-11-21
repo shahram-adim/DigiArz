@@ -63,6 +63,9 @@ jobs:
       - name: Verify npm package signatures
         run: npm audit signatures
 
+      - name: Run Android biometric storage unit tests
+        run: npm test
+
       - name: Verify and upload generated npm lockfile
         run: test -s package-lock.json
 
