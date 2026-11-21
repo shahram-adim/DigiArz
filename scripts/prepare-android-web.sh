@@ -15,8 +15,16 @@ curl --fail --silent --show-error --location --retry 3 \
   "https://unpkg.com/@supabase/supabase-js@${VERSION}/dist/umd/supabase.js" \
   --output "$TMP_B"
 
+EXPECTED_SHA256="8816af04d9915dbba1882d6f84f0b402dc40268063a63d9c66d24f52f371c263"
+
 if ! cmp -s "$TMP_A" "$TMP_B"; then
   echo "Pinned Supabase UMD mirrors differ; refusing to package an unverified SDK bundle." >&2
+  exit 1
+fi
+
+ACTUAL_SHA256="$(sha256sum "$TMP_A" | cut -d ' ' -f 1)"
+if [[ "$ACTUAL_SHA256" != "$EXPECTED_SHA256" ]]; then
+  echo "Supabase SDK bundle SHA-256 mismatch: expected $EXPECTED_SHA256, got $ACTUAL_SHA256" >&2
   exit 1
 fi
 
