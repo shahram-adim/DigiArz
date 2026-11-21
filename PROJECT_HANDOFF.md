@@ -794,3 +794,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Application change: registration form no longer asks for first/last name and signup submits email/password only. Existing login, dashboard, stored account metadata, and database schema/data were not changed. Tests assert name field absence and email/password-only signup.
 - No production database migration, schema/data update, release, or deployment was performed. No physical-device test has been performed. The separate APK-only biometric PR #41 remains separate and unaffected.
 - Next: verify the hosted/PWA registration form after the normal deployment pipeline when deployment is separately authorized; do not deploy automatically.
+
+ 
+## 2026-11-21 — combined Indigo Glass + APK-only biometric candidate
+- Rechecked ancestry using GitHub compare: PR #41 biometric branch is **47 commits ahead and 2 commits behind** current main (not 47 commits behind). The two main-only commits include PR #42's already-merged removal of registration name fields and its handoff record.
+- To avoid importing unrelated branch history, created build/indigo-glass-biometric-apk-2026-11-21 directly from current main and ported only the reviewed biometric implementation files from PR #41, plus the exact Indigo Glass index.html and regression tests from PR #44's visual branch.
+- Preflight verified the APK injection script's three source anchors each match exactly once: decimal.js script anchor, forgot-password button anchor, and existing initClient implementation. Signup name field remains absent; email/password registration and all existing login controls remain present.
+- APK build injects biometric adapter and unlock button into generated www assets only. Source index.html does not load the biometric plugin; hosted web/PWA authentication remains unchanged.
+- Combined Android workflow uses Capacitor 8.6.2, native biometric plugin 8.9.3, strong-biometric protected session storage, cancellation/retry, password fallback, logout deletion and background/foreground relock. The workflow has read-only repository permissions, uploads DigiArz-Indigo-Glass-Biometric-APK, and contains no GitHub Release or publishing step.
+- No main merge, Production deployment, Supabase/database change, release, or physical-device test performed. Await CI and artifact verification.
