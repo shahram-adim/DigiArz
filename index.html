@@ -1904,6 +1904,266 @@ body.dashboard-page-active #authView{visibility:hidden!important;pointer-events:
 body.auth-page-active #authView:not(.hidden),
 body.dashboard-page-active #appView.app-view-active{visibility:visible!important;pointer-events:auto!important}
 
+
+
+/* Third theme — faithfully apply the user's approved pale blue/lavender glass reference. */
+body.luxury-theme{
+ --bg:#eaf0ff;--panel:rgba(255,255,255,.68);--panel2:rgba(248,251,255,.72);
+ --line:rgba(143,170,218,.25);--text:#14264f;--muted:#64799d;
+ --field:rgba(255,255,255,.72);--soft:rgba(255,255,255,.52);
+ background:
+  radial-gradient(ellipse at 14% 14%,rgba(206,190,255,.62),transparent 34%),
+  radial-gradient(ellipse at 86% 18%,rgba(147,193,255,.58),transparent 36%),
+  radial-gradient(ellipse at 50% 100%,rgba(174,219,255,.62),transparent 45%),
+  linear-gradient(135deg,#eeeaff 0%,#e4edff 48%,#e1f3ff 100%)!important;
+ color:#14264f!important;
+}
+body.luxury-theme .wrap{max-width:1180px!important}
+body.luxury-theme .top{
+ background:rgba(255,255,255,.46)!important;border:1px solid rgba(255,255,255,.72)!important;
+ border-radius:20px!important;box-shadow:0 10px 30px rgba(76,112,177,.08)!important;
+ backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+}
+body.luxury-theme .brand,body.luxury-theme .brand span:first-child{color:#172b59!important}
+body.luxury-theme .brand span:not(:first-child){color:#4e85dc!important}
+body.luxury-theme .muted,body.luxury-theme .small{color:#7184a5}
+body.luxury-theme #authView.auth-reference-layout{
+ display:flex!important;flex-direction:column!important;max-width:570px!important;
+ margin:22px auto 34px!important;padding:0!important;overflow:hidden!important;
+ border:1px solid rgba(255,255,255,.88)!important;border-radius:32px!important;
+ background:rgba(255,255,255,.26)!important;
+ box-shadow:0 28px 70px rgba(91,119,184,.17),inset 0 1px 0 rgba(255,255,255,.9)!important;
+ backdrop-filter:blur(28px) saturate(145%);-webkit-backdrop-filter:blur(28px) saturate(145%);
+ color:#172b59!important;
+}
+body.luxury-theme #authView .auth-reference-visual{
+ min-height:245px!important;padding:25px 28px 14px!important;overflow:hidden!important;
+ background:
+  radial-gradient(circle at 84% 20%,rgba(111,148,255,.46) 0 70px,transparent 72px),
+  radial-gradient(circle at 13% 38%,rgba(115,164,255,.62) 0 17px,transparent 19px),
+  radial-gradient(circle at 74% 94%,rgba(130,194,255,.5) 0 155px,transparent 157px),
+  linear-gradient(135deg,#eee8ff 0%,#e3edff 55%,#d9efff 100%)!important;
+}
+body.luxury-theme #authView .ref-brandbar{
+ min-height:195px!important;justify-content:center!important;align-items:center!important;
+}
+body.luxury-theme #authView .ref-brand-lockup{
+ flex-direction:column!important;gap:8px!important;text-align:center!important;color:#172b59!important;
+}
+body.luxury-theme #authView .ref-monogram{
+ width:auto!important;height:auto!important;border:0!important;transform:none!important;
+ color:#557df2!important;text-shadow:0 5px 16px rgba(74,115,230,.22)!important;
+ font-size:54px!important;letter-spacing:-7px!important;
+}
+body.luxury-theme #authView .ref-monogram:after,
+body.luxury-theme #authView .ref-monogram small{display:none!important}
+body.luxury-theme #authView .ref-brand-lockup strong{
+ color:#152b61!important;font-size:clamp(39px,7vw,54px)!important;
+ text-shadow:none!important;letter-spacing:-2px!important;
+}
+body.luxury-theme #authView .ref-brand-lockup em{
+ color:#355b9b!important;font-size:15px!important;font-weight:800!important;
+}
+body.luxury-theme #authView .ref-live-pill{display:none!important}
+body.luxury-theme #authView .ref-hero-grid{display:none!important}
+body.luxury-theme #authView .auth-form{
+ width:auto!important;margin:0 22px 22px!important;padding:27px 25px 22px!important;
+ border:1px solid rgba(255,255,255,.94)!important;border-radius:26px!important;
+ background:linear-gradient(145deg,rgba(255,255,255,.78),rgba(246,250,255,.56))!important;
+ box-shadow:0 15px 36px rgba(78,111,177,.13),inset 0 1px 0 #fff!important;
+ color:#172b59!important;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+}
+body.luxury-theme #authView .auth-form-toolbar{display:none!important}
+body.luxury-theme #authView .auth-form .auth-kicker{color:#5278c8!important;text-align:center!important;font-weight:800!important}
+body.luxury-theme #authView .auth-form h2{color:#142b5d!important;text-align:center!important;font-size:27px!important}
+body.luxury-theme #authView .auth-form .auth-intro{color:#63799d!important;text-align:center!important}
+body.luxury-theme #authView .auth-form .field label{color:#536b94!important}
+body.luxury-theme #authView .auth-form input{
+ min-height:54px!important;border:1px solid rgba(151,178,222,.35)!important;
+ border-radius:15px!important;background:rgba(255,255,255,.72)!important;
+ color:#172b59!important;box-shadow:inset 0 1px 3px rgba(93,127,183,.04)!important;
+}
+body.luxury-theme #authView .auth-form input::placeholder{color:#8a9bb8!important}
+body.luxury-theme #authView .auth-form .auth-actions{grid-template-columns:1fr!important}
+body.luxury-theme #authView .auth-form .auth-actions #loginBtn{
+ min-height:55px!important;border:0!important;border-radius:14px!important;
+ background:linear-gradient(105deg,#9862f4 0%,#625cf5 52%,#438ff1 100%)!important;
+ color:#fff!important;font-weight:900!important;box-shadow:0 9px 20px rgba(105,91,230,.22)!important;
+}
+body.luxury-theme #authView .auth-form .auth-actions #signupBtn{
+ min-height:48px!important;border:1px solid rgba(130,163,216,.35)!important;
+ border-radius:14px!important;background:rgba(255,255,255,.56)!important;color:#315c9d!important;
+}
+body.luxury-theme #authView .auth-form #forgotBtn{color:#3768bd!important;background:transparent!important;border:0!important}
+body.luxury-theme #authView .auth-form .auth-security{
+ border-top:1px solid rgba(136,164,211,.22)!important;color:#7185a6!important;
+}
+body.luxury-theme #authView .ref-daily-promo,
+body.luxury-theme #authView .ref-demo-footer{display:none!important}
+body.luxury-theme #appView{max-width:1100px!important;margin:20px auto 44px!important}
+body.luxury-theme #appView .market-announcement{
+ background:rgba(255,255,255,.52)!important;border:1px solid rgba(255,255,255,.72)!important;
+ border-radius:15px!important;color:#45648f!important;backdrop-filter:blur(18px);
+}
+body.luxury-theme #appView .digiarz-v2-dashboard{
+ --da-gold:#527fe0!important;padding:18px!important;border:1px solid rgba(255,255,255,.86)!important;
+ border-radius:27px!important;background:rgba(255,255,255,.22)!important;
+ box-shadow:0 22px 55px rgba(78,111,177,.12),inset 0 1px 0 rgba(255,255,255,.85)!important;
+ backdrop-filter:blur(25px) saturate(150%);-webkit-backdrop-filter:blur(25px) saturate(150%);
+ color:#172b59!important;
+}
+body.luxury-theme #appView .da-v2-topline{padding:4px 5px 14px!important}
+body.luxury-theme #appView .da-v2-brand{color:#172b59!important}
+body.luxury-theme #appView .da-v2-brand strong{color:#4b80df!important}
+body.luxury-theme #appView .da-v2-brand small{color:#6d82a5!important}
+body.luxury-theme #appView .da-v2-logo{
+ border:1px solid rgba(255,255,255,.9)!important;border-radius:50%!important;
+ background:linear-gradient(145deg,#b6d5ff,#778cf4)!important;color:#fff!important;
+ box-shadow:0 6px 18px rgba(93,132,219,.22)!important;
+}
+body.luxury-theme #appView .da-v2-demo{
+ color:#426db1!important;background:rgba(255,255,255,.55)!important;
+ border:1px solid rgba(142,174,224,.3)!important;border-radius:999px!important;
+}
+body.luxury-theme #appView .da-v2-hero{
+ min-height:205px!important;padding:22px 23px 54px!important;border:1px solid rgba(255,255,255,.82)!important;
+ border-radius:22px!important;
+ background:
+  radial-gradient(ellipse at 88% 20%,rgba(117,151,255,.32),transparent 33%),
+  linear-gradient(115deg,rgba(255,255,255,.76),rgba(221,237,255,.72) 58%,rgba(232,226,255,.68))!important;
+ box-shadow:0 12px 28px rgba(85,119,185,.09)!important;
+}
+body.luxury-theme #appView .da-v2-eyebrow{color:#5279c1!important}
+body.luxury-theme #appView .da-v2-eyebrow svg{color:#648ff2!important}
+body.luxury-theme #appView .da-v2-hero h1{color:#142b5d!important}
+body.luxury-theme #appView .da-v2-hero h1 em{color:#5b7ee4!important}
+body.luxury-theme #appView .da-v2-hero p{color:#63799d!important}
+body.luxury-theme #appView .da-v2-primary{
+ background:linear-gradient(105deg,#9862f4,#625cf5 55%,#438ff1)!important;color:#fff!important;
+ box-shadow:0 7px 17px rgba(105,91,230,.2)!important;
+}
+body.luxury-theme #appView .da-v2-coin{
+ background:radial-gradient(circle at 30% 25%,#d8eaff,#8ab5f4 48%,#617fe4 82%)!important;
+ color:#fff!important;border:4px solid rgba(255,255,255,.82)!important;
+ box-shadow:0 0 0 8px rgba(124,162,244,.12),0 10px 30px rgba(91,127,211,.2)!important;
+}
+body.luxury-theme #appView .da-v2-orbit{border-color:rgba(95,145,230,.32)!important}
+body.luxury-theme #appView .da-v2-bars i{background:linear-gradient(#9ac8ff,#6588ed)!important}
+body.luxury-theme #appView .da-v2-art-label{color:#6b87bb!important}
+body.luxury-theme #appView .da-v2-hero-foot{
+ background:rgba(255,255,255,.36)!important;border-top:1px solid rgba(255,255,255,.55)!important;
+ color:#58749d!important;
+}
+body.luxury-theme #appView .da-v2-hero-foot svg,
+body.luxury-theme #appView .da-v2-trust-row svg{color:#628fe7!important}
+body.luxury-theme #appView .da-v2-quick-grid button{
+ border:1px solid rgba(255,255,255,.84)!important;border-radius:16px!important;
+ background:rgba(255,255,255,.5)!important;color:#18315f!important;
+ box-shadow:0 9px 22px rgba(82,119,183,.08)!important;backdrop-filter:blur(16px);
+}
+body.luxury-theme #appView .da-v2-quick-grid svg{color:#5685e7!important}
+body.luxury-theme #appView .da-v2-section-head h2{color:#172e5e!important}
+body.luxury-theme #appView .da-v2-kicker{color:#6487c7!important}
+body.luxury-theme #appView .da-v2-link{color:#477bd0!important}
+body.luxury-theme #appView .da-market-glass,
+body.luxury-theme #appView .da-v2-account-card,
+body.luxury-theme #appView .dashboard-activity-panel{
+ border:1px solid rgba(255,255,255,.82)!important;border-radius:19px!important;
+ background:rgba(255,255,255,.48)!important;color:#1b315f!important;
+ box-shadow:0 12px 28px rgba(83,119,182,.07)!important;backdrop-filter:blur(18px);
+}
+body.luxury-theme #appView .da-market-search,
+body.luxury-theme #appView .da-market-sort{
+ background:rgba(255,255,255,.66)!important;border:1px solid rgba(148,177,220,.28)!important;color:#5879aa!important;
+}
+body.luxury-theme #appView .da-market-search input,
+body.luxury-theme #appView .da-market-sort select{color:#203967!important}
+body.luxury-theme #appView .da-market-sort select option{background:#f3f7ff!important;color:#203967!important}
+body.luxury-theme #appView .da-market-filters button{
+ background:rgba(255,255,255,.54)!important;border:1px solid rgba(143,174,220,.25)!important;color:#61799f!important;
+}
+body.luxury-theme #appView .da-market-filters button.active{
+ background:linear-gradient(105deg,#e4d9ff,#d5e8ff)!important;color:#355fa7!important;border-color:rgba(122,150,227,.4)!important;
+}
+body.luxury-theme #appView .da-v2-market-list .coin,
+body.luxury-theme #appView .da-v2-market-list .asset-row{
+ background:rgba(255,255,255,.52)!important;border:0!important;border-bottom:1px solid rgba(142,169,211,.17)!important;
+ border-radius:0!important;box-shadow:none!important;color:#172d5a!important;
+}
+body.luxury-theme #appView .da-v2-market-list .coin-identity,
+body.luxury-theme #appView .da-v2-market-list .price-usd{color:#1b315d!important}
+body.luxury-theme #appView .da-v2-market-list .price-toman{color:#577cc1!important}
+body.luxury-theme #appView .da-v2-account-card{background:rgba(255,255,255,.54)!important}
+body.luxury-theme #appView .da-v2-balance-main{
+ background:linear-gradient(110deg,rgba(255,255,255,.78),rgba(218,235,255,.75))!important;
+ border:1px solid rgba(148,177,220,.3)!important;
+}
+body.luxury-theme #appView .da-v2-balance-main span,
+body.luxury-theme #appView .da-v2-balance-main small{color:#63799d!important}
+body.luxury-theme #appView .da-v2-balance-main strong{color:#315fae!important}
+body.luxury-theme #appView .da-v2-account-stats>div{
+ background:rgba(255,255,255,.56)!important;border:1px solid rgba(148,177,220,.23)!important;
+}
+body.luxury-theme #appView .da-v2-account-stats small{color:#7185a5!important}
+body.luxury-theme #appView .da-v2-account-stats b{color:#203967!important}
+body.luxury-theme #appView .da-v2-wallet-link{
+ background:linear-gradient(105deg,#dcd7ff,#d6e9ff)!important;border:1px solid rgba(140,166,224,.28)!important;
+ color:#345eaa!important;
+}
+body.luxury-theme #appView .da-v2-trust-row{color:#6d82a3!important}
+body.luxury-theme #appView .mobile-bottom-nav{
+ background:rgba(250,252,255,.82)!important;border:1px solid rgba(255,255,255,.9)!important;
+ box-shadow:0 12px 34px rgba(83,116,178,.15)!important;backdrop-filter:blur(24px);
+}
+body.luxury-theme #appView .mobile-bottom-nav button{color:#59749f!important}
+body.luxury-theme #appView .mobile-bottom-nav button.active{color:#6559e8!important}
+body.luxury-theme #appView .mobile-bottom-nav button.active svg{color:#6559e8!important}
+body.luxury-theme #appView .tabs{
+ background:rgba(255,255,255,.62)!important;border:1px solid rgba(255,255,255,.84)!important;
+ border-radius:17px!important;backdrop-filter:blur(18px);
+}
+body.luxury-theme #appView .tabs button{color:#58749e!important}
+body.luxury-theme #appView .tabs button.active{
+ background:linear-gradient(105deg,#e4d9ff,#d5e8ff)!important;color:#315da8!important;
+}
+body.luxury-theme #appView input,body.luxury-theme #appView select,body.luxury-theme #appView textarea{
+ background:rgba(255,255,255,.7)!important;color:#1b315f!important;border-color:rgba(143,173,220,.32)!important;
+}
+body.luxury-theme #appView .card:not(.digiarz-v2-dashboard),
+body.luxury-theme #appView .stat,body.luxury-theme #appView .trade-box,
+body.luxury-theme #appView .performance-item,body.luxury-theme #appView .indicator-panel,
+body.luxury-theme #appView .fx-box,body.luxury-theme #appView .orderbook-side{
+ background:rgba(255,255,255,.58)!important;border:1px solid rgba(255,255,255,.82)!important;
+ color:#1b315f!important;box-shadow:0 12px 28px rgba(83,119,182,.07)!important;
+ backdrop-filter:blur(18px);
+}
+body.luxury-theme #appView .section-title h2,
+body.luxury-theme #appView .section-title h3{color:#1b315f!important}
+body.luxury-theme #appView button:not(.secondary){
+ border-color:rgba(255,255,255,.65)!important;
+}
+@media(max-width:600px){
+ body.luxury-theme #authView.auth-reference-layout{max-width:430px!important;margin:12px auto 25px!important;border-radius:27px!important}
+ body.luxury-theme #authView .auth-reference-visual{min-height:205px!important;padding:16px 18px 8px!important}
+ body.luxury-theme #authView .ref-brandbar{min-height:178px!important}
+ body.luxury-theme #authView .auth-form{margin:0 13px 14px!important;padding:22px 17px 18px!important;border-radius:22px!important}
+ body.luxury-theme #authView .auth-form h2{font-size:23px!important}
+ body.luxury-theme #appView .digiarz-v2-dashboard{padding:12px!important;border-radius:22px!important}
+ body.luxury-theme #appView .da-v2-hero{grid-template-columns:minmax(0,1fr) 105px!important;min-height:218px!important;padding:17px 13px 54px!important}
+ body.luxury-theme #appView .da-v2-hero h1{font-size:22px!important}
+ body.luxury-theme #appView .da-v2-hero p{font-size:10px!important}
+ body.luxury-theme #appView .da-v2-hero-art{height:130px!important}
+ body.luxury-theme #appView .da-v2-coin{width:73px!important;height:73px!important;font-size:48px!important}
+ body.luxury-theme #appView .da-v2-quick-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px!important}
+ body.luxury-theme #appView .da-v2-quick-grid button{min-height:78px!important;padding:9px 3px!important;font-size:9px!important}
+ body.luxury-theme #appView .da-v2-market-list{grid-template-columns:1fr!important}
+ body.luxury-theme #appView .mobile-bottom-nav{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+}
+@media(max-width:370px){
+ body.luxury-theme #appView .da-v2-hero{grid-template-columns:1fr!important}
+ body.luxury-theme #appView .da-v2-hero-art{position:absolute!important;right:0!important;top:10px!important;opacity:.25!important;width:110px!important}
+}
+
 </style>
 <style>
 .pwa-install-banner{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 16px;margin:0 0 14px;border:1px solid rgba(240,185,11,.45);border-radius:14px;background:linear-gradient(110deg,rgba(240,185,11,.10),rgba(24,26,32,.96));box-shadow:0 8px 24px rgba(0,0,0,.12)}
