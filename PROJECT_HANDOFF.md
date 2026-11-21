@@ -982,3 +982,10 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Exact-decimal and Android review CI for the latest head have not yet been confirmed. Do not share a replacement APK until both test suites pass and its artifact provenance matches the latest app-code commit.
 - PR #48 remains Draft/open/unmerged. PR #47 and all other branches remain untouched. No Supabase/Production changes, merge, deployment, signing, or release.
 - Next: verify CI for latest head a26ef25...; inspect the new Android artifact's build provenance and verify the APK contents before sharing.
+
+
+### CI follow-up — 2026-11-21
+- Exact-decimal/PostgreSQL/market/order/concurrency workflow run 44927852526 completed SUCCESS on app/test head a26ef25abd5b22618f6554feffefebee3d531e25. The UI regression step and all PostgreSQL/concurrency integration steps completed successfully.
+- An earlier run on the preceding UI commit, 44927812247, failed only because the existing regression assertion still expected the obsolete label نیلی شیشه‌ای; the assertion was updated to the new approved label آبی شیشه‌ای, and the latest run passed.
+- Android review workflow/artifact for the new biometric lifecycle fix has not yet been independently located/verified. Do not distribute the previous APK as a fix for the reported dashboard issue.
+- PR #48 remains Draft/open/unmerged. No Production or Supabase changes.
