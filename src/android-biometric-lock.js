@@ -152,6 +152,10 @@
               onState('memory-only', new Error('اثر انگشت قوی روی دستگاه فعال نیست.'));
               return;
             }
+            // Android may briefly background the WebView while the native biometric
+            // confirmation is shown. Tell the lifecycle handler not to dispose the
+            // Supabase client in the middle of this session write.
+            promptInProgress = true;
             await plugin.setData({
               key: secureKey,
               value: value,
@@ -160,10 +164,12 @@
               title: 'محافظت از نشست DigiArz',
               negativeButtonText: 'لغو'
             });
+            promptInProgress = false;
             secureSaved = true;
             lastError = null;
             onState('saved');
           } catch (error) {
+            promptInProgress = false;
             lastError = error;
             // Never fall back to plaintext. Keep this login alive in memory only.
             try { await plugin.deleteData({ key: secureKey }); } catch (_) {}
