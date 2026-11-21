@@ -20,7 +20,7 @@ once(
 )
 
 login = '  <button id="forgotBtn" class="secondary" style="width:100%;margin-top:9px">بازیابی رمز عبور</button>'
-once(login, login + '\n  <button id="unlockSessionBtn" type="button" class="secondary" style="width:100%;margin-top:9px" hidden>بازگشایی با اثر انگشت</button>', "login recovery button")
+once(login, login + '\n  <button id="unlockSessionBtn" type="button" class="secondary" style="width:100%;margin-top:9px;min-height:48px;font-weight:800" aria-label="ورود با اثر انگشت" hidden>ورود با اثر انگشت</button>', "login recovery button")
 
 old_client = "function initClient(){if(!window.supabase?.createClient)throw new Error('کتابخانه اتصال بارگذاری نشد؛ اینترنت را بررسی کنید.');supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})}"
 new_client = """let androidBiometricStorage=null,androidBiometricApp=null;
@@ -36,9 +36,10 @@ function initClient(){
     storageKey:'digiarz.auth.session.v1',
     secureKey:'digiarz.auth.session.v1',
     localStorage:window.localStorage,
+    deferBiometricPrompt:true,
     onState:(state,error)=>{
      const unlockButton=$('unlockSessionBtn');
-     if(state==='saved'&&unlockButton)unlockButton.hidden=true;
+     if((state==='saved'||state==='unlocked'||state==='deleted')&&unlockButton)unlockButton.hidden=true;
      if(state==='memory-only'&&error)console.warn('DigiArz session is memory-only; no plaintext fallback was used:',error);
     }
    });
@@ -49,7 +50,7 @@ function initClient(){
    unlockButton.addEventListener('click',()=>unlockSavedSession(false));
    unlockButton.dataset.bound='1';
   }
-  androidBiometricStorage.hasSecureSession().then(saved=>{if(unlockButton)unlockButton.hidden=!saved;}).catch(()=>{if(unlockButton)unlockButton.hidden=true;});
+  androidBiometricStorage.hasSecureSession().then(saved=>{if(unlockButton)unlockButton.hidden=!saved||androidBiometricStorage.hasCachedSession();}).catch(()=>{if(unlockButton)unlockButton.hidden=true;});
   return;
  }
  supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
