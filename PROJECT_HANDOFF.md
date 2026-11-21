@@ -906,3 +906,15 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - APK SHA-256 verified against BUILD-INFO.txt: `1fad5736346a1504c5adf9c4a67f23ae45349ce803bd6350a51b1ef146af4d25`.
 - This is an installable Android debug review APK, not a production-signed release. Physical device biometric enrollment/login/logout/background relock and full visual review are still required.
 - PR #48 remains Draft/open/unmerged; branch remains isolated from main. No production deployment or database changes.
+
+
+## 2026-11-21 — Third theme approved reference applied
+- User explicitly approved the pale blue/lavender glass login + dashboard mockup as the exact visual target for theme 3.
+- Applied the reference only under `body.luxury-theme`; black/gold and light themes remain separately scoped.
+- Login: centered DigiArz brand treatment, pale lavender/blue gradient backdrop, translucent rounded glass form, soft white fields, purple-to-blue primary action; removed the older dark globe/phone composition from this theme only.
+- Dashboard: translucent glass shell, pale blue balance/hero panel, four quick-action tiles, light market rows without individual frames, glass market/account panels, pale navigation surfaces and blue-violet active states.
+- Preserved authentication markup and Supabase wiring; no auth/backend logic, database, or production settings changed.
+- Added UI regression assertions in `tests/index-syntax.test.js`.
+- Commits: UI `c41777eb28fd9e9e31c4905db11e5acfc756aa38`; tests `420d0cba7ec7cc5a717253ec0ec59058fa6088e1`.
+- CI and Android review APK runs for the latest commits are pending/in progress at handoff time. Do not distribute an APK until the run for latest tested commit succeeds.
+- PR #48 remains draft/open/unmerged. Physical-device visual acceptance is still required.
