@@ -35,7 +35,7 @@ empty=$(psql -At -v ON_ERROR_STOP=1 -c "select public.insert_market_toman_histor
 
 if psql -v ON_ERROR_STOP=1 -c "select public.insert_market_toman_history_if_due('[{\"exchange\":\"nobitex\",\"asset_symbol\":\"BTC\",\"price_toman\":0,\"recorded_at\":now()}]'::jsonb)" >/dev/null 2>&1; then echo "Zero price unexpectedly succeeded"; exit 1; fi
 if psql -v ON_ERROR_STOP=1 -c "select public.insert_market_toman_history_if_due('[{\"exchange\":\"nobitex\",\"asset_symbol\":\"BTC\",\"price_toman\":\"NaN\",\"recorded_at\":now()}]'::jsonb)" >/dev/null 2>&1; then echo "NaN price unexpectedly succeeded"; exit 1; fi
-if psql -v ON_ERROR_STOP=1 -c "select public.insert_market_toman_history_if_due('[{\"exchange\":\"nobitex\",\"asset_symbol\":\"BTC\",\"price_toman\":1,\"recorded_at\":now()+interval \"10 minutes\"}]'::jsonb)" >/dev/null 2>&1; then echo "Future timestamp unexpectedly succeeded"; exit 1; fi
+if psql -v ON_ERROR_STOP=1 -c "select public.insert_market_toman_history_if_due(jsonb_build_array(jsonb_build_object('exchange','nobitex','asset_symbol','BTC','price_toman',1,'recorded_at',now()+interval '10 minutes')))" >/dev/null 2>&1; then echo "Future timestamp unexpectedly succeeded"; exit 1; fi
 
 payload=$(psql -At -v ON_ERROR_STOP=1 -c "select jsonb_build_array(jsonb_build_object('exchange','nobitex','asset_symbol','BTC','price_toman',3000000000,'recorded_at',now()))")
 first=$(psql -At -v ON_ERROR_STOP=1 -c "select public.insert_market_toman_history_if_due('$payload'::jsonb)")
