@@ -62,6 +62,6 @@ test("history writes use the atomic six-hour RPC instead of a read-then-write ra
   assert.doesNotMatch(edgeSource, /market_toman_price_history\?select=exchange,asset_symbol,recorded_at/);
   assert.match(migration, /pg_advisory_xact_lock/);
   assert.match(migration, /order by exchange, asset_symbol/i);
-  assert.match(migration, /recorded_at >= item\.recorded_at - interval '6 hours'/);
+  assert.match(migration, /recorded_at >= pg_catalog\.now\(\) - interval '6 hours'/);
   assert.match(migration, /grant execute on function public\.insert_market_toman_history_if_due\(jsonb\) to service_role/i);
 });
