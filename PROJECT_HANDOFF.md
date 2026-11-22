@@ -1122,3 +1122,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Current PR #50 branch tip is 6c915af8e2b653ad90f18ea40a6567780965254b. GitHub compare confirms it is exactly one documentation-only commit ahead of the APK source commit (only PROJECT_HANDOFF.md changed); therefore app source and tests in the APK match the current candidate code. Run 44944044169's event SHA is 445222fa41abc2dfa9a5ea997810b4b3fd1ae5fa; workflow provenance is taken from the actual checked-out source commit as recorded in BUILD-INFO.
 - PR #50 remains Draft/open/unmerged and based on PR #48. PR #48 remains Draft/open/unmerged. No merge to main, release, production deployment, Supabase/database/auth/trading changes were made.
 - Validation boundary: automated CI/build and APK packaging succeeded, but no physical Android install or visual QA has been performed. User should install this debug review APK and verify login, dashboard, market row containment, and all themes on the phone; report any mismatch before any merge.
+
+
+## UI finishing pass — 2026-11-22
+- User requested removal of all logo frames and favorite-star frames on every theme/page, plus consistent layout across all app pages.
+- Updated `index.html` on branch `fix/pure-white-glass-dashboard-market-2026-11-21-v2` with final global stylesheet `digiarz-global-logo-star-layout-20261122`.
+- Global reset removes border, outline, box-shadow and decorative background from coin/asset/brand logos on auth and authenticated app views; favorite/star controls retain their glyph but lose the surrounding frame.
+- Shared layout guard applies safe box sizing, min/max widths, text wrapping, section-heading wrapping, form control containment, responsive single-column behavior for narrow screens, and bounded responsive table wrappers across all `#tab-*` views.
+- Added regression tests for logo/star frame removal and responsive page layout. The latest workflow at the time of this note is run `45002086383`, head `59f90e928f54e46c70bbe98770e91b3b1d59a570`; visual/application regression tests passed, Android debug APK build step was still running. No artifact had been uploaded at last check.
+- Earlier run `45001972363` attempt 1/2 failed first on a transient npm attestation verification and then on a malformed test regex; both were addressed. Do not weaken or bypass npm signature/attestation checks.
+- No merge, deployment, Supabase change, or physical-device visual verification has been performed.
+- Next action: verify latest workflow result and APK artifact, then update this handoff with final run/artifact status. Physical Android appearance still requires device QA.
