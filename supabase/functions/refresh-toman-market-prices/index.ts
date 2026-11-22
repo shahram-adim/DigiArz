@@ -282,7 +282,7 @@ export const handler = async (req: Request) => {
     const serviceHeaders = { apikey: serviceKey, Authorization: "Bearer " + serviceKey };
     stage = "cache_read";
     const latestResponse = await fetch(
-      supabaseUrl + "/rest/v1/market_toman_prices?select=fetched_at&order=fetched_at.desc&limit=1",
+      supabaseUrl + "/rest/v1/market_toman_prices?select=fetched_at&order=fetched_at.asc&limit=1",
       { headers: serviceHeaders, signal: AbortSignal.timeout(8000) },
     );
     if (!latestResponse.ok) throw new Error("Could not check Toman market cache");
