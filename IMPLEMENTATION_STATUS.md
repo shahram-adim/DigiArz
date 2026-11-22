@@ -1277,3 +1277,14 @@
 - [x] Edge workflow `45029355064` پس از اصلاح با SUCCESS کامل شد: type-check، HTTP tests (از جمله Kifpool APQ fallback و Bit24 page-two)، dedupe و PostgreSQL atomic-history/concurrency.
 - [x] Exact-decimal workflow قبلی `45029200017` نیز با SUCCESS کامل شد. اجرای تازه‌تر `45029355083` هنوز در مرحلهٔ setup Node قرار دارد.
 - [x] آخرین وضعیت Production همچنان بدون تغییر است؛ هیچ deploy/migration یا write انجام نشده است.
+
+
+### تأیید نهایی اصلاح freshness و adapter صفحه‌بندی Bit24 — ۲۲ نوامبر ۲۰۲۶
+- [x] آخرین Edge workflow شمارهٔ `45029355064` روی commit نهایی کد/تست `75c9f168d6ebf372068cc33776e6b3e0346e1b0d` با SUCCESS کامل شد: Deno type-check، HTTP integration tests (شامل oldest-row freshness، Bit24 page 2 و Kifpool persisted-query fallback)، dedupe و PostgreSQL atomic-history/concurrency.
+- [x] Exact-decimal workflow شمارهٔ `45029355083` نیز با SUCCESS کامل شد: decimal/browser integration، PostgreSQL arithmetic، schema-widening preflight/rollback/lock timeout، Market/Limit/Stop-Limit/TP-SL integration، cancellation و raceهای واقعی دو session.
+- [x] اجرای قبلی Edge شمارهٔ `45029323962` به علت خطای syntax در nesting تست‌ها fail شد؛ nesting اصلاح و اجرای بعدی `45029355064` سبز شد. این شکست و اصلاح ثبت می‌شود.
+- [x] Bit24 اکنون تمام صفحات بازار را واکشی می‌کند؛ آزمون fixture ثابت می‌کند دارایی BTC/IRT که فقط در صفحهٔ دوم است به خروجی می‌رسد.
+- [x] cache guard قدیمی‌ترین timestamp را می‌سنجد؛ آزمون ثابت می‌کند timestamp تازهٔ یک بخش از snapshot، داده‌های قدیمی‌تر را مخفی نمی‌کند.
+- [x] PR #51 همچنان open/Draft و بدون merge/deploy است. شاخه ۶۸ commit جلوتر از main و صفر commit عقب است؛ mergeability در آخرین بررسی پس از sync به true برگشت.
+- [!] شواهد Bit24/Kifpool همچنان عمدتاً endpointهای عمومی سایت و منبع فنی ثالث غیررسمی هستند؛ تأیید قرارداد API مستقیم از خود providerها پیش از انتشار همچنان لازم است.
+- [x] Supabase Production بدون تغییر: پروژه ACTIVE_HEALTHY، Edge Function نسخهٔ ۳، ۳۷۳ ردیف قیمت stale و RPC تاریخچه نصب‌نشده. هیچ migration، deploy، cron یا دادهٔ مالی Production تغییر نکرد.
