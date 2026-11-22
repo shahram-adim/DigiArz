@@ -3,7 +3,7 @@ import { handler } from "./index.ts";
 const envKeys = ["SUPABASE_URL", "SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY"] as const;
 
 async function withMockedRuntime(
-  mode: "timeout-wallex" | "malformed-nobitex" | "all-providers-fail" | "cache-read-fail" | "kifpool-hash-expired",
+  mode: "timeout-wallex" | "malformed-nobitex" | "all-providers-fail" | "cache-read-fail" | "partial-cache-stale" | "kifpool-hash-expired",
   run: (writes: () => number, errorLog: () => unknown[] | null, cacheOrder: () => string | null, kifpoolRequests: () => number) => Promise<void>,
 ) {
   const previousEnv = new Map(envKeys.map((key) => [key, Deno.env.get(key)]));
@@ -180,6 +180,7 @@ Deno.test("Toman refresh HTTP handler isolates provider failures and refuses emp
       }
       if (writes() !== 0) throw new Error("Cache failure must not write market rows");
     });
+  });
 
   await t.step("a recent partial snapshot cannot hide older stale rows", async () => {
     await withMockedRuntime("partial-cache-stale", async (writes, _errorLog, cacheOrder) => {
