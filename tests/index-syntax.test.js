@@ -635,3 +635,29 @@ test('theme 3 final override uses light indigo and light blue glass across login
   assert.ok(start > html.lastIndexOf('Keep the entire theme-3 page on its own pale-blue glass canvas'), 'indigo glass override wins over the old pale-blue canvas');
 });
 
+
+test('all ten application pages receive the shared page-specific responsive geometry pass', () => {
+  const marker = 'DIGIARZ-ALL-PAGES-GEOMETRY-20261122';
+  const start = html.lastIndexOf(marker);
+  const end = html.indexOf('</style>', start);
+  assert.ok(start >= 0 && end > start, 'all-pages geometry stylesheet exists');
+  const css = html.slice(start, end);
+  for (const tab of ['dashboard','markets','toman','chart','trade','assets','orders','history','admin','settings']) {
+    assert.ok(html.includes('id="tab-' + tab + '"'), 'page exists: ' + tab);
+  }
+  for (const selector of [
+    '#appView #tab-dashboard .da-v2-quick-grid',
+    '#appView #tab-markets .market-tools',
+    '#appView #tab-toman .toman-toolbar',
+    '#appView #tab-chart .asset-detail-head',
+    '#appView #tab-trade .trade-market-grid',
+    '#appView #tab-assets .asset-summary-grid',
+    '#appView #tab-orders .market-list',
+    '#appView #tab-history .history-filters',
+    '#appView #tab-admin .daily-ad-admin-grid',
+    '#appView #tab-settings .settings-grid'
+  ]) assert.ok(css.includes(selector), 'page-specific layout selector: ' + selector);
+  assert.ok(css.includes('@media(max-width:760px)'));
+  assert.ok(css.includes('@media(max-width:390px)'));
+  assert.ok(css.includes('grid-template-columns:minmax(0,1fr)!important'));
+});
