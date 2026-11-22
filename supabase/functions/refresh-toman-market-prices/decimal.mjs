@@ -23,8 +23,13 @@ export function normalizeDecimal(value, precision = 30, scale = 10) {
   if (!Number.isInteger(precision) || !Number.isInteger(scale) || precision < 1 || scale < 0 || scale > precision) return null;
 
   let raw;
-  if (typeof value === "string") raw = value.trim().replace(/,/g, "");
-  else if (typeof value === "number") {
+  if (typeof value === "string") {
+    raw = value.trim();
+    if (raw.includes(",")) {
+      if (!/^[+-]?\\d{1,3}(?:,\\d{3})*(?:\\.\\d*)?(?:[eE][+-]?\\d+)?$/.test(raw)) return null;
+      raw = raw.replace(/,/g, "");
+    }
+  } else if (typeof value === "number") {
     if (!Number.isFinite(value)) return null;
     raw = String(value);
   } else if (typeof value === "bigint") raw = value.toString();
@@ -78,8 +83,13 @@ export function normalizeDecimal(value, precision = 30, scale = 10) {
 export function shiftDecimal(value, exponent, precision = 30, scale = 10) {
   if (!Number.isInteger(exponent) || Math.abs(exponent) > 100 || value === null || value === undefined) return null;
   let raw;
-  if (typeof value === "string") raw = value.trim().replace(/,/g, "");
-  else if (typeof value === "number" && Number.isFinite(value)) raw = String(value);
+  if (typeof value === "string") {
+    raw = value.trim();
+    if (raw.includes(",")) {
+      if (!/^[+-]?\\d{1,3}(?:,\\d{3})*(?:\\.\\d*)?(?:[eE][+-]?\\d+)?$/.test(raw)) return null;
+      raw = raw.replace(/,/g, "");
+    }
+  } else if (typeof value === "number" && Number.isFinite(value)) raw = String(value);
   else if (typeof value === "bigint") raw = value.toString();
   else if (typeof value === "object" && typeof value.toString === "function") raw = value.toString();
   else return null;
@@ -115,8 +125,11 @@ export function compareDecimals(left, right) {
 }
 
 export function equalDecimals(left, right) {
-  if (left === null || left === undefined || right === null || right === undefined) {
-    return (left ?? null) === (right ?? null);
-  }
-  return compareDecimals(left, right) === 0;
+  const leftNull = left === null || left === undefined;
+  const rightNull = right === null || right === undefined;
+  if (leftNull || rightNull) return leftNull && rightNull;
+  const a = normalizeDecimal(left, 80, 40);
+  const b = normalizeDecimal(right, 80, 40);
+  if (a === null || b === null) return false;
+  return compareDecimals(a, b) === 0;
 }
