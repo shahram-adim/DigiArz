@@ -3,14 +3,15 @@ import { handler } from "./index.ts";
 const envKeys = ["SUPABASE_URL", "SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY"] as const;
 
 async function withMockedRuntime(
-  mode: "timeout-wallex" | "malformed-nobitex" | "all-providers-fail" | "cache-read-fail",
-  run: (writes: () => number, errorLog: () => unknown[] | null, cacheOrder: () => string | null) => Promise<void>,
+  mode: "timeout-wallex" | "malformed-nobitex" | "all-providers-fail" | "cache-read-fail" | "kifpool-hash-expired",
+  run: (writes: () => number, errorLog: () => unknown[] | null, cacheOrder: () => string | null, kifpoolRequests: () => number) => Promise<void>,
 ) {
   const previousEnv = new Map(envKeys.map((key) => [key, Deno.env.get(key)]));
   const originalFetch = globalThis.fetch;
   let writes = 0;
   let capturedError: unknown[] | null = null;
   let capturedCacheOrder: string | null = null;
+  let kifpoolRequestCount = 0;
   const originalConsoleError = console.error;
 
   Deno.env.set("SUPABASE_URL", "https://digiarz-test.supabase.co");
@@ -29,7 +30,8 @@ async function withMockedRuntime(
       return new Response("[]", { status: 200 });
     }
     if (url.includes("/rest/v1/exchange_asset_observations?")) {
-      return new Response("[]", { status: 200 });
+      const exchange = new URL(url).searchParams.get("exchange");
+      return Response.json(exchange === "eq.kifpool" && mode === "kifpool-hash-expired" ? [{ base_symbol: "BTC" }] : []);
     }
     if (url.includes("/rest/v1/market_toman_prices?on_conflict=")) {
       writes += 1;
@@ -91,6 +93,17 @@ async function withMockedRuntime(
 
     if (url.includes("kifpool.me/api/graphql")) {
       if (mode === "all-providers-fail") throw new Error("Kifpool unavailable");
+      kifpoolRequestCount += 1;
+      if (mode === "kifpool-hash-expired" && kifpoolRequestCount === 1) {
+        return Response.json({ errors: [{ extensions: { code: "PERSISTED_QUERY_NOT_FOUND" } }] });
+      }
+      if (mode === "kifpool-hash-expired") {
+        const body = JSON.parse(String(init?.body || "{}"));
+        if (typeof body.query !== "string" || !body.query.includes("priceSellIRT")) {
+          throw new Error("Kifpool fallback query text was not sent");
+        }
+        return Response.json({ data: { coinList: { coins: [{ symbol: "BTC", priceSellIRT: "123456789", priceChangePercent: "1.25", faName: "بیت کوین", name: "Bitcoin" }] } } });
+      }
       return Response.json({ data: { coinList: { coins: [] } } });
     }
 
@@ -98,7 +111,7 @@ async function withMockedRuntime(
   }) as typeof fetch;
 
   try {
-    await run(() => writes, () => capturedError, () => capturedCacheOrder);
+    await run(() => writes, () => capturedError, () => capturedCacheOrder, () => kifpoolRequestCount);
   } finally {
     globalThis.fetch = originalFetch;
     console.error = originalConsoleError;
@@ -183,6 +196,21 @@ Deno.test("Toman refresh HTTP handler isolates provider failures and refuses emp
       }
       if (body.sources.nobitex.ok !== true) throw new Error("Provider refresh did not run for stale rows");
       if (writes() !== 1) throw new Error("Expected a refresh upsert after detecting stale rows");
+    });
+  });
+
+
+  await t.step("Kifpool retries with GraphQL text when its persisted query hash expires", async () => {
+    await withMockedRuntime("kifpool-hash-expired", async (writes, _errorLog, _cacheOrder, kifpoolRequests) => {
+      const response = await handler(new Request("https://edge.test/refresh", {
+        method: "POST",
+        headers: { Authorization: "Bearer test-user-token" },
+      }));
+      const body = await response.json();
+      if (response.status !== 200) throw new Error("Expected 200 after Kifpool fallback, got " + response.status);
+      if (body.sources.kifpool.ok !== true) throw new Error("Kifpool fallback response was not accepted");
+      if (kifpoolRequests() !== 2) throw new Error("Expected one persisted-query request and one text-query retry");
+      if (writes() !== 1) throw new Error("Expected one aggregated current-price upsert");
     });
   });
   });
