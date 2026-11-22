@@ -209,6 +209,30 @@ const KIFPOOL_BODY = {
   },
 };
 
+const KIFPOOL_QUERY = `query headerCoins($search: String, $offset: Int, $limit: Int) {
+  coinList(offset: $offset, limit: $limit, query: $search) {
+    coins {
+      ...CoinCardCore
+      name
+      priceSellIRT
+      __typename
+    }
+    total
+    __typename
+  }
+}
+
+fragment CoinCardCore on CoinDetailType {
+  faName
+  smallImage
+  price
+  priceChangePercent
+  slug
+  nameId
+  symbol
+  __typename
+}`;
+
 async function fetchKifpool(
   fetchedAt: string,
   supabaseUrl: string,
@@ -230,7 +254,27 @@ async function fetchKifpool(
     }),
   ]);
   if (!response.ok) throw new Error("Kifpool HTTP " + response.status);
-  const payload = parse(await response.text()) as any;
+  let payload = parse(await response.text()) as any;
+  const hashExpired = Array.isArray(payload?.errors) && payload.errors.some(
+    (error: any) => error?.extensions?.code === "PERSISTED_QUERY_NOT_FOUND",
+  );
+  if (hashExpired) {
+    // Apollo persisted-query hashes can change after a frontend deployment.
+    const retry = await fetch("https://kifpool.me/api/graphql", {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        origin: "https://kifpool.me",
+        referer: "https://kifpool.me/markets",
+        "user-agent": "Mozilla/5.0 DigiArz-Toman-Market/1.0",
+      },
+      body: JSON.stringify({ ...KIFPOOL_BODY, query: KIFPOOL_QUERY }),
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!retry.ok) throw new Error("Kifpool GraphQL fallback HTTP " + retry.status);
+    payload = parse(await retry.text()) as any;
+  }
   const coins = payload?.data?.coinList?.coins;
   if (!Array.isArray(coins) || payload?.errors?.length) {
     throw new Error("Kifpool returned an invalid persisted GraphQL market response");
