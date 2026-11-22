@@ -1218,3 +1218,9 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - تغییرات فقط در شاخهٔ بازبینی UI انجام شد؛ PR #52 همچنان Draft/Open/Unmerged باقی می‌ماند. هیچ merge، deploy، انتشار، Supabase، Auth یا منطق مالی تغییر نکرد.
 - APK workflow قبلی `45037245050` موفق شده و artifact قبلی `DigiArz-White-Glass-Review-APK` موجود است، اما آن APK مربوط به commit قدیمی‌تر `535bb2869f641a0c67962dab8dca4de3e6a6bdd9` است و این اصلاح را شامل نمی‌شود.
 - گام بعد: بررسی اجرای خودکار CI/APK روی commit تست `c676f12c1cff3799696d6a02dd1b0ef2b35762fd`؛ تا تأیید workflow و artifact هم‌منبع، APK جدید آمادهٔ نصب اعلام نشود.
+
+### نتیجهٔ ساخت APK پس از حذف قاب‌ها — ۲۰۲۶-۱۱-۲۲
+- Workflow شمارهٔ 81، run ID `45037681243` روی commit کد `3790e74fee318f185fae28c580e1f2459697dbfa` با نتیجهٔ SUCCESS تمام شد؛ تمام 19 مرحله از جمله تست‌های رگرسیون، build APK، بررسی مجوز زیست‌سنجی، ثبت provenance و upload موفق‌اند.
+- Artifact مربوط به commit کد: `DigiArz-White-Glass-Review-APK`، ID `14760955042`، حجم 6,209,833 بایت، digest آرشیو `sha256:a830661d0dcef46c2969e613196b9bcae604d483e2b82923a17bef99eb500476`، انقضا `2026-12-06T15:21:46Z`. این artifact از commit کد ساخته شده و commit تست/هندآف بعدی را شامل نمی‌شود؛ فعلاً نسخهٔ نهایی برای تحویل محسوب نشود.
+- Workflow شمارهٔ 82، run ID `45037700130` روی commit تست `c676f12c1cff3799696d6a02dd1b0ef2b35762fd` اکنون `in_progress` است؛ در آخرین بررسی، مرحلهٔ checkout در حال اجرا و بقیهٔ مراحل pending بودند. این run مبنای APK نهایی هم‌منبع با تست‌ها خواهد بود.
+- PR #52 همچنان Open/Draft/Unmerged است؛ هیچ merge یا deploy انجام نشده است.
