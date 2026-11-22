@@ -318,8 +318,8 @@ test('market list rows use five aligned cells, 40px logos, visible Persian names
 test('login screen uses the selected Binance-inspired black-and-yellow palette without changing auth behavior', () => {
   const marker = '/* DigiArz selected Binance-inspired black-and-yellow auth palette — 2026-11-21 */';
   const paletteStart = html.lastIndexOf(marker);
-  const styleEnd = html.lastIndexOf('</style>');
-  assert.ok(paletteStart >= 0 && styleEnd > paletteStart, 'final brand override is present at the end of the stylesheet');
+  const styleEnd = html.indexOf('</style>', paletteStart);
+  assert.ok(paletteStart >= 0 && styleEnd > paletteStart, 'final brand override is present and its own stylesheet closes');
   const palette = html.slice(paletteStart, styleEnd);
   assert.ok(palette.includes('body.dark-theme #authView.auth-reference-layout{'), 'black-and-yellow auth palette is scoped to the dark theme only');
   assert.doesNotMatch(palette, /(^|[,{]\\s*)#authView/m, 'no unscoped auth palette selector can leak into other themes');
@@ -428,14 +428,14 @@ test('login mini chart renders real five-minute candles without depending on a c
 
 test('approved indigo glass, separated page shells, and repaired borderless market rows stay scoped', () => {
   assert.match(html, /id="digiarz-approved-layout-20261121"/);
-  assert.match(html, /body\.luxury-theme\s*\{[^}]*--bg:#eaf3ff/s);
+  assert.match(html, /body\.luxury-theme\s*\{[^}]*--bg:#0c1024/s);
   assert.match(html, /body\.light-theme #appView \.card[^\{]*\{[^}]*backdrop-filter:blur\(18px\)/s);
   assert.match(html, /#authView\.auth\s*\{[^}]*max-width:1080px/s);
   assert.match(html, /#appView\.app-view-active\s*\{[^}]*max-width:1320px/s);
   assert.match(html, /#tab-markets \.coin\s*\{[^}]*grid-template-columns:minmax\(0,1\.25fr\)/s);
   assert.match(html, /#tab-markets \.coin>\.favorite-btn[^\{]*\{display:none!important\}/);
   assert.match(html, /#tab-markets \.coin\s*\{[^}]*border:0!important/s);
-  assert.match(html, /luxury:'آبی شیشه‌ای'/);
+  assert.match(html, /luxury:'نیلی شیشه‌ای'/);
   assert.match(html, /body\.auth-page-active #appView[\s\S]*?display:none!important/);
   assert.match(html, /body\.dashboard-page-active #authView[\s\S]*?display:none!important/);
   assert.match(html, /#authView\.hidden,\s*#appView\.hidden\{display:none!important\}/);
@@ -474,23 +474,23 @@ test('final theme overrides remain inside the stylesheet rather than leaking int
   );
 });
 
-test('third theme controls and chart palette consistently use pale blue glass', () => {
-  assert.match(html, /data-theme-choice="luxury"[^>]*>✧ آبی شیشه‌ای/);
+test('third theme controls and chart palette consistently use luminous light indigo and pale blue glass', () => {
+  assert.match(html, /data-theme-choice="luxury"[^>]*>✧ نیلی شیشه‌ای/);
   assert.match(html, /document\.documentElement\.style\.colorScheme=light\|\|luxury\?'light':'dark'/);
-  assert.match(html, /luxury\?'#eaf3ff':'#080d1b'/);
-  assert.match(html, /luxury\?\{bg:'#eaf3ff',text:'#183b5c',grid:'#d7eafa',line:'#b8d5eb'\}/);
-  assert.doesNotMatch(html, /luxury:'نیلی شیشه‌ای'/);
+  assert.match(html, /luxury\?'#e8efff':'#080d1b'/);
+  assert.match(html, /luxury\?\{bg:'#edf1ff',text:'#27345f',grid:'#dce2fa',line:'#9aa8e5'\}/);
+  assert.match(html, /luxury:'نیلی شیشه‌ای'/);
 });
 
 
-test('final pale-blue glass cascade overrides legacy indigo dashboard and login controls', () => {
-  const guard = html.lastIndexOf('/* Final cascade guard: pale sky-blue glass');
-  assert.ok(guard > html.indexOf('body.luxury-theme #appView .digiarz-v2-dashboard'), 'final cascade guard follows legacy indigo rules');
+test('final luminous indigo-blue glass cascade overrides legacy dark indigo dashboard and login controls', () => {
+  const guard = html.lastIndexOf('/* Final cascade guard: luminous light indigo');
+  assert.ok(guard > html.indexOf('/* Third theme: deep indigo glass'), 'final cascade guard follows legacy indigo rules');
   const tail = html.slice(guard, html.lastIndexOf('</style>'));
-  assert.match(tail, /body\.luxury-theme #appView \.card[\s\S]*?background:rgba\(255,255,255,\.64\)!important/);
+  assert.match(tail, /body\.luxury-theme #appView \.card[\s\S]*?background:rgba\(255,255,255,\.74\)!important/);
   assert.match(tail, /body\.luxury-theme #appView #tab-markets \.coin[\s\S]*?border:0!important/);
-  assert.match(tail, /body\.luxury-theme #authView \.auth-form \.auth-actions #loginBtn[\s\S]*?linear-gradient\(135deg,#b8ddf8,#8fc7ef\)!important/);
-  assert.doesNotMatch(tail, /#9862f4|#9587e8|#090d20/);
+  assert.match(tail, /body\.luxury-theme #appView button:not\(\.secondary\)[\s\S]*?linear-gradient\(135deg,#b9baff,#9bcfff\)!important/);
+  assert.match(tail, /#edf1ff|#b9baff|#9bcfff/);
 });
 
 
@@ -525,7 +525,7 @@ test('all inline style elements are balanced and the mobile market stylesheet is
   const mobileOpen = html.indexOf('<style id="digiarz-mobile-market-row-containment-20261121">');
   assert.ok(heroOpen >= 0 && mobileOpen > heroOpen, 'hero and mobile styles are separate ordered blocks');
   assert.ok(html.lastIndexOf('</style>', mobileOpen) > heroOpen, 'hero stylesheet closes before the mobile stylesheet opens');
-  assert.ok(html.includes('body.luxury-theme{min-height:100vh;background:radial-gradient(ellipse at 12% 8%'), 'theme 3 keeps its pale-blue full-page canvas');
+  assert.match(html, /body\.luxury-theme\{[^}]*background:radial-gradient\(ellipse at 12% 5%/s, 'theme 3 keeps its luminous indigo-blue full-page canvas');
 });
 
 
@@ -567,4 +567,97 @@ test('final dashboard and market layouts remain contained and responsive on phon
   assert.match(css, /@media\(max-width:760px\)[\s\S]*?grid-template-areas:"identity price" "change price"/);
   assert.match(css, /@media\(max-width:390px\)/);
   assert.match(css, /min-width:0/);
+});
+
+test('theme 2 is pure white glass with blue accents and no grey surface palette', () => {
+  const marker = '/* DIGIARZ-PURE-WHITE-GLASS-THEME-20261121 */';
+  const start = html.lastIndexOf(marker);
+  const end = html.indexOf('</style>', start);
+  assert.ok(start >= 0 && end > start, 'final pure-white theme override exists');
+  const css = html.slice(start, end);
+  assert.match(css, /body\.light-theme\s*\{[^}]*background:#fff!important;background-image:none!important/s);
+  assert.match(css, /--panel:rgba\(255,255,255,\.94\)!important/);
+  assert.match(css, /body\.light-theme #appView \.card[\s\S]*?background:rgba\(255,255,255,\.92\)!important/);
+  assert.match(css, /body\.light-theme #appView button:not\(\.secondary\)[\s\S]*?linear-gradient\(135deg,#eaf6ff,#d8edff\)!important/);
+  assert.match(css, /body\.light-theme #appView \.tabs button\.active[\s\S]*?background:#e7f4ff!important/);
+  assert.doesNotMatch(css, /#f5f7fa|#e9eef4|#edf1f6|#e0e6ee|#e4e9ef|#fbfcfe|#f6f8fb|#f2f5fa|#edf2f8|#eef3f9|#f7f9fc|#f9fbff|#f5f8fc/);
+  assert.match(css, /body\.light-theme #appView \.market-tools,[\s\S]*?body\.light-theme #authView \.auth-top-banner\{[\s\S]*?background:#fff!important/);
+  assert.match(css, /body\.light-theme #appView \.market-board-v34 \.market-head/);
+  assert.match(css, /body\.light-theme #appView #tab-history tbody tr:hover/);
+});
+
+
+test('global logo and favorite-star frames are removed across all themes and app pages', () => {
+  const marker = 'digiarz-global-logo-star-layout-20261122';
+  const start = html.lastIndexOf(marker);
+  const end = html.indexOf('</style>', start);
+  assert.ok(start >= 0 && end > start, 'global logo/star/layout finishing stylesheet exists');
+  const css = html.slice(start, end);
+  for (const selector of ['#appView .coin-icon', '#appView .asset-logo', '#appView .da-v2-logo',
+    '#appView .da-market-logo', '#appView .ref-monogram', '#authView .ref-monogram']) {
+    assert.ok(css.includes(selector), 'logo frame reset covers ' + selector);
+  }
+  assert.ok(css.includes('border:0!important;outline:0!important;'));
+  assert.ok(css.includes('box-shadow:none!important;background:transparent!important;'));
+  assert.ok(css.includes('button.favorite-btn'));
+  assert.ok(css.includes('button.da-market-favorite'));
+  assert.ok(css.includes('button[aria-label*="علاقه‌مندی"]'));
+});
+
+test('shared responsive layout guard covers every application tab and mobile forms, cards and tables', () => {
+  const marker = 'digiarz-global-logo-star-layout-20261122';
+  const start = html.lastIndexOf(marker);
+  const end = html.indexOf('</style>', start);
+  assert.ok(start >= 0 && end > start, 'global layout stylesheet exists');
+  const css = html.slice(start, end);
+  assert.ok(css.includes('#appView [id^="tab-"]{width:100%!important;overflow-x:clip}'));
+  assert.ok(css.includes('#appView input,#appView select,#appView textarea'));
+  assert.ok(css.includes('#appView table{width:100%;max-width:100%;border-collapse:collapse'));
+  assert.ok(css.includes('#appView .table-wrap'));
+  assert.ok(css.includes('overflow-x:auto'));
+  assert.ok(css.includes('@media(max-width:760px)'));
+  assert.ok(css.includes('@media(max-width:390px)'));
+  assert.ok(css.includes('grid-template-columns:minmax(0,1fr)!important'));
+});
+
+test('theme 3 final override uses light indigo and light blue glass across login and app', () => {
+  const marker = 'DIGIARZ-THEME3-LIGHT-INDIGO-GLASS-20261122';
+  const start = html.lastIndexOf(marker);
+  const end = html.indexOf('</style>', start);
+  assert.ok(start >= 0 && end > start, 'final theme 3 override exists');
+  const css = html.slice(start, end);
+  assert.match(css, /--bg:#e9edff!important/);
+  assert.match(css, /linear-gradient\(135deg,#f0edff 0%,#e7edff 48%,#e1f3ff 100%\)/);
+  assert.match(css, /rgba\(181,174,255,\.52\)/);
+  assert.match(css, /rgba\(153,205,255,\.48\)/);
+  assert.match(css, /body\.luxury-theme #appView \.card[\s\S]*?background:rgba\(255,255,255,\.66\)!important/);
+  assert.match(css, /body\.luxury-theme #authView \.auth-reference-visual[\s\S]*?linear-gradient\(135deg,#f0edff 0%,#e5edff 54%,#dff2ff 100%\)!important/);
+  assert.ok(start > html.lastIndexOf('Keep the entire theme-3 page on its own pale-blue glass canvas'), 'indigo glass override wins over the old pale-blue canvas');
+});
+
+
+test('all ten application pages receive the shared page-specific responsive geometry pass', () => {
+  const marker = 'DIGIARZ-ALL-PAGES-GEOMETRY-20261122';
+  const start = html.lastIndexOf(marker);
+  const end = html.indexOf('</style>', start);
+  assert.ok(start >= 0 && end > start, 'all-pages geometry stylesheet exists');
+  const css = html.slice(start, end);
+  for (const tab of ['dashboard','markets','toman','chart','trade','assets','orders','history','admin','settings']) {
+    assert.ok(html.includes('id="tab-' + tab + '"'), 'page exists: ' + tab);
+  }
+  for (const selector of [
+    '#appView #tab-dashboard .da-v2-quick-grid',
+    '#appView #tab-markets .market-tools',
+    '#appView #tab-toman .toman-toolbar',
+    '#appView #tab-chart .asset-detail-head',
+    '#appView #tab-trade .trade-market-grid',
+    '#appView #tab-assets .asset-summary-grid',
+    '#appView #tab-orders .market-list',
+    '#appView #tab-history .history-filters',
+    '#appView #tab-admin .daily-ad-admin-grid',
+    '#appView #tab-settings .settings-grid'
+  ]) assert.ok(css.includes(selector), 'page-specific layout selector: ' + selector);
+  assert.ok(css.includes('@media(max-width:760px)'));
+  assert.ok(css.includes('@media(max-width:390px)'));
+  assert.ok(css.includes('grid-template-columns:minmax(0,1fr)!important'));
 });

@@ -1089,3 +1089,89 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Added regression assertions for the dashboard and market breakpoints/areas in `tests/index-syntax.test.js` (commit/current branch head `23c1d7d36c21dfb3856cb4641bbbfe8074836d63`).
 - Validation boundary: the source changes are committed on the isolated PR #48 branch. A matching GitHub Actions run has not yet been returned for this exact head; do not report tests as passed. No physical-device screenshot/viewport test has been performed. Do not claim the installed APK has these changes.
 - No merge, release, deployment, Supabase/database changes, or real-money functionality changes. Keep PR #48 Draft/unmerged pending CI and visual review.
+
+
+## 2026-11-21 — pure-white glass theme 2 and dashboard/market finishing pass
+- A follow-up source audit found additional legacy grey-tinted secondary surfaces (market toolbar/header, orderbook mid, detail sections, history hover rows and auth security banner). Added a final explicit white-surface override and regression assertions for these areas; no semantic green/red status indicators or theme 1/theme 3 selectors are changed.
+- User clarified that theme 2 must be white throughout, with no grey anywhere; the dashboard and market layouts must remain professional and orderly.
+- Inspected the current PR #48 source and found remaining grey-tinted theme-2 surfaces: page gradient variables, card borders, hero gradient, grey primary buttons, grey active tabs, and grey form borders/buttons.
+- Created isolated follow-up branch `fix/pure-white-glass-dashboard-market-2026-11-21` from the PR #48 candidate, preserving the existing responsive dashboard/market layout and theme 1/theme 3 separation.
+- Added a final theme-2 CSS override: pure-white page canvas and white glass panels throughout login/dashboard/market, blue-tinted borders and controls instead of grey, navy/blue text, and preserved borderless market coin rows. Added regression assertions to guard the white palette and prevent the known grey hex colors from returning.
+- Source commits: `2f0a5ce9e7224abdda25eb208f5888d2d0fac4b3` (CSS) and `5932038814ec22496cfed1de2bf5d21969137aa0` (initial test; test regex is corrected in the follow-up commit).
+- Dashboard/market responsive grid corrections remain inherited from PR #48: shrink-safe dashboard cards, named market-row grid areas, no favorite-button column, wrap-safe values, and narrow-phone breakpoints.
+- Validation: CI has not yet run on this follow-up branch; no APK has been built for this branch and no physical-device visual QA has been performed. Do not claim the changes are validated or present in the installed APK.
+- No merge, release, deployment, Supabase/database, authentication, or financial trading logic changes. Keep isolated for review.
+- Regression test source has been corrected and included in Draft PR #49; it has not yet run in CI. PR #49 is intentionally based on PR #48's candidate branch to avoid duplicating its full change set. Next: merge/review PR #48 first; then retarget PR #49 to `main`, inspect CI for its exact head, and build a matching review APK only if CI passes.
+- Added a white override for neutral informational notices as well; warning/error/success notices keep their meaningful status colors.
+
+## 2026-11-21 — white theme secondary-surface audit and follow-up PR consolidation
+- Audited all legacy `body.light-theme` background rules in `index.html`; found additional grey-tinted surfaces beyond the main cards, including market toolbar/header, orderbook mid, detail sections, history hover, auth security, category controls and neutral notices.
+- Added a final override to make these surfaces white, retain blue accents and readable navy text, and preserve semantic warning/error/success colors. Theme 1 and theme 3 selectors are not modified by the white-theme override.
+- Added regression assertions for secondary white surfaces and expanded the grey-token guard.
+- Ran source-level verification against the exact candidate head: 14 checks passed (white page/panels, blue controls, market toolbar/header, history hover, auth security, neutral notices, no known grey hex values in the final override, balanced style tags, test presence, and candidate-specific workflow checkout).
+- Parent PR #48 UI suite passed 66/66 tests after correcting an overly strict assertion for the existing mobile grid's `gap:0` declaration. Parent exact-decimal/PostgreSQL/Market/Limit/Stop-Limit/TP-SL/concurrency workflow run 44943748586 completed SUCCESS on parent head `e9673c944bfd325296ee5476ad548d86315b67af`.
+- Consolidated the white-theme follow-up on fresh branch `fix/pure-white-glass-dashboard-market-2026-11-21-v2` from the latest PR #48 head. Draft PR #50 is open and mergeable, based on PR #48. Obsolete PR #49 was closed unmerged as superseded.
+- Candidate head: `49bc1909b66c81a8d662f74e7c1a2e1a00a02d5b`. The candidate-specific Android review workflow is configured to check out the pushed branch and upload a debug artifact only; no run ID or APK artifact for this exact head has been verified yet.
+- No merge to main, release, deployment, Supabase/database change, authentication change, or trading/wallet logic change. No physical Android visual review has been performed.
+- Next: wait for and inspect the candidate-specific Android workflow, review PR #48 then PR #50, and only after explicit approval merge PR #48 and retarget PR #50 to main; install the matching review APK and visually verify all three themes and phone-width layouts.
+
+
+## 2026-11-21 — white glass candidate Android APK verified
+- Android review workflow run 44944044169 completed SUCCESS for the white-glass follow-up branch. All steps passed: locked dependency install and npm signature verification, biometric storage tests, visual/application regression tests, Android web preparation, Capacitor generation/sync/runtime verification, debug APK build, merged biometric permission verification, provenance recording, and artifact upload.
+- Downloaded and inspected artifact ID 14722937253 (DigiArz-White-Glass-Review-APK), 7,306,634-byte APK. Embedded BUILD-INFO records source commit 49bc1909b66c81a8d662f74e7c1a2e1a00a02d5b, run 44944044169, and APK SHA-256 c6812bb42b7fff0bc6ee763767801b3ab71f95321e4f587062155699c08cf946. Artifact expires 2026-12-05T20:03:39Z.
+- Current PR #50 branch tip is 6c915af8e2b653ad90f18ea40a6567780965254b. GitHub compare confirms it is exactly one documentation-only commit ahead of the APK source commit (only PROJECT_HANDOFF.md changed); therefore app source and tests in the APK match the current candidate code. Run 44944044169's event SHA is 445222fa41abc2dfa9a5ea997810b4b3fd1ae5fa; workflow provenance is taken from the actual checked-out source commit as recorded in BUILD-INFO.
+- PR #50 remains Draft/open/unmerged and based on PR #48. PR #48 remains Draft/open/unmerged. No merge to main, release, production deployment, Supabase/database/auth/trading changes were made.
+- Validation boundary: automated CI/build and APK packaging succeeded, but no physical Android install or visual QA has been performed. User should install this debug review APK and verify login, dashboard, market row containment, and all themes on the phone; report any mismatch before any merge.
+
+
+## UI finishing pass — 2026-11-22
+- User requested removal of all logo frames and favorite-star frames on every theme/page, plus consistent layout across all app pages.
+- Updated `index.html` on branch `fix/pure-white-glass-dashboard-market-2026-11-21-v2` with final global stylesheet `digiarz-global-logo-star-layout-20261122`.
+- Global reset removes border, outline, box-shadow and decorative background from coin/asset/brand logos on auth and authenticated app views; favorite/star controls retain their glyph but lose the surrounding frame.
+- Shared layout guard applies safe box sizing, min/max widths, text wrapping, section-heading wrapping, form control containment, responsive single-column behavior for narrow screens, and bounded responsive table wrappers across all `#tab-*` views.
+- Added regression tests for logo/star frame removal and responsive page layout. The latest workflow at the time of this note is run `45002086383`, head `59f90e928f54e46c70bbe98770e91b3b1d59a570`; visual/application regression tests passed, Android debug APK build step was still running. No artifact had been uploaded at last check.
+- Earlier run `45001972363` attempt 1/2 failed first on a transient npm attestation verification and then on a malformed test regex; both were addressed. Do not weaken or bypass npm signature/attestation checks.
+- No merge, deployment, Supabase change, or physical-device visual verification has been performed.
+- Next action: verify latest workflow result and APK artifact, then update this handoff with final run/artifact status. Physical Android appearance still requires device QA.
+
+
+## تأیید اجرای بازبینی رابط کاربری و APK — ۲۰۲۶-۱۱-۲۲
+- [x] وضعیت زندهٔ شاخهٔ نامزد بازبینی: `fix/pure-white-glass-dashboard-market-2026-11-21-v2`، commit کد/آزمون `124871a88510e110ee7210980563dc7db524c570`. چهار commit پس از checkpoint قبلی `59f90e928f54e46c70bbe98770e91b3b1d59a570` بررسی شد؛ تغییرات شامل اصلاحات CSS/تست و ثبت handoff است.
+- [x] سه تم در کد نام‌گذاری و پیاده‌سازی شده‌اند: تم ۱ مشکی/طلایی، تم ۲ سفید خالص شیشه‌ای، تم ۳ نیلی روشن شیشه‌ای با آبی روشن. آخرین override تم سوم از طیف نیلی/یاسی روشن و آبی یخی استفاده می‌کند؛ نه تم تیرهٔ قبلی و نه آبی آسمانی مستقل.
+- [x] ده صفحهٔ اصلی در DOM تأیید شدند: dashboard، markets، toman، chart، trade، assets، orders، history، admin و settings. لایهٔ مشترک responsive روی تمام `#tab-*`ها، فرم‌ها، کارت‌ها، جدول‌ها و عرض‌های کوچک اعمال شده است.
+- [x] لایهٔ سراسری `digiarz-global-logo-star-layout-20261122` قاب/حاشیه/سایهٔ تزئینی دور لوگوهای دارایی و برند و قاب دکمه‌های علاقه‌مندی را در صفحه ورود و برنامه حذف می‌کند؛ گلیف ستاره حفظ می‌شود. این قاعده به هر سه تم محدود نشده است.
+- [x] Android review workflow run `45007626018` (Build #73) دقیقاً روی commit `124871a88510e110ee7210980563dc7db524c570` با نتیجهٔ SUCCESS پایان یافت. npm signature verification موفق؛ تست‌های biometric برابر 10/10؛ تست‌های visual/application برابر 70/70؛ Gradle با `BUILD SUCCESSFUL` تمام شد.
+- [x] Artifact بازبینی: `DigiArz-White-Glass-Review-APK`، artifact ID `14747759136`، انقضا `2026-12-06T09:29:09Z`. SHA-256 خود APK از BUILD-INFO: `4fa2d39b71d34b5c3d384a3a680152cfba705c1e959920344e14678eacca1d33`. این APK debug/review است، نه نسخهٔ production-signed.
+- [!] این شواهد، صحت آزمون خودکار و ساخت APK را تأیید می‌کنند؛ مشاهدهٔ واقعی روی گوشی Android و تأیید چشمی همهٔ صفحات/سه تم هنوز انجام نشده است. build موفق به‌تنهایی اثبات نمی‌کند که هر صفحه روی دستگاه واقعی بی‌نقص دیده می‌شود.
+- [!] PR #48 و PR #50 همچنان Open/Draft و ادغام‌نشده‌اند؛ PR #50 بر پایهٔ PR #48 است. `main`، Supabase Production، Auth و منطق مالی/معاملاتی تغییر نکرده‌اند. هیچ merge، انتشار یا deploy انجام نشود مگر با تأیید صریح کاربر.
+- [ ] گام بعد: نصب APK بازبینی روی Android و بررسی دیداری هر ده صفحه در سه تم، به‌ویژه عرض‌های کوچک؛ هر نقص مشاهده‌شده باید با صفحه/تم/اندازهٔ viewport ثبت و در همین شاخه اصلاح شود. پس از تأیید بصری، تصمیم merge برای PR #48 و سپس PR #50 جداگانه گرفته شود.
+
+
+## ادامهٔ تکمیل چیدمان تمام صفحات — ۲۰۲۶-۱۱-۲۲
+- شاخهٔ بازبینی روی commit `db353f3cab445e555680ddbf758a75d5bb97f5a2` ادامه یافت؛ `main` دست‌نخورده است.
+- به `index.html` لایهٔ CSS مستقل `DIGIARZ-ALL-PAGES-GEOMETRY-20261122` اضافه شد. این لایه برای هر ده صفحهٔ dashboard، markets، toman، chart، trade، assets، orders، history، admin و settings قواعد اختصاصی عرض/چیدمان، کنترل‌های فرم، سربرگ‌ها و رفتار موبایل دارد؛ رنگ و هویت سه تم را تغییر نمی‌دهد.
+- تست رگرسیون جدید در `tests/index-syntax.test.js` وجود هر ده صفحه، selector اختصاصی هر صفحه و breakpointهای 760 و 390 پیکسل را کنترل می‌کند.
+- دو اجرای workflow خودکار پس از تغییر شروع شدند: run `45031384625` برای commit CSS و run `45031400394` برای commit تست؛ در زمان ثبت این یادداشت، run دوم در وضعیت pending بود. تا نتیجهٔ موفق، این مرحله را تأییدشده تلقی نکن.
+- هیچ merge، deploy، Supabase یا تغییر auth/معامله/کیف پول انجام نشده است. گام بعد: نتیجهٔ run 75 را بررسی کن؛ اگر موفق شد، APK تازهٔ همان commit را از artifact بردار و بعد QA دیداری روی گوشی را انجام بده.
+
+
+## تأیید CI و APK تازهٔ چیدمان همهٔ صفحات — ۲۰۲۶-۱۱-۲۲
+- [x] اجرای workflow شمارهٔ 74 با شناسهٔ `45031384625` روی commit کد CSS `62e3c03342460c67eb572eba06fe6f2901d0e933` موفق شد؛ همهٔ 16 مرحلهٔ job از جمله تست‌ها، ساخت APK و بارگذاری artifact موفق بودند.
+- [x] اجرای workflow شمارهٔ 75 با شناسهٔ `45031400394` نیز موفق شد؛ تست‌ها، ساخت Android debug APK، بررسی مجوز `USE_BIOMETRIC` و بارگذاری artifact همگی موفق‌اند. این workflow از شاخهٔ نامزد بازبینی اجرا شد و فایل BUILD-INFO مقدار source_commit برابر `35c415cbed6656bd0d569a11dbb0347caa12722f` را ثبت کرده است؛ این commit شامل CSS و تست‌های مرحلهٔ تکمیل چیدمان به‌علاوهٔ handoff به‌روز است.
+- [x] Artifact تازه: `DigiArz-White-Glass-Review-APK`، run `45031400394`، artifact ID `14757871658`، حجم 6,208,712 بایت، انقضا `2026-12-06T14:14:14Z`. SHA-256 فایل APK طبق BUILD-INFO: `051bfef1ea6bf20407ca339518fa065bb455a5e4e0a60ade848708ae7a3c826e`. SHA-256 آرشیو artifact: `1ffd7b106506254fcf4751e194eb0352d3782b7950c87b7900e287fd607b99b3`.
+- [x] npm registry signatures: 100 packages verified؛ Gradle: `BUILD SUCCESSFUL`؛ مجوز Android biometric در merged manifest تأیید شد.
+- [x] بررسی CSS تأیید کرد قانون `.hidden{display:none!important}` باقی است؛ selector عمومی tabها باعث نمایش هم‌زمان صفحات غیرفعال نمی‌شود.
+- [!] ساخت APK و CI موفق‌اند، اما QA دیداری روی گوشی واقعی هنوز انجام نشده و ظاهر نهایی هر ده صفحه در هر سه تم را نمی‌توان بدون مشاهدهٔ دستگاه تأیید کرد.
+- [!] PR #50 همچنان Open/Draft/Unmerged است؛ PR #48 نیز طبق سوابق Open/Draft باقی می‌ماند. هیچ merge، release، deploy، تغییر Supabase، Auth یا منطق مالی انجام نشود مگر با تأیید صریح کاربر.
+- [ ] گام بعد: نصب APK همین run روی Android و گرفتن تصویر از داشبورد، بازار و چند صفحهٔ داخلی در هر سه تم؛ سپس اصلاح دقیق مواردی که در گوشی دیده می‌شوند. پس از QA بصری، تصمیم merge جداگانه گرفته شود.
+
+
+
+## بازبینی مستقل رابط کاربری و وضعیت ادامه — ۲۰۲۶-۱۱-۲۲
+- وضعیت زندهٔ شاخهٔ UI دوباره بررسی شد: `fix/pure-white-glass-dashboard-market-2026-11-21-v2` روی commit `a06d21bbeb9cdf031efdd918606e611b7b3ad0a7`؛ PR #50 همچنان Draft/Open و بر پایهٔ PR #48 است. PR #48 نیز Draft/Open و روی `main` قرار دارد. هیچ‌کدام merge نشده‌اند.
+- APK run `45031400394` همچنان موفق و artifact `14757871658` موجود و منقضی‌نشده است. اجرای workflow دقیقاً روی commit منبع `db353f3cab445e555680ddbf758a75d5bb97f5a2` موفق بوده؛ شاخهٔ فعلی فقط handoff را پس از آن جلوتر برده است.
+- ممیزی ایستای مجدد فایل `index.html` روی شاخهٔ جاری انجام شد: هر سه selector تم (dark/light/luxury) و markerهای سه لایهٔ طراحی موجودند؛ هر ده شناسهٔ صفحه و selector چیدمان اختصاصی‌شان پیدا شد؛ پس از آخرین `</style>` هیچ CSS سرگردانی وجود ندارد؛ چهار رنگ خاکستری شناخته‌شده در override سفید نهایی دیده نشدند.
+- تست‌های رگرسیون فعلی، وجود صفحات و selectorهای اختصاصی هر ده صفحه و breakpointهای 760 و 390 پیکسل را کنترل می‌کنند. این‌ها شواهد ساختاری/خودکارند، نه تأیید رندر واقعی روی گوشی.
+- وضعیت پذیرش همچنان: **پیاده‌سازی و CI موفق؛ QA بصری دستگاه واقعی در انتظار نصب APK و نظر کاربر**. کاربر لازم نیست ممیزی فنی انجام دهد؛ فقط اگر ظاهر/عملکردی را روی گوشی نادرست دید گزارش کند.
+- اقدام بعدی بدون حدس یا تغییر پرریسک: منتظر بازخورد نصب APK بمان؛ هر نقص گزارش‌شده را در همین شاخه اصلاح و CI/APK هم‌منبع را دوباره تأیید کن. هیچ merge، deploy، تغییر Supabase/Auth یا منطق مالی انجام نشود.
+- PR #51 با موضوع جلوگیری از upsert تکراری بازار تومان روی شاخه‌ای جداگانه مشاهده شد؛ خارج از محدودهٔ این مرحلهٔ UI است و در این بازبینی تغییر داده نشد.

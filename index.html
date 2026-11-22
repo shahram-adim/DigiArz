@@ -2798,7 +2798,7 @@ body.luxury-theme .tag{background:rgba(199,184,255,.12)!important;border-color:r
  <div id="exchangeSyncStats" class="grid"><div class="muted small">برای دریافت گزارش، این بخش را باز کنید.</div></div>
  <h4>وضعیت منابع</h4><div id="exchangeSyncSources" class="market-list"><div class="muted small">در انتظار دریافت گزارش…</div></div>
  <div class="detail-section"><div class="section-title"><h4>موارد نیازمند بررسی تطبیق</h4><span class="muted small">حداکثر ۱۰۰ مورد اخیر</span></div><div id="exchangeSyncIssues" class="market-list"><div class="muted small">در انتظار دریافت گزارش…</div></div></div>
-</div><div class="detail-section"><div class="section-title"><h3>مدیریت کاربران و اعتبار مجازی</h3><button type="button" class="secondary" id="adminRefreshBtn">به‌روزرسانی فهرست</button></div><div class="notice">هر تغییر اعتبار با دلیل، موجودی قبل و بعد و شناسه مدیر ثبت می‌شود. موجودی رزروشده سفارش‌های باز قابل برداشت نیست.</div><div id="adminUsersMsg" class="notice hidden" role="status"></div><div id="adminUsersList"><div class="muted small">برای دریافت فهرست کاربران، بخش مدیریت را باز کنید.</div></div></div><div class="detail-section"><div class="section-title"><h3>افزودن ارز به فهرست «ارزهای جدید»</h3><button type="button" class="secondary" id="adminAssetListingsRefreshBtn">به‌روزرسانی فهرست</button></div><div class="notice">ارزهای شناسایی‌شده از منابع صرافی‌ها پس از تطبیق دقیق با کاتالوگ، دریافت قیمت معتبر و عبور از کنترل نقدشوندگی و تداخل نماد، خودکار به فهرست اضافه و برای خریدوفروش آزمایشی فعال می‌شوند؛ تأیید مدیر لازم نیست. این بخش فقط برای مدیریت دستی فهرست‌های ویژه مدیر است.</div><div class="market-tools"><input id="adminAssetSearch" type="search" placeholder="جست‌وجوی نام یا نماد ارز؛ مثل SOL" dir="auto"><button type="button" id="adminAssetSearchBtn">جست‌وجو در کاتالوگ</button></div><div id="adminAssetCandidates" class="market-list"><div class="muted small">برای جست‌وجو، نام یا نماد ارز را وارد کنید.</div></div><div class="detail-section"><h4>ارزهای اضافه‌شده توسط مدیر</h4><div id="adminAssetListings" class="market-list"><div class="muted small">در حال دریافت فهرست…</div></div></div><div id="adminAssetMsg" class="notice hidden" role="status"></div><div class="detail-section"><div class="section-title"><h3>بررسی و فعال‌سازی جفت‌ارزها</h3><button type="button" class="secondary" id="adminPairReviewRefreshBtn">بررسی دوباره قیمت‌ها</button></div><div class="notice">فعال‌سازی خودکار جفت‌ارزهای کشف‌شده: قیمت CoinGecko تازه‌تر از ۲ دقیقه، داده کاتالوگ تازه‌تر از ۲۴ ساعت، حجم ۲۴ساعته حداقل یک میلیون دلار، رتبه بازار حداکثر ۲۰۰۰ (در صورت وجود)، تطبیق یکتای نماد و مشاهده فعال از منبع صرافی در ۴۸ ساعت اخیر. این فرایند هر دقیقه اجرا می‌شود و تأیید مدیر نمی‌خواهد.</div><div id="adminPairMsg" class="notice hidden" role="status"></div><div id="adminPairReview" class="market-list"><div class="muted small">برای بررسی وضعیت جفت‌ارزها، فهرست را به‌روزرسانی کنید.</div></div></div></div></section><section id="tab-settings" class="card hidden"><div class="section-title"><h2>تنظیمات برنامه</h2><span class="live">شخصی‌سازی DigiArz</span></div><div id="accountStatusBox" class="notice hidden" role="status"></div><div id="deactivateAccountPanel" class="setting-row"><div><strong>وضعیت حساب</strong><small>با غیرفعال‌سازی، ورود به امکانات حساب و انجام معامله متوقف می‌شود؛ اطلاعات هویتی، کیف پول و سوابق مالی حذف نمی‌شوند.</small></div><button id="deactivateAccountBtn" class="danger" type="button">غیرفعال‌سازی حساب</button></div><div id="reactivateAccountPanel" class="setting-row hidden" style="margin-top:12px"><div style="flex:1"><strong>فعال‌سازی دوباره حساب</strong><small>برای امنیت، رمز عبور را دوباره وارد کنید. احراز هویت تازه لازم است.</small><input id="reactivatePassword" type="password" autocomplete="current-password" placeholder="رمز عبور فعلی" dir="ltr" style="margin-top:9px"></div><button id="reactivateAccountBtn" type="button">فعال‌سازی حساب</button></div><div id="accountActionMsg" class="notice hidden" role="status"></div><div class="settings-grid" style="margin-top:14px"><div class="setting-row theme-setting-row"><div><strong>پوسته برنامه</strong><small>یکی از سه فضای بصری DigiArz را انتخاب کنید؛ انتخاب شما روی همین دستگاه ذخیره می‌شود.</small></div><div class="theme-choice-group" role="group" aria-label="انتخاب پوسته"><button type="button" data-theme-choice="light" aria-pressed="false">☀ روشن</button><button type="button" data-theme-choice="dark" aria-pressed="false">☾ تاریک</button><button type="button" data-theme-choice="luxury" aria-pressed="false">✧ آبی شیشه‌ای</button></div><button id="themeToggle" class="theme-switch theme-cycle-button" type="button">تغییر تم</button></div><div class="setting-row"><div><strong>زبان رابط کاربری</strong><small>زبان فعلی برنامه فارسی است.</small></div><span class="tag">فارسی</span></div><div class="setting-row"><div><strong>نوع حساب</strong><small>تمام موجودی‌ها و معاملات این نسخه مجازی هستند.</small></div><span class="tag">DEMO</span></div><div class="setting-row"><div><strong>اطلاعات نسخه</strong><small>DigiArz · نسخه آزمایشی وب سازگار با اندروید</small></div><span class="muted small">Account controls</span></div></div><div class="notice" style="margin-top:14px">تنظیمات ظاهری فقط روی دستگاه و مرورگر فعلی ذخیره می‌شوند. غیرفعال‌سازی حساب اطلاعات هویتی و سوابق معاملات را حفظ می‌کند.</div></section>
+</div><div class="detail-section"><div class="section-title"><h3>مدیریت کاربران و اعتبار مجازی</h3><button type="button" class="secondary" id="adminRefreshBtn">به‌روزرسانی فهرست</button></div><div class="notice">هر تغییر اعتبار با دلیل، موجودی قبل و بعد و شناسه مدیر ثبت می‌شود. موجودی رزروشده سفارش‌های باز قابل برداشت نیست.</div><div id="adminUsersMsg" class="notice hidden" role="status"></div><div id="adminUsersList"><div class="muted small">برای دریافت فهرست کاربران، بخش مدیریت را باز کنید.</div></div></div><div class="detail-section"><div class="section-title"><h3>افزودن ارز به فهرست «ارزهای جدید»</h3><button type="button" class="secondary" id="adminAssetListingsRefreshBtn">به‌روزرسانی فهرست</button></div><div class="notice">ارزهای شناسایی‌شده از منابع صرافی‌ها پس از تطبیق دقیق با کاتالوگ، دریافت قیمت معتبر و عبور از کنترل نقدشوندگی و تداخل نماد، خودکار به فهرست اضافه و برای خریدوفروش آزمایشی فعال می‌شوند؛ تأیید مدیر لازم نیست. این بخش فقط برای مدیریت دستی فهرست‌های ویژه مدیر است.</div><div class="market-tools"><input id="adminAssetSearch" type="search" placeholder="جست‌وجوی نام یا نماد ارز؛ مثل SOL" dir="auto"><button type="button" id="adminAssetSearchBtn">جست‌وجو در کاتالوگ</button></div><div id="adminAssetCandidates" class="market-list"><div class="muted small">برای جست‌وجو، نام یا نماد ارز را وارد کنید.</div></div><div class="detail-section"><h4>ارزهای اضافه‌شده توسط مدیر</h4><div id="adminAssetListings" class="market-list"><div class="muted small">در حال دریافت فهرست…</div></div></div><div id="adminAssetMsg" class="notice hidden" role="status"></div><div class="detail-section"><div class="section-title"><h3>بررسی و فعال‌سازی جفت‌ارزها</h3><button type="button" class="secondary" id="adminPairReviewRefreshBtn">بررسی دوباره قیمت‌ها</button></div><div class="notice">فعال‌سازی خودکار جفت‌ارزهای کشف‌شده: قیمت CoinGecko تازه‌تر از ۲ دقیقه، داده کاتالوگ تازه‌تر از ۲۴ ساعت، حجم ۲۴ساعته حداقل یک میلیون دلار، رتبه بازار حداکثر ۲۰۰۰ (در صورت وجود)، تطبیق یکتای نماد و مشاهده فعال از منبع صرافی در ۴۸ ساعت اخیر. این فرایند هر دقیقه اجرا می‌شود و تأیید مدیر نمی‌خواهد.</div><div id="adminPairMsg" class="notice hidden" role="status"></div><div id="adminPairReview" class="market-list"><div class="muted small">برای بررسی وضعیت جفت‌ارزها، فهرست را به‌روزرسانی کنید.</div></div></div></div></section><section id="tab-settings" class="card hidden"><div class="section-title"><h2>تنظیمات برنامه</h2><span class="live">شخصی‌سازی DigiArz</span></div><div id="accountStatusBox" class="notice hidden" role="status"></div><div id="deactivateAccountPanel" class="setting-row"><div><strong>وضعیت حساب</strong><small>با غیرفعال‌سازی، ورود به امکانات حساب و انجام معامله متوقف می‌شود؛ اطلاعات هویتی، کیف پول و سوابق مالی حذف نمی‌شوند.</small></div><button id="deactivateAccountBtn" class="danger" type="button">غیرفعال‌سازی حساب</button></div><div id="reactivateAccountPanel" class="setting-row hidden" style="margin-top:12px"><div style="flex:1"><strong>فعال‌سازی دوباره حساب</strong><small>برای امنیت، رمز عبور را دوباره وارد کنید. احراز هویت تازه لازم است.</small><input id="reactivatePassword" type="password" autocomplete="current-password" placeholder="رمز عبور فعلی" dir="ltr" style="margin-top:9px"></div><button id="reactivateAccountBtn" type="button">فعال‌سازی حساب</button></div><div id="accountActionMsg" class="notice hidden" role="status"></div><div class="settings-grid" style="margin-top:14px"><div class="setting-row theme-setting-row"><div><strong>پوسته برنامه</strong><small>یکی از سه فضای بصری DigiArz را انتخاب کنید؛ انتخاب شما روی همین دستگاه ذخیره می‌شود.</small></div><div class="theme-choice-group" role="group" aria-label="انتخاب پوسته"><button type="button" data-theme-choice="light" aria-pressed="false">☀ روشن</button><button type="button" data-theme-choice="dark" aria-pressed="false">☾ تاریک</button><button type="button" data-theme-choice="luxury" aria-pressed="false">✧ نیلی شیشه‌ای</button></div><button id="themeToggle" class="theme-switch theme-cycle-button" type="button">تغییر تم</button></div><div class="setting-row"><div><strong>زبان رابط کاربری</strong><small>زبان فعلی برنامه فارسی است.</small></div><span class="tag">فارسی</span></div><div class="setting-row"><div><strong>نوع حساب</strong><small>تمام موجودی‌ها و معاملات این نسخه مجازی هستند.</small></div><span class="tag">DEMO</span></div><div class="setting-row"><div><strong>اطلاعات نسخه</strong><small>DigiArz · نسخه آزمایشی وب سازگار با اندروید</small></div><span class="muted small">Account controls</span></div></div><div class="notice" style="margin-top:14px">تنظیمات ظاهری فقط روی دستگاه و مرورگر فعلی ذخیره می‌شوند. غیرفعال‌سازی حساب اطلاعات هویتی و سوابق معاملات را حفظ می‌کند.</div></section>
 </main>
 <div class="footer">DigiArz Demo · پول واقعی و واریز/برداشت واقعی در این نسخه وجود ندارد.<br>این نسخه برای آزمایش رابط کاربری و معاملات مجازی است.</div>
 </div>
@@ -3176,10 +3176,10 @@ function applyTheme(theme){
  document.body.classList.toggle('luxury-theme',luxury);
  document.body.classList.toggle('dark-theme',dark);
  document.documentElement.style.colorScheme=light||luxury?'light':'dark';
- const labels={light:'روشن',dark:'تاریک',luxury:'آبی شیشه‌ای'};
+ const labels={light:'روشن',dark:'تاریک',luxury:'نیلی شیشه‌ای'};
  const authThemeButton=$('authThemeToggle');
  const next={light:'dark',dark:'luxury',luxury:'light'}[selected];
- const actionLabels={light:'رفتن به تم تاریک',dark:'رفتن به تم آبی شیشه‌ای',luxury:'رفتن به تم روشن'};
+ const actionLabels={light:'رفتن به تم تاریک',dark:'رفتن به تم نیلی شیشه‌ای',luxury:'رفتن به تم روشن'};
  for(const id of ['themeToggle','themeToggleTop','authThemeToggle']){
   const el=$(id);if(!el)continue;
   el.setAttribute('aria-label',actionLabels[selected]);el.setAttribute('title',actionLabels[selected]);
@@ -3191,8 +3191,8 @@ function applyTheme(theme){
   el.classList.toggle('active',active);el.setAttribute('aria-pressed',active?'true':'false');
  });
  const meta=document.querySelector('meta[name="theme-color"]');
- if(meta)meta.content=light?'#f4f7fb':luxury?'#eaf3ff':'#080d1b';
- const palette=light?{bg:'#ffffff',text:'#263244',grid:'#edf0f4',line:'#dce1e8'}:luxury?{bg:'#eaf3ff',text:'#183b5c',grid:'#d7eafa',line:'#b8d5eb'}:{bg:'#101318',text:'#c7cbd1',grid:'#202630',line:'#30343d'};
+ if(meta)meta.content=light?'#f4f7fb':luxury?'#e8efff':'#080d1b';
+ const palette=light?{bg:'#ffffff',text:'#263244',grid:'#edf0f4',line:'#dce1e8'}:luxury?{bg:'#edf1ff',text:'#27345f',grid:'#dce2fa',line:'#9aa8e5'}:{bg:'#101318',text:'#c7cbd1',grid:'#202630',line:'#30343d'};
  const options={layout:{background:{color:palette.bg},textColor:palette.text},grid:{vertLines:{color:palette.grid},horzLines:{color:palette.grid}},rightPriceScale:{borderColor:palette.line},timeScale:{borderColor:palette.line}};
  if(chart)chart.applyOptions(options);
  if(volumeChart)volumeChart.applyOptions(options);
@@ -4730,16 +4730,23 @@ body.luxury-theme .mobile-bottom-nav{background:rgba(255,255,255,.86)!important;
 body.luxury-theme .tag{background:rgba(120,200,255,.16)!important;border-color:rgba(75,158,215,.25)!important;color:#315b7b!important}
 
 
-/* Final cascade guard: pale sky-blue glass must win over earlier indigo theme rules. */
+/* Final cascade guard: luminous light indigo + pale blue glass, theme 3. */
+body.luxury-theme{
+ min-height:100vh;color-scheme:light!important;
+ --bg:#edf1ff!important;--panel:rgba(255,255,255,.76)!important;--panel2:rgba(239,246,255,.78)!important;
+ --line:rgba(112,130,218,.22)!important;--text:#27345f!important;--muted:#7180aa!important;
+ --field:rgba(255,255,255,.86)!important;--soft:rgba(222,233,255,.72)!important;
+ background:radial-gradient(ellipse at 12% 5%,rgba(158,163,255,.38),transparent 36%),radial-gradient(ellipse at 88% 18%,rgba(133,202,255,.36),transparent 34%),linear-gradient(140deg,#f1efff 0%,#e8efff 48%,#e0f3ff 100%)!important;
+ color:#27345f!important;
+}
+body.luxury-theme::before{background:transparent!important;opacity:0!important}
+body.luxury-theme #authView,
 body.luxury-theme #appView,
-body.luxury-theme #appView.app-view-active{background:transparent!important;color:#183b5c!important}
+body.luxury-theme #appView.app-view-active,
+body.luxury-theme #appView .wrap{background:transparent!important;color:#27345f!important}
 body.luxury-theme #appView .top,
 body.luxury-theme #appView .tabs,
-body.luxury-theme #appView .mobile-bottom-nav{
- background:rgba(255,255,255,.76)!important;border:1px solid rgba(111,177,224,.28)!important;
- color:#315b7b!important;box-shadow:0 10px 30px rgba(64,127,176,.09)!important;
- backdrop-filter:blur(20px)!important;-webkit-backdrop-filter:blur(20px)!important;
-}
+body.luxury-theme #appView .mobile-bottom-nav,
 body.luxury-theme #appView .card,
 body.luxury-theme #appView .stat,
 body.luxury-theme #appView .trade-box,
@@ -4751,62 +4758,96 @@ body.luxury-theme #appView .setting-row,
 body.luxury-theme #appView .gainer-card,
 body.luxury-theme #appView .asset-row,
 body.luxury-theme #appView .digiarz-v2-dashboard,
-body.luxury-theme #appView .da-v2-market-list{
- background:rgba(255,255,255,.64)!important;border:1px solid rgba(111,177,224,.22)!important;
- color:#183b5c!important;box-shadow:0 12px 34px rgba(64,127,176,.08),inset 0 1px 0 rgba(255,255,255,.82)!important;
- backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;
+body.luxury-theme #appView .da-v2-market-list,
+body.luxury-theme #authView .auth-form,
+body.luxury-theme #authView .auth-security{
+ background:rgba(255,255,255,.74)!important;color:#27345f!important;
+ border:1px solid rgba(122,139,222,.20)!important;
+ box-shadow:0 12px 34px rgba(91,105,190,.09),inset 0 1px 0 rgba(255,255,255,.96)!important;
+ backdrop-filter:blur(20px)!important;-webkit-backdrop-filter:blur(20px)!important;
 }
 body.luxury-theme #appView .hero{
- background:linear-gradient(120deg,rgba(255,255,255,.9),rgba(224,242,255,.84),rgba(244,250,255,.92))!important;
- border:1px solid rgba(111,177,224,.28)!important;box-shadow:0 14px 36px rgba(64,127,176,.09)!important;
- color:#183b5c!important;
+ background:linear-gradient(120deg,rgba(226,225,255,.94),rgba(218,235,255,.9),rgba(237,246,255,.94))!important;
+ border:1px solid rgba(119,133,218,.24)!important;color:#27345f!important;
+ box-shadow:0 14px 36px rgba(91,105,190,.10)!important;
 }
 body.luxury-theme #appView .brand,
 body.luxury-theme #appView h1,body.luxury-theme #appView h2,body.luxury-theme #appView h3,
 body.luxury-theme #appView .stat,body.luxury-theme #appView .performance-item,
-body.luxury-theme #appView .section-title,
-body.luxury-theme #appView .price-stack{color:#183b5c!important}
+body.luxury-theme #appView .section-title,body.luxury-theme #appView .price-stack,
+body.luxury-theme #authView .auth-form,
+body.luxury-theme #authView .auth-form label{color:#27345f!important}
+body.luxury-theme #appView .muted,
+body.luxury-theme #appView small,
+body.luxury-theme #authView .auth-security{color:#7180aa!important}
 body.luxury-theme #appView .brand span:first-child,
-body.luxury-theme #appView .hero-mark{color:#398fc9!important}
-body.luxury-theme #appView button:not(.secondary){
- background:linear-gradient(135deg,#b8ddf8,#8fc7ef)!important;color:#153b5b!important;
- border:1px solid rgba(255,255,255,.9)!important;box-shadow:0 5px 16px rgba(64,127,176,.14)!important;
+body.luxury-theme #appView .hero-mark{color:#6874d8!important}
+body.luxury-theme #appView button:not(.secondary),
+body.luxury-theme #authView .auth-form .auth-actions #loginBtn,
+body.luxury-theme #authView .auth-form .auth-actions #signupBtn{
+ background:linear-gradient(135deg,#b9baff,#9bcfff)!important;color:#253568!important;
+ border:1px solid rgba(255,255,255,.94)!important;box-shadow:0 6px 18px rgba(92,112,202,.14)!important;
 }
 body.luxury-theme #appView button.secondary,
 body.luxury-theme #appView .tabs button,
 body.luxury-theme #appView .timeframes button{
- background:rgba(255,255,255,.64)!important;color:#315b7b!important;
- border:1px solid rgba(111,177,224,.22)!important;box-shadow:none!important;
+ background:rgba(255,255,255,.72)!important;color:#52649a!important;
+ border:1px solid rgba(122,139,222,.18)!important;box-shadow:none!important;
 }
 body.luxury-theme #appView .tabs button.active,
 body.luxury-theme #appView .timeframes button.active{
- background:linear-gradient(135deg,#c5e4fb,#9dcef1)!important;color:#153b5b!important;
- border-color:rgba(255,255,255,.92)!important;
+ background:linear-gradient(135deg,#d7d8ff,#c4e6ff)!important;color:#35458d!important;
+ border-color:rgba(255,255,255,.96)!important;
 }
 body.luxury-theme #appView input,
 body.luxury-theme #appView select,
-body.luxury-theme #appView textarea{
- background:rgba(255,255,255,.84)!important;color:#183b5c!important;
- border:1px solid rgba(111,177,224,.3)!important;
+body.luxury-theme #appView textarea,
+body.luxury-theme #authView .auth-form input,
+body.luxury-theme #authView .auth-form select,
+body.luxury-theme #authView .auth-form textarea{
+ background:rgba(255,255,255,.88)!important;color:#27345f!important;
+ border:1px solid rgba(122,139,222,.24)!important;
+}
+body.luxury-theme #appView input:focus,
+body.luxury-theme #appView select:focus,
+body.luxury-theme #appView textarea:focus{
+ border-color:#8c9cff!important;box-shadow:0 0 0 3px rgba(140,156,255,.16)!important;
 }
 body.luxury-theme #appView #tab-markets .coin,
 body.luxury-theme #appView .da-v2-market-list .coin{
  background:transparent!important;border:0!important;box-shadow:none!important;
 }
-body.luxury-theme #appView .tag{background:rgba(120,200,255,.16)!important;border-color:rgba(75,158,215,.25)!important;color:#315b7b!important}
-body.luxury-theme #authView .auth-form .auth-actions #loginBtn,
-body.luxury-theme #authView .auth-form .auth-actions #signupBtn{
- background:linear-gradient(135deg,#b8ddf8,#8fc7ef)!important;color:#153b5b!important;
- border:1px solid rgba(255,255,255,.92)!important;box-shadow:0 7px 18px rgba(64,127,176,.14)!important;
+body.luxury-theme #appView .tag{
+ background:rgba(137,147,255,.14)!important;border-color:rgba(122,139,222,.22)!important;color:#5260ad!important;
 }
-body.luxury-theme #authView .auth-form,
-body.luxury-theme #authView .auth-form .auth-security{
- color:#183b5c!important;
+body.luxury-theme #authView.auth-reference-layout{
+ background:rgba(255,255,255,.62)!important;color:#27345f!important;
+ border:1px solid rgba(255,255,255,.94)!important;
+ box-shadow:0 24px 68px rgba(91,105,190,.13),inset 0 1px 0 #fff!important;
 }
-
-
-/* Keep the entire theme-3 page on its own pale-blue glass canvas; no grey app shell. */
-body.luxury-theme{min-height:100vh;background:radial-gradient(ellipse at 12% 8%,rgba(120,200,255,.36),transparent 36%),radial-gradient(ellipse at 88% 84%,rgba(183,215,255,.42),transparent 40%),linear-gradient(135deg,#f0f9ff 0%,#e2f2ff 52%,#d9edff 100%)!important}
+body.luxury-theme #authView.auth-reference-layout .auth-reference-visual{
+ background:radial-gradient(circle at 82% 18%,rgba(169,180,255,.42) 0 78px,transparent 80px),radial-gradient(circle at 18% 78%,rgba(139,207,255,.42) 0 145px,transparent 147px),linear-gradient(135deg,#eeedff,#e4f0ff 58%,#dff3ff)!important;
+ color:#27345f!important;
+}
+body.luxury-theme #authView.auth-reference-layout .auth-form{
+ background:linear-gradient(145deg,rgba(255,255,255,.92),rgba(238,245,255,.82))!important;color:#27345f!important;
+}
+body.luxury-theme #authView.auth-reference-layout h1,
+body.luxury-theme #authView.auth-reference-layout h2,
+body.luxury-theme #authView.auth-reference-layout h3,
+body.luxury-theme #authView.auth-reference-layout .auth-headline{color:#27345f!important}
+body.luxury-theme #authView.auth-reference-layout p,
+body.luxury-theme #authView.auth-reference-layout label,
+body.luxury-theme #authView.auth-reference-layout .auth-intro{color:#7180aa!important}
+body.luxury-theme #authView .ref-brand-lockup,
+body.luxury-theme #authView .ref-brand-lockup strong,
+body.luxury-theme #authView .ref-market-copy h1 span{color:#6874d8!important;text-shadow:none!important}
+body.luxury-theme #authView .ref-brand-lockup em,
+body.luxury-theme #authView .ref-market-copy>p{color:#7180aa!important}
+body.luxury-theme #authView .ref-coin-row{color:#344779!important}
+body.luxury-theme #authView .ref-coin-row strong{color:#159b83!important}
+body.luxury-theme #authView .ref-gold-coin{border-color:#b7c5ff!important;box-shadow:0 8px 20px rgba(91,105,190,.14)!important}
+body.luxury-theme .mobile-bottom-nav{background:rgba(255,255,255,.88)!important;border-color:rgba(122,139,222,.20)!important;color:#52649a!important}
 /* Final light-theme guard: clean white and neutral frosted glass, distinct from pale-blue glass. */
 body.light-theme{
  color-scheme:light!important;--bg:#ffffff;--panel:rgba(255,255,255,.88);
@@ -4900,6 +4941,157 @@ body.light-theme #authView .auth-form .auth-actions #signupBtn{
 }
 
 
+
+/* DIGIARZ-PURE-WHITE-GLASS-THEME-20261121 */
+/* Theme 2 is white throughout: no grey canvas, panels, controls, or neutral-grey surfaces. */
+body.light-theme{
+ color-scheme:light!important;
+ --bg:#fff!important;--panel:rgba(255,255,255,.94)!important;--panel2:rgba(255,255,255,.98)!important;
+ --line:rgba(105,174,229,.20)!important;
+ background:#fff!important;background-image:none!important;color:#203a58!important;
+}
+body.light-theme::before{background:#fff!important;opacity:1!important}
+body.light-theme #appView,
+body.light-theme #appView.app-view-active,
+body.light-theme #appView .wrap{background:transparent!important;color:#203a58!important}
+body.light-theme #appView .top,
+body.light-theme #appView .tabs,
+body.light-theme #appView .mobile-bottom-nav,
+body.light-theme #appView .card,
+body.light-theme #appView .stat,
+body.light-theme #appView .trade-box,
+body.light-theme #appView .performance-item,
+body.light-theme #appView .indicator-panel,
+body.light-theme #appView .fx-box,
+body.light-theme #appView .orderbook-side,
+body.light-theme #appView .setting-row,
+body.light-theme #appView .gainer-card,
+body.light-theme #appView .asset-row,
+body.light-theme #appView .digiarz-v2-dashboard,
+body.light-theme #appView .da-v2-market-list,
+body.light-theme #appView .hero,
+body.light-theme #appView .market-board-v34,
+body.light-theme #appView .market-list,
+body.light-theme #appView .chart-card,
+body.light-theme #appView .wallet-card,
+body.light-theme #appView .order-card,
+body.light-theme #appView .history-card,
+body.light-theme #appView .profile-card,
+body.light-theme #appView .security-card,
+body.light-theme #appView .support-card,
+body.light-theme #appView .filter-bar{
+ background:rgba(255,255,255,.92)!important;color:#203a58!important;
+ border:1px solid rgba(105,174,229,.18)!important;
+ box-shadow:0 10px 30px rgba(73,139,194,.075),inset 0 1px 0 #fff!important;
+ backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;
+}
+body.light-theme #appView .hero{background:#fff!important}
+body.light-theme #appView .brand,
+body.light-theme #appView h1,body.light-theme #appView h2,body.light-theme #appView h3,
+body.light-theme #appView .section-title,
+body.light-theme #appView .price-stack,
+body.light-theme #appView .muted,
+body.light-theme #appView .hint,
+body.light-theme #appView .subtle,
+body.light-theme #appView .secondary-text,
+body.light-theme #appView .text-muted,
+body.light-theme #appView .description,
+body.light-theme #appView .meta{color:#54799d!important}
+body.light-theme #appView button:not(.secondary){
+ background:linear-gradient(135deg,#eaf6ff,#d8edff)!important;color:#174a78!important;
+ border:1px solid rgba(105,174,229,.32)!important;box-shadow:0 5px 14px rgba(73,139,194,.10)!important;
+}
+body.light-theme #appView button.secondary,
+body.light-theme #appView .tabs button,
+body.light-theme #appView .timeframes button{
+ background:#fff!important;color:#41688e!important;
+ border:1px solid rgba(105,174,229,.22)!important;box-shadow:none!important;
+}
+body.light-theme #appView .tabs button.active,
+body.light-theme #appView .timeframes button.active{
+ background:#e7f4ff!important;color:#174a78!important;border-color:#acd5f5!important;
+}
+body.light-theme #appView input,
+body.light-theme #appView select,
+body.light-theme #appView textarea,
+body.light-theme #authView .auth-form input,
+body.light-theme #authView .auth-form select,
+body.light-theme #authView .auth-form textarea{
+ background:#fff!important;color:#203a58!important;border:1px solid rgba(105,174,229,.30)!important;
+}
+body.light-theme #appView #tab-markets .coin,
+body.light-theme #appView .da-v2-market-list .coin{
+ background:transparent!important;border:0!important;box-shadow:none!important;
+}
+body.light-theme #authView,
+body.light-theme #authView .auth-form,
+body.light-theme #authView.auth-reference-layout{
+ background:#fff!important;color:#203a58!important;
+ border-color:rgba(105,174,229,.20)!important;
+}
+body.light-theme #authView .auth-form .auth-actions #loginBtn,
+body.light-theme #authView .auth-form .auth-actions #signupBtn{
+ background:linear-gradient(135deg,#eaf6ff,#d8edff)!important;color:#174a78!important;
+ border:1px solid rgba(105,174,229,.30)!important;box-shadow:0 6px 16px rgba(73,139,194,.09)!important;
+}
+
+
+/* Final white-only coverage for authentication, table headers and market controls. */
+body.light-theme #authView .auth-reference-visual,
+body.light-theme #authView .auth-form,
+body.light-theme #authView.auth-reference-layout,
+body.light-theme #appView .market-toolbar,
+body.light-theme #appView .market-header,
+body.light-theme #appView .table-wrap,
+body.light-theme #appView .table-container,
+body.light-theme #appView table,
+body.light-theme #appView thead,
+body.light-theme #appView th,
+body.light-theme #appView .market-search,
+body.light-theme #appView .market-filters{
+ background:#fff!important;color:#203a58!important;
+ border-color:rgba(105,174,229,.20)!important;
+}
+body.light-theme #appView tr,
+body.light-theme #appView td{border-color:rgba(105,174,229,.14)!important}
+
+
+
+/* Remove remaining neutral-grey legacy surfaces from theme 2 across secondary screens. */
+body.light-theme #appView .market-tools,
+body.light-theme #appView .market-board-v34 .market-head,
+body.light-theme #appView .toman-table th,
+body.light-theme #appView .orderbook-mid,
+body.light-theme #appView .detail-section,
+body.light-theme #appView .dashboard-panel>.detail-section,
+body.light-theme #appView .market-categories .category-btn,
+body.light-theme #appView .category-icon,
+body.light-theme #appView .reference-market-strip,
+body.light-theme #appView .market-announcement,
+body.light-theme #appView .market-hero-v34,
+body.light-theme #appView .trade-workspace-banner-v35,
+body.light-theme #appView .orders-center-v36,
+body.light-theme #appView .advanced-order-list-v36,
+body.light-theme #appView .digiarz-home-hero,
+body.light-theme #appView .review-row,
+body.light-theme #appView .news-item,
+body.light-theme #appView #tab-orders .order-history-card,
+body.light-theme #appView #tab-orders .open-order-row,
+body.light-theme #appView #tab-orders .open-order-details small:nth-of-type(1),
+body.light-theme #appView #tab-history tbody tr:hover,
+body.light-theme #appView #tab-chart .asset-detail-head,
+body.light-theme #appView #tab-chart .detail-section,
+body.light-theme #authView .auth-security,
+body.light-theme #authView .auth-top-banner{
+ background:#fff!important;color:#203a58!important;
+ border-color:rgba(105,174,229,.18)!important;
+}
+
+
+body.light-theme #appView .notice:not(.warn):not(.err):not(.ok){
+ background:#fff!important;color:#203a58!important;
+ border-color:rgba(105,174,229,.18)!important;
+}
 
 </style>
 
@@ -5150,6 +5342,348 @@ body.light-theme #authView .auth-form .auth-actions #signupBtn{
  #tab-markets .market-board-v34 .coin-name-fa{font-size:10px}
  #tab-markets .market-board-v34 .price-usd{font-size:10px}
  #tab-markets .market-board-v34 .price-toman{font-size:9px}
+}
+</style>
+
+
+<style id="digiarz-global-logo-star-layout-20261122">
+/* Global finishing pass: remove decorative frames from every brand/coin logo and favorite star in every theme/page. */
+#appView .coin-icon,#appView .coin-identity .coin-icon,#appView .asset-logo,
+#appView .da-v2-logo,#appView .da-market-logo,#appView .da-market-logo-inner,
+#appView .ref-monogram,#appView .auth-coin-chip,
+#authView .coin-icon,#authView .asset-logo,#authView .da-v2-logo,
+#authView .da-market-logo,#authView .da-market-logo-inner,
+#authView .ref-monogram,#authView .auth-coin-chip{
+ box-sizing:border-box!important;border:0!important;outline:0!important;
+ box-shadow:none!important;background:transparent!important;
+}
+#appView .coin-icon img,#appView .asset-logo img,#appView .da-market-logo-inner img,
+#authView .coin-icon img,#authView .asset-logo img,#authView .da-market-logo-inner img{
+ display:block!important;border:0!important;outline:0!important;box-shadow:none!important;
+ background:transparent!important;object-fit:contain!important;
+}
+#appView button.favorite-btn,#appView button.da-market-favorite,
+#authView button.favorite-btn,#authView button.da-market-favorite,
+#appView button[aria-label*="علاقه‌مندی"],#appView button[aria-label*="علاقه مندی"],
+#authView button[aria-label*="علاقه‌مندی"],#authView button[aria-label*="علاقه مندی"]{
+ border:0!important;outline:0!important;box-shadow:none!important;
+ background:transparent!important;padding:0!important;
+}
+#appView button.favorite-btn::before,#appView button.favorite-btn::after,
+#appView button.da-market-favorite::before,#appView button.da-market-favorite::after,
+#authView button.favorite-btn::before,#authView button.favorite-btn::after,
+#authView button.da-market-favorite::before,#authView button.da-market-favorite::after{
+ border:0!important;box-shadow:none!important;background:transparent!important;
+}
+/* Shared page geometry: consistent sizing, alignment and safe wrapping across dashboard, market,
+   trading, chart, wallet, orders, history, assets, settings and admin screens. */
+#appView,#appView>.wrap,#appView .wrap,#authView,
+#appView [id^="tab-"],#appView .detail-section,#appView .card,
+#appView .trade-box,#appView .setting-row,#appView .order-history-card,
+#appView .open-order-row,#appView .admin-user-card,
+#appView .market-board-v34,#appView .market-list{
+ box-sizing:border-box!important;min-width:0!important;max-width:100%!important;
+}
+#appView [id^="tab-"]{width:100%!important;overflow-x:clip}
+#appView img,#appView svg,#authView img,#authView svg{max-width:100%}
+#appView input,#appView select,#appView textarea,
+#authView input,#authView select,#authView textarea{
+ box-sizing:border-box!important;max-width:100%!important;min-width:0;
+}
+#appView .section-title,#appView .detail-section>.section-title,
+#appView .order-history-title,#appView .market-board-head,
+#appView .da-v2-topline,#appView .da-v2-section-head,
+#appView .trade-entry-heading-v35{
+ display:flex;align-items:center;justify-content:space-between;
+ flex-wrap:wrap;gap:9px;min-width:0;max-width:100%;
+}
+#appView .section-title>* ,#appView .detail-section>.section-title>*,
+#appView .order-history-title>* ,#appView .market-board-head>*{
+ min-width:0;max-width:100%;
+}
+#appView .detail-section,#appView .card,#appView .trade-box,
+#appView .order-history-card,#appView .open-order-row,
+#appView .admin-user-card,#appView .setting-row{
+ overflow-wrap:anywhere;
+}
+#appView .market-tools,#appView .trade-grid,#appView .trade-market-grid,
+#appView .dashboard-activity-grid,#appView .admin-grid,
+#appView .settings-grid,#appView .form-grid{
+ min-width:0;max-width:100%;
+}
+#appView .market-tools>* ,#appView .trade-grid>*,
+#appView .trade-market-grid>* ,#appView .dashboard-activity-grid>*,
+#appView .admin-grid>* ,#appView .settings-grid>*,
+#appView .form-grid>*{box-sizing:border-box;min-width:0;max-width:100%}
+#appView table{width:100%;max-width:100%;border-collapse:collapse;table-layout:auto}
+#appView th,#appView td{overflow-wrap:anywhere;word-break:normal;vertical-align:middle}
+#appView .table-wrap,#appView .table-responsive,
+#appView .history-table-wrap,#appView .admin-table-wrap{
+ box-sizing:border-box;max-width:100%;min-width:0;overflow-x:auto;
+ -webkit-overflow-scrolling:touch;
+}
+#appView .muted,#appView small,#appView p,
+#appView .price-usd,#appView .price-toman,
+#appView .coin-name-fa,#appView .coin-symbol-en{
+ overflow-wrap:anywhere;
+}
+@media(max-width:760px){
+ #appView .wrap{padding-inline:10px}
+ #appView .section-title,#appView .detail-section>.section-title,
+ #appView .order-history-title{align-items:flex-start}
+ #appView .section-title button,#appView .detail-section>.section-title button{
+  max-width:100%;white-space:normal;
+ }
+ #appView .market-tools,#appView .trade-grid,
+ #appView .trade-market-grid,#appView .dashboard-activity-grid,
+ #appView .admin-grid,#appView .settings-grid,#appView .form-grid{
+  grid-template-columns:minmax(0,1fr)!important;
+ }
+ #appView .detail-section,#appView .card,#appView .trade-box,
+ #appView .order-history-card,#appView .open-order-row{
+  min-width:0;max-width:100%;
+ }
+}
+@media(max-width:390px){
+ #appView .wrap{padding-inline:7px}
+ #appView .section-title h2,#appView .section-title h3{font-size:clamp(14px,4vw,18px)}
+ #appView button{max-width:100%;overflow-wrap:anywhere}
+}
+</style>
+
+
+<style id="DIGIARZ-THEME3-LIGHT-INDIGO-GLASS-20261122">
+/* Theme 3: light indigo + light blue glass, distinct from theme 2 pure white. */
+body.luxury-theme{
+  color-scheme:light!important;
+  --bg:#e9edff!important;
+  --panel:rgba(255,255,255,.70)!important;
+  --panel2:rgba(245,248,255,.76)!important;
+  --line:rgba(125,143,218,.20)!important;
+  --text:#27345f!important;
+  --muted:#687ba7!important;
+  --field:rgba(255,255,255,.78)!important;
+  --soft:rgba(255,255,255,.58)!important;
+  background:
+    radial-gradient(ellipse at 12% 10%,rgba(181,174,255,.52),transparent 35%),
+    radial-gradient(ellipse at 88% 16%,rgba(153,205,255,.48),transparent 37%),
+    radial-gradient(ellipse at 52% 100%,rgba(194,222,255,.58),transparent 45%),
+    linear-gradient(135deg,#f0edff 0%,#e7edff 48%,#e1f3ff 100%)!important;
+  color:#27345f!important;
+}
+body.luxury-theme #appView,
+body.luxury-theme #appView.app-view-active{background:transparent!important;color:#27345f!important}
+body.luxury-theme #appView .top,
+body.luxury-theme #appView .tabs,
+body.luxury-theme #appView .mobile-bottom-nav{
+  background:rgba(255,255,255,.66)!important;
+  border-color:rgba(143,158,225,.20)!important;
+  color:#354574!important;
+  box-shadow:0 10px 30px rgba(80,96,170,.075)!important;
+  backdrop-filter:blur(22px) saturate(145%)!important;
+  -webkit-backdrop-filter:blur(22px) saturate(145%)!important;
+}
+body.luxury-theme #appView .card,
+body.luxury-theme #appView .stat,
+body.luxury-theme #appView .trade-box,
+body.luxury-theme #appView .performance-item,
+body.luxury-theme #appView .indicator-panel,
+body.luxury-theme #appView .fx-box,
+body.luxury-theme #appView .orderbook-side,
+body.luxury-theme #appView .setting-row,
+body.luxury-theme #appView .gainer-card,
+body.luxury-theme #appView .asset-row,
+body.luxury-theme #appView .digiarz-v2-dashboard,
+body.luxury-theme #appView .da-v2-market-list,
+body.luxury-theme #appView .da-market-glass,
+body.luxury-theme #appView .da-v2-account-card,
+body.luxury-theme #appView .dashboard-activity-panel{
+  background:rgba(255,255,255,.66)!important;
+  color:#27345f!important;
+  border-color:rgba(143,158,225,.19)!important;
+  box-shadow:0 12px 34px rgba(80,96,170,.075),inset 0 1px 0 rgba(255,255,255,.9)!important;
+  backdrop-filter:blur(19px) saturate(140%)!important;
+  -webkit-backdrop-filter:blur(19px) saturate(140%)!important;
+}
+body.luxury-theme #appView .hero,
+body.luxury-theme #appView .da-v2-hero,
+body.luxury-theme #appView .market-hero-v34{
+  background:linear-gradient(125deg,rgba(245,241,255,.90),rgba(224,235,255,.86),rgba(222,243,255,.90))!important;
+  color:#27345f!important;
+  border-color:rgba(143,158,225,.22)!important;
+  box-shadow:0 14px 38px rgba(80,96,170,.09)!important;
+}
+body.luxury-theme #appView h1,
+body.luxury-theme #appView h2,
+body.luxury-theme #appView h3,
+body.luxury-theme #appView .brand,
+body.luxury-theme #appView .section-title,
+body.luxury-theme #appView .price-stack{color:#27345f!important}
+body.luxury-theme #appView .brand span:first-child,
+body.luxury-theme #appView .hero-mark{color:#7181dc!important}
+body.luxury-theme #appView button:not(.secondary),
+body.luxury-theme #authView .auth-actions button{
+  background:linear-gradient(135deg,#c9c8ff,#a9d9fa)!important;
+  color:#293b70!important;
+  border-color:rgba(255,255,255,.92)!important;
+  box-shadow:0 7px 18px rgba(91,117,195,.12)!important;
+}
+body.luxury-theme #appView input,
+body.luxury-theme #appView select,
+body.luxury-theme #appView textarea,
+body.luxury-theme #authView input,
+body.luxury-theme #authView select{
+  background:rgba(255,255,255,.78)!important;
+  color:#27345f!important;
+  border-color:rgba(143,158,225,.24)!important;
+}
+body.luxury-theme #appView .muted,
+body.luxury-theme #appView .small,
+body.luxury-theme #appView .market-note{color:#687ba7!important}
+body.luxury-theme #appView .coin,
+body.luxury-theme #appView .da-market-coin-card{
+  background:transparent!important;
+  border:0!important;
+  border-bottom:1px solid rgba(143,158,225,.16)!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+}
+body.luxury-theme #appView .coin-icon,
+body.luxury-theme #appView .da-market-logo,
+body.luxury-theme #appView .da-market-logo-inner{
+  border:0!important;outline:0!important;box-shadow:none!important;
+}
+body.luxury-theme #appView .favorite-btn,
+body.luxury-theme #appView .da-market-favorite{
+  border:0!important;outline:0!important;box-shadow:none!important;
+  background:transparent!important;
+}
+body.luxury-theme #authView,
+body.luxury-theme #authView .auth-form{
+  color:#27345f!important;
+}
+body.luxury-theme #authView .auth-reference-layout,
+body.luxury-theme #authView .auth-form{
+  background:rgba(255,255,255,.66)!important;
+  border-color:rgba(143,158,225,.20)!important;
+  box-shadow:0 18px 48px rgba(80,96,170,.10)!important;
+  backdrop-filter:blur(22px) saturate(145%)!important;
+  -webkit-backdrop-filter:blur(22px) saturate(145%)!important;
+}
+body.luxury-theme #authView .auth-reference-visual{
+  background:linear-gradient(135deg,#f0edff 0%,#e5edff 54%,#dff2ff 100%)!important;
+}
+
+/* DIGIARZ-ALL-PAGES-GEOMETRY-20261122: page-specific layout finish, shared across all themes. */
+#appView [id^="tab-"]{display:block;box-sizing:border-box;min-width:0;max-width:100%}
+#appView [id^="tab-"]>*{box-sizing:border-box;min-width:0;max-width:100%}
+#appView #tab-dashboard .da-v2-topline,
+#appView #tab-dashboard .da-v2-section-head,
+#appView #tab-markets .section-title,
+#appView #tab-toman .section-title,
+#appView #tab-chart .section-title,
+#appView #tab-trade .section-title,
+#appView #tab-assets .section-title,
+#appView #tab-orders .section-title,
+#appView #tab-history .section-title,
+#appView #tab-admin .section-title,
+#appView #tab-settings .section-title{
+ box-sizing:border-box;min-width:0;max-width:100%;
+ display:flex;align-items:center;justify-content:space-between;
+ flex-wrap:wrap;gap:10px;
+}
+#appView #tab-dashboard .da-v2-quick-grid,
+#appView #tab-dashboard .da-market-toolbar,
+#appView #tab-markets .market-tools,
+#appView #tab-assets .asset-summary-grid,
+#appView #tab-assets .asset-tools,
+#appView #tab-orders .market-tools,
+#appView #tab-history .history-filters,
+#appView #tab-admin .daily-ad-admin-grid,
+#appView #tab-admin .market-tools,
+#appView #tab-settings .settings-grid{
+ min-width:0;max-width:100%;box-sizing:border-box;
+}
+#appView #tab-toman .toman-toolbar,
+#appView #tab-chart .asset-detail-head,
+#appView #tab-trade .trade-workspace-banner-v35,
+#appView #tab-trade .trade-market-heading,
+#appView #tab-history .history-date-presets{
+ display:flex;align-items:center;flex-wrap:wrap;gap:9px;
+ min-width:0;max-width:100%;box-sizing:border-box;
+}
+#appView #tab-chart .trade-grid,
+#appView #tab-trade .trade-market-grid,
+#appView #tab-trade .indicator-grid,
+#appView #tab-admin .grid{
+ min-width:0;max-width:100%;
+}
+#appView #tab-toman .toman-table-wrap,
+#appView #tab-history .table-wrap,
+#appView #tab-admin .admin-table-wrap{
+ width:100%;min-width:0;max-width:100%;overflow-x:auto;
+ -webkit-overflow-scrolling:touch;
+}
+#appView #tab-dashboard .da-market-glass,
+#appView #tab-markets .market-hero-v34,
+#appView #tab-chart .detail-section,
+#appView #tab-trade .detail-section,
+#appView #tab-assets .asset-summary-grid,
+#appView #tab-orders .market-list,
+#appView #tab-history .table-wrap,
+#appView #tab-admin .detail-section,
+#appView #tab-settings .setting-row{
+ min-width:0;max-width:100%;box-sizing:border-box;
+}
+#appView #tab-dashboard input,
+#appView #tab-markets input,#appView #tab-markets select,
+#appView #tab-toman input,#appView #tab-toman select,
+#appView #tab-assets input,#appView #tab-assets select,
+#appView #tab-orders input,#appView #tab-orders select,
+#appView #tab-history input,#appView #tab-history select,
+#appView #tab-admin input,#appView #tab-admin select,
+#appView #tab-admin textarea,
+#appView #tab-settings input,#appView #tab-settings select{
+ min-width:0;max-width:100%;box-sizing:border-box;
+}
+@media(max-width:760px){
+ #appView #tab-dashboard .da-v2-quick-grid,
+ #appView #tab-dashboard .da-market-toolbar,
+ #appView #tab-markets .market-tools,
+ #appView #tab-assets .asset-summary-grid,
+ #appView #tab-assets .asset-tools,
+ #appView #tab-orders .market-tools,
+ #appView #tab-history .history-filters,
+ #appView #tab-admin .daily-ad-admin-grid,
+ #appView #tab-admin .market-tools,
+ #appView #tab-settings .settings-grid{
+  grid-template-columns:minmax(0,1fr)!important;
+ }
+ #appView #tab-toman .toman-toolbar,
+ #appView #tab-chart .asset-detail-head,
+ #appView #tab-trade .trade-workspace-banner-v35,
+ #appView #tab-trade .trade-market-heading,
+ #appView #tab-history .history-date-presets{
+  align-items:stretch;
+ }
+ #appView #tab-dashboard .da-v2-topline>*,
+ #appView #tab-markets .section-title>*,
+ #appView #tab-toman .section-title>*,
+ #appView #tab-chart .section-title>*,
+ #appView #tab-trade .section-title>*,
+ #appView #tab-assets .section-title>*,
+ #appView #tab-orders .section-title>*,
+ #appView #tab-history .section-title>*,
+ #appView #tab-admin .section-title>*,
+ #appView #tab-settings .section-title>*{
+  min-width:0;max-width:100%;
+ }
+}
+@media(max-width:390px){
+ #appView [id^="tab-"]{padding-inline:0}
+ #appView #tab-history .history-filters,
+ #appView #tab-admin .daily-ad-admin-grid{gap:8px}
+ #appView #tab-settings .setting-row{gap:8px;align-items:flex-start}
 }
 </style>
 

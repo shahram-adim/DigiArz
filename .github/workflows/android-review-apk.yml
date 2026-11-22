@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - redesign/indigo-glass-layout-fix-2026-11-21
+      - fix/pure-white-glass-dashboard-market-2026-11-21-v2
     paths:
       - .github/workflows/android-review-apk.yml
       - index.html
@@ -29,10 +30,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
-      - name: Checkout approved pale-blue glass biometric candidate
+      - name: Checkout selected DigiArz review candidate
         uses: actions/checkout@v4
         with:
-          ref: redesign/indigo-glass-layout-fix-2026-11-21
+          ref: ${{ github.ref }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -99,7 +100,7 @@ jobs:
           APK="android/app/build/outputs/apk/debug/app-debug.apk"
           {
             echo "app=DigiArz"
-            echo "source_branch=redesign/indigo-glass-layout-fix-2026-11-21"
+            echo "source_branch=$GITHUB_REF_NAME"
             echo "source_commit=$(git rev-parse HEAD)"
             echo "workflow_run_id=$GITHUB_RUN_ID"
             echo "built_at_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -110,7 +111,7 @@ jobs:
       - name: Upload review APK artifact only
         uses: actions/upload-artifact@v4
         with:
-          name: DigiArz-Pale-Blue-Glass-Biometric-APK
+          name: DigiArz-White-Glass-Review-APK
           path: |
             android/app/build/outputs/apk/debug/app-debug.apk
             android/app/build/outputs/apk/debug/BUILD-INFO.txt
