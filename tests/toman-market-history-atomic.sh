@@ -23,21 +23,12 @@ SQL
 psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261122130000_atomic_toman_history_interval.sql
 
 # Verify the RPC is exposed only to the trusted backend role.
-psql -v ON_ERROR_STOP=1 <<'SQL'
-do $
-begin
-  if not has_function_privilege('service_role', 'public.insert_market_toman_history_if_due(jsonb)', 'EXECUTE') then
-    raise exception 'service_role must be able to execute the history RPC';
-  end if;
-  if has_function_privilege('anon', 'public.insert_market_toman_history_if_due(jsonb)', 'EXECUTE') then
-    raise exception 'anon must not be able to execute the history RPC';
-  end if;
-  if has_function_privilege('authenticated', 'public.insert_market_toman_history_if_due(jsonb)', 'EXECUTE') then
-    raise exception 'authenticated must not be able to execute the history RPC';
-  end if;
-end;
-$;
-SQL
+service_exec=$(psql -At -v ON_ERROR_STOP=1 -c "select has_function_privilege('service_role', 'public.insert_market_toman_history_if_due(jsonb)', 'EXECUTE')")
+anon_exec=$(psql -At -v ON_ERROR_STOP=1 -c "select has_function_privilege('anon', 'public.insert_market_toman_history_if_due(jsonb)', 'EXECUTE')")
+authenticated_exec=$(psql -At -v ON_ERROR_STOP=1 -c "select has_function_privilege('authenticated', 'public.insert_market_toman_history_if_due(jsonb)', 'EXECUTE')")
+[[ "$service_exec" == "t" ]] || { echo "service_role cannot execute history RPC"; exit 1; }
+[[ "$anon_exec" == "f" ]] || { echo "anon unexpectedly can execute history RPC"; exit 1; }
+[[ "$authenticated_exec" == "f" ]] || { echo "authenticated unexpectedly can execute history RPC"; exit 1; }
 
 payload='[{"exchange":"nobitex","asset_symbol":"BTC","price_toman":3000000000,"recorded_at":"2026-11-22T13:00:00Z"}]'
 first=$(psql -At -v ON_ERROR_STOP=1 -c "select public.insert_market_toman_history_if_due('$payload'::jsonb)")
