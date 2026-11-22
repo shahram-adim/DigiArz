@@ -2798,7 +2798,7 @@ body.luxury-theme .tag{background:rgba(199,184,255,.12)!important;border-color:r
  <div id="exchangeSyncStats" class="grid"><div class="muted small">برای دریافت گزارش، این بخش را باز کنید.</div></div>
  <h4>وضعیت منابع</h4><div id="exchangeSyncSources" class="market-list"><div class="muted small">در انتظار دریافت گزارش…</div></div>
  <div class="detail-section"><div class="section-title"><h4>موارد نیازمند بررسی تطبیق</h4><span class="muted small">حداکثر ۱۰۰ مورد اخیر</span></div><div id="exchangeSyncIssues" class="market-list"><div class="muted small">در انتظار دریافت گزارش…</div></div></div>
-</div><div class="detail-section"><div class="section-title"><h3>مدیریت کاربران و اعتبار مجازی</h3><button type="button" class="secondary" id="adminRefreshBtn">به‌روزرسانی فهرست</button></div><div class="notice">هر تغییر اعتبار با دلیل، موجودی قبل و بعد و شناسه مدیر ثبت می‌شود. موجودی رزروشده سفارش‌های باز قابل برداشت نیست.</div><div id="adminUsersMsg" class="notice hidden" role="status"></div><div id="adminUsersList"><div class="muted small">برای دریافت فهرست کاربران، بخش مدیریت را باز کنید.</div></div></div><div class="detail-section"><div class="section-title"><h3>افزودن ارز به فهرست «ارزهای جدید»</h3><button type="button" class="secondary" id="adminAssetListingsRefreshBtn">به‌روزرسانی فهرست</button></div><div class="notice">ارزهای شناسایی‌شده از منابع صرافی‌ها پس از تطبیق دقیق با کاتالوگ، دریافت قیمت معتبر و عبور از کنترل نقدشوندگی و تداخل نماد، خودکار به فهرست اضافه و برای خریدوفروش آزمایشی فعال می‌شوند؛ تأیید مدیر لازم نیست. این بخش فقط برای مدیریت دستی فهرست‌های ویژه مدیر است.</div><div class="market-tools"><input id="adminAssetSearch" type="search" placeholder="جست‌وجوی نام یا نماد ارز؛ مثل SOL" dir="auto"><button type="button" id="adminAssetSearchBtn">جست‌وجو در کاتالوگ</button></div><div id="adminAssetCandidates" class="market-list"><div class="muted small">برای جست‌وجو، نام یا نماد ارز را وارد کنید.</div></div><div class="detail-section"><h4>ارزهای اضافه‌شده توسط مدیر</h4><div id="adminAssetListings" class="market-list"><div class="muted small">در حال دریافت فهرست…</div></div></div><div id="adminAssetMsg" class="notice hidden" role="status"></div><div class="detail-section"><div class="section-title"><h3>بررسی و فعال‌سازی جفت‌ارزها</h3><button type="button" class="secondary" id="adminPairReviewRefreshBtn">بررسی دوباره قیمت‌ها</button></div><div class="notice">فعال‌سازی خودکار جفت‌ارزهای کشف‌شده: قیمت CoinGecko تازه‌تر از ۲ دقیقه، داده کاتالوگ تازه‌تر از ۲۴ ساعت، حجم ۲۴ساعته حداقل یک میلیون دلار، رتبه بازار حداکثر ۲۰۰۰ (در صورت وجود)، تطبیق یکتای نماد و مشاهده فعال از منبع صرافی در ۴۸ ساعت اخیر. این فرایند هر دقیقه اجرا می‌شود و تأیید مدیر نمی‌خواهد.</div><div id="adminPairMsg" class="notice hidden" role="status"></div><div id="adminPairReview" class="market-list"><div class="muted small">برای بررسی وضعیت جفت‌ارزها، فهرست را به‌روزرسانی کنید.</div></div></div></div></section><section id="tab-settings" class="card hidden"><div class="section-title"><h2>تنظیمات برنامه</h2><span class="live">شخصی‌سازی DigiArz</span></div><div id="accountStatusBox" class="notice hidden" role="status"></div><div id="deactivateAccountPanel" class="setting-row"><div><strong>وضعیت حساب</strong><small>با غیرفعال‌سازی، ورود به امکانات حساب و انجام معامله متوقف می‌شود؛ اطلاعات هویتی، کیف پول و سوابق مالی حذف نمی‌شوند.</small></div><button id="deactivateAccountBtn" class="danger" type="button">غیرفعال‌سازی حساب</button></div><div id="reactivateAccountPanel" class="setting-row hidden" style="margin-top:12px"><div style="flex:1"><strong>فعال‌سازی دوباره حساب</strong><small>برای امنیت، رمز عبور را دوباره وارد کنید. احراز هویت تازه لازم است.</small><input id="reactivatePassword" type="password" autocomplete="current-password" placeholder="رمز عبور فعلی" dir="ltr" style="margin-top:9px"></div><button id="reactivateAccountBtn" type="button">فعال‌سازی حساب</button></div><div id="accountActionMsg" class="notice hidden" role="status"></div><div class="settings-grid" style="margin-top:14px"><div class="setting-row theme-setting-row"><div><strong>پوسته برنامه</strong><small>یکی از سه فضای بصری DigiArz را انتخاب کنید؛ انتخاب شما روی همین دستگاه ذخیره می‌شود.</small></div><div class="theme-choice-group" role="group" aria-label="انتخاب پوسته"><button type="button" data-theme-choice="light" aria-pressed="false">☀ روشن</button><button type="button" data-theme-choice="dark" aria-pressed="false">☾ تاریک</button><button type="button" data-theme-choice="luxury" aria-pressed="false">✧ آبی شیشه‌ای</button></div><button id="themeToggle" class="theme-switch theme-cycle-button" type="button">تغییر تم</button></div><div class="setting-row"><div><strong>زبان رابط کاربری</strong><small>زبان فعلی برنامه فارسی است.</small></div><span class="tag">فارسی</span></div><div class="setting-row"><div><strong>نوع حساب</strong><small>تمام موجودی‌ها و معاملات این نسخه مجازی هستند.</small></div><span class="tag">DEMO</span></div><div class="setting-row"><div><strong>اطلاعات نسخه</strong><small>DigiArz · نسخه آزمایشی وب سازگار با اندروید</small></div><span class="muted small">Account controls</span></div></div><div class="notice" style="margin-top:14px">تنظیمات ظاهری فقط روی دستگاه و مرورگر فعلی ذخیره می‌شوند. غیرفعال‌سازی حساب اطلاعات هویتی و سوابق معاملات را حفظ می‌کند.</div></section>
+</div><div class="detail-section"><div class="section-title"><h3>مدیریت کاربران و اعتبار مجازی</h3><button type="button" class="secondary" id="adminRefreshBtn">به‌روزرسانی فهرست</button></div><div class="notice">هر تغییر اعتبار با دلیل، موجودی قبل و بعد و شناسه مدیر ثبت می‌شود. موجودی رزروشده سفارش‌های باز قابل برداشت نیست.</div><div id="adminUsersMsg" class="notice hidden" role="status"></div><div id="adminUsersList"><div class="muted small">برای دریافت فهرست کاربران، بخش مدیریت را باز کنید.</div></div></div><div class="detail-section"><div class="section-title"><h3>افزودن ارز به فهرست «ارزهای جدید»</h3><button type="button" class="secondary" id="adminAssetListingsRefreshBtn">به‌روزرسانی فهرست</button></div><div class="notice">ارزهای شناسایی‌شده از منابع صرافی‌ها پس از تطبیق دقیق با کاتالوگ، دریافت قیمت معتبر و عبور از کنترل نقدشوندگی و تداخل نماد، خودکار به فهرست اضافه و برای خریدوفروش آزمایشی فعال می‌شوند؛ تأیید مدیر لازم نیست. این بخش فقط برای مدیریت دستی فهرست‌های ویژه مدیر است.</div><div class="market-tools"><input id="adminAssetSearch" type="search" placeholder="جست‌وجوی نام یا نماد ارز؛ مثل SOL" dir="auto"><button type="button" id="adminAssetSearchBtn">جست‌وجو در کاتالوگ</button></div><div id="adminAssetCandidates" class="market-list"><div class="muted small">برای جست‌وجو، نام یا نماد ارز را وارد کنید.</div></div><div class="detail-section"><h4>ارزهای اضافه‌شده توسط مدیر</h4><div id="adminAssetListings" class="market-list"><div class="muted small">در حال دریافت فهرست…</div></div></div><div id="adminAssetMsg" class="notice hidden" role="status"></div><div class="detail-section"><div class="section-title"><h3>بررسی و فعال‌سازی جفت‌ارزها</h3><button type="button" class="secondary" id="adminPairReviewRefreshBtn">بررسی دوباره قیمت‌ها</button></div><div class="notice">فعال‌سازی خودکار جفت‌ارزهای کشف‌شده: قیمت CoinGecko تازه‌تر از ۲ دقیقه، داده کاتالوگ تازه‌تر از ۲۴ ساعت، حجم ۲۴ساعته حداقل یک میلیون دلار، رتبه بازار حداکثر ۲۰۰۰ (در صورت وجود)، تطبیق یکتای نماد و مشاهده فعال از منبع صرافی در ۴۸ ساعت اخیر. این فرایند هر دقیقه اجرا می‌شود و تأیید مدیر نمی‌خواهد.</div><div id="adminPairMsg" class="notice hidden" role="status"></div><div id="adminPairReview" class="market-list"><div class="muted small">برای بررسی وضعیت جفت‌ارزها، فهرست را به‌روزرسانی کنید.</div></div></div></div></section><section id="tab-settings" class="card hidden"><div class="section-title"><h2>تنظیمات برنامه</h2><span class="live">شخصی‌سازی DigiArz</span></div><div id="accountStatusBox" class="notice hidden" role="status"></div><div id="deactivateAccountPanel" class="setting-row"><div><strong>وضعیت حساب</strong><small>با غیرفعال‌سازی، ورود به امکانات حساب و انجام معامله متوقف می‌شود؛ اطلاعات هویتی، کیف پول و سوابق مالی حذف نمی‌شوند.</small></div><button id="deactivateAccountBtn" class="danger" type="button">غیرفعال‌سازی حساب</button></div><div id="reactivateAccountPanel" class="setting-row hidden" style="margin-top:12px"><div style="flex:1"><strong>فعال‌سازی دوباره حساب</strong><small>برای امنیت، رمز عبور را دوباره وارد کنید. احراز هویت تازه لازم است.</small><input id="reactivatePassword" type="password" autocomplete="current-password" placeholder="رمز عبور فعلی" dir="ltr" style="margin-top:9px"></div><button id="reactivateAccountBtn" type="button">فعال‌سازی حساب</button></div><div id="accountActionMsg" class="notice hidden" role="status"></div><div class="settings-grid" style="margin-top:14px"><div class="setting-row theme-setting-row"><div><strong>پوسته برنامه</strong><small>یکی از سه فضای بصری DigiArz را انتخاب کنید؛ انتخاب شما روی همین دستگاه ذخیره می‌شود.</small></div><div class="theme-choice-group" role="group" aria-label="انتخاب پوسته"><button type="button" data-theme-choice="light" aria-pressed="false">☀ روشن</button><button type="button" data-theme-choice="dark" aria-pressed="false">☾ تاریک</button><button type="button" data-theme-choice="luxury" aria-pressed="false">✧ نیلی شیشه‌ای</button></div><button id="themeToggle" class="theme-switch theme-cycle-button" type="button">تغییر تم</button></div><div class="setting-row"><div><strong>زبان رابط کاربری</strong><small>زبان فعلی برنامه فارسی است.</small></div><span class="tag">فارسی</span></div><div class="setting-row"><div><strong>نوع حساب</strong><small>تمام موجودی‌ها و معاملات این نسخه مجازی هستند.</small></div><span class="tag">DEMO</span></div><div class="setting-row"><div><strong>اطلاعات نسخه</strong><small>DigiArz · نسخه آزمایشی وب سازگار با اندروید</small></div><span class="muted small">Account controls</span></div></div><div class="notice" style="margin-top:14px">تنظیمات ظاهری فقط روی دستگاه و مرورگر فعلی ذخیره می‌شوند. غیرفعال‌سازی حساب اطلاعات هویتی و سوابق معاملات را حفظ می‌کند.</div></section>
 </main>
 <div class="footer">DigiArz Demo · پول واقعی و واریز/برداشت واقعی در این نسخه وجود ندارد.<br>این نسخه برای آزمایش رابط کاربری و معاملات مجازی است.</div>
 </div>
@@ -3191,8 +3191,8 @@ function applyTheme(theme){
   el.classList.toggle('active',active);el.setAttribute('aria-pressed',active?'true':'false');
  });
  const meta=document.querySelector('meta[name="theme-color"]');
- if(meta)meta.content=light?'#f4f7fb':luxury?'#eaf3ff':'#080d1b';
- const palette=light?{bg:'#ffffff',text:'#263244',grid:'#edf0f4',line:'#dce1e8'}:luxury?{bg:'#eaf3ff',text:'#183b5c',grid:'#d7eafa',line:'#b8d5eb'}:{bg:'#101318',text:'#c7cbd1',grid:'#202630',line:'#30343d'};
+ if(meta)meta.content=light?'#f4f7fb':luxury?'#0c1024':'#080d1b';
+ const palette=light?{bg:'#ffffff',text:'#263244',grid:'#edf0f4',line:'#dce1e8'}:luxury?{bg:'#0c1024',text:'#f0f1ff',grid:'#30365f',line:'#59618d'}:{bg:'#101318',text:'#c7cbd1',grid:'#202630',line:'#30343d'};
  const options={layout:{background:{color:palette.bg},textColor:palette.text},grid:{vertLines:{color:palette.grid},horzLines:{color:palette.grid}},rightPriceScale:{borderColor:palette.line},timeScale:{borderColor:palette.line}};
  if(chart)chart.applyOptions(options);
  if(volumeChart)volumeChart.applyOptions(options);
@@ -4730,16 +4730,23 @@ body.luxury-theme .mobile-bottom-nav{background:rgba(255,255,255,.86)!important;
 body.luxury-theme .tag{background:rgba(120,200,255,.16)!important;border-color:rgba(75,158,215,.25)!important;color:#315b7b!important}
 
 
-/* Final cascade guard: pale sky-blue glass must win over earlier indigo theme rules. */
+/* Final cascade guard: deep indigo glass must win over legacy pale-blue overrides. */
+body.luxury-theme{
+ min-height:100vh;color-scheme:dark!important;--bg:#090d20!important;
+ --panel:rgba(24,31,67,.76)!important;--panel2:rgba(33,42,83,.72)!important;
+ --line:rgba(145,157,220,.26)!important;--text:#f0f1ff!important;
+ --muted:#aeb5d3!important;--field:rgba(13,19,48,.86)!important;
+ background:radial-gradient(ellipse at 14% 4%,rgba(73,83,169,.38),transparent 36%),radial-gradient(ellipse at 88% 16%,rgba(123,94,190,.22),transparent 32%),linear-gradient(145deg,#090d20,#151b3c 54%,#0b1026)!important;
+ color:#f0f1ff!important;
+}
+body.luxury-theme::before{background:transparent!important;opacity:0!important}
+body.luxury-theme #authView,
 body.luxury-theme #appView,
-body.luxury-theme #appView.app-view-active{background:transparent!important;color:#183b5c!important}
+body.luxury-theme #appView.app-view-active,
+body.luxury-theme #appView .wrap{background:transparent!important;color:#f0f1ff!important}
 body.luxury-theme #appView .top,
 body.luxury-theme #appView .tabs,
-body.luxury-theme #appView .mobile-bottom-nav{
- background:rgba(255,255,255,.76)!important;border:1px solid rgba(111,177,224,.28)!important;
- color:#315b7b!important;box-shadow:0 10px 30px rgba(64,127,176,.09)!important;
- backdrop-filter:blur(20px)!important;-webkit-backdrop-filter:blur(20px)!important;
-}
+body.luxury-theme #appView .mobile-bottom-nav,
 body.luxury-theme #appView .card,
 body.luxury-theme #appView .stat,
 body.luxury-theme #appView .trade-box,
@@ -4751,62 +4758,63 @@ body.luxury-theme #appView .setting-row,
 body.luxury-theme #appView .gainer-card,
 body.luxury-theme #appView .asset-row,
 body.luxury-theme #appView .digiarz-v2-dashboard,
-body.luxury-theme #appView .da-v2-market-list{
- background:rgba(255,255,255,.64)!important;border:1px solid rgba(111,177,224,.22)!important;
- color:#183b5c!important;box-shadow:0 12px 34px rgba(64,127,176,.08),inset 0 1px 0 rgba(255,255,255,.82)!important;
- backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;
+body.luxury-theme #appView .da-v2-market-list,
+body.luxury-theme #authView .auth-form,
+body.luxury-theme #authView .auth-security{
+ background:rgba(24,31,67,.70)!important;color:#f0f1ff!important;
+ border:1px solid rgba(145,157,220,.24)!important;
+ box-shadow:0 12px 34px rgba(0,0,0,.22),inset 0 1px 0 rgba(210,216,255,.06)!important;
+ backdrop-filter:blur(20px)!important;-webkit-backdrop-filter:blur(20px)!important;
 }
 body.luxury-theme #appView .hero{
- background:linear-gradient(120deg,rgba(255,255,255,.9),rgba(224,242,255,.84),rgba(244,250,255,.92))!important;
- border:1px solid rgba(111,177,224,.28)!important;box-shadow:0 14px 36px rgba(64,127,176,.09)!important;
- color:#183b5c!important;
+ background:linear-gradient(120deg,rgba(41,48,96,.88),rgba(67,55,116,.76),rgba(27,35,76,.9))!important;
+ border:1px solid rgba(161,151,231,.30)!important;color:#f4f2ff!important;
+ box-shadow:0 14px 36px rgba(0,0,0,.22)!important;
 }
 body.luxury-theme #appView .brand,
 body.luxury-theme #appView h1,body.luxury-theme #appView h2,body.luxury-theme #appView h3,
 body.luxury-theme #appView .stat,body.luxury-theme #appView .performance-item,
-body.luxury-theme #appView .section-title,
-body.luxury-theme #appView .price-stack{color:#183b5c!important}
+body.luxury-theme #appView .section-title,body.luxury-theme #appView .price-stack,
+body.luxury-theme #authView .auth-form,
+body.luxury-theme #authView .auth-form label{color:#f0f1ff!important}
+body.luxury-theme #appView .muted,
+body.luxury-theme #appView small,
+body.luxury-theme #authView .auth-security{color:#b8bfdf!important}
 body.luxury-theme #appView .brand span:first-child,
-body.luxury-theme #appView .hero-mark{color:#398fc9!important}
-body.luxury-theme #appView button:not(.secondary){
- background:linear-gradient(135deg,#b8ddf8,#8fc7ef)!important;color:#153b5b!important;
- border:1px solid rgba(255,255,255,.9)!important;box-shadow:0 5px 16px rgba(64,127,176,.14)!important;
+body.luxury-theme #appView .hero-mark{color:#c7b8ff!important}
+body.luxury-theme #appView button:not(.secondary),
+body.luxury-theme #authView .auth-form .auth-actions #loginBtn,
+body.luxury-theme #authView .auth-form .auth-actions #signupBtn{
+ background:linear-gradient(135deg,#8069d8,#5e4db0)!important;color:#fff!important;
+ border:1px solid rgba(198,185,255,.38)!important;box-shadow:0 6px 18px rgba(7,8,30,.26)!important;
 }
 body.luxury-theme #appView button.secondary,
 body.luxury-theme #appView .tabs button,
 body.luxury-theme #appView .timeframes button{
- background:rgba(255,255,255,.64)!important;color:#315b7b!important;
- border:1px solid rgba(111,177,224,.22)!important;box-shadow:none!important;
+ background:rgba(39,47,91,.76)!important;color:#e3e4ff!important;
+ border:1px solid rgba(145,157,220,.22)!important;box-shadow:none!important;
 }
 body.luxury-theme #appView .tabs button.active,
 body.luxury-theme #appView .timeframes button.active{
- background:linear-gradient(135deg,#c5e4fb,#9dcef1)!important;color:#153b5b!important;
- border-color:rgba(255,255,255,.92)!important;
+ background:linear-gradient(135deg,#6c5bc1,#51439b)!important;color:#fff!important;
+ border-color:rgba(198,185,255,.42)!important;
 }
 body.luxury-theme #appView input,
 body.luxury-theme #appView select,
-body.luxury-theme #appView textarea{
- background:rgba(255,255,255,.84)!important;color:#183b5c!important;
- border:1px solid rgba(111,177,224,.3)!important;
+body.luxury-theme #appView textarea,
+body.luxury-theme #authView .auth-form input,
+body.luxury-theme #authView .auth-form select,
+body.luxury-theme #authView .auth-form textarea{
+ background:rgba(13,19,48,.88)!important;color:#f0f1ff!important;
+ border:1px solid rgba(145,157,220,.30)!important;
 }
 body.luxury-theme #appView #tab-markets .coin,
 body.luxury-theme #appView .da-v2-market-list .coin{
  background:transparent!important;border:0!important;box-shadow:none!important;
 }
-body.luxury-theme #appView .tag{background:rgba(120,200,255,.16)!important;border-color:rgba(75,158,215,.25)!important;color:#315b7b!important}
-body.luxury-theme #authView .auth-form .auth-actions #loginBtn,
-body.luxury-theme #authView .auth-form .auth-actions #signupBtn{
- background:linear-gradient(135deg,#b8ddf8,#8fc7ef)!important;color:#153b5b!important;
- border:1px solid rgba(255,255,255,.92)!important;box-shadow:0 7px 18px rgba(64,127,176,.14)!important;
+body.luxury-theme #appView .tag{
+ background:rgba(130,112,218,.18)!important;border-color:rgba(161,151,231,.28)!important;color:#d8d0ff!important;
 }
-body.luxury-theme #authView .auth-form,
-body.luxury-theme #authView .auth-form .auth-security{
- color:#183b5c!important;
-}
-
-
-/* Keep the entire theme-3 page on its own pale-blue glass canvas; no grey app shell. */
-body.luxury-theme{min-height:100vh;background:radial-gradient(ellipse at 12% 8%,rgba(120,200,255,.36),transparent 36%),radial-gradient(ellipse at 88% 84%,rgba(183,215,255,.42),transparent 40%),linear-gradient(135deg,#f0f9ff 0%,#e2f2ff 52%,#d9edff 100%)!important}
 /* Final light-theme guard: clean white and neutral frosted glass, distinct from pale-blue glass. */
 body.light-theme{
  color-scheme:light!important;--bg:#ffffff;--panel:rgba(255,255,255,.88);
