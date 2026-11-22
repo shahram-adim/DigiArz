@@ -698,3 +698,19 @@ test('top five gainers and losers are removed from markets and shown as horizont
   assert.match(css, /overflow-x:auto/);
   assert.match(css, /@media\(max-width:760px\)[\s\S]*?grid-template-columns:minmax\(0,1fr\)/);
 });
+
+
+test('dashboard top spacing and legacy hero regression', () => {
+  assert.match(html, /#appView>\.hero\{display:none!important\}/,
+    'obsolete pre-tab hero is hidden while the redesigned dashboard hero remains');
+  assert.match(html, /#tab-dashboard\.digiarz-v2-dashboard\{[\s\S]*?width:100%[\s\S]*?margin:0!important/,
+    'dashboard panel uses the available width without inherited card spacing');
+  assert.match(html, /body\.luxury-theme #appView\{[\s\S]*?margin:8px auto 30px!important/,
+    'theme three app shell no longer leaves an oversized top gap');
+  assert.match(html, /body\.luxury-theme #appView>\.market-announcement\{[\s\S]*?margin:0 0 10px!important/,
+    'theme three announcement is aligned to the top of the app shell');
+  assert.match(html, /@media\(max-width:760px\)[\s\S]*?#tab-dashboard \.da-v2-quick-grid\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important/,
+    'dashboard quick actions collapse cleanly on mobile');
+  assert.match(html, /@media\(max-width:390px\)[\s\S]*?#tab-dashboard \.da-v2-hero\{grid-template-columns:minmax\(0,1fr\) 78px!important/,
+    'dashboard hero remains constrained on narrow phones');
+});
