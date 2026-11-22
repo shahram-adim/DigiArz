@@ -1270,3 +1270,10 @@
 - [x] تست مسیر hash منقضی‌شده در مجموعهٔ HTTP اجرا شده است و مرحلهٔ HTTP integration با موفقیت گذشت.
 - [!] Exact-decimal workflow `45029200017` هنوز در مرحلهٔ PostgreSQL arithmetic regression است؛ نتیجهٔ نهایی آن تا این لحظه اعلام نشده.
 - [x] PR #51 همچنان Draft است و هیچ تغییر Production انجام نشده است.
+
+
+### اصلاح ساختار تست‌ها و CI پس از افزودن تست صفحه‌بندی Bit24 — ۲۲ نوامبر ۲۰۲۶
+- [x] خطای CI در commit قبلی ناشی از قرار گرفتن تست Bit24 درون test step مربوط به Kifpool بود؛ stepها جدا و closure اضافی حذف شد.
+- [x] Edge workflow `45029355064` پس از اصلاح با SUCCESS کامل شد: type-check، HTTP tests (از جمله Kifpool APQ fallback و Bit24 page-two)، dedupe و PostgreSQL atomic-history/concurrency.
+- [x] Exact-decimal workflow قبلی `45029200017` نیز با SUCCESS کامل شد. اجرای تازه‌تر `45029355083` هنوز در مرحلهٔ setup Node قرار دارد.
+- [x] آخرین وضعیت Production همچنان بدون تغییر است؛ هیچ deploy/migration یا write انجام نشده است.
