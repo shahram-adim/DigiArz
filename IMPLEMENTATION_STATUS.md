@@ -1250,3 +1250,16 @@
 - [x] تست HTTP برای سناریوی hash منقضی‌شده اضافه شد: درخواست اول با خطای persisted query، درخواست دوم با متن GraphQL و دریافت دادهٔ معتبر.
 - [!] آخرین commit تست/کد `02ac9ffbad1c6fa39eb26b634fdb9999d4d2a7bf` است؛ اجرای CI این commit هنوز در زمان ثبت گزارش ظاهر نشده، پس موفقیت آن تأیید نشده است.
 - [x] PR #51 همچنان Draft است؛ Production بدون تغییر باقی مانده است.
+
+
+### بازبینی عمیق‌تر freshness و adapterهای Bit24/Kifpool — ۲۲ نوامبر ۲۰۲۶
+- [x] اجرای Edge CI شمارهٔ `45028764738` روی commit `8cdc42ebfd72c6794097137657f150a8b0174668` موفق شد: Deno type-check، HTTP integration، dedupe و PostgreSQL atomic-history/concurrency.
+- [x] اجرای exact-decimal CI شمارهٔ `45028764779` روی همان commit موفق شد: محاسبات اعشاری، PostgreSQL، preflight/rollback migration، مسیرهای سفارش و raceهای دو session.
+- [x] یک نقص cache شناسایی و اصلاح شد: freshness اکنون با قدیمی‌ترین ردیف `fetched_at.asc` سنجیده می‌شود؛ بنابراین یک upsert جزئی نمی‌تواند ردیف‌های قدیمی‌تر را با timestamp تازهٔ یک ردیف دیگر پنهان کند.
+- [x] آزمون HTTP برای snapshot جزئی/قدیمی اضافه شد و ترتیب `fetched_at.asc` را صریحاً assert می‌کند.
+- [x] Bit24 adapter اکنون `per_page=100` را درخواست می‌کند، `last_page` را اعتبارسنجی می‌کند و تمام صفحات بازار را واکشی می‌کند؛ تعداد صفحات نامعتبر یا بیش از ۵۰ رد می‌شود.
+- [x] آزمون HTTP جدید، BTC/IRT را فقط در صفحهٔ دوم fixture می‌کند تا صفحه‌بندی واقعی adapter را بررسی کند.
+- [x] بازبینی منبع فنی ثانویهٔ عمومی نشان می‌دهد Kifpool از Apollo persisted query با امکان تغییر hash استفاده می‌کند؛ fallback به متن GraphQL و آزمون آن از قبل در شاخه وجود دارد. این منبع غیررسمی است و جایگزین تأیید مستقیم Kifpool نیست.
+- [!] تغییرات freshness و صفحه‌بندی Bit24 در commit `8d507d13dd11a08adc550be6b4c28a615319c79f` قرار گرفته‌اند؛ اجرای CI روی این commit در زمان ثبت این بخش هنوز مشاهده نشده و موفقیت آن ادعا نمی‌شود.
+- [!] قرارداد مستقیم/رسمی API برای Bit24 و Kifpool هنوز مستند مستقل قابل اتکایی پیدا نشده؛ داده‌های فعلی بر endpoint عمومی وب‌سایت و شواهد فنی ثانویه متکی‌اند.
+- [x] Production بدون تغییر باقی مانده: تابع نسخهٔ ۳، ۳۷۳ ردیف قیمت stale، RPC تاریخچه نصب‌نشده؛ هیچ deploy یا migration انجام نشده.
