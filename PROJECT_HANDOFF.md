@@ -1224,3 +1224,15 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Artifact مربوط به commit کد: `DigiArz-White-Glass-Review-APK`، ID `14760955042`، حجم 6,209,833 بایت، digest آرشیو `sha256:a830661d0dcef46c2969e613196b9bcae604d483e2b82923a17bef99eb500476`، انقضا `2026-12-06T15:21:46Z`. این artifact از commit کد ساخته شده و commit تست/هندآف بعدی را شامل نمی‌شود؛ فعلاً نسخهٔ نهایی برای تحویل محسوب نشود.
 - Workflow شمارهٔ 82، run ID `45037700130` روی commit تست `c676f12c1cff3799696d6a02dd1b0ef2b35762fd` اکنون `in_progress` است؛ در آخرین بررسی، مرحلهٔ checkout در حال اجرا و بقیهٔ مراحل pending بودند. این run مبنای APK نهایی هم‌منبع با تست‌ها خواهد بود.
 - PR #52 همچنان Open/Draft/Unmerged است؛ هیچ merge یا deploy انجام نشده است.
+
+
+## تکمیل ساخت APK بازبینی پس از حذف قاب لوگو و ستاره — ۲۰۲۶-۱۱-۲۲
+- Workflow run ID `45037700130` با نتیجهٔ `success` تکمیل شد؛ تمام مراحل job شامل تست‌های زیست‌سنجی، تست‌های رگرسیون UI/برنامه، نصب وابستگی‌های قفل‌شده و بررسی امضای npm، آماده‌سازی و sync اندروید، ساخت APK، بررسی مجوز و بارگذاری artifact موفق بودند.
+- commit کد و تست اجراشده: `c676f12c1cff379969d6a02dd1b0ef2b35762fd`. commit نهایی ثبت‌شده در BUILD-INFO: `cb6174e300c34003c2cbeeea82b12d12f1ad52cd` که فرزند مستقیم commit تست است و فقط `PROJECT_HANDOFF.md` را به‌روزرسانی می‌کند؛ بنابراین محتوای اجرایی و تست‌شده APK همان کد commit بالا است.
+- مجوز `android.permission.USE_BIOMETRIC` در merged manifest تأیید شد.
+- Artifact: `DigiArz-White-Glass-Review-APK`، ID `14760058263`، اندازهٔ ZIP برابر 6,209,830 بایت، digest آرشیو `sha256:f19aa60a4387a74b7629eb100bf03007ad9924a2def636c72f3dbd14397ae44c`، انقضا `2026-12-06T15:23:37Z`. لینک: https://github.com/shahram-adim/DigiArz/actions/runs/45037700130/artifacts/14760058263
+- BUILD-INFO مقدار SHA-256 خود APK را `7680cc40a0cb9e297bb2910970aa874a2600b814e557eb35ece467640b56b708` ثبت کرده است.
+- PR #52 همچنان Draft/Open/Unmerged است؛ head فعلی `326206ccaf4cf44b0d8ba9b477719cca5e91f5fd` و base آن PR #50 است. این شاخه stacked است؛ ادغام مستقل یا بازکردن آن برای merge بدون تعیین تکلیف PR #50 انجام نشود.
+- مرز اعتبارسنجی: CI و بسته‌بندی موفق‌اند، اما نصب واقعی روی گوشی، مشاهدهٔ سه تم و صفحات، ورود/خروج و آزمون عملکردهای دستگاه هنوز با شواهد تصویری کاربر تأیید نشده‌اند. APK یک debug review build است، نه نسخهٔ امضاشدهٔ انتشار عمومی.
+- هیچ merge، release، deploy، Supabase، Auth، کیف پول، سفارش، معامله یا موجودی مالی تغییر نکرده است.
+- اقدام بعدی: کاربر APK را روی گوشی نصب کند و نتیجهٔ دیداری سه تم، صفحهٔ بازار و قاب لوگو/ستاره را گزارش یا تصویر کند؛ فقط ایرادهای مشاهده‌شده اصلاح شوند. تا دریافت نتیجهٔ دستگاه، از حدس‌زدن مشکلات ظاهری و تغییرات گستردهٔ CSS خودداری شود.
