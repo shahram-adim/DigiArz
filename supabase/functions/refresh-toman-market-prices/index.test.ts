@@ -4,12 +4,13 @@ const envKeys = ["SUPABASE_URL", "SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY
 
 async function withMockedRuntime(
   mode: "timeout-wallex" | "malformed-nobitex" | "all-providers-fail" | "cache-read-fail",
-  run: (writes: () => number, errorLog: () => unknown[] | null) => Promise<void>,
+  run: (writes: () => number, errorLog: () => unknown[] | null, cacheOrder: () => string | null) => Promise<void>,
 ) {
   const previousEnv = new Map(envKeys.map((key) => [key, Deno.env.get(key)]));
   const originalFetch = globalThis.fetch;
   let writes = 0;
   let capturedError: unknown[] | null = null;
+  let capturedCacheOrder: string | null = null;
   const originalConsoleError = console.error;
 
   Deno.env.set("SUPABASE_URL", "https://digiarz-test.supabase.co");
@@ -22,6 +23,7 @@ async function withMockedRuntime(
 
     if (url.endsWith("/auth/v1/user")) return new Response("{}", { status: 200 });
     if (url.includes("/rest/v1/market_toman_prices?select=fetched_at")) {
+      capturedCacheOrder = new URL(url).searchParams.get("order");
       if (mode === "cache-read-fail") return new Response("database unavailable", { status: 503 });
       if (mode === "partial-cache-stale") return Response.json([{ fetched_at: "2026-11-17T22:04:26.622Z" }]);
       return new Response("[]", { status: 200 });
@@ -96,7 +98,7 @@ async function withMockedRuntime(
   }) as typeof fetch;
 
   try {
-    await run(() => writes, () => capturedError);
+    await run(() => writes, () => capturedError, () => capturedCacheOrder);
   } finally {
     globalThis.fetch = originalFetch;
     console.error = originalConsoleError;
@@ -167,7 +169,7 @@ Deno.test("Toman refresh HTTP handler isolates provider failures and refuses emp
     });
 
   await t.step("a recent partial snapshot cannot hide older stale rows", async () => {
-    await withMockedRuntime("partial-cache-stale", async (writes) => {
+    await withMockedRuntime("partial-cache-stale", async (writes, _errorLog, cacheOrder) => {
       const response = await handler(new Request("https://edge.test/refresh", {
         method: "POST",
         headers: { Authorization: "Bearer test-user-token" },
@@ -175,6 +177,9 @@ Deno.test("Toman refresh HTTP handler isolates provider failures and refuses emp
       const body = await response.json();
       if (response.status !== 200 || body.cached === true) {
         throw new Error("A stale oldest row was incorrectly treated as a fresh cache");
+      }
+      if (cacheOrder() !== "fetched_at.asc") {
+        throw new Error("Cache freshness must be determined by the oldest row");
       }
       if (body.sources.nobitex.ok !== true) throw new Error("Provider refresh did not run for stale rows");
       if (writes() !== 1) throw new Error("Expected a refresh upsert after detecting stale rows");
