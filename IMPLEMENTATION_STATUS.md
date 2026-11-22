@@ -1196,3 +1196,10 @@
 - [x] آزمون‌های Node برای dedupe، درخواست upsert و خلاصه امن خطاها اضافه شد؛ fixture PostgreSQL 17 با درج تکراری و rollback به CI افزوده شد.
 - [!] اصلاح فقط در GitHub است؛ تابع Production هنوز نسخه ۳ است. هیچ deploy، refresh واقعی، یا نوشتن/حذف داده در Production انجام نشده است.
 - [ ] گام بعد: نتیجه CI را بررسی کن؛ استقرار و refresh واقعی فقط پس از تأیید صریح کاربر.
+
+
+### نتیجه نهایی CI اصلاح upsert قیمت تومانی — ۲۳ نوامبر ۲۰۲۶
+- [x] اجرای اول `45082686169` روی commit `c452d1e` یک خطای تست واقعی در دسته‌بندی HTTP نشان داد: regex به‌صورت double-escaped ذخیره شده بود و `HTTP 429` به `provider_error` تبدیل می‌شد.
+- [x] اصلاح regex در commit `fe151109a9fd46c38a317f305785f0eb95449ee0` ثبت و فایل از `main` دوباره دریافت و تأیید شد.
+- [x] اجرای نهایی `45082751825` روی commit `fe151109` با نتیجه `success` کامل شد؛ آزمون‌های Node/browser، آزمون PostgreSQL 17 برای upsert تکراری، تمام آزمون‌های widening، Market/Limit/Stop-Limit و آزمون‌های race همگی موفق شدند.
+- [!] CI فقط کد مخزن و PostgreSQL دورریختنی را آزمود؛ Edge Function Production هنوز نسخه ۳ است و deploy/refresh واقعی انجام نشده است.
