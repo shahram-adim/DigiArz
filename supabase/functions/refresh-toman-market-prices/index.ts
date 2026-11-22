@@ -156,21 +156,35 @@ async function fetchBit24(
   supabaseUrl: string,
   serviceHeaders: Record<string, string>,
 ) {
-  const [payload, mappedSymbols] = await Promise.all([
-    getJson("https://pro.bit24.cash/api/v3/markets", "Bit24"),
+  const firstUrl = new URL("https://pro.bit24.cash/api/v3/markets");
+  firstUrl.searchParams.set("per_page", "100");
+  firstUrl.searchParams.set("page", "1");
+  const [firstPayload, mappedSymbols] = await Promise.all([
+    getJson(firstUrl.toString(), "Bit24"),
     fetchMappedSymbols("bit24", supabaseUrl, serviceHeaders),
   ]);
+  const firstPage = firstPayload?.data;
+  if (!Array.isArray(firstPage?.results)) {
+    throw new Error("Bit24 returned an invalid paginated markets response");
+  }
+  const lastPage = Number(firstPage.last_page || 1);
+  if (!Number.isInteger(lastPage) || lastPage < 1 || lastPage > 50) {
+    throw new Error("Bit24 returned an invalid markets page count");
+  }
+  const pagePayloads = await Promise.all(
+    Array.from({ length: lastPage - 1 }, (_, index) => {
+      const pageUrl = new URL("https://pro.bit24.cash/api/v3/markets");
+      pageUrl.searchParams.set("per_page", "100");
+      pageUrl.searchParams.set("page", String(index + 2));
+      return getJson(pageUrl.toString(), "Bit24");
+    }),
+  );
   const markets: any[] = [];
-  const visit = (value: any, depth = 0) => {
-    if (!value || typeof value !== "object" || depth > 8) return;
-    if (Array.isArray(value)) {
-      for (const item of value) visit(item, depth + 1);
-      return;
-    }
-    if (value.base_coin && value.quote_coin && value.market_24h_information) markets.push(value);
-    for (const child of Object.values(value)) visit(child, depth + 1);
-  };
-  visit(payload);
+  for (const pagePayload of [firstPayload, ...pagePayloads]) {
+    const results = pagePayload?.data?.results;
+    if (!Array.isArray(results)) throw new Error("Bit24 returned an invalid markets page");
+    markets.push(...results);
+  }
 
   const rows = [];
   for (const item of markets) {
