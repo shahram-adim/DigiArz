@@ -17,15 +17,9 @@ begin
   for item in
     select *
     from pg_catalog.jsonb_to_recordset(p_rows) as x(
-      exchange text,
-      asset_symbol text,
-      price_toman numeric,
-      bid_toman numeric,
-      ask_toman numeric,
-      change_24h_pct numeric,
-      volume_24h_toman numeric,
-      asset_name_fa text,
-      asset_name_en text,
+      exchange text, asset_symbol text, price_toman numeric,
+      bid_toman numeric, ask_toman numeric, change_24h_pct numeric,
+      volume_24h_toman numeric, asset_name_fa text, asset_name_en text,
       recorded_at timestamptz
     )
     order by exchange, asset_symbol
@@ -34,18 +28,15 @@ begin
        or item.asset_symbol is null or item.asset_symbol !~ '^[A-Z0-9]{2,20}$'
        or item.price_toman is null or item.price_toman <= 0
        or item.price_toman >= 'Infinity'::numeric
-       or item.recorded_at is null then
+       or item.recorded_at is null
+       or item.recorded_at > pg_catalog.now() + interval '5 minutes' then
       raise exception 'History row contains invalid required fields';
     end if;
 
-    if (item.bid_toman is not null and
-          (item.bid_toman <= 0 or item.bid_toman >= 'Infinity'::numeric))
-       or (item.ask_toman is not null and
-          (item.ask_toman <= 0 or item.ask_toman >= 'Infinity'::numeric))
-       or (item.change_24h_pct is not null and
-          (item.change_24h_pct <= '-Infinity'::numeric or item.change_24h_pct >= 'Infinity'::numeric))
-       or (item.volume_24h_toman is not null and
-          (item.volume_24h_toman < 0 or item.volume_24h_toman >= 'Infinity'::numeric)) then
+    if (item.bid_toman is not null and (item.bid_toman <= 0 or item.bid_toman >= 'Infinity'::numeric))
+       or (item.ask_toman is not null and (item.ask_toman <= 0 or item.ask_toman >= 'Infinity'::numeric))
+       or (item.change_24h_pct is not null and (item.change_24h_pct <= '-Infinity'::numeric or item.change_24h_pct >= 'Infinity'::numeric))
+       or (item.volume_24h_toman is not null and (item.volume_24h_toman < 0 or item.volume_24h_toman >= 'Infinity'::numeric)) then
       raise exception 'History row contains invalid numeric values';
     end if;
 
@@ -58,7 +49,7 @@ begin
       from public.market_toman_price_history h
       where h.exchange = item.exchange
         and h.asset_symbol = item.asset_symbol
-        and h.recorded_at >= item.recorded_at - interval '6 hours'
+        and h.recorded_at >= pg_catalog.now() - interval '6 hours'
     ) then
       insert into public.market_toman_price_history (
         exchange, asset_symbol, price_toman, bid_toman, ask_toman,
