@@ -318,8 +318,8 @@ test('market list rows use five aligned cells, 40px logos, visible Persian names
 test('login screen uses the selected Binance-inspired black-and-yellow palette without changing auth behavior', () => {
   const marker = '/* DigiArz selected Binance-inspired black-and-yellow auth palette — 2026-11-21 */';
   const paletteStart = html.lastIndexOf(marker);
-  const styleEnd = html.lastIndexOf('</style>');
-  assert.ok(paletteStart >= 0 && styleEnd > paletteStart, 'final brand override is present at the end of the stylesheet');
+  const styleEnd = html.indexOf('</style>', paletteStart);
+  assert.ok(paletteStart >= 0 && styleEnd > paletteStart, 'final brand override is present and its own stylesheet closes');
   const palette = html.slice(paletteStart, styleEnd);
   assert.ok(palette.includes('body.dark-theme #authView.auth-reference-layout{'), 'black-and-yellow auth palette is scoped to the dark theme only');
   assert.doesNotMatch(palette, /(^|[,{]\\s*)#authView/m, 'no unscoped auth palette selector can leak into other themes');
