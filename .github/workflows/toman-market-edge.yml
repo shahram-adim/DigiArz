@@ -49,6 +49,9 @@ jobs:
       - name: Type-check Toman market Edge Function
         run: deno check supabase/functions/refresh-toman-market-prices/index.ts
 
+      - name: Run Toman market HTTP handler integration tests
+        run: deno test --allow-env supabase/functions/refresh-toman-market-prices/index.test.ts
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
