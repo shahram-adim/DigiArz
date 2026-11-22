@@ -135,6 +135,8 @@ test("Kifpool uses matched assets and sell-side price only", async () => {
   assert.match(edgeSource, /const price = decimalOrNull\(item\?\.priceSellIRT\)/);
   assert.match(edgeSource, /Kifpool exposes a sell-side IRT price only/);
   assert.match(edgeSource, /price,\s*\/\/ Kifpool exposes/);
-  const kifpoolBlock = edgeSource.slice(edgeSource.indexOf("async function fetchKifpool"), edgeSource.indexOf("\\nDeno.serve"));
-  assert.doesNotMatch(kifpoolBlock, /priceBuyIRT|\\b(?:bid|ask):/);
+  const kifpoolStart = edgeSource.indexOf("async function fetchKifpool");
+  const kifpoolEnd = edgeSource.indexOf("\nDeno.serve", kifpoolStart);
+  const kifpoolBlock = edgeSource.slice(kifpoolStart, kifpoolEnd);
+  assert.doesNotMatch(kifpoolBlock, /priceBuyIRT|\b(?:bid|ask):/);
 });
