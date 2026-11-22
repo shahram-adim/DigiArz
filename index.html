@@ -5801,5 +5801,55 @@ body.luxury-theme #authView .auth-reference-visual{
 @media(max-width:390px){#tab-dashboard .dashboard-market-movers .gainer-card{flex-basis:150px;padding:9px 8px}}
 </style>
 
+
+<style id="DIGIARZ-THEME3-TOP-DASHBOARD-FIX-20261122">
+/* Remove the obsolete pre-tab hero: the dashboard now has its own complete hero. Keep its legacy controls in the DOM for existing handlers. */
+#appView>.hero{display:none!important}
+#appView>.tabs{margin:0 0 12px!important}
+#tab-dashboard.digiarz-v2-dashboard{
+ box-sizing:border-box;width:100%;max-width:100%;min-width:0;
+ margin:0!important;overflow:hidden;
+}
+#tab-dashboard .da-v2-topline,
+#tab-dashboard .da-v2-section-head{min-width:0;max-width:100%}
+#tab-dashboard .da-v2-hero{min-width:0;max-width:100%;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr)}
+#tab-dashboard .da-v2-quick-grid{min-width:0;max-width:100%;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+#tab-dashboard .dashboard-market-movers{min-width:0;max-width:100%}
+body.luxury-theme #appView{
+ margin:8px auto 30px!important;padding-top:0!important;
+}
+body.luxury-theme #appView>.market-announcement{
+ margin:0 0 10px!important;
+}
+body.luxury-theme #appView>.tabs{margin:0 0 10px!important}
+body.luxury-theme #tab-dashboard.digiarz-v2-dashboard{
+ padding:clamp(12px,2.4vw,22px)!important;
+ border-radius:24px!important;
+}
+body.luxury-theme #tab-dashboard .da-v2-topline{margin-bottom:14px!important}
+body.luxury-theme #tab-dashboard .da-v2-hero{
+ min-height:0!important;gap:12px!important;
+}
+body.luxury-theme #tab-dashboard .da-v2-quick-grid button{
+ min-width:0;white-space:normal;overflow-wrap:anywhere;
+}
+@media(max-width:760px){
+ #tab-dashboard .da-v2-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+ #tab-dashboard .da-v2-hero{grid-template-columns:minmax(0,1fr) minmax(88px,.55fr)!important}
+ #tab-dashboard .da-v2-hero-copy{min-width:0}
+ #tab-dashboard .da-v2-hero-art{min-width:0}
+ body.luxury-theme #appView{margin:4px auto 24px!important}
+ body.luxury-theme #appView>.market-announcement{margin:0 0 8px!important}
+ body.luxury-theme #tab-dashboard.digiarz-v2-dashboard{padding:11px!important;border-radius:18px!important}
+ body.luxury-theme #tab-dashboard .da-v2-hero{padding:15px 11px 50px!important;grid-template-columns:minmax(0,1fr) 90px!important}
+}
+@media(max-width:390px){
+ #tab-dashboard .da-v2-hero{grid-template-columns:minmax(0,1fr) 78px!important}
+ #tab-dashboard .da-v2-hero h1{font-size:clamp(18px,5.2vw,22px)!important}
+ #tab-dashboard .da-v2-quick-grid button{padding:10px 7px!important;font-size:11px!important}
+ body.luxury-theme #appView{margin-top:2px!important}
+}
+</style>
+
 </body>
 </html>
