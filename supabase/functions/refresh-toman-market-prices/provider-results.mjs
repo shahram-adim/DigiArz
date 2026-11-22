@@ -7,6 +7,7 @@ export function collectProviderResults(sourceNames, settledResults) {
     throw new TypeError("Provider names and results must be matching arrays");
   }
 
+  /** @type {Record<string, { ok: boolean, count: number, error?: string }>} */
   const sources = {};
   const rows = [];
   const failed = [];
