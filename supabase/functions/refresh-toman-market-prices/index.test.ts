@@ -214,5 +214,4 @@ Deno.test("Toman refresh HTTP handler isolates provider failures and refuses emp
       if (writes() !== 1) throw new Error("Expected one aggregated current-price upsert");
     });
   });
-  });
 });
