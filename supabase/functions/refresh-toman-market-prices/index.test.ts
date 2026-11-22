@@ -3,22 +3,26 @@ import { handler } from "./index.ts";
 const envKeys = ["SUPABASE_URL", "SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY"] as const;
 
 async function withMockedRuntime(
-  mode: "timeout-wallex" | "malformed-nobitex" | "all-providers-fail",
-  run: (writes: () => number) => Promise<void>,
+  mode: "timeout-wallex" | "malformed-nobitex" | "all-providers-fail" | "cache-read-fail",
+  run: (writes: () => number, errorLog: () => unknown[] | null) => Promise<void>,
 ) {
   const previousEnv = new Map(envKeys.map((key) => [key, Deno.env.get(key)]));
   const originalFetch = globalThis.fetch;
   let writes = 0;
+  let capturedError: unknown[] | null = null;
+  const originalConsoleError = console.error;
 
   Deno.env.set("SUPABASE_URL", "https://digiarz-test.supabase.co");
   Deno.env.set("SUPABASE_ANON_KEY", "test-anon");
   Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "test-service-role");
 
+  console.error = (...args: unknown[]) => { capturedError = args; };
   globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = String(input);
 
     if (url.endsWith("/auth/v1/user")) return new Response("{}", { status: 200 });
     if (url.includes("/rest/v1/market_toman_prices?select=fetched_at")) {
+      if (mode === "cache-read-fail") return new Response("database unavailable", { status: 503 });
       return new Response("[]", { status: 200 });
     }
     if (url.includes("/rest/v1/exchange_asset_observations?")) {
@@ -91,9 +95,10 @@ async function withMockedRuntime(
   }) as typeof fetch;
 
   try {
-    await run(() => writes);
+    await run(() => writes, () => capturedError);
   } finally {
     globalThis.fetch = originalFetch;
+    console.error = originalConsoleError;
     for (const key of envKeys) {
       const value = previousEnv.get(key);
       if (value === undefined) Deno.env.delete(key);
@@ -141,5 +146,24 @@ Deno.test("Toman refresh HTTP handler isolates provider failures and refuses emp
       if (response.status !== 502 || body.success !== false) throw new Error("Expected an explicit 502 failure");
       if (writes() !== 0) throw new Error("An empty provider snapshot must never be written");
     });
+
+
+  await t.step("cache failures expose a structured diagnostic stage", async () => {
+    await withMockedRuntime("cache-read-fail", async (writes, errorLog) => {
+      const response = await handler(new Request("https://edge.test/refresh", {
+        method: "POST",
+        headers: { Authorization: "Bearer test-user-token" },
+      }));
+      const body = await response.json();
+      if (response.status !== 502 || body.stage !== "cache_read") {
+        throw new Error("Cache failure did not expose the cache_read stage");
+      }
+      const logged = errorLog();
+      if (!logged || logged[0] !== "Toman market refresh failed") {
+        throw new Error("Structured failure log was not emitted");
+      }
+      if (writes() !== 0) throw new Error("Cache failure must not write market rows");
+    });
+  });
   });
 });
