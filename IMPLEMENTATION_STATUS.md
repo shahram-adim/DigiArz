@@ -1263,3 +1263,10 @@
 - [!] تغییرات freshness و صفحه‌بندی Bit24 در commit `8d507d13dd11a08adc550be6b4c28a615319c79f` قرار گرفته‌اند؛ اجرای CI روی این commit در زمان ثبت این بخش هنوز مشاهده نشده و موفقیت آن ادعا نمی‌شود.
 - [!] قرارداد مستقیم/رسمی API برای Bit24 و Kifpool هنوز مستند مستقل قابل اتکایی پیدا نشده؛ داده‌های فعلی بر endpoint عمومی وب‌سایت و شواهد فنی ثانویه متکی‌اند.
 - [x] Production بدون تغییر باقی مانده: تابع نسخهٔ ۳، ۳۷۳ ردیف قیمت stale، RPC تاریخچه نصب‌نشده؛ هیچ deploy یا migration انجام نشده.
+
+
+### تأیید CI بازیابی GraphQL Kifpool — ۲۲ نوامبر ۲۰۲۶
+- [x] Edge workflow `45029200100` روی نسخهٔ دارای fallback گراف‌کیوال با نتیجهٔ SUCCESS کامل شد؛ Deno type-check، HTTP integration tests، Node dedupe و PostgreSQL atomic-history/concurrency همگی موفق‌اند.
+- [x] تست مسیر hash منقضی‌شده در مجموعهٔ HTTP اجرا شده است و مرحلهٔ HTTP integration با موفقیت گذشت.
+- [!] Exact-decimal workflow `45029200017` هنوز در مرحلهٔ PostgreSQL arithmetic regression است؛ نتیجهٔ نهایی آن تا این لحظه اعلام نشده.
+- [x] PR #51 همچنان Draft است و هیچ تغییر Production انجام نشده است.
