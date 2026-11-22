@@ -144,3 +144,56 @@ test("Kifpool uses matched assets and sell-side price only", async () => {
   assert.match(kifpoolBlock, /price,/);
   assert.doesNotMatch(kifpoolBlock, /priceBuyIRT|\b(?:bid|ask):/);
 });
+
+
+test("isolates provider timeouts and malformed JSON while preserving healthy provider rows", async () => {
+  const { collectProviderResults, emptyProviderOutcome } = await import("../supabase/functions/refresh-toman-market-prices/provider-results.mjs");
+  const healthyRows = [{ exchange: "nobitex", asset_symbol: "BTC", price_toman: "1" }];
+  const settled = await Promise.allSettled([
+    Promise.resolve(healthyRows),
+    Promise.reject(new Error("AbortError: provider timeout")),
+    Promise.reject(new SyntaxError("Unexpected token in JSON")),
+    Promise.resolve([{ exchange: "wallex", asset_symbol: "ETH", price_toman: "2" }]),
+  ]);
+  const result = collectProviderResults(["nobitex", "bit24", "kifpool", "wallex"], settled);
+
+  assert.equal(result.rows.length, 2);
+  assert.deepEqual(result.failed, ["bit24", "kifpool"]);
+  assert.equal(result.sources.bit24.ok, false);
+  assert.equal(result.sources.kifpool.ok, false);
+  assert.equal(result.sources.nobitex.count, 1);
+  assert.equal(emptyProviderOutcome(result), null);
+});
+
+test("returns a 502 outcome when every provider fails or produces no usable rows", async () => {
+  const { collectProviderResults, emptyProviderOutcome } = await import("../supabase/functions/refresh-toman-market-prices/provider-results.mjs");
+  const settled = await Promise.allSettled([
+    Promise.reject(new Error("HTTP 503")),
+    Promise.reject(new Error("timeout")),
+    Promise.resolve([]),
+    Promise.reject(new SyntaxError("malformed JSON")),
+  ]);
+  const result = collectProviderResults(["nobitex", "wallex", "bit24", "kifpool"], settled);
+  const outcome = emptyProviderOutcome(result);
+
+  assert.equal(result.rows.length, 0);
+  assert.equal(outcome.status, 502);
+  assert.equal(outcome.body.success, false);
+  assert.deepEqual(Object.keys(outcome.body.sources), ["nobitex", "wallex", "bit24", "kifpool"]);
+});
+
+test("rejects malformed fulfilled provider results instead of treating them as healthy", async () => {
+  const { collectProviderResults, emptyProviderOutcome } = await import("../supabase/functions/refresh-toman-market-prices/provider-results.mjs");
+  const result = collectProviderResults(["nobitex"], [{ status: "fulfilled", value: { price: "not-an-array" } }]);
+  assert.equal(result.rows.length, 0);
+  assert.equal(result.sources.nobitex.ok, false);
+  assert.equal(emptyProviderOutcome(result).status, 502);
+});
+
+test("keeps previous market rows when the provider snapshot is partial", async () => {
+  const fs = require("node:fs");
+  const edgeSource = fs.readFileSync("supabase/functions/refresh-toman-market-prices/index.ts", "utf8");
+  assert.match(edgeSource, /Keep prior rows when a provider returns a partial snapshot/);
+  assert.doesNotMatch(edgeSource, /DELETE\\s+FROM\\s+market_toman_prices/i);
+  assert.match(edgeSource, /collectProviderResults\\(sourceNames, sourceResults\\)/);
+});
