@@ -103,3 +103,34 @@ test("deduplicates numerically equal decimal representations", async () => {
   assert.equal(result.duplicateRowsRemoved, 1);
   assert.equal(result.conflictingSymbolsSkipped, 0);
 });
+
+
+test("uses only the four approved Toman market sources", async () => {
+  const fs = require("node:fs");
+  const edgeSource = fs.readFileSync("supabase/functions/refresh-toman-market-prices/index.ts", "utf8");
+  assert.match(edgeSource, /fetchNobitex\(fetchedAt\)/);
+  assert.match(edgeSource, /fetchWallex\(fetchedAt\)/);
+  assert.match(edgeSource, /fetchBit24\(fetchedAt, supabaseUrl, serviceHeaders\)/);
+  assert.match(edgeSource, /fetchKifpool\(fetchedAt, supabaseUrl, serviceHeaders\)/);
+  assert.match(edgeSource, /const sourceNames = \["nobitex", "wallex", "bit24", "kifpool"\]/);
+  assert.doesNotMatch(edgeSource, /fetchBitpin|bitpin/);
+});
+
+test("Bit24 uses IRT last trade price and does not fabricate bid or ask", async () => {
+  const fs = require("node:fs");
+  const edgeSource = fs.readFileSync("supabase/functions/refresh-toman-market-prices/index.ts", "utf8");
+  assert.match(edgeSource, /const quote = String\(item\?\.quote_coin\?\.symbol \|\| ""\)\.toUpperCase\(\);\s*if \(quote !== "IRT"\) continue;/);
+  assert.match(edgeSource, /price,\s*\/\/ last_price is the market's last traded price/);
+  assert.match(edgeSource, /high: decimalOrNull\(stats\.max_price\)/);
+  assert.match(edgeSource, /low: decimalOrNull\(stats\.min_price\)/);
+  assert.doesNotMatch(edgeSource, /bid: decimalOrNull\(stats\.|ask: decimalOrNull\(stats\./);
+});
+
+test("Kifpool uses matched assets and sell-side price only", async () => {
+  const fs = require("node:fs");
+  const edgeSource = fs.readFileSync("supabase/functions/refresh-toman-market-prices/index.ts", "utf8");
+  assert.match(edgeSource, /fetchMappedSymbols\("kifpool", supabaseUrl, serviceHeaders\)/);
+  assert.match(edgeSource, /const price = decimalOrNull\(item\?\.priceSellIRT\)/);
+  assert.match(edgeSource, /price,\s*\/\/ Kifpool exposes a sell-side IRT price only/);
+  assert.doesNotMatch(edgeSource, /priceBuyIRT/);
+});
