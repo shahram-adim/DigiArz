@@ -1,4 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { dedupeMarketRows } from "./dedupe-market-rows.mjs";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -216,31 +217,58 @@ Deno.serve(async (req: Request) => {
         sources[key] = { ok: true, count: result.value.length };
         rows.push(...result.value);
       } else {
-        sources[key] = { ok: false, count: 0, error: String(result.reason).slice(0, 220) };
+        const error = String(result.reason).slice(0, 220);
+        sources[key] = { ok: false, count: 0, error };
+        console.warn("Toman market provider failed", { provider: key, error });
       }
     });
     if (!rows.length) {
       return json({ success: false, error: "هیچ منبعی قیمت معتبر تومانی برنگرداند.", sources }, 502);
     }
 
-    const writeResponse = await fetch(supabaseUrl + "/rest/v1/market_toman_prices", {
+    const deduped = dedupeMarketRows(rows);
+    const writeRows = deduped.rows;
+    if (!writeRows.length) {
+      return json({
+        success: false,
+        error: "همه نمادها به‌دلیل تعارض قیمت تکراری کنار گذاشته شدند.",
+        sources,
+        dedupe: {
+          duplicate_rows_removed: deduped.duplicateRowsRemoved,
+          conflicting_symbols_skipped: deduped.conflictingSymbolsSkipped,
+        },
+      }, 502);
+    }
+
+    console.info("Toman market rows normalized", {
+      received: rows.length,
+      unique: writeRows.length,
+      duplicate_rows_removed: deduped.duplicateRowsRemoved,
+      conflicting_symbols_skipped: deduped.conflictingSymbolsSkipped,
+    });
+
+    const writeUrl = new URL(supabaseUrl + "/rest/v1/market_toman_prices");
+    writeUrl.searchParams.set("on_conflict", "exchange,asset_symbol,quote_currency");
+    const writeResponse = await fetch(writeUrl.toString(), {
       method: "POST",
       headers: {
         ...serviceHeaders, "Content-Type": "application/json",
-        Prefer: "return=minimal",
+        Prefer: "resolution=merge-duplicates,return=minimal",
       },
-      body: JSON.stringify(rows),
+      body: JSON.stringify(writeRows),
       signal: AbortSignal.timeout(15000),
     });
     if (!writeResponse.ok) {
-      throw new Error("Toman market write failed: " + writeResponse.status + " " + (await writeResponse.text()).slice(0, 220));
+      const detail = (await writeResponse.text()).slice(0, 220);
+      console.error("Toman market upsert failed", { status: writeResponse.status, detail });
+      throw new Error("Toman market upsert failed: " + writeResponse.status + " " + detail);
     }
 
     // Keep the current-price table compact; long-term snapshots live in the history table.
     let cleanupWarning: string | null = null;
     try {
       const cleanupUrl = new URL(supabaseUrl + "/rest/v1/market_toman_prices");
-      const refreshedExchanges = [...new Set(rows.map(row => row.exchange))];
+      const refreshedExchanges = [...new Set(writeRows.map(row => row.exchange))];
       cleanupUrl.searchParams.set("exchange", "in.(" + refreshedExchanges.join(",") + ")");
       cleanupUrl.searchParams.set("fetched_at", "lt." + fetchedAt);
       const cleanupResponse = await fetch(cleanupUrl.toString(), {
@@ -264,7 +292,7 @@ Deno.serve(async (req: Request) => {
       if (!historyResponse.ok) throw new Error("History pre-check failed: " + historyResponse.status);
       const recentHistory = await historyResponse.json();
       const seen = new Set((recentHistory || []).map((item: any) => item.exchange + ":" + item.asset_symbol));
-      const historyRows = rows
+      const historyRows = writeRows
         .filter(row => !seen.has(row.exchange + ":" + row.asset_symbol))
         .map(row => ({
           exchange: row.exchange, asset_symbol: row.asset_symbol,
@@ -289,8 +317,13 @@ Deno.serve(async (req: Request) => {
     }
 
     return json({
-      success: true, saved: rows.length, history_saved: historySaved,
+      success: true, saved: writeRows.length, history_saved: historySaved,
       updated_at: fetchedAt, sources,
+      dedupe: {
+        received: rows.length,
+        duplicate_rows_removed: deduped.duplicateRowsRemoved,
+        conflicting_symbols_skipped: deduped.conflictingSymbolsSkipped,
+      },
       ...(historyWarning ? { history_warning: historyWarning } : {}),
       ...(cleanupWarning ? { cleanup_warning: cleanupWarning } : {}),
       note: "Prices are read-only market references in Toman. They are not used to execute demo trades.",
