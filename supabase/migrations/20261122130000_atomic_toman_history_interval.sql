@@ -28,6 +28,7 @@ begin
       asset_name_en text,
       recorded_at timestamptz
     )
+    order by exchange, asset_symbol
   loop
     if item.exchange is null or item.asset_symbol is null
        or item.price_toman is null or item.recorded_at is null then
