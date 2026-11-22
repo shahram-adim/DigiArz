@@ -195,5 +195,5 @@ test("keeps previous market rows when the provider snapshot is partial", async (
   const edgeSource = fs.readFileSync("supabase/functions/refresh-toman-market-prices/index.ts", "utf8");
   assert.match(edgeSource, /Keep prior rows when a provider returns a partial snapshot/);
   assert.doesNotMatch(edgeSource, /DELETE\\s+FROM\\s+market_toman_prices/i);
-  assert.match(edgeSource, /collectProviderResults\\(sourceNames, sourceResults\\)/);
+  assert.match(edgeSource, /collectProviderResults\(sourceNames, sourceResults\)/);
 });
