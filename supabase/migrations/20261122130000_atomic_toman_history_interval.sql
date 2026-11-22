@@ -4,19 +4,19 @@ create or replace function public.insert_market_toman_history_if_due(p_rows json
 returns integer
 language plpgsql
 security definer
-set search_path = public, pg_temp
+set search_path = ''
 as $$
 declare
   item record;
   inserted_count integer := 0;
 begin
-  if jsonb_typeof(p_rows) <> 'array' then
+  if p_rows is null or pg_catalog.jsonb_typeof(p_rows) <> 'array' then
     raise exception 'p_rows must be a JSON array';
   end if;
 
   for item in
     select *
-    from jsonb_to_recordset(p_rows) as x(
+    from pg_catalog.jsonb_to_recordset(p_rows) as x(
       exchange text,
       asset_symbol text,
       price_toman numeric,
@@ -30,13 +30,27 @@ begin
     )
     order by exchange, asset_symbol
   loop
-    if item.exchange is null or item.asset_symbol is null
-       or item.price_toman is null or item.recorded_at is null then
-      raise exception 'History row is missing a required field';
+    if item.exchange is null or item.exchange !~ '^[a-z0-9_-]{2,30}$'
+       or item.asset_symbol is null or item.asset_symbol !~ '^[A-Z0-9]{2,20}$'
+       or item.price_toman is null or item.price_toman <= 0
+       or item.price_toman >= 'Infinity'::numeric
+       or item.recorded_at is null then
+      raise exception 'History row contains invalid required fields';
     end if;
 
-    perform pg_advisory_xact_lock(
-      hashtextextended(item.exchange || ':' || item.asset_symbol, 0)
+    if (item.bid_toman is not null and
+          (item.bid_toman <= 0 or item.bid_toman >= 'Infinity'::numeric))
+       or (item.ask_toman is not null and
+          (item.ask_toman <= 0 or item.ask_toman >= 'Infinity'::numeric))
+       or (item.change_24h_pct is not null and
+          (item.change_24h_pct <= '-Infinity'::numeric or item.change_24h_pct >= 'Infinity'::numeric))
+       or (item.volume_24h_toman is not null and
+          (item.volume_24h_toman < 0 or item.volume_24h_toman >= 'Infinity'::numeric)) then
+      raise exception 'History row contains invalid numeric values';
+    end if;
+
+    perform pg_catalog.pg_advisory_xact_lock(
+      pg_catalog.hashtextextended(item.exchange || ':' || item.asset_symbol, 0)
     );
 
     if not exists (
