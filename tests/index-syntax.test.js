@@ -661,3 +661,19 @@ test('all ten application pages receive the shared page-specific responsive geom
   assert.ok(css.includes('@media(max-width:390px)'));
   assert.ok(css.includes('grid-template-columns:minmax(0,1fr)!important'));
 });
+
+
+test('mobile market asset list remains a full-width vertical list and top assets stay bounded horizontally', () => {
+  const marker = 'DIGIARZ-MOBILE-MARKET-ASSETS-FINAL-FIX-20261122';
+  const start = html.lastIndexOf(marker);
+  const end = html.indexOf('</style>', start);
+  assert.ok(start >= 0 && end > start, 'mobile market/assets finishing stylesheet exists');
+  const css = html.slice(start, end);
+  assert.match(css, /#tab-markets \.market-board-v34 \.market-list\{[\s\S]*?display:flex!important;flex-direction:column!important/);
+  assert.match(css, /#tab-markets \.market-board-v34 \.coin\{[\s\S]*?width:100%!important;min-width:0!important;max-width:100%!important/);
+  assert.match(css, /grid-template-areas:"identity price" "change price"!important/);
+  assert.match(css, /#tab-markets \.top-assets-strip\{[\s\S]*?overflow-x:auto!important/);
+  assert.match(css, /#tab-markets \.top-assets-strip>\.top-asset-card\{[\s\S]*?flex:0 0 168px!important/);
+  assert.ok(css.includes('@media(max-width:760px)'));
+  assert.ok(css.includes('@media(max-width:390px)'));
+});
