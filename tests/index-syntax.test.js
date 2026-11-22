@@ -734,3 +734,21 @@ test('global logo and favorite star frame removal applies after all theme styles
   assert.match(css, /button\.da-market-favorite[\s\S]*?border:0!important/);
   assert.ok(start > html.lastIndexOf('</style>', start), 'override is appended after theme styles');
 });
+
+
+test('reference-style market rows use premium black and clean light layouts without touching theme three', () => {
+  const marker = 'DIGIARZ-REFERENCE-MARKET-ROWS-DARK-LIGHT-20261122';
+  const start = html.lastIndexOf(marker);
+  const end = html.indexOf('</style>', start);
+  assert.ok(start >= 0 && end > start, 'reference-style market row override exists');
+  const css = html.slice(start, end);
+  assert.match(css, /grid-template-areas:"identity change favorite" "identity price favorite"/);
+  assert.match(css, /body:not\(\.light-theme\):not\(\.luxury-theme\)/);
+  assert.match(css, /body\.light-theme #tab-markets/);
+  assert.match(css, /border:0!important;border-radius:0!important;box-shadow:none!important/);
+  assert.match(css, /\.coin-sparkline\{display:none!important\}/);
+  assert.match(css, /\.coin>\.favorite-btn\{[\s\S]*?background:transparent!important;box-shadow:none!important/);
+  assert.match(css, /@media\(max-width:760px\)/);
+  assert.match(css, /@media\(max-width:390px\)/);
+  assert.ok(!css.includes('body.luxury-theme #tab-markets'), 'third theme is not restyled');
+});
