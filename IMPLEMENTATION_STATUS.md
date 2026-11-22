@@ -1185,3 +1185,25 @@
 - [x] گزارش تفصیلی در `docs/TOMAN_MARKET_FEED_AUDIT_2026-11-22.md` ثبت شد.
 - [x] این نوبت فقط خواندن GitHub/Supabase، بررسی schema و لاگ و مستندسازی بود. هیچ Edge Function deploy، RPC مالی، Migration، cron یا تغییر داده‌ای در Production انجام نشد.
 - [ ] گام بعد: قرارداد و fixtureهای Bit24 و Kifpool را بررسی؛ adapterهای چهار منبع و آزمون‌های واحد/stale/timeout/partial failure را در CI آماده کن؛ logging ساختاریافته برای تفکیک علت ۵۰۲ اضافه کن. استقرار Production فقط پس از تأیید صریح کاربر.
+
+
+## پیشرفت مسیر قیمت تومانی و PR #51 — ۲۲ نوامبر ۲۰۲۶
+
+- [x] شاخهٔ `fix/toman-market-duplicate-upsert-2026-11-22` به‌روزرسانی شد؛ آخرین commit کد در زمان ثبت این گزارش: `4648d37595e78964f7c0544b1f3afcd377514aa8`.
+- [x] parser عددی `lossless-json@4.3.4` به مسیر دریافت قیمت اضافه شد؛ JSON قیمت‌ها پیش از تبدیل به رشتهٔ اعشاری دقیق، از `response.json()/Number()` عبور نمی‌کنند.
+- [x] تبدیل ریال به تومان با جابه‌جایی ممیز، گردکردن صریح مطابق مقیاس ستون‌های PostgreSQL، اعتبارسنجی precision/scale و مقایسهٔ decimal-aware انجام می‌شود. `1.0` و `1.00` یک مقدار محسوب می‌شوند.
+- [x] مسیر قیمت تومانی به چهار منبع موردتأیید محدود شد: Nobitex، Wallex، Bit24 و Kifpool؛ Bitpin از این مسیر حذف شد.
+- [x] Bit24 فقط بازارهای IRT با دارایی فعال و تطبیق‌یافته را می‌پذیرد و از `market_24h_information.last_price` استفاده می‌کند؛ bid/ask از دادهٔ ناموجود ساخته نمی‌شود.
+- [x] Kifpool فقط دارایی‌های فعال و تطبیق‌یافته با `coingecko_id` و `priceSellIRT` مثبت را می‌پذیرد؛ قیمت خرید، bid یا ask جعلی نمی‌شود.
+- [x] در CI مربوط به Edge، commit قبلی `93ca9ec917a2e6c4c9acccda11ea16731d7099f8` با موفقیت type-check، تست dedupe، و تست migration تاریخچه/هم‌زمانی را گذراند (run `45027878160`). workflow گستردهٔ exact-decimal نیز روی همان commit موفق شد (run `45027878242`).
+- [x] پس از اصلاحات نهایی helper اعشار، اجرای جدید Edge روی commit `4648d37595e78964f7c0544b1f3afcd377514aa8`، مراحل type-check، تست dedupe و تست PostgreSQL را با موفقیت گذراند (run `45028020712`؛ مرحلهٔ پاک‌سازی runner در زمان ثبت در حال پایان بود).
+- [x] PR #51 همچنان Draft/open و mergeable است؛ merge یا انتشار انجام نشده است.
+- [!] وضعیت Production بدون تغییر: Supabase برابر `ACTIVE_HEALTHY` و PostgreSQL `17.11.0.018`؛ تابع `refresh-toman-market-prices` هنوز نسخهٔ ۳ است؛ RPC تاریخچهٔ اتمی در Production وجود ندارد؛ هر ۳۷۳ ردیف `market_toman_prices` stale هستند و آخرین `fetched_at` برابر `2026-11-17 22:04:26 UTC` است.
+- [x] snapshot فقط‌خواندنی منابع: Bit24 دارای ۳۵۱ observation فعال و ۲۹۱ دارایی تطبیق‌یافته؛ Kifpool دارای ۱٬۲۷۱ observation فعال، ۱٬۱۲۱ دارایی تطبیق‌یافته و ۱٬۱۲۰ مورد با `priceSellIRT` مثبت است.
+- [x] هیچ Migration، RPC، Edge Function، Cron، دادهٔ Production، سفارش، معامله یا موجودی در Supabase تغییر نکرد.
+
+### گام بعد
+1. ثبت نتیجهٔ نهایی run `45028020712` و اجرای مجدد workflow گستردهٔ exact-decimal روی آخرین commit کد در صورت نیاز.
+2. افزودن آزمون‌های HTTP-level برای JSON خراب، timeout، شکست جزئی providerها و شکست همهٔ منابع؛ تست‌های فعلی adapterها عمدتاً unit/source regression هستند.
+3. بازبینی مستقل قرارداد واحد قیمت Kifpool و payload واقعی Bit24 قبل از هر انتشار.
+4. بررسی و تأیید ترتیب اجرای migration مربوط به RPC تاریخچه در Production؛ سپس فقط با اجازهٔ صریح کاربر deploy کنترل‌شده. PR تا آن زمان Draft باقی بماند.
