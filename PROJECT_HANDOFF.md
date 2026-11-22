@@ -1133,3 +1133,15 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Earlier run `45001972363` attempt 1/2 failed first on a transient npm attestation verification and then on a malformed test regex; both were addressed. Do not weaken or bypass npm signature/attestation checks.
 - No merge, deployment, Supabase change, or physical-device visual verification has been performed.
 - Next action: verify latest workflow result and APK artifact, then update this handoff with final run/artifact status. Physical Android appearance still requires device QA.
+
+
+## تأیید اجرای بازبینی رابط کاربری و APK — ۲۰۲۶-۱۱-۲۲
+- [x] وضعیت زندهٔ شاخهٔ نامزد بازبینی: `fix/pure-white-glass-dashboard-market-2026-11-21-v2`، commit کد/آزمون `124871a88510e110ee7210980563dc7db524c570`. چهار commit پس از checkpoint قبلی `59f90e928f54e46c70bbe98770e91b3b1d59a570` بررسی شد؛ تغییرات شامل اصلاحات CSS/تست و ثبت handoff است.
+- [x] سه تم در کد نام‌گذاری و پیاده‌سازی شده‌اند: تم ۱ مشکی/طلایی، تم ۲ سفید خالص شیشه‌ای، تم ۳ نیلی روشن شیشه‌ای با آبی روشن. آخرین override تم سوم از طیف نیلی/یاسی روشن و آبی یخی استفاده می‌کند؛ نه تم تیرهٔ قبلی و نه آبی آسمانی مستقل.
+- [x] ده صفحهٔ اصلی در DOM تأیید شدند: dashboard، markets، toman، chart، trade، assets، orders، history، admin و settings. لایهٔ مشترک responsive روی تمام `#tab-*`ها، فرم‌ها، کارت‌ها، جدول‌ها و عرض‌های کوچک اعمال شده است.
+- [x] لایهٔ سراسری `digiarz-global-logo-star-layout-20261122` قاب/حاشیه/سایهٔ تزئینی دور لوگوهای دارایی و برند و قاب دکمه‌های علاقه‌مندی را در صفحه ورود و برنامه حذف می‌کند؛ گلیف ستاره حفظ می‌شود. این قاعده به هر سه تم محدود نشده است.
+- [x] Android review workflow run `45007626018` (Build #73) دقیقاً روی commit `124871a88510e110ee7210980563dc7db524c570` با نتیجهٔ SUCCESS پایان یافت. npm signature verification موفق؛ تست‌های biometric برابر 10/10؛ تست‌های visual/application برابر 70/70؛ Gradle با `BUILD SUCCESSFUL` تمام شد.
+- [x] Artifact بازبینی: `DigiArz-White-Glass-Review-APK`، artifact ID `14747759136`، انقضا `2026-12-06T09:29:09Z`. SHA-256 خود APK از BUILD-INFO: `4fa2d39b71d34b5c3d384a3a680152cfba705c1e959920344e14678eacca1d33`. این APK debug/review است، نه نسخهٔ production-signed.
+- [!] این شواهد، صحت آزمون خودکار و ساخت APK را تأیید می‌کنند؛ مشاهدهٔ واقعی روی گوشی Android و تأیید چشمی همهٔ صفحات/سه تم هنوز انجام نشده است. build موفق به‌تنهایی اثبات نمی‌کند که هر صفحه روی دستگاه واقعی بی‌نقص دیده می‌شود.
+- [!] PR #48 و PR #50 همچنان Open/Draft و ادغام‌نشده‌اند؛ PR #50 بر پایهٔ PR #48 است. `main`، Supabase Production، Auth و منطق مالی/معاملاتی تغییر نکرده‌اند. هیچ merge، انتشار یا deploy انجام نشود مگر با تأیید صریح کاربر.
+- [ ] گام بعد: نصب APK بازبینی روی Android و بررسی دیداری هر ده صفحه در سه تم، به‌ویژه عرض‌های کوچک؛ هر نقص مشاهده‌شده باید با صفحه/تم/اندازهٔ viewport ثبت و در همین شاخه اصلاح شود. پس از تأیید بصری، تصمیم merge برای PR #48 و سپس PR #50 جداگانه گرفته شود.
