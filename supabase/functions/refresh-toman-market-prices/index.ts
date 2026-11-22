@@ -62,7 +62,7 @@ function makeRow(
     ask_toman: positive(values.ask),
     high_24h_toman: positive(values.high),
     low_24h_toman: positive(values.low),
-    change_24h_pct: values.change !== null && values.change !== undefined && Number.isFinite(values.change) ? values.change : null,
+    change_24h_pct: values.change !== null && values.change !== undefined ? values.change : null,
     volume_24h_toman: nonNegative(values.volume),
     asset_name_fa: values.nameFa || faNames[asset] || asset,
     asset_name_en: values.nameEn || asset,
