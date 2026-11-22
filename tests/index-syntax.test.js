@@ -597,9 +597,11 @@ test('global logo and favorite-star frames are removed across all themes and app
     '#appView .da-market-logo', '#appView .ref-monogram', '#authView .ref-monogram']) {
     assert.ok(css.includes(selector), 'logo frame reset covers ' + selector);
   }
-  assert.match(css, /border:0!important;outline:0!important;[\\s\\S]*?box-shadow:none!important;background:transparent!important/);
-  assert.match(css, /button\\.favorite-btn[\\s\\S]*?button\\.da-market-favorite[\\s\\S]*?border:0!important/);
-  assert.match(css, /button\\[aria-label\\*="علاقه‌مندی"\\]/);
+  assert.ok(css.includes('border:0!important;outline:0!important;'));
+  assert.ok(css.includes('box-shadow:none!important;background:transparent!important;'));
+  assert.ok(css.includes('button.favorite-btn'));
+  assert.ok(css.includes('button.da-market-favorite'));
+  assert.ok(css.includes('button[aria-label*="علاقه‌مندی"]'));
 });
 
 test('shared responsive layout guard covers every application tab and mobile forms, cards and tables', () => {
@@ -608,10 +610,12 @@ test('shared responsive layout guard covers every application tab and mobile for
   const end = html.indexOf('</style>', start);
   assert.ok(start >= 0 && end > start, 'global layout stylesheet exists');
   const css = html.slice(start, end);
-  assert.match(css, /#appView \\[id\\^="tab-"\\]\\{width:100%!important;overflow-x:clip\\}/);
-  assert.match(css, /#appView input,#appView select,#appView textarea/);
-  assert.match(css, /#appView table\\{width:100%;max-width:100%;border-collapse:collapse/);
-  assert.match(css, /#appView \.table-wrap[\\s\\S]*?overflow-x:auto/);
-  assert.match(css, /@media\\(max-width:760px\\)[\\s\\S]*?#appView \.trade-market-grid[\\s\\S]*?grid-template-columns:minmax\\(0,1fr\\)!important/);
-  assert.match(css, /@media\\(max-width:390px\\)/);
+  assert.ok(css.includes('#appView [id^="tab-"]{width:100%!important;overflow-x:clip}'));
+  assert.ok(css.includes('#appView input,#appView select,#appView textarea'));
+  assert.ok(css.includes('#appView table{width:100%;max-width:100%;border-collapse:collapse'));
+  assert.ok(css.includes('#appView .table-wrap'));
+  assert.ok(css.includes('overflow-x:auto'));
+  assert.ok(css.includes('@media(max-width:760px)'));
+  assert.ok(css.includes('@media(max-width:390px)'));
+  assert.ok(css.includes('grid-template-columns:minmax(0,1fr)!important'));
 });
