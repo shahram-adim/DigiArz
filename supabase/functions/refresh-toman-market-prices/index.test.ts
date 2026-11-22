@@ -165,5 +165,4 @@ Deno.test("Toman refresh HTTP handler isolates provider failures and refuses emp
       if (writes() !== 0) throw new Error("Cache failure must not write market rows");
     });
   });
-  });
 });
