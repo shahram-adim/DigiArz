@@ -26,7 +26,7 @@ export function normalizeDecimal(value, precision = 30, scale = 10) {
   if (typeof value === "string") {
     raw = value.trim();
     if (raw.includes(",")) {
-      if (!/^[+-]?\\d{1,3}(?:,\\d{3})*(?:\\.\\d*)?(?:[eE][+-]?\\d+)?$/.test(raw)) return null;
+      if (!/^[+-]?\d{1,3}(?:,\d{3})*(?:\.\d*)?(?:[eE][+-]?\d+)?$/.test(raw)) return null;
       raw = raw.replace(/,/g, "");
     }
   } else if (typeof value === "number") {
@@ -86,7 +86,7 @@ export function shiftDecimal(value, exponent, precision = 30, scale = 10) {
   if (typeof value === "string") {
     raw = value.trim();
     if (raw.includes(",")) {
-      if (!/^[+-]?\\d{1,3}(?:,\\d{3})*(?:\\.\\d*)?(?:[eE][+-]?\\d+)?$/.test(raw)) return null;
+      if (!/^[+-]?\d{1,3}(?:,\d{3})*(?:\.\d*)?(?:[eE][+-]?\d+)?$/.test(raw)) return null;
       raw = raw.replace(/,/g, "");
     }
   } else if (typeof value === "number" && Number.isFinite(value)) raw = String(value);
