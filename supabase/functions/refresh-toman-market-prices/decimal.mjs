@@ -39,8 +39,10 @@ export function normalizeDecimal(value, precision = 30, scale = 10) {
   const exponent = Number(match[4] || 0);
   if (!Number.isSafeInteger(exponent) || Math.abs(exponent) > 100) return null;
 
-  const coefficient = (integerPart + fractionPart).replace(/^0+/, "") || "0";
-  const point = integerPart.length + exponent;
+  const rawDigits = integerPart + fractionPart;
+  const leadingZeros = rawDigits.length - rawDigits.replace(/^0+/, "").length;
+  const coefficient = rawDigits.replace(/^0+/, "") || "0";
+  const point = integerPart.length + exponent - leadingZeros;
   let integer;
   let fraction;
   if (point <= 0) {
