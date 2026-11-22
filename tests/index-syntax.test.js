@@ -474,7 +474,7 @@ test('final theme overrides remain inside the stylesheet rather than leaking int
   );
 });
 
-test('third theme controls and chart palette consistently use deep indigo glass', () => {
+test('third theme controls and chart palette consistently use luminous light indigo and pale blue glass', () => {
   assert.match(html, /data-theme-choice="luxury"[^>]*>✧ نیلی شیشه‌ای/);
   assert.match(html, /document\.documentElement\.style\.colorScheme=light\|\|luxury\?'light':'dark'/);
   assert.match(html, /luxury\?'#0c1024':'#080d1b'/);
@@ -483,14 +483,14 @@ test('third theme controls and chart palette consistently use deep indigo glass'
 });
 
 
-test('final deep-indigo glass cascade overrides legacy pale-blue dashboard and login controls', () => {
-  const guard = html.lastIndexOf('/* Final cascade guard: deep indigo glass');
+test('final luminous indigo-blue glass cascade overrides legacy dark indigo dashboard and login controls', () => {
+  const guard = html.lastIndexOf('/* Final cascade guard: luminous light indigo');
   assert.ok(guard > html.indexOf('body.luxury-theme #appView .digiarz-v2-dashboard'), 'final cascade guard follows legacy indigo rules');
   const tail = html.slice(guard, html.lastIndexOf('</style>'));
-  assert.match(tail, /body\.luxury-theme #appView \.card[\s\S]*?background:rgba\(24,31,67,\.70\)!important/);
+  assert.match(tail, /body\.luxury-theme #appView \.card[\s\S]*?background:rgba\(255,255,255,\.74\)!important/);
   assert.match(tail, /body\.luxury-theme #appView #tab-markets \.coin[\s\S]*?border:0!important/);
-  assert.match(tail, /body\.luxury-theme #authView \.auth-form \.auth-actions #loginBtn[\s\S]*?linear-gradient\(135deg,#8069d8,#5e4db0\)!important/);
-  assert.match(tail, /#090d20|#8069d8/);
+  assert.match(tail, /body\.luxury-theme #appView button:not\(\.secondary\)[\s\S]*?linear-gradient\(135deg,#b9baff,#9bcfff\)!important/);
+  assert.match(tail, /#edf1ff|#b9baff|#9bcfff/);
 });
 
 
@@ -525,7 +525,7 @@ test('all inline style elements are balanced and the mobile market stylesheet is
   const mobileOpen = html.indexOf('<style id="digiarz-mobile-market-row-containment-20261121">');
   assert.ok(heroOpen >= 0 && mobileOpen > heroOpen, 'hero and mobile styles are separate ordered blocks');
   assert.ok(html.lastIndexOf('</style>', mobileOpen) > heroOpen, 'hero stylesheet closes before the mobile stylesheet opens');
-  assert.match(html, /body\.luxury-theme\{[^}]*background:radial-gradient\(ellipse at 14% 4%/s, 'theme 3 keeps its deep-indigo full-page canvas');
+  assert.match(html, /body\.luxury-theme\{[^}]*background:radial-gradient\(ellipse at 12% 5%/s, 'theme 3 keeps its luminous indigo-blue full-page canvas');
 });
 
 
