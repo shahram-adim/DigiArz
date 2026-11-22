@@ -6,6 +6,7 @@ on:
     branches:
       - redesign/indigo-glass-layout-fix-2026-11-21
       - fix/pure-white-glass-dashboard-market-2026-11-21-v2
+      - fix/mobile-market-assets-layout-2026-11-22
     paths:
       - .github/workflows/android-review-apk.yml
       - index.html

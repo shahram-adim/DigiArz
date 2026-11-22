@@ -661,3 +661,94 @@ test('all ten application pages receive the shared page-specific responsive geom
   assert.ok(css.includes('@media(max-width:390px)'));
   assert.ok(css.includes('grid-template-columns:minmax(0,1fr)!important'));
 });
+
+
+test('mobile market asset list remains a full-width vertical list and top assets stay bounded horizontally', () => {
+  const marker = 'DIGIARZ-MOBILE-MARKET-ASSETS-FINAL-FIX-20261122';
+  const start = html.lastIndexOf(marker);
+  const end = html.indexOf('</style>', start);
+  assert.ok(start >= 0 && end > start, 'mobile market/assets finishing stylesheet exists');
+  const css = html.slice(start, end);
+  assert.match(css, /#tab-markets \.market-board-v34 \.market-list\{[\s\S]*?display:flex!important;flex-direction:column!important/);
+  assert.match(css, /#tab-markets \.market-board-v34 \.coin\{[\s\S]*?width:100%!important;min-width:0!important;max-width:100%!important/);
+  assert.match(css, /grid-template-areas:"identity price" "change price"!important/);
+  assert.match(css, /#tab-markets \.top-assets-strip\{[\s\S]*?overflow-x:auto!important/);
+  assert.match(css, /#tab-markets \.top-assets-strip>\.top-asset-card\{[\s\S]*?flex:0 0 168px!important/);
+  assert.ok(css.includes('@media(max-width:760px)'));
+  assert.ok(css.includes('@media(max-width:390px)'));
+});
+
+
+test('top five gainers and losers are removed from markets and shown as horizontal dashboard strips', () => {
+  const dashboard = html.indexOf('id="tab-dashboard"');
+  const markets = html.indexOf('id="tab-markets"');
+  const movers = html.indexOf('class="dashboard-market-movers"');
+  assert.ok(dashboard >= 0 && markets > dashboard && movers > dashboard && movers < markets,
+    'gainers and losers are positioned inside the dashboard before the markets page');
+  assert.equal((html.match(/id="topGainersList"/g) || []).length, 1, 'gainers list root is unique');
+  assert.equal((html.match(/id="topLosersList"/g) || []).length, 1, 'losers list root is unique');
+  const marketTab = html.slice(markets, html.indexOf('id="tab-toman"', markets));
+  assert.doesNotMatch(marketTab, /id="topGainersList"|id="topLosersList"/,
+    'top five gainers and losers are not displayed on the markets page');
+  const start = html.lastIndexOf('DIGIARZ-DASHBOARD-MARKET-MOVERS-HORIZONTAL-20261122');
+  const end = html.indexOf('</style>', start);
+  assert.ok(start >= 0 && end > start, 'dashboard mover horizontal layout styles exist');
+  const css = html.slice(start, end);
+  assert.match(css, /#tab-dashboard \.dashboard-market-movers \.gainers-grid\{display:flex!important;flex-direction:row!important/);
+  assert.match(css, /overflow-x:auto/);
+  assert.match(css, /@media\(max-width:760px\)[\s\S]*?grid-template-columns:minmax\(0,1fr\)/);
+});
+
+
+test('dashboard top spacing and legacy hero regression', () => {
+  assert.match(html, /#appView>\.hero\{display:none!important\}/,
+    'obsolete pre-tab hero is hidden while the redesigned dashboard hero remains');
+  assert.match(html, /#tab-dashboard\.digiarz-v2-dashboard\{[\s\S]*?width:100%[\s\S]*?margin:0!important/,
+    'dashboard panel uses the available width without inherited card spacing');
+  assert.match(html, /body\.luxury-theme #appView\{[\s\S]*?margin:8px auto 30px!important/,
+    'theme three app shell no longer leaves an oversized top gap');
+  assert.match(html, /body\.luxury-theme #appView>\.market-announcement\{[\s\S]*?margin:0 0 10px!important/,
+    'theme three announcement is aligned to the top of the app shell');
+  assert.match(html, /@media\(max-width:760px\)[\s\S]*?#tab-dashboard \.da-v2-quick-grid\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important/,
+    'dashboard quick actions collapse cleanly on mobile');
+  assert.match(html, /@media\(max-width:390px\)[\s\S]*?#tab-dashboard \.da-v2-hero\{grid-template-columns:minmax\(0,1fr\) 78px!important/,
+    'dashboard hero remains constrained on narrow phones');
+});
+
+
+test('global logo and favorite star frame removal applies after all theme styles', () => {
+  const marker = 'DIGIARZ-GLOBAL-LOGO-STAR-FRAME-REMOVAL-20261122';
+  const start = html.lastIndexOf(marker);
+  const end = html.indexOf('</style>', start);
+  assert.ok(start >= 0 && end > start, 'final global logo/star override exists');
+  const css = html.slice(start, end);
+  for (const selector of [
+    '#appView .coin-icon', '#appView .asset-logo', '#appView .da-market-logo',
+    '#appView .da-market-logo-inner', '#appView .da-v2-logo',
+    '#authView .coin-icon', '#authView .asset-logo',
+    '#authView .da-market-logo', '#authView .da-market-logo-inner'
+  ]) assert.ok(css.includes(selector), 'logo frame removed: ' + selector);
+  assert.match(css, /border:0!important;outline:0!important;box-shadow:none!important/);
+  assert.match(css, /background:transparent!important/);
+  assert.match(css, /button\.favorite-btn[\s\S]*?border:0!important/);
+  assert.match(css, /button\.da-market-favorite[\s\S]*?border:0!important/);
+  assert.ok(start > html.lastIndexOf('</style>', start), 'override is appended after theme styles');
+});
+
+
+test('reference-style market rows use premium black and clean light layouts without touching theme three', () => {
+  const marker = 'DIGIARZ-REFERENCE-MARKET-ROWS-DARK-LIGHT-20261122';
+  const start = html.lastIndexOf(marker);
+  const end = html.indexOf('</style>', start);
+  assert.ok(start >= 0 && end > start, 'reference-style market row override exists');
+  const css = html.slice(start, end);
+  assert.match(css, /grid-template-areas:"identity change favorite" "identity price favorite"/);
+  assert.match(css, /body:not\(\.light-theme\):not\(\.luxury-theme\)/);
+  assert.match(css, /body\.light-theme #tab-markets/);
+  assert.match(css, /border:0!important;border-radius:0!important;box-shadow:none!important/);
+  assert.match(css, /\.coin-sparkline\{display:none!important\}/);
+  assert.match(css, /\.coin>\.favorite-btn\{[\s\S]*?background:transparent!important;box-shadow:none!important/);
+  assert.match(css, /@media\(max-width:760px\)/);
+  assert.match(css, /@media\(max-width:390px\)/);
+  assert.ok(!css.includes('body.luxury-theme #tab-markets'), 'third theme is not restyled');
+});
