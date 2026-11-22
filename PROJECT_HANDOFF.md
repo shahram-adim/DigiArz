@@ -1200,3 +1200,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - GitHub Actions review APK run `45037245050` روی دقیقاً همین head در وضعیت pending مشاهده شد؛ تا پایان run و بررسی لاگ‌ها، تست‌ها و APK موفق تلقی نشوند.
 - هیچ merge، انتشار، deploy، Supabase، Auth، کیف پول یا منطق معاملاتی تغییر نکرده است.
 - گام بعد: بررسی نتیجهٔ run `45037245050` و در صورت موفقیت، تطبیق BUILD-INFO artifact با head بالا؛ QA دیداری واقعی گوشی هنوز نیازمند مشاهدهٔ کاربر است.
+
+
+### وضعیت تازهٔ CI — ۲۰۲۶-۱۱-۲۲
+- اجرای review APK شمارهٔ `45037245050` روی کد و تست commit `535bb2869f641a0c67962dab8dca4de3e6a6bdd9` به مرحلهٔ ساخت APK رسیده است.
+- مراحل نصب وابستگی‌های قفل‌شده، امضای npm، تست‌های زیست‌سنجی، تست‌های رگرسیون `tests/*.test.js`، آماده‌سازی web، ساخت و sync پروژهٔ اندروید و بررسی Capacitor همگی موفق گزارش شده‌اند.
+- مرحلهٔ `Build installable debug APK` هنوز `in_progress` است؛ بررسی مجوز زیست‌سنجی، ثبت BUILD-INFO و بارگذاری artifact هنوز انجام نشده‌اند. هنوز artifact قابل تحویل موجود نیست.
+- PR #52 همچنان Draft/Open/Unmerged است؛ head آن `38b3e5c32a36a64a7b51749c02691e4d8843d594` است. این head فقط شامل به‌روزرسانی handoff نسبت به commit کد/تست CI است.
+- گام بعد: پس از تکمیل run، conclusion، مجوز merged manifest، BUILD-INFO و artifact را بررسی کن و فقط در صورت تطابق source_commit با `535bb2869f641a0c67962dab8dca4de3e6a6bdd9` APK را تحویل بده.
