@@ -677,3 +677,24 @@ test('mobile market asset list remains a full-width vertical list and top assets
   assert.ok(css.includes('@media(max-width:760px)'));
   assert.ok(css.includes('@media(max-width:390px)'));
 });
+
+
+test('top five gainers and losers are removed from markets and shown as horizontal dashboard strips', () => {
+  const dashboard = html.indexOf('id="tab-dashboard"');
+  const markets = html.indexOf('id="tab-markets"');
+  const movers = html.indexOf('class="dashboard-market-movers"');
+  assert.ok(dashboard >= 0 && markets > dashboard && movers > dashboard && movers < markets,
+    'gainers and losers are positioned inside the dashboard before the markets page');
+  assert.equal((html.match(/id="topGainersList"/g) || []).length, 1, 'gainers list root is unique');
+  assert.equal((html.match(/id="topLosersList"/g) || []).length, 1, 'losers list root is unique');
+  const marketTab = html.slice(markets, html.indexOf('id="tab-toman"', markets));
+  assert.doesNotMatch(marketTab, /id="topGainersList"|id="topLosersList"/,
+    'top five gainers and losers are not displayed on the markets page');
+  const start = html.lastIndexOf('DIGIARZ-DASHBOARD-MARKET-MOVERS-HORIZONTAL-20261122');
+  const end = html.indexOf('</style>', start);
+  assert.ok(start >= 0 && end > start, 'dashboard mover horizontal layout styles exist');
+  const css = html.slice(start, end);
+  assert.match(css, /#tab-dashboard \.dashboard-market-movers \.gainers-grid\{display:flex!important;flex-direction:row!important/);
+  assert.match(css, /overflow-x:auto/);
+  assert.match(css, /@media\(max-width:760px\)[\s\S]*?grid-template-columns:minmax\(0,1fr\)/);
+});
