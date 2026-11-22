@@ -474,23 +474,23 @@ test('final theme overrides remain inside the stylesheet rather than leaking int
   );
 });
 
-test('third theme controls and chart palette consistently use pale blue glass', () => {
-  assert.match(html, /data-theme-choice="luxury"[^>]*>✧ آبی شیشه‌ای/);
+test('third theme controls and chart palette consistently use deep indigo glass', () => {
+  assert.match(html, /data-theme-choice="luxury"[^>]*>✧ نیلی شیشه‌ای/);
   assert.match(html, /document\.documentElement\.style\.colorScheme=light\|\|luxury\?'light':'dark'/);
   assert.match(html, /luxury\?'#eaf3ff':'#080d1b'/);
   assert.match(html, /luxury\?\{bg:'#eaf3ff',text:'#183b5c',grid:'#d7eafa',line:'#b8d5eb'\}/);
-  assert.doesNotMatch(html, /luxury:'نیلی شیشه‌ای'/);
+  assert.match(html, /luxury:'نیلی شیشه‌ای'/);
 });
 
 
-test('final pale-blue glass cascade overrides legacy indigo dashboard and login controls', () => {
-  const guard = html.lastIndexOf('/* Final cascade guard: pale sky-blue glass');
+test('final deep-indigo glass cascade overrides legacy pale-blue dashboard and login controls', () => {
+  const guard = html.lastIndexOf('/* Final cascade guard: deep indigo glass');
   assert.ok(guard > html.indexOf('body.luxury-theme #appView .digiarz-v2-dashboard'), 'final cascade guard follows legacy indigo rules');
   const tail = html.slice(guard, html.lastIndexOf('</style>'));
   assert.match(tail, /body\.luxury-theme #appView \.card[\s\S]*?background:rgba\(255,255,255,\.64\)!important/);
   assert.match(tail, /body\.luxury-theme #appView #tab-markets \.coin[\s\S]*?border:0!important/);
   assert.match(tail, /body\.luxury-theme #authView \.auth-form \.auth-actions #loginBtn[\s\S]*?linear-gradient\(135deg,#b8ddf8,#8fc7ef\)!important/);
-  assert.doesNotMatch(tail, /#9862f4|#9587e8|#090d20/);
+  assert.match(tail, /#090d20|#8069d8/);
 });
 
 
@@ -525,7 +525,7 @@ test('all inline style elements are balanced and the mobile market stylesheet is
   const mobileOpen = html.indexOf('<style id="digiarz-mobile-market-row-containment-20261121">');
   assert.ok(heroOpen >= 0 && mobileOpen > heroOpen, 'hero and mobile styles are separate ordered blocks');
   assert.ok(html.lastIndexOf('</style>', mobileOpen) > heroOpen, 'hero stylesheet closes before the mobile stylesheet opens');
-  assert.ok(html.includes('body.luxury-theme{min-height:100vh;background:radial-gradient(ellipse at 12% 8%'), 'theme 3 keeps its pale-blue full-page canvas');
+  assert.ok(html.includes('body.luxury-theme{min-height:100vh;background:radial-gradient(ellipse at 14% 4%'), 'theme 3 keeps its deep-indigo full-page canvas');
 });
 
 
