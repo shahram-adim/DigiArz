@@ -5573,6 +5573,118 @@ body.luxury-theme #authView .auth-form{
 body.luxury-theme #authView .auth-reference-visual{
   background:linear-gradient(135deg,#f0edff 0%,#e5edff 54%,#dff2ff 100%)!important;
 }
+
+/* DIGIARZ-ALL-PAGES-GEOMETRY-20261122: page-specific layout finish, shared across all themes. */
+#appView [id^="tab-"]{display:block;box-sizing:border-box;min-width:0;max-width:100%}
+#appView [id^="tab-"]>*{box-sizing:border-box;min-width:0;max-width:100%}
+#appView #tab-dashboard .da-v2-topline,
+#appView #tab-dashboard .da-v2-section-head,
+#appView #tab-markets .section-title,
+#appView #tab-toman .section-title,
+#appView #tab-chart .section-title,
+#appView #tab-trade .section-title,
+#appView #tab-assets .section-title,
+#appView #tab-orders .section-title,
+#appView #tab-history .section-title,
+#appView #tab-admin .section-title,
+#appView #tab-settings .section-title{
+ box-sizing:border-box;min-width:0;max-width:100%;
+ display:flex;align-items:center;justify-content:space-between;
+ flex-wrap:wrap;gap:10px;
+}
+#appView #tab-dashboard .da-v2-quick-grid,
+#appView #tab-dashboard .da-market-toolbar,
+#appView #tab-markets .market-tools,
+#appView #tab-assets .asset-summary-grid,
+#appView #tab-assets .asset-tools,
+#appView #tab-orders .market-tools,
+#appView #tab-history .history-filters,
+#appView #tab-admin .daily-ad-admin-grid,
+#appView #tab-admin .market-tools,
+#appView #tab-settings .settings-grid{
+ min-width:0;max-width:100%;box-sizing:border-box;
+}
+#appView #tab-toman .toman-toolbar,
+#appView #tab-chart .asset-detail-head,
+#appView #tab-trade .trade-workspace-banner-v35,
+#appView #tab-trade .trade-market-heading,
+#appView #tab-history .history-date-presets{
+ display:flex;align-items:center;flex-wrap:wrap;gap:9px;
+ min-width:0;max-width:100%;box-sizing:border-box;
+}
+#appView #tab-chart .trade-grid,
+#appView #tab-trade .trade-market-grid,
+#appView #tab-trade .indicator-grid,
+#appView #tab-admin .grid{
+ min-width:0;max-width:100%;
+}
+#appView #tab-toman .toman-table-wrap,
+#appView #tab-history .table-wrap,
+#appView #tab-admin .admin-table-wrap{
+ width:100%;min-width:0;max-width:100%;overflow-x:auto;
+ -webkit-overflow-scrolling:touch;
+}
+#appView #tab-dashboard .da-market-glass,
+#appView #tab-markets .market-hero-v34,
+#appView #tab-chart .detail-section,
+#appView #tab-trade .detail-section,
+#appView #tab-assets .asset-summary-grid,
+#appView #tab-orders .market-list,
+#appView #tab-history .table-wrap,
+#appView #tab-admin .detail-section,
+#appView #tab-settings .setting-row{
+ min-width:0;max-width:100%;box-sizing:border-box;
+}
+#appView #tab-dashboard input,
+#appView #tab-markets input,#appView #tab-markets select,
+#appView #tab-toman input,#appView #tab-toman select,
+#appView #tab-assets input,#appView #tab-assets select,
+#appView #tab-orders input,#appView #tab-orders select,
+#appView #tab-history input,#appView #tab-history select,
+#appView #tab-admin input,#appView #tab-admin select,
+#appView #tab-admin textarea,
+#appView #tab-settings input,#appView #tab-settings select{
+ min-width:0;max-width:100%;box-sizing:border-box;
+}
+@media(max-width:760px){
+ #appView #tab-dashboard .da-v2-quick-grid,
+ #appView #tab-dashboard .da-market-toolbar,
+ #appView #tab-markets .market-tools,
+ #appView #tab-assets .asset-summary-grid,
+ #appView #tab-assets .asset-tools,
+ #appView #tab-orders .market-tools,
+ #appView #tab-history .history-filters,
+ #appView #tab-admin .daily-ad-admin-grid,
+ #appView #tab-admin .market-tools,
+ #appView #tab-settings .settings-grid{
+  grid-template-columns:minmax(0,1fr)!important;
+ }
+ #appView #tab-toman .toman-toolbar,
+ #appView #tab-chart .asset-detail-head,
+ #appView #tab-trade .trade-workspace-banner-v35,
+ #appView #tab-trade .trade-market-heading,
+ #appView #tab-history .history-date-presets{
+  align-items:stretch;
+ }
+ #appView #tab-dashboard .da-v2-topline>*,
+ #appView #tab-markets .section-title>*,
+ #appView #tab-toman .section-title>*,
+ #appView #tab-chart .section-title>*,
+ #appView #tab-trade .section-title>*,
+ #appView #tab-assets .section-title>*,
+ #appView #tab-orders .section-title>*,
+ #appView #tab-history .section-title>*,
+ #appView #tab-admin .section-title>*,
+ #appView #tab-settings .section-title>*{
+  min-width:0;max-width:100%;
+ }
+}
+@media(max-width:390px){
+ #appView [id^="tab-"]{padding-inline:0}
+ #appView #tab-history .history-filters,
+ #appView #tab-admin .daily-ad-admin-grid{gap:8px}
+ #appView #tab-settings .setting-row{gap:8px;align-items:flex-start}
+}
 </style>
 
 </body>
