@@ -1185,3 +1185,106 @@
 - [x] گزارش تفصیلی در `docs/TOMAN_MARKET_FEED_AUDIT_2026-11-22.md` ثبت شد.
 - [x] این نوبت فقط خواندن GitHub/Supabase، بررسی schema و لاگ و مستندسازی بود. هیچ Edge Function deploy، RPC مالی، Migration، cron یا تغییر داده‌ای در Production انجام نشد.
 - [ ] گام بعد: قرارداد و fixtureهای Bit24 و Kifpool را بررسی؛ adapterهای چهار منبع و آزمون‌های واحد/stale/timeout/partial failure را در CI آماده کن؛ logging ساختاریافته برای تفکیک علت ۵۰۲ اضافه کن. استقرار Production فقط پس از تأیید صریح کاربر.
+
+
+## پیشرفت مسیر قیمت تومانی و PR #51 — ۲۲ نوامبر ۲۰۲۶
+
+- [x] شاخهٔ `fix/toman-market-duplicate-upsert-2026-11-22` به‌روزرسانی شد؛ آخرین commit کد در زمان ثبت این گزارش: `4648d37595e78964f7c0544b1f3afcd377514aa8`.
+- [x] parser عددی `lossless-json@4.3.4` به مسیر دریافت قیمت اضافه شد؛ JSON قیمت‌ها پیش از تبدیل به رشتهٔ اعشاری دقیق، از `response.json()/Number()` عبور نمی‌کنند.
+- [x] تبدیل ریال به تومان با جابه‌جایی ممیز، گردکردن صریح مطابق مقیاس ستون‌های PostgreSQL، اعتبارسنجی precision/scale و مقایسهٔ decimal-aware انجام می‌شود. `1.0` و `1.00` یک مقدار محسوب می‌شوند.
+- [x] مسیر قیمت تومانی به چهار منبع موردتأیید محدود شد: Nobitex، Wallex، Bit24 و Kifpool؛ Bitpin از این مسیر حذف شد.
+- [x] Bit24 فقط بازارهای IRT با دارایی فعال و تطبیق‌یافته را می‌پذیرد و از `market_24h_information.last_price` استفاده می‌کند؛ bid/ask از دادهٔ ناموجود ساخته نمی‌شود.
+- [x] Kifpool فقط دارایی‌های فعال و تطبیق‌یافته با `coingecko_id` و `priceSellIRT` مثبت را می‌پذیرد؛ قیمت خرید، bid یا ask جعلی نمی‌شود.
+- [x] در CI مربوط به Edge، commit قبلی `93ca9ec917a2e6c4c9acccda11ea16731d7099f8` با موفقیت type-check، تست dedupe، و تست migration تاریخچه/هم‌زمانی را گذراند (run `45027878160`). workflow گستردهٔ exact-decimal نیز روی همان commit موفق شد (run `45027878242`).
+- [x] پس از اصلاحات نهایی helper اعشار، اجرای جدید Edge روی commit `4648d37595e78964f7c0544b1f3afcd377514aa8`، مراحل type-check، تست dedupe و تست PostgreSQL را با موفقیت گذراند (run `45028020712`؛ مرحلهٔ پاک‌سازی runner در زمان ثبت در حال پایان بود).
+- [x] PR #51 همچنان Draft/open و mergeable است؛ merge یا انتشار انجام نشده است.
+- [!] وضعیت Production بدون تغییر: Supabase برابر `ACTIVE_HEALTHY` و PostgreSQL `17.11.0.018`؛ تابع `refresh-toman-market-prices` هنوز نسخهٔ ۳ است؛ RPC تاریخچهٔ اتمی در Production وجود ندارد؛ هر ۳۷۳ ردیف `market_toman_prices` stale هستند و آخرین `fetched_at` برابر `2026-11-17 22:04:26 UTC` است.
+- [x] snapshot فقط‌خواندنی منابع: Bit24 دارای ۳۵۱ observation فعال و ۲۹۱ دارایی تطبیق‌یافته؛ Kifpool دارای ۱٬۲۷۱ observation فعال، ۱٬۱۲۱ دارایی تطبیق‌یافته و ۱٬۱۲۰ مورد با `priceSellIRT` مثبت است.
+- [x] هیچ Migration، RPC، Edge Function، Cron، دادهٔ Production، سفارش، معامله یا موجودی در Supabase تغییر نکرد.
+
+### گام بعد
+1. ثبت نتیجهٔ نهایی run `45028020712` و اجرای مجدد workflow گستردهٔ exact-decimal روی آخرین commit کد در صورت نیاز.
+2. افزودن آزمون‌های HTTP-level برای JSON خراب، timeout، شکست جزئی providerها و شکست همهٔ منابع؛ تست‌های فعلی adapterها عمدتاً unit/source regression هستند.
+3. بازبینی مستقل قرارداد واحد قیمت Kifpool و payload واقعی Bit24 قبل از هر انتشار.
+4. بررسی و تأیید ترتیب اجرای migration مربوط به RPC تاریخچه در Production؛ سپس فقط با اجازهٔ صریح کاربر deploy کنترل‌شده. PR تا آن زمان Draft باقی بماند.
+
+
+### تکمیل آزمون‌های عایق‌سازی خطای منابع — ۲۲ نوامبر ۲۰۲۶
+- [x] منطق جمع‌آوری خروجی `Promise.allSettled` در فایل مستقل `provider-results.mjs` قرار گرفت و تابع Edge از همان منطق استفاده می‌کند.
+- [x] تست‌های جدید برای حفظ ردیف‌های منابع سالم هنگام timeout یا JSON خراب منبع دیگر، پاسخ ۵۰۲ هنگام شکست همهٔ منابع/خروجی خالی، رد خروجی غیرآرایه، و عدم حذف ردیف‌های قدیمی در snapshot ناقص اضافه شد.
+- [x] آخرین commit کد/تست: `1b93161174dc371edc1d95ca6db0c3a9e506b17e`. اجرای CI مربوط به همین commit هنوز در زمان ثبت این سطرها مشاهده نشده بود؛ نتیجه نباید موفق فرض شود.
+- [!] این‌ها آزمون‌های orchestration/contract در سطح ماژول هستند، نه تست end-to-end با HTTP server واقعی و mock کردن همهٔ fetchهای Edge. تست HTTP-level واقعی همچنان گام جداگانه است.
+
+
+### آزمون یکپارچهٔ HTTP برای Edge Function — ۲۲ نوامبر ۲۰۲۶
+- [x] handler تابع به‌صورت export قابل تست شد؛ اجرای واقعی Edge همچنان فقط در حالت `import.meta.main` با `Deno.serve` آغاز می‌شود.
+- [x] فایل `index.test.ts` با mock کردن fetch و متغیرهای محیطی ساخته شد: timeout والکس همراه با موفقیت نوبیتکس، JSON خراب نوبیتکس همراه با موفقیت والکس، و شکست همهٔ چهار provider.
+- [x] آزمون‌ها بررسی می‌کنند در دو سناریوی شکست جزئی، ردیف‌های منبع سالم ذخیره شوند و در شکست کامل، پاسخ ۵۰۲ صادر شود و هیچ upsert خالی انجام نشود.
+- [x] workflow Edge به اجرای `deno test --allow-env .../index.test.ts` مجهز شد.
+- [!] اجرای CI جدید روی commit `5503cbfbc6c7486b6d0dcc3d1be3d0e42a3dd001` در حال اجراست؛ نتیجهٔ HTTP integration هنوز تأیید نشده است.
+
+
+### نتیجهٔ CI برای آزمون HTTP — ۲۲ نوامبر ۲۰۲۶
+- [x] اجرای Edge workflow `45028471398` روی commit کد/تست `89baf9a55936bd894b26fa2739ce4accaca5ac52` با نتیجهٔ SUCCESS پایان یافت: Deno type-check، HTTP handler integration tests، Node dedupe tests و PostgreSQL atomic-history/concurrency tests همگی موفق.
+- [!] اجرای workflow گستردهٔ exact-decimal شمارهٔ `45028471406` در زمان ثبت این گزارش هنوز در مرحلهٔ تست exact-decimal/browser integration بود؛ نتیجهٔ نهایی آن تأیید نشده است.
+- [x] PR #51 در آخرین بررسی open و Draft، mergeable بود؛ merge و deploy انجام نشده است.
+
+
+### نتیجهٔ آزمون گستردهٔ اعشار و سفارش‌ها — ۲۲ نوامبر ۲۰۲۶
+- [x] workflow `45028471406` با نتیجهٔ SUCCESS پایان یافت. تست‌های exact-decimal/browser، محاسبات PostgreSQL، preflight و rollback تغییر schema، قفل timeout، مسیرهای Market/Limit/Stop-Limit/TP-SL، چرخهٔ لغو و raceهای دو session همگی موفق شدند.
+- [x] برای تشخیص علت ۵۰۲های آینده، در handler قیمت تومانی مرحله‌های `auth_user`, `cache_read`, `provider_fetch`, `price_upsert`, `history_rpc` ثبت می‌شوند و خطای بیرونی با نام مرحله در log ساختاریافته ثبت خواهد شد.
+- [x] آزمون HTTP اضافی برای خطای cache و وجود diagnostic stage/log اضافه شد؛ این آخرین اصلاح هنوز منتظر اجرای CI خودش است.
+
+
+### نتیجهٔ نهایی آزمون‌های مرحلهٔ فعلی — ۲۲ نوامبر ۲۰۲۶
+- [x] آخرین Edge workflow `45028694088` روی commit `9d9235ae7642dd4ca90d1f4d21f163ddd1e374e8` با SUCCESS کامل شد: Deno type-check، HTTP integration شامل timeout/JSON خراب/شکست همه منابع/خطای cache و ثبت stage، Node dedupe، PostgreSQL atomic-history و concurrency.
+- [x] Exact-decimal workflow `45028471406` نیز با SUCCESS کامل شد؛ همهٔ تست‌های محاسبات اعشاری، PostgreSQL، migration rehearsal و مسیرهای سفارش/race سبز شدند.
+- [x] علت دقیق ۵۰۲ قدیمی Production از logهای موجود قابل بازیابی نشد: برای execution بررسی‌شده فقط Boot log ثبت شده بود و جزئیات خطا در logهای تابع موجود نبود. در نسخهٔ جدید، خطاهای بیرونی با stage مشخص ثبت می‌شوند تا اجرای بعدی قابل عیب‌یابی باشد.
+- [!] اجرای جدیدتر Edge با stage-aware logging در Production انجام نشده؛ هیچ نتیجه‌ای از نسخهٔ مستقر استنتاج نشود.
+- [x] وضعیت انتشار بدون تغییر: PR #51 Draft/open؛ Production function نسخهٔ ۳، ۳۷۳ ردیف قیمت stale و RPC تاریخچه نصب‌نشده؛ هیچ Production write/deploy/migration انجام نشد.
+
+
+### بازیابی خودکار GraphQL کیف‌پول من — ۲۲ نوامبر ۲۰۲۶
+- [x] مسیر Kifpool اکنون خطای Apollo با کد `PERSISTED_QUERY_NOT_FOUND` را تشخیص می‌دهد و یک بار همان درخواست را با متن کامل Query و همان persisted hash تکرار می‌کند.
+- [x] منطق fallback بر اساس query متناظر `headerCoins` و قرارداد مشاهده‌شده در پیاده‌سازی مستقل read-only ساخته شد؛ این منبع غیررسمی است و جای تأیید رسمی Kifpool را نمی‌گیرد.
+- [x] تست HTTP برای سناریوی hash منقضی‌شده اضافه شد: درخواست اول با خطای persisted query، درخواست دوم با متن GraphQL و دریافت دادهٔ معتبر.
+- [!] آخرین commit تست/کد `02ac9ffbad1c6fa39eb26b634fdb9999d4d2a7bf` است؛ اجرای CI این commit هنوز در زمان ثبت گزارش ظاهر نشده، پس موفقیت آن تأیید نشده است.
+- [x] PR #51 همچنان Draft است؛ Production بدون تغییر باقی مانده است.
+
+
+### بازبینی عمیق‌تر freshness و adapterهای Bit24/Kifpool — ۲۲ نوامبر ۲۰۲۶
+- [x] اجرای Edge CI شمارهٔ `45028764738` روی commit `8cdc42ebfd72c6794097137657f150a8b0174668` موفق شد: Deno type-check، HTTP integration، dedupe و PostgreSQL atomic-history/concurrency.
+- [x] اجرای exact-decimal CI شمارهٔ `45028764779` روی همان commit موفق شد: محاسبات اعشاری، PostgreSQL، preflight/rollback migration، مسیرهای سفارش و raceهای دو session.
+- [x] یک نقص cache شناسایی و اصلاح شد: freshness اکنون با قدیمی‌ترین ردیف `fetched_at.asc` سنجیده می‌شود؛ بنابراین یک upsert جزئی نمی‌تواند ردیف‌های قدیمی‌تر را با timestamp تازهٔ یک ردیف دیگر پنهان کند.
+- [x] آزمون HTTP برای snapshot جزئی/قدیمی اضافه شد و ترتیب `fetched_at.asc` را صریحاً assert می‌کند.
+- [x] Bit24 adapter اکنون `per_page=100` را درخواست می‌کند، `last_page` را اعتبارسنجی می‌کند و تمام صفحات بازار را واکشی می‌کند؛ تعداد صفحات نامعتبر یا بیش از ۵۰ رد می‌شود.
+- [x] آزمون HTTP جدید، BTC/IRT را فقط در صفحهٔ دوم fixture می‌کند تا صفحه‌بندی واقعی adapter را بررسی کند.
+- [x] بازبینی منبع فنی ثانویهٔ عمومی نشان می‌دهد Kifpool از Apollo persisted query با امکان تغییر hash استفاده می‌کند؛ fallback به متن GraphQL و آزمون آن از قبل در شاخه وجود دارد. این منبع غیررسمی است و جایگزین تأیید مستقیم Kifpool نیست.
+- [!] تغییرات freshness و صفحه‌بندی Bit24 در commit `8d507d13dd11a08adc550be6b4c28a615319c79f` قرار گرفته‌اند؛ اجرای CI روی این commit در زمان ثبت این بخش هنوز مشاهده نشده و موفقیت آن ادعا نمی‌شود.
+- [!] قرارداد مستقیم/رسمی API برای Bit24 و Kifpool هنوز مستند مستقل قابل اتکایی پیدا نشده؛ داده‌های فعلی بر endpoint عمومی وب‌سایت و شواهد فنی ثانویه متکی‌اند.
+- [x] Production بدون تغییر باقی مانده: تابع نسخهٔ ۳، ۳۷۳ ردیف قیمت stale، RPC تاریخچه نصب‌نشده؛ هیچ deploy یا migration انجام نشده.
+
+
+### تأیید CI بازیابی GraphQL Kifpool — ۲۲ نوامبر ۲۰۲۶
+- [x] Edge workflow `45029200100` روی نسخهٔ دارای fallback گراف‌کیوال با نتیجهٔ SUCCESS کامل شد؛ Deno type-check، HTTP integration tests، Node dedupe و PostgreSQL atomic-history/concurrency همگی موفق‌اند.
+- [x] تست مسیر hash منقضی‌شده در مجموعهٔ HTTP اجرا شده است و مرحلهٔ HTTP integration با موفقیت گذشت.
+- [!] Exact-decimal workflow `45029200017` هنوز در مرحلهٔ PostgreSQL arithmetic regression است؛ نتیجهٔ نهایی آن تا این لحظه اعلام نشده.
+- [x] PR #51 همچنان Draft است و هیچ تغییر Production انجام نشده است.
+
+
+### اصلاح ساختار تست‌ها و CI پس از افزودن تست صفحه‌بندی Bit24 — ۲۲ نوامبر ۲۰۲۶
+- [x] خطای CI در commit قبلی ناشی از قرار گرفتن تست Bit24 درون test step مربوط به Kifpool بود؛ stepها جدا و closure اضافی حذف شد.
+- [x] Edge workflow `45029355064` پس از اصلاح با SUCCESS کامل شد: type-check، HTTP tests (از جمله Kifpool APQ fallback و Bit24 page-two)، dedupe و PostgreSQL atomic-history/concurrency.
+- [x] Exact-decimal workflow قبلی `45029200017` نیز با SUCCESS کامل شد. اجرای تازه‌تر `45029355083` هنوز در مرحلهٔ setup Node قرار دارد.
+- [x] آخرین وضعیت Production همچنان بدون تغییر است؛ هیچ deploy/migration یا write انجام نشده است.
+
+
+### تأیید نهایی اصلاح freshness و adapter صفحه‌بندی Bit24 — ۲۲ نوامبر ۲۰۲۶
+- [x] آخرین Edge workflow شمارهٔ `45029355064` روی commit نهایی کد/تست `75c9f168d6ebf372068cc33776e6b3e0346e1b0d` با SUCCESS کامل شد: Deno type-check، HTTP integration tests (شامل oldest-row freshness، Bit24 page 2 و Kifpool persisted-query fallback)، dedupe و PostgreSQL atomic-history/concurrency.
+- [x] Exact-decimal workflow شمارهٔ `45029355083` نیز با SUCCESS کامل شد: decimal/browser integration، PostgreSQL arithmetic، schema-widening preflight/rollback/lock timeout، Market/Limit/Stop-Limit/TP-SL integration، cancellation و raceهای واقعی دو session.
+- [x] اجرای قبلی Edge شمارهٔ `45029323962` به علت خطای syntax در nesting تست‌ها fail شد؛ nesting اصلاح و اجرای بعدی `45029355064` سبز شد. این شکست و اصلاح ثبت می‌شود.
+- [x] Bit24 اکنون تمام صفحات بازار را واکشی می‌کند؛ آزمون fixture ثابت می‌کند دارایی BTC/IRT که فقط در صفحهٔ دوم است به خروجی می‌رسد.
+- [x] cache guard قدیمی‌ترین timestamp را می‌سنجد؛ آزمون ثابت می‌کند timestamp تازهٔ یک بخش از snapshot، داده‌های قدیمی‌تر را مخفی نمی‌کند.
+- [x] PR #51 همچنان open/Draft و بدون merge/deploy است. شاخه ۶۸ commit جلوتر از main و صفر commit عقب است؛ mergeability در آخرین بررسی پس از sync به true برگشت.
+- [!] شواهد Bit24/Kifpool همچنان عمدتاً endpointهای عمومی سایت و منبع فنی ثالث غیررسمی هستند؛ تأیید قرارداد API مستقیم از خود providerها پیش از انتشار همچنان لازم است.
+- [x] Supabase Production بدون تغییر: پروژه ACTIVE_HEALTHY، Edge Function نسخهٔ ۳، ۳۷۳ ردیف قیمت stale و RPC تاریخچه نصب‌نشده. هیچ migration، deploy، cron یا دادهٔ مالی Production تغییر نکرد.

@@ -1,0 +1,70 @@
+name: Toman market Edge Function checks
+
+on:
+  pull_request:
+    paths:
+      - "supabase/functions/refresh-toman-market-prices/**"
+      - "supabase/migrations/**"
+      - "tests/toman-market-dedupe.test.js"
+      - ".github/workflows/toman-market-edge.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "supabase/functions/refresh-toman-market-prices/**"
+      - "supabase/migrations/**"
+      - "tests/toman-market-dedupe.test.js"
+      - "tests/toman-market-history-atomic.sh"
+      - ".github/workflows/toman-market-edge.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  edge-function:
+    name: Deno type-check and market dedupe tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.1.4
+
+      - name: Type-check Toman market Edge Function
+        run: deno check supabase/functions/refresh-toman-market-prices/index.ts
+
+      - name: Run Toman market HTTP handler integration tests
+        run: deno test --allow-env supabase/functions/refresh-toman-market-prices/index.test.ts
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Run Toman market deduplication tests
+        run: node --test tests/toman-market-dedupe.test.js
+
+      - name: Verify atomic history migration and concurrent writers
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: 5432
+          PGUSER: postgres
+          PGPASSWORD: postgres
+          PGDATABASE: postgres
+        run: bash tests/toman-market-history-atomic.sh

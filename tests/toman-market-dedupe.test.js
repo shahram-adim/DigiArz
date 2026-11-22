@@ -1,0 +1,199 @@
+const test = require("node:test");
+const assert = require("node:assert/strict");
+
+test("deduplicates identical provider rows by exchange, asset and quote", async () => {
+  const { dedupeMarketRows } = await import("../supabase/functions/refresh-toman-market-prices/dedupe-market-rows.mjs");
+  const base = {
+    exchange: "nobitex",
+    asset_symbol: "BTC",
+    quote_currency: "TOMAN",
+    price_toman: 3200000000,
+    bid_toman: 3199000000,
+    ask_toman: 3201000000,
+    fetched_at: "2026-11-22T12:00:00.000Z",
+  };
+  const result = dedupeMarketRows([base, { ...base }, { ...base, asset_symbol: "ETH" }]);
+
+  assert.equal(result.rows.length, 2);
+  assert.equal(result.duplicateRowsRemoved, 1);
+  assert.equal(result.conflictingSymbolsSkipped, 0);
+});
+
+test("skips a symbol when one provider supplies conflicting prices", async () => {
+  const { dedupeMarketRows } = await import("../supabase/functions/refresh-toman-market-prices/dedupe-market-rows.mjs");
+  const base = {
+    exchange: "wallex",
+    asset_symbol: "BTC",
+    quote_currency: "TOMAN",
+    price_toman: 3200000000,
+  };
+  const result = dedupeMarketRows([
+    base,
+    { ...base, price_toman: 3190000000 },
+    { ...base, price_toman: 3210000000 },
+    { ...base, asset_symbol: "ETH", price_toman: 100000000 },
+  ]);
+
+  assert.deepEqual(result.rows.map((row) => row.asset_symbol), ["ETH"]);
+  assert.equal(result.duplicateRowsRemoved, 2);
+  assert.equal(result.conflictingSymbolsSkipped, 1);
+});
+
+test("keeps the same asset from different exchanges and quote keys", async () => {
+  const { dedupeMarketRows } = await import("../supabase/functions/refresh-toman-market-prices/dedupe-market-rows.mjs");
+  const result = dedupeMarketRows([
+    { exchange: "nobitex", asset_symbol: "BTC", quote_currency: "TOMAN", price_toman: 1 },
+    { exchange: "wallex", asset_symbol: "BTC", quote_currency: "TOMAN", price_toman: 2 },
+    { exchange: "nobitex", asset_symbol: "BTC", quote_currency: "IRT", price_toman: 3 },
+  ]);
+
+  assert.equal(result.rows.length, 3);
+  assert.equal(result.duplicateRowsRemoved, 0);
+  assert.equal(result.conflictingSymbolsSkipped, 0);
+});
+
+
+test("history writes use the atomic six-hour RPC instead of a read-then-write race", async () => {
+  const fs = require("node:fs");
+  const edgeSource = fs.readFileSync("supabase/functions/refresh-toman-market-prices/index.ts", "utf8");
+  const migration = fs.readFileSync("supabase/migrations/20261122130000_atomic_toman_history_interval.sql", "utf8");
+
+  assert.match(edgeSource, /\/rest\/v1\/rpc\/insert_market_toman_history_if_due/);
+  assert.doesNotMatch(edgeSource, /market_toman_price_history\?select=exchange,asset_symbol,recorded_at/);
+  assert.match(migration, /pg_advisory_xact_lock/);
+  assert.match(migration, /order by exchange, asset_symbol/i);
+  assert.match(migration, /recorded_at >= pg_catalog\.now\(\) - interval '6 hours'/);
+  assert.match(migration, /grant execute on function public\.insert_market_toman_history_if_due\(jsonb\) to service_role/i);
+});
+
+
+test("normalizes decimal strings without binary floating-point conversion", async () => {
+  const { normalizeDecimal, shiftDecimal, equalDecimals } = await import("../supabase/functions/refresh-toman-market-prices/decimal.mjs");
+  assert.equal(normalizeDecimal("0001.2300"), "1.23");
+  assert.equal(normalizeDecimal({ toString: () => "17746.325100000002" }), "17746.3251");
+  assert.equal(normalizeDecimal("1,234.56"), "1234.56");
+  assert.equal(normalizeDecimal("1,23"), null);
+  assert.equal(equalDecimals("NaN", "NaN"), false);
+  assert.equal(normalizeDecimal("17746.325100000002"), "17746.3251000000".replace(/0+$/, ""));
+  assert.equal(shiftDecimal("17746.325100000002", -1), "1774.63251");
+  assert.equal(shiftDecimal("1.25e+3", -1), "125");
+});
+
+test("rounds to the declared PostgreSQL NUMERIC scale using half-away-from-zero", async () => {
+  const { normalizeDecimal } = await import("../supabase/functions/refresh-toman-market-prices/decimal.mjs");
+  assert.equal(normalizeDecimal("1.12345678905"), "1.1234567891");
+  assert.equal(normalizeDecimal("-1.12345678905"), "-1.1234567891");
+  assert.equal(normalizeDecimal("1.12345678904"), "1.123456789");
+  assert.equal(normalizeDecimal("123456789012345678901"), null);
+});
+
+test("deduplicates numerically equal decimal representations", async () => {
+  const { dedupeMarketRows } = await import("../supabase/functions/refresh-toman-market-prices/dedupe-market-rows.mjs");
+  const base = {
+    exchange: "nobitex",
+    asset_symbol: "USDT",
+    quote_currency: "TOMAN",
+    price_toman: "1.0",
+    bid_toman: "0.99",
+    ask_toman: "1.00",
+  };
+  const result = dedupeMarketRows([base, {
+    ...base,
+    price_toman: "1.00",
+    bid_toman: "0.9900",
+    ask_toman: "1.0",
+  }]);
+  assert.equal(result.rows.length, 1);
+  assert.equal(result.duplicateRowsRemoved, 1);
+  assert.equal(result.conflictingSymbolsSkipped, 0);
+});
+
+
+test("uses only the four approved Toman market sources", async () => {
+  const fs = require("node:fs");
+  const edgeSource = fs.readFileSync("supabase/functions/refresh-toman-market-prices/index.ts", "utf8");
+  assert.match(edgeSource, /fetchNobitex\(fetchedAt\)/);
+  assert.match(edgeSource, /fetchWallex\(fetchedAt\)/);
+  assert.match(edgeSource, /fetchBit24\(fetchedAt, supabaseUrl, serviceHeaders\)/);
+  assert.match(edgeSource, /fetchKifpool\(fetchedAt, supabaseUrl, serviceHeaders\)/);
+  assert.match(edgeSource, /const sourceNames = \["nobitex", "wallex", "bit24", "kifpool"\]/);
+  assert.doesNotMatch(edgeSource, /fetchBitpin|bitpin/);
+});
+
+test("Bit24 uses IRT last trade price and does not fabricate bid or ask", async () => {
+  const fs = require("node:fs");
+  const edgeSource = fs.readFileSync("supabase/functions/refresh-toman-market-prices/index.ts", "utf8");
+  assert.match(edgeSource, /const quote = String\(item\?\.quote_coin\?\.symbol \|\| ""\)\.toUpperCase\(\);\s*if \(quote !== "IRT"\) continue;/);
+  assert.match(edgeSource, /last_price is the market's last traded price/);
+  assert.match(edgeSource, /price,\s*\/\/ This public ticker payload/);
+  assert.match(edgeSource, /high: decimalOrNull\(stats\.max_price\)/);
+  assert.match(edgeSource, /low: decimalOrNull\(stats\.min_price\)/);
+  const bit24Block = edgeSource.slice(edgeSource.indexOf("async function fetchBit24"), edgeSource.indexOf("const KIFPOOL_BODY"));
+  assert.doesNotMatch(bit24Block, /\b(?:bid|ask):/);
+});
+
+test("Kifpool uses matched assets and sell-side price only", async () => {
+  const fs = require("node:fs");
+  const edgeSource = fs.readFileSync("supabase/functions/refresh-toman-market-prices/index.ts", "utf8");
+  assert.match(edgeSource, /fetchMappedSymbols\("kifpool", supabaseUrl, serviceHeaders\)/);
+  assert.match(edgeSource, /const price = decimalOrNull\(item\?\.priceSellIRT\)/);
+  const kifpoolStart = edgeSource.indexOf("async function fetchKifpool");
+  const kifpoolEnd = edgeSource.indexOf("\nDeno.serve", kifpoolStart);
+  const kifpoolBlock = edgeSource.slice(kifpoolStart, kifpoolEnd);
+  assert.match(kifpoolBlock, /Kifpool exposes a sell-side IRT price only/);
+  assert.match(kifpoolBlock, /price,/);
+  assert.doesNotMatch(kifpoolBlock, /priceBuyIRT|\b(?:bid|ask):/);
+});
+
+
+test("isolates provider timeouts and malformed JSON while preserving healthy provider rows", async () => {
+  const { collectProviderResults, emptyProviderOutcome } = await import("../supabase/functions/refresh-toman-market-prices/provider-results.mjs");
+  const healthyRows = [{ exchange: "nobitex", asset_symbol: "BTC", price_toman: "1" }];
+  const settled = await Promise.allSettled([
+    Promise.resolve(healthyRows),
+    Promise.reject(new Error("AbortError: provider timeout")),
+    Promise.reject(new SyntaxError("Unexpected token in JSON")),
+    Promise.resolve([{ exchange: "wallex", asset_symbol: "ETH", price_toman: "2" }]),
+  ]);
+  const result = collectProviderResults(["nobitex", "bit24", "kifpool", "wallex"], settled);
+
+  assert.equal(result.rows.length, 2);
+  assert.deepEqual(result.failed, ["bit24", "kifpool"]);
+  assert.equal(result.sources.bit24.ok, false);
+  assert.equal(result.sources.kifpool.ok, false);
+  assert.equal(result.sources.nobitex.count, 1);
+  assert.equal(emptyProviderOutcome(result), null);
+});
+
+test("returns a 502 outcome when every provider fails or produces no usable rows", async () => {
+  const { collectProviderResults, emptyProviderOutcome } = await import("../supabase/functions/refresh-toman-market-prices/provider-results.mjs");
+  const settled = await Promise.allSettled([
+    Promise.reject(new Error("HTTP 503")),
+    Promise.reject(new Error("timeout")),
+    Promise.resolve([]),
+    Promise.reject(new SyntaxError("malformed JSON")),
+  ]);
+  const result = collectProviderResults(["nobitex", "wallex", "bit24", "kifpool"], settled);
+  const outcome = emptyProviderOutcome(result);
+
+  assert.equal(result.rows.length, 0);
+  assert.equal(outcome.status, 502);
+  assert.equal(outcome.body.success, false);
+  assert.deepEqual(Object.keys(outcome.body.sources), ["nobitex", "wallex", "bit24", "kifpool"]);
+});
+
+test("rejects malformed fulfilled provider results instead of treating them as healthy", async () => {
+  const { collectProviderResults, emptyProviderOutcome } = await import("../supabase/functions/refresh-toman-market-prices/provider-results.mjs");
+  const result = collectProviderResults(["nobitex"], [{ status: "fulfilled", value: { price: "not-an-array" } }]);
+  assert.equal(result.rows.length, 0);
+  assert.equal(result.sources.nobitex.ok, false);
+  assert.equal(emptyProviderOutcome(result).status, 502);
+});
+
+test("keeps previous market rows when the provider snapshot is partial", async () => {
+  const fs = require("node:fs");
+  const edgeSource = fs.readFileSync("supabase/functions/refresh-toman-market-prices/index.ts", "utf8");
+  assert.match(edgeSource, /Keep prior rows when a provider returns a partial snapshot/);
+  assert.doesNotMatch(edgeSource, /DELETE\\s+FROM\\s+market_toman_prices/i);
+  assert.match(edgeSource, /collectProviderResults\(sourceNames, sourceResults\)/);
+});

@@ -1,4 +1,8 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { dedupeMarketRows } from "./dedupe-market-rows.mjs";
+import { normalizeDecimal, shiftDecimal, compareDecimals } from "./decimal.mjs";
+import { parse } from "npm:lossless-json@4.3.4";
+import { collectProviderResults, emptyProviderOutcome } from "./provider-results.mjs";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -18,11 +22,10 @@ const faNames: Record<string, string> = {
   ETC: "اتریوم کلاسیک", UNI: "یونی‌سواپ", AAVE: "آوه", XLM: "استلار",
 };
 
-const numberOrNull = (...values: unknown[]): number | null => {
+const decimalOrNull = (...values: unknown[]): string | null => {
   for (const value of values) {
-    if (value === null || value === undefined || value === "") continue;
-    const parsed = Number(String(value).replace(/,/g, ""));
-    if (Number.isFinite(parsed)) return parsed;
+    const parsed = normalizeDecimal(value);
+    if (parsed !== null) return parsed;
   }
   return null;
 };
@@ -35,22 +38,22 @@ async function getJson(url: string, provider: string) {
     signal: AbortSignal.timeout(12000),
   });
   if (!response.ok) throw new Error(provider + " HTTP " + response.status);
-  return await response.json();
+  return parse(await response.text()) as any;
 }
 
 function makeRow(
   exchange: string,
   asset: string,
   values: {
-    price: number | null; bid?: number | null; ask?: number | null;
-    high?: number | null; low?: number | null; change?: number | null;
-    volume?: number | null; nameFa?: string | null; nameEn?: string | null;
+    price: string | null; bid?: string | null; ask?: string | null;
+    high?: string | null; low?: string | null; change?: string | null;
+    volume?: string | null; nameFa?: string | null; nameEn?: string | null;
   },
   fetchedAt: string,
 ) {
-  if (!validAsset(asset) || !Number.isFinite(values.price) || Number(values.price) <= 0) return null;
-  const positive = (v: number | null | undefined) => v !== null && v !== undefined && Number.isFinite(v) && v > 0 ? v : null;
-  const nonNegative = (v: number | null | undefined) => v !== null && v !== undefined && Number.isFinite(v) && v >= 0 ? v : null;
+  if (!validAsset(asset) || values.price === null || compareDecimals(values.price, "0") <= 0) return null;
+  const positive = (v: string | null | undefined) => v !== null && v !== undefined && compareDecimals(v, "0") > 0 ? v : null;
+  const nonNegative = (v: string | null | undefined) => v !== null && v !== undefined && compareDecimals(v, "0") >= 0 ? v : null;
   return {
     exchange,
     asset_symbol: asset,
@@ -60,7 +63,7 @@ function makeRow(
     ask_toman: positive(values.ask),
     high_24h_toman: positive(values.high),
     low_24h_toman: positive(values.low),
-    change_24h_pct: values.change !== null && values.change !== undefined && Number.isFinite(values.change) ? values.change : null,
+    change_24h_pct: values.change !== null && values.change !== undefined ? values.change : null,
     volume_24h_toman: nonNegative(values.volume),
     asset_name_fa: values.nameFa || faNames[asset] || asset,
     asset_name_en: values.nameEn || asset,
@@ -79,8 +82,8 @@ async function fetchNobitex(fetchedAt: string) {
     if (!match) continue;
     const asset = match[1].toUpperCase();
     const rialToToman = (value: unknown) => {
-      const n = numberOrNull(value);
-      return n !== null && n > 0 ? n / 10 : null;
+      const n = shiftDecimal(value, -1);
+      return n !== null && compareDecimals(n, "0") > 0 ? n : null;
     };
     const row = makeRow("nobitex", asset, {
       price: rialToToman(stats.latest),
@@ -88,8 +91,8 @@ async function fetchNobitex(fetchedAt: string) {
       ask: rialToToman(stats.bestSell),
       high: rialToToman(stats.dayHigh),
       low: rialToToman(stats.dayLow),
-      change: numberOrNull(stats.dayChange),
-      volume: rialToToman(stats.volumeDst),
+      change: normalizeDecimal(stats.dayChange, 18, 8),
+      volume: shiftDecimal(stats.volumeDst, -1, 38, 8),
     }, fetchedAt);
     if (row) rows.push(row);
   }
@@ -111,13 +114,13 @@ async function fetchWallex(fetchedAt: string) {
     if (!match || !["TMN", "IRT"].includes(quote)) continue;
     const stats = item?.stats || {};
     const row = makeRow("wallex", match[1], {
-      price: numberOrNull(stats.lastPrice),
-      bid: numberOrNull(stats.bidPrice),
-      ask: numberOrNull(stats.askPrice),
-      high: numberOrNull(stats["24h_highPrice"]),
-      low: numberOrNull(stats["24h_lowPrice"]),
-      change: numberOrNull(stats["24h_ch"]),
-      volume: numberOrNull(stats["24h_quoteVolume"]),
+      price: decimalOrNull(stats.lastPrice),
+      bid: decimalOrNull(stats.bidPrice),
+      ask: decimalOrNull(stats.askPrice),
+      high: decimalOrNull(stats["24h_highPrice"]),
+      low: decimalOrNull(stats["24h_lowPrice"]),
+      change: normalizeDecimal(stats["24h_ch"], 18, 8),
+      volume: normalizeDecimal(stats["24h_quoteVolume"], 38, 8),
       nameFa: item.faBaseAsset || item.faName || null,
       nameEn: item.baseAsset || null,
     }, fetchedAt);
@@ -127,45 +130,190 @@ async function fetchWallex(fetchedAt: string) {
   return rows;
 }
 
-function bitpinTickerEntries(payload: any): Array<[string, any]> {
-  const source = payload?.results ?? payload?.data ?? payload?.tickers ?? payload;
-  if (Array.isArray(source)) {
-    return source.map((item: any) => [String(item?.symbol || item?.market || ""), item]);
-  }
-  if (source && typeof source === "object") {
-    return Object.entries(source).map(([key, value]) => [
-      String((value as any)?.symbol || (value as any)?.market || key), value,
-    ]);
-  }
-  return [];
+async function fetchMappedSymbols(
+  exchange: "bit24" | "kifpool",
+  supabaseUrl: string,
+  serviceHeaders: Record<string, string>,
+) {
+  const url = new URL(supabaseUrl + "/rest/v1/exchange_asset_observations");
+  url.searchParams.set("select", "base_symbol");
+  url.searchParams.set("exchange", "eq." + exchange);
+  url.searchParams.set("is_active", "eq.true");
+  url.searchParams.set("coingecko_id", "not.is.null");
+  url.searchParams.set("limit", "3000");
+  const response = await fetch(url.toString(), {
+    headers: serviceHeaders,
+    signal: AbortSignal.timeout(10000),
+  });
+  if (!response.ok) throw new Error(exchange + " mapped-asset lookup failed: " + response.status);
+  const rows = await response.json();
+  if (!Array.isArray(rows)) throw new Error(exchange + " mapped-asset lookup returned invalid data");
+  return new Set(rows.map((row: any) => String(row?.base_symbol || "").toUpperCase()).filter(validAsset));
 }
 
-async function fetchBitpin(fetchedAt: string) {
-  const payload = await getJson("https://api.bitpin.org/api/v1/mkt/tickers/", "Bitpin");
+async function fetchBit24(
+  fetchedAt: string,
+  supabaseUrl: string,
+  serviceHeaders: Record<string, string>,
+) {
+  const firstUrl = new URL("https://pro.bit24.cash/api/v3/markets");
+  firstUrl.searchParams.set("per_page", "100");
+  firstUrl.searchParams.set("page", "1");
+  const [firstPayload, mappedSymbols] = await Promise.all([
+    getJson(firstUrl.toString(), "Bit24"),
+    fetchMappedSymbols("bit24", supabaseUrl, serviceHeaders),
+  ]);
+  const firstPage = firstPayload?.data;
+  if (!Array.isArray(firstPage?.results)) {
+    throw new Error("Bit24 returned an invalid paginated markets response");
+  }
+  const lastPage = Number(firstPage.last_page || 1);
+  if (!Number.isInteger(lastPage) || lastPage < 1 || lastPage > 50) {
+    throw new Error("Bit24 returned an invalid markets page count");
+  }
+  const pagePayloads = await Promise.all(
+    Array.from({ length: lastPage - 1 }, (_, index) => {
+      const pageUrl = new URL("https://pro.bit24.cash/api/v3/markets");
+      pageUrl.searchParams.set("per_page", "100");
+      pageUrl.searchParams.set("page", String(index + 2));
+      return getJson(pageUrl.toString(), "Bit24");
+    }),
+  );
+  const markets: any[] = [];
+  for (const pagePayload of [firstPayload, ...pagePayloads]) {
+    const results = pagePayload?.data?.results;
+    if (!Array.isArray(results)) throw new Error("Bit24 returned an invalid markets page");
+    markets.push(...results);
+  }
+
   const rows = [];
-  for (const [rawSymbol, item] of bitpinTickerEntries(payload)) {
-    const symbol = rawSymbol.toUpperCase().replace(/[\/-]/g, "_");
-    const match = /^([A-Z0-9]{2,20})_?(?:IRT|TMN)$/.exec(symbol);
-    if (!match) continue;
-    const asset = match[1];
-    const row = makeRow("bitpin", asset, {
-      price: numberOrNull(item?.last, item?.last_price, item?.lastPrice, item?.price),
-      bid: numberOrNull(item?.bid, item?.best_bid, item?.bidPrice),
-      ask: numberOrNull(item?.ask, item?.best_ask, item?.askPrice),
-      high: numberOrNull(item?.high, item?.high_price, item?.highPrice),
-      low: numberOrNull(item?.low, item?.low_price, item?.lowPrice),
-      change: numberOrNull(item?.percentage, item?.priceChangePercent, item?.price_change_percent, item?.change_percent),
-      volume: numberOrNull(item?.quoteVolume, item?.quote_volume, item?.quote_volume_24h, item?.quoteVolume24h),
-      nameFa: item?.base_asset_name_fa || item?.faBaseAsset || null,
-      nameEn: item?.base_asset_name || item?.baseAsset || null,
+  for (const item of markets) {
+    const quote = String(item?.quote_coin?.symbol || "").toUpperCase();
+    if (quote !== "IRT") continue;
+    const asset = String(item?.base_coin?.symbol || "").toUpperCase();
+    if (!validAsset(asset) || !mappedSymbols.has(asset)) continue;
+    const stats = item?.market_24h_information || {};
+    const price = decimalOrNull(stats.last_price);
+    if (price === null || compareDecimals(price, "0") <= 0) continue;
+    const row = makeRow("bit24", asset, {
+      // last_price is the market's last traded price; each_price is not substituted.
+      price,
+      // This public ticker payload does not provide independent bid/ask values.
+      high: decimalOrNull(stats.max_price),
+      low: decimalOrNull(stats.min_price),
+      change: normalizeDecimal(stats.change_percent, 18, 8),
+      volume: normalizeDecimal(stats.quote_volume, 38, 8),
+      nameFa: item?.base_coin?.fa_name || null,
+      nameEn: item?.base_coin?.name || null,
     }, fetchedAt);
     if (row) rows.push(row);
   }
-  if (!rows.length) throw new Error("Bitpin returned no IRT/TMN ticker rows in the recognized format");
+  if (!rows.length) throw new Error("Bit24 returned no mapped IRT markets with a valid last price");
   return rows;
 }
 
-Deno.serve(async (req: Request) => {
+const KIFPOOL_BODY = {
+  operationName: "headerCoins",
+  variables: { search: "", offset: 0, limit: 2000 },
+  extensions: {
+    persistedQuery: {
+      version: 1,
+      sha256Hash: "bb149e99c1d2da2ca162085286128da78a9bd3936198e47e28028e20961f6f3c",
+    },
+  },
+};
+
+const KIFPOOL_QUERY = `query headerCoins($search: String, $offset: Int, $limit: Int) {
+  coinList(offset: $offset, limit: $limit, query: $search) {
+    coins {
+      ...CoinCardCore
+      name
+      priceSellIRT
+      __typename
+    }
+    total
+    __typename
+  }
+}
+
+fragment CoinCardCore on CoinDetailType {
+  faName
+  smallImage
+  price
+  priceChangePercent
+  slug
+  nameId
+  symbol
+  __typename
+}`;
+
+async function fetchKifpool(
+  fetchedAt: string,
+  supabaseUrl: string,
+  serviceHeaders: Record<string, string>,
+) {
+  const [mappedSymbols, response] = await Promise.all([
+    fetchMappedSymbols("kifpool", supabaseUrl, serviceHeaders),
+    fetch("https://kifpool.me/api/graphql", {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        origin: "https://kifpool.me",
+        referer: "https://kifpool.me/markets",
+        "user-agent": "Mozilla/5.0 DigiArz-Toman-Market/1.0",
+      },
+      body: JSON.stringify(KIFPOOL_BODY),
+      signal: AbortSignal.timeout(15000),
+    }),
+  ]);
+  if (!response.ok) throw new Error("Kifpool HTTP " + response.status);
+  let payload = parse(await response.text()) as any;
+  const hashExpired = Array.isArray(payload?.errors) && payload.errors.some(
+    (error: any) => error?.extensions?.code === "PERSISTED_QUERY_NOT_FOUND",
+  );
+  if (hashExpired) {
+    // Apollo persisted-query hashes can change after a frontend deployment.
+    const retry = await fetch("https://kifpool.me/api/graphql", {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        origin: "https://kifpool.me",
+        referer: "https://kifpool.me/markets",
+        "user-agent": "Mozilla/5.0 DigiArz-Toman-Market/1.0",
+      },
+      body: JSON.stringify({ ...KIFPOOL_BODY, query: KIFPOOL_QUERY }),
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!retry.ok) throw new Error("Kifpool GraphQL fallback HTTP " + retry.status);
+    payload = parse(await retry.text()) as any;
+  }
+  const coins = payload?.data?.coinList?.coins;
+  if (!Array.isArray(coins) || payload?.errors?.length) {
+    throw new Error("Kifpool returned an invalid persisted GraphQL market response");
+  }
+
+  const rows = [];
+  for (const item of coins) {
+    const asset = String(item?.symbol || "").toUpperCase();
+    if (!validAsset(asset) || !mappedSymbols.has(asset)) continue;
+    const price = decimalOrNull(item?.priceSellIRT);
+    if (price === null || compareDecimals(price, "0") <= 0) continue;
+    const row = makeRow("kifpool", asset, {
+      // Kifpool exposes a sell-side IRT price only; never invent buy/bid/ask values.
+      price,
+      change: normalizeDecimal(item?.priceChangePercent, 18, 8),
+      nameFa: item?.faName || null,
+      nameEn: item?.name || null,
+    }, fetchedAt);
+    if (row) rows.push(row);
+  }
+  if (!rows.length) throw new Error("Kifpool returned no mapped assets with a valid priceSellIRT");
+  return rows;
+}
+
+export const handler = async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ success: false, error: "Method not allowed" }, 405);
 
@@ -180,7 +328,9 @@ Deno.serve(async (req: Request) => {
     return json({ success: false, error: "Authentication required" }, 401);
   }
 
+  let stage = "auth_user";
   try {
+    stage = "auth_user";
     const userResponse = await fetch(supabaseUrl + "/auth/v1/user", {
       headers: { apikey: anonKey, Authorization: authorization },
       signal: AbortSignal.timeout(8000),
@@ -188,8 +338,9 @@ Deno.serve(async (req: Request) => {
     if (!userResponse.ok) return json({ success: false, error: "Valid user session required" }, 401);
 
     const serviceHeaders = { apikey: serviceKey, Authorization: "Bearer " + serviceKey };
+    stage = "cache_read";
     const latestResponse = await fetch(
-      supabaseUrl + "/rest/v1/market_toman_prices?select=fetched_at&order=fetched_at.desc&limit=1",
+      supabaseUrl + "/rest/v1/market_toman_prices?select=fetched_at&order=fetched_at.asc&limit=1",
       { headers: serviceHeaders, signal: AbortSignal.timeout(8000) },
     );
     if (!latestResponse.ok) throw new Error("Could not check Toman market cache");
@@ -204,98 +355,110 @@ Deno.serve(async (req: Request) => {
     }
 
     const fetchedAt = new Date().toISOString();
+    stage = "provider_fetch";
     const sourceResults = await Promise.allSettled([
-      fetchNobitex(fetchedAt), fetchWallex(fetchedAt), fetchBitpin(fetchedAt),
+      fetchNobitex(fetchedAt),
+      fetchWallex(fetchedAt),
+      fetchBit24(fetchedAt, supabaseUrl, serviceHeaders),
+      fetchKifpool(fetchedAt, supabaseUrl, serviceHeaders),
     ]);
-    const sourceNames = ["nobitex", "wallex", "bitpin"];
-    const sources: Record<string, { ok: boolean; count: number; error?: string }> = {};
-    const rows: any[] = [];
-    sourceResults.forEach((result, index) => {
-      const key = sourceNames[index];
-      if (result.status === "fulfilled") {
-        sources[key] = { ok: true, count: result.value.length };
-        rows.push(...result.value);
-      } else {
-        sources[key] = { ok: false, count: 0, error: String(result.reason).slice(0, 220) };
-      }
-    });
-    if (!rows.length) {
-      return json({ success: false, error: "هیچ منبعی قیمت معتبر تومانی برنگرداند.", sources }, 502);
+    const sourceNames = ["nobitex", "wallex", "bit24", "kifpool"];
+    const providerResult = collectProviderResults(sourceNames, sourceResults);
+    const { sources, rows } = providerResult;
+    for (const provider of providerResult.failed) {
+      console.warn("Toman market provider failed", { provider, error: sources[provider].error });
+    }
+    const emptyOutcome = emptyProviderOutcome(providerResult);
+    if (emptyOutcome) return json(emptyOutcome.body, emptyOutcome.status);
+
+    const deduped = dedupeMarketRows(rows);
+    const writeRows = deduped.rows;
+    if (!writeRows.length) {
+      return json({
+        success: false,
+        error: "همه نمادها به‌دلیل تعارض قیمت تکراری کنار گذاشته شدند.",
+        sources,
+        dedupe: {
+          duplicate_rows_removed: deduped.duplicateRowsRemoved,
+          conflicting_symbols_skipped: deduped.conflictingSymbolsSkipped,
+        },
+      }, 502);
     }
 
-    const writeResponse = await fetch(supabaseUrl + "/rest/v1/market_toman_prices", {
+    console.info("Toman market rows normalized", {
+      received: rows.length,
+      unique: writeRows.length,
+      duplicate_rows_removed: deduped.duplicateRowsRemoved,
+      conflicting_symbols_skipped: deduped.conflictingSymbolsSkipped,
+    });
+
+    stage = "price_upsert";
+    const writeUrl = new URL(supabaseUrl + "/rest/v1/market_toman_prices");
+    writeUrl.searchParams.set("on_conflict", "exchange,asset_symbol,quote_currency");
+    const writeResponse = await fetch(writeUrl.toString(), {
       method: "POST",
       headers: {
         ...serviceHeaders, "Content-Type": "application/json",
-        Prefer: "return=minimal",
+        Prefer: "resolution=merge-duplicates,return=minimal",
       },
-      body: JSON.stringify(rows),
+      body: JSON.stringify(writeRows),
       signal: AbortSignal.timeout(15000),
     });
     if (!writeResponse.ok) {
-      throw new Error("Toman market write failed: " + writeResponse.status + " " + (await writeResponse.text()).slice(0, 220));
+      const detail = (await writeResponse.text()).slice(0, 220);
+      console.error("Toman market upsert failed", { status: writeResponse.status, detail });
+      throw new Error("Toman market upsert failed: " + writeResponse.status + " " + detail);
     }
 
-    // Keep the current-price table compact; long-term snapshots live in the history table.
-    let cleanupWarning: string | null = null;
-    try {
-      const cleanupUrl = new URL(supabaseUrl + "/rest/v1/market_toman_prices");
-      const refreshedExchanges = [...new Set(rows.map(row => row.exchange))];
-      cleanupUrl.searchParams.set("exchange", "in.(" + refreshedExchanges.join(",") + ")");
-      cleanupUrl.searchParams.set("fetched_at", "lt." + fetchedAt);
-      const cleanupResponse = await fetch(cleanupUrl.toString(), {
-        method: "DELETE",
-        headers: { ...serviceHeaders, Prefer: "return=minimal" },
-        signal: AbortSignal.timeout(10000),
-      });
-      if (!cleanupResponse.ok) throw new Error("Current-price cleanup failed: " + cleanupResponse.status);
-    } catch (error) {
-      cleanupWarning = String(error).slice(0, 180);
-    }
+    // Keep prior rows when a provider returns a partial snapshot.
+    // The unique key bounds this table to one current row per exchange/asset/quote.
+    // Staleness is surfaced by market_toman_performance; destructive cleanup is handled separately.
 
     let historySaved = 0;
     let historyWarning: string | null = null;
+    stage = "history_rpc";
     try {
-      const cutoff = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString();
+      const historyRows = writeRows.map(row => ({
+        exchange: row.exchange, asset_symbol: row.asset_symbol,
+        price_toman: row.price_toman, bid_toman: row.bid_toman,
+        ask_toman: row.ask_toman, change_24h_pct: row.change_24h_pct,
+        volume_24h_toman: row.volume_24h_toman,
+        asset_name_fa: row.asset_name_fa, asset_name_en: row.asset_name_en,
+        recorded_at: fetchedAt,
+      }));
       const historyResponse = await fetch(
-        supabaseUrl + "/rest/v1/market_toman_price_history?select=exchange,asset_symbol,recorded_at&recorded_at=gte." + encodeURIComponent(cutoff) + "&limit=10000",
-        { headers: serviceHeaders, signal: AbortSignal.timeout(10000) },
-      );
-      if (!historyResponse.ok) throw new Error("History pre-check failed: " + historyResponse.status);
-      const recentHistory = await historyResponse.json();
-      const seen = new Set((recentHistory || []).map((item: any) => item.exchange + ":" + item.asset_symbol));
-      const historyRows = rows
-        .filter(row => !seen.has(row.exchange + ":" + row.asset_symbol))
-        .map(row => ({
-          exchange: row.exchange, asset_symbol: row.asset_symbol,
-          price_toman: row.price_toman, bid_toman: row.bid_toman,
-          ask_toman: row.ask_toman, change_24h_pct: row.change_24h_pct,
-          volume_24h_toman: row.volume_24h_toman,
-          asset_name_fa: row.asset_name_fa, asset_name_en: row.asset_name_en,
-          recorded_at: fetchedAt,
-        }));
-      if (historyRows.length) {
-        const historyWrite = await fetch(supabaseUrl + "/rest/v1/market_toman_price_history", {
+        supabaseUrl + "/rest/v1/rpc/insert_market_toman_history_if_due",
+        {
           method: "POST",
-          headers: { ...serviceHeaders, "Content-Type": "application/json", Prefer: "return=minimal" },
-          body: JSON.stringify(historyRows),
+          headers: { ...serviceHeaders, "Content-Type": "application/json" },
+          body: JSON.stringify({ p_rows: historyRows }),
           signal: AbortSignal.timeout(15000),
-        });
-        if (!historyWrite.ok) throw new Error("History write failed: " + historyWrite.status + " " + (await historyWrite.text()).slice(0, 180));
-        historySaved = historyRows.length;
+        },
+      );
+      if (!historyResponse.ok) {
+        throw new Error("Atomic history RPC failed: " + historyResponse.status + " " + (await historyResponse.text()).slice(0, 180));
       }
+      historySaved = Number(await historyResponse.json()) || 0;
     } catch (error) {
       historyWarning = String(error).slice(0, 220);
     }
 
     return json({
-      success: true, saved: rows.length, history_saved: historySaved,
+      success: true, saved: writeRows.length, history_saved: historySaved,
       updated_at: fetchedAt, sources,
+      dedupe: {
+        received: rows.length,
+        duplicate_rows_removed: deduped.duplicateRowsRemoved,
+        conflicting_symbols_skipped: deduped.conflictingSymbolsSkipped,
+      },
       ...(historyWarning ? { history_warning: historyWarning } : {}),
-      ...(cleanupWarning ? { cleanup_warning: cleanupWarning } : {}),
       note: "Prices are read-only market references in Toman. They are not used to execute demo trades.",
     });
   } catch (error) {
-    return json({ success: false, error: error instanceof Error ? error.message : String(error) }, 502);
+    const detail = String(error).slice(0, 300);
+    console.error("Toman market refresh failed", { stage, error: detail });
+    return json({ success: false, error: error instanceof Error ? error.message : String(error), stage }, 502);
   }
-});
+};
+
+if (import.meta.main) Deno.serve(handler);
