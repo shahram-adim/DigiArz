@@ -1,3 +1,5 @@
+import { equalDecimals } from "./decimal.mjs";
+
 const PRICE_FIELDS = [
   "price_toman",
   "bid_toman",
@@ -9,7 +11,7 @@ const PRICE_FIELDS = [
 ];
 
 function samePrice(left, right) {
-  return PRICE_FIELDS.every((field) => (left[field] ?? null) === (right[field] ?? null));
+  return PRICE_FIELDS.every((field) => equalDecimals(left[field], right[field]));
 }
 
 /**
