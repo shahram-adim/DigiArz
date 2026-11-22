@@ -23,6 +23,7 @@ async function withMockedRuntime(
     if (url.endsWith("/auth/v1/user")) return new Response("{}", { status: 200 });
     if (url.includes("/rest/v1/market_toman_prices?select=fetched_at")) {
       if (mode === "cache-read-fail") return new Response("database unavailable", { status: 503 });
+      if (mode === "partial-cache-stale") return Response.json([{ fetched_at: "2026-11-17T22:04:26.622Z" }]);
       return new Response("[]", { status: 200 });
     }
     if (url.includes("/rest/v1/exchange_asset_observations?")) {
@@ -164,5 +165,20 @@ Deno.test("Toman refresh HTTP handler isolates provider failures and refuses emp
       }
       if (writes() !== 0) throw new Error("Cache failure must not write market rows");
     });
+
+  await t.step("a recent partial snapshot cannot hide older stale rows", async () => {
+    await withMockedRuntime("partial-cache-stale", async (writes) => {
+      const response = await handler(new Request("https://edge.test/refresh", {
+        method: "POST",
+        headers: { Authorization: "Bearer test-user-token" },
+      }));
+      const body = await response.json();
+      if (response.status !== 200 || body.cached === true) {
+        throw new Error("A stale oldest row was incorrectly treated as a fresh cache");
+      }
+      if (body.sources.nobitex.ok !== true) throw new Error("Provider refresh did not run for stale rows");
+      if (writes() !== 1) throw new Error("Expected a refresh upsert after detecting stale rows");
+    });
+  });
   });
 });
