@@ -129,41 +129,128 @@ async function fetchWallex(fetchedAt: string) {
   return rows;
 }
 
-function bitpinTickerEntries(payload: any): Array<[string, any]> {
-  const source = payload?.results ?? payload?.data ?? payload?.tickers ?? payload;
-  if (Array.isArray(source)) {
-    return source.map((item: any) => [String(item?.symbol || item?.market || ""), item]);
-  }
-  if (source && typeof source === "object") {
-    return Object.entries(source).map(([key, value]) => [
-      String((value as any)?.symbol || (value as any)?.market || key), value,
-    ]);
-  }
-  return [];
+async function fetchMappedSymbols(
+  exchange: "bit24" | "kifpool",
+  supabaseUrl: string,
+  serviceHeaders: Record<string, string>,
+) {
+  const url = new URL(supabaseUrl + "/rest/v1/exchange_asset_observations");
+  url.searchParams.set("select", "base_symbol");
+  url.searchParams.set("exchange", "eq." + exchange);
+  url.searchParams.set("is_active", "eq.true");
+  url.searchParams.set("coingecko_id", "not.is.null");
+  url.searchParams.set("limit", "3000");
+  const response = await fetch(url.toString(), {
+    headers: serviceHeaders,
+    signal: AbortSignal.timeout(10000),
+  });
+  if (!response.ok) throw new Error(exchange + " mapped-asset lookup failed: " + response.status);
+  const rows = await response.json();
+  if (!Array.isArray(rows)) throw new Error(exchange + " mapped-asset lookup returned invalid data");
+  return new Set(rows.map((row: any) => String(row?.base_symbol || "").toUpperCase()).filter(validAsset));
 }
 
-async function fetchBitpin(fetchedAt: string) {
-  const payload = await getJson("https://api.bitpin.org/api/v1/mkt/tickers/", "Bitpin");
+async function fetchBit24(
+  fetchedAt: string,
+  supabaseUrl: string,
+  serviceHeaders: Record<string, string>,
+) {
+  const [payload, mappedSymbols] = await Promise.all([
+    getJson("https://pro.bit24.cash/api/v3/markets", "Bit24"),
+    fetchMappedSymbols("bit24", supabaseUrl, serviceHeaders),
+  ]);
+  const markets: any[] = [];
+  const visit = (value: any, depth = 0) => {
+    if (!value || typeof value !== "object" || depth > 8) return;
+    if (Array.isArray(value)) {
+      for (const item of value) visit(item, depth + 1);
+      return;
+    }
+    if (value.base_coin && value.quote_coin && value.market_24h_information) markets.push(value);
+    for (const child of Object.values(value)) visit(child, depth + 1);
+  };
+  visit(payload);
+
   const rows = [];
-  for (const [rawSymbol, item] of bitpinTickerEntries(payload)) {
-    const symbol = rawSymbol.toUpperCase().replace(/[\/-]/g, "_");
-    const match = /^([A-Z0-9]{2,20})_?(?:IRT|TMN)$/.exec(symbol);
-    if (!match) continue;
-    const asset = match[1];
-    const row = makeRow("bitpin", asset, {
-      price: decimalOrNull(item?.last, item?.last_price, item?.lastPrice, item?.price),
-      bid: decimalOrNull(item?.bid, item?.best_bid, item?.bidPrice),
-      ask: decimalOrNull(item?.ask, item?.best_ask, item?.askPrice),
-      high: decimalOrNull(item?.high, item?.high_price, item?.highPrice),
-      low: decimalOrNull(item?.low, item?.low_price, item?.lowPrice),
-      change: normalizeDecimal(item?.percentage ?? item?.priceChangePercent ?? item?.price_change_percent ?? item?.change_percent, 18, 8),
-      volume: normalizeDecimal(item?.quoteVolume ?? item?.quote_volume ?? item?.quote_volume_24h ?? item?.quoteVolume24h, 38, 8),
-      nameFa: item?.base_asset_name_fa || item?.faBaseAsset || null,
-      nameEn: item?.base_asset_name || item?.baseAsset || null,
+  for (const item of markets) {
+    const quote = String(item?.quote_coin?.symbol || "").toUpperCase();
+    if (quote !== "IRT") continue;
+    const asset = String(item?.base_coin?.symbol || "").toUpperCase();
+    if (!validAsset(asset) || !mappedSymbols.has(asset)) continue;
+    const stats = item?.market_24h_information || {};
+    const price = decimalOrNull(stats.last_price);
+    if (price === null || compareDecimals(price, "0") <= 0) continue;
+    const row = makeRow("bit24", asset, {
+      // last_price is the market's last traded price; each_price is not substituted.
+      price,
+      // This public ticker payload does not provide independent bid/ask values.
+      high: decimalOrNull(stats.max_price),
+      low: decimalOrNull(stats.min_price),
+      change: normalizeDecimal(stats.change_percent, 18, 8),
+      volume: normalizeDecimal(stats.quote_volume, 38, 8),
+      nameFa: item?.base_coin?.fa_name || null,
+      nameEn: item?.base_coin?.name || null,
     }, fetchedAt);
     if (row) rows.push(row);
   }
-  if (!rows.length) throw new Error("Bitpin returned no IRT/TMN ticker rows in the recognized format");
+  if (!rows.length) throw new Error("Bit24 returned no mapped IRT markets with a valid last price");
+  return rows;
+}
+
+const KIFPOOL_BODY = {
+  operationName: "headerCoins",
+  variables: { search: "", offset: 0, limit: 2000 },
+  extensions: {
+    persistedQuery: {
+      version: 1,
+      sha256Hash: "bb149e99c1d2da2ca162085286128da78a9bd3936198e47e28028e20961f6f3c",
+    },
+  },
+};
+
+async function fetchKifpool(
+  fetchedAt: string,
+  supabaseUrl: string,
+  serviceHeaders: Record<string, string>,
+) {
+  const [mappedSymbols, response] = await Promise.all([
+    fetchMappedSymbols("kifpool", supabaseUrl, serviceHeaders),
+    fetch("https://kifpool.me/api/graphql", {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        origin: "https://kifpool.me",
+        referer: "https://kifpool.me/markets",
+        "user-agent": "Mozilla/5.0 DigiArz-Toman-Market/1.0",
+      },
+      body: JSON.stringify(KIFPOOL_BODY),
+      signal: AbortSignal.timeout(15000),
+    }),
+  ]);
+  if (!response.ok) throw new Error("Kifpool HTTP " + response.status);
+  const payload = parse(await response.text()) as any;
+  const coins = payload?.data?.coinList?.coins;
+  if (!Array.isArray(coins) || payload?.errors?.length) {
+    throw new Error("Kifpool returned an invalid persisted GraphQL market response");
+  }
+
+  const rows = [];
+  for (const item of coins) {
+    const asset = String(item?.symbol || "").toUpperCase();
+    if (!validAsset(asset) || !mappedSymbols.has(asset)) continue;
+    const price = decimalOrNull(item?.priceSellIRT);
+    if (price === null || compareDecimals(price, "0") <= 0) continue;
+    const row = makeRow("kifpool", asset, {
+      // Kifpool exposes a sell-side IRT price only; never invent buy/bid/ask values.
+      price,
+      change: normalizeDecimal(item?.priceChangePercent, 18, 8),
+      nameFa: item?.faName || null,
+      nameEn: item?.name || null,
+    }, fetchedAt);
+    if (row) rows.push(row);
+  }
+  if (!rows.length) throw new Error("Kifpool returned no mapped assets with a valid priceSellIRT");
   return rows;
 }
 
@@ -207,9 +294,12 @@ Deno.serve(async (req: Request) => {
 
     const fetchedAt = new Date().toISOString();
     const sourceResults = await Promise.allSettled([
-      fetchNobitex(fetchedAt), fetchWallex(fetchedAt), fetchBitpin(fetchedAt),
+      fetchNobitex(fetchedAt),
+      fetchWallex(fetchedAt),
+      fetchBit24(fetchedAt, supabaseUrl, serviceHeaders),
+      fetchKifpool(fetchedAt, supabaseUrl, serviceHeaders),
     ]);
-    const sourceNames = ["nobitex", "wallex", "bitpin"];
+    const sourceNames = ["nobitex", "wallex", "bit24", "kifpool"];
     const sources: Record<string, { ok: boolean; count: number; error?: string }> = {};
     const rows: any[] = [];
     sourceResults.forEach((result, index) => {
