@@ -1172,3 +1172,16 @@
 2. تعیین رابطهٔ Migration `20261121050216` با schedule زندهٔ job 14 و ثبت منبع canonical آن.
 3. replay کامل migration set بازسازی‌شده در PostgreSQL 17 ایزوله و بررسی نهایی schedule، worker، ACL و RLS.
 4. ادامهٔ QA candidateهای UI/APK فقط در PRهای Draft؛ تست فیزیکی Android هنوز لازم است و merge یا انتشار بدون تأیید صریح انجام نشود.
+
+## ممیزی مسیر قیمت‌های تومانی — ۲۲ نوامبر ۲۰۲۶
+
+- [x] آخرین main پیش از این ثبت: `91eb6f8cef2731f51135b09965e740d3576958c8`.
+- [x] ساختار `index.html` بررسی شد: ۲۴۴ شناسه HTML یکتا و بدون تکرار؛ ۹ تب اصلی (داشبورد، بازار، بازار تومانی، خریدوفروش، سفارش‌ها، دارایی‌ها، تاریخچه، تنظیمات و مدیریت) به‌علاوه بخش‌های توکار جزئیات ارز، نمودار و اخبار.
+- [x] مسیر بازار تومانی در UI بررسی شد: `loadTomanMarket()` از `market_toman_performance` می‌خواند؛ در صورت نبود ردیف تازه `refresh-toman-market-prices` را invoke می‌کند و هنگام بازبودن تب هر پنج دقیقه refresh خودکار دارد.
+- [!] اختلاف قطعی منبع قیمت: تابع GitHub و تابع مستقر Supabase نسخه ۳ فقط `fetchNobitex()`, `fetchWallex()`, `fetchBitpin()` را اجرا می‌کنند. دو منبع موردتأیید کاربر یعنی Bit24 و Kifpool در مسیر قیمت تومانی نیستند؛ Bitpin منبع اضافی فعلی است. متن وضعیت UI نیز همین سه منبع را اعلام می‌کند.
+- [x] شمارنده‌های فقط‌خواندنی: `market_prices=899`, `market_fx_rates=1`, `market_toman_prices=0`, `market_toman_price_history=0`, `exchange_asset_observations=4967`, `exchange_asset_sync_requests=2538`, `bit24_exchange_sync_requests=784`.
+- [!] در بازه ۲۴ ساعته تا `2026-11-22 10:34 UTC`، ۲۵ درخواست OPTIONS با HTTP 200 و ۲۵ درخواست POST با HTTP 502 برای Edge Function ثبت شد. آخرین POST ناموفق `09:20:59 UTC` بود. لاگ gateway بدنه خطا را ندارد؛ علت دقیق ۵۰۲ (providerها در برابر cache/write) هنوز اثبات نشده است.
+- [!] جدول‌های قیمت تومانی خالی‌اند؛ observationهای کشف فهرست بازار قیمت قابل اتکا محسوب نمی‌شوند. نمونه‌های Kifpool شامل `priceSellIRT` و `priceChangePercent` هستند، اما همچنین نمادهای سهامی مانند AALON/ACNON دیده شدند؛ تطبیق با کاتالوگ رمزارز و تأیید واحد/معنای bid/ask پیش از استفاده لازم است.
+- [x] گزارش تفصیلی در `docs/TOMAN_MARKET_FEED_AUDIT_2026-11-22.md` ثبت شد.
+- [x] این نوبت فقط خواندن GitHub/Supabase، بررسی schema و لاگ و مستندسازی بود. هیچ Edge Function deploy، RPC مالی، Migration، cron یا تغییر داده‌ای در Production انجام نشد.
+- [ ] گام بعد: قرارداد و fixtureهای Bit24 و Kifpool را بررسی؛ adapterهای چهار منبع و آزمون‌های واحد/stale/timeout/partial failure را در CI آماده کن؛ logging ساختاریافته برای تفکیک علت ۵۰۲ اضافه کن. استقرار Production فقط پس از تأیید صریح کاربر.
