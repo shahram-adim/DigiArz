@@ -146,7 +146,7 @@ Deno.test("Toman refresh HTTP handler isolates provider failures and refuses emp
       if (response.status !== 502 || body.success !== false) throw new Error("Expected an explicit 502 failure");
       if (writes() !== 0) throw new Error("An empty provider snapshot must never be written");
     });
-
+  });
 
   await t.step("cache failures expose a structured diagnostic stage", async () => {
     await withMockedRuntime("cache-read-fail", async (writes, errorLog) => {
