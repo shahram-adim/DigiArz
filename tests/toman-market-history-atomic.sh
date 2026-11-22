@@ -3,6 +3,8 @@ set -euo pipefail
 
 psql -v ON_ERROR_STOP=1 <<'SQL'
 create role service_role nologin;
+create role anon nologin;
+create role authenticated nologin;
 create table public.market_toman_price_history (
   id bigserial primary key,
   exchange text not null,
