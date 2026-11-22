@@ -30,6 +30,24 @@ authenticated_exec=$(psql -At -v ON_ERROR_STOP=1 -c "select has_function_privile
 [[ "$anon_exec" == "f" ]] || { echo "anon unexpectedly can execute history RPC"; exit 1; }
 [[ "$authenticated_exec" == "f" ]] || { echo "authenticated unexpectedly can execute history RPC"; exit 1; }
 
+# Null and non-array payloads must fail; an empty array is a valid no-op.
+if psql -v ON_ERROR_STOP=1 -c "select public.insert_market_toman_history_if_due(null::jsonb)" >/dev/null 2>&1; then
+  echo "Null payload unexpectedly succeeded"; exit 1
+fi
+if psql -v ON_ERROR_STOP=1 -c "select public.insert_market_toman_history_if_due('{}'::jsonb)" >/dev/null 2>&1; then
+  echo "Non-array payload unexpectedly succeeded"; exit 1
+fi
+empty=$(psql -At -v ON_ERROR_STOP=1 -c "select public.insert_market_toman_history_if_due('[]'::jsonb)")
+[[ "$empty" == "0" ]] || { echo "Expected empty-array result=0, got $empty"; exit 1; }
+
+# Reject zero and non-finite prices.
+if psql -v ON_ERROR_STOP=1 -c "select public.insert_market_toman_history_if_due('[{\"exchange\":\"nobitex\",\"asset_symbol\":\"BTC\",\"price_toman\":0,\"recorded_at\":\"2026-11-22T13:00:00Z\"}]'::jsonb)" >/dev/null 2>&1; then
+  echo "Zero price unexpectedly succeeded"; exit 1
+fi
+if psql -v ON_ERROR_STOP=1 -c "select public.insert_market_toman_history_if_due('[{\"exchange\":\"nobitex\",\"asset_symbol\":\"BTC\",\"price_toman\":\"NaN\",\"recorded_at\":\"2026-11-22T13:00:00Z\"}]'::jsonb)" >/dev/null 2>&1; then
+  echo "NaN price unexpectedly succeeded"; exit 1
+fi
+
 payload='[{"exchange":"nobitex","asset_symbol":"BTC","price_toman":3000000000,"recorded_at":"2026-11-22T13:00:00Z"}]'
 first=$(psql -At -v ON_ERROR_STOP=1 -c "select public.insert_market_toman_history_if_due('$payload'::jsonb)")
 [[ "$first" == "1" ]] || { echo "Expected first insert=1, got $first"; exit 1; }
@@ -54,4 +72,4 @@ wait "$writer_a"
 count=$(psql -At -v ON_ERROR_STOP=1 -c "select count(*) from public.market_toman_price_history where exchange='wallex' and asset_symbol='ETH'")
 [[ "$count" == "1" ]] || { echo "Expected one concurrent history row, got $count"; exit 1; }
 
-echo "Atomic history migration, six-hour interval, and concurrent writer tests passed."
+echo "Atomic history migration, input validation, six-hour interval, and concurrent writer tests passed."
