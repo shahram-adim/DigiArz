@@ -65,3 +65,41 @@ test("history writes use the atomic six-hour RPC instead of a read-then-write ra
   assert.match(migration, /recorded_at >= pg_catalog\.now\(\) - interval '6 hours'/);
   assert.match(migration, /grant execute on function public\.insert_market_toman_history_if_due\(jsonb\) to service_role/i);
 });
+
+
+test("normalizes decimal strings without binary floating-point conversion", async () => {
+  const { normalizeDecimal, shiftDecimal } = await import("../supabase/functions/refresh-toman-market-prices/decimal.mjs");
+  assert.equal(normalizeDecimal("0001.2300"), "1.23");
+  assert.equal(normalizeDecimal("17746.325100000002"), "17746.3251000000".replace(/0+$/, ""));
+  assert.equal(shiftDecimal("17746.325100000002", -1), "1774.63251");
+  assert.equal(shiftDecimal("1.25e+3", -1), "125");
+});
+
+test("rounds to the declared PostgreSQL NUMERIC scale using half-away-from-zero", async () => {
+  const { normalizeDecimal } = await import("../supabase/functions/refresh-toman-market-prices/decimal.mjs");
+  assert.equal(normalizeDecimal("1.12345678905"), "1.1234567891");
+  assert.equal(normalizeDecimal("-1.12345678905"), "-1.1234567891");
+  assert.equal(normalizeDecimal("1.12345678904"), "1.123456789");
+  assert.equal(normalizeDecimal("123456789012345678901"), null);
+});
+
+test("deduplicates numerically equal decimal representations", async () => {
+  const { dedupeMarketRows } = await import("../supabase/functions/refresh-toman-market-prices/dedupe-market-rows.mjs");
+  const base = {
+    exchange: "nobitex",
+    asset_symbol: "USDT",
+    quote_currency: "TOMAN",
+    price_toman: "1.0",
+    bid_toman: "0.99",
+    ask_toman: "1.00",
+  };
+  const result = dedupeMarketRows([base, {
+    ...base,
+    price_toman: "1.00",
+    bid_toman: "0.9900",
+    ask_toman: "1.0",
+  }]);
+  assert.equal(result.rows.length, 1);
+  assert.equal(result.duplicateRowsRemoved, 1);
+  assert.equal(result.conflictingSymbolsSkipped, 0);
+});
