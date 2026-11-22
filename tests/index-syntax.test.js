@@ -619,3 +619,18 @@ test('shared responsive layout guard covers every application tab and mobile for
   assert.ok(css.includes('@media(max-width:390px)'));
   assert.ok(css.includes('grid-template-columns:minmax(0,1fr)!important'));
 });
+\ntest('theme 3 final override uses light indigo and light blue glass across login and app', () => {
+  const marker = 'DIGIARZ-THEME3-LIGHT-INDIGO-GLASS-20261122';
+  const start = html.lastIndexOf(marker);
+  const end = html.indexOf('</style>', start);
+  assert.ok(start >= 0 && end > start, 'final theme 3 override exists');
+  const css = html.slice(start, end);
+  assert.match(css, /--bg:#e9edff!important/);
+  assert.match(css, /linear-gradient\(135deg,#f0edff 0%,#e7edff 48%,#e1f3ff 100%\)/);
+  assert.match(css, /rgba\(181,174,255,\.52\)/);
+  assert.match(css, /rgba\(153,205,255,\.48\)/);
+  assert.match(css, /body\.luxury-theme #appView \.card[\s\S]*?background:rgba\(255,255,255,\.66\)!important/);
+  assert.match(css, /body\.luxury-theme #authView \.auth-reference-visual[\s\S]*?linear-gradient\(135deg,#f0edff 0%,#e5edff 54%,#dff2ff 100%\)!important/);
+  assert.ok(start > html.lastIndexOf('Keep the entire theme-3 page on its own pale-blue glass canvas'), 'indigo glass override wins over the old pale-blue canvas');
+});
+
