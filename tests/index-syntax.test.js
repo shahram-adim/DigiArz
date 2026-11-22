@@ -477,15 +477,15 @@ test('final theme overrides remain inside the stylesheet rather than leaking int
 test('third theme controls and chart palette consistently use luminous light indigo and pale blue glass', () => {
   assert.match(html, /data-theme-choice="luxury"[^>]*>✧ نیلی شیشه‌ای/);
   assert.match(html, /document\.documentElement\.style\.colorScheme=light\|\|luxury\?'light':'dark'/);
-  assert.match(html, /luxury\?'#0c1024':'#080d1b'/);
-  assert.match(html, /luxury\?\{bg:'#0c1024',text:'#f0f1ff',grid:'#30365f',line:'#59618d'\}/);
+  assert.match(html, /luxury\?'#e8efff':'#080d1b'/);
+  assert.match(html, /luxury\?\{bg:'#edf1ff',text:'#27345f',grid:'#dce2fa',line:'#9aa8e5'\}/);
   assert.match(html, /luxury:'نیلی شیشه‌ای'/);
 });
 
 
 test('final luminous indigo-blue glass cascade overrides legacy dark indigo dashboard and login controls', () => {
   const guard = html.lastIndexOf('/* Final cascade guard: luminous light indigo');
-  assert.ok(guard > html.indexOf('body.luxury-theme #appView .digiarz-v2-dashboard'), 'final cascade guard follows legacy indigo rules');
+  assert.ok(guard > html.indexOf('/* Third theme: deep indigo glass'), 'final cascade guard follows legacy indigo rules');
   const tail = html.slice(guard, html.lastIndexOf('</style>'));
   assert.match(tail, /body\.luxury-theme #appView \.card[\s\S]*?background:rgba\(255,255,255,\.74\)!important/);
   assert.match(tail, /body\.luxury-theme #appView #tab-markets \.coin[\s\S]*?border:0!important/);
