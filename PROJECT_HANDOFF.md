@@ -1208,3 +1208,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - مرحلهٔ `Build installable debug APK` هنوز `in_progress` است؛ بررسی مجوز زیست‌سنجی، ثبت BUILD-INFO و بارگذاری artifact هنوز انجام نشده‌اند. هنوز artifact قابل تحویل موجود نیست.
 - PR #52 همچنان Draft/Open/Unmerged است؛ head آن `38b3e5c32a36a64a7b51749c02691e4d8843d594` است. این head فقط شامل به‌روزرسانی handoff نسبت به commit کد/تست CI است.
 - گام بعد: پس از تکمیل run، conclusion، مجوز merged manifest، BUILD-INFO و artifact را بررسی کن و فقط در صورت تطابق source_commit با `535bb2869f641a0c67962dab8dca4de3e6a6bdd9` APK را تحویل بده.
+
+## حذف سراسری قاب لوگوها و ستاره‌های علاقه‌مندی — ۲۰۲۶-۱۱-۲۲
+- درخواست کاربر: حذف کادر دور لوگو و کادر دور ستاره در تمام پروژه/صفحات.
+- پس از بازخوانی handoff و فایل زندهٔ شاخه، مشخص شد یک override قدیمی‌تر وجود داشته اما selectorهای لوگو کامل نبودند و بعضی استایل‌های بعدی می‌توانستند آن را تحت‌الشعاع قرار دهند.
+- در انتهای `index.html` یک override نهایی با marker `DIGIARZ-GLOBAL-LOGO-STAR-FRAME-REMOVAL-20261122` افزوده شد تا پس از تمام تم‌ها و صفحات اجرا شود. قاب/حاشیه، outline، سایه و پس‌زمینهٔ قاب‌مانند لوگوهای دارایی/برند در `#appView` و `#authView` حذف می‌شود؛ قاب و پس‌زمینهٔ دکمه‌های ستارهٔ علاقه‌مندی و pseudo-elementهای تزئینی نیز حذف می‌شوند. خود تصویر لوگو، گلیف ستاره، اندازه/جایگاه کنترل و عملکرد علاقه‌مندی حفظ می‌شوند.
+- Commit کد: `3790e74fee318f185fae28c580e1f2459697dbfa`.
+- تست رگرسیون سراسری در `tests/index-syntax.test.js` اضافه شد؛ commit تست: `c676f12c1cff3799696d6a02dd1b0ef2b35762fd`.
+- تغییرات فقط در شاخهٔ بازبینی UI انجام شد؛ PR #52 همچنان Draft/Open/Unmerged باقی می‌ماند. هیچ merge، deploy، انتشار، Supabase، Auth یا منطق مالی تغییر نکرد.
+- APK workflow قبلی `45037245050` موفق شده و artifact قبلی `DigiArz-White-Glass-Review-APK` موجود است، اما آن APK مربوط به commit قدیمی‌تر `535bb2869f641a0c67962dab8dca4de3e6a6bdd9` است و این اصلاح را شامل نمی‌شود.
+- گام بعد: بررسی اجرای خودکار CI/APK روی commit تست `c676f12c1cff3799696d6a02dd1b0ef2b35762fd`؛ تا تأیید workflow و artifact هم‌منبع، APK جدید آمادهٔ نصب اعلام نشود.
