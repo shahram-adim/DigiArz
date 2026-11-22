@@ -51,3 +51,17 @@ test("keeps the same asset from different exchanges and quote keys", async () =>
   assert.equal(result.duplicateRowsRemoved, 0);
   assert.equal(result.conflictingSymbolsSkipped, 0);
 });
+
+
+test("history writes use the atomic six-hour RPC instead of a read-then-write race", async () => {
+  const fs = require("node:fs");
+  const edgeSource = fs.readFileSync("supabase/functions/refresh-toman-market-prices/index.ts", "utf8");
+  const migration = fs.readFileSync("supabase/migrations/20261122130000_atomic_toman_history_interval.sql", "utf8");
+
+  assert.match(edgeSource, /\/rest\/v1\/rpc\/insert_market_toman_history_if_due/);
+  assert.doesNotMatch(edgeSource, /market_toman_price_history\?select=exchange,asset_symbol,recorded_at/);
+  assert.match(migration, /pg_advisory_xact_lock/);
+  assert.match(migration, /order by exchange, asset_symbol/i);
+  assert.match(migration, /recorded_at >= item\.recorded_at - interval '6 hours'/);
+  assert.match(migration, /grant execute on function public\.insert_market_toman_history_if_due\(jsonb\) to service_role/i);
+});
