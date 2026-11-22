@@ -68,8 +68,12 @@ test("history writes use the atomic six-hour RPC instead of a read-then-write ra
 
 
 test("normalizes decimal strings without binary floating-point conversion", async () => {
-  const { normalizeDecimal, shiftDecimal } = await import("../supabase/functions/refresh-toman-market-prices/decimal.mjs");
+  const { normalizeDecimal, shiftDecimal, equalDecimals } = await import("../supabase/functions/refresh-toman-market-prices/decimal.mjs");
   assert.equal(normalizeDecimal("0001.2300"), "1.23");
+  assert.equal(normalizeDecimal({ toString: () => "17746.325100000002" }), "17746.3251");
+  assert.equal(normalizeDecimal("1,234.56"), "1234.56");
+  assert.equal(normalizeDecimal("1,23"), null);
+  assert.equal(equalDecimals("NaN", "NaN"), false);
   assert.equal(normalizeDecimal("17746.325100000002"), "17746.3251000000".replace(/0+$/, ""));
   assert.equal(shiftDecimal("17746.325100000002", -1), "1774.63251");
   assert.equal(shiftDecimal("1.25e+3", -1), "125");
