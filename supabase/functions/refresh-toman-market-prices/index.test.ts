@@ -238,6 +238,7 @@ Deno.test("Toman refresh HTTP handler isolates provider failures and refuses emp
       if (kifpoolRequests() !== 2) throw new Error("Expected one persisted-query request and one text-query retry");
       if (writes() !== 1) throw new Error("Expected one aggregated current-price upsert");
     });
+  });
 
   await t.step("Bit24 fetches later pages and retains a mapped IRT market", async () => {
     await withMockedRuntime("bit24-pagination", async (writes) => {
