@@ -31,7 +31,7 @@ export function classifyProviderError(error) {
   const name = error instanceof Error ? error.name : "";
   const message = error instanceof Error ? error.message : String(error ?? "");
   const text = `${name} ${message}`;
-  const httpStatus = /\\bHTTP\\s+(\\d{3})\\b/i.exec(text);
+  const httpStatus = /\bHTTP\s+(\d{3})\b/i.exec(text);
   if (httpStatus) return `http_${httpStatus[1]}`;
   if (/timeout|timed out|aborted/i.test(text)) return "timeout";
   if (/invalid|no .* (?:markets|rows|ticker)|recognized format/i.test(message)) return "invalid_or_empty_response";
