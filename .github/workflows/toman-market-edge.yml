@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "supabase/functions/refresh-toman-market-prices/**"
+      - "supabase/migrations/**"
       - "tests/toman-market-dedupe.test.js"
       - ".github/workflows/toman-market-edge.yml"
   push:
