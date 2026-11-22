@@ -271,34 +271,27 @@ Deno.serve(async (req: Request) => {
     let historySaved = 0;
     let historyWarning: string | null = null;
     try {
-      const cutoff = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString();
+      const historyRows = writeRows.map(row => ({
+        exchange: row.exchange, asset_symbol: row.asset_symbol,
+        price_toman: row.price_toman, bid_toman: row.bid_toman,
+        ask_toman: row.ask_toman, change_24h_pct: row.change_24h_pct,
+        volume_24h_toman: row.volume_24h_toman,
+        asset_name_fa: row.asset_name_fa, asset_name_en: row.asset_name_en,
+        recorded_at: fetchedAt,
+      }));
       const historyResponse = await fetch(
-        supabaseUrl + "/rest/v1/market_toman_price_history?select=exchange,asset_symbol,recorded_at&recorded_at=gte." + encodeURIComponent(cutoff) + "&limit=10000",
-        { headers: serviceHeaders, signal: AbortSignal.timeout(10000) },
-      );
-      if (!historyResponse.ok) throw new Error("History pre-check failed: " + historyResponse.status);
-      const recentHistory = await historyResponse.json();
-      const seen = new Set((recentHistory || []).map((item: any) => item.exchange + ":" + item.asset_symbol));
-      const historyRows = writeRows
-        .filter(row => !seen.has(row.exchange + ":" + row.asset_symbol))
-        .map(row => ({
-          exchange: row.exchange, asset_symbol: row.asset_symbol,
-          price_toman: row.price_toman, bid_toman: row.bid_toman,
-          ask_toman: row.ask_toman, change_24h_pct: row.change_24h_pct,
-          volume_24h_toman: row.volume_24h_toman,
-          asset_name_fa: row.asset_name_fa, asset_name_en: row.asset_name_en,
-          recorded_at: fetchedAt,
-        }));
-      if (historyRows.length) {
-        const historyWrite = await fetch(supabaseUrl + "/rest/v1/market_toman_price_history", {
+        supabaseUrl + "/rest/v1/rpc/insert_market_toman_history_if_due",
+        {
           method: "POST",
-          headers: { ...serviceHeaders, "Content-Type": "application/json", Prefer: "return=minimal" },
-          body: JSON.stringify(historyRows),
+          headers: { ...serviceHeaders, "Content-Type": "application/json" },
+          body: JSON.stringify({ p_rows: historyRows }),
           signal: AbortSignal.timeout(15000),
-        });
-        if (!historyWrite.ok) throw new Error("History write failed: " + historyWrite.status + " " + (await historyWrite.text()).slice(0, 180));
-        historySaved = historyRows.length;
+        },
+      );
+      if (!historyResponse.ok) {
+        throw new Error("Atomic history RPC failed: " + historyResponse.status + " " + (await historyResponse.text()).slice(0, 180));
       }
+      historySaved = Number(await historyResponse.json()) || 0;
     } catch (error) {
       historyWarning = String(error).slice(0, 220);
     }
