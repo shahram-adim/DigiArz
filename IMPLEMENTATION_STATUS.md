@@ -1185,3 +1185,14 @@
 - [x] گزارش تفصیلی در `docs/TOMAN_MARKET_FEED_AUDIT_2026-11-22.md` ثبت شد.
 - [x] این نوبت فقط خواندن GitHub/Supabase، بررسی schema و لاگ و مستندسازی بود. هیچ Edge Function deploy، RPC مالی، Migration، cron یا تغییر داده‌ای در Production انجام نشد.
 - [ ] گام بعد: قرارداد و fixtureهای Bit24 و Kifpool را بررسی؛ adapterهای چهار منبع و آزمون‌های واحد/stale/timeout/partial failure را در CI آماده کن؛ logging ساختاریافته برای تفکیک علت ۵۰۲ اضافه کن. استقرار Production فقط پس از تأیید صریح کاربر.
+
+
+## اصلاح مسیر ذخیره قیمت تومانی و علت تکرار 502 — ۲۳ نوامبر ۲۰۲۶
+- [x] وضعیت Production فقط‌خواندنی بررسی شد: جدول `market_toman_prices` قید یکتای `(exchange, asset_symbol, quote_currency)` دارد؛ تابع قبلی هر بار POST ساده بدون `on_conflict` و بدون `resolution=merge-duplicates` ارسال می‌کرد.
+- [x] snapshot فعلی: ۳۷۳ ردیف قیمت جاری و ۳۷۳ ردیف تاریخچه؛ آخرین زمان هر دو `2026-11-17 22:04:26 UTC`. داده‌های فعلی چند روز stale هستند.
+- [x] در ۲۴ ساعت منتهی به `2026-11-22 23:14 UTC` تعداد ۲۱ POST با HTTP 502 و ۲۱ OPTIONS موفق برای Edge Function ثبت شد. POSTها `EDGE_FUNCTION_ERROR` داشتند؛ زمان اجرا حدود ۲٫۸ تا ۷٫۳ ثانیه بود. log داخلی قبلی علت providerها را تفکیک نمی‌کرد.
+- [!] قید یکتا در کنار POST ساده، مسیر شکست قطعی هنگام تکرار کلیدهای موجود ایجاد می‌کند؛ این توضیح قوی برای stale ماندن قیمت‌هاست، هرچند خطاهای مستقل provider نیز ممکن است وجود داشته باشند.
+- [x] اصلاح GitHub: upsert با `on_conflict=exchange,asset_symbol,quote_currency` و `Prefer: resolution=merge-duplicates,return=minimal`؛ حذف duplicateهای داخل batch بر اساس همان کلید؛ logging ساختاریافته و بدون پیام خام upstream/اطلاعات احراز هویت.
+- [x] آزمون‌های Node برای dedupe، درخواست upsert و خلاصه امن خطاها اضافه شد؛ fixture PostgreSQL 17 با درج تکراری و rollback به CI افزوده شد.
+- [!] اصلاح فقط در GitHub است؛ تابع Production هنوز نسخه ۳ است. هیچ deploy، refresh واقعی، یا نوشتن/حذف داده در Production انجام نشده است.
+- [ ] گام بعد: نتیجه CI را بررسی کن؛ استقرار و refresh واقعی فقط پس از تأیید صریح کاربر.

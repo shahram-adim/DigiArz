@@ -30,13 +30,15 @@ jobs:
           node-version: 20
       - name: Run exact decimal and browser integration tests
         run: node --test tests/*.test.js
-      - name: Run PostgreSQL arithmetic regression tests
+      - name: Run PostgreSQL arithmetic and Toman upsert regressions
         env:
           PGPASSWORD: postgres
         run: |
           sudo apt-get update
           sudo apt-get install -y postgresql-client
-          psql -h localhost -U postgres -d digiarz_test -v ON_ERROR_STOP=1 -f supabase/tests/exact_decimal_arithmetic.sql
+          psql -h localhost -U postgres -d digiarz_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_arithmetic.sql \
+            -f supabase/tests/toman_market_upsert_idempotency.sql
       - name: Rehearse exact-decimal schema widening in disposable PostgreSQL
         env:
           PGPASSWORD: postgres

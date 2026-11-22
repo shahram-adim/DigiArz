@@ -1,4 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { buildTomanPriceUpsertRequest, dedupeTomanPriceRows, summarizeProviderResults } from "./persistence.mjs";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -180,7 +181,9 @@ Deno.serve(async (req: Request) => {
     return json({ success: false, error: "Authentication required" }, 401);
   }
 
+  let stage = "session_validation";
   try {
+    stage = "session_validation";
     const userResponse = await fetch(supabaseUrl + "/auth/v1/user", {
       headers: { apikey: anonKey, Authorization: authorization },
       signal: AbortSignal.timeout(8000),
@@ -188,6 +191,7 @@ Deno.serve(async (req: Request) => {
     if (!userResponse.ok) return json({ success: false, error: "Valid user session required" }, 401);
 
     const serviceHeaders = { apikey: serviceKey, Authorization: "Bearer " + serviceKey };
+    stage = "cache_read";
     const latestResponse = await fetch(
       supabaseUrl + "/rest/v1/market_toman_prices?select=fetched_at&order=fetched_at.desc&limit=1",
       { headers: serviceHeaders, signal: AbortSignal.timeout(8000) },
@@ -203,40 +207,59 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    stage = "provider_fetch";
     const fetchedAt = new Date().toISOString();
     const sourceResults = await Promise.allSettled([
       fetchNobitex(fetchedAt), fetchWallex(fetchedAt), fetchBitpin(fetchedAt),
     ]);
     const sourceNames = ["nobitex", "wallex", "bitpin"];
+    const providerSummary = summarizeProviderResults(sourceResults, sourceNames);
     const sources: Record<string, { ok: boolean; count: number; error?: string }> = {};
-    const rows: any[] = [];
+    const collectedRows: any[] = [];
     sourceResults.forEach((result, index) => {
+      const summary = providerSummary[index];
       const key = sourceNames[index];
-      if (result.status === "fulfilled") {
-        sources[key] = { ok: true, count: result.value.length };
-        rows.push(...result.value);
-      } else {
-        sources[key] = { ok: false, count: 0, error: String(result.reason).slice(0, 220) };
-      }
+      sources[key] = {
+        ok: summary.ok,
+        count: summary.count,
+        ...(!summary.ok ? { error: summary.error_code } : {}),
+      };
+      if (result.status === "fulfilled") collectedRows.push(...result.value);
     });
+    const { rows, duplicateCount } = dedupeTomanPriceRows(collectedRows);
+    console.info(JSON.stringify({
+      event: "toman_market_provider_results",
+      providers: providerSummary,
+      accepted_rows: rows.length,
+      duplicate_rows_dropped: duplicateCount,
+    }));
     if (!rows.length) {
+      console.error(JSON.stringify({
+        event: "toman_market_no_valid_provider_rows",
+        providers: providerSummary,
+      }));
       return json({ success: false, error: "هیچ منبعی قیمت معتبر تومانی برنگرداند.", sources }, 502);
     }
 
-    const writeResponse = await fetch(supabaseUrl + "/rest/v1/market_toman_prices", {
+    stage = "current_price_upsert";
+    const upsertRequest = buildTomanPriceUpsertRequest(supabaseUrl, rows);
+    const writeResponse = await fetch(upsertRequest.url, {
       method: "POST",
-      headers: {
-        ...serviceHeaders, "Content-Type": "application/json",
-        Prefer: "return=minimal",
-      },
-      body: JSON.stringify(rows),
+      headers: { ...serviceHeaders, ...upsertRequest.headers },
+      body: upsertRequest.body,
       signal: AbortSignal.timeout(15000),
     });
     if (!writeResponse.ok) {
-      throw new Error("Toman market write failed: " + writeResponse.status + " " + (await writeResponse.text()).slice(0, 220));
+      console.error(JSON.stringify({
+        event: "toman_market_upsert_failed",
+        http_status: writeResponse.status,
+        row_count: rows.length,
+      }));
+      throw new Error("Toman market upsert failed: " + writeResponse.status + " " + (await writeResponse.text()).slice(0, 220));
     }
 
     // Keep the current-price table compact; long-term snapshots live in the history table.
+    stage = "current_price_cleanup";
     let cleanupWarning: string | null = null;
     try {
       const cleanupUrl = new URL(supabaseUrl + "/rest/v1/market_toman_prices");
@@ -253,6 +276,7 @@ Deno.serve(async (req: Request) => {
       cleanupWarning = String(error).slice(0, 180);
     }
 
+    stage = "history_read";
     let historySaved = 0;
     let historyWarning: string | null = null;
     try {
@@ -275,6 +299,7 @@ Deno.serve(async (req: Request) => {
           recorded_at: fetchedAt,
         }));
       if (historyRows.length) {
+        stage = "history_write";
         const historyWrite = await fetch(supabaseUrl + "/rest/v1/market_toman_price_history", {
           method: "POST",
           headers: { ...serviceHeaders, "Content-Type": "application/json", Prefer: "return=minimal" },
@@ -288,14 +313,20 @@ Deno.serve(async (req: Request) => {
       historyWarning = String(error).slice(0, 220);
     }
 
+    stage = "complete";
     return json({
-      success: true, saved: rows.length, history_saved: historySaved,
+      success: true, saved: rows.length, duplicate_rows_dropped: duplicateCount, history_saved: historySaved,
       updated_at: fetchedAt, sources,
       ...(historyWarning ? { history_warning: historyWarning } : {}),
       ...(cleanupWarning ? { cleanup_warning: cleanupWarning } : {}),
       note: "Prices are read-only market references in Toman. They are not used to execute demo trades.",
     });
   } catch (error) {
+    console.error(JSON.stringify({
+      event: "toman_market_refresh_failed",
+      stage,
+      error_name: error instanceof Error ? error.name : "UnknownError",
+    }));
     return json({ success: false, error: error instanceof Error ? error.message : String(error) }, 502);
   }
 });
