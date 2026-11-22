@@ -1228,3 +1228,9 @@
 - [x] اجرای Edge workflow `45028471398` روی commit کد/تست `89baf9a55936bd894b26fa2739ce4accaca5ac52` با نتیجهٔ SUCCESS پایان یافت: Deno type-check، HTTP handler integration tests، Node dedupe tests و PostgreSQL atomic-history/concurrency tests همگی موفق.
 - [!] اجرای workflow گستردهٔ exact-decimal شمارهٔ `45028471406` در زمان ثبت این گزارش هنوز در مرحلهٔ تست exact-decimal/browser integration بود؛ نتیجهٔ نهایی آن تأیید نشده است.
 - [x] PR #51 در آخرین بررسی open و Draft، mergeable بود؛ merge و deploy انجام نشده است.
+
+
+### نتیجهٔ آزمون گستردهٔ اعشار و سفارش‌ها — ۲۲ نوامبر ۲۰۲۶
+- [x] workflow `45028471406` با نتیجهٔ SUCCESS پایان یافت. تست‌های exact-decimal/browser، محاسبات PostgreSQL، preflight و rollback تغییر schema، قفل timeout، مسیرهای Market/Limit/Stop-Limit/TP-SL، چرخهٔ لغو و raceهای دو session همگی موفق شدند.
+- [x] برای تشخیص علت ۵۰۲های آینده، در handler قیمت تومانی مرحله‌های `auth_user`, `cache_read`, `provider_fetch`, `price_upsert`, `history_rpc` ثبت می‌شوند و خطای بیرونی با نام مرحله در log ساختاریافته ثبت خواهد شد.
+- [x] آزمون HTTP اضافی برای خطای cache و وجود diagnostic stage/log اضافه شد؛ این آخرین اصلاح هنوز منتظر اجرای CI خودش است.
