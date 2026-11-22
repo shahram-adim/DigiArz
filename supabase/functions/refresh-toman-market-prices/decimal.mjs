@@ -83,8 +83,12 @@ export function shiftDecimal(value, exponent, precision = 30, scale = 10) {
   else if (typeof value === "bigint") raw = value.toString();
   else if (typeof value === "object" && typeof value.toString === "function") raw = value.toString();
   else return null;
-  if (!DECIMAL_PATTERN.test(raw)) return null;
-  return normalizeDecimal(raw + "e" + String(exponent), precision, scale);
+  const match = DECIMAL_PATTERN.exec(raw);
+  if (!match) return null;
+  const currentExponent = Number(match[4] || 0);
+  if (!Number.isSafeInteger(currentExponent + exponent) || Math.abs(currentExponent + exponent) > 100) return null;
+  const adjusted = match[1] + match[2] + (match[3] !== undefined ? "." + match[3] : "") + "e" + String(currentExponent + exponent);
+  return normalizeDecimal(adjusted, precision, scale);
 }
 
 export function compareDecimals(left, right) {
