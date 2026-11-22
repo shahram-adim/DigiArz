@@ -255,7 +255,7 @@ async function fetchKifpool(
   return rows;
 }
 
-Deno.serve(async (req: Request) => {
+export const handler = async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ success: false, error: "Method not allowed" }, 405);
 
@@ -393,4 +393,6 @@ Deno.serve(async (req: Request) => {
   } catch (error) {
     return json({ success: false, error: error instanceof Error ? error.message : String(error) }, 502);
   }
-});
+};
+
+if (import.meta.main) Deno.serve(handler);
