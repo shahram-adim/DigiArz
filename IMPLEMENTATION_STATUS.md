@@ -1195,7 +1195,7 @@
 - [x] اصلاح GitHub: upsert با `on_conflict=exchange,asset_symbol,quote_currency` و `Prefer: resolution=merge-duplicates,return=minimal`؛ حذف duplicateهای داخل batch بر اساس همان کلید؛ logging ساختاریافته و بدون پیام خام upstream/اطلاعات احراز هویت.
 - [x] آزمون‌های Node برای dedupe، درخواست upsert و خلاصه امن خطاها اضافه شد؛ fixture PostgreSQL 17 با درج تکراری و rollback به CI افزوده شد.
 - [!] اصلاح فقط در GitHub است؛ تابع Production هنوز نسخه ۳ است. هیچ deploy، refresh واقعی، یا نوشتن/حذف داده در Production انجام نشده است.
-- [ ] گام بعد: نتیجه CI را بررسی کن؛ استقرار و refresh واقعی فقط پس از تأیید صریح کاربر.
+- [x] اجرای نهایی CI شماره `45082751825` موفق شد. [ ] گام بعد: Bit24/Kifpool را فقط پس از تأیید قرارداد API و سپس استقرار تابع فقط با تأیید صریح کاربر ادامه بده.
 
 
 ### نتیجه نهایی CI اصلاح upsert قیمت تومانی — ۲۳ نوامبر ۲۰۲۶
