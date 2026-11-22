@@ -1153,3 +1153,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - تست رگرسیون جدید در `tests/index-syntax.test.js` وجود هر ده صفحه، selector اختصاصی هر صفحه و breakpointهای 760 و 390 پیکسل را کنترل می‌کند.
 - دو اجرای workflow خودکار پس از تغییر شروع شدند: run `45031384625` برای commit CSS و run `45031400394` برای commit تست؛ در زمان ثبت این یادداشت، run دوم در وضعیت pending بود. تا نتیجهٔ موفق، این مرحله را تأییدشده تلقی نکن.
 - هیچ merge، deploy، Supabase یا تغییر auth/معامله/کیف پول انجام نشده است. گام بعد: نتیجهٔ run 75 را بررسی کن؛ اگر موفق شد، APK تازهٔ همان commit را از artifact بردار و بعد QA دیداری روی گوشی را انجام بده.
+
+
+## تأیید CI و APK تازهٔ چیدمان همهٔ صفحات — ۲۰۲۶-۱۱-۲۲
+- [x] اجرای workflow شمارهٔ 74 با شناسهٔ `45031384625` روی commit کد CSS `62e3c03342460c67eb572eba06fe6f2901d0e933` موفق شد؛ همهٔ 16 مرحلهٔ job از جمله تست‌ها، ساخت APK و بارگذاری artifact موفق بودند.
+- [x] اجرای workflow شمارهٔ 75 با شناسهٔ `45031400394` نیز موفق شد؛ تست‌ها، ساخت Android debug APK، بررسی مجوز `USE_BIOMETRIC` و بارگذاری artifact همگی موفق‌اند. این workflow از شاخهٔ نامزد بازبینی اجرا شد و فایل BUILD-INFO مقدار source_commit برابر `35c415cbed6656bd0d569a11dbb0347caa12722f` را ثبت کرده است؛ این commit شامل CSS و تست‌های مرحلهٔ تکمیل چیدمان به‌علاوهٔ handoff به‌روز است.
+- [x] Artifact تازه: `DigiArz-White-Glass-Review-APK`، run `45031400394`، artifact ID `14757871658`، حجم 6,208,712 بایت، انقضا `2026-12-06T14:14:14Z`. SHA-256 فایل APK طبق BUILD-INFO: `051bfef1ea6bf20407ca339518fa065bb455a5e4e0a60ade848708ae7a3c826e`. SHA-256 آرشیو artifact: `1ffd7b106506254fcf4751e194eb0352d3782b7950c87b7900e287fd607b99b3`.
+- [x] npm registry signatures: 100 packages verified؛ Gradle: `BUILD SUCCESSFUL`؛ مجوز Android biometric در merged manifest تأیید شد.
+- [x] بررسی CSS تأیید کرد قانون `.hidden{display:none!important}` باقی است؛ selector عمومی tabها باعث نمایش هم‌زمان صفحات غیرفعال نمی‌شود.
+- [!] ساخت APK و CI موفق‌اند، اما QA دیداری روی گوشی واقعی هنوز انجام نشده و ظاهر نهایی هر ده صفحه در هر سه تم را نمی‌توان بدون مشاهدهٔ دستگاه تأیید کرد.
+- [!] PR #50 همچنان Open/Draft/Unmerged است؛ PR #48 نیز طبق سوابق Open/Draft باقی می‌ماند. هیچ merge، release، deploy، تغییر Supabase، Auth یا منطق مالی انجام نشود مگر با تأیید صریح کاربر.
+- [ ] گام بعد: نصب APK همین run روی Android و گرفتن تصویر از داشبورد، بازار و چند صفحهٔ داخلی در هر سه تم؛ سپس اصلاح دقیق مواردی که در گوشی دیده می‌شوند. پس از QA بصری، تصمیم merge جداگانه گرفته شود.
