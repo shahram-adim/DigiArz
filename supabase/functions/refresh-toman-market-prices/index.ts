@@ -2,6 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { dedupeMarketRows } from "./dedupe-market-rows.mjs";
 import { normalizeDecimal, shiftDecimal, compareDecimals } from "./decimal.mjs";
 import { parse } from "npm:lossless-json@4.3.4";
+import { collectProviderResults, emptyProviderOutcome } from "./provider-results.mjs";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -300,22 +301,13 @@ Deno.serve(async (req: Request) => {
       fetchKifpool(fetchedAt, supabaseUrl, serviceHeaders),
     ]);
     const sourceNames = ["nobitex", "wallex", "bit24", "kifpool"];
-    const sources: Record<string, { ok: boolean; count: number; error?: string }> = {};
-    const rows: any[] = [];
-    sourceResults.forEach((result, index) => {
-      const key = sourceNames[index];
-      if (result.status === "fulfilled") {
-        sources[key] = { ok: true, count: result.value.length };
-        rows.push(...result.value);
-      } else {
-        const error = String(result.reason).slice(0, 220);
-        sources[key] = { ok: false, count: 0, error };
-        console.warn("Toman market provider failed", { provider: key, error });
-      }
-    });
-    if (!rows.length) {
-      return json({ success: false, error: "هیچ منبعی قیمت معتبر تومانی برنگرداند.", sources }, 502);
+    const providerResult = collectProviderResults(sourceNames, sourceResults);
+    const { sources, rows } = providerResult;
+    for (const provider of providerResult.failed) {
+      console.warn("Toman market provider failed", { provider, error: sources[provider].error });
     }
+    const emptyOutcome = emptyProviderOutcome(providerResult);
+    if (emptyOutcome) return json(emptyOutcome.body, emptyOutcome.status);
 
     const deduped = dedupeMarketRows(rows);
     const writeRows = deduped.rows;
