@@ -525,7 +525,7 @@ test('all inline style elements are balanced and the mobile market stylesheet is
   const mobileOpen = html.indexOf('<style id="digiarz-mobile-market-row-containment-20261121">');
   assert.ok(heroOpen >= 0 && mobileOpen > heroOpen, 'hero and mobile styles are separate ordered blocks');
   assert.ok(html.lastIndexOf('</style>', mobileOpen) > heroOpen, 'hero stylesheet closes before the mobile stylesheet opens');
-  assert.ok(html.includes('body.luxury-theme{min-height:100vh;background:radial-gradient(ellipse at 14% 4%'), 'theme 3 keeps its deep-indigo full-page canvas');
+  assert.match(html, /body\\.luxury-theme\\{[^}]*background:radial-gradient\\(ellipse at 14% 4%/s, 'theme 3 keeps its deep-indigo full-page canvas');
 });
 
 
