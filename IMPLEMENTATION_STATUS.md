@@ -1222,3 +1222,9 @@
 - [x] آزمون‌ها بررسی می‌کنند در دو سناریوی شکست جزئی، ردیف‌های منبع سالم ذخیره شوند و در شکست کامل، پاسخ ۵۰۲ صادر شود و هیچ upsert خالی انجام نشود.
 - [x] workflow Edge به اجرای `deno test --allow-env .../index.test.ts` مجهز شد.
 - [!] اجرای CI جدید روی commit `5503cbfbc6c7486b6d0dcc3d1be3d0e42a3dd001` در حال اجراست؛ نتیجهٔ HTTP integration هنوز تأیید نشده است.
+
+
+### نتیجهٔ CI برای آزمون HTTP — ۲۲ نوامبر ۲۰۲۶
+- [x] اجرای Edge workflow `45028471398` روی commit کد/تست `89baf9a55936bd894b26fa2739ce4accaca5ac52` با نتیجهٔ SUCCESS پایان یافت: Deno type-check، HTTP handler integration tests، Node dedupe tests و PostgreSQL atomic-history/concurrency tests همگی موفق.
+- [!] اجرای workflow گستردهٔ exact-decimal شمارهٔ `45028471406` در زمان ثبت این گزارش هنوز در مرحلهٔ تست exact-decimal/browser integration بود؛ نتیجهٔ نهایی آن تأیید نشده است.
+- [x] PR #51 در آخرین بررسی open و Draft، mergeable بود؛ merge و deploy انجام نشده است.
