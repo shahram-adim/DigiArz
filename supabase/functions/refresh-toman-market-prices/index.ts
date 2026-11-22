@@ -1,5 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { dedupeMarketRows } from "./dedupe-market-rows.mjs";
+import { normalizeDecimal, shiftDecimal, compareDecimals } from "./decimal.mjs";
+import { parse } from "npm:lossless-json@4.3.4";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -19,11 +21,10 @@ const faNames: Record<string, string> = {
   ETC: "اتریوم کلاسیک", UNI: "یونی‌سواپ", AAVE: "آوه", XLM: "استلار",
 };
 
-const numberOrNull = (...values: unknown[]): number | null => {
+const decimalOrNull = (...values: unknown[]): string | null => {
   for (const value of values) {
-    if (value === null || value === undefined || value === "") continue;
-    const parsed = Number(String(value).replace(/,/g, ""));
-    if (Number.isFinite(parsed)) return parsed;
+    const parsed = normalizeDecimal(value);
+    if (parsed !== null) return parsed;
   }
   return null;
 };
@@ -36,22 +37,22 @@ async function getJson(url: string, provider: string) {
     signal: AbortSignal.timeout(12000),
   });
   if (!response.ok) throw new Error(provider + " HTTP " + response.status);
-  return await response.json();
+  return parse(await response.text()) as any;
 }
 
 function makeRow(
   exchange: string,
   asset: string,
   values: {
-    price: number | null; bid?: number | null; ask?: number | null;
-    high?: number | null; low?: number | null; change?: number | null;
-    volume?: number | null; nameFa?: string | null; nameEn?: string | null;
+    price: string | null; bid?: string | null; ask?: string | null;
+    high?: string | null; low?: string | null; change?: string | null;
+    volume?: string | null; nameFa?: string | null; nameEn?: string | null;
   },
   fetchedAt: string,
 ) {
-  if (!validAsset(asset) || !Number.isFinite(values.price) || Number(values.price) <= 0) return null;
-  const positive = (v: number | null | undefined) => v !== null && v !== undefined && Number.isFinite(v) && v > 0 ? v : null;
-  const nonNegative = (v: number | null | undefined) => v !== null && v !== undefined && Number.isFinite(v) && v >= 0 ? v : null;
+  if (!validAsset(asset) || values.price === null || compareDecimals(values.price, "0") <= 0) return null;
+  const positive = (v: string | null | undefined) => v !== null && v !== undefined && compareDecimals(v, "0") > 0 ? v : null;
+  const nonNegative = (v: string | null | undefined) => v !== null && v !== undefined && compareDecimals(v, "0") >= 0 ? v : null;
   return {
     exchange,
     asset_symbol: asset,
@@ -80,8 +81,8 @@ async function fetchNobitex(fetchedAt: string) {
     if (!match) continue;
     const asset = match[1].toUpperCase();
     const rialToToman = (value: unknown) => {
-      const n = numberOrNull(value);
-      return n !== null && n > 0 ? n / 10 : null;
+      const n = shiftDecimal(value, -1);
+      return n !== null && compareDecimals(n, "0") > 0 ? n : null;
     };
     const row = makeRow("nobitex", asset, {
       price: rialToToman(stats.latest),
@@ -89,8 +90,8 @@ async function fetchNobitex(fetchedAt: string) {
       ask: rialToToman(stats.bestSell),
       high: rialToToman(stats.dayHigh),
       low: rialToToman(stats.dayLow),
-      change: numberOrNull(stats.dayChange),
-      volume: rialToToman(stats.volumeDst),
+      change: normalizeDecimal(stats.dayChange, 18, 8),
+      volume: shiftDecimal(stats.volumeDst, -1, 38, 8),
     }, fetchedAt);
     if (row) rows.push(row);
   }
@@ -112,13 +113,13 @@ async function fetchWallex(fetchedAt: string) {
     if (!match || !["TMN", "IRT"].includes(quote)) continue;
     const stats = item?.stats || {};
     const row = makeRow("wallex", match[1], {
-      price: numberOrNull(stats.lastPrice),
-      bid: numberOrNull(stats.bidPrice),
-      ask: numberOrNull(stats.askPrice),
-      high: numberOrNull(stats["24h_highPrice"]),
-      low: numberOrNull(stats["24h_lowPrice"]),
-      change: numberOrNull(stats["24h_ch"]),
-      volume: numberOrNull(stats["24h_quoteVolume"]),
+      price: decimalOrNull(stats.lastPrice),
+      bid: decimalOrNull(stats.bidPrice),
+      ask: decimalOrNull(stats.askPrice),
+      high: decimalOrNull(stats["24h_highPrice"]),
+      low: decimalOrNull(stats["24h_lowPrice"]),
+      change: normalizeDecimal(stats["24h_ch"], 18, 8),
+      volume: normalizeDecimal(stats["24h_quoteVolume"], 38, 8),
       nameFa: item.faBaseAsset || item.faName || null,
       nameEn: item.baseAsset || null,
     }, fetchedAt);
@@ -150,13 +151,13 @@ async function fetchBitpin(fetchedAt: string) {
     if (!match) continue;
     const asset = match[1];
     const row = makeRow("bitpin", asset, {
-      price: numberOrNull(item?.last, item?.last_price, item?.lastPrice, item?.price),
-      bid: numberOrNull(item?.bid, item?.best_bid, item?.bidPrice),
-      ask: numberOrNull(item?.ask, item?.best_ask, item?.askPrice),
-      high: numberOrNull(item?.high, item?.high_price, item?.highPrice),
-      low: numberOrNull(item?.low, item?.low_price, item?.lowPrice),
-      change: numberOrNull(item?.percentage, item?.priceChangePercent, item?.price_change_percent, item?.change_percent),
-      volume: numberOrNull(item?.quoteVolume, item?.quote_volume, item?.quote_volume_24h, item?.quoteVolume24h),
+      price: decimalOrNull(item?.last, item?.last_price, item?.lastPrice, item?.price),
+      bid: decimalOrNull(item?.bid, item?.best_bid, item?.bidPrice),
+      ask: decimalOrNull(item?.ask, item?.best_ask, item?.askPrice),
+      high: decimalOrNull(item?.high, item?.high_price, item?.highPrice),
+      low: decimalOrNull(item?.low, item?.low_price, item?.lowPrice),
+      change: normalizeDecimal(item?.percentage ?? item?.priceChangePercent ?? item?.price_change_percent ?? item?.change_percent, 18, 8),
+      volume: normalizeDecimal(item?.quoteVolume ?? item?.quote_volume ?? item?.quote_volume_24h ?? item?.quoteVolume24h, 38, 8),
       nameFa: item?.base_asset_name_fa || item?.faBaseAsset || null,
       nameEn: item?.base_asset_name || item?.baseAsset || null,
     }, fetchedAt);
