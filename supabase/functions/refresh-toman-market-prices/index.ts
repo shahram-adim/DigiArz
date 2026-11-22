@@ -270,7 +270,9 @@ export const handler = async (req: Request) => {
     return json({ success: false, error: "Authentication required" }, 401);
   }
 
+  let stage = "auth_user";
   try {
+    stage = "auth_user";
     const userResponse = await fetch(supabaseUrl + "/auth/v1/user", {
       headers: { apikey: anonKey, Authorization: authorization },
       signal: AbortSignal.timeout(8000),
@@ -278,6 +280,7 @@ export const handler = async (req: Request) => {
     if (!userResponse.ok) return json({ success: false, error: "Valid user session required" }, 401);
 
     const serviceHeaders = { apikey: serviceKey, Authorization: "Bearer " + serviceKey };
+    stage = "cache_read";
     const latestResponse = await fetch(
       supabaseUrl + "/rest/v1/market_toman_prices?select=fetched_at&order=fetched_at.desc&limit=1",
       { headers: serviceHeaders, signal: AbortSignal.timeout(8000) },
@@ -294,6 +297,7 @@ export const handler = async (req: Request) => {
     }
 
     const fetchedAt = new Date().toISOString();
+    stage = "provider_fetch";
     const sourceResults = await Promise.allSettled([
       fetchNobitex(fetchedAt),
       fetchWallex(fetchedAt),
@@ -330,6 +334,7 @@ export const handler = async (req: Request) => {
       conflicting_symbols_skipped: deduped.conflictingSymbolsSkipped,
     });
 
+    stage = "price_upsert";
     const writeUrl = new URL(supabaseUrl + "/rest/v1/market_toman_prices");
     writeUrl.searchParams.set("on_conflict", "exchange,asset_symbol,quote_currency");
     const writeResponse = await fetch(writeUrl.toString(), {
@@ -353,6 +358,7 @@ export const handler = async (req: Request) => {
 
     let historySaved = 0;
     let historyWarning: string | null = null;
+    stage = "history_rpc";
     try {
       const historyRows = writeRows.map(row => ({
         exchange: row.exchange, asset_symbol: row.asset_symbol,
@@ -391,7 +397,9 @@ export const handler = async (req: Request) => {
       note: "Prices are read-only market references in Toman. They are not used to execute demo trades.",
     });
   } catch (error) {
-    return json({ success: false, error: error instanceof Error ? error.message : String(error) }, 502);
+    const detail = String(error).slice(0, 300);
+    console.error("Toman market refresh failed", { stage, error: detail });
+    return json({ success: false, error: error instanceof Error ? error.message : String(error), stage }, 502);
   }
 };
 
