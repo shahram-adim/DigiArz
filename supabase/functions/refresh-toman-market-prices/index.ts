@@ -264,22 +264,9 @@ Deno.serve(async (req: Request) => {
       throw new Error("Toman market upsert failed: " + writeResponse.status + " " + detail);
     }
 
-    // Keep the current-price table compact; long-term snapshots live in the history table.
-    let cleanupWarning: string | null = null;
-    try {
-      const cleanupUrl = new URL(supabaseUrl + "/rest/v1/market_toman_prices");
-      const refreshedExchanges = [...new Set(writeRows.map(row => row.exchange))];
-      cleanupUrl.searchParams.set("exchange", "in.(" + refreshedExchanges.join(",") + ")");
-      cleanupUrl.searchParams.set("fetched_at", "lt." + fetchedAt);
-      const cleanupResponse = await fetch(cleanupUrl.toString(), {
-        method: "DELETE",
-        headers: { ...serviceHeaders, Prefer: "return=minimal" },
-        signal: AbortSignal.timeout(10000),
-      });
-      if (!cleanupResponse.ok) throw new Error("Current-price cleanup failed: " + cleanupResponse.status);
-    } catch (error) {
-      cleanupWarning = String(error).slice(0, 180);
-    }
+    // Keep prior rows when a provider returns a partial snapshot.
+    // The unique key bounds this table to one current row per exchange/asset/quote.
+    // Staleness is surfaced by market_toman_performance; destructive cleanup is handled separately.
 
     let historySaved = 0;
     let historyWarning: string | null = null;
@@ -325,7 +312,6 @@ Deno.serve(async (req: Request) => {
         conflicting_symbols_skipped: deduped.conflictingSymbolsSkipped,
       },
       ...(historyWarning ? { history_warning: historyWarning } : {}),
-      ...(cleanupWarning ? { cleanup_warning: cleanupWarning } : {}),
       note: "Prices are read-only market references in Toman. They are not used to execute demo trades.",
     });
   } catch (error) {
