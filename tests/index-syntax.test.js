@@ -714,3 +714,23 @@ test('dashboard top spacing and legacy hero regression', () => {
   assert.match(html, /@media\(max-width:390px\)[\s\S]*?#tab-dashboard \.da-v2-hero\{grid-template-columns:minmax\(0,1fr\) 78px!important/,
     'dashboard hero remains constrained on narrow phones');
 });
+
+
+test('global logo and favorite star frame removal applies after all theme styles', () => {
+  const marker = 'DIGIARZ-GLOBAL-LOGO-STAR-FRAME-REMOVAL-20261122';
+  const start = html.lastIndexOf(marker);
+  const end = html.indexOf('</style>', start);
+  assert.ok(start >= 0 && end > start, 'final global logo/star override exists');
+  const css = html.slice(start, end);
+  for (const selector of [
+    '#appView .coin-icon', '#appView .asset-logo', '#appView .da-market-logo',
+    '#appView .da-market-logo-inner', '#appView .da-v2-logo',
+    '#authView .coin-icon', '#authView .asset-logo',
+    '#authView .da-market-logo', '#authView .da-market-logo-inner'
+  ]) assert.ok(css.includes(selector), 'logo frame removed: ' + selector);
+  assert.match(css, /border:0!important;outline:0!important;box-shadow:none!important/);
+  assert.match(css, /background:transparent!important/);
+  assert.match(css, /button\.favorite-btn[\s\S]*?border:0!important/);
+  assert.match(css, /button\.da-market-favorite[\s\S]*?border:0!important/);
+  assert.ok(start > html.lastIndexOf('</style>', start), 'override is appended after theme styles');
+});
