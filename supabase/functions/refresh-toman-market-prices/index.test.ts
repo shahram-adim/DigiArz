@@ -3,7 +3,7 @@ import { handler } from "./index.ts";
 const envKeys = ["SUPABASE_URL", "SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY"] as const;
 
 async function withMockedRuntime(
-  mode: "timeout-wallex" | "malformed-nobitex" | "all-providers-fail" | "cache-read-fail" | "partial-cache-stale" | "kifpool-hash-expired",
+  mode: "timeout-wallex" | "malformed-nobitex" | "all-providers-fail" | "cache-read-fail" | "partial-cache-stale" | "kifpool-hash-expired" | "bit24-pagination",
   run: (writes: () => number, errorLog: () => unknown[] | null, cacheOrder: () => string | null, kifpoolRequests: () => number) => Promise<void>,
 ) {
   const previousEnv = new Map(envKeys.map((key) => [key, Deno.env.get(key)]));
@@ -31,7 +31,12 @@ async function withMockedRuntime(
     }
     if (url.includes("/rest/v1/exchange_asset_observations?")) {
       const exchange = new URL(url).searchParams.get("exchange");
-      return Response.json(exchange === "eq.kifpool" && mode === "kifpool-hash-expired" ? [{ base_symbol: "BTC" }] : []);
+      return Response.json(
+        (exchange === "eq.kifpool" && mode === "kifpool-hash-expired") ||
+        (exchange === "eq.bit24" && mode === "bit24-pagination")
+          ? [{ base_symbol: "BTC" }]
+          : [],
+      );
     }
     if (url.includes("/rest/v1/market_toman_prices?on_conflict=")) {
       writes += 1;
@@ -88,7 +93,27 @@ async function withMockedRuntime(
 
     if (url.includes("pro.bit24.cash")) {
       if (mode === "all-providers-fail") throw new Error("Bit24 unavailable");
-      return Response.json({ data: [] });
+      if (mode === "bit24-pagination") {
+        const page = Number(new URL(url).searchParams.get("page") || "1");
+        if (page === 1) return Response.json({ data: { results: [], last_page: 2 } });
+        return Response.json({
+          data: {
+            last_page: 2,
+            results: [{
+              base_coin: { symbol: "BTC", name: "Bitcoin", fa_name: "بیت کوین" },
+              quote_coin: { symbol: "IRT", name: "Toman" },
+              market_24h_information: {
+                last_price: "123456789",
+                max_price: "130000000",
+                min_price: "120000000",
+                change_percent: "1.25",
+                quote_volume: "1000000000",
+              },
+            }],
+          },
+        });
+      }
+      return Response.json({ data: { results: [], last_page: 1 } });
     }
 
     if (url.includes("kifpool.me/api/graphql")) {
@@ -213,5 +238,20 @@ Deno.test("Toman refresh HTTP handler isolates provider failures and refuses emp
       if (kifpoolRequests() !== 2) throw new Error("Expected one persisted-query request and one text-query retry");
       if (writes() !== 1) throw new Error("Expected one aggregated current-price upsert");
     });
+
+  await t.step("Bit24 fetches later pages and retains a mapped IRT market", async () => {
+    await withMockedRuntime("bit24-pagination", async (writes) => {
+      const response = await handler(new Request("https://edge.test/refresh", {
+        method: "POST",
+        headers: { Authorization: "Bearer test-user-token" },
+      }));
+      const body = await response.json();
+      if (response.status !== 200) throw new Error("Expected 200 for paginated Bit24 market");
+      if (body.sources.bit24.ok !== true || body.sources.bit24.count !== 1) {
+        throw new Error("Bit24 market from page two was not retained");
+      }
+      if (writes() !== 1) throw new Error("Expected one aggregated market upsert");
+    });
+  });
   });
 });
