@@ -1234,3 +1234,11 @@
 - [x] workflow `45028471406` با نتیجهٔ SUCCESS پایان یافت. تست‌های exact-decimal/browser، محاسبات PostgreSQL، preflight و rollback تغییر schema، قفل timeout، مسیرهای Market/Limit/Stop-Limit/TP-SL، چرخهٔ لغو و raceهای دو session همگی موفق شدند.
 - [x] برای تشخیص علت ۵۰۲های آینده، در handler قیمت تومانی مرحله‌های `auth_user`, `cache_read`, `provider_fetch`, `price_upsert`, `history_rpc` ثبت می‌شوند و خطای بیرونی با نام مرحله در log ساختاریافته ثبت خواهد شد.
 - [x] آزمون HTTP اضافی برای خطای cache و وجود diagnostic stage/log اضافه شد؛ این آخرین اصلاح هنوز منتظر اجرای CI خودش است.
+
+
+### نتیجهٔ نهایی آزمون‌های مرحلهٔ فعلی — ۲۲ نوامبر ۲۰۲۶
+- [x] آخرین Edge workflow `45028694088` روی commit `9d9235ae7642dd4ca90d1f4d21f163ddd1e374e8` با SUCCESS کامل شد: Deno type-check، HTTP integration شامل timeout/JSON خراب/شکست همه منابع/خطای cache و ثبت stage، Node dedupe، PostgreSQL atomic-history و concurrency.
+- [x] Exact-decimal workflow `45028471406` نیز با SUCCESS کامل شد؛ همهٔ تست‌های محاسبات اعشاری، PostgreSQL، migration rehearsal و مسیرهای سفارش/race سبز شدند.
+- [x] علت دقیق ۵۰۲ قدیمی Production از logهای موجود قابل بازیابی نشد: برای execution بررسی‌شده فقط Boot log ثبت شده بود و جزئیات خطا در logهای تابع موجود نبود. در نسخهٔ جدید، خطاهای بیرونی با stage مشخص ثبت می‌شوند تا اجرای بعدی قابل عیب‌یابی باشد.
+- [!] اجرای جدیدتر Edge با stage-aware logging در Production انجام نشده؛ هیچ نتیجه‌ای از نسخهٔ مستقر استنتاج نشود.
+- [x] وضعیت انتشار بدون تغییر: PR #51 Draft/open؛ Production function نسخهٔ ۳، ۳۷۳ ردیف قیمت stale و RPC تاریخچه نصب‌نشده؛ هیچ Production write/deploy/migration انجام نشد.
