@@ -124,7 +124,8 @@ test("Bit24 uses IRT last trade price and does not fabricate bid or ask", async 
   assert.match(edgeSource, /price,\s*\/\/ This public ticker payload/);
   assert.match(edgeSource, /high: decimalOrNull\(stats\.max_price\)/);
   assert.match(edgeSource, /low: decimalOrNull\(stats\.min_price\)/);
-  assert.doesNotMatch(edgeSource, /bid: decimalOrNull\(stats\.|ask: decimalOrNull\(stats\./);
+  const bit24Block = edgeSource.slice(edgeSource.indexOf("async function fetchBit24"), edgeSource.indexOf("const KIFPOOL_BODY"));
+  assert.doesNotMatch(bit24Block, /\b(?:bid|ask):/);
 });
 
 test("Kifpool uses matched assets and sell-side price only", async () => {
@@ -134,5 +135,6 @@ test("Kifpool uses matched assets and sell-side price only", async () => {
   assert.match(edgeSource, /const price = decimalOrNull\(item\?\.priceSellIRT\)/);
   assert.match(edgeSource, /Kifpool exposes a sell-side IRT price only/);
   assert.match(edgeSource, /price,\s*\/\/ Kifpool exposes/);
-  assert.doesNotMatch(edgeSource, /priceBuyIRT/);
+  const kifpoolBlock = edgeSource.slice(edgeSource.indexOf("async function fetchKifpool"), edgeSource.indexOf("\\nDeno.serve"));
+  assert.doesNotMatch(kifpoolBlock, /priceBuyIRT|\\b(?:bid|ask):/);
 });
