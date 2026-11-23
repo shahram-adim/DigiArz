@@ -4189,6 +4189,89 @@ body.luxury-theme #tab-markets .market-board-v34 .coin{
   background:linear-gradient(110deg,rgba(48,45,98,.72),rgba(22,22,55,.84))!important;
   color:var(--text)!important;
 }
+
+/* Final cross-theme defect fixes: white-theme contrast and full surface parity. */
+body.light-theme{
+  --bg:#fff;--panel:#fff;--panel2:#fff;--field:#fff;--soft:#fff;
+  --line:#dbe7f5;--text:#172b4d;--muted:#60758f;
+  background:#fff!important;color:var(--text)!important;
+}
+body.light-theme .top,body.light-theme .tabs,
+body.light-theme .mobile-bottom-nav{
+  background:rgba(255,255,255,.98)!important;color:var(--text)!important;
+  border-color:var(--line)!important;box-shadow:0 4px 18px rgba(35,75,125,.045)!important;
+}
+body.light-theme .card,body.light-theme .stat,body.light-theme .trade-box,
+body.light-theme .performance-item,body.light-theme .indicator-panel,
+body.light-theme .fx-box,body.light-theme .setting-row,
+body.light-theme .orderbook-side,body.light-theme .gainer-card,
+body.light-theme .asset-row,body.light-theme .dashboard-mover-panel,
+body.light-theme .daily-ad-card,body.light-theme .gainers-panel{
+  background:#fff!important;color:var(--text)!important;
+  border-color:var(--line)!important;box-shadow:0 5px 18px rgba(35,75,125,.045)!important;
+}
+body.light-theme input,body.light-theme select,body.light-theme textarea,
+body.light-theme button.secondary,body.light-theme .theme-switch{
+  background:#fff!important;color:var(--text)!important;border-color:var(--line)!important;
+}
+body.light-theme .tag,body.light-theme .notice:not(.warn):not(.err):not(.ok){
+  background:#fff!important;color:#245b91!important;border-color:#cfe2f7!important;
+}
+body.light-theme #tab-markets .market-board-v34 .coin,
+body.light-theme #tab-markets .market-board-v34 .coin:hover,
+body.light-theme #tab-markets .market-board-v34 .coin.selected{
+  background:#fff!important;color:#172b4d!important;border:0!important;box-shadow:none!important;
+}
+body.light-theme #tab-markets .market-board-v34 .coin-name-fa,
+body.light-theme #tab-markets .market-board-v34 .coin .price-usd{
+  color:#172b4d!important;
+}
+body.light-theme #tab-markets .market-board-v34 .coin-symbol-en,
+body.light-theme #tab-markets .market-board-v34 .coin-change-label,
+body.light-theme #tab-markets .market-board-v34 .coin-english-name,
+body.light-theme #tab-markets .market-board-v34 .coin-source{
+  color:#60758f!important;
+}
+body.light-theme #tab-markets .market-board-v34 .coin .price-toman,
+body.light-theme #tab-markets .market-board-v34 .coin-volume{
+  color:#8a650c!important;
+}
+body.light-theme #authView.auth-reference-layout,
+body.light-theme #authView.auth-reference-layout .auth-form,
+body.light-theme #authView .auth-form,
+body.light-theme #authView .auth-security,
+body.light-theme #authView .ref-daily-promo,
+body.light-theme #authView .ref-demo-footer,
+body.light-theme #authView .ref-phone,
+body.light-theme #authView .auth-phone-preview{
+  background:#fff!important;color:#172b4d!important;
+  border-color:#dbe7f5!important;box-shadow:0 8px 24px rgba(35,75,125,.06)!important;
+}
+body.light-theme #authView .auth-form h2,
+body.light-theme #authView .auth-form .auth-kicker,
+body.light-theme #authView .ref-clock,
+body.light-theme #authView .ref-promo-copy span{
+  color:#245b91!important;
+}
+body.light-theme #authView .auth-form .field label,
+body.light-theme #authView .auth-form .auth-intro,
+body.light-theme #authView .auth-form .auth-security,
+body.light-theme #authView .ref-demo-footer{
+  color:#60758f!important;
+}
+body.light-theme #authView .auth-form input{
+  background:#fff!important;color:#172b4d!important;border:1px solid #cfe2f7!important;
+}
+body.light-theme #authView .auth-form input::placeholder{color:#8498b0!important}
+body.light-theme #authView .auth-form .auth-actions button{
+  background:linear-gradient(110deg,#2878c8,#155da5)!important;color:#fff!important;
+}
+body.light-theme #authView .auth-form .auth-actions #signupBtn{
+  background:#fff!important;color:#245b91!important;border:1px solid #cfe2f7!important;
+}
+body.light-theme #authView .auth-form #forgotBtn{
+  background:transparent!important;color:#245b91!important;border-color:#cfe2f7!important;
+}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
   body.luxury-theme .card,body.luxury-theme .stat,
   body.luxury-theme .trade-box,body.luxury-theme .performance-item,
