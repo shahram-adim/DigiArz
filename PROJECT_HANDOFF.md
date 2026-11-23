@@ -954,3 +954,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Preserved the market tab's own gainers/losers analytics and market filters; only the dashboard display was removed.
 - Removed obsolete dashboard event bindings and replaced the prior horizontal-movers regression with assertions that those widgets are absent from the dashboard while market-tab panels remain.
 - Change is on the existing draft PR #55 branch only. Requires fresh CI; no merge, APK release, deployment, Supabase/Production, auth, wallet, or trading changes.
+
+
+## 2026-11-23 — Dashboard layout repair
+- Removed the duplicate legacy hero and quick-action strip from the visible app shell while retaining their DOM hooks for existing event bindings; moved the existing market refresh action into the dashboard header (single `refreshBtn` ID).
+- Fixed the theme-parity CSS scope so the three theme rules are no longer accidentally limited to viewports at or below 640px.
+- Rebuilt dashboard spacing and responsive hierarchy: compact header, balanced hero, two-column mobile shortcuts, scroll-contained filters, and a compact two-row mobile market-coin layout that avoids horizontal overflow.
+- Applied distinct black/gold, clean-white, and deep-indigo dashboard surfaces; removed decorative borders/backgrounds from dashboard coin logos and favorite stars. Existing dashboard market data, search, filters, favorite actions, account summary, and super-admin-only activity logic remain intact.
+- Added regression assertions for duplicate-shell suppression, refresh-button uniqueness, desktop theme scope, mobile row sizing, and frameless logo/favorite controls. CI must pass before a new review APK is built; PR #55 remains draft and unmerged.
