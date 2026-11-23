@@ -568,3 +568,16 @@ test('settings and admin controls inherit the selected theme tokens', () => {
   assert.ok(html.includes('.daily-ad-admin-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text)}'),
     'admin list items follow active theme surface and text colors');
 });
+
+
+test('final order-book surfaces follow the active theme after legacy fixed-color rules', () => {
+  const guard = html.lastIndexOf('/* Final order-book theme parity: remove legacy fixed navy surfaces in all three themes. */');
+  const styleEnd = html.lastIndexOf('</style>');
+  assert.ok(guard >= 0 && styleEnd > guard, 'final order-book theme guard is present at the end of the stylesheet');
+  const finalCss = html.slice(guard, styleEnd);
+  assert.ok(finalCss.includes('.orderbook-side{\\n  background:var(--panel)!important;'), 'order-book cards use the active panel token');
+  assert.ok(finalCss.includes('border-color:var(--line)!important;'), 'order-book borders use the active theme line token');
+  assert.ok(finalCss.includes('.orderbook-side h4{\\n  background:var(--panel2)!important;'), 'order-book headers use the active secondary surface token');
+  const legacyNavy = html.lastIndexOf('.orderbook-side{background:#0b1932;border:1px solid #29436e;border-radius:15px}');
+  assert.ok(legacyNavy >= 0 && guard > legacyNavy, 'final theme-token rules override the older fixed navy order-book skin');
+});
