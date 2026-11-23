@@ -923,3 +923,9 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - In `showApp()`, visibility is enabled only when the existing server-side `is_current_user_super_admin` RPC returns exactly `true`. A failed role check or any non-admin result leaves the panel hidden (fail-closed). Existing account-specific order/history loading and the underlying pages are unchanged.
 - Added regression assertions for default-hidden state, server-confirmed admin gate, and preservation of the three panel containers.
 - Re-run the Node/browser and PostgreSQL integration workflow on the new PR head before claiming validation. No role RPC, policy, database, or Supabase changes were made.
+
+
+### Test adjustment after admin-only visibility change — 2026-11-23
+- First CI attempt after the admin-only change correctly exposed one stale regression assertion: an older test still required the activity panel to be visible to every user.
+- Updated that legacy assertion to require the panel markup to remain available for admins while hidden by default. The new role-gate regression test separately verifies that only a successful server-side super-admin result reveals it.
+- This was a test expectation mismatch, not a production runtime failure. Re-run the full workflow on the latest head before treating the branch as green.
