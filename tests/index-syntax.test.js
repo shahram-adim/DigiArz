@@ -618,3 +618,15 @@ test('exchange-sync admin header wraps without horizontal pressure on narrow pho
   assert.ok(css.includes('min-height:44px') && css.includes('overflow-wrap:anywhere'), 'buttons remain touch-friendly and long labels can wrap');
   assert.ok(css.includes('@media(max-width:380px)') && css.includes('grid-template-columns:1fr;'), 'actions stack on very narrow phones');
 });
+
+
+test('admin section headers and refresh actions wrap cleanly on mobile', () => {
+  const guard = html.lastIndexOf('/* Admin section headers: keep long Persian titles and refresh actions readable on mobile. */');
+  const styleEnd = html.lastIndexOf('</style>');
+  assert.ok(guard >= 0 && styleEnd > guard, 'admin responsive header guard is present at stylesheet end');
+  const css = html.slice(guard, styleEnd);
+  assert.ok(css.includes('@media(max-width:700px)'), 'admin headers adapt at mobile widths');
+  assert.ok(css.includes('#tab-admin .detail-section>.section-title{align-items:flex-start;flex-wrap:wrap;gap:9px;}'), 'admin section headers may wrap');
+  assert.ok(css.includes('#tab-admin .detail-section>.section-title h3{flex:1 1 100%;min-width:0;max-width:100%;overflow-wrap:anywhere;}'), 'long admin titles can use full width and wrap');
+  assert.ok(css.includes('#tab-admin .detail-section>.section-title>button{flex:1 1 100%;width:100%;min-width:0;min-height:44px;white-space:normal;overflow-wrap:anywhere;}'), 'refresh actions remain full-width, touch-friendly, and wrap labels');
+});
