@@ -444,6 +444,9 @@ test('dashboard account activity is visible only to an authenticated super-admin
   const body = html.slice(start, end);
   assert.ok(body.includes("el.classList.toggle('hidden',!active||!isSuperAdmin)"), 'activity center is hidden unless the account is active and super-admin');
   assert.match(html, /is_current_user_super_admin/);
+  const rendererStart = html.indexOf('function renderDashboardActivity(){');
+  assert.ok(rendererStart >= 0, 'dashboard activity renderer exists');
+  assert.match(html.slice(rendererStart, rendererStart + 100), /if\(!isSuperAdmin\)return;/, 'non-admin activity content is not rendered into the dashboard DOM');
 });
 
 test('coin rows, favorite controls and coin logo wrappers have no decorative frames', () => {
