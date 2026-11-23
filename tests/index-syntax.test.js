@@ -699,3 +699,15 @@ test('light theme keeps translucent glass cards instead of flattening every surf
   assert.ok(css.includes('-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);'), 'glass blur works in supported mobile browsers');
   assert.ok(css.includes('body.light-theme input,body.light-theme select,body.light-theme textarea'), 'form fields remain opaque for readability');
 });
+
+
+test('market asset logos have no legacy disc, border, or shadow in any theme', () => {
+  const guard = html.lastIndexOf('/* Market asset logos: remove the legacy dark disc so logos remain frameless in every theme. */');
+  const styleEnd = html.lastIndexOf('</style>');
+  assert.ok(guard >= 0 && styleEnd > guard, 'frameless market-logo guard is present at stylesheet end');
+  const css = html.slice(guard, styleEnd);
+  assert.ok(css.includes('#tab-markets .market-board-v34 .coin-icon,'), 'rule is scoped to market-board logo container');
+  assert.ok(css.includes('#tab-markets .market-board-v34 .coin-icon img{'), 'rule also covers the logo image');
+  assert.ok(css.includes('background:transparent!important;'), 'legacy dark logo background is removed');
+  assert.ok(css.includes('border:0!important;') && css.includes('box-shadow:none!important;'), 'logo border and shadow are removed');
+});
