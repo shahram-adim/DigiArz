@@ -643,3 +643,17 @@ test('admin user cards keep balances and credit controls inside very narrow phon
   assert.ok(css.includes('#tab-admin .admin-adjust-grid{grid-template-columns:minmax(0,1fr);}'), 'credit adjustment controls use one compact column');
   assert.ok(css.includes('#tab-admin .admin-adjust-grid>*{width:100%;min-width:0;max-width:100%;}'), 'form controls cannot force the card wider');
 });
+
+
+test('admin asset and exchange-sync result rows wrap long identifiers on mobile', () => {
+  const guard = html.lastIndexOf('/* Admin dynamic asset rows: wrap long symbols and keep action buttons inside compact result cards. */');
+  const styleEnd = html.lastIndexOf('</style>');
+  assert.ok(guard >= 0 && styleEnd > guard, 'admin dynamic-row responsive guard is present at stylesheet end');
+  const css = html.slice(guard, styleEnd);
+  assert.ok(css.includes('@media(max-width:700px)'), 'dynamic admin rows adapt on mobile');
+  assert.ok(css.includes('#tab-admin .asset-row>.asset-symbol{min-width:0;max-width:100%;overflow-wrap:anywhere;}'), 'asset identity column can shrink and wrap');
+  assert.ok(css.includes('word-break:break-word'), 'long provider identifiers can wrap');
+  assert.ok(css.includes('#tab-admin .asset-row>button{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;}'), 'action labels cannot force horizontal overflow');
+  assert.ok(css.includes('@media(max-width:380px)') && css.includes('#tab-admin .asset-row{grid-template-columns:minmax(0,1fr);}'), 'very narrow phones use a single-column result layout');
+  assert.ok(css.includes('min-height:44px'), 'compact result actions retain a usable touch target');
+});
