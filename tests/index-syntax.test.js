@@ -483,3 +483,13 @@ test('three themes have isolated final palettes and frameless market coin rows',
   assert.ok(audit.includes('#tab-markets .market-board-v34 .coin{background:linear-gradient(110deg,#181a20,#101318)!important'), 'dark market rows use the black palette');
   assert.ok(audit.includes('#tab-markets .market-board-v34 .coin .price-toman{color:#f0b90b!important'), 'dark market Toman price uses gold');
 });
+
+
+test('pure-white theme has white surfaces and readable dark market-row typography across login and app', () => {
+  assert.match(html, /body\.light-theme\{[\s\S]{0,220}--bg:#fff;--panel:#fff;--panel2:#fff;--field:#fff;--soft:#fff/);
+  assert.match(html, /body\.light-theme \.card,body\.light-theme \.stat,[\s\S]{0,450}background:#fff!important;color:var\(--text\)!important/);
+  assert.match(html, /body\.light-theme #tab-markets \.market-board-v34 \.coin-name-fa,[\s\S]{0,180}color:#172b4d!important/);
+  assert.match(html, /body\.light-theme #tab-markets \.market-board-v34 \.coin \.price-usd/);
+  assert.match(html, /body\.light-theme #authView \.auth-form input\{[\s\S]{0,100}background:#fff!important;color:#172b4d!important/);
+  assert.match(html, /body\.light-theme #authView \.auth-form \.auth-actions button\{[\s\S]{0,100}color:#fff!important/);
+});
