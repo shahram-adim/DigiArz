@@ -1203,3 +1203,9 @@
 - [x] اصلاح regex در commit `fe151109a9fd46c38a317f305785f0eb95449ee0` ثبت و فایل از `main` دوباره دریافت و تأیید شد.
 - [x] اجرای نهایی `45082751825` روی commit `fe151109` با نتیجه `success` کامل شد؛ آزمون‌های Node/browser، آزمون PostgreSQL 17 برای upsert تکراری، تمام آزمون‌های widening، Market/Limit/Stop-Limit و آزمون‌های race همگی موفق شدند.
 - [!] CI فقط کد مخزن و PostgreSQL دورریختنی را آزمود؛ Edge Function Production هنوز نسخه ۳ است و deploy/refresh واقعی انجام نشده است.
+
+## 2026-11-23 UI review candidate
+- Draft PR #54: dashboard gainers/losers horizontal strips, super-admin-only dashboard activity center, unframed coin rows/favorite controls/logo wrappers.
+- Branch: fix/ui-dashboard-cleanup-2026-11-23 (based on main 968010d37a175b947616167ed265953a2ed6b62c).
+- Static structural checks passed; three regression tests added. CI run/status not visible yet; no CI success claimed.
+- Physical Android visual check, including Sky Blue Glass top spacing, remains outstanding. No APK/merge/Production changes.
