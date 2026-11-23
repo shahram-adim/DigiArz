@@ -4634,6 +4634,16 @@ body.luxury-theme #authView .ref-coin-row strong{color:#53d6ad!important}
   .daily-ad-admin-actions button{flex:1 1 112px;min-width:0;min-height:44px;white-space:normal;overflow-wrap:anywhere;}
 }
 
+
+/* Market rows: frameless surface in every theme; keep the black theme truly black/gold. */
+#tab-markets .market-board-v34 .coin{
+  border:0!important;
+}
+body.dark-theme #tab-markets .market-board-v34 .coin{
+  background:linear-gradient(110deg,#17191f,#101216)!important;
+  border:0!important;
+  color:var(--text)!important;
+}
 /* Market asset logos: final cascade override removes the legacy disc in every theme. */
 #tab-markets .market-board-v34 .coin-icon,
 #tab-markets .market-board-v34 .coin-icon img{
