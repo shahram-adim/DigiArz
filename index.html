@@ -2441,6 +2441,7 @@ body.luxury-theme #tab-markets .market-board-v34 .coin.selected{
   <div id="marketPriceFreshness" class="market-note" aria-live="polite" style="display:none" aria-hidden="true"></div>
   <div id="marketCategories" class="market-categories"></div>
   <section id="cryptoComparePanel" class="card" style="margin-top:14px"><div class="section-title"><h2>مقایسهٔ رمزارزها</h2><span class="live">بر پایهٔ دادهٔ بازار</span></div><div class="market-tools"><label>ارز اول <select id="compareSymbolA" aria-label="ارز اول برای مقایسه"><option value="BTCUSDT">BTC</option></select></label><label>ارز دوم <select id="compareSymbolB" aria-label="ارز دوم برای مقایسه"><option value="ETHUSDT">ETH</option></select></label><button id="compareRefreshBtn" type="button" class="secondary">مقایسه</button></div><div id="cryptoCompareResult" class="market-note" role="status" aria-live="polite">پس از دریافت داده‌های تازهٔ بازار، دو رمزارز را برای مقایسه انتخاب کنید.</div></section>
+  <section id="publicCryptoQrPanel" class="card" style="margin-top:14px"><div class="section-title"><h2>QR اطلاعات عمومی رمزارز</h2><span class="live">فقط اطلاعات عمومی</span></div><div class="market-tools"><label>انتخاب رمزارز <select id="publicQrSymbol" aria-label="رمزارز برای ساخت QR"><option value="BTCUSDT">BTC</option><option value="ETHUSDT">ETH</option></select></label><button id="publicQrGenerate" type="button" class="secondary">ساخت QR</button></div><div id="publicQrStatus" class="market-note" role="status" aria-live="polite">برای ساخت QR، یک رمزارز را انتخاب کنید. QR فقط نماد، نام و نشانی عمومی بازار را در بر می‌گیرد.</div><div id="publicQrOutput" hidden style="margin-top:12px;text-align:center"><img id="publicQrImage" alt="QR اطلاعات عمومی رمزارز انتخاب‌شده" width="220" height="220" loading="lazy" referrerpolicy="no-referrer" style="max-width:100%;height:auto;background:#fff;padding:10px;border-radius:12px"><div id="publicQrCaption" class="muted small" style="margin-top:8px"></div></div><p class="muted small">برای تولید تصویر QR از سرویس عمومی بیرونی استفاده می‌شود؛ فقط داده‌های عمومی انتخاب‌شده به آن سرویس ارسال می‌شود. هیچ رمز عبور، توکن، موجودی یا اطلاعات خصوصی ارسال نمی‌شود.</p></section>
   <div class="market-tools market-tools-primary"><input id="marketSearch" type="search" placeholder="جست‌وجوی نماد؛ مثل BTC یا ETH" dir="auto"><select id="marketCurrencyMode" aria-label="واحد نمایش قیمت"><option value="both">نمایش دلار و تومان</option><option value="usd">فقط دلار</option><option value="toman">فقط تومان</option></select><select id="marketSort"><option value="symbol">مرتب‌سازی: نماد</option><option value="change-desc">بیشترین افزایش ۲۴ ساعته</option><option value="change-asc">بیشترین کاهش ۲۴ ساعته</option><option value="price-desc">قیمت: بیشترین</option><option value="price-asc">قیمت: کمترین</option><option value="volume-desc">بیشترین حجم معاملات ۲۴ ساعته</option></select></div>
   <div class="volatility-panel" aria-live="polite"><div class="volatility-title">نمای نوسان بازار در ۲۴ ساعت گذشته</div><div class="volatility-grid"><div class="volatility-stat"><small>میانگین تغییر بازار</small><strong id="marketAvgChange">—</strong></div><div class="volatility-stat"><small>بیشترین افزایش</small><strong id="marketTopGain">—</strong></div><div class="volatility-stat"><small>بیشترین کاهش</small><strong id="marketTopLoss">—</strong></div></div><div class="volatility-updated" id="marketTickerUpdated">در انتظار دریافت داده‌های ۲۴ ساعته بازارهای جهانی</div></div>
   
@@ -3071,6 +3072,30 @@ function observeMarketSparklines(list){
  },{root:null,rootMargin:'140px 0px',threshold:0.01});
  nodes.forEach(node=>{const cached=marketSparklineCache.get(node.dataset.symbol);if(cached&&Date.now()-cached.at<300000)node.innerHTML=cached.svg;else marketSparklineObserver.observe(node)});
 }
+function renderPublicCryptoQr(){
+ const select=$('publicQrSymbol'),button=$('publicQrGenerate'),status=$('publicQrStatus'),output=$('publicQrOutput'),image=$('publicQrImage'),caption=$('publicQrCaption');
+ if(!select||!button||!status||!output||!image||!caption)return;
+ const symbols=[...new Set(marketRows.map(item=>String(item.symbol||'').toUpperCase()).filter(symbol=>/^[A-Z0-9]{2,24}USDT$/.test(symbol)))].sort();
+ const previous=select.value;select.replaceChildren();
+ for(const symbol of symbols){const option=document.createElement('option');option.value=symbol;option.textContent=symbol.replace(/USDT$/,'');select.append(option)}
+ select.value=symbols.includes(previous)?previous:symbols.includes('BTCUSDT')?'BTCUSDT':(symbols[0]||'');
+ if(!select.value){const option=document.createElement('option');option.value='';option.textContent='بازار در دسترس نیست';select.append(option);select.value=''}
+ const make=()=>{
+  const symbol=select.value;
+  const item=marketRows.find(row=>row.symbol===symbol);
+  if(!item){output.hidden=true;status.textContent='اطلاعات این رمزارز در فهرست بازار موجود نیست.';return}
+  const base=symbol.replace(/USDT$/,'');
+  const name=String(coinInfo[base]?.name||item.name||base).slice(0,80);
+  const publicUrl='https://www.binance.com/en/trade/'+base+'_USDT';
+  const payload=JSON.stringify({app:'DigiArz',type:'public-crypto-info',symbol:base,name,marketUrl:publicUrl});
+  const qrUrl='https://api.qrserver.com/v1/create-qr-code/?size=240x240&format=png&data='+encodeURIComponent(payload);
+  image.onerror=()=>{output.hidden=true;status.textContent='ساخت تصویر QR ناموفق بود. اتصال اینترنت یا سرویس تولید QR را بررسی کنید.'};
+  image.onload=()=>{output.hidden=false;status.textContent='QR اطلاعات عمومی آماده شد.'};
+  image.src=qrUrl;caption.textContent=name+' ('+base+') · '+publicUrl;
+ };
+ button.addEventListener('click',make);
+ select.addEventListener('change',()=>{output.hidden=true;status.textContent='برای رمزارز انتخاب‌شده، دکمهٔ ساخت QR را بزنید.'});
+}
 function renderCryptoComparison(){
  const a=$('compareSymbolA'),b=$('compareSymbolB'),root=$('cryptoCompareResult');
  if(!a||!b||!root)return;
@@ -3092,6 +3117,7 @@ function renderCryptoComparison(){
 }
 function renderMarkets(){
  const list=$('marketList');if(!list)return;list.replaceChildren();
+ renderPublicCryptoQr();
  renderCryptoComparison();
  const q=String($('marketSearch')?.value||'').trim().toUpperCase(),sort=$('marketSort')?.value||'symbol';
  const changeOf=item=>getMarketChange24h(item);
