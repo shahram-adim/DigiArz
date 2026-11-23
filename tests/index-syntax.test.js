@@ -459,7 +459,7 @@ test('dashboard no longer renders the five-coin gainers and losers panels', () =
     assert.doesNotMatch(html, new RegExp(obsolete), obsolete + ' should be removed from the dashboard');
   }
   for (const obsolete of ['renderTopGainers(', 'renderTopLosers(', 'showAllGainers(', 'showAllLosers(']) {
-    assert.doesNotMatch(html, new RegExp(obsolete.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')), obsolete + ' should not remain as dead code');
+    assert.ok(!html.includes(obsolete), obsolete + ' should not remain as dead code');
   }
   assert.match(html, /id="topAssetsList"/, 'the separate top-volume assets strip remains available');
   assert.match(html, /id="marketList"/, 'the full market list remains available');
