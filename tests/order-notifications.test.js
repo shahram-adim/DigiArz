@@ -15,7 +15,7 @@ test('auth security events are limited to confirmed Supabase auth callbacks',()=
 });
 test('order event handler emits only status transitions and incremental partial fills',()=>{
  const storage=new Map();
- const context={window:{},document:{getElementById:()=>null},localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},Math,Date,JSON,Number,String,Array,Object,Set,Map,console};
+ const context={window:{addEventListener:()=>{}},document:{getElementById:()=>null},localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},Math,Date,JSON,Number,String,Array,Object,Set,Map,console};
  vm.runInNewContext(source,context);
  const api=context.window.DigiArzNotifications;
  const calls=[];
