@@ -50,7 +50,7 @@ test('trade history CSV export respects filters and preserves exact decimal stri
   assert.ok(body.includes("String(item.amount??'')"), 'amount stays an exact string');
   assert.ok(body.includes("String(item.price??'')"), 'price stays an exact string');
   assert.ok(body.includes("const csv='\\uFEFF'"), 'UTF-8 BOM is included');
-  assert.ok(body.includes("join('\\r\\n')"), 'CSV uses CRLF line endings');
+  assert.ok(body.includes("join('\\r\n')"), 'CSV uses CRLF line endings');
   assert.ok(body.includes('createObjectURL') && body.includes('revokeObjectURL'));
   assert.ok(body.includes('safeCell'), 'CSV cells are protected against formula injection');
 });
@@ -85,7 +85,7 @@ test('trade history date filters apply consistently to the table and CSV export'
   assert.ok(body.includes("new Date(toDate+'T23:59:59.999')"), 'end date includes the full local day');
   assert.ok(body.includes('fromTime') && body.includes('toTime'));
   const exportStart = html.indexOf('function exportHistoryCsv(){');
-  const exportEnd = html.indexOf('\\nasync function trade(side)', exportStart);
+  const exportEnd = html.indexOf('\nasync function trade(side)', exportStart);
   assert.ok(html.slice(exportStart, exportEnd).includes('getFilteredHistoryRows()'), 'CSV uses the same filters as the table');
   assert.ok(html.includes("clearHistoryFiltersBtn')?.addEventListener('click'"), 'clear action is wired');
 });
@@ -575,9 +575,9 @@ test('final order-book surfaces follow the active theme after legacy fixed-color
   const styleEnd = html.lastIndexOf('</style>');
   assert.ok(guard >= 0 && styleEnd > guard, 'final order-book theme guard is present at the end of the stylesheet');
   const finalCss = html.slice(guard, styleEnd);
-  assert.ok(finalCss.includes('.orderbook-side{\\n  background:var(--panel)!important;'), 'order-book cards use the active panel token');
+  assert.ok(finalCss.includes('.orderbook-side{\n  background:var(--panel)!important;'), 'order-book cards use the active panel token');
   assert.ok(finalCss.includes('border-color:var(--line)!important;'), 'order-book borders use the active theme line token');
-  assert.ok(finalCss.includes('.orderbook-side h4{\\n  background:var(--panel2)!important;'), 'order-book headers use the active secondary surface token');
+  assert.ok(finalCss.includes('.orderbook-side h4{\n  background:var(--panel2)!important;'), 'order-book headers use the active secondary surface token');
   const legacyNavy = html.lastIndexOf('.orderbook-side{background:#0b1932;border:1px solid #29436e;border-radius:15px}');
   assert.ok(legacyNavy >= 0 && guard > legacyNavy, 'final theme-token rules override the older fixed navy order-book skin');
 });
