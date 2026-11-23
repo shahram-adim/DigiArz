@@ -1102,3 +1102,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Corrected the test assertion only; no CSV implementation, trading, wallet, auth, or database logic changed. A fresh CI run must validate the corrected test on the new HEAD.
 - Do not merge PR #55 or mark it ready. No main/Production/Supabase writes were performed; the merge commit only brings main ancestry into the feature branch.
 - Next: verify the latest CI run and then continue visual/source audit only after test status is clear. Physical Android appearance remains unverified.
+
+
+## 2026-11-23 — CSV assertion corrected; full regression passed
+- Fixed the malformed escaping in the CSV regression assertion. The test now checks for both literal escape sequences for CRLF; no production CSV code was changed.
+- Exact Decimal workflow run 45176307142 completed SUCCESS on code/test commit 39ed7e74d37bd86fe516e213d397d1899f5fc4a1. Node/browser regression passed 80/80 tests; PostgreSQL arithmetic and Toman upsert tests, widening/rollback/lock-timeout checks, Market/Limit, Stop-Limit, TP-SL, and two-session race/lifecycle integrations all passed. All 24 workflow steps completed successfully.
+- Current branch HEAD cd8b62e3c90408c46be6c9595290ffb6a0a2710e is a no-content-change child of the tested commit; its Git tree SHA exactly matches the tested commit (95a498f955a089375cb31162f2306b62af9f201b). Thus source and test contents are identical to the successful run.
+- PR #55 remains Draft/open/unmerged. GitHub reports mergeable=true and mergeable_state=unstable; do not merge or mark ready without explicit user approval. No physical Android visual acceptance has been performed.
+- No Supabase/Production, live database, migration, cron, authentication, wallet, orders, or trading changes were performed in this stage. PostgreSQL CI used disposable test containers only.
+- Next: continue the UI/theme audit with small, evidence-based presentation fixes; any source/test edits must receive a fresh CI run before claiming validation.
