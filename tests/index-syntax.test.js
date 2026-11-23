@@ -590,5 +590,5 @@ test('trade-history date presets use defined cross-theme surface tokens', () => 
   const rule = html.slice(start, end + 1);
   assert.ok(rule.includes('border:1px solid var(--line)'), 'preset border uses the shared theme line token');
   assert.ok(rule.includes('background:var(--panel2)'), 'preset background uses the shared theme surface token');
-  assert.doesNotMatch(rule, /var\\(--(?:border|surface-2)\\)/, 'preset does not reference undefined legacy tokens');
+  assert.ok(!rule.includes('var(--border)') && !rule.includes('var(--surface-2)'), 'preset does not reference undefined legacy tokens');
 });
