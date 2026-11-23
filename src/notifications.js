@@ -58,6 +58,7 @@ function init(){
 }
 
 let orderChannel=null,orderChannelUserId=null;
+const orderSnapshots=new Map();
 function disconnectOrderEvents(){
  const channel=orderChannel;orderChannel=null;orderChannelUserId=null;
  if(channel&&window.__digiArzSupabaseClient?.removeChannel){
@@ -73,14 +74,17 @@ function orderLabel(row){
 function handleOrderChange(payload,userId){
  const row=payload?.new,old=payload?.old||{};
  if(!row||row.user_id!==userId||!row.id)return;
- const label=orderLabel(row),type=String(row.order_type||'order');
+ const label=orderLabel(row);
  if(payload.eventType==='INSERT'){
+  orderSnapshots.set(row.id,{status:String(row.status||''),filled_amount:Number(row.filled_amount||0)});
   publish('order_created','سفارش آزمایشی ثبت شد',label+' با موفقیت در سرور ثبت شد.');
   return;
  }
  if(payload.eventType!=='UPDATE')return;
- const previous=String(old.status||''),next=String(row.status||'');
- const filledNow=Number(row.filled_amount||0),filledBefore=Number(old.filled_amount||0);
+ const previousState=orderSnapshots.get(row.id)||old;
+ const previous=String(previousState.status||''),next=String(row.status||'');
+ const filledNow=Number(row.filled_amount||0),filledBefore=Number(previousState.filled_amount||0);
+ orderSnapshots.set(row.id,{status:next,filled_amount:filledNow});
  if(next==='filled'&&previous!=='filled')publish('order_filled','سفارش آزمایشی تکمیل شد',label+' به‌طور کامل اجرا شد.');
  else if(next==='partially_filled'&&(previous!=='partially_filled'||filledNow>filledBefore))publish('order_partially_filled','بخشی از سفارش اجرا شد',label+' به‌صورت جزئی اجرا شد؛ مانده سفارش همچنان طبق وضعیت سرور پیگیری می‌شود.');
  else if(next==='cancelled'&&previous!=='cancelled')publish('order_cancelled','سفارش آزمایشی لغو شد',label+'؛ لغو از وضعیت ثبت‌شده در سرور دریافت شد.');
