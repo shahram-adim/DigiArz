@@ -888,3 +888,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - The workflow does not create a GitHub Release/tag, deploy Pages, touch Supabase, or modify financial data.
 - The GitHub connection exposes PR-triggered workflow runs but not push-triggered run listing or workflow dispatch. The push-triggered APK build has not yet been verified from this session; no APK/artifact is claimed.
 - Next: verify the Android workflow run/artifact through Actions; only provide an install link after the exact artifact is available and its BUILD-INFO/SHA-256 is verified. Keep PR #53 Draft/unmerged.
+
+
+### Android review APK artifact verified — 2026-11-23
+- Pull-request workflow run 45113780222 (run #3) completed SUCCESS. Steps included web asset build, Capacitor Android project generation/sync, Gradle assembleDebug, provenance generation, and artifact upload; all succeeded.
+- Downloaded artifact ID 14791115950, DigiArz-Market-Row-Review-APK.zip (3,526,569 bytes); archive integrity passed. It contains app-debug.apk (3,908,021 bytes) and BUILD-INFO.txt.
+- Extracted APK SHA-256 verified against BUILD-INFO: c5bdb2485dbda7f74cdc2544261eb7abef62f4992e58fc89adce560a6be82be4.
+- Build provenance: version 1.0.0; workflow run 45113780222; built 2026-11-23 04:49:05 UTC. Because this was a pull_request workflow, GitHub checked out synthetic PR merge ref 53/merge, commit 3f86184a50f0a4ab44df6a2f537f164c217d990b (not the feature branch SHA directly).
+- Exact decimal tests run 1624 (45113780223) completed SUCCESS on the PR event.
+- APK is a debug/review build, not a production-signed release. Android device visual QA is still required. PR #53 remains Draft/unmerged; no Pages deployment or Supabase/production changes.
