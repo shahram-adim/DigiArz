@@ -862,3 +862,97 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - PR #47 remains Draft/open/unmerged and mergeable. Physical Android installation, fingerprint enrollment, and login/logout/background-relock acceptance tests remain outstanding. APK is a debug review build, not production-signed.
 - No app code was merged to main; no release/deployment/publishing or Supabase/database/user-financial-data changes were made. This handoff entry is documentation-only.
 - Next: user installs the new APK and checks all three themes, password login, fingerprint enrollment/unlock, logout and relock. Fix only observed issues on PR #47; do not merge without explicit user approval.
+
+
+## 2026-11-23 — market asset-row theme refinement (Draft PR #53)
+- Re-established live repository baseline. Current main HEAD at start of this task: 968010d37a175b947616167ed265953a2ed6b62c.
+- The older redesign/independent-ui-2026 branch is 210 commits ahead and 115 behind current main; it was not reused or merged.
+- Created fresh branch ui/market-row-theme-polish-2026-11-23 directly from current main.
+- Updated only index.html and tests/index-syntax.test.js: added a final isolated market-row CSS override preserving the existing five-cell renderer and market data behavior; dark theme is black/gold, light theme is clean white, and third theme is explicitly Sky Blue Glass (not indigo). Logos remain 40px without frames; favorite-star controls are borderless; mobile rows use a compact two-line layout.
+- Added regression assertions for the three independent palettes, 40px logo size, frameless logo/star controls and mobile grid.
+- Draft PR #53: https://github.com/shahram-adim/DigiArz/pull/53. At creation, comparison against main was 3 commits ahead / 0 behind; PR is open, Draft, unmerged. Changed files: 2.
+- GitHub workflow-run lookup and combined commit-status lookup for head da9a63957bc0db586e89e46621f25e2b89309ba1 returned no runs/statuses. CI is therefore NOT verified; do not claim tests passed.
+- No main merge, Pages deployment, APK build/release, Supabase deployment, database/migration/cron/schema change, or financial-data modification occurred.
+- Next action: determine why PR checks are not appearing, run the relevant Node/browser test workflow, then inspect the three themes and mobile row on Android before asking for any merge approval.
+
+
+### PR #53 CI result — 2026-11-23
+- GitHub Actions Exact decimal tests run 1620 (ID 45113256556) completed with conclusion SUCCESS on branch head 4e0850fefb55563e2aaf06a76e60a93fccc91d02.
+- All 21 substantive workflow steps passed: Node/browser tests; PostgreSQL arithmetic and Toman upsert; exact-decimal widening positive/negative/lock-timeout/rollback; Market/Limit; Stop-Limit/TP-SL placement, workers, lifecycle and two-session race tests. Cleanup also succeeded.
+- This verifies the automated repository/integration workflow only. It does not establish Android visual acceptance. No APK build, Pages deployment, merge, Supabase Production change, or financial-data change occurred.
+- PR #53 remains Draft/open/unmerged. Next: visual review on Android; if the layout needs adjustment, make only evidence-based CSS changes on this branch. Do not merge or release without explicit user approval.
+
+
+### Artifact-only Android review build added — 2026-11-23
+- Added .github/workflows/android-market-row-review.yml on the UI review branch only. It is restricted to pushes on ui/market-row-theme-polish-2026-11-23, uses read-only contents permission, builds a debug APK, records commit/hash provenance, and uploads a 14-day Actions artifact only.
+- The workflow does not create a GitHub Release/tag, deploy Pages, touch Supabase, or modify financial data.
+- The GitHub connection exposes PR-triggered workflow runs but not push-triggered run listing or workflow dispatch. The push-triggered APK build has not yet been verified from this session; no APK/artifact is claimed.
+- Next: verify the Android workflow run/artifact through Actions; only provide an install link after the exact artifact is available and its BUILD-INFO/SHA-256 is verified. Keep PR #53 Draft/unmerged.
+
+
+### Android review APK artifact verified — 2026-11-23
+- Pull-request workflow run 45113780222 (run #3) completed SUCCESS. Steps included web asset build, Capacitor Android project generation/sync, Gradle assembleDebug, provenance generation, and artifact upload; all succeeded.
+- Downloaded artifact ID 14791115950, DigiArz-Market-Row-Review-APK.zip (3,526,569 bytes); archive integrity passed. It contains app-debug.apk (3,908,021 bytes) and BUILD-INFO.txt.
+- Extracted APK SHA-256 verified against BUILD-INFO: c5bdb2485dbda7f74cdc2544261eb7abef62f4992e58fc89adce560a6be82be4.
+- Build provenance: version 1.0.0; workflow run 45113780222; built 2026-11-23 04:49:05 UTC. Because this was a pull_request workflow, GitHub checked out synthetic PR merge ref 53/merge, commit 3f86184a50f0a4ab44df6a2f537f164c217d990b (not the feature branch SHA directly).
+- Exact decimal tests run 1624 (45113780223) completed SUCCESS on the PR event.
+- APK is a debug/review build, not a production-signed release. Android device visual QA is still required. PR #53 remains Draft/unmerged; no Pages deployment or Supabase/production changes.
+
+
+### 2026-11-23 — independent narrow-phone market-row audit
+- Reviewed the actual `renderMarkets()` DOM order against the final market-row CSS grid: favorite button, coin identity, sparkline, 24h change/volume, and price stack. The wrapper and target list selectors are present and aligned.
+- Found and corrected a concrete responsive defect: the final `max-width:360px` rule reduced coin logos to 36px, conflicting with the requested 40px standard. Logos now remain 40px at widths down to 320px.
+- Added a regression test that checks the renderer's five child elements, the matching five-column desktop grid, the compact mobile grid, the actual market wrapper/list selectors, and the 40px logo size at <=360px.
+- Changes are isolated to `index.html`, `tests/index-syntax.test.js`, and this handoff note on the existing Draft PR #53 branch.
+- Automated workflow must complete on this new head before calling the correction validated. No merge, release, deployment, Supabase/database, auth, wallet, order, balance, or market-data pipeline changes were made.
+- Visual inspection on a real Android device remains unverified; no claim of pixel-perfect device QA.
+
+
+### 2026-11-23 — dashboard top-five movers relocation
+- Found that the five-largest-gainers and five-largest-losers panels were still embedded in the Markets tab, contrary to the user's earlier dashboard placement request.
+- Moved the existing `topGainersList` and `topLosersList` sections below the Dashboard's `بازار ارزهای دیجیتال` heading and before the dashboard market preview. The Markets tab no longer duplicates these two panels; its 10 highest-volume assets strip and full market list remain.
+- Reused the existing market data renderers and IDs; each still shows up to five rows and is refreshed by the existing market ticker pipeline. Added horizontal scrolling cards, two-panel desktop layout, stacked mobile panels, and theme-specific black/gold, white, and Sky Blue Glass surfaces.
+- Fixed the “مشاهده همه” actions to switch to the Markets tab before applying the gainers/losers filter.
+- Added regression coverage for dashboard placement, absence from Markets, five-item limits, horizontal overflow, responsive stacking, and navigation.
+- This remains an isolated Draft PR #53 candidate. Automated test and Android build runs for the newest head must finish before validation can be claimed. No Supabase, auth, wallet, order, balance, real-money, deployment, or release changes.
+
+
+### 2026-11-23 — admin-only dashboard activity and alerts
+- Audited the earlier request to hide account activity and alerts from ordinary users while retaining them for administrators; the dashboard markup still exposed the panel to every signed-in user.
+- Added a stable `dashboardActivityCenter` ID and made the panel hidden by default.
+- In `showApp()`, visibility is enabled only when the existing server-side `is_current_user_super_admin` RPC returns exactly `true`. A failed role check or any non-admin result leaves the panel hidden (fail-closed). Existing account-specific order/history loading and the underlying pages are unchanged.
+- Added regression assertions for default-hidden state, server-confirmed admin gate, and preservation of the three panel containers.
+- Re-run the Node/browser and PostgreSQL integration workflow on the new PR head before claiming validation. No role RPC, policy, database, or Supabase changes were made.
+
+
+### Test adjustment after admin-only visibility change — 2026-11-23
+- First CI attempt after the admin-only change correctly exposed one stale regression assertion: an older test still required the activity panel to be visible to every user.
+- Updated that legacy assertion to require the panel markup to remain available for admins while hidden by default. The new role-gate regression test separately verifies that only a successful server-side super-admin result reveals it.
+- This was a test expectation mismatch, not a production runtime failure. Re-run the full workflow on the latest head before treating the branch as green.
+
+
+### Session-transition hardening for admin-only dashboard panel — 2026-11-23
+- Further tightened the fail-closed behavior: the admin-only activity panel is now hidden immediately when a new authenticated session begins, before the asynchronous profile and super-admin role lookups complete. This prevents a prior administrator's visible panel from briefly carrying over while a different account is being checked.
+- Reset the in-memory admin flag at session entry and added a regression assertion that the hide occurs before the profile query.
+- The server-side super-admin RPC remains unchanged; no authorization policy or database object was modified.
+
+
+### Duplicate authentication-event safety — 2026-11-23
+- Preserved an already-running session initialization before applying the admin-panel reset. This avoids a duplicate auth event clearing a super-admin state while the first role lookup is still completing.
+- Added a regression assertion for the duplicate-event ordering. The admin-only panel remains hidden before a new session's role check and is revealed only after the verified admin result.
+
+
+### Latest automated validation — 2026-11-23
+- Exact-decimal workflow run 1642 (ID `45116158097`) completed all Node/browser and PostgreSQL 17 integration steps successfully on the latest reviewed PR head `7e29d5bb6c300f13e1965acd9124175c563f7c58`.
+- The suite included the newly added market-row renderer/grid contract, narrow-screen 40px logo rule, dashboard mover relocation and horizontal-scroll assertions, and admin-only activity visibility/session-event guards.
+- Android review workflow run 26 (ID `45116158059`) is building the APK for the same PR branch; wait for Gradle, provenance, and artifact upload to finish before sharing a new APK.
+- Physical-device visual QA remains unverified. PR #53 remains Draft/unmerged; no deployment, release, or Supabase/Production change.
+
+
+### Latest Android review APK verified — 2026-11-23
+- Android review workflow run 26 (ID `45116158059`) completed SUCCESS on PR branch head `7e29d5bb6c300f13e1965acd9124175c563f7c58`; web build, Capacitor Android generation/sync, Gradle `assembleDebug`, provenance and artifact upload all passed.
+- Artifact ID `14791373041`, name `DigiArz-Market-Row-Review-APK`, archive size 3,527,197 bytes; retention through 2026-12-07.
+- Downloaded and verified ZIP integrity. Extracted `app-debug.apk` size 3,908,925 bytes; `BUILD-INFO.txt` reports version 1.0.0, workflow run 45116158059, synthetic PR merge ref `53/merge`, source commit `be26cc85852ef5b7289611c32ed4973d7b728165`.
+- APK SHA-256 independently recomputed and matches BUILD-INFO: `125023c09673aae9416abf5e3997b468ec610e1ee99adc2bb7356fd6a7e62f6f`.
+- Exact-decimal workflow run 1642 (ID `45116158097`) completed SUCCESS with all Node/browser and PostgreSQL 17 integration steps passing on the same code head.
+- Debug review APK only; not production-signed. Physical-device install and visual acceptance are still outstanding. PR #53 remains Draft/open/unmerged. No release/deployment or Supabase/Production changes.

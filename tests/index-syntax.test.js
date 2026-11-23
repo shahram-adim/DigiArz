@@ -107,16 +107,16 @@ test('trade history provides accessible local-date quick presets', () => {
   assert.ok(html.includes("setHistoryDatePreset('all')"), 'clear action resets the selected preset');
 });
 
-test('dashboard exposes recent account activity and account alerts', () => {
-  const start = html.indexOf('<div class="dashboard-activity-center"');
+test('dashboard retains account activity markup for admins while hiding it by default', () => {
+  const start = html.indexOf('<div id="dashboardActivityCenter" class="dashboard-activity-center hidden"');
   const end = html.indexOf('<div class="da-v2-compat hidden"', start);
-  assert.ok(start >= 0 && end > start, 'visible dashboard activity center boundaries found');
+  assert.ok(start >= 0 && end > start, 'default-hidden dashboard activity center boundaries found');
   const section = html.slice(start, end);
   for (const id of ['dashboardRecentOrders', 'dashboardRecentTrades', 'dashboardAccountAlerts']) {
-    assert.match(section, new RegExp('id="' + id + '"'), id + ' is visible in the activity center');
+    assert.match(section, new RegExp('id="' + id + '"'), id + ' is retained for administrators');
   }
-  assert.ok(section.includes('data-dashboard-tab="orders"'), 'orders shortcut is present');
-  assert.ok(section.includes('data-dashboard-tab="history"'), 'history shortcut is present');
+  assert.ok(section.includes('data-dashboard-tab="orders"'), 'orders shortcut is retained');
+  assert.ok(section.includes('data-dashboard-tab="history"'), 'history shortcut is retained');
   assert.ok(section.includes('aria-live="polite"'), 'activity updates are announced politely');
   const compatibility = html.slice(end);
   assert.doesNotMatch(compatibility, /id="dashboard(?:RecentOrders|RecentTrades|AccountAlerts)"/, 'activity roots are not duplicated in hidden compatibility markup');
@@ -422,4 +422,90 @@ test('login mini chart renders real five-minute candles without depending on a c
   assert.match(html, /renderAuthMiniChart\(\[\]\)/);
   assert.match(html, /fetchBinanceKlines\('BTCUSDT','5m',36\)/);
   assert.match(html, /<svg viewBox=/);
+});
+
+
+test('market rows keep three isolated visual themes and frameless logos/stars', () => {
+  const start = html.indexOf('<style id="digiarz-market-row-reference-themes-20261123">');
+  const end = html.indexOf('</style>', start);
+  assert.ok(start >= 0 && end > start, 'final market-row theme override is present');
+  const css = html.slice(start, end);
+  assert.ok(css.includes('body.dark-theme #tab-markets'), 'dark theme has a dedicated market-row palette');
+  assert.ok(css.includes('body.light-theme #tab-markets'), 'light theme has a dedicated market-row palette');
+  assert.ok(css.includes('body.luxury-theme #tab-markets'), 'Sky Blue Glass has a dedicated market-row palette');
+  assert.ok(css.includes('background:#fff!important'));
+  assert.ok(css.includes('#78c8ff'));
+  assert.ok(!css.includes('#1b245f'), 'third theme must not fall back to indigo');
+  assert.ok(css.includes('width:40px!important;height:40px!important'));
+  assert.ok(css.includes('border:0!important;outline:0!important;border-radius:0!important;background:transparent!important'));
+  assert.ok(css.includes('grid-template-columns:28px minmax(0,1fr) minmax(112px,auto)!important'));
+});
+
+
+test('market row renderer and narrow-phone CSS stay aligned with the five-cell layout and 40px logos', () => {
+  const marker = '<style id="digiarz-market-row-reference-themes-20261123">';
+  const start = html.indexOf(marker);
+  const end = html.indexOf('</style>', start);
+  assert.ok(start >= 0 && end > start, 'isolated market-row stylesheet is present');
+  const css = html.slice(start, end);
+  assert.match(css, /grid-template-columns:34px minmax\(0,1\.2fr\) minmax\(58px,\.55fr\) minmax\(84px,\.72fr\) minmax\(116px,\.86fr\)!important/);
+  assert.match(css, /grid-template-columns:28px minmax\(0,1fr\) minmax\(112px,auto\)!important/);
+  const narrow = css.slice(css.indexOf('@media(max-width:360px)'));
+  assert.match(narrow, /width:40px!important;height:40px!important;min-width:40px!important;max-width:40px!important;flex-basis:40px!important/);
+  assert.match(html, /class="market-board-v34"/);
+  assert.match(html, /id="marketList" class="market-list"/);
+  const renderStart = html.indexOf('function renderMarkets(){');
+  const renderEnd = html.indexOf('function renderDashboardPortfolio(', renderStart);
+  const renderer = html.slice(renderStart, renderEnd);
+  assert.match(renderer, /div\.append\(star,identity,sparkline,changeWrap,price\)/, 'renderer order must match the five desktop grid cells');
+  assert.match(renderer, /star\.className='favorite-btn'/);
+  assert.match(renderer, /identity\.className='coin-identity market-coin-open'/);
+  assert.match(renderer, /sparkline\.className='coin-sparkline'/);
+  assert.match(renderer, /changeWrap\.className='coin-change-wrap'/);
+  assert.match(renderer, /price\.className='price-stack'/);
+});
+
+
+test('top-five gainers and losers live only below the dashboard market heading in horizontal strips', () => {
+  const dashboardStart = html.indexOf('<section id="tab-dashboard"');
+  const marketsStart = html.indexOf('<section id="tab-markets"');
+  const tomanStart = html.indexOf('<section id="tab-toman"');
+  assert.ok(dashboardStart >= 0 && marketsStart > dashboardStart && tomanStart > marketsStart);
+  const dashboard = html.slice(dashboardStart, marketsStart);
+  const markets = html.slice(marketsStart, tomanStart);
+  const heading = dashboard.indexOf('<h2>بازار ارزهای دیجیتال</h2>');
+  const gainers = dashboard.indexOf('id="topGainersList"');
+  const losers = dashboard.indexOf('id="topLosersList"');
+  const marketList = dashboard.indexOf('id="dashboardMarketPreview"');
+  assert.ok(heading >= 0 && gainers > heading && losers > gainers && marketList > losers, 'both movers strips sit immediately below the dashboard market heading and before the main market preview');
+  assert.doesNotMatch(markets, /id="topGainersList"|id="topLosersList"/, 'the five-item movers panels are removed from the market tab');
+  assert.match(html, /function renderTopGainers\(\)[\s\S]{0,250}\.slice\(0,5\)/);
+  assert.match(html, /function renderTopLosers\(\)[\s\S]{0,250}\.slice\(0,5\)/);
+  const styleStart = html.indexOf('<style id="digiarz-dashboard-movers-layout-20261123">');
+  const styleEnd = html.indexOf('</style>', styleStart);
+  assert.ok(styleStart >= 0 && styleEnd > styleStart, 'dashboard horizontal mover styles are present');
+  const css = html.slice(styleStart, styleEnd);
+  assert.match(css, /display:flex!important;flex-direction:row!important/);
+  assert.match(css, /overflow-x:auto!important/);
+  assert.match(css, /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+  assert.match(css, /@media\(max-width:760px\)\{\.dashboard-movers\{grid-template-columns:minmax\(0,1fr\)\}\}/);
+  assert.match(html, /function showAllGainers\(\)\{switchTab\('markets'\)/);
+  assert.match(html, /function showAllLosers\(\)\{switchTab\('markets'\)/);
+});
+
+
+test('dashboard account activity and alerts are visible only after a verified super-admin role check', () => {
+  assert.match(html, /id="dashboardActivityCenter" class="dashboard-activity-center hidden"/, 'account activity is hidden by default');
+  const showAppStart = html.indexOf('async function showApp(session){');
+  const showAppEnd = html.indexOf('\nfunction setAccountMode(', showAppStart);
+  assert.ok(showAppStart >= 0 && showAppEnd > showAppStart, 'session activation handler boundaries are present');
+  const showApp = html.slice(showAppStart, showAppEnd);
+  assert.match(showApp, /isSuperAdmin=false/, 'admin access defaults to false for each session');
+  assert.ok(showApp.indexOf("$('dashboardActivityCenter')?.classList.add('hidden')") < showApp.indexOf("supabaseClient.from('profiles')"), 'admin panel is hidden before the asynchronous profile and role checks');
+  assert.ok(showApp.indexOf('if(appLoadPromise)return appLoadPromise') < showApp.indexOf("$('dashboardActivityCenter')?.classList.add('hidden')"), 'duplicate auth events do not reset an in-flight verified admin session');
+  assert.match(showApp, /roleResult\.data===true\)\{isSuperAdmin=true/, 'only the server-confirmed super-admin result grants admin visibility');
+  assert.match(showApp, /\$\('dashboardActivityCenter'\)\?\.classList\.toggle\('hidden',!isSuperAdmin\)/, 'activity panel visibility follows verified admin state');
+  assert.match(html, /id="dashboardRecentOrders"/);
+  assert.match(html, /id="dashboardRecentTrades"/);
+  assert.match(html, /id="dashboardAccountAlerts"/);
 });
