@@ -962,3 +962,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Rebuilt dashboard spacing and responsive hierarchy: compact header, balanced hero, two-column mobile shortcuts, scroll-contained filters, and a compact two-row mobile market-coin layout that avoids horizontal overflow.
 - Applied distinct black/gold, clean-white, and deep-indigo dashboard surfaces; removed decorative borders/backgrounds from dashboard coin logos and favorite stars. Existing dashboard market data, search, filters, favorite actions, account summary, and super-admin-only activity logic remain intact.
 - Added regression assertions for duplicate-shell suppression, refresh-button uniqueness, desktop theme scope, mobile row sizing, and frameless logo/favorite controls. CI must pass before a new review APK is built; PR #55 remains draft and unmerged.
+
+
+## Live handoff — 2026-11-23, dashboard layout APK ready
+- PR #55 remains Draft/open/unmerged. Latest app-code candidate is the dashboard layout repair already tested by CI; the review APK was built from a child commit whose parent is PR code head `286f7aa6364628186e88f9bc0d2313a3388a84d8`.
+- Regression CI [45158231654](https://github.com/shahram-adim/DigiArz/actions/runs/45158231654): SUCCESS, all 43 steps.
+- Android review APK workflow [45161116469](https://github.com/shahram-adim/DigiArz/actions/runs/45161116469): SUCCESS, all 23 steps. Artifact ID `14809698748`, name `DigiArz-PR55-Theme-Parity-APK`.
+- Verified APK SHA-256: `8a537a66323b03ea883e2874a3729133e15f03659e86d7750100a3a2960630ed`. ZIP SHA-256: `a0d9de6244d43a5fbd626e64ed86b9f47cc0bc9ee031194ad051109d7d55e52a`.
+- APK is a debug/review build, not release-signed. User should install and check dashboard layout and all three themes on Android. Do not claim physical visual verification until user confirms.
+- No merge, release, deployment, or Production/Supabase mutation. Keep PR draft unless user explicitly approves merging.
