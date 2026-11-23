@@ -862,3 +862,15 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - PR #47 remains Draft/open/unmerged and mergeable. Physical Android installation, fingerprint enrollment, and login/logout/background-relock acceptance tests remain outstanding. APK is a debug review build, not production-signed.
 - No app code was merged to main; no release/deployment/publishing or Supabase/database/user-financial-data changes were made. This handoff entry is documentation-only.
 - Next: user installs the new APK and checks all three themes, password login, fingerprint enrollment/unlock, logout and relock. Fix only observed issues on PR #47; do not merge without explicit user approval.
+
+
+## 2026-11-23 — market asset-row theme refinement (Draft PR #53)
+- Re-established live repository baseline. Current main HEAD at start of this task: 968010d37a175b947616167ed265953a2ed6b62c.
+- The older redesign/independent-ui-2026 branch is 210 commits ahead and 115 behind current main; it was not reused or merged.
+- Created fresh branch ui/market-row-theme-polish-2026-11-23 directly from current main.
+- Updated only index.html and tests/index-syntax.test.js: added a final isolated market-row CSS override preserving the existing five-cell renderer and market data behavior; dark theme is black/gold, light theme is clean white, and third theme is explicitly Sky Blue Glass (not indigo). Logos remain 40px without frames; favorite-star controls are borderless; mobile rows use a compact two-line layout.
+- Added regression assertions for the three independent palettes, 40px logo size, frameless logo/star controls and mobile grid.
+- Draft PR #53: https://github.com/shahram-adim/DigiArz/pull/53. At creation, comparison against main was 3 commits ahead / 0 behind; PR is open, Draft, unmerged. Changed files: 2.
+- GitHub workflow-run lookup and combined commit-status lookup for head da9a63957bc0db586e89e46621f25e2b89309ba1 returned no runs/statuses. CI is therefore NOT verified; do not claim tests passed.
+- No main merge, Pages deployment, APK build/release, Supabase deployment, database/migration/cron/schema change, or financial-data modification occurred.
+- Next action: determine why PR checks are not appearing, run the relevant Node/browser test workflow, then inspect the three themes and mobile row on Android before asking for any merge approval.
