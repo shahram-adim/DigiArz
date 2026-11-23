@@ -947,3 +947,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - The suite included the newly added market-row renderer/grid contract, narrow-screen 40px logo rule, dashboard mover relocation and horizontal-scroll assertions, and admin-only activity visibility/session-event guards.
 - Android review workflow run 26 (ID `45116158059`) is building the APK for the same PR branch; wait for Gradle, provenance, and artifact upload to finish before sharing a new APK.
 - Physical-device visual QA remains unverified. PR #53 remains Draft/unmerged; no deployment, release, or Supabase/Production change.
+
+
+### Latest Android review APK verified — 2026-11-23
+- Android review workflow run 26 (ID `45116158059`) completed SUCCESS on PR branch head `7e29d5bb6c300f13e1965acd9124175c563f7c58`; web build, Capacitor Android generation/sync, Gradle `assembleDebug`, provenance and artifact upload all passed.
+- Artifact ID `14791373041`, name `DigiArz-Market-Row-Review-APK`, archive size 3,527,197 bytes; retention through 2026-12-07.
+- Downloaded and verified ZIP integrity. Extracted `app-debug.apk` size 3,908,925 bytes; `BUILD-INFO.txt` reports version 1.0.0, workflow run 45116158059, synthetic PR merge ref `53/merge`, source commit `be26cc85852ef5b7289611c32ed4973d7b728165`.
+- APK SHA-256 independently recomputed and matches BUILD-INFO: `125023c09673aae9416abf5e3997b468ec610e1ee99adc2bb7356fd6a7e62f6f`.
+- Exact-decimal workflow run 1642 (ID `45116158097`) completed SUCCESS with all Node/browser and PostgreSQL 17 integration steps passing on the same code head.
+- Debug review APK only; not production-signed. Physical-device install and visual acceptance are still outstanding. PR #53 remains Draft/open/unmerged. No release/deployment or Supabase/Production changes.
