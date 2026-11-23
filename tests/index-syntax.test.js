@@ -315,18 +315,20 @@ test('market list rows use five aligned cells, 40px logos, visible Persian names
 });
 
 
-test('login screen uses the selected Binance-inspired black-and-yellow palette without changing auth behavior', () => {
-  const marker = '/* DigiArz selected Binance-inspired black-and-yellow auth palette — 2026-11-21 */';
+test('dark login theme keeps its Binance-inspired black-and-yellow palette without leaking', () => {
+  const marker = '/* Theme-specific palettes for the same complete reference login layout. */';
   const paletteStart = html.lastIndexOf(marker);
   const styleEnd = html.lastIndexOf('</style>');
-  assert.ok(paletteStart >= 0 && styleEnd > paletteStart, 'final brand override is present at the end of the stylesheet');
+  assert.ok(paletteStart >= 0 && styleEnd > paletteStart, 'scoped theme palette block is at the end of the stylesheet');
   const palette = html.slice(paletteStart, styleEnd);
-  assert.ok(palette.includes('#authView.auth-reference-layout{'), 'final palette scopes to the reference auth layout');
-  assert.ok(palette.includes('background:#0b0e11!important'), 'outer auth surface uses black');
-  assert.ok(palette.includes('linear-gradient(155deg,#181a20 0%,#0b0e11 60%,#11151c 100%)!important'), 'visual panel uses charcoal and black');
-  assert.ok(palette.includes('linear-gradient(145deg,#181a20,#0b0e11 72%)!important'), 'form panel uses charcoal and black');
-  assert.ok(palette.includes('#f0b90b'), 'selected brand yellow remains the primary accent');
-  assert.ok(palette.includes('background:#252a33!important'), 'signup button remains a secondary charcoal action');
+  assert.ok(palette.includes('body.dark-theme #authView.auth-reference-layout{'), 'black-and-yellow palette is restricted to dark theme');
+  assert.ok(palette.includes('background:#0b0e11!important'), 'dark auth surface uses black');
+  assert.ok(palette.includes('linear-gradient(155deg,#181a20 0%,#0b0e11 60%,#11151c 100%)!important'), 'dark visual panel uses charcoal and black');
+  assert.ok(palette.includes('linear-gradient(145deg,#181a20,#0b0e11 72%)!important'), 'dark form panel uses charcoal and black');
+  assert.ok(palette.includes('#f0b90b'), 'dark brand yellow remains the primary accent');
+  assert.ok(palette.includes('body.light-theme #authView.auth-reference-layout{'), 'light theme has its own palette');
+  assert.ok(palette.includes('body.luxury-theme #authView.auth-reference-layout{'), 'Sky Blue Glass has its own palette');
+  assert.doesNotMatch(palette, /^#authView/m, 'no unscoped auth palette overrides remain');
   assert.ok(html.includes('@media(max-width:760px){') && html.includes('#authView.auth-reference-layout{margin:0 auto 18px!important}'), 'existing mobile layout remains');
   for (const id of ['email','password','loginBtn','signupBtn','forgotBtn','authMsg','recoveryPanel','newPassword','confirmPassword','saveNewPassword']) {
     assert.match(html, new RegExp('id="' + id + '"'), 'existing auth control remains: ' + id);
@@ -365,7 +367,7 @@ test('reference login has its branded market header, live coin list and working 
   assert.match(html, /\$\('authThemeToggle'\)\?\.addEventListener\('click',cycleTheme\)/);
   assert.match(html, /const authThemeButton=\$\('authThemeToggle'\)/);
   assert.match(html, /@media\(max-width:760px\)[\s\S]*?#authView\.auth\{display:flex;flex-direction:column/);
-  assert.ok(html.lastIndexOf('/* DigiArz selected Binance-inspired black-and-yellow auth palette — 2026-11-21 */') > html.indexOf('/* Faithful reconstruction of the approved DigiArz login reference */'), 'final brand palette overrides the earlier reference colors');
+  assert.ok(html.lastIndexOf('/* Theme-specific palettes for the same complete reference login layout. */') > html.indexOf('/* Faithful reconstruction of the approved DigiArz login reference */'), 'final brand palette overrides the earlier reference colors');
   for (const id of ['email','password','loginBtn','signupBtn','forgotBtn','authMsg','recoveryPanel','newPassword','confirmPassword','saveNewPassword']) {
     assert.match(html, new RegExp('id="' + id + '"'), 'existing auth control remains: ' + id);
   }
@@ -422,4 +424,43 @@ test('login mini chart renders real five-minute candles without depending on a c
   assert.match(html, /renderAuthMiniChart\(\[\]\)/);
   assert.match(html, /fetchBinanceKlines\('BTCUSDT','5m',36\)/);
   assert.match(html, /<svg viewBox=/);
+});
+
+
+test('third theme is Sky Blue Glass and remains scoped independently from light and dark themes', () => {
+  assert.ok(html.includes('آبی آسمانی شیشه‌ای · Sky Blue Glass'));
+  assert.ok(html.includes('body.luxury-theme{color-scheme:dark;--bg:#061a2b'));
+  assert.ok(html.includes('--yellow:#78c8ff'));
+  assert.ok(html.includes('auth-form{background:#0b2c43}'));
+  assert.ok(!html.includes('#1b245f'), 'third theme must not retain indigo fallback colors');
+  assert.ok(html.includes('linear-gradient(135deg,#8bd4ff,#42a9e5)'));
+  assert.ok(html.includes("localStorage.setItem('digiArzTheme',selected)"));
+  assert.ok(html.includes("id=\"digiarz-sky-blue-glass-motion\""));
+});
+
+test('login hero animation respects reduced-motion preferences', () => {
+  assert.ok(html.includes('animation:digiarzGlobeSpin 48s linear infinite!important'));
+  assert.ok(html.includes('animation:digiarzPhoneFloat 7s ease-in-out infinite!important'));
+  assert.ok(html.includes('animation:digiarzOrbitA 13s linear infinite!important'));
+  assert.ok(html.includes('@media(prefers-reduced-motion:reduce)'));
+});
+
+test('all three complete login themes have isolated, non-leaking palettes', () => {
+  const paletteStart = html.indexOf('/* Theme-specific palettes for the same complete reference login layout. */');
+  assert.ok(paletteStart >= 0, 'theme isolation palette block exists');
+  const palette = html.slice(paletteStart);
+  assert.ok(palette.includes('body.dark-theme #authView.auth-reference-layout'));
+  assert.ok(palette.includes('body.light-theme #authView.auth-reference-layout'));
+  assert.ok(palette.includes('body.luxury-theme #authView.auth-reference-layout'));
+  assert.ok(palette.includes('body.luxury-theme #authView .ref-brand-lockup,body.luxury-theme #authView .ref-brand-lockup strong{color:#78c8ff'));
+  assert.ok(palette.includes('body.light-theme #authView .auth-form input{background:#f6f9fd'));
+  assert.ok(palette.includes('body.dark-theme #authView .auth-form input{background:#0b0e11'));
+  assert.doesNotMatch(palette, /^#authView/m, 'no unscoped auth palette overrides can leak between themes');
+});
+
+test('login BTC preview refreshes the current candle from the live Binance ticker', () => {
+  assert.ok(html.includes('function refreshAuthLiveCandle()'));
+  assert.ok(html.includes('/api/v3/ticker/price?symbol=BTCUSDT'));
+  assert.ok(html.includes('last.close=price'));
+  assert.ok(html.includes('authMiniTickerTimer=setInterval'));
 });
