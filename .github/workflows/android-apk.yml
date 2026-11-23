@@ -6,12 +6,14 @@ on:
     branches:
       - main
       - integration/theme-market-cleanup-2026-11-23
+      - features/user-selected-tools-2026-11-23
     paths:
       - "index.html"
       - "manifest.webmanifest"
       - "sw.js"
       - "icon*.svg"
       - "src/**"
+      - "tests/**"
       - "package.json"
       - "capacitor.config.json"
       - ".github/workflows/android-apk.yml"
