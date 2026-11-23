@@ -1063,3 +1063,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Re-fetch the final PR head and Actions before marking this regression validated. The prior successful exact-decimal workflow was for an older SHA and is not evidence for these commits.
 - PR #55 remains open/Draft/unmerged. No changes to `main`, Supabase/Production, database, authentication, wallet, orders, or trading logic. No physical Android visual test was performed.
 - Next: continue checking remaining admin panels and page-level horizontal overflow at compact widths; preserve internal horizontal scrolling for intentionally wide tables. Do not merge or publish.
+
+
+## 2026-11-23 — Admin section-header mobile wrapping
+- Continued the remaining admin-panel audit. The user-management, manual asset-list, and pair-review sections share detail-section section-title headers; unlike the exchange-sync panel, their long Persian headings and refresh buttons had no admin-scoped mobile wrapping rule.
+- Added a <=700px rule scoped to #tab-admin: each admin section heading can wrap, the title takes a full row and breaks long text, and its direct action button takes a full-width row with a 44px minimum touch height and wrapping labels.
+- Added a regression test covering the scoped selector and responsive behavior. No admin RPCs, permissions, asset catalog, pair activation, account balances, or trading logic changed.
+- Source commit: f75b8ad27b38d3ef3f6d199a6244e80c8e55b8ae; test commit: 61e89388754a87f244601325a32992931687b955.
+- Re-fetch the final PR head and Actions. Do not treat earlier successful CI runs as validation for this change.
+- PR #55 remains open/Draft/unmerged. No main, Supabase/Production, database, auth, wallet, orders, or trading changes. No real-device visual test was performed.
+- Next: continue auditing admin user cards and dynamic result lists for long identifiers and narrow-width overflow; preserve intentional table scrolling. Do not merge or publish.
