@@ -36,9 +36,10 @@ Current feature head: updated by the latest GitHub commit; verify branch head be
 1. Recover and reconcile the full 36-question response record against this tracker; do not ask the user to repeat answers.
 2. Verify quick-start and low-power behavior in the latest feature-branch CI and Android debug build.
 3. [x] Implement read-only service health status with network state, actual market refresh timestamp/source, and an explicit note that account/database connectivity is not independently checked; never expose secrets.
+4. [x] Add two-asset comparison using the app's existing trusted price/freshness checks; unavailable or stale values are labeled rather than fabricated.
 4. Implement crypto comparison using fresh market rows only; show unavailable/stale values as unavailable, never fabricated.
 5. Implement QR only for public, non-sensitive profile/public asset information; never encode secrets, account tokens, or wallet credentials.
-6. Add automated coverage for the service health panel; then continue remaining confirmed security, notification, bilingual/Toman and app usability requirements after source audit.
+6. Verify the comparison and service-health tests in full CI; continue remaining confirmed security, notification, bilingual/Toman and app usability requirements after source audit.
 8. Test all changes; keep PR draft and main/Supabase untouched.
 
 ## Safety notes
