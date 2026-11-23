@@ -936,3 +936,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Physical Android rendering/installation is still required for final visual acceptance; CI cannot certify device appearance.
 
 - Validation result: GitHub Actions run 45150130527 completed SUCCESS on final code/test head efe0261ee85a996d97acce92d3b886127dbcea65; all 43 job steps passed, including the newly added runtime chart/theme-color parity regression. PR #55 remains Draft/open/unmerged. Main and Production remain unchanged. Final physical Android rendering/installation is still not verified.
+
+
+## Live handoff — 2026-11-23, final theme parity CI recheck
+- Current candidate: PR #55, branch `fix/theme-parity-2026-11-23`, head `21290f02e9bcc339e7a658b40a87e1d6667524ac`.
+- GitHub API recheck: PR open, Draft, unmerged, mergeable; main/base remains `968010d37a175b947616167ed265953a2ed6b62c`.
+- Latest workflow run `45150454902` on this head completed SUCCESS. No artifacts were attached to that run.
+- Android APK workflow audit: `.github/workflows/android-review-apk.yml` checks out an obsolete fixed branch (`build/indigo-glass-biometric-apk-2026-11-21`), so its APK cannot represent PR #55. `.github/workflows/android-apk.yml` has workflow_dispatch support, but the connected GitHub integration has no dispatch action.
+- The older artifact `14804561034` / run `45146118883` was built from `b44e90e1d52614b3164109d260de385160205f99`, not the current PR head; do not send it as the final build.
+- No physical Android test has been performed. Do not claim the themes are visually accepted on-device.
+- No merge, release, deployment, Supabase/Production, database, authentication, wallet, order, or trading changes were made.
+- Next: build an artifact-only APK from the exact PR head using a safe workflow trigger; verify provenance and SHA-256; then ask the user to install and inspect all three themes on Android. Keep PR #55 Draft/unmerged unless the user explicitly approves merging.
