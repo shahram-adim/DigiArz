@@ -1,0 +1,73 @@
+name: DigiArz PR55 Android review APK (artifact only)
+
+on:
+  push:
+    branches:
+      - build/pr55-layout-review-apk-2026-11-23
+
+permissions:
+  contents: read
+
+concurrency:
+  group: digiarz-pr55-review-apk
+  cancel-in-progress: false
+
+jobs:
+  build-review-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact pushed source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install pinned Capacitor dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Prepare web assets
+        run: npm run build:web
+
+      - name: Generate Android project
+        run: npx cap add android
+
+      - name: Sync Android project
+        run: npx cap sync android
+
+      - name: Build installable debug APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleDebug
+
+      - name: Record APK provenance and checksum
+        run: |
+          APK="android/app/build/outputs/apk/debug/app-debug.apk"
+          {
+            echo "app=DigiArz"
+            echo "source_branch=$GITHUB_REF_NAME"
+            echo "source_commit=$GITHUB_SHA"
+            echo "workflow_run_id=$GITHUB_RUN_ID"
+            echo "built_at_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "apk_sha256=$(sha256sum "$APK" | cut -d ' ' -f 1)"
+          } > android/app/build/outputs/apk/debug/BUILD-INFO.txt
+          cat android/app/build/outputs/apk/debug/BUILD-INFO.txt
+
+      - name: Upload debug APK artifact only
+        uses: actions/upload-artifact@v4
+        with:
+          name: DigiArz-PR55-Theme-Parity-APK
+          path: |
+            android/app/build/outputs/apk/debug/app-debug.apk
+            android/app/build/outputs/apk/debug/BUILD-INFO.txt
+          if-no-files-found: error
+          retention-days: 14
