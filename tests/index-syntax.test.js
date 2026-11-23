@@ -686,3 +686,16 @@ test('Toman market summary reports observed sources, freshness, and source times
   assert.ok(loader.includes('summary.latestFetchedAt'), 'loader displays the real source timestamp');
   assert.doesNotMatch(loader, /Object\.keys\(tomanExchangeNames\)\.length/, 'configured labels are not reported as active sources');
 });
+
+
+test('light theme keeps translucent glass cards instead of flattening every surface to opaque white', () => {
+  const start = html.lastIndexOf('/* Final cross-theme defect fixes: white-theme contrast and full surface parity. */');
+  const end = html.lastIndexOf('/* DigiArz final indigo auth cascade guard');
+  assert.ok(start >= 0 && end > start, 'final light-theme parity layer is present');
+  const css = html.slice(start, end);
+  assert.ok(css.includes('--panel:rgba(255,255,255,.76)'), 'light panel token retains translucency');
+  assert.ok(css.includes('--panel2:rgba(248,251,255,.72)'), 'secondary panel token retains translucency');
+  assert.ok(css.includes('background:rgba(255,255,255,.68)!important'), 'light cards use a translucent surface');
+  assert.ok(css.includes('-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);'), 'glass blur works in supported mobile browsers');
+  assert.ok(css.includes('body.light-theme input,body.light-theme select,body.light-theme textarea'), 'form fields remain opaque for readability');
+});
