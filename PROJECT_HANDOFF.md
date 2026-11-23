@@ -906,3 +906,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Changes are isolated to `index.html`, `tests/index-syntax.test.js`, and this handoff note on the existing Draft PR #53 branch.
 - Automated workflow must complete on this new head before calling the correction validated. No merge, release, deployment, Supabase/database, auth, wallet, order, balance, or market-data pipeline changes were made.
 - Visual inspection on a real Android device remains unverified; no claim of pixel-perfect device QA.
+
+
+### 2026-11-23 — dashboard top-five movers relocation
+- Found that the five-largest-gainers and five-largest-losers panels were still embedded in the Markets tab, contrary to the user's earlier dashboard placement request.
+- Moved the existing `topGainersList` and `topLosersList` sections below the Dashboard's `بازار ارزهای دیجیتال` heading and before the dashboard market preview. The Markets tab no longer duplicates these two panels; its 10 highest-volume assets strip and full market list remain.
+- Reused the existing market data renderers and IDs; each still shows up to five rows and is refreshed by the existing market ticker pipeline. Added horizontal scrolling cards, two-panel desktop layout, stacked mobile panels, and theme-specific black/gold, white, and Sky Blue Glass surfaces.
+- Fixed the “مشاهده همه” actions to switch to the Markets tab before applying the gainers/losers filter.
+- Added regression coverage for dashboard placement, absence from Markets, five-item limits, horizontal overflow, responsive stacking, and navigation.
+- This remains an isolated Draft PR #53 candidate. Automated test and Android build runs for the newest head must finish before validation can be claimed. No Supabase, auth, wallet, order, balance, real-money, deployment, or release changes.
