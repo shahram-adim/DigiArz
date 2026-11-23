@@ -14,6 +14,20 @@ on:
       - "capacitor.config.json"
       - ".github/workflows/android-market-row-review.yml"
 
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+    paths:
+      - "index.html"
+      - "manifest.webmanifest"
+      - "sw.js"
+      - "icon*.svg"
+      - "src/**"
+      - "package.json"
+      - "capacitor.config.json"
+      - ".github/workflows/android-market-row-review.yml"
+
 permissions:
   contents: read
 
