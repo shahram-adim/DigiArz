@@ -630,3 +630,16 @@ test('admin section headers and refresh actions wrap cleanly on mobile', () => {
   assert.ok(css.includes('#tab-admin .detail-section>.section-title h3{flex:1 1 100%;min-width:0;max-width:100%;overflow-wrap:anywhere;}'), 'long admin titles can use full width and wrap');
   assert.ok(css.includes('#tab-admin .detail-section>.section-title>button{flex:1 1 100%;width:100%;min-width:0;min-height:44px;white-space:normal;overflow-wrap:anywhere;}'), 'refresh actions remain full-width, touch-friendly, and wrap labels');
 });
+
+
+test('admin user cards keep balances and credit controls inside very narrow phone widths', () => {
+  const guard = html.lastIndexOf('/* Admin user cards: prevent balance values and credit controls from overflowing compact phones. */');
+  const styleEnd = html.lastIndexOf('</style>');
+  assert.ok(guard >= 0 && styleEnd > guard, 'compact admin-user card guard is present at stylesheet end');
+  const css = html.slice(guard, styleEnd);
+  assert.ok(css.includes('@media(max-width:380px)'), 'rules target very narrow phones');
+  assert.ok(css.includes('#tab-admin .admin-user-card>.grid{grid-template-columns:minmax(0,1fr);min-width:0;}'), 'balance cards stack on compact screens');
+  assert.ok(css.includes('overflow-wrap:anywhere') && css.includes('word-break:break-word'), 'long email and balance values can wrap');
+  assert.ok(css.includes('#tab-admin .admin-adjust-grid{grid-template-columns:minmax(0,1fr);}'), 'credit adjustment controls use one compact column');
+  assert.ok(css.includes('#tab-admin .admin-adjust-grid>*{width:100%;min-width:0;max-width:100%;}'), 'form controls cannot force the card wider');
+});
