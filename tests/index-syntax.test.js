@@ -502,6 +502,7 @@ test('dashboard account activity and alerts are visible only after a verified su
   const showApp = html.slice(showAppStart, showAppEnd);
   assert.match(showApp, /isSuperAdmin=false/, 'admin access defaults to false for each session');
   assert.ok(showApp.indexOf("$('dashboardActivityCenter')?.classList.add('hidden')") < showApp.indexOf("supabaseClient.from('profiles')"), 'admin panel is hidden before the asynchronous profile and role checks');
+  assert.ok(showApp.indexOf('if(appLoadPromise)return appLoadPromise') < showApp.indexOf("$('dashboardActivityCenter')?.classList.add('hidden')"), 'duplicate auth events do not reset an in-flight verified admin session');
   assert.match(showApp, /roleResult\.data===true\)\{isSuperAdmin=true/, 'only the server-confirmed super-admin result grants admin visibility');
   assert.match(showApp, /\$\('dashboardActivityCenter'\)\?\.classList\.toggle\('hidden',!isSuperAdmin\)/, 'activity panel visibility follows verified admin state');
   assert.match(html, /id="dashboardRecentOrders"/);
