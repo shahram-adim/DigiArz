@@ -971,3 +971,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Verified APK SHA-256: `8a537a66323b03ea883e2874a3729133e15f03659e86d7750100a3a2960630ed`. ZIP SHA-256: `a0d9de6244d43a5fbd626e64ed86b9f47cc0bc9ee031194ad051109d7d55e52a`.
 - APK is a debug/review build, not release-signed. User should install and check dashboard layout and all three themes on Android. Do not claim physical visual verification until user confirms.
 - No merge, release, deployment, or Production/Supabase mutation. Keep PR draft unless user explicitly approves merging.
+
+
+## 2026-11-23 — Prevent account-activity flash before role verification
+- The dashboard activity center now starts with the existing `hidden` class in the HTML, so regular users cannot briefly see its heading or placeholders while the admin-role RPC is still running.
+- Existing `setAccountMode(active)` logic remains the only reveal path: the section is shown only when the account is active and `isSuperAdmin === true`. If role verification fails, it stays hidden (fail-closed); confirmed super-admin access remains intact.
+- Updated `tests/index-syntax.test.js` to assert the initial hidden state and the active-super-admin reveal condition.
+- Source commit: `d9079b3c7951812fba3f12cc7857de31e4125458`; test commit: `4315fa7c394d4f1544c80b56951538ce339f0660`.
+- A fresh CI result is **not yet available** for the latest test commit: the connected workflow/status lookup returned no runs and no status checks. Earlier green CI and the earlier review APK apply to older commits only; do not treat them as validation of this change.
+- PR #55 remains Draft/unmerged. No changes were made to `main`, Supabase/Production, authentication, wallets, orders, or trading. A new review APK and physical Android check are still pending.
