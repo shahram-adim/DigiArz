@@ -885,3 +885,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Commits: index.html 1805dec0e6f58b948026d4dc633faeae374820b7; tests/index-syntax.test.js ca22b9c6aa591eac7ee8e0a4b2120d1fd26bfb67.
 - A new GitHub Actions run is expected for this latest source. Do not treat earlier passing CI on feaafa2 as validation of these two follow-up commits; wait for the latest head's run.
 - Android visual testing and a PR-specific APK remain outstanding; no merge, APK, or Production changes.
+
+
+## 2026-11-23 — isolated theme palette and market-row parity follow-up
+- Created branch `fix/theme-parity-2026-11-23` directly from the reviewed PR #54 head `ff7e07da44f615348eccb1c36bb05317c512ec1f`; main remains unchanged.
+- Added a final scoped palette pass for dark black/gold, light neutral, and third luxury indigo-glass themes. The third theme now uses a deep indigo base rather than the prior blue-teal palette; glass surfaces, controls, charts, and login inputs receive explicit theme-scoped colors.
+- Fixed a confirmed specificity conflict: the market-board coin selector had a stronger border rule than the generic frameless cleanup. A final high-specificity override now removes the row border and shadow in every theme.
+- Added a regression test for the three final palettes, theme-scoped login inputs, backdrop-filter fallback, and frameless market rows.
+- Commits: `aa52dd8c555fa8846440ff28919a3fed69d5b9f6` (CSS), `2e81abe17465ca556311437abaa1c3e84fced3b8` (tests).
+- Validation boundary: source-level changes only. CI has not yet run on this branch, and no browser/device screenshots or physical Android rendering have been reviewed. Do not claim visual parity or a completed theme redesign until those checks pass.
+- No merge, APK build, release, deployment, database/Supabase, auth, wallet, or trade logic changes.
+- Next: run the project regression workflow on this branch, inspect failures, then build a separate review APK only after CI succeeds. Keep all candidate branches unmerged pending explicit approval.
