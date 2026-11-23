@@ -874,3 +874,10 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - GitHub workflow-run lookup and combined commit-status lookup for head da9a63957bc0db586e89e46621f25e2b89309ba1 returned no runs/statuses. CI is therefore NOT verified; do not claim tests passed.
 - No main merge, Pages deployment, APK build/release, Supabase deployment, database/migration/cron/schema change, or financial-data modification occurred.
 - Next action: determine why PR checks are not appearing, run the relevant Node/browser test workflow, then inspect the three themes and mobile row on Android before asking for any merge approval.
+
+
+### PR #53 CI result — 2026-11-23
+- GitHub Actions Exact decimal tests run 1620 (ID 45113256556) completed with conclusion SUCCESS on branch head 4e0850fefb55563e2aaf06a76e60a93fccc91d02.
+- All 21 substantive workflow steps passed: Node/browser tests; PostgreSQL arithmetic and Toman upsert; exact-decimal widening positive/negative/lock-timeout/rollback; Market/Limit; Stop-Limit/TP-SL placement, workers, lifecycle and two-session race tests. Cleanup also succeeded.
+- This verifies the automated repository/integration workflow only. It does not establish Android visual acceptance. No APK build, Pages deployment, merge, Supabase Production change, or financial-data change occurred.
+- PR #53 remains Draft/open/unmerged. Next: visual review on Android; if the layout needs adjustment, make only evidence-based CSS changes on this branch. Do not merge or release without explicit user approval.
