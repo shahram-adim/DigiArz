@@ -26,6 +26,7 @@ function evaluate(event){
  const pending=alerts(),remaining=[];let changed=false;
  for(const alert of pending){
   const row=latestRows.find(x=>x.symbol===alert.symbol);if(!row){remaining.push(alert);continue}
+  if(alert.metric==='percent'&&(row.change24h===null||row.change24h===undefined||!Number.isFinite(Number(row.change24h)))){remaining.push(alert);continue}
   const value=alert.metric==='percent'?Number(row.change24h):Number(row.price);
   if(!Number.isFinite(value)){remaining.push(alert);continue}
   const hit=alert.direction==='below'?value<=alert.target:value>=alert.target;
