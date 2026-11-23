@@ -1227,3 +1227,12 @@
 - Main remains at `968010d37a175b947616167ed265953a2ed6b62c`; no production or Supabase changes.
 
 - Follow-up: initial CI run 45138971915 failed only because of an over-escaped regex in the newly added test. Replaced the regexes with direct string assertions; latest head must pass a new CI run before validation is complete.
+
+
+## 2026-11-23 — Theme parity APK review build verified
+- Theme regression workflow run `45139169031` completed SUCCESS on candidate head `afdf21d6a2a1207cb017f50c53282bd7e7d7c0e9` (all 21 job steps passed).
+- Built the Android debug review APK from isolated build branch `build/apk-theme-parity-2026-11-23`, commit `c02530b3f01fd166f443b8fe09f253998f01c094`, workflow run `45141624881` (SUCCESS).
+- Artifact `DigiArz-Android-debug-APK`, artifact ID `14802112785`, size 3,526,514 bytes; extracted APK size 3,907,938 bytes.
+- ZIP integrity passed; `BUILD-INFO.txt` SHA-256 matches computed APK SHA-256: `5525ca9a8cbd1969cf603a02cd52213cc3a6f2d09f626e91e8a4b76de5a2a20f`.
+- APK is a debug review build, not production-signed. Physical Android installation and visual acceptance across all three themes remain outstanding; no browser screenshot/device rendering was performed.
+- PR #55 remains Draft/open/unmerged; PR #54 also remains Draft/open/unmerged. Main remains unchanged; no Supabase, Production, auth, wallet, order, or trading logic changes.
