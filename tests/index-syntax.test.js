@@ -455,3 +455,13 @@ test('coin rows, favorite controls and coin logo wrappers have no decorative fra
   assert.match(html, /\.coin-icon\{background:transparent!important;border:0!important/);
 });
 
+
+test('three themes have isolated final palettes and frameless market coin rows', () => {
+  assert.match(html, /body\\.dark-theme\\{[\\s\\S]*?--yellow:#f0b90b/);
+  assert.match(html, /body\\.light-theme\\{[\\s\\S]*?--bg:#f3f6fb/);
+  assert.match(html, /body\\.luxury-theme\\{[\\s\\S]*?--bg:#101027[\\s\\S]*?--panel:rgba\\(29,30,66/);
+  assert.match(html, /body\\.luxury-theme \\.tabs button\\.active/);
+  assert.match(html, /body\\.luxury-theme #authView \\.auth-form input/);
+  assert.match(html, /#tab-markets \\.market-board-v34 \\.coin,[\\s\\S]*?border:0!important;box-shadow:none!important/);
+  assert.match(html, /@supports not \\(\\(backdrop-filter:blur\\(1px\\)\\) or \\(-webkit-backdrop-filter:blur\\(1px\\)\\)\\)/);
+});
