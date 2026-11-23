@@ -432,6 +432,29 @@ test('dashboard does not display the five top gainers or five top losers', () =>
   assert.match(html, /#tab-markets \.gainers-panel/, 'market tab retains its separate market analytics panels');
 });
 
+
+test('dashboard layout removes duplicate shell and keeps refresh control in the dashboard header', () => {
+  assert.match(html, /#appView>\.hero,#appView>\.quick\{display:none!important\}/);
+  assert.match(html, /class="da-v2-top-actions"[\s\S]*id="refreshBtn"/);
+  assert.equal((html.match(/id="refreshBtn"/g) || []).length, 1);
+  assert.match(html, /id="heroTradeBtn"/);
+  assert.match(html, /id="heroMarketBtn"/);
+});
+
+test('theme parity rules apply on desktop as well as mobile', () => {
+  assert.doesNotMatch(html, /@media\(max-width:640px\)\{\s*\/\* Final theme parity pass:/);
+  assert.match(html, /body\.dark-theme #tab-dashboard\.digiarz-v2-dashboard/);
+  assert.match(html, /body\.light-theme #tab-dashboard\.digiarz-v2-dashboard/);
+  assert.match(html, /body\.luxury-theme #tab-dashboard\.digiarz-v2-dashboard/);
+});
+
+test('dashboard market rows remain responsive and logo/favorite controls are frameless', () => {
+  assert.match(html, /grid-template-columns:26px minmax\(0,1fr\) minmax\(88px,auto\)!important/);
+  assert.match(html, /#dashboardMarketPreview \.da-market-favorite\{border:0!important;background:transparent!important/);
+  assert.match(html, /#dashboardMarketPreview \.da-market-logo,#dashboardMarketPreview \.da-market-logo-inner\{border:0!important;background:transparent!important/);
+  assert.match(html, /#dashboardMarketPreview \.da-market-sparkline\{display:none!important\}/);
+});
+
 test('dashboard account activity is visible only to an authenticated super-admin', () => {
   const start = html.indexOf('function setAccountMode(active){');
   const end = html.indexOf('\nasync function deactivateMyAccount()', start);
