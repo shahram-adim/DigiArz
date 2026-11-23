@@ -1022,3 +1022,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - CI has not yet run for these commits. The latest visible successful workflow is still on older SHA 321777d00a209f0164a4c3452bbce55019ce6944; it is not validation for the latest changes.
 - PR #55 remains Draft/open/unmerged. No changes to main, Supabase/Production, database, authentication logic, wallet, orders, or trading. No APK or device visual verification.
 - Next: continue checking the remaining order-book/history/admin surfaces and mobile overflow. Keep changes scoped to the feature branch; do not merge.
+
+## 2026-11-23 — Order-book three-theme palette repair
+- Continued the cross-page theme audit on the existing PR branch after re-reading the PR, handoff, source, and regression tests.
+- Found legacy order-book rules that hard-coded dark navy surfaces (`#101318`, `#111821`, `#0b1932`) and older header colors. These could leak into the white and indigo themes depending on stylesheet order.
+- Added a final stylesheet guard so order-book cards use `var(--panel)`, borders use `var(--line)`, and order-book headers use `var(--panel2)`. The existing buy/sell green/red text semantics remain intact; no order-book behavior or trading logic changed.
+- Added a regression test that checks the final guard is after the legacy fixed-navy selector and verifies the three theme tokens. Corrected the test's newline assertions before finalizing.
+- Source commit: `606ece63bd517d5a24770aa466f979183f4735f4`; test commit: `9a6e927c5fdf01e1555fabdc304ec65322a794e4`; test assertion correction: `421bfbb36727f04701336bf1e97850600b70d6bf`.
+- At handoff update time, re-run CI for the latest PR head and confirm its exact SHA before treating the new regression as passed. The previously observed successful run `45163851803` has head commit `321777d00a209f0164a4c3452bbce55019ce6944`, so it is not proof that the latest source/test edits passed.
+- PR #55 remains open/Draft/unmerged. No changes to `main`, Supabase/Production, database, authentication, wallets, orders, or trading logic. No new APK or physical-device visual test was performed.
+- Next safe audit: inspect the remaining history table and admin responsive surfaces for fixed colors and narrow-width overflow, then re-check Actions against the exact latest head. Do not merge or publish.
