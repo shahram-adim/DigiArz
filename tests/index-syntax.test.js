@@ -199,17 +199,14 @@ test('market 24h ranking uses one freshness-aware comparator in both directions'
   assert.equal(context.getMarketChange24h(rows[5]), 2.25, 'fresh stored fallback percentages are accepted');
 });
 
-test('gainer, loser, volatility and market-list views share the same ranking helpers', () => {
-  const gainersStart = html.indexOf('function renderTopGainers(){');
-  const losersStart = html.indexOf('function renderTopLosers(){', gainersStart);
-  const assetsStart = html.indexOf('function renderTopAssets(){', losersStart);
-  const gainers = html.slice(gainersStart, losersStart);
-  const losers = html.slice(losersStart, assetsStart);
+test('market ranking helpers remain available after removing dedicated gainers and losers panels', () => {
+  assert.equal(html.includes('function renderTopGainers('), false);
+  assert.equal(html.includes('function renderTopLosers('), false);
+  assert.ok(html.includes('function compareMarketChange('));
+  assert.ok(html.includes('function sortMarketRowsByChange('));
   const marketStart = html.indexOf('function renderMarkets(){');
   const marketEnd = html.indexOf('function renderDashboardPortfolio(', marketStart);
   const market = html.slice(marketStart, marketEnd);
-  assert.ok(gainers.includes("sortMarketRowsByChange(marketRows,'desc')"));
-  assert.ok(losers.includes("sortMarketRowsByChange(marketRows,'asc')"));
   assert.ok(market.includes("compareMarketChange(a,b,'desc')"));
   assert.ok(market.includes("compareMarketChange(a,b,'asc')"));
   assert.ok(html.includes("const valid=sortMarketRowsByChange(marketRows,'desc')"));
@@ -451,4 +448,16 @@ test('Toman market summary reports observed sources, freshness, and source times
   assert.ok(loader.includes('summarizeTomanMarketRows(filtered)'), 'loader uses the tested summary');
   assert.ok(loader.includes('summary.latestFetchedAt'), 'loader displays the real source timestamp');
   assert.doesNotMatch(loader, /Object\.keys\(tomanExchangeNames\)\.length/, 'configured labels are not reported as active sources');
+});
+
+
+test('dashboard no longer renders the five-coin gainers and losers panels', () => {
+  for (const obsolete of ['topGainersList', 'topLosersList', 'allGainersBtn', 'allLosersBtn']) {
+    assert.doesNotMatch(html, new RegExp(obsolete), obsolete + ' should be removed from the dashboard');
+  }
+  for (const obsolete of ['renderTopGainers(', 'renderTopLosers(', 'showAllGainers(', 'showAllLosers(']) {
+    assert.ok(!html.includes(obsolete), obsolete + ' should not remain as dead code');
+  }
+  assert.match(html, /id="topAssetsList"/, 'the separate top-volume assets strip remains available');
+  assert.match(html, /id="marketList"/, 'the full market list remains available');
 });
