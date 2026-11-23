@@ -529,10 +529,12 @@ test('runtime chart palette and Android browser theme-color match the three CSS 
 
 
 test('indigo glass login overrides the legacy black-and-gold reference skin', () => {
-  assert.match(html, /body\.luxury-theme #authView\.auth-reference-layout\.auth-form/);
-  assert.match(html, /body\.luxury-theme #authView\.auth-form h2\{color:#d8c5ff!important/);
-  assert.match(html, /body\.luxury-theme #authView \.ref-platform\{/);
-  assert.match(html, /body\.luxury-theme #authView \.ref-gold-coin\{/);
-  assert.match(html, /body\.luxury-theme #authView \.ref-phone \.auth-phone-preview/);
-  assert.match(html, /body\.luxury-theme #authView \.ref-coin-row strong\{color:#53d6ad!important/);
+  for (const rule of [
+    'body.luxury-theme #authView.auth-reference-layout .auth-form{',
+    'body.luxury-theme #authView .auth-form h2{color:#d8c5ff!important',
+    'body.luxury-theme #authView .ref-platform{',
+    'body.luxury-theme #authView .ref-gold-coin{',
+    'body.luxury-theme #authView .ref-phone .auth-phone-preview{',
+    'body.luxury-theme #authView .ref-coin-row strong{color:#53d6ad!important'
+  ]) assert.ok(html.includes(rule), 'indigo login override exists: ' + rule);
 });
