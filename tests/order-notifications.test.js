@@ -19,7 +19,7 @@ test('order event handler emits only status transitions and incremental partial 
  vm.runInNewContext(source,context);
  const api=context.window.DigiArzNotifications;
  const calls=[];
- const fakeClient={channel:name=>({on:(type,filter,cb)=>{calls.push({type,filter,cb});return this},subscribe(){return this}}),removeChannel:async()=>{}};
+ const fakeClient={channel(name){const channel={on(type,filter,cb){calls.push({type,filter,cb});return channel},subscribe(){return channel}};return channel},removeChannel:async()=>{}};
  assert.equal(api.connectOrderEvents(fakeClient,'user-123'),true);
  assert.equal(calls[0].filter.filter,'user_id=eq.user-123');
  calls[0].cb({eventType:'INSERT',new:{id:'o1',user_id:'user-123',symbol:'BTCUSDT',side:'buy',order_type:'limit',status:'pending'}});
