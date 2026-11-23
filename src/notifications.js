@@ -57,12 +57,12 @@ function init(){
  window.addEventListener('digiarz:market-snapshot',evaluate);renderAlerts();render();
 }
 
-let orderChannel=null,orderChannelUserId=null;
+let orderChannel=null,orderChannelUserId=null,orderRealtimeClient=null;
 const orderSnapshots=new Map();
 function disconnectOrderEvents(){
- const channel=orderChannel;orderChannel=null;orderChannelUserId=null;
- if(channel&&window.__digiArzSupabaseClient?.removeChannel){
-  try{window.__digiArzSupabaseClient.removeChannel(channel).catch(()=>{})}catch(_){}
+ const channel=orderChannel,client=orderRealtimeClient;orderChannel=null;orderChannelUserId=null;orderRealtimeClient=null;orderSnapshots.clear();
+ if(channel&&client?.removeChannel){
+  try{client.removeChannel(channel).catch(()=>{})}catch(_){}
  }
 }
 function orderLabel(row){
@@ -95,7 +95,7 @@ function connectOrderEvents(client,userId){
  if(!client||!userId||typeof client.channel!=='function')return false;
  if(orderChannel&&orderChannelUserId===userId)return true;
  disconnectOrderEvents();
- window.__digiArzSupabaseClient=client;
+ orderRealtimeClient=client;
  try{
   orderChannel=client.channel('digiarz-order-notifications-'+userId)
    .on('postgres_changes',{event:'*',schema:'public',table:'orders',filter:'user_id=eq.'+userId},payload=>handleOrderChange(payload,userId))
