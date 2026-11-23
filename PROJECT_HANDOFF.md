@@ -897,3 +897,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Build provenance: version 1.0.0; workflow run 45113780222; built 2026-11-23 04:49:05 UTC. Because this was a pull_request workflow, GitHub checked out synthetic PR merge ref 53/merge, commit 3f86184a50f0a4ab44df6a2f537f164c217d990b (not the feature branch SHA directly).
 - Exact decimal tests run 1624 (45113780223) completed SUCCESS on the PR event.
 - APK is a debug/review build, not a production-signed release. Android device visual QA is still required. PR #53 remains Draft/unmerged; no Pages deployment or Supabase/production changes.
+
+
+### 2026-11-23 — independent narrow-phone market-row audit
+- Reviewed the actual `renderMarkets()` DOM order against the final market-row CSS grid: favorite button, coin identity, sparkline, 24h change/volume, and price stack. The wrapper and target list selectors are present and aligned.
+- Found and corrected a concrete responsive defect: the final `max-width:360px` rule reduced coin logos to 36px, conflicting with the requested 40px standard. Logos now remain 40px at widths down to 320px.
+- Added a regression test that checks the renderer's five child elements, the matching five-column desktop grid, the compact mobile grid, the actual market wrapper/list selectors, and the 40px logo size at <=360px.
+- Changes are isolated to `index.html`, `tests/index-syntax.test.js`, and this handoff note on the existing Draft PR #53 branch.
+- Automated workflow must complete on this new head before calling the correction validated. No merge, release, deployment, Supabase/database, auth, wallet, order, balance, or market-data pipeline changes were made.
+- Visual inspection on a real Android device remains unverified; no claim of pixel-perfect device QA.
