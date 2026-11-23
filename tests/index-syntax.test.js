@@ -558,3 +558,13 @@ test('final indigo login cascade wins over later legacy gold auth rules', () => 
   assert.ok(finalCss.includes('background:linear-gradient(135deg,#d8c5ff,#8f82d2)!important'), 'primary auth action remains lavender, not gold');
   assert.ok(finalCss.includes('color:#53d6ad!important'), 'live market accent remains mint');
 });
+
+
+test('settings and admin controls inherit the selected theme tokens', () => {
+  assert.ok(html.includes('#tab-settings .setting-row{border-radius:15px;background:var(--soft);border-color:var(--line);color:var(--text)}'),
+    'settings rows use active theme tokens instead of a fixed dark gradient');
+  assert.ok(html.includes('.daily-ad-admin-grid textarea{width:100%;min-height:88px;padding:12px;border:1px solid var(--line);border-radius:9px;background:var(--field);color:var(--text);resize:vertical}'),
+    'admin textarea follows active theme field and text colors');
+  assert.ok(html.includes('.daily-ad-admin-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text)}'),
+    'admin list items follow active theme surface and text colors');
+});
