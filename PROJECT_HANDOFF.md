@@ -991,3 +991,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Prior artifact 14809698748 predates the latest account-activity hidden-by-default change; do not present it as the latest candidate APK.
 - Next safe step: manually run Actions > DigiArz Android APK > Run workflow, selecting branch fix/theme-parity-2026-11-23. Verify the run's source SHA equals the current PR head and inspect BUILD-INFO.txt plus APK SHA-256 before sharing. Then install on Android and visually inspect all three themes. Keep PR Draft/unmerged until user explicitly approves.
 - No workflow file was changed; no merge, release, deployment, Supabase/Production, database, authentication, wallet, order, or trading changes were made.
+
+
+## 2026-11-23 — Indigo glass login theme parity repair
+- Audited the final CSS cascade and found the reference login screen retained a later, high-specificity black/gold skin even when the user selected the indigo glass theme. This caused the login hero, phone/platform/coin accents, and login form to remain visually inconsistent with the selected theme.
+- Added final, explicitly scoped `body.luxury-theme #authView ...` overrides so the reference login visual, form, inputs, buttons, phone, platform, coin accents, and promo/footer use the deep indigo/lavender glass palette with mint live-market accents.
+- Added a regression test that checks the indigo login override selectors and key palette values.
+- Code commits: `f3ec1b9747a20bae1d9f6a2c003ebdc62bb14b35` (CSS) and `af67d7c721c3e089a228c32d183e5113ad20a4c0` (initial test), followed by `6499005761965ddc223f38a03a00bb27ef6f53bd` (corrected selector assertions). Current PR head is `6499005761965ddc223f38a03a00bb27ef6f53bd`.
+- No workflow run exists yet for this new head; the earlier successful run `45163851803` is for older code SHA `321777d00a209f0164a4c3452bbce55019ce6944` and does not validate this patch.
+- PR #55 remains Draft/open/unmerged. No APK built for this new head, no physical Android visual verification, and no changes to main, Supabase/Production, database, authentication logic, wallet, orders, or trading.
+- Next: wait for/inspect CI on current head, then review remaining legacy theme overrides and all-page responsive consistency before requesting a new APK build.
