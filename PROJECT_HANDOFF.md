@@ -1013,3 +1013,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Next: inspect Actions for a run matching the new PR head, then continue page-by-page responsive and theme cascade audit. Do not merge or publish.
 
 - Follow-up test-review correction: the precedence assertion now searches for the legacy selector strictly before the final guard marker, so the guard's own repeated selector cannot be mistaken for the older rule. Test commit: 27d258cebc9600555a2c57aecafcb365f27c8ec9.
+
+## 2026-11-23 — Settings and admin theme-token consistency
+- Page-by-page CSS audit found three fixed-color surfaces that bypassed the selected theme: settings rows used a dark navy gradient; admin daily-ad textarea used near-black/white; admin daily-ad list items used fixed charcoal.
+- Replaced those fixed colors with the shared theme tokens (--soft, --field, --panel2, --line, --text) so the surfaces follow the active dark, white, or indigo theme without changing admin functionality.
+- Added regression coverage for all three token-based styles.
+- Source commit: f168b7943c12e1feff48e6f74f100e35b3b2058d. Test commit: 8b922f930f3fd0b4dedc71458ba5ea2653ea668c.
+- CI has not yet run for these commits. The latest visible successful workflow is still on older SHA 321777d00a209f0164a4c3452bbce55019ce6944; it is not validation for the latest changes.
+- PR #55 remains Draft/open/unmerged. No changes to main, Supabase/Production, database, authentication logic, wallet, orders, or trading. No APK or device visual verification.
+- Next: continue checking the remaining order-book/history/admin surfaces and mobile overflow. Keep changes scoped to the feature branch; do not merge.
