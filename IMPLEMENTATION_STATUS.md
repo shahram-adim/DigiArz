@@ -1291,3 +1291,12 @@
 - Rebuilt dashboard spacing and responsive hierarchy: compact header, balanced hero, two-column mobile shortcuts, scroll-contained filters, and a compact two-row mobile market-coin layout that avoids horizontal overflow.
 - Applied distinct black/gold, clean-white, and deep-indigo dashboard surfaces; removed decorative borders/backgrounds from dashboard coin logos and favorite stars. Existing dashboard market data, search, filters, favorite actions, account summary, and super-admin-only activity logic remain intact.
 - Added regression assertions for duplicate-shell suppression, refresh-button uniqueness, desktop theme scope, mobile row sizing, and frameless logo/favorite controls. CI must pass before a new review APK is built; PR #55 remains draft and unmerged.
+
+
+## 2026-11-23 — Dashboard layout CI and review APK verified
+- Full regression workflow [45158231654](https://github.com/shahram-adim/DigiArz/actions/runs/45158231654) completed SUCCESS; all 43 steps passed. It tested code/test commit `d175c5453626674cb0bb0f488a9d486daaf8e00e`; subsequent PR-head changes before APK build were documentation/PR metadata only.
+- Review APK workflow [45161116469](https://github.com/shahram-adim/DigiArz/actions/runs/45161116469) completed SUCCESS; all 23 job steps passed, including Android project generation, sync, debug APK build, provenance/checksum recording, and artifact upload.
+- Verified artifact `DigiArz-PR55-Theme-Parity-APK`, artifact ID `14809698748`, source commit `998c246a53ba5ae740072987c7a143b0cd799998` whose parent is PR code head `286f7aa6364628186e88f9bc0d2313a3388a84d8`.
+- APK SHA-256: `8a537a66323b03ea883e2874a3729133e15f03659e86d7750100a3a2960630ed`. Artifact ZIP SHA-256: `a0d9de6244d43a5fbd626e64ed86b9f47cc0bc9ee031194ad051109d7d55e52a`.
+- This is an installable debug/review APK, not a release-signed build. Physical Android installation and visual acceptance across all three themes remain outstanding.
+- PR #55 remains draft/open/unmerged; main remains unchanged. No release, deployment, or Production/Supabase changes.
