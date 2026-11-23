@@ -1216,3 +1216,12 @@
 - Code review found activity renderer was still called by general refresh functions while visually hidden for non-admins.
 - Added early return to renderDashboardActivity() unless isSuperAdmin; added regression assertion. Awaiting CI on latest branch head; previous successful run predates this follow-up.
 - No Android APK, merge, or Production change.
+
+
+## 2026-11-23 — Theme parity follow-up (PR #55)
+- Candidate branch: `fix/theme-parity-2026-11-23`; head `e19aa2d820db8abcf53873b1d8ca3fb33b765fa4`.
+- Added scoped dark black/gold, light, and deep indigo-glass palettes and a higher-specificity frameless market-row correction.
+- Added source regression assertions for palette selectors, login input scope, glass fallback, and market row borders.
+- Draft PR: https://github.com/shahram-adim/DigiArz/pull/55. It is based on the PR #54 candidate head and therefore includes those dashboard changes as well; keep both drafts unmerged until candidate ordering is reconciled.
+- CI run 45138971915 is in progress. No visual browser/Android confirmation yet.
+- Main remains at `968010d37a175b947616167ed265953a2ed6b62c`; no production or Supabase changes.
