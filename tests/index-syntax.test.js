@@ -545,8 +545,8 @@ test('final indigo login cascade wins over later legacy gold auth rules', () => 
   assert.ok(guard >= 0, 'final indigo cascade guard exists');
   const styleEnd = html.lastIndexOf('</style>');
   assert.ok(styleEnd > guard, 'final indigo guard remains inside the stylesheet');
-  const legacyGold = html.lastIndexOf('body.luxury-theme #authView .auth-form .auth-actions button');
-  assert.ok(guard > legacyGold, 'final indigo rules come after legacy auth button rules');
+  const legacyGold = html.lastIndexOf('body.luxury-theme #authView .auth-form .auth-actions button', guard - 1);
+  assert.ok(legacyGold >= 0 && guard > legacyGold, 'final indigo rules come after legacy auth button rules');
   const finalCss = html.slice(guard, styleEnd);
   for (const rule of [
     'body.luxury-theme #authView .auth-form input{',
