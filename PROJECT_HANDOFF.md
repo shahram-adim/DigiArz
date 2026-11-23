@@ -1111,3 +1111,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - PR #55 remains Draft/open/unmerged. GitHub reports mergeable=true and mergeable_state=unstable; do not merge or mark ready without explicit user approval. No physical Android visual acceptance has been performed.
 - No Supabase/Production, live database, migration, cron, authentication, wallet, orders, or trading changes were performed in this stage. PostgreSQL CI used disposable test containers only.
 - Next: continue the UI/theme audit with small, evidence-based presentation fixes; any source/test edits must receive a fresh CI run before claiming validation.
+
+
+## 2026-11-23 — Restore glass surfaces in the light theme
+- Continued the three-theme visual audit after confirming the latest full regression workflow passed. Found a concrete mismatch with the approved design: the final light-theme override forced all main cards and surface tokens to opaque white, removing the requested translucent/glass appearance.
+- Updated only the final light-theme palette and surface layer: warm-neutral white/very-light background gradient, translucent panel tokens, semi-transparent card surfaces, subtle cool shadows, and 16px backdrop blur with the WebKit fallback. Inputs/selects/textareas remain opaque white for contrast and readability; market coin rows remain frameless.
+- Added a regression test ensuring translucent panel/card values and backdrop blur remain present while form fields keep their opaque treatment.
+- Source commit: 77dc3d0a493f247cecd7e48d92eb391c882f6f87; test commit: c26bf885b13514ea7f1f88de77d2fdf467f2b5f0.
+- The previous full CI success was on HEAD 679da335c75daa456545dd8c57570f18fbd206e3; this new CSS/test change requires a fresh full regression run before it can be called validated.
+- PR #55 stays Draft/open/unmerged. No production, Supabase, database, auth, wallet, orders, trading, main, merge, or release changes. No physical-device visual test has been performed.
+- Next: run the full regression workflow on the new HEAD, inspect the result, then continue theme parity audit only if tests pass.
