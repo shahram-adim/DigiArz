@@ -4553,6 +4553,17 @@ body.luxury-theme #authView .ref-coin-row strong{color:#53d6ad!important}
 .orderbook-side h4{
   background:var(--panel2)!important;
 }
+
+
+/* Admin mobile controls: preserve readable wrapping and comfortable touch targets on narrow phones. */
+@media(max-width:380px){
+  #dailyAdAdminPanel>.section-title{align-items:flex-start;flex-wrap:wrap;}
+  #dailyAdAdminPanel>.section-title button{width:100%;min-height:44px;}
+  .daily-ad-admin-item{width:100%;min-width:0;}
+  .daily-ad-admin-copy{width:100%;overflow-wrap:anywhere;}
+  .daily-ad-admin-actions{width:100%;flex-wrap:wrap;}
+  .daily-ad-admin-actions button{flex:1 1 112px;min-width:0;min-height:44px;white-space:normal;overflow-wrap:anywhere;}
+}
 </style>
 
 </body>
