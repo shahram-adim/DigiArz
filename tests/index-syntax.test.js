@@ -508,9 +508,9 @@ test('three themes have isolated final palettes and frameless market coin rows',
 });
 
 
-test('pure-white theme has white surfaces and readable dark market-row typography across login and app', () => {
-  assert.match(html, /body\.light-theme\{[\s\S]{0,220}--bg:#fff;--panel:#fff;--panel2:#fff;--field:#fff;--soft:#fff/);
-  assert.match(html, /body\.light-theme \.card,body\.light-theme \.stat,[\s\S]{0,450}background:#fff!important;color:var\(--text\)!important/);
+test('light glass theme keeps translucent app surfaces and readable login and market typography', () => {
+  assert.match(html, /body\.light-theme\{[\s\S]{0,260}--bg:#f7f9fd;--panel:rgba\(255,255,255,\.76\);--panel2:rgba\(248,251,255,\.72\);/);
+  assert.match(html, /body\.light-theme \.card,body\.light-theme \.stat,[\s\S]{0,650}background:rgba\(255,255,255,\.68\)!important;color:var\(--text\)!important/);
   assert.match(html, /body\.light-theme #tab-markets \.market-board-v34 \.coin-name-fa,[\s\S]{0,180}color:#172b4d!important/);
   assert.match(html, /body\.light-theme #tab-markets \.market-board-v34 \.coin \.price-usd/);
   assert.match(html, /body\.light-theme #authView \.auth-form input\{[\s\S]{0,100}background:#fff!important;color:#172b4d!important/);
