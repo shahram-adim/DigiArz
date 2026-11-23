@@ -474,4 +474,12 @@ test('three themes have isolated final palettes and frameless market coin rows',
   for (const surface of ['.card','.stat','.trade-box','.performance-item','.indicator-panel','.fx-box','.setting-row','.orderbook-side','.gainer-card','.asset-row','.dashboard-mover-panel']) {
     assert.ok(fallback.includes('body.luxury-theme ' + surface), 'glass surface has a no-backdrop-filter fallback: ' + surface);
   }
+  const auditStart = html.indexOf('/* Theme audit: override legacy teal rules');
+  const auditEnd = html.indexOf('/* Coin rows stay frameless', auditStart);
+  const audit = html.slice(auditStart, auditEnd);
+  for (const selector of ['body.luxury-theme .tag','body.luxury-theme .coin:hover','body.luxury-theme .auth-top-banner','body.luxury-theme .daily-ad-card','body.luxury-theme .toman-table th','body.luxury-theme .gainers-panel','body.luxury-theme #tab-markets .market-board-v34 .coin-name-fa']) {
+    assert.ok(audit.includes(selector), 'legacy luxury surface is recolored: ' + selector);
+  }
+  assert.ok(audit.includes('#tab-markets .market-board-v34 .coin{background:linear-gradient(110deg,#181a20,#101318)!important'), 'dark market rows use the black palette');
+  assert.ok(audit.includes('#tab-markets .market-board-v34 .coin .price-toman{color:#f0b90b!important'), 'dark market Toman price uses gold');
 });
