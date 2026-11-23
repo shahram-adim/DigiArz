@@ -1207,5 +1207,7 @@
 ## 2026-11-23 UI review candidate
 - Draft PR #54: dashboard gainers/losers horizontal strips, super-admin-only dashboard activity center, unframed coin rows/favorite controls/logo wrappers.
 - Branch: fix/ui-dashboard-cleanup-2026-11-23 (based on main 968010d37a175b947616167ed265953a2ed6b62c).
-- Static structural checks passed; three regression tests added. CI run/status not visible yet; no CI success claimed.
+- Static structural checks passed; three regression tests added. GitHub Actions run 45130193148 passed all 21 job steps, including Node/browser tests and PostgreSQL integration regressions (2026-11-23).
 - Physical Android visual check, including Sky Blue Glass top spacing, remains outstanding. No APK/merge/Production changes.
+
+- APK note: existing android-review-apk.yml still checks out the older build/indigo-glass-biometric-apk-2026-11-21 branch, so that artifact is not valid for PR #54. android-apk.yml can build the selected ref via workflow_dispatch, but the connected GitHub tools do not expose workflow dispatch. No APK built or reused.
