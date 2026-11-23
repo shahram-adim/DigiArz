@@ -424,17 +424,12 @@ test('login mini chart renders real five-minute candles without depending on a c
   assert.match(html, /<svg viewBox=/);
 });
 
-test('dashboard market movers are horizontal and no longer duplicated in the markets tab', () => {
-  const dashboardStart = html.indexOf('<div class="dashboard-market-movers"');
-  const marketTabStart = html.indexOf('<section id="tab-markets"');
-  assert.ok(dashboardStart >= 0 && marketTabStart > dashboardStart, 'movers are placed inside the dashboard before the markets tab');
+test('dashboard does not display the five top gainers or five top losers', () => {
+  assert.doesNotMatch(html, /class="dashboard-market-movers"/);
   for (const id of ['topGainersList', 'topLosersList', 'allGainersBtn', 'allLosersBtn']) {
-    const matches = [...html.matchAll(new RegExp('id="' + id + '"', 'g'))];
-    assert.equal(matches.length, 1, id + ' appears exactly once');
-    assert.ok(matches[0].index > dashboardStart && matches[0].index < marketTabStart, id + ' belongs to the dashboard');
+    assert.doesNotMatch(html, new RegExp('id="' + id + '"'), id + ' is removed from the dashboard');
   }
-  assert.match(html, /\.dashboard-market-movers \.gainers-grid\{display:flex;flex-direction:row;[^}]*overflow-x:auto/);
-  assert.match(html, /\.dashboard-market-movers \.gainer-card\{flex:0 0/);
+  assert.match(html, /#tab-markets \.gainers-panel/, 'market tab retains its separate market analytics panels');
 });
 
 test('dashboard account activity is visible only to an authenticated super-admin', () => {
