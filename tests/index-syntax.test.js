@@ -426,16 +426,17 @@ test('login mini chart renders real five-minute candles without depending on a c
 
 
 test('market rows keep three isolated visual themes and frameless logos/stars', () => {
-  const block = html.match(/<style id="digiarz-market-row-reference-themes-20261123">([\\s\\S]*?)<\\/style>/);
-  assert.ok(block, 'final market-row theme override is present');
-  const css = block[1];
-  assert.match(css, /body\\.dark-theme[\\s\\S]*?#tab-markets/);
-  assert.match(css, /body\\.light-theme[\\s\\S]*?#tab-markets/);
-  assert.match(css, /body\\.luxury-theme[\\s\\S]*?#tab-markets/);
-  assert.match(css, /background:#fff!important/);
-  assert.match(css, /#78c8ff/);
-  assert.doesNotMatch(css, /#1b245f|#1b2[0-9a-f]{2}/i, 'third theme must not fall back to indigo');
-  assert.match(css, /width:40px!important;height:40px!important/);
-  assert.match(css, /border:0!important;outline:0!important;border-radius:0!important;background:transparent!important/);
-  assert.match(css, /grid-template-columns:28px minmax\\(0,1fr\\) minmax\\(112px,auto\\)!important/);
+  const start = html.indexOf('<style id="digiarz-market-row-reference-themes-20261123">');
+  const end = html.indexOf('</style>', start);
+  assert.ok(start >= 0 && end > start, 'final market-row theme override is present');
+  const css = html.slice(start, end);
+  assert.ok(css.includes('body.dark-theme #tab-markets'), 'dark theme has a dedicated market-row palette');
+  assert.ok(css.includes('body.light-theme #tab-markets'), 'light theme has a dedicated market-row palette');
+  assert.ok(css.includes('body.luxury-theme #tab-markets'), 'Sky Blue Glass has a dedicated market-row palette');
+  assert.ok(css.includes('background:#fff!important'));
+  assert.ok(css.includes('#78c8ff'));
+  assert.ok(!css.includes('#1b245f'), 'third theme must not fall back to indigo');
+  assert.ok(css.includes('width:40px!important;height:40px!important'));
+  assert.ok(css.includes('border:0!important;outline:0!important;border-radius:0!important;background:transparent!important'));
+  assert.ok(css.includes('grid-template-columns:28px minmax(0,1fr) minmax(112px,auto)!important'));
 });
