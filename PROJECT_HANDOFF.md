@@ -1177,3 +1177,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - The prior CI success (run 45189354433) was for the previous HEAD 27821aa7. A new successful run on the new final HEAD is required before treating this adjustment as validated.
 - PR #55 remains Draft/open/unmerged. Do not merge or publish. No Supabase/Production, DB, auth, wallet, orders, or trading logic changed. Physical Android visual acceptance remains outstanding.
 - Next: verify source/test CSS placement and current CI on the final HEAD; then continue auditing theme contrast only where a specific mismatch is supported by the cascade.
+
+
+## 2026-11-23 — Market percentage color audit
+- Rechecked the live PR #55 head and exact-decimal CI. The full workflow run `45189911956` completed SUCCESS on code/test SHA `be246a124b284d5455ae9ba24c6851519ea646ef`; a newer run `45189952353` also completed SUCCESS on the documentation-updated PR head `86fe31a4ef62a4a0bd36062394a6140515843392`. The latest run includes the complete 43-step job.
+- Audited the market list percentage change indicators: positive and negative badges already consume the shared `--green` and `--red` tokens. Verified explicit palette values in dark/black-gold (`#0ecb81` / `#f6465d`), light glass (`#16845e` / `#cf4052`), and deep indigo glass (`#53d6ad` / `#ff8198`). Their foreground contrast against the respective market row surfaces is adequate for normal text; no unnecessary color change was made.
+- Added a regression test ensuring gain/loss indicators use those theme tokens and each theme defines its own positive/negative colors.
+- Test commit: `7e38e090b5662897e7aa6b69ee392ab2892a8a42`.
+- PR #55 remains open, Draft, and unmerged. No application CSS/logic, main, Supabase/Production, database, auth, wallet, orders, or trading behavior was changed in this audit. Physical Android visual acceptance remains outstanding.
+- Next: verify CI for the new regression-test commit and continue only with concrete cascade/layout defects.
