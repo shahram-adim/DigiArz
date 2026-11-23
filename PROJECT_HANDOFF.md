@@ -862,3 +862,16 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - PR #47 remains Draft/open/unmerged and mergeable. Physical Android installation, fingerprint enrollment, and login/logout/background-relock acceptance tests remain outstanding. APK is a debug review build, not production-signed.
 - No app code was merged to main; no release/deployment/publishing or Supabase/database/user-financial-data changes were made. This handoff entry is documentation-only.
 - Next: user installs the new APK and checks all three themes, password login, fingerprint enrollment/unlock, logout and relock. Fix only observed issues on PR #47; do not merge without explicit user approval.
+
+## 2026-11-23 — Dashboard market movers and account-activity visibility review
+- Verified current main is still 968010d37a175b947616167ed265953a2ed6b62c; created fresh branch fix/ui-dashboard-cleanup-2026-11-23 directly from that exact head.
+- Moved the existing five-gainer and five-loser panels out of the Markets tab and into the Dashboard immediately below “بازار ارزهای دیجیتال”. Their existing IDs, click handlers, and render functions were preserved; each list is now horizontally scrollable with responsive card widths.
+- Updated setAccountMode(active) so .dashboard-activity-center is visible only when the account is active and isSuperAdmin has been positively confirmed by is_current_user_super_admin. Existing admin-only check remains server-derived; no role or authorization backend was changed.
+- Removed decorative borders from .coin rows and .favorite-btn, and removed the background/frame from .coin-icon wrappers. Existing logo images and star interaction remain intact.
+- Added three regression tests in tests/index-syntax.test.js for dashboard placement/horizontal layout, super-admin activity visibility, and unframed coin styling.
+- Opened Draft PR #54: https://github.com/shahram-adim/DigiArz/pull/54. Current branch is 2 commits ahead and 0 behind main; comparison shows only index.html and tests/index-syntax.test.js changed.
+- Static source checks confirmed the two market lists appear exactly once and only in the dashboard, the dashboard appears before the Markets tab, the role gate and CSS overrides are present, and all three new regression tests are included.
+- GitHub Actions workflow-run lookup and combined commit status returned no runs/statuses for this PR head at the time of this handoff. Therefore syntax/test suite success is NOT claimed yet. The repository's exact-decimal-tests.yml is configured for pull requests to main, but no run was visible through the connected GitHub API in this session.
+- No visual browser/device render was performed. The Sky Blue Glass dashboard's reported top blank-space issue still requires actual Android visual verification before claiming fixed.
+- No merge, APK build, release, deployment, Supabase/Production/database change, wallet/trade change, or authentication-flow change was performed.
+- Next: verify Actions run for PR #54 and fix any failures; then obtain an Android review APK only after CI passes, and have the user verify all three themes on-device. Keep PR #54 Draft/unmerged until explicit approval.
