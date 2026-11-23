@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - integration/theme-market-cleanup-2026-11-23
     paths:
       - "index.html"
       - "manifest.webmanifest"
@@ -83,4 +84,3 @@ jobs:
             android/app/build/outputs/apk/debug/BUILD-INFO.txt
           if-no-files-found: error
           retention-days: 14
-
