@@ -1265,3 +1265,14 @@
 - Physical Android rendering/installation is still required for final visual acceptance; CI cannot certify device appearance.
 
 - Validation result: GitHub Actions run 45150130527 completed SUCCESS on final code/test head efe0261ee85a996d97acce92d3b886127dbcea65; all 43 job steps passed, including the newly added runtime chart/theme-color parity regression. PR #55 remains Draft/open/unmerged. Main and Production remain unchanged. Final physical Android rendering/installation is still not verified.
+
+
+## 2026-11-23 — Latest theme parity verification and APK gate
+- Rechecked PR #55 through GitHub: state=open, draft=true, merged=false, mergeable=true; head `21290f02e9bcc339e7a658b40a87e1d6667524ac`; base/main `968010d37a175b947616167ed265953a2ed6b62c`.
+- The branch ref points to the same head. Exact-decimal workflow run `45150454902` completed with conclusion SUCCESS on this commit. Its `exact-decimal` job completed successfully; the run contains no Android APK artifacts.
+- Confirmed `android-review-apk.yml` still checks out the obsolete `build/indigo-glass-biometric-apk-2026-11-21` branch regardless of the selected branch. It must not be used for this theme candidate.
+- Confirmed `android-apk.yml` supports workflow_dispatch but the connected GitHub tools expose no workflow-dispatch action. No new APK for head `21290f0` has been built or verified.
+- The available APK artifact from run `45146118883` (artifact `14804561034`) comes from branch `build/apk-final-theme-parity-2026-11-23`, source head `b44e90e1d52614b3164109d260de385160205f99`; it predates the final white/indigo and runtime chart palette fixes and must not be presented as the latest APK.
+- Physical Android installation and visual acceptance remain outstanding. CI success does not certify device rendering.
+- No merge, release, deployment, Supabase/Production, database, authentication, wallet, order, or trading change was performed.
+- Next safe step: add a narrowly scoped artifact-only APK workflow that can build the exact PR #55 head without changing main/Production, or have the user trigger the existing workflow_dispatch manually with the exact branch ref. Verify BUILD-INFO source commit and APK SHA-256 before sharing.
