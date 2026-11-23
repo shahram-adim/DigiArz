@@ -929,3 +929,9 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - First CI attempt after the admin-only change correctly exposed one stale regression assertion: an older test still required the activity panel to be visible to every user.
 - Updated that legacy assertion to require the panel markup to remain available for admins while hidden by default. The new role-gate regression test separately verifies that only a successful server-side super-admin result reveals it.
 - This was a test expectation mismatch, not a production runtime failure. Re-run the full workflow on the latest head before treating the branch as green.
+
+
+### Session-transition hardening for admin-only dashboard panel — 2026-11-23
+- Further tightened the fail-closed behavior: the admin-only activity panel is now hidden immediately when a new authenticated session begins, before the asynchronous profile and super-admin role lookups complete. This prevents a prior administrator's visible panel from briefly carrying over while a different account is being checked.
+- Reset the in-memory admin flag at session entry and added a regression assertion that the hide occurs before the profile query.
+- The server-side super-admin RPC remains unchanged; no authorization policy or database object was modified.
