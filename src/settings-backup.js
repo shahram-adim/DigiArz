@@ -12,7 +12,7 @@ function readPreferences() {
     try {
       const raw = localStorage.getItem(spec.key);
       if (raw === null) continue;
-      const value = JSON.parse(raw);
+      const value = spec.type === 'symbols' ? JSON.parse(raw) : raw;
       if (spec.values && spec.values.includes(value)) result[name] = value;
       if (spec.type === 'symbols' && Array.isArray(value) && value.every(x => typeof x === 'string' && /^[A-Z0-9]{2,20}$/.test(x))) result[name] = [...new Set(value)];
     } catch (_) {}
@@ -52,8 +52,8 @@ async function importBackup(file) {
   const payload = JSON.parse(await file.text());
   const prefs = validate(payload);
   if (!window.confirm('تنظیمات موجود روی این دستگاه با موارد موجود در فایل جایگزین شوند؟')) return;
-  if (prefs.theme) localStorage.setItem(KEYS.theme.key, JSON.stringify(prefs.theme));
-  if (prefs.currency) localStorage.setItem(KEYS.currency.key, JSON.stringify(prefs.currency));
+  if (prefs.theme) localStorage.setItem(KEYS.theme.key, prefs.theme);
+  if (prefs.currency) localStorage.setItem(KEYS.currency.key, prefs.currency);
   if (prefs.favorites) localStorage.setItem(KEYS.favorites.key, JSON.stringify(prefs.favorites));
   show('تنظیمات بازیابی شد. صفحه برای اعمال کامل تغییرات تازه‌سازی می‌شود.', 'ok');
   setTimeout(() => location.reload(), 700);
