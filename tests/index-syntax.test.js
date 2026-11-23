@@ -50,7 +50,7 @@ test('trade history CSV export respects filters and preserves exact decimal stri
   assert.ok(body.includes("String(item.amount??'')"), 'amount stays an exact string');
   assert.ok(body.includes("String(item.price??'')"), 'price stays an exact string');
   assert.ok(body.includes("const csv='\\uFEFF'"), 'UTF-8 BOM is included');
-  assert.ok(body.includes("join('\\r\n')"), 'CSV uses CRLF line endings');
+  assert.ok(body.includes("join('\\r\\n')"), 'CSV uses CRLF line endings');
   assert.ok(body.includes('createObjectURL') && body.includes('revokeObjectURL'));
   assert.ok(body.includes('safeCell'), 'CSV cells are protected against formula injection');
 });
