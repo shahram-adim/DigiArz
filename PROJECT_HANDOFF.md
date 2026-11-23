@@ -1157,3 +1157,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - CI run 45188116927 passed on earlier SHA bb171c9e503251af9613e0bdf72afe29c5967f8e. Newer source/test commits have their own workflow runs; verify the newest run against the final HEAD before calling this validated.
 - PR #55 remains Draft/open/unmerged. Do not merge or publish. No Supabase/Production, DB, auth, wallet, orders, or trading logic changed. Physical Android visual acceptance remains outstanding.
 - Next: inspect the final theme cascade around market logo/coin rows for duplicate or conflicting !important rules, then verify current HEAD and Actions.
+
+
+## 2026-11-23 — Move market-logo override to the actual final cascade
+- A deeper cascade-order check found that the previous frameless-logo override had been inserted into the first style block, while a later dedicated market-row stylesheet appears after it. Although the selector matched the rendered .coin-icon markup, it was not guaranteed to win against all later CSS.
+- Moved the override into the final stylesheet at the end of index.html, after the dedicated market-row rules, so background, border, and shadow removal wins in all three themes.
+- Strengthened the regression test to assert the override is inside the final style block (not merely before the last closing style tag), and to verify it targets the actual coinLogo wrapper/image.
+- Source commit: b469685ddd939bc0fd1f96505cd2e5520e16fcaf; test commit: f7ef60f5ddf4663e45df46b6dc81868704b5b761.
+- Previous successful workflow 45188878308 covered the earlier source state; workflow 45189152338 was still running on the markup-specific test commit at last check. Verify a completed successful workflow on the final source/test HEAD before calling this final cascade fix validated.
+- PR #55 remains Draft/open/unmerged. No main, Supabase/Production, DB, auth, wallet, orders, or trading logic changes. No physical Android visual test has been performed.
+- Next: verify the final branch HEAD, final stylesheet placement, regression assertions, and latest workflow. Continue theme review only if a specific cascade defect is evidenced.
