@@ -440,3 +440,27 @@ test('market rows keep three isolated visual themes and frameless logos/stars', 
   assert.ok(css.includes('border:0!important;outline:0!important;border-radius:0!important;background:transparent!important'));
   assert.ok(css.includes('grid-template-columns:28px minmax(0,1fr) minmax(112px,auto)!important'));
 });
+
+
+test('market row renderer and narrow-phone CSS stay aligned with the five-cell layout and 40px logos', () => {
+  const marker = '<style id="digiarz-market-row-reference-themes-20261123">';
+  const start = html.indexOf(marker);
+  const end = html.indexOf('</style>', start);
+  assert.ok(start >= 0 && end > start, 'isolated market-row stylesheet is present');
+  const css = html.slice(start, end);
+  assert.match(css, /grid-template-columns:34px minmax\(0,1\.2fr\) minmax\(58px,\.55fr\) minmax\(84px,\.72fr\) minmax\(116px,\.86fr\)!important/);
+  assert.match(css, /grid-template-columns:28px minmax\(0,1fr\) minmax\(112px,auto\)!important/);
+  const narrow = css.slice(css.indexOf('@media(max-width:360px)'));
+  assert.match(narrow, /width:40px!important;height:40px!important;min-width:40px!important;max-width:40px!important;flex-basis:40px!important/);
+  assert.match(html, /class="market-board-v34"/);
+  assert.match(html, /id="marketList" class="market-list"/);
+  const renderStart = html.indexOf('function renderMarkets(){');
+  const renderEnd = html.indexOf('function renderDashboardPortfolio(', renderStart);
+  const renderer = html.slice(renderStart, renderEnd);
+  assert.match(renderer, /div\.append\(star,identity,sparkline,changeWrap,price\)/, 'renderer order must match the five desktop grid cells');
+  assert.match(renderer, /star\.className='favorite-btn'/);
+  assert.match(renderer, /identity\.className='coin-identity market-coin-open'/);
+  assert.match(renderer, /sparkline\.className='coin-sparkline'/);
+  assert.match(renderer, /changeWrap\.className='coin-change-wrap'/);
+  assert.match(renderer, /price\.className='price-stack'/);
+});
