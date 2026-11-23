@@ -4041,6 +4041,113 @@ body.luxury-theme #authView .auth-phone-device{border-color:rgba(232,218,183,.8)
 .dashboard-market-movers .gainers-grid::-webkit-scrollbar{height:5px}
 .dashboard-market-movers .gainers-grid::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
 @media(max-width:640px){.dashboard-market-movers{grid-template-columns:minmax(0,1fr)}.dashboard-market-movers .gainer-card{flex-basis:min(260px,84vw)}}
+
+/* Final theme parity pass: one scoped palette per theme; keep all page surfaces in sync. */
+body.dark-theme{
+  color-scheme:dark;--bg:#0b0e11;--panel:#181a20;--panel2:#202630;
+  --line:#303844;--text:#f5f5f5;--muted:#9299a5;--field:#101318;
+  --soft:#141820;--yellow:#f0b90b;--green:#0ecb81;--red:#f6465d;
+}
+body.light-theme{
+  color-scheme:light;--bg:#f3f6fb;--panel:#fff;--panel2:#f5f8fc;
+  --line:#e1e7f0;--text:#172337;--muted:#64748b;--field:#fff;
+  --soft:#f7f9fc;--yellow:#b98512;--green:#16845e;--red:#cf4052;
+}
+body.luxury-theme{
+  color-scheme:dark;--bg:#101027;--panel:rgba(29,30,66,.78);
+  --panel2:rgba(39,40,82,.76);--line:rgba(151,145,220,.32);
+  --text:#f0efff;--muted:#b3b1d1;--field:rgba(19,19,48,.9);
+  --soft:rgba(29,29,67,.78);--yellow:#d8c58a;
+  --green:#53d6ad;--red:#ff8198;
+  background:
+    radial-gradient(ellipse at 12% 4%,rgba(103,87,190,.30),transparent 36%),
+    radial-gradient(ellipse at 88% 18%,rgba(191,164,105,.13),transparent 30%),
+    linear-gradient(145deg,#0b0b20,#171735 55%,#101027);
+  color:var(--text);
+}
+body.luxury-theme .top{
+  background:rgba(16,16,42,.88);border-color:rgba(151,145,220,.28);
+}
+body.luxury-theme .card,body.luxury-theme .stat,
+body.luxury-theme .trade-box,body.luxury-theme .performance-item,
+body.luxury-theme .indicator-panel,body.luxury-theme .fx-box,
+body.luxury-theme .setting-row,body.luxury-theme .orderbook-side,
+body.luxury-theme .gainer-card,body.luxury-theme .asset-row,
+body.luxury-theme .dashboard-mover-panel{
+  background:linear-gradient(145deg,rgba(48,45,98,.72),rgba(22,22,55,.84));
+  border-color:rgba(151,145,220,.28);
+  box-shadow:0 12px 34px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.07);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+}
+body.luxury-theme .hero{
+  background:radial-gradient(circle at 12% 10%,rgba(115,98,210,.26),transparent 38%),
+  linear-gradient(125deg,rgba(42,40,91,.94),rgba(25,25,62,.92) 68%,rgba(91,76,52,.32));
+  border-color:rgba(216,197,138,.4);
+}
+body.luxury-theme .brand,body.luxury-theme h2,
+body.luxury-theme h3,body.luxury-theme .stat .value,
+body.luxury-theme .price-usd{color:var(--text)}
+body.luxury-theme .brand span:first-child,
+body.luxury-theme .hero-mark,body.luxury-theme .orderbook-mid{color:var(--yellow)}
+body.luxury-theme input,body.luxury-theme select,
+body.luxury-theme textarea{
+  background:var(--field);color:var(--text);
+  border-color:rgba(151,145,220,.38);
+}
+body.luxury-theme .tabs,body.luxury-theme .mobile-bottom-nav{
+  background:rgba(17,17,47,.94);border-color:var(--line);
+}
+body.luxury-theme .tabs button,body.luxury-theme .timeframes button,
+body.luxury-theme button.secondary{
+  background:rgba(49,46,99,.72);color:var(--text);border-color:var(--line);
+}
+body.luxury-theme .tabs button.active,
+body.luxury-theme .timeframes button.active{
+  background:linear-gradient(135deg,#d8c58a,#a99155);color:#17152b;
+}
+body.luxury-theme .notice{background:rgba(49,46,99,.55);color:var(--text);border-color:var(--line)}
+body.luxury-theme #priceChart,body.luxury-theme #volumeChart{
+  background:#171735;border-color:var(--line);
+}
+body.luxury-theme #authView .auth-form,
+body.luxury-theme #authView .auth-security{
+  background:rgba(25,25,64,.9);border-color:var(--line);color:var(--text);
+}
+body.luxury-theme #authView .auth-form h2,
+body.luxury-theme #authView .auth-headline,
+body.luxury-theme #authView .auth-benefit{color:var(--text)}
+body.luxury-theme #authView .auth-form input{background:var(--field);color:var(--text);border-color:var(--line)}
+body.luxury-theme #authView .auth-form .auth-actions button{
+  background:linear-gradient(135deg,#d8c58a,#a99155);color:#17152b;
+}
+body.luxury-theme #authView .auth-form .auth-actions #signupBtn{
+  background:rgba(49,46,99,.8);color:var(--text);border-color:var(--line);
+}
+/* Coin rows stay frameless in every theme, including the more-specific market-board rules. */
+#tab-markets .market-board-v34 .coin,
+#tab-markets .market-board-v34 .coin:hover,
+#tab-markets .market-board-v34 .coin.selected{
+  border:0!important;box-shadow:none!important;
+}
+#tab-markets .market-board-v34 .coin:hover,
+#tab-markets .market-board-v34 .coin.selected{
+  background:var(--panel2)!important;
+}
+body.light-theme #tab-markets .market-board-v34 .coin{
+  background:#fff!important;color:var(--text)!important;
+}
+body.luxury-theme #tab-markets .market-board-v34 .coin{
+  background:linear-gradient(110deg,rgba(48,45,98,.72),rgba(22,22,55,.84))!important;
+  color:var(--text)!important;
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  body.luxury-theme .card,body.luxury-theme .stat,
+  body.luxury-theme .trade-box,body.luxury-theme .performance-item,
+  body.luxury-theme .setting-row,body.luxury-theme .gainer-card{
+    background:#20204a;
+  }
+}
+
 </style>
 
 </body>
