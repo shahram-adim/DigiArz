@@ -4494,9 +4494,10 @@ body.luxury-theme #tab-markets .market-board-v34 .coin{
 
 /* Final cross-theme defect fixes: white-theme contrast and full surface parity. */
 body.light-theme{
-  --bg:#fff;--panel:#fff;--panel2:#fff;--field:#fff;--soft:#fff;
-  --line:#dbe7f5;--text:#172b4d;--muted:#60758f;
-  background:#fff!important;color:var(--text)!important;
+  --bg:#f7f9fd;--panel:rgba(255,255,255,.76);--panel2:rgba(248,251,255,.72);
+  --field:#fff;--soft:rgba(248,251,255,.66);
+  --line:rgba(205,218,236,.78);--text:#172b4d;--muted:#60758f;
+  background:linear-gradient(145deg,#fff 0%,#f5f8fd 58%,#f1f6fc 100%)!important;color:var(--text)!important;
 }
 body.light-theme .top,body.light-theme .tabs,
 body.light-theme .mobile-bottom-nav{
@@ -4509,8 +4510,9 @@ body.light-theme .fx-box,body.light-theme .setting-row,
 body.light-theme .orderbook-side,body.light-theme .gainer-card,
 body.light-theme .asset-row,body.light-theme .dashboard-mover-panel,
 body.light-theme .daily-ad-card,body.light-theme .gainers-panel{
-  background:#fff!important;color:var(--text)!important;
-  border-color:var(--line)!important;box-shadow:0 5px 18px rgba(35,75,125,.045)!important;
+  background:rgba(255,255,255,.68)!important;color:var(--text)!important;
+  border-color:var(--line)!important;box-shadow:0 8px 24px rgba(35,75,125,.065)!important;
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
 }
 body.light-theme input,body.light-theme select,body.light-theme textarea,
 body.light-theme button.secondary,body.light-theme .theme-switch{
