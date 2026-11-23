@@ -1093,3 +1093,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Recheck Actions for the final PR head before claiming validation. No physical Android visual test has been performed.
 - PR #55 remains Draft/open/unmerged. No main, Supabase/Production, database, auth, wallet, orders, or trading logic changes. Do not merge or publish.
 - Next: check final PR/CI state and continue only with presentation-level fixes supported by inspection; keep all production and financial behavior untouched.
+
+
+## 2026-11-23 — Reconcile main updates and repair CSV test assertion
+- Main advanced by two commits after the theme branch's merge base. Incorporated the main Toman-market freshness helper/status change and its regression test into the theme branch, and carried the associated implementation-status note forward without replacing the branch's UI work.
+- Created a two-parent merge commit `fe596876bee8a9c325eca9705495b589b94d763b` with the theme branch as first parent and current main `c7b024fc56a5e5004f8b1fbb49c71ad2fd8cab39` as second parent. PR #55 became mergeable=true; it remains Draft/open/unmerged.
+- Exact Decimal CI run `45175990913` ran on merge commit `fe596876bee8a9c325eca9705495b589b94d763b`. The first Node/browser stage reported 79/80 passing. The only failure was a malformed escape in the existing CSV regression assertion: the test expected backslash-r followed by a real newline instead of the two escaped sequences `\\r\\n`. The production CSV implementation itself still emits CRLF correctly; all new admin layout and Toman freshness tests passed.
+- Corrected the test assertion only; no CSV implementation, trading, wallet, auth, or database logic changed. A fresh CI run must validate the corrected test on the new HEAD.
+- Do not merge PR #55 or mark it ready. No main/Production/Supabase writes were performed; the merge commit only brings main ancestry into the feature branch.
+- Next: verify the latest CI run and then continue visual/source audit only after test status is clear. Physical Android appearance remains unverified.
