@@ -493,3 +493,13 @@ test('pure-white theme has white surfaces and readable dark market-row typograph
   assert.match(html, /body\.light-theme #authView \.auth-form input\{[\s\S]{0,100}background:#fff!important;color:#172b4d!important/);
   assert.match(html, /body\.light-theme #authView \.auth-form \.auth-actions button\{[\s\S]{0,100}color:#fff!important/);
 });
+
+
+test('runtime chart palette and Android browser theme-color match the three CSS themes', () => {
+  assert.ok(html.includes("if(meta)meta.content=light?'#ffffff':luxury?'#101027':'#0b0e11'"));
+  assert.ok(html.includes("light?{bg:'#ffffff',text:'#172b4d',grid:'#edf2f8',line:'#dbe7f5'}"));
+  assert.ok(html.includes("luxury?{bg:'#171735',text:'#f0efff',grid:'#2f2e59',line:'#514d78'}"));
+  assert.ok(html.includes("{bg:'#101318',text:'#f5f5f5',grid:'#202630',line:'#303844'}"));
+  assert.ok(html.includes('--bg:#101027'));
+  assert.ok(html.includes('--text:#f0efff'));
+});
