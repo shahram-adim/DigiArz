@@ -980,3 +980,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Source commit: `d9079b3c7951812fba3f12cc7857de31e4125458`; test commit: `4315fa7c394d4f1544c80b56951538ce339f0660`.
 - A fresh CI result is **not yet available** for the latest test commit: the connected workflow/status lookup returned no runs and no status checks. Earlier green CI and the earlier review APK apply to older commits only; do not treat them as validation of this change.
 - PR #55 remains Draft/unmerged. No changes were made to `main`, Supabase/Production, authentication, wallets, orders, or trading. A new review APK and physical Android check are still pending.
+
+
+## Live handoff — 2026-11-23, account-activity gate CI passed
+- Latest PR #55 head: 321777d00a209f0164a4c3452bbce55019ce6944; base/main remains 968010d37a175b947616167ed265953a2ed6b62c.
+- Exact-decimal workflow run 45163851803 completed SUCCESS on the latest head. The exact-decimal job completed all 43 steps successfully, including browser/Node, PostgreSQL regression, migration rehearsal/rollback/lock checks, market/limit/stop-limit, TP-SL, and concurrency tests. This supersedes the earlier note that CI was still pending for the account-activity gate.
+- PR #55 remains open, Draft, unmerged, and mergeable. Main and Production remain unchanged.
+- Current APK workflows were inspected. android-apk.yml supports workflow_dispatch and checks out the selected ref by default, so it is suitable for a manual build when dispatched on fix/theme-parity-2026-11-23. The connected GitHub tools expose no workflow_dispatch action, so no new APK has been built by this session.
+- android-review-apk.yml is unsuitable: it hardcodes checkout of build/indigo-glass-biometric-apk-2026-11-21, irrespective of selected ref. Do not use it for this candidate.
+- Prior artifact 14809698748 predates the latest account-activity hidden-by-default change; do not present it as the latest candidate APK.
+- Next safe step: manually run Actions > DigiArz Android APK > Run workflow, selecting branch fix/theme-parity-2026-11-23. Verify the run's source SHA equals the current PR head and inspect BUILD-INFO.txt plus APK SHA-256 before sharing. Then install on Android and visually inspect all three themes. Keep PR Draft/unmerged until user explicitly approves.
+- No workflow file was changed; no merge, release, deployment, Supabase/Production, database, authentication, wallet, order, or trading changes were made.
