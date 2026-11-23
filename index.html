@@ -2004,6 +2004,18 @@ body.luxury-theme #authView .ref-promo-copy strong{color:#f0efff!important}
 body.luxury-theme #authView .ref-promo-tag{background:linear-gradient(120deg,#d8c5ff,#8f82d2)!important;color:#17152b!important}
 body.luxury-theme #authView .ref-demo-footer{color:#c4b9f2!important;background:#101027!important}
 
+
+/* Exchange-sync admin header: wrap actions cleanly on compact screens. */
+@media(max-width:700px){
+  #exchangeAssetSyncPanel>.section-title{align-items:flex-start;flex-wrap:wrap;}
+  #exchangeAssetSyncPanel>.section-title h3{min-width:0;max-width:100%;overflow-wrap:anywhere;}
+  #exchangeAssetSyncPanel>.section-title .market-tools{width:100%;min-width:0;grid-template-columns:repeat(2,minmax(0,1fr));}
+  #exchangeAssetSyncPanel>.section-title .market-tools button{min-width:0;min-height:44px;white-space:normal;overflow-wrap:anywhere;}
+}
+@media(max-width:380px){
+  #exchangeAssetSyncPanel>.section-title .market-tools{grid-template-columns:1fr;}
+}
+
 </style>
 <style>
 .pwa-install-banner{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 16px;margin:0 0 14px;border:1px solid rgba(240,185,11,.45);border-radius:14px;background:linear-gradient(110deg,rgba(240,185,11,.10),rgba(24,26,32,.96));box-shadow:0 8px 24px rgba(0,0,0,.12)}
