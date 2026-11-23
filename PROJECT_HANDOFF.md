@@ -1073,3 +1073,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Re-fetch the final PR head and Actions. Do not treat earlier successful CI runs as validation for this change.
 - PR #55 remains open/Draft/unmerged. No main, Supabase/Production, database, auth, wallet, orders, or trading changes. No real-device visual test was performed.
 - Next: continue auditing admin user cards and dynamic result lists for long identifiers and narrow-width overflow; preserve intentional table scrolling. Do not merge or publish.
+
+
+## 2026-11-23 — Compact admin user-card layout
+- Continued the admin responsive audit and inspected the generated user-card markup. At widths <=380px, the two balance tiles and two-column credit-adjustment form could become cramped, while long email/balance values could resist wrapping.
+- Added a scoped <=380px rule under #tab-admin: user balance tiles stack vertically, long email and numeric values can wrap, and each credit-adjustment control uses the available card width. No RPC, wallet balance, adjustment validation, permission, or financial logic changed.
+- Added a regression test covering the compact user-card layout and wrapping constraints.
+- Source commit: 6c78e3d294b163d12b2576e9e449fd877da69b3f; test commit: 8f04cae1cf8acbc5030e857e54d93b9c2b85bf31.
+- Recheck Actions against the final branch HEAD; previous successful CI runs target older SHAs and do not validate this change. Do not claim physical-device visual verification.
+- PR #55 remains Draft/open/unmerged. No main, Supabase/Production, database, authentication, wallet, orders, or trading logic changes. Do not merge or publish.
+- Next: inspect the dynamic admin asset/pair-review and exchange-sync result rows for long symbols/identifiers and narrow-screen overflow; keep changes scoped to presentation and tests.
