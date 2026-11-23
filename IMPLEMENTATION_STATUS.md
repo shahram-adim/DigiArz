@@ -1300,3 +1300,27 @@
 - APK SHA-256: `8a537a66323b03ea883e2874a3729133e15f03659e86d7750100a3a2960630ed`. Artifact ZIP SHA-256: `a0d9de6244d43a5fbd626e64ed86b9f47cc0bc9ee031194ad051109d7d55e52a`.
 - This is an installable debug/review APK, not a release-signed build. Physical Android installation and visual acceptance across all three themes remain outstanding.
 - PR #55 remains draft/open/unmerged; main remains unchanged. No release, deployment, or Production/Supabase changes.
+
+## گزارش اجرای روزانه — ۲۰۲۶-۱۱-۲۳: اصلاح نمایش تازگی بازار تومانی
+
+### تغییر رابط و آزمون رگرسیون
+- [x] HEAD مبنا در شروع این اقدام: `968010d37a175b947616167ed265953a2ed6b62c`.
+- [x] Commit کد و آزمون: `83f0e3ceedaf7ce69129790a930e3916f5103e35` (`fix(market-ui): report observed Toman source freshness`).
+- [x] `index.html`: شمار منبع اکنون از کلیدهای یکتای `exchange` در ردیف‌های واقعاً برگشتی محاسبه می‌شود؛ تعداد ردیف/منبع تازه و بیشترین `fetched_at` نمایش داده می‌شود. زمان خواندن مرورگر دیگر به‌جای زمان دریافت بازار معرفی نمی‌شود.
+- [x] `tests/index-syntax.test.js`: آزمون مستقل helper برای تکرار منبع، تفاوت حروف بزرگ/کوچک، ردیف stale و timestamp واقعی اضافه شد.
+- [x] اجرای Exact Decimal Run #1677، شناسه `45165054735`، روی همین commit شروع شد؛ مرحله Node/browser regression موفق است. در زمان ثبت این گزارش، مرحله PostgreSQL 17 و ادامه آزمون‌های مالی هنوز در حال اجرا بود؛ نتیجه کامل CI تا پایان آن ادعا نمی‌شود.
+- [x] Android Build #193، شناسه `45165054765`، روی همین commit با نتیجه SUCCESS پایان یافت. Artifact: `14812559044`، حجم 3,524,865 bytes، SHA-256 `d0ad577bf805bc5b95b4037fdbad5efb5509a6f8465af9b18c12ab83706ed9ce`، انقضا `2026-12-07T11:26:38Z`. APK debug است؛ نصب فیزیکی روی Android هنوز آزمایش نشده است.
+
+### Supabase Production — بررسی فقط‌خواندنی در ۲۳ نوامبر
+- [x] پروژه `gfoaubfilhttnwjykaox` در `ACTIVE_HEALTHY` و PostgreSQL `17.11.0.018`؛ Migration ledger برابر ۵۵ و آخرین نسخه `20261121050216`.
+- [x] Edge Function `refresh-toman-market-prices` در Production هنوز نسخه ۳ است. بدنه زنده هنوز POST ساده به `market_toman_prices` می‌فرستد و helperهای upsert/dedupe موجود در main را ندارد.
+- [x] لاگ ۲۴ ساعت اخیر برای این تابع: ۲۳ درخواست POST با HTTP 502 و ۲۳ درخواست OPTIONS با HTTP 200. بنابراین ۲۰۰ها موفقیت refresh نیستند؛ فقط preflight هستند.
+- [x] شمارش فقط‌خواندنی `market_toman_prices`: نوبیتکس ۲۲۱ ردیف و والکس ۱۵۲ ردیف؛ آخرین `fetched_at` برای هر دو `2026-11-17 22:04:26.622 UTC` و سن حدود ۸۰۰۰ دقیقه. در جدول قیمت جاری ردیفی از Bit24 یا Kifpool وجود ندارد.
+- [x] Health Advisor بدون یافته بود. هشدارهای Security/Performance همچنان نیازمند بازبینی برنامه‌ریزی‌شده‌اند؛ هیچ grant، policy، index، Auth setting یا تابع Production تغییر نکرد.
+- [!] کد اصلاح upsert در GitHub و تست PostgreSQL دورریختنی موجود است، اما تا استقرار صریحاً تأیید نشود، داده زنده همچنان تحت تأثیر تابع نسخه ۳ است.
+- [x] هیچ refresh، worker، RPC مالی، Migration یا نوشتن/حذف داده‌ای در Production اجرا نشد؛ هیچ سفارش، معامله، رزرو، کیف پول، موجودی یا سابقه مالی تغییر نکرد.
+
+### گام بعد
+1. نتیجه نهایی Run #1677 را بررسی و فقط پس از پایان همه jobهای PostgreSQL/Stop-Limit وضعیت CI را SUCCESS اعلام کن.
+2. قرارداد API رسمی Bit24 و Kifpool، معنای bid/ask، واحد تومان/ریال، نرخ‌محدودیت و مجوز استفاده از endpoint را مستند و fixture تهیه کن؛ تا پیش از آن adapter یا endpoint حدسی اضافه نشود.
+3. اصلاح upsert تابع Production فقط پس از تأیید صریح کاربر deploy شود؛ سپس refresh واقعی صرفاً در چارچوب تأیید جداگانه و بدون اجرای هیچ RPC مالی انجام شود.
