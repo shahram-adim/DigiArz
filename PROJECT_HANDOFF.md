@@ -862,3 +862,230 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - PR #47 remains Draft/open/unmerged and mergeable. Physical Android installation, fingerprint enrollment, and login/logout/background-relock acceptance tests remain outstanding. APK is a debug review build, not production-signed.
 - No app code was merged to main; no release/deployment/publishing or Supabase/database/user-financial-data changes were made. This handoff entry is documentation-only.
 - Next: user installs the new APK and checks all three themes, password login, fingerprint enrollment/unlock, logout and relock. Fix only observed issues on PR #47; do not merge without explicit user approval.
+
+
+## Live UI correction — 2026-11-21 (PR #48)
+- User explicitly selected **Indigo Glass / نیلی شیشه‌ای** for theme three and requested page-edge spacing, repair of cryptocurrency row layout, and separation of login from dashboard.
+- Fresh branch created from current main: `redesign/indigo-glass-layout-fix-2026-11-21`.
+- Draft PR: https://github.com/shahram-adim/DigiArz/pull/48
+- Current implementation files: `index.html`, `tests/index-syntax.test.js`.
+- Added a final, explicitly scoped visual override: separate centered login/recovery composition and authenticated app shell; hide the shared dashboard header while the login screen is active; consistent max widths/gutters and responsive padding; four-column desktop and two-row mobile coin-row layout; no star/favorite column and no outer row frames/borders; removed logo monogram frame/ring; light frosted-glass surfaces; deep Indigo Glass palette scoped to `body.luxury-theme`; retained dark black/yellow theme.
+- Updated third-theme display label to نیلی شیشه‌ای and chart palette to indigo.
+- Added regression assertions for the approved theme/layout.
+- Latest branch commit at handoff update time: `b845638c3ce7bb42702add88174f9d4f4d02bf6c` (before this handoff-only commit). PR #48 open, Draft, unmerged; GitHub reported mergeable true on latest metadata read.
+- Automated workflow results for this head were not yet returned by the workflow-run lookup at handoff time; do not claim tests passed until confirmed.
+- No authentication/trading JavaScript intentionally changed; no Supabase/database edits, merge, release, deployment, or publishing.
+- Physical visual QA on the Android device remains outstanding. Current PR #47 (Sky Blue) remains separate and unmerged; do not merge either PR without explicit approval.
+- Next: wait for/verify PR #48 CI, review the exact rendered login/dashboard/market layouts at mobile width, correct any visual regressions, then produce a review APK only after build provenance and biometric scope are validated.
+
+
+### PR #48 CI correction — 2026-11-21
+- First exact-decimal workflow run `44907362540` failed only in the newly added UI regression test: its assertion expected a standalone light-theme selector, while the actual valid CSS grouped the light-theme card selectors. Existing tests 1–38 passed, including the three-theme and login-hero checks.
+- Corrected the test selector assertion without changing app CSS or behavior.
+- Latest tested code head: `8ef8ff72d6710013fd15e3d427da99187b984de8`.
+- New exact-decimal workflow run `44907443764` is in progress; no passing result claimed yet.
+- PR #48 remains open, Draft, unmerged; mergeability last reported true. No APK build yet; physical device visual QA remains pending.
+
+
+## 2026-11-21 — PR #48 Indigo Glass + Android biometric review integration
+- Preserved PR #48's latest UI-only work and ported the previously tested APK-only biometric implementation onto the same fresh-from-main branch: pinned Capacitor 8 dependencies, native biometric session storage module, injection/preparation scripts, Capacitor config, and biometric unit tests.
+- Verified the Android injection anchors occur exactly once in the PR #48 index: decimal script, recovery button, original Supabase initClient, auth-state listener block, and start() function. The build injection is designed to modify only the generated `www/index.html`, not the repository source index.
+- Updated `.github/workflows/android-review-apk.yml` to build from `redesign/indigo-glass-layout-fix-2026-11-21`, trigger on relevant pushes to that branch, verify the Capacitor runtime and merged `USE_BIOMETRIC` permission, and upload only a 14-day debug review APK artifact named `DigiArz-Indigo-Glass-Biometric-APK`.
+- PR #48 branch is now 17 commits ahead of main and 0 behind. Changed files include the UI, test suite, Android build config, biometric module/scripts and artifact-only workflow. PR remains Draft/open/unmerged.
+- Exact-decimal/PostgreSQL/market/order/concurrency workflow run `44916926921` completed SUCCESS before the Android port. The latest exact-decimal run `44917421087` is running after the integration commits; do not claim its result until verified.
+- The APK workflow is configured for the integrated PR #48 branch. A matching Android workflow run/artifact has not yet been verified; do not provide an old Sky Blue APK as the Indigo build.
+- No merge, release, production deployment, Supabase/database changes, or real-money functionality changes. Physical Android install and biometric enrollment/login/logout/relock checks remain outstanding.
+- Next: verify the latest exact-decimal run, then verify the Indigo Glass biometric Android workflow and artifact provenance before sharing any APK.
+
+
+## 2026-11-21 — Indigo Glass Android APK verified
+- Android workflow run `44917416392` completed SUCCESS on commit `d2b6598bb27377b77391f990d10fe9c02ebb290a`.
+- All Android review-build steps passed: biometric storage tests, prepare web assets/native bridge, Gradle debug APK build, merged `USE_BIOMETRIC` permission check, provenance and artifact upload.
+- Artifact: `DigiArz-Indigo-Glass-Biometric-APK`, artifact ID `14712600080`, expires 2026-12-05 15:08:12 UTC.
+- Downloaded and extracted the artifact for verification. APK path in the model runtime: `/mnt/data/digiarz-apk/app-debug.apk`; size 7,291,522 bytes.
+- APK SHA-256 verified against BUILD-INFO.txt: `1fad5736346a1504c5adf9c4a67f23ae45349ce803bd6350a51b1ef146af4d25`.
+- This is an installable Android debug review APK, not a production-signed release. Physical device biometric enrollment/login/logout/background relock and full visual review are still required.
+- PR #48 remains Draft/open/unmerged; branch remains isolated from main. No production deployment or database changes.
+
+
+## 2026-11-21 — Third theme approved reference applied
+- User explicitly approved the pale blue/lavender glass login + dashboard mockup as the exact visual target for theme 3.
+- Applied the reference only under `body.luxury-theme`; black/gold and light themes remain separately scoped.
+- Login: centered DigiArz brand treatment, pale lavender/blue gradient backdrop, translucent rounded glass form, soft white fields, purple-to-blue primary action; removed the older dark globe/phone composition from this theme only.
+- Dashboard: translucent glass shell, pale blue balance/hero panel, four quick-action tiles, light market rows without individual frames, glass market/account panels, pale navigation surfaces and blue-violet active states.
+- Preserved authentication markup and Supabase wiring; no auth/backend logic, database, or production settings changed.
+- Added UI regression assertions in `tests/index-syntax.test.js`.
+- Commits: UI `c41777eb28fd9e9e31c4905db11e5acfc756aa38`; tests `420d0cba7ec7cc5a717253ec0ec59058fa6088e1`.
+- CI and Android review APK runs for the latest commits are pending/in progress at handoff time. Do not distribute an APK until the run for latest tested commit succeeds.
+- PR #48 remains draft/open/unmerged. Physical-device visual acceptance is still required.
+
+
+## 2026-11-21 — Approved pale-blue glass theme APK built
+- Android review APK workflow succeeded: run `44919847545`.
+- Artifact: `DigiArz-Indigo-Glass-Biometric-APK`, artifact ID `14712908852`, expires 2026-12-05 15:35:22 UTC.
+- APK source commit: `420d0cba7ec7cc5a717253ec0ec59058fa6088e1` (contains approved third-theme styling and strict login/dashboard isolation); subsequent `c0a9b5e4` commit only updates this handoff note.
+- Extracted APK path in assistant runtime: `/mnt/data/digiarz-apk-latest/app-debug.apk`.
+- APK SHA-256: `f9bbd3d4d1a4c6dab082b05b9243fa88b578fe76f2dc1da020a6f975164b0056`.
+- CI exact-decimal suite for source commit `420d0cba` passed (run `44919865047`).
+- Build remains an unsigned debug/review APK. Physical-device testing of theme appearance, login/dashboard isolation, biometric enrollment/authentication, logout and relock is still pending.
+- No production deploy, merge, Supabase/database changes, or production signing.
+
+
+
+## 2026-11-21 — Pale blue/lavender glass correction and CSS-boundary regression guard
+- User's latest explicit visual direction takes precedence over the earlier Indigo label: theme 3 must be pale blue/lavender glass with a light sky-blue accent, not saturated navy/deep indigo. Theme 2 remains genuinely light with a light frosted background; theme 1 remains black/gold.
+- Found that the previous theme override block had been appended after the final `</style>`, so the browser treated it as document text rather than active CSS. Corrected the stylesheet placement and restored the approved compact login composition (570px maximum width on theme 3, hero hidden in that theme) without changing authentication or dashboard business logic.
+- Added the theme-3 pale glass dashboard/login palette and kept the existing v2 dashboard layout, login/dashboard separation, borderless market rows, and logo-frame removal.
+- Added a regression test in `tests/index-syntax.test.js` to fail if any CSS declarations appear after the final style element.
+- Updated Android review artifact naming to `DigiArz-Pale-Blue-Glass-Biometric-APK`.
+- Updated PR #48 title and description to match the latest approved pale-blue/lavender design: https://github.com/shahram-adim/DigiArz/pull/48
+- Current branch: `redesign/indigo-glass-layout-fix-2026-11-21`. Latest branch head after index, test, and workflow naming changes: `c07657e2ed80578e00900351daf194dd8d5cfcc1`. Files changed in this correction: `index.html`, `tests/index-syntax.test.js`, `.github/workflows/android-review-apk.yml`, and this handoff file.
+- A live Actions query for the latest test commit returned zero workflow runs. Therefore the new regression test and current APK build are **not yet CI-verified**. Earlier CI/APK results belong to older commits and must not be presented as validating this head.
+- PR #48 remains open and Draft, unmerged; GitHub's latest PR metadata reported `mergeable=false`. No merge, release, deployment, production signing, Supabase/database changes, or real-money functionality changes were made.
+- Physical Android visual QA and fingerprint enrollment/login/logout/background-relock acceptance tests remain outstanding.
+- Next: obtain a CI run for current head `c07657e2...`, verify the Android artifact provenance matches that exact head, and only then share a review APK. Do not merge without explicit user approval.
+
+
+
+### Actions status refresh — 2026-11-21 16:32 UTC
+- Follow-up live Actions query supersedes the earlier zero-runs snapshot: exact-decimal workflow run `44925058935` is in progress on handoff head `304eb34cebd214a7c1ab8cb74e350328b21a250b`; a second exact-decimal run `44925034185` is in progress on code/workflow head `c07657e2ed80578e00900351daf194dd8d5cfcc1`.
+- Android artifact-only workflow run `44925030730` is queued/pending on `c07657e2...`. An earlier Android run `44924975787` is still building the prior `e3e30f5a...` head and uses the older artifact label; do not distribute that artifact as the final pale-blue build.
+- The latest static verification confirms: CSS declarations are now inside the final stylesheet; no raw CSS remains between `</style>` and `</body>`; the three target palette selectors, compact third-theme login, hero visibility, borderless market rows, and login/dashboard visibility selectors are present; all three inline scripts pass V8 syntax compilation. These are static checks, not a substitute for CI or Android visual QA.
+- Wait for exact-decimal and the queued Android run; only share an APK after the artifact provenance source commit is checked against `c07657e2...` and the build completes successfully.
+
+
+
+### CI completion update — 2026-11-21
+- Exact-decimal/PostgreSQL/market/order/concurrency CI run `44924996393` completed **SUCCESS** on commit `b42e5fa5c7b839a0d985b1d876ca2b7c13168295`. This commit includes the current app CSS correction and the new stylesheet-boundary regression test.
+- Android review build run `44924975787` completed **SUCCESS** on app-code commit `e3e30f5a8f492565f1f728587dfe9e99b7ecfe53`. Its artifact label predates the pale-blue naming correction, so it is not the final artifact to share.
+- Final-label Android review run `44925030730` is queued/pending on `c07657e2ed80578e00900351daf194dd8d5cfcc1`; wait for its completion and verify artifact provenance before sharing.
+- Exact-decimal runs `44925034185` (code/workflow head) and `44925058935` (latest handoff head) were still in progress at this check. The passing run above is already on the exact same application code and regression-test content.
+
+
+
+### APK artifact delivered — 2026-11-21
+- Android review workflow `44925030730` completed **SUCCESS** on source commit `56d049f315d1ce3ee03bccb83bf9eb5e43a61f67`. All workflow steps passed, including biometric storage tests, visual/application regression tests, Capacitor packaging, debug APK build, merged biometric permission verification, provenance recording, and artifact upload.
+- GitHub artifact ID: `14714519615`, name `DigiArz-Pale-Blue-Glass-Biometric-APK`, ZIP size 6,194,783 bytes. It contains `app-debug.apk` (7,299,806 bytes) and `BUILD-INFO.txt`.
+- APK SHA-256: `a836222ce3463a35cf8c74908826c95f307adc4197dcecaae5ccd3300c438763`.
+- Downloaded and locally verified the ZIP archive and embedded APK with `unzip -t`; no archive corruption was reported. Build-info source commit is the current handoff commit and includes the app code from `c07657e2...` unchanged.
+- APK is a **debug/review build**, not a production-signed release. Real-device installation, biometric enrollment and login/logout/background-relock checks remain to be completed by user/device testing. Do not merge or publish without explicit user approval.
+
+
+## 2026-11-21 — Android login/dashboard failure and pale-blue theme correction
+- User reported that login succeeds but the dashboard does not open, and the three themes still look unchanged.
+- Read-only Supabase unified logs show Android WebView password-token requests returning HTTP 200 at 16:52:10, 16:53:15, and 16:55:35 UTC, followed by profile GET requests returning HTTP 401 at 16:52:12, 16:53:16, and 16:55:37 UTC. Those failed profile requests carried no authenticated JWT claims. Earlier profile GET requests from the same app/account did carry the authenticated role and returned HTTP 200.
+- Read-only privilege/policy inspection: authenticated has SELECT on public.profiles; RLS is enabled; the existing SELECT policy restricts reads to auth.uid() = id. anon does not have SELECT. Do not grant anon access: the 401s are consistent with the client request losing its authenticated session/token, not a missing authenticated-role grant. No database privileges, policies, schema, or data were changed.
+- Inspected APK biometric injection: the Android lifecycle handler avoids disposing the Supabase client while isPromptInProgress() is true, but the secure-storage adapter previously marked only biometric reads as in-progress. A native biometric prompt during plugin.setData() could therefore background the WebView and let the lifecycle handler dispose the authenticated client mid-login.
+- Fixed src/android-biometric-lock.js to mark secure session writes as biometric-prompt-in-progress for the entire native setData() call, resetting the flag on both success and error. Added a regression test in scripts/test-android-biometric.js proving the lifecycle guard remains active until the secure write completes.
+- Fixed stale third-theme JavaScript palette/metadata: theme 3 now identifies as آبی شیشه‌ای, sets the root color scheme to light, and uses the pale-blue glass chart/background palette rather than the old deep-indigo values. Updated the theme selector label and added UI regression assertions in tests/index-syntax.test.js.
+- Commits on redesign/indigo-glass-layout-fix-2026-11-21: secure-storage fix 1d2001da3fd0b9138cce53967347e9dd717017ce; biometric test 20ebd7b46e896b645d1ab1f92164031936778bba; UI palette fix 1a38b87658aafbc4d3e45f0920fba4fb177f2ef4; UI regression test/latest head a26ef25abd5b22618f6554feffefebee3d531e25.
+- Exact-decimal and Android review CI for the latest head have not yet been confirmed. Do not share a replacement APK until both test suites pass and its artifact provenance matches the latest app-code commit.
+- PR #48 remains Draft/open/unmerged. PR #47 and all other branches remain untouched. No Supabase/Production changes, merge, deployment, signing, or release.
+- Next: verify CI for latest head a26ef25...; inspect the new Android artifact's build provenance and verify the APK contents before sharing.
+
+
+### CI follow-up — 2026-11-21
+- Exact-decimal/PostgreSQL/market/order/concurrency workflow run 44927852526 completed SUCCESS on app/test head a26ef25abd5b22618f6554feffefebee3d531e25. The UI regression step and all PostgreSQL/concurrency integration steps completed successfully.
+- An earlier run on the preceding UI commit, 44927812247, failed only because the existing regression assertion still expected the obsolete label نیلی شیشه‌ای; the assertion was updated to the new approved label آبی شیشه‌ای, and the latest run passed.
+- Android review workflow/artifact for the new biometric lifecycle fix has not yet been independently located/verified. Do not distribute the previous APK as a fix for the reported dashboard issue.
+- PR #48 remains Draft/open/unmerged. No Production or Supabase changes.
+
+
+### Theme separation correction — 2026-11-21
+- User explicitly clarified that the **light theme must have a white/light background**, not the pale-blue background reserved for theme 3.
+- Added a final high-specificity light-theme cascade: white-to-near-white page background, neutral white frosted dashboard cards, restrained grey borders/shadows, white login shell and neutral controls. Kept the pale sky-blue glass palette exclusive to theme 3.
+- Added a regression test ensuring the light theme remains neutral white and does not inherit theme-3 blue colors.
+- App CSS commit: `9674be0c4cbfb1de5a15f8d33eda92edf2c8deab`; test commit/current head: `cdd6076ec34cae2a8bc3e5b4c433824e20486e34`.
+- Android review build triggered for these commits; do not share an APK until it completes and artifact provenance is verified. PR #48 remains Draft/open/unmerged; no production, Supabase, merge, or release changes.
+
+
+## 2026-11-21 — Explicit email-or-fingerprint login choice
+- User requested that the login screen let them choose between email/password and fingerprint.
+- Reused the existing Android-only NativeBiometric + encrypted Supabase session adapter; did not introduce a second authentication provider or change Supabase policies.
+- Updated `src/android-biometric-lock.js` with an opt-in deferred biometric prompt. During cold startup, Supabase reads no session until the user taps the fingerprint option; this keeps email/password immediately available without triggering the biometric dialog automatically. Tapping the option explicitly unlocks the encrypted session, then reinitializes Supabase so the authenticated session is restored.
+- Updated `scripts/inject-android-biometric.py` so generated Android APK login screens show a clearly labeled **ورود با اثر انگشت** button only when a protected session exists. Email/password login remains visible and unchanged. Logout hides/removes the saved-session option; cancellation keeps the encrypted record and leaves email login available.
+- Added regression test `scripts/test-android-biometric.js` verifying deferred startup does not call the native biometric prompt and explicit user selection unlocks the saved session.
+- Commits: secure storage `20a7b20ccb1eee74acc42f772cee4f09feeeb422`; test `5f39b2c9023c80d97bc6a52c9da22e6801e60260`; Android injection `eb0855d48982544faee3b6fd8e4796c76ec5f590`.
+- CI for these commits has not yet been verified. A new Android review build and test run must complete before sharing an APK.
+- PR #48 remains Draft/open/unmerged. No merge, production deployment, Supabase/database changes, or real-money features. Physical Android fingerprint enrollment and end-to-end device acceptance remain unverified.
+
+
+## 2026-11-21 — Crypto market row overflow correction
+- User reported that cryptocurrency rows were misaligned and overflowing their container.
+- Inspected the actual market-row renderer: each row contains favorite, identity, sparkline, 24h-change/volume, and price cells. Existing CSS had several conflicting desktop/tablet/mobile grid definitions (including 5-column, 4-column, and two-column overrides), plus fixed minimum widths that could exceed narrow phone content width.
+- Added a final scoped CSS correction after the legacy styles. Market board and row now use border-box sizing and strict 100%/min-width:0 constraints; desktop rows use four shrinkable columns; phones use a two-column identity/price layout with 24h change beneath the identity; sub-380px screens receive tighter tracks and typography. Long price/name/source values can wrap rather than push the row outside the viewport. Existing borderless row and logo treatment is preserved across all three themes.
+- Also constrained dashboard market-preview rows and their text columns so the compact preview cannot force horizontal overflow on small phones.
+- Added regression coverage in `tests/index-syntax.test.js` for the final mobile row containment cascade, narrow viewport breakpoints, wrapping behavior, and borderless treatment.
+- Commits: CSS `78ae9826c9b704fd7ac847bf7387db1be90d9d1e`; regression test `921915de675dd6c22af9f00a8786c051e2c43176`; assertion correction `ba3a426a315214c1104f2607331ca79f55e9ed31`.
+- Exact-decimal/UI test and Android review APK workflows are running/queued for these commits. Do not share an APK until the latest build completes and artifact provenance is verified.
+- No Supabase/database changes, merge, production deployment, or release. PR #48 remains Draft/open/unmerged. Physical device viewport verification is still pending.
+
+
+## 2026-11-21 — dashboard remains visible during profile/auth role checks
+- User reported that the authenticated dashboard does not open.
+- Source inspection found showApp(session) switched the body to dashboard mode but did not reveal #appView until after two network operations: profiles lookup and, for active accounts, is_current_user_super_admin RPC. A slow/failed Supabase request (including the previously observed timeout/504 class of incident) could therefore leave the user on the login screen even with a valid auth session.
+- Patched index.html on the existing isolated PR #48 branch redesign/indigo-glass-layout-fix-2026-11-21: after validating the session object, reveal #appView.app-view-active, hide #authView, show logout and user identity immediately; then perform the existing profile/account-status and super-admin checks. Authorization/account gating and dashboard data loading remain in place.
+- Added a regression test in tests/index-syntax.test.js asserting that the dashboard shell is revealed before the profile lookup.
+- Fix commits: 0fd5b351cfa574dfc79ce6390c298987e5a3d273 (application) and 3254e0a3ddf65bd8754097e294b9c81588d10398 (test).
+- No CI run has yet been returned for the test commit; do not claim automated validation passed. No merge, deployment, release, or Supabase/database change was performed. PR #48 remains isolated for review.
+- Next: verify the CI run for the latest PR #48 head, then build/review an APK or deploy only after the user's explicit approval. Confirm actual dashboard open on Android after installing the matching build.
+
+
+## 2026-11-21 — Full-page light/blue-glass backgrounds and stylesheet boundary repair
+- User confirmed the installed APK shows a completely white screen after login (symptom category 1). They also clarified: remove the grey page background; the light theme must use its own white glass appearance across the full page, and theme 3 must carry its own pale-blue glass background across the full page.
+- Re-inspected the current PR #48 branch and confirmed the light-theme final override still used a subtle grey-tinted gradient behind the dashboard. Changed the light page pseudo-background to pure white and made the dashboard shell transparent so the page canvas remains white while the frosted cards stay translucent.
+- Reasserted the existing pale sky-blue glass gradient on the entire theme-3 body canvas; the dashboard shell remains transparent so it does not cover the theme background.
+- Found a malformed stylesheet boundary: `digiarz-login-hero-premium-v1` was not closed before the mobile market containment stylesheet opened, and an extra closing style tag remained at EOF. Separated the two style blocks and balanced all 8 style open/close tags.
+- Added regression coverage for balanced style elements, independent hero/mobile style blocks, theme-3 full-page canvas, and the light-theme transparent dashboard shell.
+- App change commit: `301d5159590ad99a7a577be902dd2c2a867c8685`; test commit/current head at time of check: `52e9ddd41326cae541f5e3c329f015af17edbd39`.
+- Exact-decimal/UI workflow run `44935311575` was in progress at handoff update. Android APK workflow/artifact for this head is not yet verified. Do not claim the white-screen symptom is fixed until the authenticated dashboard is inspected and the matching APK is built and tested on-device.
+- Further diagnosis is still required for the fully white post-login screen: inspect the authenticated shell's visible section state and failure path around the initial `profiles` lookup / admin-role RPC. No changes to authentication, Supabase, database, merge, deployment, signing, or release were made. PR #48 remains Draft/open/unmerged.
+- Next action: complete CI for this head, inspect the Android review build/artifact provenance, then continue targeted diagnosis of the white dashboard screen without asking the user for a screenshot.
+
+
+### CI correction follow-up — 2026-11-21
+- Exact-decimal workflow run `44935311575` failed before running the suite because the newly added test's closing-style regex was over-escaped and caused a JavaScript SyntaxError. This was a test-source issue, not an application runtime failure; 29 unrelated subtests passed and the rest were skipped after the test process failed.
+- Corrected the regression guard to count literal opening/closing style tags without regex escaping in commit `380a2474b9e003f669efd1b249beb3290b5bd10f`.
+- As of this update, no matching workflow run/status has yet been returned for corrected head `380a2474b9e003f669efd1b249beb3290b5bd10f`; do not report CI as passing. Android APK build/artifact for the latest app commit is also unverified.
+- The initial code inspection also found that the auth-listener error handler only displays the load failure in the login message if the login view is still visible; showApp() hides it before the profile query. Continue tracing this path and ensure a profile/RPC failure produces a visible in-dashboard error instead of a silent white/empty state. Do not weaken account-active gating or expose restricted tabs before the profile check.
+
+
+### Authenticated dashboard failure visibility follow-up — 2026-11-21
+- Inspected the actual auth listener and confirmed a concrete silent-failure path: after `showApp(session)` hides the login view, a failed initial profile lookup rejects the promise; the catch handler previously displayed the error only if the login view was still visible, so the failure message was suppressed in the authenticated state.
+- Changed the listener to render the account-loading error in the dashboard's existing `#adminRoleStatus` live status region. This does not bypass the profile active check, grant access, or expose restricted tabs; it only makes the reason visible instead of silently swallowing it.
+- Application commit: `eeebdc4590c4f260c1befd402b79cd66603d8737`; regression test commit/current branch head at this update: `8c0d36394b5ca9e1bcadbd4dbd2cc4a8172fdb93`.
+- Latest workflow lookup returned no matching run/status for corrected head `8c0d363...`; CI is therefore pending/unverified. The prior run `44935311575` failed due to the over-escaped test regex, which was corrected in `380a247...`. Do not claim the suite passes.
+- This is a targeted correction to a verified silent error path, but it does not yet prove the user's full-white-screen symptom is resolved. The dashboard still requires a matching Android review build and real-device validation. No APK has been delivered or installed, and no merge, deployment, release, Supabase/database changes were made. PR #48 remains Draft/open/unmerged.
+
+
+### Market coin-row alignment repair — 2026-11-21
+- User again reported market coin rows were misaligned and overflowing the table. Re-inspected the actual DOM construction in `renderMarkets`: each row appends children in this order: favorite button, identity, sparkline, change/volume, price. The previous CSS positioned identity/spark/change/price but did not remove the first favorite-button grid item, which created an unintended extra grid track and shifted the columns.
+- Added a final scoped layout override on PR #48: hide the visual favorite button (consistent with the approved no-star/no-favorite-column design), use named CSS grid areas for identity/sparkline/change/price on desktop, and a two-column/two-row mobile arrangement (identity + change on the first column, price on the second; sparkline hidden). Added min-width:0, bounded icon/name tracks, wrap-safe text and a narrower <=380px profile.
+- App commit: `7afd979478be29fb0710c1107002a685bd38d1c2`; regression test commit/current branch head at this note: `200460c997fabfea50d303aa773333319a55c9cc`.
+- This is a source-level correction based on verified DOM child order, not a physical-device visual confirmation. Matching CI and APK artifact for this latest head are still unverified; do not say it is already fixed in the user's installed APK. No merge/deployment/release or Supabase/database changes.
+
+
+### PR #48 latest-head CI verification — 2026-11-21
+- Rechecked live PR #48: Draft/open/unmerged, mergeable=true; head `b0b2d5346e538b0f947dd911736391e94145ded2`.
+- Matching GitHub Actions run `44935795408` completed with conclusion `success` for that exact head. Job `exact-decimal` (`136942011133`) and all listed steps completed successfully, including exact-decimal/browser integration tests and the PostgreSQL 17 disposable integration/concurrency suites.
+- The earlier note saying latest-head CI was unverified is superseded for this exact head. This does not constitute physical Android UI QA or prove the white/black screen issue is resolved on the user's phone.
+- The Android review APK workflow has not produced a verified artifact for this exact head; the only matching run found is the exact-decimal workflow. No APK build/download, merge, release, deployment, or Supabase/database changes were performed.
+- Next: obtain a review APK built from this exact PR #48 head, then perform phone-level visual checks of login, dashboard, all three themes and market rows; separately test fingerprint enrollment/unlock and logout/background relock. Keep PR Draft and do not merge without explicit user approval.
+
+
+### Android review APK provenance verified — 2026-11-21
+- Follow-up artifact lookup found the Android review build that was omitted from the first run query: workflow run `44935779185`, job `136942446649`, conclusion `success`.
+- All build steps succeeded: APK biometric storage tests, visual/application regression tests, Capacitor generation/sync/runtime verification, debug APK build, merged biometric permission verification, provenance recording and artifact upload.
+- Artifact: `DigiArz-Pale-Blue-Glass-Biometric-APK`, artifact ID `14719965866`, expires 2026-12-05 18:32:48 UTC. Artifact BUILD-INFO confirms exact source commit `b0b2d5346e538b0f947dd911736391e94145ded2` and run `44935779185`.
+- Extracted APK SHA-256: `57300ad934b3f5e4bde48b059765de621afe5a70215bc348f9d5d3544edf35e8` (7,303,534 bytes). This is a debug review APK, not a production-signed release.
+- The earlier statement above that no APK artifact was verified for the app code head is superseded by this artifact provenance check. Current PR head advanced afterward only because of the handoff documentation commit `a4bb9ff62c8e24e9aee70e8b06013693ac757490`; app source remains at the APK-verified code commit `b0b2d534...`.
+- Physical Android installation, visual review of all three themes and fingerprint enrollment/login/logout/background-relock tests remain outstanding. PR #48 remains Draft/open/unmerged; no release, deployment or Supabase/database changes.
+
+
+## 2026-11-21 — dashboard and market responsive layout correction
+- User explicitly reiterated that both the authenticated dashboard and the market page must be laid out correctly; this is part of the deliverable, not an optional follow-up.
+- Inspected the actual dashboard DOM and market-row DOM on the existing isolated PR #48 branch before changing styles.
+- Added a final responsive CSS layer in `index.html` (commit `6e0efde56367e570a48b72d9e1bf3e1b68f4f667`): dashboard quick actions and account stats use shrink-safe grids; dashboard market cards are organized into bounded identity/price/change areas; search/filter controls and activity panels wrap without forcing horizontal overflow. The market page now has a contained hero, stable market-list grid areas, no extra favorite-button column in market rows, and a two-column mobile row arrangement with price aligned separately from identity/change. Added tighter <=390px sizing.
+- Added regression assertions for the dashboard and market breakpoints/areas in `tests/index-syntax.test.js` (commit/current branch head `23c1d7d36c21dfb3856cb4641bbbfe8074836d63`).
+- Validation boundary: the source changes are committed on the isolated PR #48 branch. A matching GitHub Actions run has not yet been returned for this exact head; do not report tests as passed. No physical-device screenshot/viewport test has been performed. Do not claim the installed APK has these changes.
+- No merge, release, deployment, Supabase/database changes, or real-money functionality changes. Keep PR #48 Draft/unmerged pending CI and visual review.

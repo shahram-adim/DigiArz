@@ -321,7 +321,9 @@ test('login screen uses the selected Binance-inspired black-and-yellow palette w
   const styleEnd = html.lastIndexOf('</style>');
   assert.ok(paletteStart >= 0 && styleEnd > paletteStart, 'final brand override is present at the end of the stylesheet');
   const palette = html.slice(paletteStart, styleEnd);
-  assert.ok(palette.includes('#authView.auth-reference-layout{'), 'final palette scopes to the reference auth layout');
+  assert.ok(palette.includes('body.dark-theme #authView.auth-reference-layout{'), 'black-and-yellow auth palette is scoped to the dark theme only');
+  assert.doesNotMatch(palette, /(^|[,{]\\s*)#authView/m, 'no unscoped auth palette selector can leak into other themes');
+  assert.doesNotMatch(palette, /ref-monogram:after|border-bottom-color/, 'the logo monogram has no decorative frame or ring');
   assert.ok(palette.includes('background:#0b0e11!important'), 'outer auth surface uses black');
   assert.ok(palette.includes('linear-gradient(155deg,#181a20 0%,#0b0e11 60%,#11151c 100%)!important'), 'visual panel uses charcoal and black');
   assert.ok(palette.includes('linear-gradient(145deg,#181a20,#0b0e11 72%)!important'), 'form panel uses charcoal and black');
@@ -422,4 +424,147 @@ test('login mini chart renders real five-minute candles without depending on a c
   assert.match(html, /renderAuthMiniChart\(\[\]\)/);
   assert.match(html, /fetchBinanceKlines\('BTCUSDT','5m',36\)/);
   assert.match(html, /<svg viewBox=/);
+});
+
+test('approved indigo glass, separated page shells, and repaired borderless market rows stay scoped', () => {
+  assert.match(html, /id="digiarz-approved-layout-20261121"/);
+  assert.match(html, /body\.luxury-theme\s*\{[^}]*--bg:#eaf3ff/s);
+  assert.match(html, /body\.light-theme #appView \.card[^\{]*\{[^}]*backdrop-filter:blur\(18px\)/s);
+  assert.match(html, /#authView\.auth\s*\{[^}]*max-width:1080px/s);
+  assert.match(html, /#appView\.app-view-active\s*\{[^}]*max-width:1320px/s);
+  assert.match(html, /#tab-markets \.coin\s*\{[^}]*grid-template-columns:minmax\(0,1\.25fr\)/s);
+  assert.match(html, /#tab-markets \.coin>\.favorite-btn[^\{]*\{display:none!important\}/);
+  assert.match(html, /#tab-markets \.coin\s*\{[^}]*border:0!important/s);
+  assert.match(html, /luxury:'آبی شیشه‌ای'/);
+  assert.match(html, /body\.auth-page-active #appView[\s\S]*?display:none!important/);
+  assert.match(html, /body\.dashboard-page-active #authView[\s\S]*?display:none!important/);
+  assert.match(html, /#authView\.hidden,\s*#appView\.hidden\{display:none!important\}/);
+  assert.match(html, /body\.luxury-theme #authView\.auth-reference-layout[\s\S]*?max-width:570px/);
+  assert.match(html, /body\.luxury-theme #authView \.ref-hero-grid\{display:none!important\}/);
+  assert.match(html, /body\.luxury-theme #authView \.auth-form \.auth-actions #loginBtn[\s\S]*?linear-gradient\(105deg,#9862f4/);
+  assert.match(html, /body\.luxury-theme #appView \.digiarz-v2-dashboard[\s\S]*?background:rgba\(255,255,255,\.22\)/);
+  assert.match(html, /body\.luxury-theme #appView \.da-v2-market-list \.coin[\s\S]*?border:0!important/);
+  assert.match(html, /body\.luxury-theme #appView \.mobile-bottom-nav[\s\S]*?background:rgba\(250,252,255,\.82\)/);
+});
+
+test('crypto market rows stay inside the viewport on narrow phones in every theme', () => {
+  const marker = '/* DIGIARZ-MOBILE-MARKET-ROW-CONTAINMENT-20261121 */';
+  const start = html.lastIndexOf(marker);
+  const end = html.lastIndexOf('</style>');
+  assert.ok(start >= 0 && end > start, 'final mobile row containment override exists');
+  const css = html.slice(start, end);
+  assert.match(css, /#tab-markets \.market-board-v34 \.coin\s*\{[^}]*box-sizing:border-box!important/s);
+  assert.match(css, /#tab-markets \.market-board-v34 \.coin\s*\{[^}]*width:100%!important;min-width:0!important;max-width:100%!important/s);
+  assert.match(css, /@media\(max-width:760px\)[\s\S]*?grid-template-columns:minmax\(0,1fr\) minmax\(0,42%\)!important/);
+  assert.match(css, /@media\(max-width:380px\)[\s\S]*?grid-template-columns:minmax\(0,1fr\) minmax\(0,44%\)!important/);
+  assert.ok(css.includes('#tab-markets .market-board-v34 .coin .price-usd,') && css.includes('overflow-wrap:anywhere!important'), 'long price text can wrap within its own cell');
+  assert.match(css, /#dashboardMarketPreview\.dashboard-market-preview\.da-v2-market-list>\.da-market-coin-card\s*\{[^}]*min-width:0!important;max-width:100%!important/s);
+  assert.match(css, /#dashboardMarketPreview \.da-market-price[\s\S]*?word-break:break-word!important/);
+  assert.match(css, /border:0!important;border-radius:0!important;outline:0!important;box-shadow:none!important/);
+});
+
+test('final theme overrides remain inside the stylesheet rather than leaking into document text', () => {
+  const finalStyleClose = html.lastIndexOf('</style>');
+  const bodyClose = html.indexOf('</body>', finalStyleClose);
+  assert.ok(finalStyleClose >= 0 && bodyClose > finalStyleClose, 'final stylesheet and body boundaries exist');
+  assert.equal(
+    html.slice(finalStyleClose + '</style>'.length, bodyClose).trim(),
+    '',
+    'no CSS or raw style declarations may appear outside the final style element'
+  );
+});
+
+test('third theme controls and chart palette consistently use pale blue glass', () => {
+  assert.match(html, /data-theme-choice="luxury"[^>]*>✧ آبی شیشه‌ای/);
+  assert.match(html, /document\.documentElement\.style\.colorScheme=light\|\|luxury\?'light':'dark'/);
+  assert.match(html, /luxury\?'#eaf3ff':'#080d1b'/);
+  assert.match(html, /luxury\?\{bg:'#eaf3ff',text:'#183b5c',grid:'#d7eafa',line:'#b8d5eb'\}/);
+  assert.doesNotMatch(html, /luxury:'نیلی شیشه‌ای'/);
+});
+
+
+test('final pale-blue glass cascade overrides legacy indigo dashboard and login controls', () => {
+  const guard = html.lastIndexOf('/* Final cascade guard: pale sky-blue glass');
+  assert.ok(guard > html.indexOf('body.luxury-theme #appView .digiarz-v2-dashboard'), 'final cascade guard follows legacy indigo rules');
+  const tail = html.slice(guard, html.lastIndexOf('</style>'));
+  assert.match(tail, /body\.luxury-theme #appView \.card[\s\S]*?background:rgba\(255,255,255,\.64\)!important/);
+  assert.match(tail, /body\.luxury-theme #appView #tab-markets \.coin[\s\S]*?border:0!important/);
+  assert.match(tail, /body\.luxury-theme #authView \.auth-form \.auth-actions #loginBtn[\s\S]*?linear-gradient\(135deg,#b8ddf8,#8fc7ef\)!important/);
+  assert.doesNotMatch(tail, /#9862f4|#9587e8|#090d20/);
+});
+
+
+test('light theme uses a clean white background and neutral white frosted cards, distinct from blue glass', () => {
+  const guard = html.lastIndexOf('/* Final light-theme guard: clean white');
+  assert.ok(guard > html.indexOf('body.light-theme #appView .card'), 'final light guard follows earlier theme rules');
+  const tail = html.slice(guard, html.lastIndexOf('</style>'));
+  assert.match(tail, /body\.light-theme\s*\{[^}]*background:#fff!important/s);
+  assert.match(tail, /body\.light-theme #appView\s*,[\s\S]*?background:transparent!important/);
+  assert.match(tail, /body\.light-theme #appView \.card[\s\S]*?background:rgba\(255,255,255,\.88\)!important/);
+  assert.match(tail, /body\.light-theme #authView\s*\{[^}]*linear-gradient\(180deg,#fff 0%,#fbfcfe 100%\)!important/s);
+  assert.doesNotMatch(tail, /#eaf3ff|#b8ddf8|#8fc7ef/);
+});
+
+
+test('authenticated dashboard shell is revealed before profile and admin-role network checks', () => {
+  const start = html.indexOf('async function showApp(session)');
+  const profileLookup = html.indexOf("from('profiles').select('is_active,deactivated_at')", start);
+  assert.ok(start >= 0 && profileLookup > start, 'authenticated session handler and profile lookup exist');
+  const reveal = html.indexOf("appView.classList.add('app-view-active')", start);
+  const hideLogin = html.indexOf("authView.classList.add('hidden')", start);
+  assert.ok(reveal > start && reveal < profileLookup, 'dashboard is made visible before waiting for profile lookup');
+  assert.ok(hideLogin > start && hideLogin < profileLookup, 'login is hidden before waiting for profile lookup');
+});
+
+
+test('all inline style elements are balanced and the mobile market stylesheet is independent', () => {
+  const opens = html.split('<style').length - 1;
+  const closes = html.split('</style>').length - 1;
+  assert.equal(opens, closes, 'every style element has exactly one closing tag');
+  const heroOpen = html.indexOf('<style id="digiarz-login-hero-premium-v1">');
+  const mobileOpen = html.indexOf('<style id="digiarz-mobile-market-row-containment-20261121">');
+  assert.ok(heroOpen >= 0 && mobileOpen > heroOpen, 'hero and mobile styles are separate ordered blocks');
+  assert.ok(html.lastIndexOf('</style>', mobileOpen) > heroOpen, 'hero stylesheet closes before the mobile stylesheet opens');
+  assert.ok(html.includes('body.luxury-theme{min-height:100vh;background:radial-gradient(ellipse at 12% 8%'), 'theme 3 keeps its pale-blue full-page canvas');
+});
+
+
+test('account-load failures remain visible in the authenticated dashboard after login is hidden', () => {
+  const start = html.indexOf('supabaseClient.auth.onAuthStateChange');
+  const end = html.indexOf('let sessionData', start);
+  assert.ok(start >= 0 && end > start, 'auth listener boundaries exist');
+  const listener = html.slice(start, end);
+  assert.ok(listener.includes("const status=$('adminRoleStatus')"), 'dashboard status region receives the failure');
+  assert.ok(listener.includes("showMessage(status,'ورود انجام شد، اما بارگذاری حساب کامل نشد:"), 'the error is rendered in the visible dashboard');
+  assert.doesNotMatch(listener, /if\(!authView\.classList\.contains\('hidden'\)\)/, 'the error is not suppressed just because login is hidden');
+});
+
+
+test('market coin rows use fixed named grid areas and do not allocate a favorite-button column', () => {
+  const start = html.indexOf('/* Stable market-row columns:');
+  const end = html.indexOf('/* Dashboard preview:', start);
+  assert.ok(start >= 0 && end > start, 'final market-row layout override exists');
+  const css = html.slice(start, end);
+  assert.match(css, /\.coin>\.favorite-btn\{display:none!important\}/);
+  assert.match(css, /grid-template-areas:"identity spark change price"!important/);
+  assert.match(css, /grid-template-areas:"identity price" "change price"!important/);
+  assert.match(css, /grid-template-columns:minmax\(0,1fr\) minmax\(0,42%\)!important/);
+  assert.match(css, /max-width:380px/);
+});
+
+test('final dashboard and market layouts remain contained and responsive on phones', () => {
+  const marker = 'digiarz-dashboard-market-final-layout-20261121';
+  const start = html.lastIndexOf(marker);
+  const end = html.lastIndexOf('</style>');
+  assert.ok(start >= 0 && end > start, 'final dashboard/market layout stylesheet exists');
+  const css = html.slice(start, end);
+  assert.match(css, /#tab-dashboard \.da-v2-quick-grid\{display:grid;grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
+  assert.match(css, /#dashboardMarketPreview\.dashboard-market-preview\.da-v2-market-list\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+  assert.match(css, /#tab-dashboard \.dashboard-activity-grid\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+  assert.match(css, /#tab-markets \.market-board-v34 \.coin\{[^}]*grid-template-areas:"identity spark change price"/s);
+  assert.match(css, /#tab-markets \.market-board-v34 \.coin>\.favorite-btn\{display:none!important\}/);
+  assert.match(css, /@media\(max-width:760px\)[\s\S]*?#dashboardMarketPreview\.dashboard-market-preview\.da-v2-market-list\{grid-template-columns:minmax\(0,1fr\)(?:;gap:0)?\}/);
+  assert.match(css, /@media\(max-width:760px\)[\s\S]*?grid-template-areas:"identity price" "change price"/);
+  assert.match(css, /@media\(max-width:390px\)/);
+  assert.match(css, /min-width:0/);
 });
