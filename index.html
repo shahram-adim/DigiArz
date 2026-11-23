@@ -3409,6 +3409,7 @@ function renderDashboardMarketPreview(){
 }
 function renderDashboardSummary(){renderDashboardMarketPreview();const count=$('dashboardMarketCount'),fx=$('dashboardFxRate'),prices=$('dashboardPriceCount'),note=$('dashboardMarketNote');if(count)count.textContent=formatNum(marketRows.length,0);if(fx)fx.textContent=currentFxIsValid?formatNum(currentFxRate,0)+' تومان':'نامعتبر / ناموجود';let validPriceCount=0;for(const item of marketRows){if(getTrustedMarketPrice(item)!==null)validPriceCount++}if(prices)prices.textContent=formatNum(validPriceCount,0);if(note)note.textContent=currentFxIsValid?'نرخ تبدیل تومان معتبر است؛ قیمت‌ها از فهرست فعال بازار خوانده می‌شوند.':'نرخ تبدیل تومان در حال حاضر معتبر نیست؛ ارزش تومانی دارایی‌ها نمایش داده نمی‌شود.'}
 function renderDashboardActivity(){
+ if(!isSuperAdmin)return;
  const open=[],activeStatuses=new Set(['pending','partially_filled','triggered']);let partialCountValue=0;
  for(const order of allOrderRows){if(activeStatuses.has(order.status))open.push(order);if(order.status==='partially_filled')partialCountValue++}
  const openCount=$('dashboardOpenOrderCount'),partialCount=$('dashboardPartialOrderCount'),totalCount=$('dashboardOrderCount');
