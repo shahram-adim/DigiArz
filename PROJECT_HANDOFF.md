@@ -1121,3 +1121,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - The previous full CI success was on HEAD 679da335c75daa456545dd8c57570f18fbd206e3; this new CSS/test change requires a fresh full regression run before it can be called validated.
 - PR #55 stays Draft/open/unmerged. No production, Supabase, database, auth, wallet, orders, trading, main, merge, or release changes. No physical-device visual test has been performed.
 - Next: run the full regression workflow on the new HEAD, inspect the result, then continue theme parity audit only if tests pass.
+
+
+## 2026-11-23 — Light-theme glass regression assertion aligned
+- The first CI run after restoring glass surfaces failed 1 of 80 browser/source tests. The failing assertion was the older test named “pure-white theme has white surfaces…” which explicitly required opaque white cards and therefore contradicted the approved translucent-card design. The new glass-specific regression itself passed.
+- Updated the stale test title and its two surface assertions to require the translucent panel tokens and translucent card backgrounds. The login form-field and market typography assertions remain unchanged. No application logic changed.
+- Test commit: 32b4670d9d8a255240619b74d29be208efec57f3. A fresh full workflow must pass on the resulting latest HEAD; do not treat the earlier failed run as final validation.
+- PR #55 remains Draft/open/unmerged and mergeable. No production, Supabase, database, auth, wallet, orders, trading, main, merge, or release changes. Physical-device visual acceptance remains outstanding.
+- Next: verify the latest full CI run after this assertion update, then continue only if all tests pass.
