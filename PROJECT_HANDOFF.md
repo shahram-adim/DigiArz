@@ -1083,3 +1083,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Recheck Actions against the final branch HEAD; previous successful CI runs target older SHAs and do not validate this change. Do not claim physical-device visual verification.
 - PR #55 remains Draft/open/unmerged. No main, Supabase/Production, database, authentication, wallet, orders, or trading logic changes. Do not merge or publish.
 - Next: inspect the dynamic admin asset/pair-review and exchange-sync result rows for long symbols/identifiers and narrow-screen overflow; keep changes scoped to presentation and tests.
+
+
+## 2026-11-23 — Dynamic admin asset result rows on mobile
+- Inspected the actual generated rows for admin asset search/listing, pair review, and exchange-sync source/issue panels. These use shared .asset-row markup; long CoinGecko identifiers, symbols, and action labels could resist wrapping inside narrow grid tracks.
+- Added admin-scoped <=700px rules allowing identity/provider text and prices to shrink and wrap, while keeping action labels inside their cells. At <=380px, result rows stack to one column and action buttons become full-width with a 44px minimum height.
+- Added a regression test for long identifier wrapping, compact single-column layout, and touch-target sizing. No source data, RPCs, sync scheduling, pair review, or activation behavior changed.
+- Source commit: 08662acdcd03daa9814bf3e186e199fa60209dd6; test commit: 1050641cef2e497d354d00e84462d4a49cd04ad7.
+- Recheck Actions for the final PR head before claiming validation. No physical Android visual test has been performed.
+- PR #55 remains Draft/open/unmerged. No main, Supabase/Production, database, auth, wallet, orders, or trading logic changes. Do not merge or publish.
+- Next: check final PR/CI state and continue only with presentation-level fixes supported by inspection; keep all production and financial behavior untouched.
