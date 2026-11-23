@@ -581,3 +581,14 @@ test('final order-book surfaces follow the active theme after legacy fixed-color
   const legacyNavy = html.lastIndexOf('.orderbook-side{background:#0b1932;border:1px solid #29436e;border-radius:15px}');
   assert.ok(legacyNavy >= 0 && guard > legacyNavy, 'final theme-token rules override the older fixed navy order-book skin');
 });
+
+
+test('trade-history date presets use defined cross-theme surface tokens', () => {
+  const start = html.indexOf('.history-date-presets button{');
+  const end = html.indexOf('}', start);
+  assert.ok(start >= 0 && end > start, 'history date preset style exists');
+  const rule = html.slice(start, end + 1);
+  assert.ok(rule.includes('border:1px solid var(--line)'), 'preset border uses the shared theme line token');
+  assert.ok(rule.includes('background:var(--panel2)'), 'preset background uses the shared theme surface token');
+  assert.doesNotMatch(rule, /var\\(--(?:border|surface-2)\\)/, 'preset does not reference undefined legacy tokens');
+});
