@@ -1011,3 +1011,5 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - CI for these new commits has not yet been observed; the last successful workflow remains on older SHA 321777d00a209f0164a4c3452bbce55019ce6944 and does not validate this patch.
 - PR #55 remains Draft/open/unmerged. Main, Supabase/Production, database, authentication logic, wallet, orders, and trading were not changed. No APK or physical-device visual test was performed.
 - Next: inspect Actions for a run matching the new PR head, then continue page-by-page responsive and theme cascade audit. Do not merge or publish.
+
+- Follow-up test-review correction: the precedence assertion now searches for the legacy selector strictly before the final guard marker, so the guard's own repeated selector cannot be mistaken for the older rule. Test commit: 27d258cebc9600555a2c57aecafcb365f27c8ec9.
