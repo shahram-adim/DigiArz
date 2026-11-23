@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - build/apk-glass-fallback-2026-11-23
     paths:
       - "index.html"
       - "manifest.webmanifest"
