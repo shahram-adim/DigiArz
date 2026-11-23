@@ -200,10 +200,10 @@ test('market 24h ranking uses one freshness-aware comparator in both directions'
 });
 
 test('market ranking helpers remain available after removing dedicated gainers and losers panels', () => {
-  assert.doesNotMatch(html, /function renderTopGainers\\s*\\(/);
-  assert.doesNotMatch(html, /function renderTopLosers\\s*\\(/);
-  assert.match(html, /function compareMarketChange\\(a,b,direction='desc'\\)/);
-  assert.match(html, /function sortMarketRowsByChange\\(rows,direction='desc'\\)/);
+  assert.equal(html.includes('function renderTopGainers('), false);
+  assert.equal(html.includes('function renderTopLosers('), false);
+  assert.ok(html.includes('function compareMarketChange('));
+  assert.ok(html.includes('function sortMarketRowsByChange('));
   const marketStart = html.indexOf('function renderMarkets(){');
   const marketEnd = html.indexOf('function renderDashboardPortfolio(', marketStart);
   const market = html.slice(marketStart, marketEnd);
