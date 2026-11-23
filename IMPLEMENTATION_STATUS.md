@@ -1255,3 +1255,11 @@
 - IMPORTANT: the latest source/test commits have not yet received a fresh CI run. Earlier CI success [45142995600](https://github.com/shahram-adim/DigiArz/actions/runs/45142995600) applies to the previous tested commit only, not these follow-up changes. Do not treat the current palette audit as fully validated until CI is rerun.
 - Physical Android visual acceptance across all three themes remains outstanding. No claim of error-free rendering is made.
 - PR #55 remains draft/open/unmerged; main and Supabase/Production remain untouched.
+
+
+## 2026-11-23 — Runtime chart palette parity fix
+- Full CI run 45149337439 completed SUCCESS on head eaf0519a1b00fae119e3e833616586d02f4892eb; all 43 job steps passed, including browser/Node, PostgreSQL, schema migration rollback/lock, market/limit/stop-limit, TP-SL, and concurrency regressions.
+- Follow-up source audit found a real remaining theme mismatch in applyTheme(): the third theme's Lightweight Charts canvas and Android/browser status-bar color still used a dark teal/navy palette (#0b2235 / #071b2b) while the app CSS correctly used deep indigo glass (#101027). Light and dark chart/status colors were also not fully aligned with their CSS tokens.
+- Updated runtime chart palette, text/grid/border colors, and theme-color metadata to match the three CSS themes; added regression test to prevent CSS/runtime divergence.
+- This follow-up is a new source/test change and requires a fresh CI run. No merge, APK build, deployment, Supabase/Production, auth, wallet, order, or trading changes.
+- Physical Android rendering/installation is still required for final visual acceptance; CI cannot certify device appearance.
