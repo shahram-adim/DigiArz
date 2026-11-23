@@ -3,7 +3,7 @@
 Updated: 2026-11-23
 Working branch: `features/user-selected-tools-2026-11-23`
 Base: integration branch commit `82bfbb2131ca9d0ba9b6ebc91918219a36caac85`
-Current feature head: `02741e9dcb9cf47d6829471bdf4e660e5dd96cd9`
+Current feature head: updated by the latest GitHub commit; verify branch head before release.
 
 ## Confirmed user constraints
 - Android-first; Persian RTL and English support; display currency includes Toman.
@@ -27,18 +27,18 @@ Current feature head: `02741e9dcb9cf47d6829471bdf4e660e5dd96cd9`
 - [x] Add automated validation tests in `tests/settings-backup.test.js`.
 - [x] Include the low-power preference in the same allowlisted backup/restore format.
 - [x] Enable exact-decimal regression workflow on this feature branch.
-- [ ] Await full GitHub Actions run on the latest feature head before calling this milestone CI-verified.
+- [x] Full 24-step GitHub Actions run passed for feature head `2012a59a383735b7f62ad3b58a24d973f0a16182`; later health-panel commits still require their own full CI run.
 - [ ] Build a new Android debug APK only after the feature branch CI passes.
 - [x] Add the quick-start guide to Settings, including demo-only boundary and Market/Limit/Stop-Limit workflow; regression test added.
 - [x] Add opt-in low-power mode: automatic market refresh is reduced from 1-minute intervals to roughly 5-minute intervals; manual refresh and account/order actions remain unchanged; regression test added.
 
 ## Remaining implementation queue
 1. Recover and reconcile the full 36-question response record against this tracker; do not ask the user to repeat answers.
-2. Verify quick-start and low-power behavior on the next full CI run and in the Android build.
-3. Implement read-only service health status with truthful source/last-checked timestamps; never expose secrets.
+2. Verify quick-start and low-power behavior in the latest feature-branch CI and Android debug build.
+3. [x] Implement read-only service health status with network state, actual market refresh timestamp/source, and an explicit note that account/database connectivity is not independently checked; never expose secrets.
 4. Implement crypto comparison using fresh market rows only; show unavailable/stale values as unavailable, never fabricated.
 5. Implement QR only for public, non-sensitive profile/public asset information; never encode secrets, account tokens, or wallet credentials.
-6. Continue remaining confirmed security, notification, bilingual/Toman and app usability requirements after source audit.
+6. Add automated coverage for the service health panel; then continue remaining confirmed security, notification, bilingual/Toman and app usability requirements after source audit.
 8. Test all changes; keep PR draft and main/Supabase untouched.
 
 ## Safety notes
