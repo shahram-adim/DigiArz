@@ -13,7 +13,7 @@ window.DigiArzLowPower = {
     return ticks === 0;
   }
 };
-document.addEventListener('DOMContentLoaded', () => {
+if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded', () => {
   const control = document.getElementById('lowPowerModeToggle');
   if (!control) return;
   control.checked = enabled();
