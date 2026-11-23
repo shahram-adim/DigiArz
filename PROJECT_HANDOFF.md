@@ -915,3 +915,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Fixed the “مشاهده همه” actions to switch to the Markets tab before applying the gainers/losers filter.
 - Added regression coverage for dashboard placement, absence from Markets, five-item limits, horizontal overflow, responsive stacking, and navigation.
 - This remains an isolated Draft PR #53 candidate. Automated test and Android build runs for the newest head must finish before validation can be claimed. No Supabase, auth, wallet, order, balance, real-money, deployment, or release changes.
+
+
+### 2026-11-23 — admin-only dashboard activity and alerts
+- Audited the earlier request to hide account activity and alerts from ordinary users while retaining them for administrators; the dashboard markup still exposed the panel to every signed-in user.
+- Added a stable `dashboardActivityCenter` ID and made the panel hidden by default.
+- In `showApp()`, visibility is enabled only when the existing server-side `is_current_user_super_admin` RPC returns exactly `true`. A failed role check or any non-admin result leaves the panel hidden (fail-closed). Existing account-specific order/history loading and the underlying pages are unchanged.
+- Added regression assertions for default-hidden state, server-confirmed admin gate, and preservation of the three panel containers.
+- Re-run the Node/browser and PostgreSQL integration workflow on the new PR head before claiming validation. No role RPC, policy, database, or Supabase changes were made.
