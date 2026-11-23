@@ -1032,3 +1032,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - At handoff update time, re-run CI for the latest PR head and confirm its exact SHA before treating the new regression as passed. The previously observed successful run `45163851803` has head commit `321777d00a209f0164a4c3452bbce55019ce6944`, so it is not proof that the latest source/test edits passed.
 - PR #55 remains open/Draft/unmerged. No changes to `main`, Supabase/Production, database, authentication, wallets, orders, or trading logic. No new APK or physical-device visual test was performed.
 - Next safe audit: inspect the remaining history table and admin responsive surfaces for fixed colors and narrow-width overflow, then re-check Actions against the exact latest head. Do not merge or publish.
+
+
+## 2026-11-23 — Trade-history date-filter token repair
+- The next audit found the quick date-preset buttons in trade history referenced `--border` and `--surface-2`, neither of which is defined in the stylesheet. Those declarations were therefore ineffective and the buttons could lose their intended surface/border styling across themes.
+- Replaced the undefined references with the existing shared tokens `--line` and `--panel2`; selected-state accent behavior and date-filter logic were left unchanged.
+- Added a regression test confirming the rule uses defined theme tokens and does not reference the missing variables.
+- Source commit: `44b2657689eba04560db1c6ecd6d5e3d1bc294d1`; test commit: `ced13a3601e94ebe85e5c1cd1478fa414afef011`; assertion correction: `267ecf334c4cc55bdbbaee31c75e479c200ff6b2`.
+- Recheck Actions against the final PR head before considering this test validated. Existing successful run `45163851803` is for SHA `321777d00a209f0164a4c3452bbce55019ce6944`, not the current branch head.
+- PR #55 remains Draft/open/unmerged; no Production/Supabase/database/auth/wallet/trading changes and no APK/device test.
+- Next: continue responsive checks on the history table and admin controls; retain the existing safety boundary and do not merge or publish.
