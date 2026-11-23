@@ -2024,6 +2024,20 @@ body.luxury-theme #authView .ref-demo-footer{color:#c4b9f2!important;background:
   #tab-admin .detail-section>.section-title>button{flex:1 1 100%;width:100%;min-width:0;min-height:44px;white-space:normal;overflow-wrap:anywhere;}
 }
 
+
+/* Admin user cards: prevent balance values and credit controls from overflowing compact phones. */
+@media(max-width:380px){
+  #tab-admin .admin-user-card{padding:11px;min-width:0;}
+  #tab-admin .admin-user-card>.section-title{align-items:flex-start;flex-wrap:wrap;}
+  #tab-admin .admin-user-card>.section-title>div{min-width:0;max-width:100%;overflow-wrap:anywhere;}
+  #tab-admin .admin-user-card>.section-title>.tag{max-width:100%;white-space:normal;overflow-wrap:anywhere;}
+  #tab-admin .admin-user-card>.grid{grid-template-columns:minmax(0,1fr);min-width:0;}
+  #tab-admin .admin-user-card .stat{min-width:0;}
+  #tab-admin .admin-user-card .stat .value{min-width:0;max-width:100%;font-size:clamp(14px,4vw,17px);overflow-wrap:anywhere;word-break:break-word;}
+  #tab-admin .admin-adjust-grid{grid-template-columns:minmax(0,1fr);}
+  #tab-admin .admin-adjust-grid>*{width:100%;min-width:0;max-width:100%;}
+  #tab-admin .admin-adjust-grid button{grid-column:1/-1;}
+}
 </style>
 <style>
 .pwa-install-banner{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 16px;margin:0 0 14px;border:1px solid rgba(240,185,11,.45);border-radius:14px;background:linear-gradient(110deg,rgba(240,185,11,.10),rgba(24,26,32,.96));box-shadow:0 8px 24px rgba(0,0,0,.12)}
