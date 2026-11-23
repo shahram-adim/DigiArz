@@ -1129,3 +1129,10 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Test commit: 32b4670d9d8a255240619b74d29be208efec57f3. A fresh full workflow must pass on the resulting latest HEAD; do not treat the earlier failed run as final validation.
 - PR #55 remains Draft/open/unmerged and mergeable. No production, Supabase, database, auth, wallet, orders, trading, main, merge, or release changes. Physical-device visual acceptance remains outstanding.
 - Next: verify the latest full CI run after this assertion update, then continue only if all tests pass.
+
+
+## 2026-11-23 — Light glass theme regression passed
+- Full Exact Decimal workflow run `45187787664` completed SUCCESS on code/test commit `32b4670d9d8a255240619b74d29be208efec57f3` (HEAD before this handoff-only update). The browser/source stage passed all 81 tests; PostgreSQL arithmetic/upsert, disposable schema widening, lock-timeout/rollback, Market/Limit, Stop-Limit, TP-SL, worker/cancellation, and two-session race/lifecycle stages all completed successfully (24/24 workflow steps).
+- This validates the translucent light-theme card/panel update and the corrected regression assertions. The earlier failed runs were superseded; their only failure was the stale assertion expecting opaque white cards.
+- PR #55 remains open, Draft, unmerged, and GitHub reports mergeable=true. No main, Production/Supabase, database, auth, wallet, orders, trading, release, or deployment changes. Android physical visual acceptance remains outstanding.
+- Next: continue the visual audit for theme-specific fixed colors and mobile layout; rebuild the review APK from the current tested PR source only after the next agreed milestone. Do not merge or mark ready without explicit approval.
