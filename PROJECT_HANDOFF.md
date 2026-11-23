@@ -940,3 +940,10 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 ### Duplicate authentication-event safety — 2026-11-23
 - Preserved an already-running session initialization before applying the admin-panel reset. This avoids a duplicate auth event clearing a super-admin state while the first role lookup is still completing.
 - Added a regression assertion for the duplicate-event ordering. The admin-only panel remains hidden before a new session's role check and is revealed only after the verified admin result.
+
+
+### Latest automated validation — 2026-11-23
+- Exact-decimal workflow run 1642 (ID `45116158097`) completed all Node/browser and PostgreSQL 17 integration steps successfully on the latest reviewed PR head `7e29d5bb6c300f13e1965acd9124175c563f7c58`.
+- The suite included the newly added market-row renderer/grid contract, narrow-screen 40px logo rule, dashboard mover relocation and horizontal-scroll assertions, and admin-only activity visibility/session-event guards.
+- Android review workflow run 26 (ID `45116158059`) is building the APK for the same PR branch; wait for Gradle, provenance, and artifact upload to finish before sharing a new APK.
+- Physical-device visual QA remains unverified. PR #53 remains Draft/unmerged; no deployment, release, or Supabase/Production change.
