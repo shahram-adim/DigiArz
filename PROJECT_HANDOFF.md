@@ -907,3 +907,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - ZIP integrity passed; `BUILD-INFO.txt` SHA-256 matches computed APK SHA-256: `5525ca9a8cbd1969cf603a02cd52213cc3a6f2d09f626e91e8a4b76de5a2a20f`.
 - APK is a debug review build, not production-signed. Physical Android installation and visual acceptance across all three themes remain outstanding; no browser screenshot/device rendering was performed.
 - PR #55 remains Draft/open/unmerged; PR #54 also remains Draft/open/unmerged. Main remains unchanged; no Supabase, Production, auth, wallet, order, or trading logic changes.
+
+
+## 2026-11-23 — Glass fallback audit
+- Extended the luxury/indigo no-backdrop-filter fallback to every glass surface used by the theme: card, stat, trade box, performance item, indicator panel, FX box, setting row, orderbook side, gainer card, asset row, and dashboard mover panel.
+- Added explicit regression assertions for each fallback surface.
+- Exact-decimal/browser regression workflow: [45142995600](https://github.com/shahram-adim/DigiArz/actions/runs/45142995600) — SUCCESS on code commit `0757142d9e2e92b07af85fee983e8de1a2fdf3c7`.
+- A separate APK review branch `build/apk-glass-fallback-2026-11-23` was created from that exact tested source. Android APK build was triggered by a scoped workflow push; await artifact verification before sharing a new APK.
+- PR #55 remains draft/open/unmerged. Main remains at `968010d37a175b947616167ed265953a2ed6b62c`. No Production/Supabase, database, auth, wallet, order, or trading logic changes.
+- Physical Android visual acceptance remains outstanding; CI success is not a substitute for device rendering.
