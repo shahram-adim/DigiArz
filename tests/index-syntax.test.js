@@ -468,5 +468,10 @@ test('three themes have isolated final palettes and frameless market coin rows',
   assert.ok(html.includes('body.luxury-theme #authView .auth-form input'));
   assert.ok(html.includes('#tab-markets .market-board-v34 .coin:hover'));
   assert.ok(html.includes('border:0!important;box-shadow:none!important'));
-  assert.ok(html.includes('@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)))'));
+  const fallbackStart = html.lastIndexOf('@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)))');
+  const fallbackEnd = html.indexOf('</style>', fallbackStart);
+  const fallback = html.slice(fallbackStart, fallbackEnd);
+  for (const surface of ['.card','.stat','.trade-box','.performance-item','.indicator-panel','.fx-box','.setting-row','.orderbook-side','.gainer-card','.asset-row','.dashboard-mover-panel']) {
+    assert.ok(fallback.includes('body.luxury-theme ' + surface), 'glass surface has a no-backdrop-filter fallback: ' + surface);
+  }
 });
