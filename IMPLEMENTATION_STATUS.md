@@ -1204,6 +1204,103 @@
 - [x] اجرای نهایی `45082751825` روی commit `fe151109` با نتیجه `success` کامل شد؛ آزمون‌های Node/browser، آزمون PostgreSQL 17 برای upsert تکراری، تمام آزمون‌های widening، Market/Limit/Stop-Limit و آزمون‌های race همگی موفق شدند.
 - [!] CI فقط کد مخزن و PostgreSQL دورریختنی را آزمود؛ Edge Function Production هنوز نسخه ۳ است و deploy/refresh واقعی انجام نشده است.
 
+## 2026-11-23 UI review candidate
+- Draft PR #54: dashboard gainers/losers horizontal strips, super-admin-only dashboard activity center, unframed coin rows/favorite controls/logo wrappers.
+- Branch: fix/ui-dashboard-cleanup-2026-11-23 (based on main 968010d37a175b947616167ed265953a2ed6b62c).
+- Static structural checks passed; three regression tests added. GitHub Actions run 45130193148 passed all 21 job steps, including Node/browser tests and PostgreSQL integration regressions (2026-11-23).
+- Physical Android visual check, including Sky Blue Glass top spacing, remains outstanding. No APK/merge/Production changes.
+
+- APK note: existing android-review-apk.yml still checks out the older build/indigo-glass-biometric-apk-2026-11-21 branch, so that artifact is not valid for PR #54. android-apk.yml can build the selected ref via workflow_dispatch, but the connected GitHub tools do not expose workflow dispatch. No APK built or reused.
+
+## 2026-11-23 admin-only dashboard activity follow-up
+- Code review found activity renderer was still called by general refresh functions while visually hidden for non-admins.
+- Added early return to renderDashboardActivity() unless isSuperAdmin; added regression assertion. Awaiting CI on latest branch head; previous successful run predates this follow-up.
+- No Android APK, merge, or Production change.
+
+
+## 2026-11-23 — Theme parity follow-up (PR #55)
+- Candidate branch: `fix/theme-parity-2026-11-23`; head `e19aa2d820db8abcf53873b1d8ca3fb33b765fa4`.
+- Added scoped dark black/gold, light, and deep indigo-glass palettes and a higher-specificity frameless market-row correction.
+- Added source regression assertions for palette selectors, login input scope, glass fallback, and market row borders.
+- Draft PR: https://github.com/shahram-adim/DigiArz/pull/55. It is based on the PR #54 candidate head and therefore includes those dashboard changes as well; keep both drafts unmerged until candidate ordering is reconciled.
+- CI run 45138971915 is in progress. No visual browser/Android confirmation yet.
+- Main remains at `968010d37a175b947616167ed265953a2ed6b62c`; no production or Supabase changes.
+
+- Follow-up: initial CI run 45138971915 failed only because of an over-escaped regex in the newly added test. Replaced the regexes with direct string assertions; latest head must pass a new CI run before validation is complete.
+
+
+## 2026-11-23 — Theme parity APK review build verified
+- Theme regression workflow run `45139169031` completed SUCCESS on candidate head `afdf21d6a2a1207cb017f50c53282bd7e7d7c0e9` (all 21 job steps passed).
+- Built the Android debug review APK from isolated build branch `build/apk-theme-parity-2026-11-23`, commit `c02530b3f01fd166f443b8fe09f253998f01c094`, workflow run `45141624881` (SUCCESS).
+- Artifact `DigiArz-Android-debug-APK`, artifact ID `14802112785`, size 3,526,514 bytes; extracted APK size 3,907,938 bytes.
+- ZIP integrity passed; `BUILD-INFO.txt` SHA-256 matches computed APK SHA-256: `5525ca9a8cbd1969cf603a02cd52213cc3a6f2d09f626e91e8a4b76de5a2a20f`.
+- APK is a debug review build, not production-signed. Physical Android installation and visual acceptance across all three themes remain outstanding; no browser screenshot/device rendering was performed.
+- PR #55 remains Draft/open/unmerged; PR #54 also remains Draft/open/unmerged. Main remains unchanged; no Supabase, Production, auth, wallet, order, or trading logic changes.
+
+
+## 2026-11-23 — Glass fallback audit
+- Extended the luxury/indigo no-backdrop-filter fallback to every glass surface used by the theme: card, stat, trade box, performance item, indicator panel, FX box, setting row, orderbook side, gainer card, asset row, and dashboard mover panel.
+- Added explicit regression assertions for each fallback surface.
+- Exact-decimal/browser regression workflow: [45142995600](https://github.com/shahram-adim/DigiArz/actions/runs/45142995600) — SUCCESS on code commit `0757142d9e2e92b07af85fee983e8de1a2fdf3c7`.
+- A separate APK review branch `build/apk-glass-fallback-2026-11-23` was created from that exact tested source. Android APK build was triggered by a scoped workflow push; await artifact verification before sharing a new APK.
+- PR #55 remains draft/open/unmerged. Main remains at `968010d37a175b947616167ed265953a2ed6b62c`. No Production/Supabase, database, auth, wallet, order, or trading logic changes.
+- Physical Android visual acceptance remains outstanding; CI success is not a substitute for device rendering.
+
+
+## 2026-11-23 — Cross-theme audit follow-up (validation pending)
+- Further source audit found legacy teal/blue luxury-theme selectors still affecting tags, coin hover states, notices, auth banner/ad, gainers panel, Toman table header/source, and theme selector active state. Added final indigo/glass overrides for these surfaces.
+- Found market-board coin rows retained a navy background and hard-coded gold/white text regardless of selected theme. Added explicit black/gold dark palette rules and indigo luxury overrides for row text/prices; existing light-theme text/background overrides remain.
+- Added regression assertions for the legacy luxury surfaces and dark market-row palette.
+- Latest source/test commits: `08d5bb111c339c3893ccda2ee1502976604dfe6f` and `2f7e9f3657eb6dfd1f078b209ccf391a1ac988c6`.
+- IMPORTANT: the latest source/test commits have not yet received a fresh CI run. Earlier CI success [45142995600](https://github.com/shahram-adim/DigiArz/actions/runs/45142995600) applies to the previous tested commit only, not these follow-up changes. Do not treat the current palette audit as fully validated until CI is rerun.
+- Physical Android visual acceptance across all three themes remains outstanding. No claim of error-free rendering is made.
+- PR #55 remains draft/open/unmerged; main and Supabase/Production remain untouched.
+
+
+## 2026-11-23 — Runtime chart palette parity fix
+- Full CI run 45149337439 completed SUCCESS on head eaf0519a1b00fae119e3e833616586d02f4892eb; all 43 job steps passed, including browser/Node, PostgreSQL, schema migration rollback/lock, market/limit/stop-limit, TP-SL, and concurrency regressions.
+- Follow-up source audit found a real remaining theme mismatch in applyTheme(): the third theme's Lightweight Charts canvas and Android/browser status-bar color still used a dark teal/navy palette (#0b2235 / #071b2b) while the app CSS correctly used deep indigo glass (#101027). Light and dark chart/status colors were also not fully aligned with their CSS tokens.
+- Updated runtime chart palette, text/grid/border colors, and theme-color metadata to match the three CSS themes; added regression test to prevent CSS/runtime divergence.
+- This follow-up is a new source/test change and requires a fresh CI run. No merge, APK build, deployment, Supabase/Production, auth, wallet, order, or trading changes.
+- Physical Android rendering/installation is still required for final visual acceptance; CI cannot certify device appearance.
+
+- Validation result: GitHub Actions run 45150130527 completed SUCCESS on final code/test head efe0261ee85a996d97acce92d3b886127dbcea65; all 43 job steps passed, including the newly added runtime chart/theme-color parity regression. PR #55 remains Draft/open/unmerged. Main and Production remain unchanged. Final physical Android rendering/installation is still not verified.
+
+
+## 2026-11-23 — Latest theme parity verification and APK gate
+- Rechecked PR #55 through GitHub: state=open, draft=true, merged=false, mergeable=true; head `21290f02e9bcc339e7a658b40a87e1d6667524ac`; base/main `968010d37a175b947616167ed265953a2ed6b62c`.
+- The branch ref points to the same head. Exact-decimal workflow run `45150454902` completed with conclusion SUCCESS on this commit. Its `exact-decimal` job completed successfully; the run contains no Android APK artifacts.
+- Confirmed `android-review-apk.yml` still checks out the obsolete `build/indigo-glass-biometric-apk-2026-11-21` branch regardless of the selected branch. It must not be used for this theme candidate.
+- Confirmed `android-apk.yml` supports workflow_dispatch but the connected GitHub tools expose no workflow-dispatch action. No new APK for head `21290f0` has been built or verified.
+- The available APK artifact from run `45146118883` (artifact `14804561034`) comes from branch `build/apk-final-theme-parity-2026-11-23`, source head `b44e90e1d52614b3164109d260de385160205f99`; it predates the final white/indigo and runtime chart palette fixes and must not be presented as the latest APK.
+- Physical Android installation and visual acceptance remain outstanding. CI success does not certify device rendering.
+- No merge, release, deployment, Supabase/Production, database, authentication, wallet, order, or trading change was performed.
+- Next safe step: add a narrowly scoped artifact-only APK workflow that can build the exact PR #55 head without changing main/Production, or have the user trigger the existing workflow_dispatch manually with the exact branch ref. Verify BUILD-INFO source commit and APK SHA-256 before sharing.
+
+
+## 2026-11-23 — Remove dashboard top gainers/losers on user request
+- Removed the dashboard sections showing the five biggest 24-hour gainers and five biggest losers, including their dashboard-only buttons and horizontal-strip styling.
+- Preserved the market tab's own gainers/losers analytics and market filters; only the dashboard display was removed.
+- Removed obsolete dashboard event bindings and replaced the prior horizontal-movers regression with assertions that those widgets are absent from the dashboard while market-tab panels remain.
+- Change is on the existing draft PR #55 branch only. Requires fresh CI; no merge, APK release, deployment, Supabase/Production, auth, wallet, or trading changes.
+
+
+## 2026-11-23 — Dashboard layout repair
+- Removed the duplicate legacy hero and quick-action strip from the visible app shell while retaining their DOM hooks for existing event bindings; moved the existing market refresh action into the dashboard header (single `refreshBtn` ID).
+- Fixed the theme-parity CSS scope so the three theme rules are no longer accidentally limited to viewports at or below 640px.
+- Rebuilt dashboard spacing and responsive hierarchy: compact header, balanced hero, two-column mobile shortcuts, scroll-contained filters, and a compact two-row mobile market-coin layout that avoids horizontal overflow.
+- Applied distinct black/gold, clean-white, and deep-indigo dashboard surfaces; removed decorative borders/backgrounds from dashboard coin logos and favorite stars. Existing dashboard market data, search, filters, favorite actions, account summary, and super-admin-only activity logic remain intact.
+- Added regression assertions for duplicate-shell suppression, refresh-button uniqueness, desktop theme scope, mobile row sizing, and frameless logo/favorite controls. CI must pass before a new review APK is built; PR #55 remains draft and unmerged.
+
+
+## 2026-11-23 — Dashboard layout CI and review APK verified
+- Full regression workflow [45158231654](https://github.com/shahram-adim/DigiArz/actions/runs/45158231654) completed SUCCESS; all 43 steps passed. It tested code/test commit `d175c5453626674cb0bb0f488a9d486daaf8e00e`; subsequent PR-head changes before APK build were documentation/PR metadata only.
+- Review APK workflow [45161116469](https://github.com/shahram-adim/DigiArz/actions/runs/45161116469) completed SUCCESS; all 23 job steps passed, including Android project generation, sync, debug APK build, provenance/checksum recording, and artifact upload.
+- Verified artifact `DigiArz-PR55-Theme-Parity-APK`, artifact ID `14809698748`, source commit `998c246a53ba5ae740072987c7a143b0cd799998` whose parent is PR code head `286f7aa6364628186e88f9bc0d2313a3388a84d8`.
+- APK SHA-256: `8a537a66323b03ea883e2874a3729133e15f03659e86d7750100a3a2960630ed`. Artifact ZIP SHA-256: `a0d9de6244d43a5fbd626e64ed86b9f47cc0bc9ee031194ad051109d7d55e52a`.
+- This is an installable debug/review APK, not a release-signed build. Physical Android installation and visual acceptance across all three themes remain outstanding.
+- PR #55 remains draft/open/unmerged; main remains unchanged. No release, deployment, or Production/Supabase changes.
+
 ## گزارش اجرای روزانه — ۲۰۲۶-۱۱-۲۳: اصلاح نمایش تازگی بازار تومانی
 
 ### تغییر رابط و آزمون رگرسیون

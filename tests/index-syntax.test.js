@@ -85,7 +85,7 @@ test('trade history date filters apply consistently to the table and CSV export'
   assert.ok(body.includes("new Date(toDate+'T23:59:59.999')"), 'end date includes the full local day');
   assert.ok(body.includes('fromTime') && body.includes('toTime'));
   const exportStart = html.indexOf('function exportHistoryCsv(){');
-  const exportEnd = html.indexOf('\\nasync function trade(side)', exportStart);
+  const exportEnd = html.indexOf('\nasync function trade(side)', exportStart);
   assert.ok(html.slice(exportStart, exportEnd).includes('getFilteredHistoryRows()'), 'CSV uses the same filters as the table');
   assert.ok(html.includes("clearHistoryFiltersBtn')?.addEventListener('click'"), 'clear action is wired');
 });
@@ -107,17 +107,22 @@ test('trade history provides accessible local-date quick presets', () => {
   assert.ok(html.includes("setHistoryDatePreset('all')"), 'clear action resets the selected preset');
 });
 
-test('dashboard exposes recent account activity and account alerts', () => {
-  const start = html.indexOf('<div class="dashboard-activity-center"');
+test('dashboard account activity is hidden by default and only revealed for an active super-admin', () => {
+  const start = html.indexOf('<div class="dashboard-activity-center hidden"');
   const end = html.indexOf('<div class="da-v2-compat hidden"', start);
-  assert.ok(start >= 0 && end > start, 'visible dashboard activity center boundaries found');
+  assert.ok(start >= 0 && end > start, 'activity center starts hidden before role verification');
   const section = html.slice(start, end);
   for (const id of ['dashboardRecentOrders', 'dashboardRecentTrades', 'dashboardAccountAlerts']) {
-    assert.match(section, new RegExp('id="' + id + '"'), id + ' is visible in the activity center');
+    assert.match(section, new RegExp('id="' + id + '"'), id + ' remains available inside the admin activity center');
   }
   assert.ok(section.includes('data-dashboard-tab="orders"'), 'orders shortcut is present');
   assert.ok(section.includes('data-dashboard-tab="history"'), 'history shortcut is present');
   assert.ok(section.includes('aria-live="polite"'), 'activity updates are announced politely');
+  const modeStart = html.indexOf('function setAccountMode(active){');
+  const modeEnd = html.indexOf('\nasync function deactivateMyAccount()', modeStart);
+  assert.ok(modeStart >= 0 && modeEnd > modeStart, 'account-mode function boundaries found');
+  const mode = html.slice(modeStart, modeEnd);
+  assert.ok(mode.includes("el.classList.toggle('hidden',!active||!isSuperAdmin)"), 'activity is revealed only after active account and super-admin checks');
   const compatibility = html.slice(end);
   assert.doesNotMatch(compatibility, /id="dashboard(?:RecentOrders|RecentTrades|AccountAlerts)"/, 'activity roots are not duplicated in hidden compatibility markup');
 });
@@ -424,6 +429,235 @@ test('login mini chart renders real five-minute candles without depending on a c
   assert.match(html, /<svg viewBox=/);
 });
 
+test('dashboard does not display the five top gainers or five top losers', () => {
+  assert.doesNotMatch(html, /class="dashboard-market-movers"/);
+  for (const id of ['topGainersList', 'topLosersList', 'allGainersBtn', 'allLosersBtn']) {
+    assert.doesNotMatch(html, new RegExp('id="' + id + '"'), id + ' is removed from the dashboard');
+  }
+  assert.match(html, /#tab-markets \.gainers-panel/, 'market tab retains its separate market analytics panels');
+});
+
+
+test('dashboard layout removes duplicate shell and keeps refresh control in the dashboard header', () => {
+  assert.match(html, /#appView>\.hero,#appView>\.quick\{display:none!important\}/);
+  assert.match(html, /class="da-v2-top-actions"[\s\S]*id="refreshBtn"/);
+  assert.equal((html.match(/id="refreshBtn"/g) || []).length, 1);
+  assert.match(html, /id="heroTradeBtn"/);
+  assert.match(html, /id="heroMarketBtn"/);
+});
+
+test('theme parity rules apply on desktop as well as mobile', () => {
+  assert.doesNotMatch(html, /@media\(max-width:640px\)\{\s*\/\* Final theme parity pass:/);
+  assert.match(html, /body\.dark-theme #tab-dashboard\.digiarz-v2-dashboard/);
+  assert.match(html, /body\.light-theme #tab-dashboard\.digiarz-v2-dashboard/);
+  assert.match(html, /body\.luxury-theme #tab-dashboard\.digiarz-v2-dashboard/);
+});
+
+test('dashboard market rows remain responsive and logo/favorite controls are frameless', () => {
+  assert.match(html, /grid-template-columns:26px minmax\(0,1fr\) minmax\(88px,auto\)!important/);
+  assert.match(html, /#dashboardMarketPreview \.da-market-favorite\{border:0!important;background:transparent!important/);
+  assert.match(html, /#dashboardMarketPreview \.da-market-logo,#dashboardMarketPreview \.da-market-logo-inner\{border:0!important;background:transparent!important/);
+  assert.match(html, /#dashboardMarketPreview \.da-market-sparkline\{display:none!important\}/);
+});
+
+test('dashboard account activity is visible only to an authenticated super-admin', () => {
+  const start = html.indexOf('function setAccountMode(active){');
+  const end = html.indexOf('\nasync function deactivateMyAccount()', start);
+  assert.ok(start >= 0 && end > start, 'account mode function boundaries found');
+  const body = html.slice(start, end);
+  assert.ok(body.includes("el.classList.toggle('hidden',!active||!isSuperAdmin)"), 'activity center is hidden unless the account is active and super-admin');
+  assert.match(html, /is_current_user_super_admin/);
+  const rendererStart = html.indexOf('function renderDashboardActivity(){');
+  assert.ok(rendererStart >= 0, 'dashboard activity renderer exists');
+  assert.match(html.slice(rendererStart, rendererStart + 100), /if\(!isSuperAdmin\)return;/, 'non-admin activity content is not rendered into the dashboard DOM');
+});
+
+test('coin rows, favorite controls and coin logo wrappers have no decorative frames', () => {
+  assert.match(html, /\.coin\{[^}]*border:0/);
+  assert.match(html, /\.favorite-btn\{[^}]*border:0/);
+  assert.match(html, /\.coin-icon\{background:transparent!important;border:0!important/);
+});
+
+
+
+test('three themes have isolated final palettes and frameless market coin rows', () => {
+  assert.ok(html.includes('body.dark-theme{'));
+  assert.ok(html.includes('--yellow:#f0b90b'));
+  assert.ok(html.includes('body.light-theme{'));
+  assert.ok(html.includes('--bg:#f3f6fb'));
+  assert.ok(html.includes('body.luxury-theme{'));
+  assert.ok(html.includes('--bg:#101027;--panel:rgba(29,30,66,.78)'));
+  assert.ok(html.includes('body.luxury-theme .tabs button.active'));
+  assert.ok(html.includes('body.luxury-theme #authView .auth-form input'));
+  assert.ok(html.includes('#tab-markets .market-board-v34 .coin:hover'));
+  assert.ok(html.includes('border:0!important;box-shadow:none!important'));
+  const fallbackStart = html.lastIndexOf('@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)))');
+  const fallbackEnd = html.indexOf('</style>', fallbackStart);
+  const fallback = html.slice(fallbackStart, fallbackEnd);
+  for (const surface of ['.card','.stat','.trade-box','.performance-item','.indicator-panel','.fx-box','.setting-row','.orderbook-side','.gainer-card','.asset-row','.dashboard-mover-panel']) {
+    assert.ok(fallback.includes('body.luxury-theme ' + surface), 'glass surface has a no-backdrop-filter fallback: ' + surface);
+  }
+  const auditStart = html.indexOf('/* Theme audit: override legacy teal rules');
+  const auditEnd = html.indexOf('/* Coin rows stay frameless', auditStart);
+  const audit = html.slice(auditStart, auditEnd);
+  for (const selector of ['body.luxury-theme .tag','body.luxury-theme .coin:hover','body.luxury-theme .auth-top-banner','body.luxury-theme .daily-ad-card','body.luxury-theme .toman-table th','body.luxury-theme .gainers-panel','body.luxury-theme #tab-markets .market-board-v34 .coin-name-fa']) {
+    assert.ok(audit.includes(selector), 'legacy luxury surface is recolored: ' + selector);
+  }
+  assert.ok(audit.includes('#tab-markets .market-board-v34 .coin{background:linear-gradient(110deg,#181a20,#101318)!important'), 'dark market rows use the black palette');
+  assert.ok(audit.includes('#tab-markets .market-board-v34 .coin .price-toman{color:#f0b90b!important'), 'dark market Toman price uses gold');
+});
+
+
+test('light glass theme keeps translucent app surfaces and readable login and market typography', () => {
+  assert.match(html, /body\.light-theme\{[\s\S]{0,260}--bg:#f7f9fd;--panel:rgba\(255,255,255,\.76\);--panel2:rgba\(248,251,255,\.72\);/);
+  assert.match(html, /body\.light-theme \.card,body\.light-theme \.stat,[\s\S]{0,650}background:rgba\(255,255,255,\.68\)!important;color:var\(--text\)!important/);
+  assert.match(html, /body\.light-theme #tab-markets \.market-board-v34 \.coin-name-fa,[\s\S]{0,180}color:#172b4d!important/);
+  assert.match(html, /body\.light-theme #tab-markets \.market-board-v34 \.coin \.price-usd/);
+  assert.match(html, /body\.light-theme #authView \.auth-form input\{[\s\S]{0,100}background:#fff!important;color:#172b4d!important/);
+  assert.match(html, /body\.light-theme #authView \.auth-form \.auth-actions button\{[\s\S]{0,100}color:#fff!important/);
+});
+
+
+test('runtime chart palette and Android browser theme-color match the three CSS themes', () => {
+  assert.ok(html.includes("if(meta)meta.content=light?'#ffffff':luxury?'#101027':'#0b0e11'"));
+  assert.ok(html.includes("light?{bg:'#ffffff',text:'#172b4d',grid:'#edf2f8',line:'#dbe7f5'}"));
+  assert.ok(html.includes("luxury?{bg:'#171735',text:'#f0efff',grid:'#2f2e59',line:'#514d78'}"));
+  assert.ok(html.includes("{bg:'#101318',text:'#f5f5f5',grid:'#202630',line:'#303844'}"));
+  assert.ok(html.includes('--bg:#101027'));
+  assert.ok(html.includes('--text:#f0efff'));
+});
+
+
+test('indigo glass login overrides the legacy black-and-gold reference skin', () => {
+  for (const rule of [
+    'body.luxury-theme #authView.auth-reference-layout .auth-form{',
+    'body.luxury-theme #authView .auth-form h2{color:#d8c5ff!important',
+    'body.luxury-theme #authView .ref-platform{',
+    'body.luxury-theme #authView .ref-gold-coin{',
+    'body.luxury-theme #authView .ref-phone .auth-phone-preview{',
+    'body.luxury-theme #authView .ref-coin-row strong{color:#53d6ad!important'
+  ]) assert.ok(html.includes(rule), 'indigo login override exists: ' + rule);
+});
+
+
+test('final indigo login cascade wins over later legacy gold auth rules', () => {
+  const guard = html.lastIndexOf('/* DigiArz final indigo auth cascade guard — 2026-11-23 */');
+  assert.ok(guard >= 0, 'final indigo cascade guard exists');
+  const styleEnd = html.lastIndexOf('</style>');
+  assert.ok(styleEnd > guard, 'final indigo guard remains inside the stylesheet');
+  const legacyGold = html.lastIndexOf('body.luxury-theme #authView .auth-form .auth-actions button', guard - 1);
+  assert.ok(legacyGold >= 0 && guard > legacyGold, 'final indigo rules come after legacy auth button rules');
+  const finalCss = html.slice(guard, styleEnd);
+  for (const rule of [
+    'body.luxury-theme #authView .auth-form input{',
+    'body.luxury-theme #authView .auth-form .auth-actions button{',
+    'body.luxury-theme #authView .auth-phone-device{',
+    'body.luxury-theme #authView .ref-platform{',
+    'body.luxury-theme #authView .ref-gold-coin{'
+  ]) assert.ok(finalCss.includes(rule), 'final indigo cascade covers: ' + rule);
+  assert.ok(finalCss.includes('background:linear-gradient(135deg,#d8c5ff,#8f82d2)!important'), 'primary auth action remains lavender, not gold');
+  assert.ok(finalCss.includes('color:#53d6ad!important'), 'live market accent remains mint');
+});
+
+
+test('settings and admin controls inherit the selected theme tokens', () => {
+  assert.ok(html.includes('#tab-settings .setting-row{border-radius:15px;background:var(--soft);border-color:var(--line);color:var(--text)}'),
+    'settings rows use active theme tokens instead of a fixed dark gradient');
+  assert.ok(html.includes('.daily-ad-admin-grid textarea{width:100%;min-height:88px;padding:12px;border:1px solid var(--line);border-radius:9px;background:var(--field);color:var(--text);resize:vertical}'),
+    'admin textarea follows active theme field and text colors');
+  assert.ok(html.includes('.daily-ad-admin-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text)}'),
+    'admin list items follow active theme surface and text colors');
+});
+
+
+test('final order-book surfaces follow the active theme after legacy fixed-color rules', () => {
+  const guard = html.lastIndexOf('/* Final order-book theme parity: remove legacy fixed navy surfaces in all three themes. */');
+  const styleEnd = html.lastIndexOf('</style>');
+  assert.ok(guard >= 0 && styleEnd > guard, 'final order-book theme guard is present at the end of the stylesheet');
+  const finalCss = html.slice(guard, styleEnd);
+  assert.ok(finalCss.includes('.orderbook-side{\n  background:var(--panel)!important;'), 'order-book cards use the active panel token');
+  assert.ok(finalCss.includes('border-color:var(--line)!important;'), 'order-book borders use the active theme line token');
+  assert.ok(finalCss.includes('.orderbook-side h4{\n  background:var(--panel2)!important;'), 'order-book headers use the active secondary surface token');
+  const legacyNavy = html.lastIndexOf('.orderbook-side{background:#0b1932;border:1px solid #29436e;border-radius:15px}');
+  assert.ok(legacyNavy >= 0 && guard > legacyNavy, 'final theme-token rules override the older fixed navy order-book skin');
+});
+
+
+test('trade-history date presets use defined cross-theme surface tokens', () => {
+  const start = html.indexOf('.history-date-presets button{');
+  const end = html.indexOf('}', start);
+  assert.ok(start >= 0 && end > start, 'history date preset style exists');
+  const rule = html.slice(start, end + 1);
+  assert.ok(rule.includes('border:1px solid var(--line)'), 'preset border uses the shared theme line token');
+  assert.ok(rule.includes('background:var(--panel2)'), 'preset background uses the shared theme surface token');
+  assert.ok(!rule.includes('var(--border)') && !rule.includes('var(--surface-2)'), 'preset does not reference undefined legacy tokens');
+});
+
+
+test('admin daily-ad controls remain usable without overflow on narrow phones', () => {
+  const guard = html.lastIndexOf('/* Admin mobile controls: preserve readable wrapping and comfortable touch targets on narrow phones. */');
+  const styleEnd = html.lastIndexOf('</style>');
+  assert.ok(guard >= 0 && styleEnd > guard, 'final narrow-phone admin rules are present');
+  const css = html.slice(guard, styleEnd);
+  assert.ok(css.includes('@media(max-width:380px)'), 'rules target compact phone widths');
+  assert.ok(css.includes('#dailyAdAdminPanel>.section-title{align-items:flex-start;flex-wrap:wrap;}'), 'admin section header can wrap');
+  assert.ok(css.includes('.daily-ad-admin-actions{width:100%;flex-wrap:wrap;}'), 'admin action buttons can wrap instead of overflowing');
+  assert.ok(css.includes('min-height:44px'), 'admin controls keep a comfortable touch target');
+  assert.ok(css.includes('min-width:0') && css.includes('overflow-wrap:anywhere'), 'long admin labels cannot force horizontal overflow');
+});
+
+
+test('exchange-sync admin header wraps without horizontal pressure on narrow phones', () => {
+  const guard = html.lastIndexOf('/* Exchange-sync admin header: wrap actions cleanly on compact screens. */');
+  const styleEnd = html.lastIndexOf('</style>');
+  assert.ok(guard >= 0 && styleEnd > guard, 'exchange-sync responsive guard is present at stylesheet end');
+  const css = html.slice(guard, styleEnd);
+  assert.ok(css.includes('@media(max-width:700px)'), 'header layout adapts on mobile and small tablets');
+  assert.ok(css.includes('#exchangeAssetSyncPanel>.section-title{align-items:flex-start;flex-wrap:wrap;}'), 'panel heading can wrap');
+  assert.ok(css.includes('#exchangeAssetSyncPanel>.section-title .market-tools{width:100%;min-width:0;grid-template-columns:repeat(2,minmax(0,1fr));}'), 'action group takes available width in two columns');
+  assert.ok(css.includes('min-height:44px') && css.includes('overflow-wrap:anywhere'), 'buttons remain touch-friendly and long labels can wrap');
+  assert.ok(css.includes('@media(max-width:380px)') && css.includes('grid-template-columns:1fr;'), 'actions stack on very narrow phones');
+});
+
+
+test('admin section headers and refresh actions wrap cleanly on mobile', () => {
+  const guard = html.lastIndexOf('/* Admin section headers: keep long Persian titles and refresh actions readable on mobile. */');
+  const styleEnd = html.lastIndexOf('</style>');
+  assert.ok(guard >= 0 && styleEnd > guard, 'admin responsive header guard is present at stylesheet end');
+  const css = html.slice(guard, styleEnd);
+  assert.ok(css.includes('@media(max-width:700px)'), 'admin headers adapt at mobile widths');
+  assert.ok(css.includes('#tab-admin .detail-section>.section-title{align-items:flex-start;flex-wrap:wrap;gap:9px;}'), 'admin section headers may wrap');
+  assert.ok(css.includes('#tab-admin .detail-section>.section-title h3{flex:1 1 100%;min-width:0;max-width:100%;overflow-wrap:anywhere;}'), 'long admin titles can use full width and wrap');
+  assert.ok(css.includes('#tab-admin .detail-section>.section-title>button{flex:1 1 100%;width:100%;min-width:0;min-height:44px;white-space:normal;overflow-wrap:anywhere;}'), 'refresh actions remain full-width, touch-friendly, and wrap labels');
+});
+
+
+test('admin user cards keep balances and credit controls inside very narrow phone widths', () => {
+  const guard = html.lastIndexOf('/* Admin user cards: prevent balance values and credit controls from overflowing compact phones. */');
+  const styleEnd = html.lastIndexOf('</style>');
+  assert.ok(guard >= 0 && styleEnd > guard, 'compact admin-user card guard is present at stylesheet end');
+  const css = html.slice(guard, styleEnd);
+  assert.ok(css.includes('@media(max-width:380px)'), 'rules target very narrow phones');
+  assert.ok(css.includes('#tab-admin .admin-user-card>.grid{grid-template-columns:minmax(0,1fr);min-width:0;}'), 'balance cards stack on compact screens');
+  assert.ok(css.includes('overflow-wrap:anywhere') && css.includes('word-break:break-word'), 'long email and balance values can wrap');
+  assert.ok(css.includes('#tab-admin .admin-adjust-grid{grid-template-columns:minmax(0,1fr);}'), 'credit adjustment controls use one compact column');
+  assert.ok(css.includes('#tab-admin .admin-adjust-grid>*{width:100%;min-width:0;max-width:100%;}'), 'form controls cannot force the card wider');
+});
+
+
+test('admin asset and exchange-sync result rows wrap long identifiers on mobile', () => {
+  const guard = html.lastIndexOf('/* Admin dynamic asset rows: wrap long symbols and keep action buttons inside compact result cards. */');
+  const styleEnd = html.lastIndexOf('</style>');
+  assert.ok(guard >= 0 && styleEnd > guard, 'admin dynamic-row responsive guard is present at stylesheet end');
+  const css = html.slice(guard, styleEnd);
+  assert.ok(css.includes('@media(max-width:700px)'), 'dynamic admin rows adapt on mobile');
+  assert.ok(css.includes('#tab-admin .asset-row>.asset-symbol{min-width:0;max-width:100%;overflow-wrap:anywhere;}'), 'asset identity column can shrink and wrap');
+  assert.ok(css.includes('word-break:break-word'), 'long provider identifiers can wrap');
+  assert.ok(css.includes('#tab-admin .asset-row>button{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;}'), 'action labels cannot force horizontal overflow');
+  assert.ok(css.includes('@media(max-width:380px)') && css.includes('#tab-admin .asset-row{grid-template-columns:minmax(0,1fr);}'), 'very narrow phones use a single-column result layout');
+  assert.ok(css.includes('min-height:44px'), 'compact result actions retain a usable touch target');
+});
+
 test('Toman market summary reports observed sources, freshness, and source timestamps', () => {
   const start = html.indexOf('function summarizeTomanMarketRows(rows){');
   const end = html.indexOf("function showTomanStatus(message,type=''){", start);
@@ -451,4 +685,73 @@ test('Toman market summary reports observed sources, freshness, and source times
   assert.ok(loader.includes('summarizeTomanMarketRows(filtered)'), 'loader uses the tested summary');
   assert.ok(loader.includes('summary.latestFetchedAt'), 'loader displays the real source timestamp');
   assert.doesNotMatch(loader, /Object\.keys\(tomanExchangeNames\)\.length/, 'configured labels are not reported as active sources');
+});
+
+
+test('light theme keeps translucent glass cards instead of flattening every surface to opaque white', () => {
+  const start = html.lastIndexOf('/* Final cross-theme defect fixes: white-theme contrast and full surface parity. */');
+  const end = html.lastIndexOf('/* DigiArz final indigo auth cascade guard');
+  assert.ok(start >= 0 && end > start, 'final light-theme parity layer is present');
+  const css = html.slice(start, end);
+  assert.ok(css.includes('--panel:rgba(255,255,255,.76)'), 'light panel token retains translucency');
+  assert.ok(css.includes('--panel2:rgba(248,251,255,.72)'), 'secondary panel token retains translucency');
+  assert.ok(css.includes('background:rgba(255,255,255,.68)!important'), 'light cards use a translucent surface');
+  assert.ok(css.includes('-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);'), 'glass blur works in supported mobile browsers');
+  assert.ok(css.includes('body.light-theme input,body.light-theme select,body.light-theme textarea'), 'form fields remain opaque for readability');
+});
+
+
+test('market asset logos have no legacy disc, border, or shadow in any theme', () => {
+  const guard = html.lastIndexOf('/* Market asset logos: final cascade override removes the legacy disc in every theme. */');
+  const styleEnd = html.lastIndexOf('</style>');
+  assert.ok(guard >= 0 && styleEnd > guard, 'frameless market-logo guard is present at stylesheet end');
+  const css = html.slice(guard, styleEnd);
+  assert.ok(css.includes('#tab-markets .market-board-v34 .coin-icon,'), 'rule is scoped to market-board logo container');
+  assert.ok(css.includes('#tab-markets .market-board-v34 .coin-icon img{'), 'rule also covers the logo image');
+  assert.ok(css.includes('background:transparent!important;'), 'legacy dark logo background is removed');
+  assert.ok(css.includes('border:0!important;') && css.includes('box-shadow:none!important;'), 'logo border and shadow are removed');
+});
+
+
+test('market logo frameless styling targets the actual coinLogo markup', () => {
+  assert.ok(html.includes("function coinLogo(symbol,sizeClass='coin-icon',imageUrl='')"), 'shared coinLogo renderer exists');
+  assert.ok(html.includes("identity.innerHTML=coinLogo(base,'coin-icon',item.image_url)"), 'market rows render the logo with the coin-icon class');
+  const guard = html.lastIndexOf('/* Market asset logos: final cascade override removes the legacy disc in every theme. */');
+  const styleEnd = html.lastIndexOf('</style>');
+  const finalStyleStart = html.lastIndexOf('<style', styleEnd);
+  assert.ok(guard >= finalStyleStart && styleEnd > guard, 'frameless market logo override is inside the final stylesheet cascade');
+  const css = html.slice(guard, styleEnd);
+  assert.ok(css.includes('#tab-markets .market-board-v34 .coin-icon{') || css.includes('#tab-markets .market-board-v34 .coin-icon,'), 'override covers the actual logo wrapper');
+  assert.ok(css.includes('.coin-icon img{') || css.includes('.coin-icon img{background:transparent!important;'), 'override covers the actual logo image');
+});
+
+
+test('market rows stay frameless and use a true black-gold surface in dark theme', () => {
+  const marker = '/* Market rows: frameless surface in every theme; keep the black theme truly black/gold. */';
+  const guard = html.lastIndexOf(marker);
+  const styleEnd = html.lastIndexOf('</style>');
+  const finalStyleStart = html.lastIndexOf('<style', styleEnd);
+  assert.ok(guard >= finalStyleStart && guard < styleEnd, 'market row correction is in the final stylesheet layer');
+  const css = html.slice(guard, styleEnd);
+  assert.ok(css.includes('#tab-markets .market-board-v34 .coin{') && css.includes('border:0!important;'), 'market row frames are removed in all themes');
+  assert.ok(css.includes('body.dark-theme #tab-markets .market-board-v34 .coin{'), 'dark theme has its own market-row surface');
+  assert.ok(css.includes('linear-gradient(110deg,#17191f,#101216)'), 'dark market rows use black-charcoal rather than the legacy blue surface');
+  assert.ok(css.includes('color:var(--text)!important;'), 'dark market row text follows the active palette');
+});
+
+
+test('market gain and loss indicators inherit accessible colors from all three theme palettes', () => {
+  assert.match(html, /\.coin-change\.pos\s*\{[^}]*color:\s*var\(--green\)/);
+  assert.match(html, /\.coin-change\.neg\s*\{[^}]*color:\s*var\(--red\)/);
+  for (const [theme, green, red] of [
+    ['dark', '#0ecb81', '#f6465d'],
+    ['light', '#16845e', '#cf4052'],
+    ['luxury', '#53d6ad', '#ff8198']
+  ]) {
+    const start = html.lastIndexOf('body.' + theme + '-theme{');
+    assert.ok(start >= 0, theme + ' palette declaration exists');
+    const block = html.slice(start, html.indexOf('}', start) + 1);
+    assert.ok(block.includes('--green:' + green), theme + ' positive market color is explicitly themed');
+    assert.ok(block.includes('--red:' + red), theme + ' negative market color is explicitly themed');
+  }
 });
