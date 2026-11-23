@@ -1147,3 +1147,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - The prior successful workflow does NOT validate these new commits; verify CI on the final current HEAD before claiming this fix is tested.
 - PR #55 remains Draft/open/unmerged. Do not merge, publish, or change main. No Supabase/Production, DB, auth, wallet, orders, or trading behavior changed. Physical Android visual acceptance remains outstanding.
 - Next: verify final HEAD and workflow status, then continue the theme audit for any remaining fixed logo/row surfaces. Keep changes presentation-only and scoped.
+
+
+## 2026-11-23 — Verify market-logo frameless override against rendered markup
+- Rechecked the market renderer: market rows call coinLogo(base,'coin-icon',item.image_url), which emits a .coin-icon wrapper containing an img. The existing #tab-markets .coin .coin-icon rule applied a theme panel background and border, leaving a disc behind each logo.
+- The final override targets the actual #tab-markets .market-board-v34 .coin-icon wrapper and its img, clearing background, border, and shadow without changing logo size, URL, or fallback behavior.
+- Added an additional regression test asserting that the renderer emits the expected class and the CSS override covers the actual wrapper/image selectors.
+- Source commit: 5b63d873fcf8a14ed769bdca3e682b5d090df068; base CSS test commit: 5b63d873fcf8a14ed769bdca3e682b5d090df068; markup-specific test commit: 3bd69e659061b5fc9f0917981949c7e31bb98a1c.
+- CI run 45188116927 passed on earlier SHA bb171c9e503251af9613e0bdf72afe29c5967f8e. Newer source/test commits have their own workflow runs; verify the newest run against the final HEAD before calling this validated.
+- PR #55 remains Draft/open/unmerged. Do not merge or publish. No Supabase/Production, DB, auth, wallet, orders, or trading logic changed. Physical Android visual acceptance remains outstanding.
+- Next: inspect the final theme cascade around market logo/coin rows for duplicate or conflicting !important rules, then verify current HEAD and Actions.
