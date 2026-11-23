@@ -877,3 +877,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Next: verify Actions run for PR #54 and fix any failures; then obtain an Android review APK only after CI passes, and have the user verify all three themes on-device. Keep PR #54 Draft/unmerged until explicit approval.
 
 - APK workflow review: `android-apk.yml` supports workflow_dispatch and builds the selected ref, but no workflow-dispatch action is available in the connected GitHub tools. The separate `android-review-apk.yml` explicitly checks out the older `build/indigo-glass-biometric-apk-2026-11-21` branch, so its artifact would NOT contain PR #54 changes. Do not reuse that APK as this UI candidate.
+
+## 2026-11-23 — Tighten non-admin dashboard activity suppression
+- Follow-up code review found renderDashboardActivity() was still called from general dashboard/history/order refresh paths even though the activity center was CSS-hidden for non-admins.
+- Added an early return when isSuperAdmin is false so private activity/alert content is not populated into the dashboard DOM for ordinary users; admin behavior remains unchanged.
+- Extended the role-visibility regression test to assert the renderer guard.
+- Commits: index.html 1805dec0e6f58b948026d4dc633faeae374820b7; tests/index-syntax.test.js ca22b9c6aa591eac7ee8e0a4b2120d1fd26bfb67.
+- A new GitHub Actions run is expected for this latest source. Do not treat earlier passing CI on feaafa2 as validation of these two follow-up commits; wait for the latest head's run.
+- Android visual testing and a PR-specific APK remain outstanding; no merge, APK, or Production changes.
