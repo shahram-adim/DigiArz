@@ -452,3 +452,15 @@ test('Toman market summary reports observed sources, freshness, and source times
   assert.ok(loader.includes('summary.latestFetchedAt'), 'loader displays the real source timestamp');
   assert.doesNotMatch(loader, /Object\.keys\(tomanExchangeNames\)\.length/, 'configured labels are not reported as active sources');
 });
+
+
+test('dashboard no longer renders the five-coin gainers and losers panels', () => {
+  for (const obsolete of ['topGainersList', 'topLosersList', 'allGainersBtn', 'allLosersBtn']) {
+    assert.doesNotMatch(html, new RegExp(obsolete), obsolete + ' should be removed from the dashboard');
+  }
+  for (const obsolete of ['renderTopGainers(', 'renderTopLosers(', 'showAllGainers(', 'showAllLosers(']) {
+    assert.doesNotMatch(html, new RegExp(obsolete.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')), obsolete + ' should not remain as dead code');
+  }
+  assert.match(html, /id="topAssetsList"/, 'the separate top-volume assets strip remains available');
+  assert.match(html, /id="marketList"/, 'the full market list remains available');
+});
