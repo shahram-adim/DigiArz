@@ -37,6 +37,13 @@ Verified feature head before this tracker update: `281c0e24ec1a8f491fbfbfeccbc9d
 - [ ] Debug APK containing the notification center: build run 45239691176 is still running; verify uploaded artifact before calling it install-ready.
 - [ ] Physical installation and Android device testing remain outstanding.
 
+
+- [x] Add user-scoped Supabase Realtime order lifecycle notification handling for server-confirmed INSERT/UPDATE events: created, partially filled (including incremental fills), filled, cancelled, rejected and triggered.
+- [x] Add account security notifications from confirmed Supabase Auth callbacks: sign-in, sign-out, password recovery start and user update; no credentials, tokens, IP addresses or private account data are included.
+- [x] Disconnect the order channel and clear per-user event snapshots on sign-out; keep the Supabase client private to the notification module.
+- [ ] Verify the latest runtime regression test and Android APK build for order/security notifications; first test attempts exposed test-harness issues, now corrected with a DOM mock and explicit channel setup.
+- [ ] Confirm the Production Realtime publication/RLS path for the user's own `orders` rows without changing Production Supabase; do not claim real-time delivery until confirmed.
+
 ## Remaining work — do not mark complete prematurely
 1. Reconcile the full 36-question response record from prior conversation/repository; do not ask the user to repeat answers.
 2. Complete order lifecycle notifications (created, filled, partially filled, cancelled) and security-event notifications, using confirmed server/app events only.
