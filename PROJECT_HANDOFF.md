@@ -896,3 +896,5 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Validation boundary: source-level changes only. CI has not yet run on this branch, and no browser/device screenshots or physical Android rendering have been reviewed. Do not claim visual parity or a completed theme redesign until those checks pass.
 - No merge, APK build, release, deployment, database/Supabase, auth, wallet, or trade logic changes.
 - Next: run the project regression workflow on this branch, inspect failures, then build a separate review APK only after CI succeeds. Keep all candidate branches unmerged pending explicit approval.
+
+- CI run 45138971915 initially failed in the new test file because the added JavaScript regex literal was over-escaped (test harness syntax error, not application runtime failure). Replaced those expressions with direct source-string assertions in commit `0a353bb4cd0f08de0ac7e601bceac20583314577`; a fresh PR run is required before treating the candidate as validated.
