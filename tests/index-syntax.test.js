@@ -605,3 +605,16 @@ test('admin daily-ad controls remain usable without overflow on narrow phones', 
   assert.ok(css.includes('min-height:44px'), 'admin controls keep a comfortable touch target');
   assert.ok(css.includes('min-width:0') && css.includes('overflow-wrap:anywhere'), 'long admin labels cannot force horizontal overflow');
 });
+
+
+test('exchange-sync admin header wraps without horizontal pressure on narrow phones', () => {
+  const guard = html.lastIndexOf('/* Exchange-sync admin header: wrap actions cleanly on compact screens. */');
+  const styleEnd = html.lastIndexOf('</style>');
+  assert.ok(guard >= 0 && styleEnd > guard, 'exchange-sync responsive guard is present at stylesheet end');
+  const css = html.slice(guard, styleEnd);
+  assert.ok(css.includes('@media(max-width:700px)'), 'header layout adapts on mobile and small tablets');
+  assert.ok(css.includes('#exchangeAssetSyncPanel>.section-title{align-items:flex-start;flex-wrap:wrap;}'), 'panel heading can wrap');
+  assert.ok(css.includes('#exchangeAssetSyncPanel>.section-title .market-tools{width:100%;min-width:0;grid-template-columns:repeat(2,minmax(0,1fr));}'), 'action group takes available width in two columns');
+  assert.ok(css.includes('min-height:44px') && css.includes('overflow-wrap:anywhere'), 'buttons remain touch-friendly and long labels can wrap');
+  assert.ok(css.includes('@media(max-width:380px)') && css.includes('grid-template-columns:1fr;'), 'actions stack on very narrow phones');
+});
