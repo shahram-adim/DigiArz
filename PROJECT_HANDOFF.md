@@ -916,3 +916,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - A separate APK review branch `build/apk-glass-fallback-2026-11-23` was created from that exact tested source. Android APK build was triggered by a scoped workflow push; await artifact verification before sharing a new APK.
 - PR #55 remains draft/open/unmerged. Main remains at `968010d37a175b947616167ed265953a2ed6b62c`. No Production/Supabase, database, auth, wallet, order, or trading logic changes.
 - Physical Android visual acceptance remains outstanding; CI success is not a substitute for device rendering.
+
+
+## 2026-11-23 — Cross-theme audit follow-up (validation pending)
+- Further source audit found legacy teal/blue luxury-theme selectors still affecting tags, coin hover states, notices, auth banner/ad, gainers panel, Toman table header/source, and theme selector active state. Added final indigo/glass overrides for these surfaces.
+- Found market-board coin rows retained a navy background and hard-coded gold/white text regardless of selected theme. Added explicit black/gold dark palette rules and indigo luxury overrides for row text/prices; existing light-theme text/background overrides remain.
+- Added regression assertions for the legacy luxury surfaces and dark market-row palette.
+- Latest source/test commits: `08d5bb111c339c3893ccda2ee1502976604dfe6f` and `2f7e9f3657eb6dfd1f078b209ccf391a1ac988c6`.
+- IMPORTANT: the latest source/test commits have not yet received a fresh CI run. Earlier CI success [45142995600](https://github.com/shahram-adim/DigiArz/actions/runs/45142995600) applies to the previous tested commit only, not these follow-up changes. Do not treat the current palette audit as fully validated until CI is rerun.
+- Physical Android visual acceptance across all three themes remains outstanding. No claim of error-free rendering is made.
+- PR #55 remains draft/open/unmerged; main and Supabase/Production remain untouched.
