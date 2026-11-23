@@ -1042,3 +1042,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Recheck Actions against the final PR head before considering this test validated. Existing successful run `45163851803` is for SHA `321777d00a209f0164a4c3452bbce55019ce6944`, not the current branch head.
 - PR #55 remains Draft/open/unmerged; no Production/Supabase/database/auth/wallet/trading changes and no APK/device test.
 - Next: continue responsive checks on the history table and admin controls; retain the existing safety boundary and do not merge or publish.
+
+
+## 2026-11-23 — Narrow-phone admin controls
+- Continued responsive audit after checking the latest PR head, Actions, handoff, source, and tests. History table already has a horizontally scrollable wrapper and a deliberate minimum table width; this preserves column readability on small screens without forcing the whole page wider.
+- Found the daily-ad admin item action area switched to a vertical card layout below 650px but did not explicitly wrap its action buttons or enforce comfortable touch height at very narrow widths.
+- Added a <=380px rule: the daily-ad admin section header may wrap, its refresh button becomes full-width, admin item/copy containers are constrained to available width, action buttons wrap, and buttons receive a 44px minimum height. Long labels can break instead of pushing the page horizontally.
+- No admin permissions, data, or action logic changed. Added a regression test for the narrow-phone rules.
+- Source commit: `7500ee16582b018170299196bc6999323a19e5be`; test commit: `f94268323ae71dac04cc1325ef30b815e3b84cc8`.
+- The previous successful CI run still targets an older SHA; re-check Actions after this latest source/test change. Do not claim the new test passed until a run reports the exact final head SHA.
+- PR #55 remains open/Draft/unmerged. No main, Supabase/Production, database, auth, wallet, order, or trading changes. No APK build or real-device visual verification.
+- Next safe work: inspect the remaining admin panels and page-level overflow rules, then verify CI against the exact final PR head. Keep the PR Draft and do not merge.
