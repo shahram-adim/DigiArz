@@ -97,12 +97,14 @@ function connectOrderEvents(client,userId){
  disconnectOrderEvents();
  orderRealtimeClient=client;
  try{
-  orderChannel=client.channel('digiarz-order-notifications-'+userId)
-   .on('postgres_changes',{event:'*',schema:'public',table:'orders',filter:'user_id=eq.'+userId},payload=>handleOrderChange(payload,userId))
-   .subscribe();
+  const channel=client.channel('digiarz-order-notifications-'+userId);
+  if(!channel||typeof channel.on!=='function')throw new Error('Realtime channel unavailable');
+  channel.on('postgres_changes',{event:'*',schema:'public',table:'orders',filter:'user_id=eq.'+userId},payload=>handleOrderChange(payload,userId));
+  orderChannel=channel;
   orderChannelUserId=userId;
+  if(typeof channel.subscribe==='function')channel.subscribe();
   return true;
- }catch(_){orderChannel=null;orderChannelUserId=null;return false}
+ }catch(_){orderChannel=null;orderChannelUserId=null;orderRealtimeClient=null;return false}
 }
 function publishSecurityEvent(event){
  const events={
