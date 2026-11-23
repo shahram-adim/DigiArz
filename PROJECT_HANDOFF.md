@@ -862,3 +862,26 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - PR #47 remains Draft/open/unmerged and mergeable. Physical Android installation, fingerprint enrollment, and login/logout/background-relock acceptance tests remain outstanding. APK is a debug review build, not production-signed.
 - No app code was merged to main; no release/deployment/publishing or Supabase/database/user-financial-data changes were made. This handoff entry is documentation-only.
 - Next: user installs the new APK and checks all three themes, password login, fingerprint enrollment/unlock, logout and relock. Fix only observed issues on PR #47; do not merge without explicit user approval.
+
+## 2026-11-23 — Dashboard market movers and account-activity visibility review
+- Verified current main is still 968010d37a175b947616167ed265953a2ed6b62c; created fresh branch fix/ui-dashboard-cleanup-2026-11-23 directly from that exact head.
+- Moved the existing five-gainer and five-loser panels out of the Markets tab and into the Dashboard immediately below “بازار ارزهای دیجیتال”. Their existing IDs, click handlers, and render functions were preserved; each list is now horizontally scrollable with responsive card widths.
+- Updated setAccountMode(active) so .dashboard-activity-center is visible only when the account is active and isSuperAdmin has been positively confirmed by is_current_user_super_admin. Existing admin-only check remains server-derived; no role or authorization backend was changed.
+- Removed decorative borders from .coin rows and .favorite-btn, and removed the background/frame from .coin-icon wrappers. Existing logo images and star interaction remain intact.
+- Added three regression tests in tests/index-syntax.test.js for dashboard placement/horizontal layout, super-admin activity visibility, and unframed coin styling.
+- Opened Draft PR #54: https://github.com/shahram-adim/DigiArz/pull/54. Current branch is 4 commits ahead and 0 behind main; comparison shows only index.html, tests/index-syntax.test.js, PROJECT_HANDOFF.md, and IMPLEMENTATION_STATUS.md changed.
+- Static source checks confirmed the two market lists appear exactly once and only in the dashboard, the dashboard appears before the Markets tab, the role gate and CSS overrides are present, and all three new regression tests are included.
+- GitHub Actions run 45130193148 completed SUCCESS on the latest head `feaafa2ee97b2b37d76cd7bb71c155c1d7288003`. The `exact-decimal` job passed all Node/browser tests (including `tests/index-syntax.test.js`) and PostgreSQL arithmetic, upsert, schema-widening, Market/Limit/Stop-Limit, TP-SL, lifecycle, and concurrency regressions. Job steps 1–21 all completed successfully. See https://github.com/shahram-adim/DigiArz/actions/runs/45130193148.
+- No visual browser/device render was performed. The Sky Blue Glass dashboard's reported top blank-space issue still requires actual Android visual verification before claiming fixed.
+- No merge, APK build, release, deployment, Supabase/Production/database change, wallet/trade change, or authentication-flow change was performed.
+- Next: verify Actions run for PR #54 and fix any failures; then obtain an Android review APK only after CI passes, and have the user verify all three themes on-device. Keep PR #54 Draft/unmerged until explicit approval.
+
+- APK workflow review: `android-apk.yml` supports workflow_dispatch and builds the selected ref, but no workflow-dispatch action is available in the connected GitHub tools. The separate `android-review-apk.yml` explicitly checks out the older `build/indigo-glass-biometric-apk-2026-11-21` branch, so its artifact would NOT contain PR #54 changes. Do not reuse that APK as this UI candidate.
+
+## 2026-11-23 — Tighten non-admin dashboard activity suppression
+- Follow-up code review found renderDashboardActivity() was still called from general dashboard/history/order refresh paths even though the activity center was CSS-hidden for non-admins.
+- Added an early return when isSuperAdmin is false so private activity/alert content is not populated into the dashboard DOM for ordinary users; admin behavior remains unchanged.
+- Extended the role-visibility regression test to assert the renderer guard.
+- Commits: index.html 1805dec0e6f58b948026d4dc633faeae374820b7; tests/index-syntax.test.js ca22b9c6aa591eac7ee8e0a4b2120d1fd26bfb67.
+- A new GitHub Actions run is expected for this latest source. Do not treat earlier passing CI on feaafa2 as validation of these two follow-up commits; wait for the latest head's run.
+- Android visual testing and a PR-specific APK remain outstanding; no merge, APK, or Production changes.

@@ -423,3 +423,35 @@ test('login mini chart renders real five-minute candles without depending on a c
   assert.match(html, /fetchBinanceKlines\('BTCUSDT','5m',36\)/);
   assert.match(html, /<svg viewBox=/);
 });
+
+test('dashboard market movers are horizontal and no longer duplicated in the markets tab', () => {
+  const dashboardStart = html.indexOf('<div class="dashboard-market-movers"');
+  const marketTabStart = html.indexOf('<section id="tab-markets"');
+  assert.ok(dashboardStart >= 0 && marketTabStart > dashboardStart, 'movers are placed inside the dashboard before the markets tab');
+  for (const id of ['topGainersList', 'topLosersList', 'allGainersBtn', 'allLosersBtn']) {
+    const matches = [...html.matchAll(new RegExp('id="' + id + '"', 'g'))];
+    assert.equal(matches.length, 1, id + ' appears exactly once');
+    assert.ok(matches[0].index > dashboardStart && matches[0].index < marketTabStart, id + ' belongs to the dashboard');
+  }
+  assert.match(html, /\.dashboard-market-movers \.gainers-grid\{display:flex;flex-direction:row;[^}]*overflow-x:auto/);
+  assert.match(html, /\.dashboard-market-movers \.gainer-card\{flex:0 0/);
+});
+
+test('dashboard account activity is visible only to an authenticated super-admin', () => {
+  const start = html.indexOf('function setAccountMode(active){');
+  const end = html.indexOf('\nasync function deactivateMyAccount()', start);
+  assert.ok(start >= 0 && end > start, 'account mode function boundaries found');
+  const body = html.slice(start, end);
+  assert.ok(body.includes("el.classList.toggle('hidden',!active||!isSuperAdmin)"), 'activity center is hidden unless the account is active and super-admin');
+  assert.match(html, /is_current_user_super_admin/);
+  const rendererStart = html.indexOf('function renderDashboardActivity(){');
+  assert.ok(rendererStart >= 0, 'dashboard activity renderer exists');
+  assert.match(html.slice(rendererStart, rendererStart + 100), /if\(!isSuperAdmin\)return;/, 'non-admin activity content is not rendered into the dashboard DOM');
+});
+
+test('coin rows, favorite controls and coin logo wrappers have no decorative frames', () => {
+  assert.match(html, /\.coin\{[^}]*border:0/);
+  assert.match(html, /\.favorite-btn\{[^}]*border:0/);
+  assert.match(html, /\.coin-icon\{background:transparent!important;border:0!important/);
+});
+

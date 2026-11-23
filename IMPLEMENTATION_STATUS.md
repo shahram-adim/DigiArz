@@ -1203,3 +1203,16 @@
 - [x] اصلاح regex در commit `fe151109a9fd46c38a317f305785f0eb95449ee0` ثبت و فایل از `main` دوباره دریافت و تأیید شد.
 - [x] اجرای نهایی `45082751825` روی commit `fe151109` با نتیجه `success` کامل شد؛ آزمون‌های Node/browser، آزمون PostgreSQL 17 برای upsert تکراری، تمام آزمون‌های widening، Market/Limit/Stop-Limit و آزمون‌های race همگی موفق شدند.
 - [!] CI فقط کد مخزن و PostgreSQL دورریختنی را آزمود؛ Edge Function Production هنوز نسخه ۳ است و deploy/refresh واقعی انجام نشده است.
+
+## 2026-11-23 UI review candidate
+- Draft PR #54: dashboard gainers/losers horizontal strips, super-admin-only dashboard activity center, unframed coin rows/favorite controls/logo wrappers.
+- Branch: fix/ui-dashboard-cleanup-2026-11-23 (based on main 968010d37a175b947616167ed265953a2ed6b62c).
+- Static structural checks passed; three regression tests added. GitHub Actions run 45130193148 passed all 21 job steps, including Node/browser tests and PostgreSQL integration regressions (2026-11-23).
+- Physical Android visual check, including Sky Blue Glass top spacing, remains outstanding. No APK/merge/Production changes.
+
+- APK note: existing android-review-apk.yml still checks out the older build/indigo-glass-biometric-apk-2026-11-21 branch, so that artifact is not valid for PR #54. android-apk.yml can build the selected ref via workflow_dispatch, but the connected GitHub tools do not expose workflow dispatch. No APK built or reused.
+
+## 2026-11-23 admin-only dashboard activity follow-up
+- Code review found activity renderer was still called by general refresh functions while visually hidden for non-admins.
+- Added early return to renderDashboardActivity() unless isSuperAdmin; added regression assertion. Awaiting CI on latest branch head; previous successful run predates this follow-up.
+- No Android APK, merge, or Production change.
