@@ -738,3 +738,20 @@ test('market rows stay frameless and use a true black-gold surface in dark theme
   assert.ok(css.includes('linear-gradient(110deg,#17191f,#101216)'), 'dark market rows use black-charcoal rather than the legacy blue surface');
   assert.ok(css.includes('color:var(--text)!important;'), 'dark market row text follows the active palette');
 });
+
+
+test('market gain and loss indicators inherit accessible colors from all three theme palettes', () => {
+  assert.match(html, /\.coin-change\.pos\s*\{[^}]*color:\s*var\(--green\)/);
+  assert.match(html, /\.coin-change\.neg\s*\{[^}]*color:\s*var\(--red\)/);
+  for (const [theme, green, red] of [
+    ['dark', '#0ecb81', '#f6465d'],
+    ['light', '#16845e', '#cf4052'],
+    ['luxury', '#53d6ad', '#ff8198']
+  ]) {
+    const start = html.lastIndexOf('body.' + theme + '-theme{');
+    assert.ok(start >= 0, theme + ' palette declaration exists');
+    const block = html.slice(start, html.indexOf('}', start) + 1);
+    assert.ok(block.includes('--green:' + green), theme + ' positive market color is explicitly themed');
+    assert.ok(block.includes('--red:' + red), theme + ' negative market color is explicitly themed');
+  }
+});
