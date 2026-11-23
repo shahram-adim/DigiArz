@@ -1276,3 +1276,10 @@
 - Physical Android installation and visual acceptance remain outstanding. CI success does not certify device rendering.
 - No merge, release, deployment, Supabase/Production, database, authentication, wallet, order, or trading change was performed.
 - Next safe step: add a narrowly scoped artifact-only APK workflow that can build the exact PR #55 head without changing main/Production, or have the user trigger the existing workflow_dispatch manually with the exact branch ref. Verify BUILD-INFO source commit and APK SHA-256 before sharing.
+
+
+## 2026-11-23 — Remove dashboard top gainers/losers on user request
+- Removed the dashboard sections showing the five biggest 24-hour gainers and five biggest losers, including their dashboard-only buttons and horizontal-strip styling.
+- Preserved the market tab's own gainers/losers analytics and market filters; only the dashboard display was removed.
+- Removed obsolete dashboard event bindings and replaced the prior horizontal-movers regression with assertions that those widgets are absent from the dashboard while market-tab panels remain.
+- Change is on the existing draft PR #55 branch only. Requires fresh CI; no merge, APK release, deployment, Supabase/Production, auth, wallet, or trading changes.
