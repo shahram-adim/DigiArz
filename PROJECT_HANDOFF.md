@@ -935,3 +935,8 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Further tightened the fail-closed behavior: the admin-only activity panel is now hidden immediately when a new authenticated session begins, before the asynchronous profile and super-admin role lookups complete. This prevents a prior administrator's visible panel from briefly carrying over while a different account is being checked.
 - Reset the in-memory admin flag at session entry and added a regression assertion that the hide occurs before the profile query.
 - The server-side super-admin RPC remains unchanged; no authorization policy or database object was modified.
+
+
+### Duplicate authentication-event safety — 2026-11-23
+- Preserved an already-running session initialization before applying the admin-panel reset. This avoids a duplicate auth event clearing a super-admin state while the first role lookup is still completing.
+- Added a regression assertion for the duplicate-event ordering. The admin-only panel remains hidden before a new session's role check and is revealed only after the verified admin result.
