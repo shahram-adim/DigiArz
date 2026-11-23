@@ -107,16 +107,16 @@ test('trade history provides accessible local-date quick presets', () => {
   assert.ok(html.includes("setHistoryDatePreset('all')"), 'clear action resets the selected preset');
 });
 
-test('dashboard exposes recent account activity and account alerts', () => {
-  const start = html.indexOf('<div class="dashboard-activity-center"');
+test('dashboard retains account activity markup for admins while hiding it by default', () => {
+  const start = html.indexOf('<div id="dashboardActivityCenter" class="dashboard-activity-center hidden"');
   const end = html.indexOf('<div class="da-v2-compat hidden"', start);
-  assert.ok(start >= 0 && end > start, 'visible dashboard activity center boundaries found');
+  assert.ok(start >= 0 && end > start, 'default-hidden dashboard activity center boundaries found');
   const section = html.slice(start, end);
   for (const id of ['dashboardRecentOrders', 'dashboardRecentTrades', 'dashboardAccountAlerts']) {
-    assert.match(section, new RegExp('id="' + id + '"'), id + ' is visible in the activity center');
+    assert.match(section, new RegExp('id="' + id + '"'), id + ' is retained for administrators');
   }
-  assert.ok(section.includes('data-dashboard-tab="orders"'), 'orders shortcut is present');
-  assert.ok(section.includes('data-dashboard-tab="history"'), 'history shortcut is present');
+  assert.ok(section.includes('data-dashboard-tab="orders"'), 'orders shortcut is retained');
+  assert.ok(section.includes('data-dashboard-tab="history"'), 'history shortcut is retained');
   assert.ok(section.includes('aria-live="polite"'), 'activity updates are announced politely');
   const compatibility = html.slice(end);
   assert.doesNotMatch(compatibility, /id="dashboard(?:RecentOrders|RecentTrades|AccountAlerts)"/, 'activity roots are not duplicated in hidden compatibility markup');
