@@ -538,3 +538,23 @@ test('indigo glass login overrides the legacy black-and-gold reference skin', ()
     'body.luxury-theme #authView .ref-coin-row strong{color:#53d6ad!important'
   ]) assert.ok(html.includes(rule), 'indigo login override exists: ' + rule);
 });
+
+
+test('final indigo login cascade wins over later legacy gold auth rules', () => {
+  const guard = html.lastIndexOf('/* DigiArz final indigo auth cascade guard — 2026-11-23 */');
+  assert.ok(guard >= 0, 'final indigo cascade guard exists');
+  const styleEnd = html.lastIndexOf('</style>');
+  assert.ok(styleEnd > guard, 'final indigo guard remains inside the stylesheet');
+  const legacyGold = html.lastIndexOf('body.luxury-theme #authView .auth-form .auth-actions button');
+  assert.ok(guard > legacyGold, 'final indigo rules come after legacy auth button rules');
+  const finalCss = html.slice(guard, styleEnd);
+  for (const rule of [
+    'body.luxury-theme #authView .auth-form input{',
+    'body.luxury-theme #authView .auth-form .auth-actions button{',
+    'body.luxury-theme #authView .auth-phone-device{',
+    'body.luxury-theme #authView .ref-platform{',
+    'body.luxury-theme #authView .ref-gold-coin{'
+  ]) assert.ok(finalCss.includes(rule), 'final indigo cascade covers: ' + rule);
+  assert.ok(finalCss.includes('background:linear-gradient(135deg,#d8c5ff,#8f82d2)!important'), 'primary auth action remains lavender, not gold');
+  assert.ok(finalCss.includes('color:#53d6ad!important'), 'live market accent remains mint');
+});
