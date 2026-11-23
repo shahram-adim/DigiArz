@@ -724,3 +724,17 @@ test('market logo frameless styling targets the actual coinLogo markup', () => {
   assert.ok(css.includes('#tab-markets .market-board-v34 .coin-icon{') || css.includes('#tab-markets .market-board-v34 .coin-icon,'), 'override covers the actual logo wrapper');
   assert.ok(css.includes('.coin-icon img{') || css.includes('.coin-icon img{background:transparent!important;'), 'override covers the actual logo image');
 });
+
+
+test('market rows stay frameless and use a true black-gold surface in dark theme', () => {
+  const marker = '/* Market rows: frameless surface in every theme; keep the black theme truly black/gold. */';
+  const guard = html.lastIndexOf(marker);
+  const styleEnd = html.lastIndexOf('</style>');
+  const finalStyleStart = html.lastIndexOf('<style', styleEnd);
+  assert.ok(guard >= finalStyleStart && guard < styleEnd, 'market row correction is in the final stylesheet layer');
+  const css = html.slice(guard, styleEnd);
+  assert.ok(css.includes('#tab-markets .market-board-v34 .coin{') && css.includes('border:0!important;'), 'market row frames are removed in all themes');
+  assert.ok(css.includes('body.dark-theme #tab-markets .market-board-v34 .coin{'), 'dark theme has its own market-row surface');
+  assert.ok(css.includes('linear-gradient(110deg,#17191f,#101216)'), 'dark market rows use black-charcoal rather than the legacy blue surface');
+  assert.ok(css.includes('color:var(--text)!important;'), 'dark market row text follows the active palette');
+});
