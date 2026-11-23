@@ -423,3 +423,19 @@ test('login mini chart renders real five-minute candles without depending on a c
   assert.match(html, /fetchBinanceKlines\('BTCUSDT','5m',36\)/);
   assert.match(html, /<svg viewBox=/);
 });
+
+
+test('market rows keep three isolated visual themes and frameless logos/stars', () => {
+  const block = html.match(/<style id="digiarz-market-row-reference-themes-20261123">([\\s\\S]*?)<\\/style>/);
+  assert.ok(block, 'final market-row theme override is present');
+  const css = block[1];
+  assert.match(css, /body\\.dark-theme[\\s\\S]*?#tab-markets/);
+  assert.match(css, /body\\.light-theme[\\s\\S]*?#tab-markets/);
+  assert.match(css, /body\\.luxury-theme[\\s\\S]*?#tab-markets/);
+  assert.match(css, /background:#fff!important/);
+  assert.match(css, /#78c8ff/);
+  assert.doesNotMatch(css, /#1b245f|#1b2[0-9a-f]{2}/i, 'third theme must not fall back to indigo');
+  assert.match(css, /width:40px!important;height:40px!important/);
+  assert.match(css, /border:0!important;outline:0!important;border-radius:0!important;background:transparent!important/);
+  assert.match(css, /grid-template-columns:28px minmax\\(0,1fr\\) minmax\\(112px,auto\\)!important/);
+});
