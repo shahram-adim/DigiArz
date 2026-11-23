@@ -1053,3 +1053,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - The previous successful CI run still targets an older SHA; re-check Actions after this latest source/test change. Do not claim the new test passed until a run reports the exact final head SHA.
 - PR #55 remains open/Draft/unmerged. No main, Supabase/Production, database, auth, wallet, order, or trading changes. No APK build or real-device visual verification.
 - Next safe work: inspect the remaining admin panels and page-level overflow rules, then verify CI against the exact final PR head. Keep the PR Draft and do not merge.
+
+
+## 2026-11-23 — Exchange-sync admin header responsive repair
+- Continued the narrow-screen admin audit and found the exchange-asset synchronization panel header placed a long Persian title beside a two-action group without a panel-specific wrapping rule. On compact widths this could compress the title and controls or cause horizontal pressure.
+- Added a scoped responsive rule for `#exchangeAssetSyncPanel`: at widths up to 700px the header wraps, the title may break long words, and the two action buttons occupy a full-width two-column group. Buttons retain a 44px minimum touch height and can wrap their labels. At widths up to 380px the actions stack into one column.
+- Added a regression test for the scoped mobile rules. No exchange-sync requests, source configuration, data handling, scheduling, or activation logic changed.
+- Source commit: `332d7c1b1cd5c249aa429bf2418ffa695c1e5aac`; test commit: `5dbe5f4a22a4f33c4c556dbe038d3f00b10fedc7`.
+- Re-fetch the final PR head and Actions before marking this regression validated. The prior successful exact-decimal workflow was for an older SHA and is not evidence for these commits.
+- PR #55 remains open/Draft/unmerged. No changes to `main`, Supabase/Production, database, authentication, wallet, orders, or trading logic. No physical Android visual test was performed.
+- Next: continue checking remaining admin panels and page-level horizontal overflow at compact widths; preserve internal horizontal scrolling for intentionally wide tables. Do not merge or publish.
