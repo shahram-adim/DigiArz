@@ -702,7 +702,7 @@ test('light theme keeps translucent glass cards instead of flattening every surf
 
 
 test('market asset logos have no legacy disc, border, or shadow in any theme', () => {
-  const guard = html.lastIndexOf('/* Market asset logos: remove the legacy dark disc so logos remain frameless in every theme. */');
+  const guard = html.lastIndexOf('/* Market asset logos: final cascade override removes the legacy disc in every theme. */');
   const styleEnd = html.lastIndexOf('</style>');
   assert.ok(guard >= 0 && styleEnd > guard, 'frameless market-logo guard is present at stylesheet end');
   const css = html.slice(guard, styleEnd);
@@ -716,9 +716,10 @@ test('market asset logos have no legacy disc, border, or shadow in any theme', (
 test('market logo frameless styling targets the actual coinLogo markup', () => {
   assert.ok(html.includes("function coinLogo(symbol,sizeClass='coin-icon',imageUrl='')"), 'shared coinLogo renderer exists');
   assert.ok(html.includes("identity.innerHTML=coinLogo(base,'coin-icon',item.image_url)"), 'market rows render the logo with the coin-icon class');
-  const guard = html.lastIndexOf('/* Market asset logos: remove the legacy dark disc so logos remain frameless in every theme. */');
+  const guard = html.lastIndexOf('/* Market asset logos: final cascade override removes the legacy disc in every theme. */');
   const styleEnd = html.lastIndexOf('</style>');
-  assert.ok(guard >= 0 && styleEnd > guard, 'frameless market logo override is in the final theme layer');
+  const finalStyleStart = html.lastIndexOf('<style', styleEnd);
+  assert.ok(guard >= finalStyleStart && styleEnd > guard, 'frameless market logo override is inside the final stylesheet cascade');
   const css = html.slice(guard, styleEnd);
   assert.ok(css.includes('#tab-markets .market-board-v34 .coin-icon{') || css.includes('#tab-markets .market-board-v34 .coin-icon,'), 'override covers the actual logo wrapper');
   assert.ok(css.includes('.coin-icon img{') || css.includes('.coin-icon img{background:transparent!important;'), 'override covers the actual logo image');
