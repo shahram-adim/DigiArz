@@ -3,7 +3,8 @@
 const KEYS = Object.freeze({
   theme: { key: 'digiArzTheme', values: ['light','dark','luxury'] },
   currency: { key: 'digiArzCurrencyMode', values: ['usd','toman','both'] },
-  favorites: { key: 'digiArzFavorites', type: 'symbols' }
+  favorites: { key: 'digiArzFavorites', type: 'symbols' },
+  lowPower: { key: 'digiArzLowPowerMode', type: 'boolean' }
 });
 const $ = id => document.getElementById(id);
 function readPreferences() {
@@ -14,6 +15,7 @@ function readPreferences() {
       if (raw === null) continue;
       const value = spec.type === 'symbols' ? JSON.parse(raw) : raw;
       if (spec.values && spec.values.includes(value)) result[name] = value;
+      if (spec.type === 'boolean' && ['true','false'].includes(raw)) result[name] = raw === 'true';
       if (spec.type === 'symbols' && Array.isArray(value) && value.every(x => typeof x === 'string' && /^[A-Z0-9]{2,20}$/.test(x))) result[name] = [...new Set(value)];
     } catch (_) {}
   }
@@ -40,6 +42,7 @@ function validate(payload) {
   const p = payload.preferences, clean = {};
   if (Object.hasOwn(p, 'theme')) { if (!KEYS.theme.values.includes(p.theme)) throw new Error('مقدار پوسته در فایل معتبر نیست.'); clean.theme = p.theme; }
   if (Object.hasOwn(p, 'currency')) { if (!KEYS.currency.values.includes(p.currency)) throw new Error('واحد نمایش در فایل معتبر نیست.'); clean.currency = p.currency; }
+  if (Object.hasOwn(p, 'lowPower')) { if (typeof p.lowPower !== 'boolean') throw new Error('مقدار حالت کم‌مصرف در فایل معتبر نیست.'); clean.lowPower = p.lowPower; }
   if (Object.hasOwn(p, 'favorites')) {
     if (!Array.isArray(p.favorites) || p.favorites.length > 500 || !p.favorites.every(x => typeof x === 'string' && /^[A-Z0-9]{2,20}$/.test(x))) throw new Error('فهرست علاقه‌مندی‌ها در فایل معتبر نیست.');
     clean.favorites = [...new Set(p.favorites)];
@@ -55,6 +58,7 @@ async function importBackup(file) {
   if (prefs.theme) localStorage.setItem(KEYS.theme.key, prefs.theme);
   if (prefs.currency) localStorage.setItem(KEYS.currency.key, prefs.currency);
   if (prefs.favorites) localStorage.setItem(KEYS.favorites.key, JSON.stringify(prefs.favorites));
+  if (Object.hasOwn(prefs, 'lowPower')) localStorage.setItem(KEYS.lowPower.key, String(prefs.lowPower));
   show('تنظیمات بازیابی شد. صفحه برای اعمال کامل تغییرات تازه‌سازی می‌شود.', 'ok');
   setTimeout(() => location.reload(), 700);
 }
