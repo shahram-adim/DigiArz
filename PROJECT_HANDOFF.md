@@ -1001,3 +1001,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - No workflow run exists yet for this new head; the earlier successful run `45163851803` is for older code SHA `321777d00a209f0164a4c3452bbce55019ce6944` and does not validate this patch.
 - PR #55 remains Draft/open/unmerged. No APK built for this new head, no physical Android visual verification, and no changes to main, Supabase/Production, database, authentication logic, wallet, orders, or trading.
 - Next: wait for/inspect CI on current head, then review remaining legacy theme overrides and all-page responsive consistency before requesting a new APK build.
+
+
+## 2026-11-23 — Final indigo login cascade precedence repair
+- A full stylesheet-order audit found later legacy auth rules still followed the earlier indigo login overrides. In particular, the old luxury-theme auth action button rule could restore the gold gradient after the indigo rules.
+- Added a final scoped indigo cascade guard at the end of the final stylesheet, covering the login form, inputs, primary/secondary actions, forgot-password control, phone frame, platform chip, floating coin accents, and mint live-market text.
+- Added a regression test that asserts the final indigo guard appears after the legacy auth rule and covers the key login surfaces.
+- Source commit: 52a0e84a57ec85ef8c842a27e83e39674c1ed8b5. Regression-test commit: b36214398ade5303c70e14c56fd16baecf42e347.
+- CI for these new commits has not yet been observed; the last successful workflow remains on older SHA 321777d00a209f0164a4c3452bbce55019ce6944 and does not validate this patch.
+- PR #55 remains Draft/open/unmerged. Main, Supabase/Production, database, authentication logic, wallet, orders, and trading were not changed. No APK or physical-device visual test was performed.
+- Next: inspect Actions for a run matching the new PR head, then continue page-by-page responsive and theme cascade audit. Do not merge or publish.
