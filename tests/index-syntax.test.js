@@ -464,3 +464,31 @@ test('market row renderer and narrow-phone CSS stay aligned with the five-cell l
   assert.match(renderer, /changeWrap\.className='coin-change-wrap'/);
   assert.match(renderer, /price\.className='price-stack'/);
 });
+
+
+test('top-five gainers and losers live only below the dashboard market heading in horizontal strips', () => {
+  const dashboardStart = html.indexOf('<section id="tab-dashboard"');
+  const marketsStart = html.indexOf('<section id="tab-markets"');
+  const tomanStart = html.indexOf('<section id="tab-toman"');
+  assert.ok(dashboardStart >= 0 && marketsStart > dashboardStart && tomanStart > marketsStart);
+  const dashboard = html.slice(dashboardStart, marketsStart);
+  const markets = html.slice(marketsStart, tomanStart);
+  const heading = dashboard.indexOf('<h2>بازار ارزهای دیجیتال</h2>');
+  const gainers = dashboard.indexOf('id="topGainersList"');
+  const losers = dashboard.indexOf('id="topLosersList"');
+  const marketList = dashboard.indexOf('id="dashboardMarketPreview"');
+  assert.ok(heading >= 0 && gainers > heading && losers > gainers && marketList > losers, 'both movers strips sit immediately below the dashboard market heading and before the main market preview');
+  assert.doesNotMatch(markets, /id="topGainersList"|id="topLosersList"/, 'the five-item movers panels are removed from the market tab');
+  assert.match(html, /function renderTopGainers\(\)[\s\S]{0,250}\.slice\(0,5\)/);
+  assert.match(html, /function renderTopLosers\(\)[\s\S]{0,250}\.slice\(0,5\)/);
+  const styleStart = html.indexOf('<style id="digiarz-dashboard-movers-layout-20261123">');
+  const styleEnd = html.indexOf('</style>', styleStart);
+  assert.ok(styleStart >= 0 && styleEnd > styleStart, 'dashboard horizontal mover styles are present');
+  const css = html.slice(styleStart, styleEnd);
+  assert.match(css, /display:flex!important;flex-direction:row!important/);
+  assert.match(css, /overflow-x:auto!important/);
+  assert.match(css, /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+  assert.match(css, /@media\(max-width:760px\)\{\.dashboard-movers\{grid-template-columns:minmax\(0,1fr\)\}\}/);
+  assert.match(html, /function showAllGainers\(\)\{switchTab\('markets'\)/);
+  assert.match(html, /function showAllLosers\(\)\{switchTab\('markets'\)/);
+});
