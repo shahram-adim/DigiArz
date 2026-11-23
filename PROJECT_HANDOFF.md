@@ -947,3 +947,10 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - No physical Android test has been performed. Do not claim the themes are visually accepted on-device.
 - No merge, release, deployment, Supabase/Production, database, authentication, wallet, order, or trading changes were made.
 - Next: build an artifact-only APK from the exact PR head using a safe workflow trigger; verify provenance and SHA-256; then ask the user to install and inspect all three themes on Android. Keep PR #55 Draft/unmerged unless the user explicitly approves merging.
+
+
+## 2026-11-23 — Remove dashboard top gainers/losers on user request
+- Removed the dashboard sections showing the five biggest 24-hour gainers and five biggest losers, including their dashboard-only buttons and horizontal-strip styling.
+- Preserved the market tab's own gainers/losers analytics and market filters; only the dashboard display was removed.
+- Removed obsolete dashboard event bindings and replaced the prior horizontal-movers regression with assertions that those widgets are absent from the dashboard while market-tab panels remain.
+- Change is on the existing draft PR #55 branch only. Requires fresh CI; no merge, APK release, deployment, Supabase/Production, auth, wallet, or trading changes.
