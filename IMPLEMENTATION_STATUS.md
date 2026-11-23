@@ -1211,3 +1211,8 @@
 - Physical Android visual check, including Sky Blue Glass top spacing, remains outstanding. No APK/merge/Production changes.
 
 - APK note: existing android-review-apk.yml still checks out the older build/indigo-glass-biometric-apk-2026-11-21 branch, so that artifact is not valid for PR #54. android-apk.yml can build the selected ref via workflow_dispatch, but the connected GitHub tools do not expose workflow dispatch. No APK built or reused.
+
+## 2026-11-23 admin-only dashboard activity follow-up
+- Code review found activity renderer was still called by general refresh functions while visually hidden for non-admins.
+- Added early return to renderDashboardActivity() unless isSuperAdmin; added regression assertion. Awaiting CI on latest branch head; previous successful run predates this follow-up.
+- No Android APK, merge, or Production change.
