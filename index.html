@@ -4123,6 +4123,55 @@ body.luxury-theme #authView .auth-form .auth-actions button{
 body.luxury-theme #authView .auth-form .auth-actions #signupBtn{
   background:rgba(49,46,99,.8);color:var(--text);border-color:var(--line);
 }
+/* Theme audit: override legacy teal rules and align every market row with its active palette. */
+body.luxury-theme .tag{
+  background:rgba(151,145,220,.14);border-color:rgba(151,145,220,.4);color:#e6d9a8;
+}
+body.luxury-theme .hero-label,body.luxury-theme .hero-sub,
+body.luxury-theme .auth-copy{color:#c9c6e6}
+body.luxury-theme .coin{
+  background:linear-gradient(145deg,rgba(48,45,98,.72),rgba(22,22,55,.84));
+  border-color:rgba(151,145,220,.28);color:var(--text);
+}
+body.luxury-theme .coin:hover,body.luxury-theme .coin.selected{
+  background:rgba(57,53,112,.9);border-color:rgba(216,197,138,.5);
+}
+body.luxury-theme .notice{background:rgba(49,46,99,.55);color:var(--text);border-color:var(--line)}
+body.luxury-theme .notice.warn{background:rgba(111,83,43,.28);color:#f1dda8}
+body.luxury-theme .notice.err{background:rgba(118,39,65,.3);color:#ffc2d0}
+body.luxury-theme .notice.ok{background:rgba(24,105,82,.28);color:#b8f3df}
+body.luxury-theme .auth-visual:not(.auth-reference-visual){
+  background:radial-gradient(circle at 16% 14%,rgba(103,87,190,.28),transparent 40%),
+  linear-gradient(145deg,#24234f,#151535 70%,#101027);border-color:var(--line);
+}
+body.luxury-theme .auth-form{background:linear-gradient(145deg,rgba(38,36,83,.9),rgba(19,19,48,.94));color:var(--text)}
+body.luxury-theme .auth-security{background:rgba(29,29,67,.78);border-color:var(--line);color:var(--muted)}
+body.luxury-theme .auth-top-banner{background:linear-gradient(110deg,rgba(48,45,98,.88),rgba(22,22,55,.92));border-color:var(--line);color:var(--text)}
+body.luxury-theme .auth-top-banner small,body.luxury-theme .auth-top-banner-live{color:var(--muted)}
+body.luxury-theme .daily-ad-card{background:rgba(29,29,67,.82);border-color:var(--line);color:var(--text)}
+body.luxury-theme .gainers-panel{background:linear-gradient(130deg,rgba(91,76,52,.2),rgba(29,29,67,.86));border-color:var(--line)}
+body.luxury-theme .toman-table th{background:rgba(49,46,99,.9);color:var(--text)}
+body.luxury-theme .toman-source{color:var(--muted);border-color:var(--line)}
+body.luxury-theme .theme-choice-group button.active{background:linear-gradient(135deg,#d8c58a,#a99155);color:#17152b;border-color:#d8c58a}
+#tab-markets .market-board-v34 .coin{background:linear-gradient(110deg,#181a20,#101318)!important;color:#f5f5f5!important}
+#tab-markets .market-board-v34 .coin-name-fa{color:#f5f5f5!important}
+#tab-markets .market-board-v34 .coin-symbol-en{color:#b9c0ca!important}
+#tab-markets .market-board-v34 .coin-english-name,
+#tab-markets .market-board-v34 .coin-source{color:#9299a5!important}
+#tab-markets .market-board-v34 .coin .price-usd{color:#f5f5f5!important}
+#tab-markets .market-board-v34 .coin .price-toman{color:#f0b90b!important}
+#tab-markets .market-board-v34 .coin-volume{color:#f0b90b!important}
+body.luxury-theme #tab-markets .market-board-v34 .coin{
+  background:linear-gradient(110deg,rgba(48,45,98,.72),rgba(22,22,55,.84))!important;color:var(--text)!important;
+}
+body.luxury-theme #tab-markets .market-board-v34 .coin-name-fa,
+body.luxury-theme #tab-markets .market-board-v34 .coin .price-usd{color:var(--text)!important}
+body.luxury-theme #tab-markets .market-board-v34 .coin-symbol-en,
+body.luxury-theme #tab-markets .market-board-v34 .coin-change-label,
+body.luxury-theme #tab-markets .market-board-v34 .coin-english-name,
+body.luxury-theme #tab-markets .market-board-v34 .coin-source{color:var(--muted)!important}
+body.luxury-theme #tab-markets .market-board-v34 .coin .price-toman,
+body.luxury-theme #tab-markets .market-board-v34 .coin-volume{color:var(--yellow)!important}
 /* Coin rows stay frameless in every theme, including the more-specific market-board rules. */
 #tab-markets .market-board-v34 .coin,
 #tab-markets .market-board-v34 .coin:hover,
