@@ -452,3 +452,21 @@ test('Toman market summary reports observed sources, freshness, and source times
   assert.ok(loader.includes('summary.latestFetchedAt'), 'loader displays the real source timestamp');
   assert.doesNotMatch(loader, /Object\.keys\(tomanExchangeNames\)\.length/, 'configured labels are not reported as active sources');
 });
+
+
+test('market row overrides preserve readable contrast in light and indigo glass themes', () => {
+  const start = html.indexOf('<style id="digiarz-market-row-fix-20261119">');
+  const end = html.indexOf('/* DigiArz Binance-inspired authentication refresh', start);
+  assert.ok(start >= 0 && end > start, 'market row style block boundaries found');
+  const css = html.slice(start, end);
+  for (const selector of [
+    'body.light-theme #tab-markets .market-board-v34 .coin-change-label',
+    'body.light-theme #tab-markets .market-board-v34 .coin-volume',
+    'body.luxury-theme #tab-markets .market-board-v34 .coin',
+    'body.luxury-theme #tab-markets .market-board-v34 .coin-name-fa',
+    'body.luxury-theme #tab-markets .market-board-v34 .coin .price-usd',
+    'body.luxury-theme #tab-markets .market-board-v34 .coin .price-toman'
+  ]) assert.ok(css.includes(selector), 'theme-specific market contrast rule exists: ' + selector);
+  assert.match(css, /grid-template-columns:34px minmax\(0,1\.2fr\)/);
+  assert.match(css, /@media\(max-width:700px\)/);
+});
