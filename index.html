@@ -3093,8 +3093,11 @@ function renderPublicCryptoQr(){
   image.onload=()=>{output.hidden=false;status.textContent='QR اطلاعات عمومی آماده شد.'};
   image.src=qrUrl;caption.textContent=name+' ('+base+') · '+publicUrl;
  };
- button.addEventListener('click',make);
- select.addEventListener('change',()=>{output.hidden=true;status.textContent='برای رمزارز انتخاب‌شده، دکمهٔ ساخت QR را بزنید.'});
+ if(button.dataset.bound!=='1'){
+  button.addEventListener('click',make);
+  select.addEventListener('change',()=>{output.hidden=true;status.textContent='برای رمزارز انتخاب‌شده، دکمهٔ ساخت QR را بزنید.'});
+  button.dataset.bound='1';
+ }
 }
 function renderCryptoComparison(){
  const a=$('compareSymbolA'),b=$('compareSymbolB'),root=$('cryptoCompareResult');
