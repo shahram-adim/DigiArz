@@ -1761,6 +1761,171 @@ body.luxury-theme .theme-choice-group button.active{background:linear-gradient(1
 @media(max-width:700px){.theme-setting-row{align-items:flex-start;flex-direction:column}.theme-choice-group{width:100%}.theme-choice-group button{flex:1;min-width:0;padding:10px 7px;font-size:10px}}
 @media(prefers-reduced-motion:reduce){body.luxury-theme *,body.luxury-theme *:before,body.luxury-theme *:after{transition:none!important;animation:none!important}}
 
+/* DigiArz dashboard layout repair — remove duplicate shell and unify responsive dashboard */
+#appView>.hero,#appView>.quick{display:none!important}
+#tab-dashboard.digiarz-v2-dashboard{
+  width:100%;max-width:100%;min-width:0;min-height:0;margin:12px 0 20px;
+  padding:clamp(13px,2.2vw,24px);overflow:hidden;
+}
+.da-v2-topline{min-width:0;min-height:42px;align-items:center;margin-bottom:14px}
+.da-v2-top-actions{display:flex;align-items:center;gap:9px;flex:0 0 auto}
+.da-v2-header-refresh{width:36px;height:36px;min-width:36px;border:1px solid var(--line);background:var(--panel2);color:var(--text)}
+.da-v2-hero{min-width:0;grid-template-columns:minmax(0,1.1fr) minmax(140px,.9fr);min-height:232px}
+.da-v2-hero-copy{min-width:0}
+.da-v2-quick-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0 22px}
+.da-v2-quick-grid button{min-width:0;overflow-wrap:anywhere}
+.da-v2-section-head{min-width:0;flex-wrap:wrap}
+.da-market-glass{min-width:0;max-width:100%;overflow:hidden}
+.da-market-toolbar{grid-template-columns:minmax(0,1fr) minmax(130px,165px)}
+.da-market-filters{max-width:100%;overscroll-behavior-x:contain}
+.dashboard-market-preview.da-v2-market-list{min-width:0;max-width:100%}
+#dashboardMarketPreview .da-market-coin-card{border:0!important;box-shadow:none!important}
+#dashboardMarketPreview .da-market-favorite{border:0!important;background:transparent!important;box-shadow:none!important}
+#dashboardMarketPreview .da-market-logo,#dashboardMarketPreview .da-market-logo-inner{border:0!important;background:transparent!important;box-shadow:none!important}
+.da-v2-account-card{min-width:0}
+.da-v2-trust-row{justify-content:space-between}
+body.dark-theme #tab-dashboard.digiarz-v2-dashboard{
+  background:linear-gradient(155deg,#11151c,#0d1117 58%,#151b24)!important;
+  border:1px solid #2a303a!important;color:#f5f5f5!important;
+}
+body.dark-theme #tab-dashboard .da-v2-hero{
+  background:radial-gradient(ellipse at 78% 42%,rgba(240,185,11,.16),transparent 40%),linear-gradient(120deg,#171a20,#101318 62%,#0b0e11);
+  border-color:rgba(240,185,11,.26);
+}
+body.dark-theme #tab-dashboard .da-v2-hero h1 em,
+body.dark-theme #tab-dashboard .da-v2-kicker{color:#f0b90b}
+body.dark-theme #tab-dashboard .da-v2-quick-grid button,
+body.dark-theme #tab-dashboard .da-v2-account-card{
+  background:linear-gradient(145deg,#1b2029,#12171f);border-color:#303844;color:#f5f5f5;
+}
+body.dark-theme #tab-dashboard .da-market-glass{background:linear-gradient(145deg,#171c25,#10151c);border-color:#303844}
+body.dark-theme #dashboardMarketPreview .da-market-coin-card{background:#181e27;color:#f5f5f5}
+body.dark-theme #tab-dashboard .da-v2-section-head h2,
+body.dark-theme #tab-dashboard .da-market-name-wrap b,
+body.dark-theme #tab-dashboard .da-market-price{color:#f5f5f5}
+body.dark-theme #tab-dashboard .da-market-name-wrap small,
+body.dark-theme #tab-dashboard .da-market-toman{color:#aab3c0}
+body.dark-theme #tab-dashboard .da-v2-balance-main{background:linear-gradient(110deg,#171a20,#242016);border-color:rgba(240,185,11,.3)}
+body.dark-theme #tab-dashboard .da-v2-balance-main strong{color:#f0b90b}
+body.light-theme #tab-dashboard.digiarz-v2-dashboard{
+  background:#fff!important;border:1px solid #e4ebf4!important;color:#172b4d!important;
+  box-shadow:0 8px 26px rgba(35,75,125,.045)!important;
+}
+body.light-theme #tab-dashboard .da-v2-topline,
+body.light-theme #tab-dashboard .da-v2-section-head h2,
+body.light-theme #tab-dashboard .da-v2-market-caption{color:#172b4d}
+body.light-theme #tab-dashboard .da-v2-brand small{color:#60758f}
+body.light-theme #tab-dashboard .da-v2-demo{background:#f4f8fd;border-color:#dbe7f5;color:#245b91}
+body.light-theme #tab-dashboard .da-v2-hero{
+  background:radial-gradient(ellipse at 82% 42%,rgba(41,120,200,.10),transparent 40%),linear-gradient(120deg,#f3f8ff,#fff 66%,#f8fbff);
+  border-color:#dbe7f5;color:#172b4d;
+}
+body.light-theme #tab-dashboard .da-v2-eyebrow,
+body.light-theme #tab-dashboard .da-v2-hero h1,
+body.light-theme #tab-dashboard .da-v2-section-head h2{color:#172b4d}
+body.light-theme #tab-dashboard .da-v2-hero h1 em{color:#1d65a8}
+body.light-theme #tab-dashboard .da-v2-hero p,
+body.light-theme #tab-dashboard .da-v2-hero-foot{color:#526984}
+body.light-theme #tab-dashboard .da-v2-hero-foot{background:rgba(226,238,251,.8);border-color:#dbe7f5}
+body.light-theme #tab-dashboard .da-v2-quick-grid button,
+body.light-theme #tab-dashboard .da-v2-account-card{
+  background:#fff;border:1px solid #dbe7f5;color:#172b4d;box-shadow:0 5px 16px rgba(35,75,125,.045);
+}
+body.light-theme #tab-dashboard .da-v2-quick-grid svg{color:#1d65a8}
+body.light-theme #tab-dashboard .da-market-glass{background:#fff;border-color:#dbe7f5;box-shadow:0 5px 18px rgba(35,75,125,.04)}
+body.light-theme #dashboardMarketPreview .da-market-coin-card{background:#f8fbff;color:#172b4d}
+body.light-theme #tab-dashboard .da-market-name-wrap b,
+body.light-theme #tab-dashboard .da-market-price{color:#172b4d}
+body.light-theme #tab-dashboard .da-market-name-wrap small,
+body.light-theme #tab-dashboard .da-market-toman{color:#60758f}
+body.light-theme #tab-dashboard .da-market-favorite{color:#9a6c00}
+body.light-theme #tab-dashboard .da-v2-balance-main{background:#f3f8ff;border-color:#dbe7f5}
+body.light-theme #tab-dashboard .da-v2-balance-main span,
+body.light-theme #tab-dashboard .da-v2-balance-main small{color:#526984}
+body.light-theme #tab-dashboard .da-v2-balance-main strong{color:#8a650c}
+body.light-theme #tab-dashboard .da-v2-account-stats>div{background:#f8fbff;border-color:#e3ebf5}
+body.light-theme #tab-dashboard .da-v2-account-stats small{color:#60758f}
+body.light-theme #tab-dashboard .da-v2-account-stats b{color:#172b4d}
+body.luxury-theme #tab-dashboard.digiarz-v2-dashboard{
+  background:linear-gradient(155deg,rgba(28,27,66,.96),rgba(16,16,42,.96) 65%,rgba(31,29,70,.94))!important;
+  border:1px solid rgba(151,145,220,.3)!important;color:#f0efff!important;
+  box-shadow:0 16px 40px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.06)!important;
+}
+body.luxury-theme #tab-dashboard .da-v2-hero{
+  background:radial-gradient(ellipse at 78% 42%,rgba(120,103,205,.24),transparent 40%),linear-gradient(120deg,#22204f,#171735 62%,#101027);
+  border-color:rgba(216,197,138,.35);
+}
+body.luxury-theme #tab-dashboard .da-v2-hero h1 em,
+body.luxury-theme #tab-dashboard .da-v2-kicker,
+body.luxury-theme #tab-dashboard .da-v2-brand strong{color:#d8c58a}
+body.luxury-theme #tab-dashboard .da-v2-quick-grid button,
+body.luxury-theme #tab-dashboard .da-v2-account-card{
+  background:linear-gradient(145deg,rgba(55,51,108,.72),rgba(24,23,61,.88));
+  border-color:rgba(151,145,220,.28);color:#f0efff;
+}
+body.luxury-theme #tab-dashboard .da-market-glass{background:rgba(29,29,67,.7);border-color:rgba(151,145,220,.28)}
+body.luxury-theme #dashboardMarketPreview .da-market-coin-card{background:rgba(48,45,98,.55);color:#f0efff}
+body.luxury-theme #tab-dashboard .da-v2-section-head h2,
+body.luxury-theme #tab-dashboard .da-market-name-wrap b,
+body.luxury-theme #tab-dashboard .da-market-price{color:#f0efff}
+body.luxury-theme #tab-dashboard .da-market-name-wrap small,
+body.luxury-theme #tab-dashboard .da-market-toman{color:#b3b1d1}
+body.luxury-theme #tab-dashboard .da-v2-balance-main{background:linear-gradient(110deg,#171735,#292653);border-color:rgba(216,197,138,.3)}
+body.luxury-theme #tab-dashboard .da-v2-balance-main strong{color:#d8c58a}
+@media(max-width:700px){
+  #tab-dashboard.digiarz-v2-dashboard{padding:12px;margin:8px 0 16px;border-radius:17px}
+  .da-v2-topline{margin-bottom:11px}
+  .da-v2-brand{font-size:19px;gap:8px}
+  .da-v2-logo{width:36px;height:36px}
+  .da-v2-top-actions{gap:6px}
+  .da-v2-header-refresh{width:34px;height:34px;min-width:34px}
+  .da-v2-hero{grid-template-columns:minmax(0,1fr) 94px;min-height:220px;padding:17px 13px 64px}
+  .da-v2-hero h1{font-size:clamp(21px,5.8vw,27px);line-height:1.55}
+  .da-v2-hero p{font-size:10px;line-height:1.9}
+  .da-v2-hero-art{height:135px}
+  .da-v2-coin{width:70px;height:70px;font-size:45px}
+  .da-v2-orbit-one{width:125px;height:50px}
+  .da-v2-orbit-two{width:140px;height:68px}
+  .da-v2-hero-foot{justify-content:flex-start;flex-wrap:wrap;gap:6px 12px;padding:10px 9px;font-size:8px}
+  .da-v2-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0 18px}
+  .da-v2-quick-grid button{min-height:62px;flex-direction:row;justify-content:flex-start;padding:10px;font-size:10px}
+  .da-v2-quick-grid svg{width:19px;height:19px}
+  .da-v2-section-head{margin:18px 0 10px}
+  .da-market-toolbar{grid-template-columns:minmax(0,1fr)}
+  .da-market-sort{height:40px}
+  .da-v2-account-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .da-v2-account-stats>div:last-child{grid-column:1/-1}
+  .da-v2-trust-row{justify-content:flex-start;gap:8px 12px}
+  #dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card{
+    grid-template-columns:26px minmax(0,1fr) minmax(88px,auto)!important;
+    grid-template-rows:32px 26px!important;min-height:62px!important;
+    gap:4px 6px!important;padding:7px 6px!important;
+  }
+  #dashboardMarketPreview .da-market-sparkline{display:none!important}
+  #dashboardMarketPreview .da-market-favorite{grid-column:1!important;grid-row:1/3!important;align-self:center!important}
+  #dashboardMarketPreview .da-market-identity{grid-column:2!important;grid-row:1!important;gap:6px!important}
+  #dashboardMarketPreview .da-market-logo,#dashboardMarketPreview .da-market-logo-inner{width:27px!important;height:27px!important;flex-basis:27px!important}
+  #dashboardMarketPreview .da-market-name-wrap b{font-size:10px!important}
+  #dashboardMarketPreview .da-market-name-wrap small{font-size:8px!important}
+  #dashboardMarketPreview .da-market-price{grid-column:3!important;grid-row:1!important;font-size:11px!important;white-space:nowrap!important}
+  #dashboardMarketPreview .da-market-toman{grid-column:3!important;grid-row:2!important;align-self:center!important;margin:0!important;font-size:10px!important}
+  #dashboardMarketPreview .da-market-card-foot{grid-column:2!important;grid-row:2!important;justify-content:flex-start!important;margin:0!important;padding:0!important;border:0!important;min-width:0!important}
+  #dashboardMarketPreview .da-market-change{font-size:8px!important;white-space:nowrap!important}
+}
+@media(max-width:370px){
+  .da-v2-hero{grid-template-columns:minmax(0,1fr) 70px;padding-inline:10px}
+  .da-v2-hero-art{width:80px;opacity:.75}
+  .da-v2-hero h1{font-size:21px}
+  .da-v2-hero-foot{font-size:7px;gap:5px 8px}
+  .da-v2-quick-grid button{font-size:9px;padding:8px}
+  #dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card{
+    grid-template-columns:23px minmax(0,1fr) minmax(78px,auto)!important;gap:3px 4px!important;
+  }
+  #dashboardMarketPreview .da-market-price{font-size:10px!important}
+  #dashboardMarketPreview .da-market-toman{font-size:9px!important}
+  #dashboardMarketPreview .da-market-change{font-size:7px!important}
+}
+
 </style>
 <style>
 .pwa-install-banner{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 16px;margin:0 0 14px;border:1px solid rgba(240,185,11,.45);border-radius:14px;background:linear-gradient(110deg,rgba(240,185,11,.10),rgba(24,26,32,.96));box-shadow:0 8px 24px rgba(0,0,0,.12)}
@@ -1969,7 +2134,6 @@ body.light-theme #tab-markets .market-board-v34 .coin .price-toman{color:#805a0a
 }
 @media(prefers-reduced-motion:reduce){
   #authView *{transition:none!important}
-}
 
 </style>
 
@@ -2079,7 +2243,7 @@ body.light-theme #tab-markets .market-board-v34 .coin .price-toman{color:#805a0a
  <div class="market-announcement"><span class="announcement-icon">◆</span><span>بازار رمزارزها به‌صورت آزمایشی و با قیمت‌های به‌روز</span><span class="announcement-pill">DEMO</span></div>
  <section id="dashboardDailyAd" class="daily-ad-card hidden" aria-label="تبلیغ روزانه"></section>
   <section class="hero"><div class="hero-top"><div><div class="hero-label">داشبورد معاملاتی DigiArz</div><div class="hero-title">بازار واقعی؛ سرمایه کاملاً آزمایشی</div><div class="hero-sub" id="userEmail">کاربر</div></div><div class="hero-mark">₿</div></div>
- <div class="quick" aria-label="میانبرهای اصلی"><button id="heroTradeBtn"><span class="icon-tab"><i data-lucide="arrow-left-right"></i>خرید و فروش</span></button><button id="heroMarketBtn" class="secondary"><span class="icon-tab"><i data-lucide="chart-no-axes-combined"></i>بازارها</span></button><button type="button" class="secondary" data-dashboard-tab="assets"><span class="icon-tab"><i data-lucide="wallet"></i>کیف پول</span></button><button id="refreshBtn" class="secondary"><span class="icon-tab"><i data-lucide="refresh-cw"></i>به‌روزرسانی</span></button></div></section>
+ <div class="quick" aria-label="میانبرهای اصلی"><button id="heroTradeBtn"><span class="icon-tab"><i data-lucide="arrow-left-right"></i>خرید و فروش</span></button><button id="heroMarketBtn" class="secondary"><span class="icon-tab"><i data-lucide="chart-no-axes-combined"></i>بازارها</span></button><button type="button" class="secondary" data-dashboard-tab="assets"><span class="icon-tab"><i data-lucide="wallet"></i>کیف پول</span></button></div></section>
  <nav class="tabs"><button class="active" data-tab="dashboard"><span class="icon-tab"><i data-lucide="layout-dashboard"></i>داشبورد</span></button><button data-tab="markets"><span class="icon-tab"><i data-lucide="chart-no-axes-combined"></i>بازارها</span></button><button data-tab="toman"><span class="icon-tab"><i data-lucide="landmark"></i>بازار تومانی</span></button><button data-tab="trade">خرید و فروش</button><button data-tab="orders"><span class="icon-tab"><i data-lucide="clipboard-list"></i>سفارش‌ها</span></button><button data-tab="assets"><span class="icon-tab"><i data-lucide="wallet"></i>دارایی‌ها</span></button><button data-tab="history"><span class="icon-tab"><i data-lucide="history"></i>تاریخچه</span></button><button data-tab="settings"><span class="icon-tab"><i data-lucide="settings"></i>تنظیمات</span></button><button data-tab="admin" id="adminTabBtn" style="display:none"><span class="icon-tab"><i data-lucide="shield-check"></i>مدیریت</span></button></nav>
 <nav class="mobile-bottom-nav" aria-label="ناوبری اصلی موبایل">
  <button type="button" data-tab="dashboard"><i data-lucide="house"></i><span>خانه</span></button>
@@ -2093,7 +2257,7 @@ body.light-theme #tab-markets .market-board-v34 .coin .price-toman{color:#805a0a
 
 <section id="tab-dashboard" class="card dashboard-panel digiarz-v2-dashboard">
  <div id="adminRoleStatus" class="notice warn hidden" role="status" style="margin-bottom:14px"></div>
- <div class="da-v2-topline"><div class="da-v2-brand"><span class="da-v2-logo">D</span><span>Digi<strong>Arz</strong><small>صرافی آزمایشی حرفه‌ای</small></span></div><span class="da-v2-demo">DEMO</span></div>
+ <div class="da-v2-topline"><div class="da-v2-brand"><span class="da-v2-logo">D</span><span>Digi<strong>Arz</strong><small>صرافی آزمایشی حرفه‌ای</small></span></div><div class="da-v2-top-actions"><span class="da-v2-demo">DEMO</span><button type="button" id="refreshBtn" class="da-v2-refresh da-v2-header-refresh" aria-label="به‌روزرسانی بازار" title="به‌روزرسانی بازار"><i data-lucide="refresh-cw"></i></button></div></div>
  <div class="da-v2-hero"><div class="da-v2-hero-copy"><span class="da-v2-eyebrow"><i data-lucide="activity"></i> بازار رمزارزها · قیمت زنده</span><h1>معامله حرفه‌ای<br><em>در دستان شما</em></h1><p>قیمت‌های واقعی بازار را دنبال کن؛ با سرمایه مجازی خریدوفروش کن، بدون ریسک پول واقعی.</p><button type="button" class="da-v2-primary" data-dashboard-tab="trade">شروع معامله <i data-lucide="arrow-left"></i></button></div><div class="da-v2-hero-art" aria-hidden="true"><div class="da-v2-orbit da-v2-orbit-one"></div><div class="da-v2-orbit da-v2-orbit-two"></div><div class="da-v2-coin">₿</div><div class="da-v2-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="da-v2-art-label">TRADE SMART</span></div><div class="da-v2-hero-foot"><span><i data-lucide="shield-check"></i> سرمایه مجازی و امن</span><span><i data-lucide="zap"></i> قیمت‌های لحظه‌ای</span><span><i data-lucide="headset"></i> تجربه حرفه‌ای</span></div></div>
  <div class="da-v2-quick-grid" aria-label="دسترسی سریع"><button type="button" data-dashboard-tab="trade"><i data-lucide="zap"></i><b>خرید و فروش سریع</b></button><button type="button" data-dashboard-tab="markets"><i data-lucide="chart-no-axes-combined"></i><b>بازار معاملات</b></button><button type="button" data-dashboard-tab="assets"><i data-lucide="wallet"></i><b>کیف پول</b></button><button type="button" data-dashboard-tab="orders"><i data-lucide="clipboard-list"></i><b>سفارش‌های من</b></button></div>
  <div class="da-v2-section-head"><div><span class="da-v2-kicker">MARKET OVERVIEW</span><h2>بازار ارزهای دیجیتال</h2></div><button type="button" class="da-v2-link" data-dashboard-tab="markets">مشاهده همه <i data-lucide="arrow-left"></i></button></div>
@@ -4035,8 +4199,6 @@ body.luxury-theme #authView .auth-phone-device{border-color:rgba(232,218,183,.8)
 
 
 
-
-@media(max-width:640px){
 
 /* Final theme parity pass: one scoped palette per theme; keep all page surfaces in sync. */
 body.dark-theme{
