@@ -2053,13 +2053,6 @@ body.luxury-theme #authView .ref-demo-footer{color:#c4b9f2!important;background:
   #tab-admin .asset-row>button{grid-column:1/-1;width:100%;min-height:44px;}
 }
 
-/* Market asset logos: remove the legacy dark disc so logos remain frameless in every theme. */
-#tab-markets .market-board-v34 .coin-icon,
-#tab-markets .market-board-v34 .coin-icon img{
-  background:transparent!important;
-  border:0!important;
-  box-shadow:none!important;
-}
 </style>
 <style>
 .pwa-install-banner{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 16px;margin:0 0 14px;border:1px solid rgba(240,185,11,.45);border-radius:14px;background:linear-gradient(110deg,rgba(240,185,11,.10),rgba(24,26,32,.96));box-shadow:0 8px 24px rgba(0,0,0,.12)}
@@ -4639,6 +4632,14 @@ body.luxury-theme #authView .ref-coin-row strong{color:#53d6ad!important}
   .daily-ad-admin-copy{width:100%;overflow-wrap:anywhere;}
   .daily-ad-admin-actions{width:100%;flex-wrap:wrap;}
   .daily-ad-admin-actions button{flex:1 1 112px;min-width:0;min-height:44px;white-space:normal;overflow-wrap:anywhere;}
+}
+
+/* Market asset logos: final cascade override removes the legacy disc in every theme. */
+#tab-markets .market-board-v34 .coin-icon,
+#tab-markets .market-board-v34 .coin-icon img{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
 }
 </style>
 
