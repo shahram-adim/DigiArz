@@ -107,17 +107,22 @@ test('trade history provides accessible local-date quick presets', () => {
   assert.ok(html.includes("setHistoryDatePreset('all')"), 'clear action resets the selected preset');
 });
 
-test('dashboard exposes recent account activity and account alerts', () => {
-  const start = html.indexOf('<div class="dashboard-activity-center"');
+test('dashboard account activity is hidden by default and only revealed for an active super-admin', () => {
+  const start = html.indexOf('<div class="dashboard-activity-center hidden"');
   const end = html.indexOf('<div class="da-v2-compat hidden"', start);
-  assert.ok(start >= 0 && end > start, 'visible dashboard activity center boundaries found');
+  assert.ok(start >= 0 && end > start, 'activity center starts hidden before role verification');
   const section = html.slice(start, end);
   for (const id of ['dashboardRecentOrders', 'dashboardRecentTrades', 'dashboardAccountAlerts']) {
-    assert.match(section, new RegExp('id="' + id + '"'), id + ' is visible in the activity center');
+    assert.match(section, new RegExp('id="' + id + '"'), id + ' remains available inside the admin activity center');
   }
   assert.ok(section.includes('data-dashboard-tab="orders"'), 'orders shortcut is present');
   assert.ok(section.includes('data-dashboard-tab="history"'), 'history shortcut is present');
   assert.ok(section.includes('aria-live="polite"'), 'activity updates are announced politely');
+  const modeStart = html.indexOf('function setAccountMode(active){');
+  const modeEnd = html.indexOf('\\nasync function deactivateMyAccount()', modeStart);
+  assert.ok(modeStart >= 0 && modeEnd > modeStart, 'account-mode function boundaries found');
+  const mode = html.slice(modeStart, modeEnd);
+  assert.ok(mode.includes("el.classList.toggle('hidden',!active||!isSuperAdmin)"), 'activity is revealed only after active account and super-admin checks');
   const compatibility = html.slice(end);
   assert.doesNotMatch(compatibility, /id="dashboard(?:RecentOrders|RecentTrades|AccountAlerts)"/, 'activity roots are not duplicated in hidden compatibility markup');
 });
