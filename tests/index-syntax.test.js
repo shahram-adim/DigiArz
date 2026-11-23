@@ -435,14 +435,16 @@ test('Toman market summary reports observed sources, freshness, and source times
     { exchange: 'wallex', is_stale: false, fetched_at: '2026-11-23T10:01:00.000Z' },
     { exchange: 'WALLEX', is_stale: true, fetched_at: '2026-11-23T10:02:00.000Z' },
     { exchange: 'bit24', is_stale: true, fetched_at: '2026-11-23T10:03:00.000Z' },
-    { exchange: '', is_stale: true, fetched_at: 'invalid' }
+    { exchange: '', is_stale: true, fetched_at: 'invalid' },
+    { exchange: 'bit24', is_stale: null, fetched_at: '2026-11-23T10:04:00.000Z' },
+    { exchange: 'kifpool', fetched_at: '2026-11-23T10:05:00.000Z' }
   ]);
   assert.deepEqual(JSON.parse(JSON.stringify(summary)), {
-    rowCount: 5,
-    sourceCount: 3,
+    rowCount: 7,
+    sourceCount: 4,
     freshRowCount: 2,
     freshSourceCount: 2,
-    latestFetchedAt: '2026-11-23T10:03:00.000Z'
+    latestFetchedAt: '2026-11-23T10:05:00.000Z'
   });
   const loadStart = html.indexOf('async function loadTomanMarket(){');
   const loadEnd = html.indexOf('async function refreshTomanMarket()', loadStart);
@@ -450,5 +452,53 @@ test('Toman market summary reports observed sources, freshness, and source times
   const loader = html.slice(loadStart, loadEnd);
   assert.ok(loader.includes('summarizeTomanMarketRows(filtered)'), 'loader uses the tested summary');
   assert.ok(loader.includes('summary.latestFetchedAt'), 'loader displays the real source timestamp');
+  assert.ok(loader.includes('rows.some(r=>r.is_stale===false)'), 'only an explicit fresh flag counts as fresh');
+  assert.ok(loader.includes("r.is_stale!==false"), 'unknown row freshness is not displayed as fresh');
+  assert.match(loader, /catch\(_\)[\s\S]*?return false;/, 'Supabase read failures return an explicit error state');
   assert.doesNotMatch(loader, /Object\.keys\(tomanExchangeNames\)\.length/, 'configured labels are not reported as active sources');
+});
+
+
+test('Toman market loader renders a safe error state when the Supabase read fails', async () => {
+  const start = html.indexOf('async function loadTomanMarket(){');
+  const end = html.indexOf('async function refreshTomanMarket()', start);
+  assert.ok(start >= 0 && end > start, 'Toman loader boundaries found');
+  const body = { innerHTML: '' };
+  const status = { message: '', type: '' };
+  const context = {
+    $: id => id === 'tomanMarketBody' ? body : id === 'tomanSearch' ? { value: '' } : null,
+    fetchAllSupabaseRows: async () => { throw new Error('private database detail'); },
+    showTomanStatus: (message, type) => { status.message = message; status.type = type; }
+  };
+  vm.runInNewContext(html.slice(start, end) + '\nthis.loadTomanMarket=loadTomanMarket;', context);
+  const loaded = await context.loadTomanMarket();
+  assert.equal(loaded, false);
+  assert.equal(status.type, 'err');
+  assert.match(status.message, /تازگی داده‌ها قابل تأیید نیست/);
+  assert.match(body.innerHTML, /دریافت داده‌های بازار تومانی ناموفق بود/);
+  assert.doesNotMatch(body.innerHTML, /private database detail/);
+  assert.equal(context.tomanMarketHasFreshRows, false);
+});
+
+test('Toman refresh distinguishes a successful write from a failed table reload', async () => {
+  const start = html.indexOf('async function refreshTomanMarket(){');
+  const end = html.indexOf('\nfunction formatExchangeSyncDate', start);
+  assert.ok(start >= 0 && end > start, 'Toman refresh boundaries found');
+  const button = { disabled: false };
+  const status = { message: '', type: '' };
+  const context = {
+    $: id => id === 'tomanRefreshBtn' ? button : null,
+    showTomanStatus: (message, type) => { status.message = message; status.type = type; },
+    supabaseClient: {
+      auth: { getSession: async () => ({ data: { session: { access_token: 'test-token' } }, error: null }) },
+      functions: { invoke: async () => ({ data: { success: true, saved: 373, sources: { nobitex: { ok: true, count: 221 } } }, error: null }) }
+    },
+    loadTomanMarket: async () => false,
+    tomanExchangeNames: { nobitex: 'نوبیتکس' }
+  };
+  vm.runInNewContext(html.slice(start, end) + '\nthis.refreshTomanMarket=refreshTomanMarket;', context);
+  await context.refreshTomanMarket();
+  assert.equal(button.disabled, false);
+  assert.equal(status.type, 'err');
+  assert.match(status.message, /ذخیره 373 قیمت انجام شد، اما بازخوانی جدول ناموفق بود/);
 });
