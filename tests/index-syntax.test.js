@@ -119,7 +119,7 @@ test('dashboard account activity is hidden by default and only revealed for an a
   assert.ok(section.includes('data-dashboard-tab="history"'), 'history shortcut is present');
   assert.ok(section.includes('aria-live="polite"'), 'activity updates are announced politely');
   const modeStart = html.indexOf('function setAccountMode(active){');
-  const modeEnd = html.indexOf('\\nasync function deactivateMyAccount()', modeStart);
+  const modeEnd = html.indexOf('\nasync function deactivateMyAccount()', modeStart);
   assert.ok(modeStart >= 0 && modeEnd > modeStart, 'account-mode function boundaries found');
   const mode = html.slice(modeStart, modeEnd);
   assert.ok(mode.includes("el.classList.toggle('hidden',!active||!isSuperAdmin)"), 'activity is revealed only after active account and super-admin checks');
