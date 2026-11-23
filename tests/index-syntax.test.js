@@ -204,17 +204,13 @@ test('market 24h ranking uses one freshness-aware comparator in both directions'
   assert.equal(context.getMarketChange24h(rows[5]), 2.25, 'fresh stored fallback percentages are accepted');
 });
 
-test('gainer, loser, volatility and market-list views share the same ranking helpers', () => {
-  const gainersStart = html.indexOf('function renderTopGainers(){');
-  const losersStart = html.indexOf('function renderTopLosers(){', gainersStart);
-  const assetsStart = html.indexOf('function renderTopAssets(){', losersStart);
-  const gainers = html.slice(gainersStart, losersStart);
-  const losers = html.slice(losersStart, assetsStart);
+test('market ranking remains available without dedicated five-gainer and five-loser panels', () => {
+  for (const obsolete of ['function renderTopGainers(', 'function renderTopLosers(', 'function showAllGainers(', 'function showAllLosers(']) {
+    assert.equal(html.includes(obsolete), false, obsolete + ' should be removed');
+  }
   const marketStart = html.indexOf('function renderMarkets(){');
   const marketEnd = html.indexOf('function renderDashboardPortfolio(', marketStart);
   const market = html.slice(marketStart, marketEnd);
-  assert.ok(gainers.includes("sortMarketRowsByChange(marketRows,'desc')"));
-  assert.ok(losers.includes("sortMarketRowsByChange(marketRows,'asc')"));
   assert.ok(market.includes("compareMarketChange(a,b,'desc')"));
   assert.ok(market.includes("compareMarketChange(a,b,'asc')"));
   assert.ok(html.includes("const valid=sortMarketRowsByChange(marketRows,'desc')"));
@@ -429,12 +425,14 @@ test('login mini chart renders real five-minute candles without depending on a c
   assert.match(html, /<svg viewBox=/);
 });
 
-test('dashboard does not display the five top gainers or five top losers', () => {
+test('dedicated five-gainer and five-loser panels are absent while the main market list remains', () => {
   assert.doesNotMatch(html, /class="dashboard-market-movers"/);
-  for (const id of ['topGainersList', 'topLosersList', 'allGainersBtn', 'allLosersBtn']) {
-    assert.doesNotMatch(html, new RegExp('id="' + id + '"'), id + ' is removed from the dashboard');
+  assert.doesNotMatch(html, /<section class="gainers-panel/);
+  for (const obsolete of ['topGainersList', 'topLosersList', 'allGainersBtn', 'allLosersBtn']) {
+    assert.doesNotMatch(html, new RegExp(obsolete), obsolete + ' should be removed');
   }
-  assert.match(html, /#tab-markets \.gainers-panel/, 'market tab retains its separate market analytics panels');
+  assert.match(html, /id="topAssetsList"/, 'top-volume assets remain available');
+  assert.match(html, /id="marketList"/, 'the full market list remains available');
 });
 
 
@@ -754,4 +752,17 @@ test('market gain and loss indicators inherit accessible colors from all three t
     assert.ok(block.includes('--green:' + green), theme + ' positive market color is explicitly themed');
     assert.ok(block.includes('--red:' + red), theme + ' negative market color is explicitly themed');
   }
+});
+
+
+test('indigo glass market rows use readable explicit contrast without changing responsive geometry', () => {
+  for (const selector of [
+    'body.luxury-theme #tab-markets .market-board-v34 .coin-name-fa',
+    'body.luxury-theme #tab-markets .market-board-v34 .coin .price-usd',
+    'body.luxury-theme #tab-markets .market-board-v34 .coin .price-toman',
+    'body.luxury-theme #tab-markets .market-board-v34 .coin-sparkline',
+    'body.luxury-theme #tab-markets .market-board-v34 .coin-source.fresh'
+  ]) assert.ok(html.includes(selector), 'indigo contrast rule exists: ' + selector);
+  assert.match(html, /grid-template-columns:34px minmax\(0,1\.2fr\)/);
+  assert.match(html, /@media\(max-width:700px\)/);
 });
