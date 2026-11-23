@@ -1225,3 +1225,5 @@
 - Draft PR: https://github.com/shahram-adim/DigiArz/pull/55. It is based on the PR #54 candidate head and therefore includes those dashboard changes as well; keep both drafts unmerged until candidate ordering is reconciled.
 - CI run 45138971915 is in progress. No visual browser/Android confirmation yet.
 - Main remains at `968010d37a175b947616167ed265953a2ed6b62c`; no production or Supabase changes.
+
+- Follow-up: initial CI run 45138971915 failed only because of an over-escaped regex in the newly added test. Replaced the regexes with direct string assertions; latest head must pass a new CI run before validation is complete.
