@@ -3248,7 +3248,7 @@ const tomanExchangeNames={nobitex:'نوبیتکس',wallex:'والکس',bitpin:'�
 function summarizeTomanMarketRows(rows){
  const safeRows=Array.isArray(rows)?rows:[];
  const sourceOf=row=>String(row?.exchange||'').trim().toLowerCase();
- const freshRows=safeRows.filter(row=>row?.is_stale!==true);
+ const freshRows=safeRows.filter(row=>row?.is_stale===false);
  const latestFetchedAtMs=safeRows.reduce((latest,row)=>{
   const stamp=Date.parse(row?.fetched_at||'');
   return Number.isFinite(stamp)?Math.max(latest,stamp):latest;
@@ -3267,9 +3267,17 @@ async function loadTomanMarket(){
  const body=$('tomanMarketBody');if(!body)return;
  body.innerHTML='<tr><td colspan="13" class="muted">در حال دریافت داده‌های تومانی…</td></tr>';
  const q=($('tomanSearch')?.value||'').trim().toUpperCase();
- const data=await fetchAllSupabaseRows(()=>supabaseClient.from('market_toman_performance').select('*').order('asset_symbol').order('exchange'));
+ let data;
+ try{
+  data=await fetchAllSupabaseRows(()=>supabaseClient.from('market_toman_performance').select('*').order('asset_symbol').order('exchange'));
+ }catch(_){
+  tomanMarketHasFreshRows=false;
+  body.innerHTML='<tr><td colspan="13" class="muted">دریافت داده‌های بازار تومانی ناموفق بود؛ اتصال را بررسی و دوباره تلاش کنید.</td></tr>';
+  showTomanStatus('خواندن قیمت‌های تومانی ناموفق بود؛ تازگی داده‌ها قابل تأیید نیست.','err');
+  return false;
+ }
  const rows=(data||[]);
- tomanMarketHasFreshRows=rows.some(r=>!r.is_stale);
+ tomanMarketHasFreshRows=rows.some(r=>r.is_stale===false);
  tomanAssetNames=new Map();
  const nameCandidates=new Map();
  for(const r of rows){
@@ -3281,17 +3289,18 @@ async function loadTomanMarket(){
  }
  for(const [symbol,item] of nameCandidates)tomanAssetNames.set(symbol,item.name);
  const filtered=rows.filter(r=>!q||String(r.asset_symbol||'').toUpperCase().includes(q)||String(r.asset_name_fa||'').toUpperCase().includes(q));
- if(!filtered.length){body.innerHTML='<tr><td colspan="13" class="muted">داده‌ای برای این جست‌وجو وجود ندارد. ابتدا «دریافت قیمت‌های تازه» را اجرا کنید.</td></tr>';renderMarkets();return}
+ if(!filtered.length){body.innerHTML='<tr><td colspan="13" class="muted">داده‌ای برای این جست‌وجو وجود ندارد. ابتدا «دریافت قیمت‌های تازه» را اجرا کنید.</td></tr>';renderMarkets();return true;}
  body.innerHTML=filtered.map(r=>{
-   const stale=!!r.is_stale,stamp=r.fetched_at?new Date(r.fetched_at):null;
+   const freshnessKnown=typeof r.is_stale==='boolean',stale=r.is_stale!==false,stamp=r.fetched_at?new Date(r.fetched_at):null;
    const age=stamp?Math.max(0,Math.floor((Date.now()-stamp.getTime())/60000)):null;
-   const freshness=stale?`<span class="toman-stale">قدیمی · ${age} دقیقه</span>`:'<span class="toman-fresh">تازه</span>';
+   const freshness=!freshnessKnown?'<span class="toman-stale">وضعیت نامشخص</span>':stale?`<span class="toman-stale">قدیمی · ${age} دقیقه</span>`:'<span class="toman-fresh">تازه</span>';
    return `<tr><td dir="ltr">${formatNum(r.price_toman,0)}</td><td><span class="history-asset">${coinLogo(r.asset_symbol,'asset-logo')} <b dir="ltr">${safeText(r.asset_symbol)}</b></span></td><td>${safeText(r.asset_name_fa||'—')}</td><td><span class="toman-source">${safeText(tomanExchangeNames[r.exchange]||r.exchange)}</span></td><td dir="ltr">${r.bid_toman?formatNum(r.bid_toman,0):'—'}</td><td dir="ltr">${r.ask_toman?formatNum(r.ask_toman,0):'—'}</td><td>${percentCell(r.change_24h_pct)}</td><td>${percentCell(r.return_7d_pct)}</td><td>${percentCell(r.return_30d_pct)}</td><td>${percentCell(r.return_90d_pct)}</td><td>${percentCell(r.return_365d_pct)}</td><td dir="ltr">${r.volume_24h_toman?formatNum(r.volume_24h_toman,0):'—'}</td><td>${freshness}</td></tr>`;
  }).join('');
  renderMarkets();
  const summary=summarizeTomanMarketRows(filtered);
  const lastFetched=summary.latestFetchedAt?formatExchangeSyncDate(summary.latestFetchedAt):'زمان دریافت ثبت نشده';
  showTomanStatus(`${summary.rowCount.toLocaleString('fa-IR')} ردیف قیمت تومانی از ${summary.sourceCount} منبع مشاهده شد؛ ${summary.freshRowCount} ردیف از ${summary.freshSourceCount} منبع تازه است. آخرین زمان دریافت ثبت‌شده: ${lastFetched}.`,summary.freshRowCount>0?'ok':'err');
+ return true;
 }
 async function refreshTomanMarket(){
  const btn=$('tomanRefreshBtn');btn.disabled=true;showTomanStatus('در حال دریافت قیمت از نوبیتکس، والکس و بیت‌پین…');
@@ -3302,7 +3311,9 @@ async function refreshTomanMarket(){
    if(error){let m=error.message||'خطای نامشخص';if(error.context){try{m+=' · '+JSON.stringify(await error.context.json())}catch(_){}}throw new Error(m)}
    if(!data?.success)throw new Error(data?.error||'پاسخ نامعتبر از تابع بازار');
    const summary=Object.entries(data.sources||{}).map(([k,v])=>`${tomanExchangeNames[k]||k}: ${v.ok?'OK ('+v.count+')':'ناموفق'}`).join(' | ');
-   await loadTomanMarket();showTomanStatus(`ذخیره ${data.saved} قیمت انجام شد. ${summary}`, 'ok');
+   const loaded=await loadTomanMarket();
+   if(loaded===false){showTomanStatus(`ذخیره ${data.saved} قیمت انجام شد، اما بازخوانی جدول ناموفق بود. ${summary}`,'err');return;}
+   showTomanStatus(`ذخیره ${data.saved} قیمت انجام شد. ${summary}`, 'ok');
  }catch(e){showTomanStatus('به‌روزرسانی بازار تومانی انجام نشد: '+(e.message||String(e)), 'err')}
  finally{btn.disabled=false}
 }
