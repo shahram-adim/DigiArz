@@ -526,3 +526,13 @@ test('runtime chart palette and Android browser theme-color match the three CSS 
   assert.ok(html.includes('--bg:#101027'));
   assert.ok(html.includes('--text:#f0efff'));
 });
+
+
+test('indigo glass login overrides the legacy black-and-gold reference skin', () => {
+  assert.match(html, /body\.luxury-theme #authView\.auth-reference-layout\.auth-form/);
+  assert.match(html, /body\.luxury-theme #authView\.auth-form h2\{color:#d8c5ff!important/);
+  assert.match(html, /body\.luxury-theme #authView \.ref-platform\{/);
+  assert.match(html, /body\.luxury-theme #authView \.ref-gold-coin\{/);
+  assert.match(html, /body\.luxury-theme #authView \.ref-phone \.auth-phone-preview/);
+  assert.match(html, /body\.luxury-theme #authView \.ref-coin-row strong\{color:#53d6ad!important/);
+});
