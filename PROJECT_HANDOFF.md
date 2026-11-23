@@ -1167,3 +1167,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Previous successful workflow 45188878308 covered the earlier source state; workflow 45189152338 was still running on the markup-specific test commit at last check. Verify a completed successful workflow on the final source/test HEAD before calling this final cascade fix validated.
 - PR #55 remains Draft/open/unmerged. No main, Supabase/Production, DB, auth, wallet, orders, or trading logic changes. No physical Android visual test has been performed.
 - Next: verify the final branch HEAD, final stylesheet placement, regression assertions, and latest workflow. Continue theme review only if a specific cascade defect is evidenced.
+
+
+## 2026-11-23 — Frameless market rows and black/gold dark-theme surface
+- Continued theme cascade audit after confirming the latest CI passed on HEAD 27821aa7. Found the shared market-row rule still imposed a 1px blue border and navy gradient; only the light and indigo themes had dedicated surface overrides, while dark-theme rows inherited that blue/navy base.
+- Added a final-cascade rule removing the border from market rows across all three themes. Added a scoped body.dark-theme market-row background using charcoal/near-black tones and active theme text tokens, preserving the existing gold price/favorite accents and all layout/data behavior.
+- Added a regression test confirming the final cascade location, border removal, and black/charcoal dark-theme surface.
+- Source commit: 55c19f2b87536e298080ce210aef464b236cfd6d; test commit: be246a124b284d5455ae9ba24c6851519ea646ef.
+- The prior CI success (run 45189354433) was for the previous HEAD 27821aa7. A new successful run on the new final HEAD is required before treating this adjustment as validated.
+- PR #55 remains Draft/open/unmerged. Do not merge or publish. No Supabase/Production, DB, auth, wallet, orders, or trading logic changed. Physical Android visual acceptance remains outstanding.
+- Next: verify source/test CSS placement and current CI on the final HEAD; then continue auditing theme contrast only where a specific mismatch is supported by the cascade.
