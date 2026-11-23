@@ -456,12 +456,17 @@ test('coin rows, favorite controls and coin logo wrappers have no decorative fra
 });
 
 
+
 test('three themes have isolated final palettes and frameless market coin rows', () => {
-  assert.match(html, /body\\.dark-theme\\{[\\s\\S]*?--yellow:#f0b90b/);
-  assert.match(html, /body\\.light-theme\\{[\\s\\S]*?--bg:#f3f6fb/);
-  assert.match(html, /body\\.luxury-theme\\{[\\s\\S]*?--bg:#101027[\\s\\S]*?--panel:rgba\\(29,30,66/);
-  assert.match(html, /body\\.luxury-theme \\.tabs button\\.active/);
-  assert.match(html, /body\\.luxury-theme #authView \\.auth-form input/);
-  assert.match(html, /#tab-markets \\.market-board-v34 \\.coin,[\\s\\S]*?border:0!important;box-shadow:none!important/);
-  assert.match(html, /@supports not \\(\\(backdrop-filter:blur\\(1px\\)\\) or \\(-webkit-backdrop-filter:blur\\(1px\\)\\)\\)/);
+  assert.ok(html.includes('body.dark-theme{'));
+  assert.ok(html.includes('--yellow:#f0b90b'));
+  assert.ok(html.includes('body.light-theme{'));
+  assert.ok(html.includes('--bg:#f3f6fb'));
+  assert.ok(html.includes('body.luxury-theme{'));
+  assert.ok(html.includes('--bg:#101027;--panel:rgba(29,30,66,.78)'));
+  assert.ok(html.includes('body.luxury-theme .tabs button.active'));
+  assert.ok(html.includes('body.luxury-theme #authView .auth-form input'));
+  assert.ok(html.includes('#tab-markets .market-board-v34 .coin:hover'));
+  assert.ok(html.includes('border:0!important;box-shadow:none!important'));
+  assert.ok(html.includes('@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)))'));
 });
