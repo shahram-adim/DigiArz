@@ -2,7 +2,7 @@ name: Exact decimal tests
 
 on:
   push:
-    branches: [main]
+    branches: [main, features/user-selected-tools-2026-11-23]
   pull_request:
     branches: [main]
 
