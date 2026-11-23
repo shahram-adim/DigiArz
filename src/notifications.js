@@ -56,6 +56,60 @@ function init(){
  $('notificationClearHistory')?.addEventListener('click',()=>{if(!window.confirm('تاریخچه اعلان‌ها از این دستگاه پاک شود؟'))return;write(HISTORY_KEY,[]);render()});
  window.addEventListener('digiarz:market-snapshot',evaluate);renderAlerts();render();
 }
-window.DigiArzNotifications={publish,render,renderAlerts};
+
+let orderChannel=null,orderChannelUserId=null;
+function disconnectOrderEvents(){
+ const channel=orderChannel;orderChannel=null;orderChannelUserId=null;
+ if(channel&&window.__digiArzSupabaseClient?.removeChannel){
+  try{window.__digiArzSupabaseClient.removeChannel(channel).catch(()=>{})}catch(_){}
+ }
+}
+function orderLabel(row){
+ const symbol=String(row?.symbol||'سفارش');
+ const side=row?.side==='buy'?'خرید':'فروش';
+ const kind=row?.order_type==='limit'?'Limit':row?.order_type==='conditional'?'سفارش شرطی':'Market';
+ return symbol+' · '+side+' '+kind;
+}
+function handleOrderChange(payload,userId){
+ const row=payload?.new,old=payload?.old||{};
+ if(!row||row.user_id!==userId||!row.id)return;
+ const label=orderLabel(row),type=String(row.order_type||'order');
+ if(payload.eventType==='INSERT'){
+  publish('order_created','سفارش آزمایشی ثبت شد',label+' با موفقیت در سرور ثبت شد.');
+  return;
+ }
+ if(payload.eventType!=='UPDATE')return;
+ const previous=String(old.status||''),next=String(row.status||'');
+ const filledNow=Number(row.filled_amount||0),filledBefore=Number(old.filled_amount||0);
+ if(next==='filled'&&previous!=='filled')publish('order_filled','سفارش آزمایشی تکمیل شد',label+' به‌طور کامل اجرا شد.');
+ else if(next==='partially_filled'&&(previous!=='partially_filled'||filledNow>filledBefore))publish('order_partially_filled','بخشی از سفارش اجرا شد',label+' به‌صورت جزئی اجرا شد؛ مانده سفارش همچنان طبق وضعیت سرور پیگیری می‌شود.');
+ else if(next==='cancelled'&&previous!=='cancelled')publish('order_cancelled','سفارش آزمایشی لغو شد',label+'؛ لغو از وضعیت ثبت‌شده در سرور دریافت شد.');
+ else if(next==='rejected'&&previous!=='rejected')publish('order_rejected','سفارش آزمایشی رد شد',label+'؛ نتیجه از سرور دریافت شد.');
+ else if(next==='triggered'&&previous!=='triggered')publish('order_triggered','شرط سفارش فعال شد',label+'؛ سفارش وارد مرحله بعدی اجرای سرور شد.');
+}
+function connectOrderEvents(client,userId){
+ if(!client||!userId||typeof client.channel!=='function')return false;
+ if(orderChannel&&orderChannelUserId===userId)return true;
+ disconnectOrderEvents();
+ window.__digiArzSupabaseClient=client;
+ try{
+  orderChannel=client.channel('digiarz-order-notifications-'+userId)
+   .on('postgres_changes',{event:'*',schema:'public',table:'orders',filter:'user_id=eq.'+userId},payload=>handleOrderChange(payload,userId))
+   .subscribe();
+  orderChannelUserId=userId;
+  return true;
+ }catch(_){orderChannel=null;orderChannelUserId=null;return false}
+}
+function publishSecurityEvent(event){
+ const events={
+  SIGNED_IN:['security','ورود به حساب DigiArz','ورود جدید به حساب شما با موفقیت انجام شد.'],
+  SIGNED_OUT:['security','خروج از حساب DigiArz','نشست این دستگاه از حساب خارج شد.'],
+  PASSWORD_RECOVERY:['security','بازیابی رمز عبور','فرایند بازیابی رمز عبور برای این حساب آغاز شد.'],
+  USER_UPDATED:['security','به‌روزرسانی امنیت حساب','اطلاعات امنیتی حساب از طریق سرویس احراز هویت به‌روزرسانی شد.']
+ };
+ const item=events[event];if(item)publish(item[0],item[1],item[2]);
+}
+
+window.DigiArzNotifications={publish,render,renderAlerts,connectOrderEvents,disconnectOrderEvents,publishSecurityEvent};
 if(typeof document!=='undefined'){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init()}
 })();
