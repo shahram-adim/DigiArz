@@ -423,3 +423,32 @@ test('login mini chart renders real five-minute candles without depending on a c
   assert.match(html, /fetchBinanceKlines\('BTCUSDT','5m',36\)/);
   assert.match(html, /<svg viewBox=/);
 });
+
+test('Toman market summary reports observed sources, freshness, and source timestamps', () => {
+  const start = html.indexOf('function summarizeTomanMarketRows(rows){');
+  const end = html.indexOf("function showTomanStatus(message,type=''){", start);
+  assert.ok(start >= 0 && end > start, 'Toman summary helper boundaries found');
+  const sandbox = {};
+  vm.runInNewContext(html.slice(start, end) + '\nglobalThis.summarizeTomanMarketRows=summarizeTomanMarketRows;', sandbox);
+  const summary = sandbox.summarizeTomanMarketRows([
+    { exchange: 'Nobitex', is_stale: false, fetched_at: '2026-11-23T10:00:00.000Z' },
+    { exchange: 'wallex', is_stale: false, fetched_at: '2026-11-23T10:01:00.000Z' },
+    { exchange: 'WALLEX', is_stale: true, fetched_at: '2026-11-23T10:02:00.000Z' },
+    { exchange: 'bit24', is_stale: true, fetched_at: '2026-11-23T10:03:00.000Z' },
+    { exchange: '', is_stale: true, fetched_at: 'invalid' }
+  ]);
+  assert.deepEqual(JSON.parse(JSON.stringify(summary)), {
+    rowCount: 5,
+    sourceCount: 3,
+    freshRowCount: 2,
+    freshSourceCount: 2,
+    latestFetchedAt: '2026-11-23T10:03:00.000Z'
+  });
+  const loadStart = html.indexOf('async function loadTomanMarket(){');
+  const loadEnd = html.indexOf('async function refreshTomanMarket()', loadStart);
+  assert.ok(loadStart >= 0 && loadEnd > loadStart, 'Toman loader boundaries found');
+  const loader = html.slice(loadStart, loadEnd);
+  assert.ok(loader.includes('summarizeTomanMarketRows(filtered)'), 'loader uses the tested summary');
+  assert.ok(loader.includes('summary.latestFetchedAt'), 'loader displays the real source timestamp');
+  assert.doesNotMatch(loader, /Object\.keys\(tomanExchangeNames\)\.length/, 'configured labels are not reported as active sources');
+});

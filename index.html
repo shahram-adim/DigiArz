@@ -3245,6 +3245,22 @@ async function cancelLimitOrder(orderId,button){
 async function tradeDetail(side){const buy=side==='buy',amount=Number($(buy?'detailBuyAmount':'detailSellAmount').value),input=$(buy?'buySymbol':'sellSymbol');input.value=selectedSymbol;$(buy?'buyAmount':'sellAmount').value=String(amount);await trade(side);const source=tradeMsg.textContent;showMessage($('detailTradeMsg'),source,tradeMsg.classList.contains('err')?'err':'ok')}
 async function refreshAll(){const btn=$('refreshBtn');btn.disabled=true;hideMessage(tradeMsg);try{const {data,error}=await supabaseClient.rpc('request_market_price_refresh');if(error)throw error;if(!data||data.success!==true)throw new Error('سرور درخواست به‌روزرسانی را تأیید نکرد.');await loadDashboard();await refreshMarketTickers();renderMarkets();showMessage(tradeMsg,'درخواست دریافت قیمت‌های زنده ثبت شد؛ با تکمیل پاسخ CoinGecko، قیمت‌ها در چرخه بعدی نمایش داده می‌شوند.','ok')}catch(e){showMessage(tradeMsg,'درخواست به‌روزرسانی ناموفق بود: '+(e.message||String(e)),'err')}finally{btn.disabled=false}}
 const tomanExchangeNames={nobitex:'نوبیتکس',wallex:'والکس',bitpin:'بیت‌پین',bit24:'بیت‌۲۴',kifpool:'کیف پول من',iran_market:'مرجع رایگان بازار ایران'};
+function summarizeTomanMarketRows(rows){
+ const safeRows=Array.isArray(rows)?rows:[];
+ const sourceOf=row=>String(row?.exchange||'').trim().toLowerCase();
+ const freshRows=safeRows.filter(row=>row?.is_stale!==true);
+ const latestFetchedAtMs=safeRows.reduce((latest,row)=>{
+  const stamp=Date.parse(row?.fetched_at||'');
+  return Number.isFinite(stamp)?Math.max(latest,stamp):latest;
+ },0);
+ return {
+  rowCount:safeRows.length,
+  sourceCount:new Set(safeRows.map(sourceOf).filter(Boolean)).size,
+  freshRowCount:freshRows.length,
+  freshSourceCount:new Set(freshRows.map(sourceOf).filter(Boolean)).size,
+  latestFetchedAt:latestFetchedAtMs>0?new Date(latestFetchedAtMs).toISOString():null
+ };
+}
 function showTomanStatus(message,type=''){const el=$('tomanMarketStatus');if(!el)return;el.textContent=message;el.className='market-note'+(type==='err'?' err':type==='ok'?' ok':'')}
 function percentCell(value){if(value===null||value===undefined||!Number.isFinite(Number(value)))return '—';const n=Number(value);return `<span style="color:${n>0?'var(--green)':n<0?'var(--red)':'var(--muted)'}">${n>0?'+':''}${formatNum(n,2)}%</span>`}
 async function loadTomanMarket(){
@@ -3273,7 +3289,9 @@ async function loadTomanMarket(){
    return `<tr><td dir="ltr">${formatNum(r.price_toman,0)}</td><td><span class="history-asset">${coinLogo(r.asset_symbol,'asset-logo')} <b dir="ltr">${safeText(r.asset_symbol)}</b></span></td><td>${safeText(r.asset_name_fa||'—')}</td><td><span class="toman-source">${safeText(tomanExchangeNames[r.exchange]||r.exchange)}</span></td><td dir="ltr">${r.bid_toman?formatNum(r.bid_toman,0):'—'}</td><td dir="ltr">${r.ask_toman?formatNum(r.ask_toman,0):'—'}</td><td>${percentCell(r.change_24h_pct)}</td><td>${percentCell(r.return_7d_pct)}</td><td>${percentCell(r.return_30d_pct)}</td><td>${percentCell(r.return_90d_pct)}</td><td>${percentCell(r.return_365d_pct)}</td><td dir="ltr">${r.volume_24h_toman?formatNum(r.volume_24h_toman,0):'—'}</td><td>${freshness}</td></tr>`;
  }).join('');
  renderMarkets();
- showTomanStatus(`${filtered.length.toLocaleString('fa-IR')} ردیف قیمت تومانی از ${Object.keys(tomanExchangeNames).length} منبع پشتیبانی‌شده خوانده شد. زمان خواندن: ${new Date().toLocaleTimeString('fa-IR')}.`, 'ok');
+ const summary=summarizeTomanMarketRows(filtered);
+ const lastFetched=summary.latestFetchedAt?formatExchangeSyncDate(summary.latestFetchedAt):'زمان دریافت ثبت نشده';
+ showTomanStatus(`${summary.rowCount.toLocaleString('fa-IR')} ردیف قیمت تومانی از ${summary.sourceCount} منبع مشاهده شد؛ ${summary.freshRowCount} ردیف از ${summary.freshSourceCount} منبع تازه است. آخرین زمان دریافت ثبت‌شده: ${lastFetched}.`,summary.freshRowCount>0?'ok':'err');
 }
 async function refreshTomanMarket(){
  const btn=$('tomanRefreshBtn');btn.disabled=true;showTomanStatus('در حال دریافت قیمت از نوبیتکس، والکس و بیت‌پین…');
