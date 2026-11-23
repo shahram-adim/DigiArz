@@ -58,7 +58,7 @@ async function importBackup(file) {
   show('تنظیمات بازیابی شد. صفحه برای اعمال کامل تغییرات تازه‌سازی می‌شود.', 'ok');
   setTimeout(() => location.reload(), 700);
 }
-document.addEventListener('DOMContentLoaded', () => {
+if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded', () => {
   $('settingsBackupExport')?.addEventListener('click', exportBackup);
   $('settingsBackupImport')?.addEventListener('click', () => $('settingsBackupFile')?.click());
   $('settingsBackupFile')?.addEventListener('change', async event => {
