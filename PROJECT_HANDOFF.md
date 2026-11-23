@@ -881,3 +881,10 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - All 21 substantive workflow steps passed: Node/browser tests; PostgreSQL arithmetic and Toman upsert; exact-decimal widening positive/negative/lock-timeout/rollback; Market/Limit; Stop-Limit/TP-SL placement, workers, lifecycle and two-session race tests. Cleanup also succeeded.
 - This verifies the automated repository/integration workflow only. It does not establish Android visual acceptance. No APK build, Pages deployment, merge, Supabase Production change, or financial-data change occurred.
 - PR #53 remains Draft/open/unmerged. Next: visual review on Android; if the layout needs adjustment, make only evidence-based CSS changes on this branch. Do not merge or release without explicit user approval.
+
+
+### Artifact-only Android review build added — 2026-11-23
+- Added .github/workflows/android-market-row-review.yml on the UI review branch only. It is restricted to pushes on ui/market-row-theme-polish-2026-11-23, uses read-only contents permission, builds a debug APK, records commit/hash provenance, and uploads a 14-day Actions artifact only.
+- The workflow does not create a GitHub Release/tag, deploy Pages, touch Supabase, or modify financial data.
+- The GitHub connection exposes PR-triggered workflow runs but not push-triggered run listing or workflow dispatch. The push-triggered APK build has not yet been verified from this session; no APK/artifact is claimed.
+- Next: verify the Android workflow run/artifact through Actions; only provide an install link after the exact artifact is available and its BUILD-INFO/SHA-256 is verified. Keep PR #53 Draft/unmerged.
