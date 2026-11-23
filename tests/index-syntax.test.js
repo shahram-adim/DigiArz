@@ -592,3 +592,16 @@ test('trade-history date presets use defined cross-theme surface tokens', () => 
   assert.ok(rule.includes('background:var(--panel2)'), 'preset background uses the shared theme surface token');
   assert.ok(!rule.includes('var(--border)') && !rule.includes('var(--surface-2)'), 'preset does not reference undefined legacy tokens');
 });
+
+
+test('admin daily-ad controls remain usable without overflow on narrow phones', () => {
+  const guard = html.lastIndexOf('/* Admin mobile controls: preserve readable wrapping and comfortable touch targets on narrow phones. */');
+  const styleEnd = html.lastIndexOf('</style>');
+  assert.ok(guard >= 0 && styleEnd > guard, 'final narrow-phone admin rules are present');
+  const css = html.slice(guard, styleEnd);
+  assert.ok(css.includes('@media(max-width:380px)'), 'rules target compact phone widths');
+  assert.ok(css.includes('#dailyAdAdminPanel>.section-title{align-items:flex-start;flex-wrap:wrap;}'), 'admin section header can wrap');
+  assert.ok(css.includes('.daily-ad-admin-actions{width:100%;flex-wrap:wrap;}'), 'admin action buttons can wrap instead of overflowing');
+  assert.ok(css.includes('min-height:44px'), 'admin controls keep a comfortable touch target');
+  assert.ok(css.includes('min-width:0') && css.includes('overflow-wrap:anywhere'), 'long admin labels cannot force horizontal overflow');
+});
