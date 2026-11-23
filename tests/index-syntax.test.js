@@ -492,3 +492,18 @@ test('top-five gainers and losers live only below the dashboard market heading i
   assert.match(html, /function showAllGainers\(\)\{switchTab\('markets'\)/);
   assert.match(html, /function showAllLosers\(\)\{switchTab\('markets'\)/);
 });
+
+
+test('dashboard account activity and alerts are visible only after a verified super-admin role check', () => {
+  assert.match(html, /id="dashboardActivityCenter" class="dashboard-activity-center hidden"/, 'account activity is hidden by default');
+  const showAppStart = html.indexOf('async function showApp(session){');
+  const showAppEnd = html.indexOf('\nfunction setAccountMode(', showAppStart);
+  assert.ok(showAppStart >= 0 && showAppEnd > showAppStart, 'session activation handler boundaries are present');
+  const showApp = html.slice(showAppStart, showAppEnd);
+  assert.match(showApp, /isSuperAdmin=false/, 'admin access defaults to false for each session');
+  assert.match(showApp, /roleResult\.data===true\)\{isSuperAdmin=true/, 'only the server-confirmed super-admin result grants admin visibility');
+  assert.match(showApp, /\$\('dashboardActivityCenter'\)\?\.classList\.toggle\('hidden',!isSuperAdmin\)/, 'activity panel visibility follows verified admin state');
+  assert.match(html, /id="dashboardRecentOrders"/);
+  assert.match(html, /id="dashboardRecentTrades"/);
+  assert.match(html, /id="dashboardAccountAlerts"/);
+});
