@@ -1136,3 +1136,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - This validates the translucent light-theme card/panel update and the corrected regression assertions. The earlier failed runs were superseded; their only failure was the stale assertion expecting opaque white cards.
 - PR #55 remains open, Draft, unmerged, and GitHub reports mergeable=true. No main, Production/Supabase, database, auth, wallet, orders, trading, release, or deployment changes. Android physical visual acceptance remains outstanding.
 - Next: continue the visual audit for theme-specific fixed colors and mobile layout; rebuild the review APK from the current tested PR source only after the next agreed milestone. Do not merge or mark ready without explicit approval.
+
+
+## 2026-11-23 — Remove legacy market-logo discs across themes
+- Latest PR state was rechecked: PR #55 open/Draft/unmerged, GitHub mergeable=true and mergeable_state=clean; branch is 101 commits ahead and 0 behind main. Exact Decimal workflow run 45188116927 passed on HEAD bb171c9e503251af9613e0bdf72afe29c5967f8e (24/24 workflow steps succeeded, including browser/source and PostgreSQL integration/race suites).
+- Continued the visual CSS audit and found a remaining fixed legacy .coin-icon background (#252a33) beneath market logos. It persisted across the light, black/gold, and indigo themes, despite the surrounding coin rows being frameless.
+- Added a narrowly scoped final rule for #tab-markets .market-board-v34 .coin-icon and its image to make background transparent and remove border/shadow. No logo dimensions, image source, row layout, or market data behavior changed.
+- Added a regression test for the cross-theme frameless logo rule.
+- Source commit: 50182475a4c7185eeaee46cc2221eff65e8845d8; test commit: c025e168ac445d9b67107746e9500d6b600be3fc.
+- The prior successful workflow does NOT validate these new commits; verify CI on the final current HEAD before claiming this fix is tested.
+- PR #55 remains Draft/open/unmerged. Do not merge, publish, or change main. No Supabase/Production, DB, auth, wallet, orders, or trading behavior changed. Physical Android visual acceptance remains outstanding.
+- Next: verify final HEAD and workflow status, then continue the theme audit for any remaining fixed logo/row surfaces. Keep changes presentation-only and scoped.
