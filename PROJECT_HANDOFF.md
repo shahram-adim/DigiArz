@@ -862,3 +862,327 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - PR #47 remains Draft/open/unmerged and mergeable. Physical Android installation, fingerprint enrollment, and login/logout/background-relock acceptance tests remain outstanding. APK is a debug review build, not production-signed.
 - No app code was merged to main; no release/deployment/publishing or Supabase/database/user-financial-data changes were made. This handoff entry is documentation-only.
 - Next: user installs the new APK and checks all three themes, password login, fingerprint enrollment/unlock, logout and relock. Fix only observed issues on PR #47; do not merge without explicit user approval.
+
+## 2026-11-23 — Dashboard market movers and account-activity visibility review
+- Verified current main is still 968010d37a175b947616167ed265953a2ed6b62c; created fresh branch fix/ui-dashboard-cleanup-2026-11-23 directly from that exact head.
+- Moved the existing five-gainer and five-loser panels out of the Markets tab and into the Dashboard immediately below “بازار ارزهای دیجیتال”. Their existing IDs, click handlers, and render functions were preserved; each list is now horizontally scrollable with responsive card widths.
+- Updated setAccountMode(active) so .dashboard-activity-center is visible only when the account is active and isSuperAdmin has been positively confirmed by is_current_user_super_admin. Existing admin-only check remains server-derived; no role or authorization backend was changed.
+- Removed decorative borders from .coin rows and .favorite-btn, and removed the background/frame from .coin-icon wrappers. Existing logo images and star interaction remain intact.
+- Added three regression tests in tests/index-syntax.test.js for dashboard placement/horizontal layout, super-admin activity visibility, and unframed coin styling.
+- Opened Draft PR #54: https://github.com/shahram-adim/DigiArz/pull/54. Current branch is 4 commits ahead and 0 behind main; comparison shows only index.html, tests/index-syntax.test.js, PROJECT_HANDOFF.md, and IMPLEMENTATION_STATUS.md changed.
+- Static source checks confirmed the two market lists appear exactly once and only in the dashboard, the dashboard appears before the Markets tab, the role gate and CSS overrides are present, and all three new regression tests are included.
+- GitHub Actions run 45130193148 completed SUCCESS on the latest head `feaafa2ee97b2b37d76cd7bb71c155c1d7288003`. The `exact-decimal` job passed all Node/browser tests (including `tests/index-syntax.test.js`) and PostgreSQL arithmetic, upsert, schema-widening, Market/Limit/Stop-Limit, TP-SL, lifecycle, and concurrency regressions. Job steps 1–21 all completed successfully. See https://github.com/shahram-adim/DigiArz/actions/runs/45130193148.
+- No visual browser/device render was performed. The Sky Blue Glass dashboard's reported top blank-space issue still requires actual Android visual verification before claiming fixed.
+- No merge, APK build, release, deployment, Supabase/Production/database change, wallet/trade change, or authentication-flow change was performed.
+- Next: verify Actions run for PR #54 and fix any failures; then obtain an Android review APK only after CI passes, and have the user verify all three themes on-device. Keep PR #54 Draft/unmerged until explicit approval.
+
+- APK workflow review: `android-apk.yml` supports workflow_dispatch and builds the selected ref, but no workflow-dispatch action is available in the connected GitHub tools. The separate `android-review-apk.yml` explicitly checks out the older `build/indigo-glass-biometric-apk-2026-11-21` branch, so its artifact would NOT contain PR #54 changes. Do not reuse that APK as this UI candidate.
+
+## 2026-11-23 — Tighten non-admin dashboard activity suppression
+- Follow-up code review found renderDashboardActivity() was still called from general dashboard/history/order refresh paths even though the activity center was CSS-hidden for non-admins.
+- Added an early return when isSuperAdmin is false so private activity/alert content is not populated into the dashboard DOM for ordinary users; admin behavior remains unchanged.
+- Extended the role-visibility regression test to assert the renderer guard.
+- Commits: index.html 1805dec0e6f58b948026d4dc633faeae374820b7; tests/index-syntax.test.js ca22b9c6aa591eac7ee8e0a4b2120d1fd26bfb67.
+- A new GitHub Actions run is expected for this latest source. Do not treat earlier passing CI on feaafa2 as validation of these two follow-up commits; wait for the latest head's run.
+- Android visual testing and a PR-specific APK remain outstanding; no merge, APK, or Production changes.
+
+
+## 2026-11-23 — isolated theme palette and market-row parity follow-up
+- Created branch `fix/theme-parity-2026-11-23` directly from the reviewed PR #54 head `ff7e07da44f615348eccb1c36bb05317c512ec1f`; main remains unchanged.
+- Added a final scoped palette pass for dark black/gold, light neutral, and third luxury indigo-glass themes. The third theme now uses a deep indigo base rather than the prior blue-teal palette; glass surfaces, controls, charts, and login inputs receive explicit theme-scoped colors.
+- Fixed a confirmed specificity conflict: the market-board coin selector had a stronger border rule than the generic frameless cleanup. A final high-specificity override now removes the row border and shadow in every theme.
+- Added a regression test for the three final palettes, theme-scoped login inputs, backdrop-filter fallback, and frameless market rows.
+- Commits: `aa52dd8c555fa8846440ff28919a3fed69d5b9f6` (CSS), `2e81abe17465ca556311437abaa1c3e84fced3b8` (tests).
+- Validation boundary: source-level changes only. CI has not yet run on this branch, and no browser/device screenshots or physical Android rendering have been reviewed. Do not claim visual parity or a completed theme redesign until those checks pass.
+- No merge, APK build, release, deployment, database/Supabase, auth, wallet, or trade logic changes.
+- Next: run the project regression workflow on this branch, inspect failures, then build a separate review APK only after CI succeeds. Keep all candidate branches unmerged pending explicit approval.
+
+- CI run 45138971915 initially failed in the new test file because the added JavaScript regex literal was over-escaped (test harness syntax error, not application runtime failure). Replaced those expressions with direct source-string assertions in commit `0a353bb4cd0f08de0ac7e601bceac20583314577`; a fresh PR run is required before treating the candidate as validated.
+
+
+## 2026-11-23 — Theme parity APK review build verified
+- Theme regression workflow run `45139169031` completed SUCCESS on candidate head `afdf21d6a2a1207cb017f50c53282bd7e7d7c0e9` (all 21 job steps passed).
+- Built the Android debug review APK from isolated build branch `build/apk-theme-parity-2026-11-23`, commit `c02530b3f01fd166f443b8fe09f253998f01c094`, workflow run `45141624881` (SUCCESS).
+- Artifact `DigiArz-Android-debug-APK`, artifact ID `14802112785`, size 3,526,514 bytes; extracted APK size 3,907,938 bytes.
+- ZIP integrity passed; `BUILD-INFO.txt` SHA-256 matches computed APK SHA-256: `5525ca9a8cbd1969cf603a02cd52213cc3a6f2d09f626e91e8a4b76de5a2a20f`.
+- APK is a debug review build, not production-signed. Physical Android installation and visual acceptance across all three themes remain outstanding; no browser screenshot/device rendering was performed.
+- PR #55 remains Draft/open/unmerged; PR #54 also remains Draft/open/unmerged. Main remains unchanged; no Supabase, Production, auth, wallet, order, or trading logic changes.
+
+
+## 2026-11-23 — Glass fallback audit
+- Extended the luxury/indigo no-backdrop-filter fallback to every glass surface used by the theme: card, stat, trade box, performance item, indicator panel, FX box, setting row, orderbook side, gainer card, asset row, and dashboard mover panel.
+- Added explicit regression assertions for each fallback surface.
+- Exact-decimal/browser regression workflow: [45142995600](https://github.com/shahram-adim/DigiArz/actions/runs/45142995600) — SUCCESS on code commit `0757142d9e2e92b07af85fee983e8de1a2fdf3c7`.
+- A separate APK review branch `build/apk-glass-fallback-2026-11-23` was created from that exact tested source. Android APK build was triggered by a scoped workflow push; await artifact verification before sharing a new APK.
+- PR #55 remains draft/open/unmerged. Main remains at `968010d37a175b947616167ed265953a2ed6b62c`. No Production/Supabase, database, auth, wallet, order, or trading logic changes.
+- Physical Android visual acceptance remains outstanding; CI success is not a substitute for device rendering.
+
+
+## 2026-11-23 — Cross-theme audit follow-up (validation pending)
+- Further source audit found legacy teal/blue luxury-theme selectors still affecting tags, coin hover states, notices, auth banner/ad, gainers panel, Toman table header/source, and theme selector active state. Added final indigo/glass overrides for these surfaces.
+- Found market-board coin rows retained a navy background and hard-coded gold/white text regardless of selected theme. Added explicit black/gold dark palette rules and indigo luxury overrides for row text/prices; existing light-theme text/background overrides remain.
+- Added regression assertions for the legacy luxury surfaces and dark market-row palette.
+- Latest source/test commits: `08d5bb111c339c3893ccda2ee1502976604dfe6f` and `2f7e9f3657eb6dfd1f078b209ccf391a1ac988c6`.
+- IMPORTANT: the latest source/test commits have not yet received a fresh CI run. Earlier CI success [45142995600](https://github.com/shahram-adim/DigiArz/actions/runs/45142995600) applies to the previous tested commit only, not these follow-up changes. Do not treat the current palette audit as fully validated until CI is rerun.
+- Physical Android visual acceptance across all three themes remains outstanding. No claim of error-free rendering is made.
+- PR #55 remains draft/open/unmerged; main and Supabase/Production remain untouched.
+
+
+## 2026-11-23 — Runtime chart palette parity fix
+- Full CI run 45149337439 completed SUCCESS on head eaf0519a1b00fae119e3e833616586d02f4892eb; all 43 job steps passed, including browser/Node, PostgreSQL, schema migration rollback/lock, market/limit/stop-limit, TP-SL, and concurrency regressions.
+- Follow-up source audit found a real remaining theme mismatch in applyTheme(): the third theme's Lightweight Charts canvas and Android/browser status-bar color still used a dark teal/navy palette (#0b2235 / #071b2b) while the app CSS correctly used deep indigo glass (#101027). Light and dark chart/status colors were also not fully aligned with their CSS tokens.
+- Updated runtime chart palette, text/grid/border colors, and theme-color metadata to match the three CSS themes; added regression test to prevent CSS/runtime divergence.
+- This follow-up is a new source/test change and requires a fresh CI run. No merge, APK build, deployment, Supabase/Production, auth, wallet, order, or trading changes.
+- Physical Android rendering/installation is still required for final visual acceptance; CI cannot certify device appearance.
+
+- Validation result: GitHub Actions run 45150130527 completed SUCCESS on final code/test head efe0261ee85a996d97acce92d3b886127dbcea65; all 43 job steps passed, including the newly added runtime chart/theme-color parity regression. PR #55 remains Draft/open/unmerged. Main and Production remain unchanged. Final physical Android rendering/installation is still not verified.
+
+
+## Live handoff — 2026-11-23, final theme parity CI recheck
+- Current candidate: PR #55, branch `fix/theme-parity-2026-11-23`, head `21290f02e9bcc339e7a658b40a87e1d6667524ac`.
+- GitHub API recheck: PR open, Draft, unmerged, mergeable; main/base remains `968010d37a175b947616167ed265953a2ed6b62c`.
+- Latest workflow run `45150454902` on this head completed SUCCESS. No artifacts were attached to that run.
+- Android APK workflow audit: `.github/workflows/android-review-apk.yml` checks out an obsolete fixed branch (`build/indigo-glass-biometric-apk-2026-11-21`), so its APK cannot represent PR #55. `.github/workflows/android-apk.yml` has workflow_dispatch support, but the connected GitHub integration has no dispatch action.
+- The older artifact `14804561034` / run `45146118883` was built from `b44e90e1d52614b3164109d260de385160205f99`, not the current PR head; do not send it as the final build.
+- No physical Android test has been performed. Do not claim the themes are visually accepted on-device.
+- No merge, release, deployment, Supabase/Production, database, authentication, wallet, order, or trading changes were made.
+- Next: build an artifact-only APK from the exact PR head using a safe workflow trigger; verify provenance and SHA-256; then ask the user to install and inspect all three themes on Android. Keep PR #55 Draft/unmerged unless the user explicitly approves merging.
+
+
+## 2026-11-23 — Remove dashboard top gainers/losers on user request
+- Removed the dashboard sections showing the five biggest 24-hour gainers and five biggest losers, including their dashboard-only buttons and horizontal-strip styling.
+- Preserved the market tab's own gainers/losers analytics and market filters; only the dashboard display was removed.
+- Removed obsolete dashboard event bindings and replaced the prior horizontal-movers regression with assertions that those widgets are absent from the dashboard while market-tab panels remain.
+- Change is on the existing draft PR #55 branch only. Requires fresh CI; no merge, APK release, deployment, Supabase/Production, auth, wallet, or trading changes.
+
+
+## 2026-11-23 — Dashboard layout repair
+- Removed the duplicate legacy hero and quick-action strip from the visible app shell while retaining their DOM hooks for existing event bindings; moved the existing market refresh action into the dashboard header (single `refreshBtn` ID).
+- Fixed the theme-parity CSS scope so the three theme rules are no longer accidentally limited to viewports at or below 640px.
+- Rebuilt dashboard spacing and responsive hierarchy: compact header, balanced hero, two-column mobile shortcuts, scroll-contained filters, and a compact two-row mobile market-coin layout that avoids horizontal overflow.
+- Applied distinct black/gold, clean-white, and deep-indigo dashboard surfaces; removed decorative borders/backgrounds from dashboard coin logos and favorite stars. Existing dashboard market data, search, filters, favorite actions, account summary, and super-admin-only activity logic remain intact.
+- Added regression assertions for duplicate-shell suppression, refresh-button uniqueness, desktop theme scope, mobile row sizing, and frameless logo/favorite controls. CI must pass before a new review APK is built; PR #55 remains draft and unmerged.
+
+
+## Live handoff — 2026-11-23, dashboard layout APK ready
+- PR #55 remains Draft/open/unmerged. Latest app-code candidate is the dashboard layout repair already tested by CI; the review APK was built from a child commit whose parent is PR code head `286f7aa6364628186e88f9bc0d2313a3388a84d8`.
+- Regression CI [45158231654](https://github.com/shahram-adim/DigiArz/actions/runs/45158231654): SUCCESS, all 43 steps.
+- Android review APK workflow [45161116469](https://github.com/shahram-adim/DigiArz/actions/runs/45161116469): SUCCESS, all 23 steps. Artifact ID `14809698748`, name `DigiArz-PR55-Theme-Parity-APK`.
+- Verified APK SHA-256: `8a537a66323b03ea883e2874a3729133e15f03659e86d7750100a3a2960630ed`. ZIP SHA-256: `a0d9de6244d43a5fbd626e64ed86b9f47cc0bc9ee031194ad051109d7d55e52a`.
+- APK is a debug/review build, not release-signed. User should install and check dashboard layout and all three themes on Android. Do not claim physical visual verification until user confirms.
+- No merge, release, deployment, or Production/Supabase mutation. Keep PR draft unless user explicitly approves merging.
+
+
+## 2026-11-23 — Prevent account-activity flash before role verification
+- The dashboard activity center now starts with the existing `hidden` class in the HTML, so regular users cannot briefly see its heading or placeholders while the admin-role RPC is still running.
+- Existing `setAccountMode(active)` logic remains the only reveal path: the section is shown only when the account is active and `isSuperAdmin === true`. If role verification fails, it stays hidden (fail-closed); confirmed super-admin access remains intact.
+- Updated `tests/index-syntax.test.js` to assert the initial hidden state and the active-super-admin reveal condition.
+- Source commit: `d9079b3c7951812fba3f12cc7857de31e4125458`; test commit: `4315fa7c394d4f1544c80b56951538ce339f0660`.
+- A fresh CI result is **not yet available** for the latest test commit: the connected workflow/status lookup returned no runs and no status checks. Earlier green CI and the earlier review APK apply to older commits only; do not treat them as validation of this change.
+- PR #55 remains Draft/unmerged. No changes were made to `main`, Supabase/Production, authentication, wallets, orders, or trading. A new review APK and physical Android check are still pending.
+
+
+## Live handoff — 2026-11-23, account-activity gate CI passed
+- Latest PR #55 head: 321777d00a209f0164a4c3452bbce55019ce6944; base/main remains 968010d37a175b947616167ed265953a2ed6b62c.
+- Exact-decimal workflow run 45163851803 completed SUCCESS on the latest head. The exact-decimal job completed all 43 steps successfully, including browser/Node, PostgreSQL regression, migration rehearsal/rollback/lock checks, market/limit/stop-limit, TP-SL, and concurrency tests. This supersedes the earlier note that CI was still pending for the account-activity gate.
+- PR #55 remains open, Draft, unmerged, and mergeable. Main and Production remain unchanged.
+- Current APK workflows were inspected. android-apk.yml supports workflow_dispatch and checks out the selected ref by default, so it is suitable for a manual build when dispatched on fix/theme-parity-2026-11-23. The connected GitHub tools expose no workflow_dispatch action, so no new APK has been built by this session.
+- android-review-apk.yml is unsuitable: it hardcodes checkout of build/indigo-glass-biometric-apk-2026-11-21, irrespective of selected ref. Do not use it for this candidate.
+- Prior artifact 14809698748 predates the latest account-activity hidden-by-default change; do not present it as the latest candidate APK.
+- Next safe step: manually run Actions > DigiArz Android APK > Run workflow, selecting branch fix/theme-parity-2026-11-23. Verify the run's source SHA equals the current PR head and inspect BUILD-INFO.txt plus APK SHA-256 before sharing. Then install on Android and visually inspect all three themes. Keep PR Draft/unmerged until user explicitly approves.
+- No workflow file was changed; no merge, release, deployment, Supabase/Production, database, authentication, wallet, order, or trading changes were made.
+
+
+## 2026-11-23 — Indigo glass login theme parity repair
+- Audited the final CSS cascade and found the reference login screen retained a later, high-specificity black/gold skin even when the user selected the indigo glass theme. This caused the login hero, phone/platform/coin accents, and login form to remain visually inconsistent with the selected theme.
+- Added final, explicitly scoped `body.luxury-theme #authView ...` overrides so the reference login visual, form, inputs, buttons, phone, platform, coin accents, and promo/footer use the deep indigo/lavender glass palette with mint live-market accents.
+- Added a regression test that checks the indigo login override selectors and key palette values.
+- Code commits: `f3ec1b9747a20bae1d9f6a2c003ebdc62bb14b35` (CSS) and `af67d7c721c3e089a228c32d183e5113ad20a4c0` (initial test), followed by `6499005761965ddc223f38a03a00bb27ef6f53bd` (corrected selector assertions). Current PR head is `6499005761965ddc223f38a03a00bb27ef6f53bd`.
+- No workflow run exists yet for this new head; the earlier successful run `45163851803` is for older code SHA `321777d00a209f0164a4c3452bbce55019ce6944` and does not validate this patch.
+- PR #55 remains Draft/open/unmerged. No APK built for this new head, no physical Android visual verification, and no changes to main, Supabase/Production, database, authentication logic, wallet, orders, or trading.
+- Next: wait for/inspect CI on current head, then review remaining legacy theme overrides and all-page responsive consistency before requesting a new APK build.
+
+
+## 2026-11-23 — Final indigo login cascade precedence repair
+- A full stylesheet-order audit found later legacy auth rules still followed the earlier indigo login overrides. In particular, the old luxury-theme auth action button rule could restore the gold gradient after the indigo rules.
+- Added a final scoped indigo cascade guard at the end of the final stylesheet, covering the login form, inputs, primary/secondary actions, forgot-password control, phone frame, platform chip, floating coin accents, and mint live-market text.
+- Added a regression test that asserts the final indigo guard appears after the legacy auth rule and covers the key login surfaces.
+- Source commit: 52a0e84a57ec85ef8c842a27e83e39674c1ed8b5. Regression-test commit: b36214398ade5303c70e14c56fd16baecf42e347.
+- CI for these new commits has not yet been observed; the last successful workflow remains on older SHA 321777d00a209f0164a4c3452bbce55019ce6944 and does not validate this patch.
+- PR #55 remains Draft/open/unmerged. Main, Supabase/Production, database, authentication logic, wallet, orders, and trading were not changed. No APK or physical-device visual test was performed.
+- Next: inspect Actions for a run matching the new PR head, then continue page-by-page responsive and theme cascade audit. Do not merge or publish.
+
+- Follow-up test-review correction: the precedence assertion now searches for the legacy selector strictly before the final guard marker, so the guard's own repeated selector cannot be mistaken for the older rule. Test commit: 27d258cebc9600555a2c57aecafcb365f27c8ec9.
+
+## 2026-11-23 — Settings and admin theme-token consistency
+- Page-by-page CSS audit found three fixed-color surfaces that bypassed the selected theme: settings rows used a dark navy gradient; admin daily-ad textarea used near-black/white; admin daily-ad list items used fixed charcoal.
+- Replaced those fixed colors with the shared theme tokens (--soft, --field, --panel2, --line, --text) so the surfaces follow the active dark, white, or indigo theme without changing admin functionality.
+- Added regression coverage for all three token-based styles.
+- Source commit: f168b7943c12e1feff48e6f74f100e35b3b2058d. Test commit: 8b922f930f3fd0b4dedc71458ba5ea2653ea668c.
+- CI has not yet run for these commits. The latest visible successful workflow is still on older SHA 321777d00a209f0164a4c3452bbce55019ce6944; it is not validation for the latest changes.
+- PR #55 remains Draft/open/unmerged. No changes to main, Supabase/Production, database, authentication logic, wallet, orders, or trading. No APK or device visual verification.
+- Next: continue checking the remaining order-book/history/admin surfaces and mobile overflow. Keep changes scoped to the feature branch; do not merge.
+
+## 2026-11-23 — Order-book three-theme palette repair
+- Continued the cross-page theme audit on the existing PR branch after re-reading the PR, handoff, source, and regression tests.
+- Found legacy order-book rules that hard-coded dark navy surfaces (`#101318`, `#111821`, `#0b1932`) and older header colors. These could leak into the white and indigo themes depending on stylesheet order.
+- Added a final stylesheet guard so order-book cards use `var(--panel)`, borders use `var(--line)`, and order-book headers use `var(--panel2)`. The existing buy/sell green/red text semantics remain intact; no order-book behavior or trading logic changed.
+- Added a regression test that checks the final guard is after the legacy fixed-navy selector and verifies the three theme tokens. Corrected the test's newline assertions before finalizing.
+- Source commit: `606ece63bd517d5a24770aa466f979183f4735f4`; test commit: `9a6e927c5fdf01e1555fabdc304ec65322a794e4`; test assertion correction: `421bfbb36727f04701336bf1e97850600b70d6bf`.
+- At handoff update time, re-run CI for the latest PR head and confirm its exact SHA before treating the new regression as passed. The previously observed successful run `45163851803` has head commit `321777d00a209f0164a4c3452bbce55019ce6944`, so it is not proof that the latest source/test edits passed.
+- PR #55 remains open/Draft/unmerged. No changes to `main`, Supabase/Production, database, authentication, wallets, orders, or trading logic. No new APK or physical-device visual test was performed.
+- Next safe audit: inspect the remaining history table and admin responsive surfaces for fixed colors and narrow-width overflow, then re-check Actions against the exact latest head. Do not merge or publish.
+
+
+## 2026-11-23 — Trade-history date-filter token repair
+- The next audit found the quick date-preset buttons in trade history referenced `--border` and `--surface-2`, neither of which is defined in the stylesheet. Those declarations were therefore ineffective and the buttons could lose their intended surface/border styling across themes.
+- Replaced the undefined references with the existing shared tokens `--line` and `--panel2`; selected-state accent behavior and date-filter logic were left unchanged.
+- Added a regression test confirming the rule uses defined theme tokens and does not reference the missing variables.
+- Source commit: `44b2657689eba04560db1c6ecd6d5e3d1bc294d1`; test commit: `ced13a3601e94ebe85e5c1cd1478fa414afef011`; assertion correction: `267ecf334c4cc55bdbbaee31c75e479c200ff6b2`.
+- Recheck Actions against the final PR head before considering this test validated. Existing successful run `45163851803` is for SHA `321777d00a209f0164a4c3452bbce55019ce6944`, not the current branch head.
+- PR #55 remains Draft/open/unmerged; no Production/Supabase/database/auth/wallet/trading changes and no APK/device test.
+- Next: continue responsive checks on the history table and admin controls; retain the existing safety boundary and do not merge or publish.
+
+
+## 2026-11-23 — Narrow-phone admin controls
+- Continued responsive audit after checking the latest PR head, Actions, handoff, source, and tests. History table already has a horizontally scrollable wrapper and a deliberate minimum table width; this preserves column readability on small screens without forcing the whole page wider.
+- Found the daily-ad admin item action area switched to a vertical card layout below 650px but did not explicitly wrap its action buttons or enforce comfortable touch height at very narrow widths.
+- Added a <=380px rule: the daily-ad admin section header may wrap, its refresh button becomes full-width, admin item/copy containers are constrained to available width, action buttons wrap, and buttons receive a 44px minimum height. Long labels can break instead of pushing the page horizontally.
+- No admin permissions, data, or action logic changed. Added a regression test for the narrow-phone rules.
+- Source commit: `7500ee16582b018170299196bc6999323a19e5be`; test commit: `f94268323ae71dac04cc1325ef30b815e3b84cc8`.
+- The previous successful CI run still targets an older SHA; re-check Actions after this latest source/test change. Do not claim the new test passed until a run reports the exact final head SHA.
+- PR #55 remains open/Draft/unmerged. No main, Supabase/Production, database, auth, wallet, order, or trading changes. No APK build or real-device visual verification.
+- Next safe work: inspect the remaining admin panels and page-level overflow rules, then verify CI against the exact final PR head. Keep the PR Draft and do not merge.
+
+
+## 2026-11-23 — Exchange-sync admin header responsive repair
+- Continued the narrow-screen admin audit and found the exchange-asset synchronization panel header placed a long Persian title beside a two-action group without a panel-specific wrapping rule. On compact widths this could compress the title and controls or cause horizontal pressure.
+- Added a scoped responsive rule for `#exchangeAssetSyncPanel`: at widths up to 700px the header wraps, the title may break long words, and the two action buttons occupy a full-width two-column group. Buttons retain a 44px minimum touch height and can wrap their labels. At widths up to 380px the actions stack into one column.
+- Added a regression test for the scoped mobile rules. No exchange-sync requests, source configuration, data handling, scheduling, or activation logic changed.
+- Source commit: `332d7c1b1cd5c249aa429bf2418ffa695c1e5aac`; test commit: `5dbe5f4a22a4f33c4c556dbe038d3f00b10fedc7`.
+- Re-fetch the final PR head and Actions before marking this regression validated. The prior successful exact-decimal workflow was for an older SHA and is not evidence for these commits.
+- PR #55 remains open/Draft/unmerged. No changes to `main`, Supabase/Production, database, authentication, wallet, orders, or trading logic. No physical Android visual test was performed.
+- Next: continue checking remaining admin panels and page-level horizontal overflow at compact widths; preserve internal horizontal scrolling for intentionally wide tables. Do not merge or publish.
+
+
+## 2026-11-23 — Admin section-header mobile wrapping
+- Continued the remaining admin-panel audit. The user-management, manual asset-list, and pair-review sections share detail-section section-title headers; unlike the exchange-sync panel, their long Persian headings and refresh buttons had no admin-scoped mobile wrapping rule.
+- Added a <=700px rule scoped to #tab-admin: each admin section heading can wrap, the title takes a full row and breaks long text, and its direct action button takes a full-width row with a 44px minimum touch height and wrapping labels.
+- Added a regression test covering the scoped selector and responsive behavior. No admin RPCs, permissions, asset catalog, pair activation, account balances, or trading logic changed.
+- Source commit: f75b8ad27b38d3ef3f6d199a6244e80c8e55b8ae; test commit: 61e89388754a87f244601325a32992931687b955.
+- Re-fetch the final PR head and Actions. Do not treat earlier successful CI runs as validation for this change.
+- PR #55 remains open/Draft/unmerged. No main, Supabase/Production, database, auth, wallet, orders, or trading changes. No real-device visual test was performed.
+- Next: continue auditing admin user cards and dynamic result lists for long identifiers and narrow-width overflow; preserve intentional table scrolling. Do not merge or publish.
+
+
+## 2026-11-23 — Compact admin user-card layout
+- Continued the admin responsive audit and inspected the generated user-card markup. At widths <=380px, the two balance tiles and two-column credit-adjustment form could become cramped, while long email/balance values could resist wrapping.
+- Added a scoped <=380px rule under #tab-admin: user balance tiles stack vertically, long email and numeric values can wrap, and each credit-adjustment control uses the available card width. No RPC, wallet balance, adjustment validation, permission, or financial logic changed.
+- Added a regression test covering the compact user-card layout and wrapping constraints.
+- Source commit: 6c78e3d294b163d12b2576e9e449fd877da69b3f; test commit: 8f04cae1cf8acbc5030e857e54d93b9c2b85bf31.
+- Recheck Actions against the final branch HEAD; previous successful CI runs target older SHAs and do not validate this change. Do not claim physical-device visual verification.
+- PR #55 remains Draft/open/unmerged. No main, Supabase/Production, database, authentication, wallet, orders, or trading logic changes. Do not merge or publish.
+- Next: inspect the dynamic admin asset/pair-review and exchange-sync result rows for long symbols/identifiers and narrow-screen overflow; keep changes scoped to presentation and tests.
+
+
+## 2026-11-23 — Dynamic admin asset result rows on mobile
+- Inspected the actual generated rows for admin asset search/listing, pair review, and exchange-sync source/issue panels. These use shared .asset-row markup; long CoinGecko identifiers, symbols, and action labels could resist wrapping inside narrow grid tracks.
+- Added admin-scoped <=700px rules allowing identity/provider text and prices to shrink and wrap, while keeping action labels inside their cells. At <=380px, result rows stack to one column and action buttons become full-width with a 44px minimum height.
+- Added a regression test for long identifier wrapping, compact single-column layout, and touch-target sizing. No source data, RPCs, sync scheduling, pair review, or activation behavior changed.
+- Source commit: 08662acdcd03daa9814bf3e186e199fa60209dd6; test commit: 1050641cef2e497d354d00e84462d4a49cd04ad7.
+- Recheck Actions for the final PR head before claiming validation. No physical Android visual test has been performed.
+- PR #55 remains Draft/open/unmerged. No main, Supabase/Production, database, auth, wallet, orders, or trading logic changes. Do not merge or publish.
+- Next: check final PR/CI state and continue only with presentation-level fixes supported by inspection; keep all production and financial behavior untouched.
+
+
+## 2026-11-23 — Reconcile main updates and repair CSV test assertion
+- Main advanced by two commits after the theme branch's merge base. Incorporated the main Toman-market freshness helper/status change and its regression test into the theme branch, and carried the associated implementation-status note forward without replacing the branch's UI work.
+- Created a two-parent merge commit `fe596876bee8a9c325eca9705495b589b94d763b` with the theme branch as first parent and current main `c7b024fc56a5e5004f8b1fbb49c71ad2fd8cab39` as second parent. PR #55 became mergeable=true; it remains Draft/open/unmerged.
+- Exact Decimal CI run `45175990913` ran on merge commit `fe596876bee8a9c325eca9705495b589b94d763b`. The first Node/browser stage reported 79/80 passing. The only failure was a malformed escape in the existing CSV regression assertion: the test expected backslash-r followed by a real newline instead of the two escaped sequences `\\r\\n`. The production CSV implementation itself still emits CRLF correctly; all new admin layout and Toman freshness tests passed.
+- Corrected the test assertion only; no CSV implementation, trading, wallet, auth, or database logic changed. A fresh CI run must validate the corrected test on the new HEAD.
+- Do not merge PR #55 or mark it ready. No main/Production/Supabase writes were performed; the merge commit only brings main ancestry into the feature branch.
+- Next: verify the latest CI run and then continue visual/source audit only after test status is clear. Physical Android appearance remains unverified.
+
+
+## 2026-11-23 — CSV assertion corrected; full regression passed
+- Fixed the malformed escaping in the CSV regression assertion. The test now checks for both literal escape sequences for CRLF; no production CSV code was changed.
+- Exact Decimal workflow run 45176307142 completed SUCCESS on code/test commit 39ed7e74d37bd86fe516e213d397d1899f5fc4a1. Node/browser regression passed 80/80 tests; PostgreSQL arithmetic and Toman upsert tests, widening/rollback/lock-timeout checks, Market/Limit, Stop-Limit, TP-SL, and two-session race/lifecycle integrations all passed. All 24 workflow steps completed successfully.
+- Current branch HEAD cd8b62e3c90408c46be6c9595290ffb6a0a2710e is a no-content-change child of the tested commit; its Git tree SHA exactly matches the tested commit (95a498f955a089375cb31162f2306b62af9f201b). Thus source and test contents are identical to the successful run.
+- PR #55 remains Draft/open/unmerged. GitHub reports mergeable=true and mergeable_state=unstable; do not merge or mark ready without explicit user approval. No physical Android visual acceptance has been performed.
+- No Supabase/Production, live database, migration, cron, authentication, wallet, orders, or trading changes were performed in this stage. PostgreSQL CI used disposable test containers only.
+- Next: continue the UI/theme audit with small, evidence-based presentation fixes; any source/test edits must receive a fresh CI run before claiming validation.
+
+
+## 2026-11-23 — Restore glass surfaces in the light theme
+- Continued the three-theme visual audit after confirming the latest full regression workflow passed. Found a concrete mismatch with the approved design: the final light-theme override forced all main cards and surface tokens to opaque white, removing the requested translucent/glass appearance.
+- Updated only the final light-theme palette and surface layer: warm-neutral white/very-light background gradient, translucent panel tokens, semi-transparent card surfaces, subtle cool shadows, and 16px backdrop blur with the WebKit fallback. Inputs/selects/textareas remain opaque white for contrast and readability; market coin rows remain frameless.
+- Added a regression test ensuring translucent panel/card values and backdrop blur remain present while form fields keep their opaque treatment.
+- Source commit: 77dc3d0a493f247cecd7e48d92eb391c882f6f87; test commit: c26bf885b13514ea7f1f88de77d2fdf467f2b5f0.
+- The previous full CI success was on HEAD 679da335c75daa456545dd8c57570f18fbd206e3; this new CSS/test change requires a fresh full regression run before it can be called validated.
+- PR #55 stays Draft/open/unmerged. No production, Supabase, database, auth, wallet, orders, trading, main, merge, or release changes. No physical-device visual test has been performed.
+- Next: run the full regression workflow on the new HEAD, inspect the result, then continue theme parity audit only if tests pass.
+
+
+## 2026-11-23 — Light-theme glass regression assertion aligned
+- The first CI run after restoring glass surfaces failed 1 of 80 browser/source tests. The failing assertion was the older test named “pure-white theme has white surfaces…” which explicitly required opaque white cards and therefore contradicted the approved translucent-card design. The new glass-specific regression itself passed.
+- Updated the stale test title and its two surface assertions to require the translucent panel tokens and translucent card backgrounds. The login form-field and market typography assertions remain unchanged. No application logic changed.
+- Test commit: 32b4670d9d8a255240619b74d29be208efec57f3. A fresh full workflow must pass on the resulting latest HEAD; do not treat the earlier failed run as final validation.
+- PR #55 remains Draft/open/unmerged and mergeable. No production, Supabase, database, auth, wallet, orders, trading, main, merge, or release changes. Physical-device visual acceptance remains outstanding.
+- Next: verify the latest full CI run after this assertion update, then continue only if all tests pass.
+
+
+## 2026-11-23 — Light glass theme regression passed
+- Full Exact Decimal workflow run `45187787664` completed SUCCESS on code/test commit `32b4670d9d8a255240619b74d29be208efec57f3` (HEAD before this handoff-only update). The browser/source stage passed all 81 tests; PostgreSQL arithmetic/upsert, disposable schema widening, lock-timeout/rollback, Market/Limit, Stop-Limit, TP-SL, worker/cancellation, and two-session race/lifecycle stages all completed successfully (24/24 workflow steps).
+- This validates the translucent light-theme card/panel update and the corrected regression assertions. The earlier failed runs were superseded; their only failure was the stale assertion expecting opaque white cards.
+- PR #55 remains open, Draft, unmerged, and GitHub reports mergeable=true. No main, Production/Supabase, database, auth, wallet, orders, trading, release, or deployment changes. Android physical visual acceptance remains outstanding.
+- Next: continue the visual audit for theme-specific fixed colors and mobile layout; rebuild the review APK from the current tested PR source only after the next agreed milestone. Do not merge or mark ready without explicit approval.
+
+
+## 2026-11-23 — Remove legacy market-logo discs across themes
+- Latest PR state was rechecked: PR #55 open/Draft/unmerged, GitHub mergeable=true and mergeable_state=clean; branch is 101 commits ahead and 0 behind main. Exact Decimal workflow run 45188116927 passed on HEAD bb171c9e503251af9613e0bdf72afe29c5967f8e (24/24 workflow steps succeeded, including browser/source and PostgreSQL integration/race suites).
+- Continued the visual CSS audit and found a remaining fixed legacy .coin-icon background (#252a33) beneath market logos. It persisted across the light, black/gold, and indigo themes, despite the surrounding coin rows being frameless.
+- Added a narrowly scoped final rule for #tab-markets .market-board-v34 .coin-icon and its image to make background transparent and remove border/shadow. No logo dimensions, image source, row layout, or market data behavior changed.
+- Added a regression test for the cross-theme frameless logo rule.
+- Source commit: 50182475a4c7185eeaee46cc2221eff65e8845d8; test commit: c025e168ac445d9b67107746e9500d6b600be3fc.
+- The prior successful workflow does NOT validate these new commits; verify CI on the final current HEAD before claiming this fix is tested.
+- PR #55 remains Draft/open/unmerged. Do not merge, publish, or change main. No Supabase/Production, DB, auth, wallet, orders, or trading behavior changed. Physical Android visual acceptance remains outstanding.
+- Next: verify final HEAD and workflow status, then continue the theme audit for any remaining fixed logo/row surfaces. Keep changes presentation-only and scoped.
+
+
+## 2026-11-23 — Verify market-logo frameless override against rendered markup
+- Rechecked the market renderer: market rows call coinLogo(base,'coin-icon',item.image_url), which emits a .coin-icon wrapper containing an img. The existing #tab-markets .coin .coin-icon rule applied a theme panel background and border, leaving a disc behind each logo.
+- The final override targets the actual #tab-markets .market-board-v34 .coin-icon wrapper and its img, clearing background, border, and shadow without changing logo size, URL, or fallback behavior.
+- Added an additional regression test asserting that the renderer emits the expected class and the CSS override covers the actual wrapper/image selectors.
+- Source commit: 5b63d873fcf8a14ed769bdca3e682b5d090df068; base CSS test commit: 5b63d873fcf8a14ed769bdca3e682b5d090df068; markup-specific test commit: 3bd69e659061b5fc9f0917981949c7e31bb98a1c.
+- CI run 45188116927 passed on earlier SHA bb171c9e503251af9613e0bdf72afe29c5967f8e. Newer source/test commits have their own workflow runs; verify the newest run against the final HEAD before calling this validated.
+- PR #55 remains Draft/open/unmerged. Do not merge or publish. No Supabase/Production, DB, auth, wallet, orders, or trading logic changed. Physical Android visual acceptance remains outstanding.
+- Next: inspect the final theme cascade around market logo/coin rows for duplicate or conflicting !important rules, then verify current HEAD and Actions.
+
+
+## 2026-11-23 — Move market-logo override to the actual final cascade
+- A deeper cascade-order check found that the previous frameless-logo override had been inserted into the first style block, while a later dedicated market-row stylesheet appears after it. Although the selector matched the rendered .coin-icon markup, it was not guaranteed to win against all later CSS.
+- Moved the override into the final stylesheet at the end of index.html, after the dedicated market-row rules, so background, border, and shadow removal wins in all three themes.
+- Strengthened the regression test to assert the override is inside the final style block (not merely before the last closing style tag), and to verify it targets the actual coinLogo wrapper/image.
+- Source commit: b469685ddd939bc0fd1f96505cd2e5520e16fcaf; test commit: f7ef60f5ddf4663e45df46b6dc81868704b5b761.
+- Previous successful workflow 45188878308 covered the earlier source state; workflow 45189152338 was still running on the markup-specific test commit at last check. Verify a completed successful workflow on the final source/test HEAD before calling this final cascade fix validated.
+- PR #55 remains Draft/open/unmerged. No main, Supabase/Production, DB, auth, wallet, orders, or trading logic changes. No physical Android visual test has been performed.
+- Next: verify the final branch HEAD, final stylesheet placement, regression assertions, and latest workflow. Continue theme review only if a specific cascade defect is evidenced.
+
+
+## 2026-11-23 — Frameless market rows and black/gold dark-theme surface
+- Continued theme cascade audit after confirming the latest CI passed on HEAD 27821aa7. Found the shared market-row rule still imposed a 1px blue border and navy gradient; only the light and indigo themes had dedicated surface overrides, while dark-theme rows inherited that blue/navy base.
+- Added a final-cascade rule removing the border from market rows across all three themes. Added a scoped body.dark-theme market-row background using charcoal/near-black tones and active theme text tokens, preserving the existing gold price/favorite accents and all layout/data behavior.
+- Added a regression test confirming the final cascade location, border removal, and black/charcoal dark-theme surface.
+- Source commit: 55c19f2b87536e298080ce210aef464b236cfd6d; test commit: be246a124b284d5455ae9ba24c6851519ea646ef.
+- The prior CI success (run 45189354433) was for the previous HEAD 27821aa7. A new successful run on the new final HEAD is required before treating this adjustment as validated.
+- PR #55 remains Draft/open/unmerged. Do not merge or publish. No Supabase/Production, DB, auth, wallet, orders, or trading logic changed. Physical Android visual acceptance remains outstanding.
+- Next: verify source/test CSS placement and current CI on the final HEAD; then continue auditing theme contrast only where a specific mismatch is supported by the cascade.
+
+
+## 2026-11-23 — Market percentage color audit
+- Rechecked the live PR #55 head and exact-decimal CI. The full workflow run `45189911956` completed SUCCESS on code/test SHA `be246a124b284d5455ae9ba24c6851519ea646ef`; a newer run `45189952353` also completed SUCCESS on the documentation-updated PR head `86fe31a4ef62a4a0bd36062394a6140515843392`. The latest run includes the complete 43-step job.
+- Audited the market list percentage change indicators: positive and negative badges already consume the shared `--green` and `--red` tokens. Verified explicit palette values in dark/black-gold (`#0ecb81` / `#f6465d`), light glass (`#16845e` / `#cf4052`), and deep indigo glass (`#53d6ad` / `#ff8198`). Their foreground contrast against the respective market row surfaces is adequate for normal text; no unnecessary color change was made.
+- Added a regression test ensuring gain/loss indicators use those theme tokens and each theme defines its own positive/negative colors.
+- Test commit: `7e38e090b5662897e7aa6b69ee392ab2892a8a42`.
+- PR #55 remains open, Draft, and unmerged. No application CSS/logic, main, Supabase/Production, database, auth, wallet, orders, or trading behavior was changed in this audit. Physical Android visual acceptance remains outstanding.
+- Next: verify CI for the new regression-test commit and continue only with concrete cascade/layout defects.
