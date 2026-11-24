@@ -3078,9 +3078,9 @@ body.luxury-theme #tab-dashboard .da-market-live i{background:#57dfbd;box-shadow
 }
 #dashboardMarketPreview .da-market-logo,#dashboardMarketPreview .da-market-logo-inner{
  width:36px!important;height:36px!important;flex:0 0 36px!important;
- border:1.5px solid!important;border-radius:50%!important;overflow:hidden!important;
+ border:0!important;border-radius:50%!important;overflow:hidden!important;
  display:grid!important;place-items:center!important;
- box-shadow:0 0 0 3px rgba(255,255,255,.045),0 5px 14px rgba(0,0,0,.18)!important;
+ box-shadow:0 0 0 3px rgba(255,255,255,.07),0 5px 14px rgba(0,0,0,.18)!important;
 }
 #dashboardMarketPreview .da-market-logo-inner img{border-radius:50%!important;object-fit:cover!important}
 #dashboardMarketPreview .da-market-name-wrap b{font-size:11px!important;font-weight:900!important}
