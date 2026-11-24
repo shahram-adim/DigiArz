@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - redesign/phase1-clean-2026
     paths:
       - "index.html"
       - "manifest.webmanifest"
@@ -19,7 +20,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: digiarz-android-apk
+  group: digiarz-android-apk-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -46,6 +47,9 @@ jobs:
 
       - name: Prepare web assets
         run: npm run build:web
+
+      - name: Verify independent theme stylesheet is packaged
+        run: test -s www/src/digiarz-independent-ui.css && grep -q 'digiarz-independent-ui.css' www/index.html
 
       - name: Generate Android project
         run: npx cap add android
@@ -83,4 +87,3 @@ jobs:
             android/app/build/outputs/apk/debug/BUILD-INFO.txt
           if-no-files-found: error
           retention-days: 14
-
