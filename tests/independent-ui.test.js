@@ -43,3 +43,10 @@ test('service worker precaches the new stylesheet under a fresh shell cache', ()
   assert.match(sw, /digiarz-shell-v59/);
   assert.match(sw, /digiarz-independent-ui\.css\?v=1/);
 });
+
+test('mobile layouts and reduced-motion accessibility rules are present', () => {
+  assert.match(css, /@media\(max-width:360px\)/);
+  assert.match(css, /@media\(max-width:760px\)/);
+  assert.match(css, /@media\(prefers-reduced-motion:reduce\)/);
+  assert.equal((css.match(/\{/g) || []).length, (css.match(/\}/g) || []).length);
+});
