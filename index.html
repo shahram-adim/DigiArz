@@ -2795,8 +2795,7 @@ function renderMarkets(){
   div.setAttribute('role','group');div.setAttribute('tabindex','0');div.setAttribute('aria-label',`اطلاعات ${persianName} (${base})`);
   const usdMarkup=`<div class="price-usd"><strong>${valid?'$ '+formatNum(usd,10):'—'}</strong></div>`;
   const tomanMarkup=`<div class="price-toman"><strong>${toman!==null?formatNum(toman,0)+' تومان':'نرخ تومان ناموجود'}</strong></div>`;
-  const freshnessMarkup=valid?'<small class="coin-source fresh">قیمت تازه · زمان منبع حداکثر ۲ دقیقه</small>':'<small class="coin-source stale">قیمت قدیمی یا ناموجود · برای معامله قابل اتکا نیست</small>';
-  const priceMarkup=usdMarkup+tomanMarkup+freshnessMarkup;
+  const priceMarkup=usdMarkup+tomanMarkup;
   const changeMarkup=change===null?'<small class="coin-change-label">تغییر ۲۴س</small><span class="coin-change">→ داده موجود نیست</span>':'<small class="coin-change-label">تغییر ۲۴س</small>'+ `<span class="coin-change ${change>0?'pos':change<0?'neg':''}" aria-label="درصد تغییر ۲۴ ساعته">${change>0?'▲ ':change<0?'▼ ':'→ '}${change>0?'+':change<0?'−':''}${formatNum(Math.abs(change),2)}٪</span>`;
   const tickerMeta=ticker&&Number.isFinite(ticker.high)&&Number.isFinite(ticker.low)?` · سقف/کف ۲۴س: ${formatNum(ticker.high,8)} / ${formatNum(ticker.low,8)}`:'';
   const volume= ticker?.quoteVolume??(isMarketTimestampFresh(item.updated_at)?item.quoteVolume:null);
