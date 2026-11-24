@@ -1329,3 +1329,12 @@
 - [ ] Exact Decimal CI has not run for the current PR head. Existing successful Exact Decimal runs are older commits and are not evidence for the current test head.
 - [ ] Physical Android installation and screenshots still required.
 - PR #60 remains Draft/open/unmerged. No Production/Supabase, database, migration, cron, merge or release changes.
+
+
+### 2026-11-24 — orders/history/settings APK verified
+- [x] Android run `45380895062` passed for CSS commit `e7d5f614b4bc716577a8a22657646f33ee7f0cc7`.
+- [x] Artifact `14914075886` ZIP SHA-256 `6bb47508b756b0f1b5bf659832aa1be90c181b51ca48d2b9fdb2fd0556754d66`; ZIP integrity passed.
+- [x] APK SHA-256 `c3eb9f20a7af46b1905568881874e79d15ead54b4efe8fcfd8fae3e893f11fc5`; APK integrity and BUILD-INFO provenance verified. CSS bundle size 212,038 bytes.
+- [!] Exact Decimal run `45377422152` failed on older head `9aff30e0b100f30e97425c3e5d1408b0f974d9bf`: 87 pass / 1 fail due to `SyntaxError: Invalid regular expression flags` in `tests/stop-limit-production-audit.test.js:11`. Current head has not yet received a verified Exact Decimal result.
+- [!] Physical Android install and screenshots remain pending.
+- PR #60 remains Draft/open/unmerged; no Production/Supabase/DB changes.
