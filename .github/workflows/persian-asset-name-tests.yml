@@ -8,7 +8,9 @@ on:
     branches: [redesign/ui-clean-rebuild-2026]
     paths:
       - "src/persian-asset-names.mjs"
+      - "src/sync-safety.mjs"
       - "tests/persian-asset-names.test.mjs"
+      - "tests/sync-safety.test.mjs"
       - "supabase/functions/sync-iran-exchange-assets/index.ts"
       - ".github/workflows/persian-asset-name-tests.yml"
 
@@ -24,4 +26,4 @@ jobs:
         with:
           node-version: "20"
       - name: Test Persian asset-name candidate extraction
-        run: node --test tests/persian-asset-names.test.mjs
+        run: node --test tests/persian-asset-names.test.mjs tests/sync-safety.test.mjs
