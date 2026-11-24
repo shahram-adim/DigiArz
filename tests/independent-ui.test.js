@@ -853,3 +853,15 @@ test('v13 mobile dashboard compacts hero, wallet and quick actions before market
   assert.ok(v13.includes('#tab-dashboard .da-v2-quick-grid button{'));
   assert.ok(v13.includes('min-height:40px!important'));
 });
+
+
+test('v14 mobile dashboard compresses top sections so market controls clear the fixed navigation', () => {
+  const v14 = css.slice(css.lastIndexOf('mobile dashboard viewport balance v14'));
+  assert.ok(v14.includes('#tab-dashboard .da-v2-hero{'));
+  assert.ok(v14.includes('font-size:16px!important'));
+  assert.ok(v14.includes('#tab-dashboard .da-v2-account-card{'));
+  assert.ok(v14.includes('min-height:38px!important'));
+  assert.ok(v14.includes('#tab-dashboard .da-v2-quick-grid button{'));
+  assert.ok(v14.includes('min-height:34px!important'));
+  assert.ok(v14.includes('#tab-dashboard .da-market-glass{padding:7px!important}'));
+});
