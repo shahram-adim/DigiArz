@@ -3264,3 +3264,14 @@ body.luxury-theme #dashboardMarketPreview .da-market-coin-card{
  #tab-dashboard .da-v2-hero h1{font-size:23px!important}
  #tab-dashboard .da-v2-quick-grid button{gap:6px!important}
 }
+
+
+/* 2026-11-24 final dashboard layout test alignment: transparent frameless market rows and explicit compact grid. */
+body.dark-theme #dashboardMarketPreview .da-market-coin-card,
+body.light-theme #dashboardMarketPreview .da-market-coin-card,
+body.luxury-theme #dashboardMarketPreview .da-market-coin-card{
+  border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;
+}
+@media(max-width:560px){
+ #tab-dashboard .da-v2-account-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
