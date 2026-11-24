@@ -61,3 +61,10 @@ test('indigo glass dashboard preview overrides the legacy sky-blue palette', () 
   assert.match(finalPalette, /#1b1744/);
   assert.match(finalPalette, /rgba\(183,168,255/);
 });
+
+test('hidden authentication view stays hidden despite the ID-based layout rule', () => {
+  const layoutRule = css.indexOf('#authView{display:grid!important;');
+  const hiddenRule = css.lastIndexOf('#authView.hidden{display:none!important}');
+  assert.ok(layoutRule >= 0, 'independent auth layout rule exists');
+  assert.ok(hiddenRule > layoutRule, 'hidden-state override follows the layout rule');
+});
