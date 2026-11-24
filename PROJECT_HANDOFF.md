@@ -1016,3 +1016,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - This artifact is an Android debug/review APK, not production-signed or released. No merge, deployment, release, Supabase change, migration, Production DB write, or user financial-data change occurred.
 - Remaining acceptance blocker: install this exact APK on a physical Android device and review Market in dark, pure-white, and indigo themes, plus auth visibility/navigation. The prior device screenshots exposed layout collisions; v5 is a targeted correction but must not be called visually accepted without a fresh screenshot/device check.
 - Next: obtain device evidence; fix only reproducible issues. Keep PR #60 Draft/unmerged until visual acceptance and explicit owner approval.
+
+
+## 2026-11-24 — latest PR-head CI and v5 APK verified
+- Rechecked PR #60: remains Draft/open/unmerged, base `main`, head branch `redesign/phase1-clean-2026`. No merge, release, deployment, Production DB change, Supabase migration, or financial-data mutation.
+- Latest branch head `0c9d3afbf6e87a67683e554c01709e5e5b48f7f5` completed Exact decimal workflow `45351790445` SUCCESS and Android workflow `45351790444` SUCCESS.
+- Downloaded Android artifact `14900676502` (ZIP digest reported by GitHub: `sha256:dfa756fc9137a88d2094b7c6beb234a914eb975d1c376d815e4a32813634f913`). ZIP integrity verified. Extracted `app-debug.apk` is 3,939,165 bytes; BUILD-INFO identifies merge ref `refs/pull/60/merge`, merge commit `608ae96e8e722c49ce7dfc3d6bde34501c99f58d`, workflow run `45351790444`, and APK SHA-256 `8cc1a2938ed54a8945e64020e4ed76fd0c73fe8d5aa6541fe7097cc0efed9b87`; independently computed hash matches.
+- APK contains `assets/public/index.html`, `assets/public/src/digiarz-independent-ui.css` (142,325 bytes), and `assets/public/sw.js`. This verifies packaging and provenance, not physical-device visual acceptance. It is a debug/review APK, not production-signed.
+- Remaining gate: install this exact APK and inspect the Market page across dark, pure-white, and indigo themes, plus login/dashboard separation. Make only reproducible device-evidenced corrections; keep PR Draft/unmerged until visual acceptance and explicit owner approval.
