@@ -317,7 +317,7 @@ test('Toman market, asset detail and trading data panels keep distinct premium s
     }
   }
   assert.match(css, /body\.light-theme #tab-toman \.toman-table th\{background:#fff!important/);
-  assert.match(css, /body\.luxury-theme #tab-chart \.detail-section\{/);
+  assert.ok(css.includes('body.luxury-theme #tab-chart .detail-section,'), 'luxury detail panel participates in grouped glass-surface rules');
   assert.match(css, /@media\(max-width:720px\)[\s\S]*?#tab-toman \.toman-toolbar/);
   assert.match(html, /id="tab-toman"/);
   assert.match(html, /id="tab-chart"/);
