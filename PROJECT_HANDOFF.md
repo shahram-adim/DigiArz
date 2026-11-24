@@ -926,3 +926,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Previous APK artifact on commit 2c9c615a12895b4080190b9535c8dee01e0be3f3 remains verified, but it predates this panel-removal change and is not the current candidate. The latest-head APK must be downloaded, checked against BUILD-INFO.txt and SHA-256, and then offered only after run 45344221722 succeeds.
 - Physical device/WebView rendering and login/biometric acceptance remain unverified. Do not infer visual QA from CI. No merge, release, deployment, Supabase/database migration, Production data change, or user-financial-data change.
 - Next: wait for exact latest-head CI runs 45344221721 and 45344221722; inspect all substantive test steps and APK provenance; then continue the static UI audit and request only the still-missing real-device acceptance evidence.
+
+
+## 2026-11-24 — panel-removal regression corrected and latest-head integration tests passed
+- The first regression-test revision exposed an obsolete assertion in tests/index-syntax.test.js that still required renderTopGainers()/renderTopLosers(). The implementation was correct; updated that test to verify the remaining freshness-aware volatility summary, category sorting, top-assets strip, and dashboard ranking behavior without requiring the removed panels.
+- A follow-up assertion typo was corrected to match the existing combined declaration of gain/loss summary variables. No production code change was needed for that test-only correction.
+- Latest branch head: 080adaf5e1d241643037dc0eb465f9e8a61d7d23. Latest exact-decimal / PostgreSQL / Market / Limit / Stop-Limit / TP-SL / two-session race workflow run 45344475016 completed SUCCESS. The Node/browser suite passed, and every PostgreSQL rehearsal and lifecycle/concurrency step completed successfully.
+- Latest Android APK workflow run 45344474993 is still in progress at the debug APK build step at this handoff update. Do not provide a new APK until the job succeeds, the artifact exists, and BUILD-INFO plus SHA-256 are verified.
+- The PR remains Draft/open/unmerged. No merge, release, deployment, Supabase/database migration, Production data change, or user-financial-data change. Physical Android/WebView visual acceptance remains unverified.
+- Next: finish Android build/artifact provenance verification; continue remaining theme/page static audit and obtain physical device acceptance for all three themes, login and navigation.
