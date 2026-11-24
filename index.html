@@ -2804,7 +2804,7 @@ function renderMarkets(){
   const star=document.createElement('button');star.type='button';star.className='favorite-btn'+(isFavorite?' is-favorite':'');star.dataset.favorite=item.symbol;star.setAttribute('aria-label',isFavorite?'حذف از علاقه‌مندی‌ها':'افزودن به علاقه‌مندی‌ها');star.setAttribute('aria-pressed',isFavorite?'true':'false');star.title=isFavorite?'حذف از علاقه‌مندی‌ها':'افزودن به علاقه‌مندی‌ها';star.innerHTML='<i data-lucide="star" aria-hidden="true"></i>';
   star.addEventListener('click',event=>{event.stopPropagation();toggleFavoriteSymbol(item.symbol);renderMarkets();renderDashboardMarketPreview()});
   const identity=document.createElement('button');identity.type='button';identity.className='coin-identity market-coin-open';
-  const englishName=String(item.name_en||item.asset_name_en||item.english_name||item.name||coinInfo[base]?.name||base);
+  
   identity.innerHTML=coinLogo(base,'coin-icon',item.image_url)+'<span class="coin-name-stack"><b class="coin-name-fa">'+safeText(persianName)+'</b><small class="coin-symbol-en" dir="ltr">'+safeText(base)+'</small><small class="coin-english-name" dir="ltr">'+safeText(englishName)+'</small></span>';
   identity.title=persianName+' · '+base+' · '+englishName;
   identity.setAttribute('role','button');identity.setAttribute('tabindex','0');identity.setAttribute('aria-label','باز کردن جزئیات و نمودار '+base);
