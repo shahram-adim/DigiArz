@@ -1098,3 +1098,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Exact-decimal workflow 45355908787 was in progress; Android APK workflow 45355908770 was pending at the checkpoint. Neither is accepted until exact-head completion and logs/results are inspected.
 - No Supabase, Production DB, migration, cron, authentication, wallet, order, balance, deployment, or release change. PR #60 remains Draft/open/unmerged.
 - Next: inspect exact-head regression/financial test workflow and Android package build; if both succeed, inspect the new APK and provenance. Physical-device screenshots remain required for visual acceptance.
+
+
+### Admin theme regression test correction — 2026-11-24
+- Exact-decimal workflow `45355908787` on commit `7fef0e3...` failed in the newly added admin theme test only: the test expected `.daily-ad-admin-item` in static index.html, but that element is rendered dynamically by `daily-ads.js`. The actual admin CSS selector and all preceding assertions passed; this was a test-scope error, not an application failure.
+- Corrected the test to verify the runtime-rendered item selector in the admin theme CSS rather than requiring its generated markup in index.html. Test-only correction commit: `7757c3ac477d474ec1d80d4c363a855ca030619d`.
+- Fresh exact-head runs on `7757c3a...`: Exact decimal `45356061857` (in progress at checkpoint) and Android APK `45356061892` (pending). The docs update below will trigger another exact-head run; always verify the latest PR head before accepting results.
+- No runtime admin logic, permissions, RPCs, wallet, Production DB, Supabase, migration, deployment, merge, or release changed. PR #60 remains Draft/open/unmerged.
+- Next: wait for and inspect the latest-head regression run, then verify APK build and provenance. Device screenshot QA remains pending.
