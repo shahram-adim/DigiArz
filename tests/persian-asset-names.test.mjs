@@ -224,7 +224,8 @@ test("rejects candidates that claim an unsupported exchange", () => {
   assert.deepEqual(rows, []);
 });
 
-\ntest("extracts Bitpin base currency Persian title without using the pair title", () => {
+
+test("extracts Bitpin base currency Persian title without using the pair title", () => {
   const candidate = extractPersianNameCandidate("bitpin", {
     currency1: { code: "BTC", title_fa: "بیت کوین" },
     currency2: { code: "IRT", title_fa: "تومان" },
