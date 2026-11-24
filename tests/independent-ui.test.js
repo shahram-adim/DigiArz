@@ -772,3 +772,11 @@ test('v7 dashboard footer spacing and theme-specific logo overrides stay compact
   assert.ok(v7.includes('border:0!important;outline:0!important;box-shadow:none!important;'));
   assert.ok(v7.includes('background:transparent!important;border-radius:0!important;'));
 });
+
+test('mobile header wordmark removes its legacy blue D tile and restores fixed-nav scroll clearance', () => {
+  const audit = css.slice(css.lastIndexOf('final mobile dashboard audit'));
+  assert.ok(audit.includes('.top .brand::before{'));
+  assert.ok(audit.includes('content:none!important;'));
+  assert.ok(audit.includes('padding-bottom:calc(96px + env(safe-area-inset-bottom))!important'));
+  assert.ok(audit.includes('.mobile-bottom-nav{'));
+});
