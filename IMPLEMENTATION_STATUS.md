@@ -1338,3 +1338,12 @@
 - [!] Exact Decimal run `45377422152` failed on older head `9aff30e0b100f30e97425c3e5d1408b0f974d9bf`: 87 pass / 1 fail due to `SyntaxError: Invalid regular expression flags` in `tests/stop-limit-production-audit.test.js:11`. Current head has not yet received a verified Exact Decimal result.
 - [!] Physical Android install and screenshots remain pending.
 - PR #60 remains Draft/open/unmerged; no Production/Supabase/DB changes.
+
+
+### 2026-11-24 — trading terminal responsive refinement
+- [x] CSS 9128efa39aba5447b67641167ba3a2ff4aafcaf7: chart/timeframe controls, indicator metrics, market summary, order-book depth, quick trade cards and advanced demo order forms refined for RTL/mobile.
+- [x] Regression coverage 3f6cd625ad5187656d616d8373ae32a3ac34ac5d checks all three themes, real trading control IDs and 720/560/380px breakpoints.
+- [ ] Android run 45381917562 pending artifact verification for CSS source commit 9128efa...
+- [ ] Exact Decimal on current PR head unverified; historical failed run was on older commit with 87/88 tests and a regex SyntaxError. No production database impact indicated.
+- [ ] Physical device install/screenshots pending.
+- PR #60 remains Draft/open/unmerged; no Production/Supabase/DB changes.
