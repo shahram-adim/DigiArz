@@ -4,6 +4,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const html = fs.readFileSync('index.html', 'utf8');
+const css = fs.readFileSync('src/digiarz-independent-ui.css', 'utf8');
 
 test('all inline JavaScript blocks in index.html parse successfully', () => {
   const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
@@ -55,17 +56,18 @@ test('trade history CSV export respects filters and preserves exact decimal stri
   assert.ok(body.includes('safeCell'), 'CSV cells are protected against formula injection');
 });
 
-test('trade history loads older pages without losing exact values or changing records', () => {
+test('trade history loads older pages with a stable keyset cursor and preserves exact values', () => {
   assert.match(html, /id="loadMoreHistoryBtn"/);
   assert.match(html, /historyPageSize=50/);
   const start = html.indexOf('async function loadHistory(){');
   const end = html.indexOf('function exportHistoryCsv(){', start);
   assert.ok(start >= 0 && end > start, 'history loading function boundaries found');
   const body = html.slice(start, end);
-  assert.ok(body.includes('.range(0,historyPageSize-1)'), 'first page uses a bounded range');
-  assert.ok(body.includes('async function loadMoreHistory()'), 'older page loader exists');
-  assert.ok(body.includes('.range(offset,offset+historyPageSize-1)'), 'older pages use stable offsets');
-  assert.ok(body.includes("order('id',{ascending:false})"), 'pagination uses a deterministic tie-breaker');
+  assert.ok(body.includes('.range(0,historyPageSize-1)'), 'each page uses a bounded range');
+  assert.ok(body.includes('historyCursor=historyRows.length?historyRows[historyRows.length-1]:null'), 'first page stores the final row as cursor');
+  assert.ok(body.includes('if(!historyCursor?.created_at||!historyCursor?.id)'), 'cursor requires timestamp and ID');
+  assert.ok(body.includes('created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${cursor.id})'), 'older pages use timestamp plus ID tie-breaker');
+  assert.ok(body.includes(".order('created_at',{ascending:false}).order('id',{ascending:false})"), 'all pages use deterministic ordering');
   assert.ok(body.includes('historyRows.push'), 'older rows append instead of replacing current rows');
   assert.ok(body.includes('historyHasMore=next.length===historyPageSize'), 'has-more state follows page size');
   assert.ok(body.includes('historyLoadingMore'), 'duplicate load requests are guarded');
@@ -199,26 +201,23 @@ test('market 24h ranking uses one freshness-aware comparator in both directions'
   assert.equal(context.getMarketChange24h(rows[5]), 2.25, 'fresh stored fallback percentages are accepted');
 });
 
-test('gainer, loser, volatility and market-list views share the same ranking helpers', () => {
-  const gainersStart = html.indexOf('function renderTopGainers(){');
-  const losersStart = html.indexOf('function renderTopLosers(){', gainersStart);
-  const assetsStart = html.indexOf('function renderTopAssets(){', losersStart);
-  const gainers = html.slice(gainersStart, losersStart);
-  const losers = html.slice(losersStart, assetsStart);
+test('market and dashboard gain/loss filters use freshness-aware ranking; obsolete panels stay removed', () => {
+  assert.doesNotMatch(html, /function renderTopGainers|function renderTopLosers/);
+  assert.doesNotMatch(html, /topGainersList|topLosersList|allGainersBtn|allLosersBtn/);
   const marketStart = html.indexOf('function renderMarkets(){');
   const marketEnd = html.indexOf('function renderDashboardPortfolio(', marketStart);
   const market = html.slice(marketStart, marketEnd);
-  assert.ok(gainers.includes("sortMarketRowsByChange(marketRows,'desc')"));
-  assert.ok(losers.includes("sortMarketRowsByChange(marketRows,'asc')"));
-  assert.ok(market.includes("compareMarketChange(a,b,'desc')"));
-  assert.ok(market.includes("compareMarketChange(a,b,'asc')"));
-  assert.ok(html.includes("const valid=sortMarketRowsByChange(marketRows,'desc')"));
+  assert.ok(market.includes("activeMarketCategory==='gainers'"), 'market retains its gainers category filter');
+  assert.ok(market.includes("activeMarketCategory==='losers'"), 'market retains its losers category filter');
+  assert.ok(market.includes("compareMarketChange(a,b,'desc')"), 'market gainers use freshness-aware descending comparison');
+  assert.ok(market.includes("compareMarketChange(a,b,'asc')"), 'market losers use freshness-aware ascending comparison');
   const dashboardStart = html.indexOf('function renderDashboardMarketPreview(){');
-  const dashboardEnd = html.indexOf('function ', dashboardStart + 10);
+  const dashboardEnd = html.indexOf('function renderDashboardPortfolio(', dashboardStart);
   const dashboard = html.slice(dashboardStart, dashboardEnd);
-  assert.ok(dashboard.includes('change=getMarketChange24h(item)'), 'dashboard filters use the shared freshness-aware percentage');
-  assert.ok(dashboard.includes("compareMarketChange(a.item,b.item,'desc')"), 'dashboard gainers use the shared descending comparator');
-  assert.ok(dashboard.includes("compareMarketChange(a.item,b.item,'asc')"), 'dashboard losers use the shared ascending comparator');
+  assert.ok(dashboard.includes("dashboardMarketFilter==='gainers'"), 'dashboard keeps a gainers filter');
+  assert.ok(dashboard.includes("dashboardMarketFilter==='losers'"), 'dashboard keeps a losers filter');
+  assert.ok(dashboard.includes("compareMarketChange(a.item,b.item,'desc')"), 'dashboard gainers use the shared comparator');
+  assert.ok(dashboard.includes("compareMarketChange(a.item,b.item,'asc')"), 'dashboard losers use the shared comparator');
 });
 
 test('coin logos proxy failed curated CoinGecko images before independent symbol fallbacks', () => {
@@ -300,20 +299,21 @@ test('ticker fallback coverage is measured across the full enabled market, not o
   assert.equal(context.isValidMarketChangeValue('-2.5'), true);
 });
 
-test('market list rows use five aligned cells, 40px logos, visible Persian names and an unboxed favorite star', () => {
+test('market rows preserve Persian and English identity, 24h change, prices and frameless controls', () => {
   const start = html.indexOf('function renderMarkets(){');
   const end = html.indexOf('function renderDashboardPortfolio(', start);
   const market = html.slice(start, end);
-  assert.match(market, /persianName=String\(item\.name_fa\|\|persianCoinName\(item\.symbol\)\)/);
+  assert.ok(market.includes('persianName=String(item.name_fa||item.asset_name_fa||persianCoinName(item.symbol,englishName))'));
   assert.match(market, /class="coin-name-fa"/);
-  assert.match(html, /digiarz-market-row-fix-20261119/);
-  assert.match(html, /grid-template-columns:34px minmax\(0,1\.2fr\) minmax\(54px,\.55fr\) minmax\(82px,\.72fr\) minmax\(112px,\.86fr\)!important/);
-  assert.match(html, /coin-identity \.coin-icon\{[\s\S]{0,100}width:40px!important;height:40px!important/);
-  assert.match(html, /coin>\.favorite-btn\{[\s\S]{0,500}border:0!important/);
-  assert.match(html, /coin-name-fa\{[\s\S]{0,200}display:block!important/);
-  assert.match(html, /@media\(max-width:700px\)[\s\S]{0,900}grid-template-columns:30px minmax\(0,1fr\) minmax\(88px,auto\)!important/);
+  assert.match(market, /class="coin-symbol-en"/);
+  assert.match(market, /class="coin-english-name"/);
+  assert.match(market, /div\.append\(star,identity,sparkline,changeWrap,price\)/);
+  assert.match(css, /#marketList>\.coin\{[\s\S]*?grid-template-areas:"fav identity spark change price"/);
+  assert.match(css, /#marketList>\.coin>\.favorite-btn\{[\s\S]*?border:0!important/);
+  assert.match(css, /#marketList>\.coin \.coin-icon\{[\s\S]*?width:40px!important;height:40px!important[\s\S]*?border:0!important/);
+  assert.match(css, /#marketList>\.coin \.coin-name-fa\{[\s\S]*?display:block!important/);
+  assert.match(css, /@media\(max-width:760px\)[\s\S]*?grid-template-areas:"fav identity price" "fav change price"/);
 });
-
 
 test('login screen uses the selected Binance-inspired black-and-yellow palette without changing auth behavior', () => {
   const marker = '/* DigiArz selected Binance-inspired black-and-yellow auth palette — 2026-11-21 */';
