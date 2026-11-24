@@ -608,7 +608,7 @@ test('admin operations panels preserve responsive controls and all key data regi
 test('dashboard hides account activity from regular users and keeps it available to admins', () => {
   assert.match(html, /id="dashboardAdminActivity"[^>]*hidden/);
   assert.match(html, /function renderDashboardActivity\(\)\{\s*const adminActivity=\$\('dashboardAdminActivity'\);if\(adminActivity\)adminActivity\.hidden=!isSuperAdmin;/);
-  assert.match(html, /const englishName=String\(row\.item\.name_en\|\|row\.item\.english_name\|\|row\.item\.name\|\|coinInfo\[base\]\?\.name\|\|base\)/);
-  assert.match(html, /className='da-market-name-en'/);
+  assert.match(html, /const englishName=String\(row\.item\.name_en\|\|row\.item\.asset_name_en\|\|row\.item\.english_name\|\|row\.item\.name\|\|coinInfo\[base\]\?\.name\|\|base\)/);
+  assert.match(html, /className='da-market-name-en'/);\n  assert.match(html, /persianName=String\(item\.name_fa\|\|item\.asset_name_fa\|\|persianCoinName\(item\.symbol\)\)/);\n  assert.match(html, /const englishName=String\(item\.name_en\|\|item\.asset_name_en\|\|item\.english_name\|\|coinInfo\[base\]\?\.name\|\|item\.name\|\|base\)/);
   assert.match(html, /class="da-v2-bottom"/);
 });
