@@ -102,3 +102,70 @@ test("does not fall back to a contract match when an explicit CoinGecko ID confl
   assert.equal(result.status, "unmatched");
   assert.equal(result.reason, "coingecko_id_not_found");
 });
+
+
+import { aggregatePersianNameCandidates } from "../src/persian-asset-names.mjs";
+
+function observation(coingecko_id, exchange, name, match_status = "matched", source_url = null) {
+  return {
+    coingecko_id, exchange, match_status, source_url,
+    candidate: { name, normalized_name: normalizePersianName(name), source_exchange: exchange, source_key: "test" }
+  };
+}
+
+test("aggregates matching Persian names from independent Iranian exchanges", () => {
+  const rows = aggregatePersianNameCandidates([
+    observation("bitcoin", "bit24", "بیت‌کوین"),
+    observation("bitcoin", "kifpool", "بیت کوین"),
+  ]);
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].status, "consensus_candidate");
+  assert.equal(rows[0].canonical_name_fa, "بیت‌کوین");
+  assert.equal(rows[0].source_count, 2);
+  assert.equal(rows[0].variants[0].sources.length, 2);
+});
+
+test("keeps spelling conflicts for review and does not select a canonical name", () => {
+  const rows = aggregatePersianNameCandidates([
+    observation("ethereum", "bit24", "اتریوم"),
+    observation("ethereum", "kifpool", "اتر"),
+  ]);
+  assert.equal(rows[0].status, "review_required");
+  assert.equal(rows[0].canonical_name_fa, null);
+  assert.equal(rows[0].variants.length, 2);
+  assert.deepEqual(rows[0].variants.map(v => v.sources[0].source_exchange), ["kifpool", "bit24"]);
+});
+
+test("one exchange alone is not enough for automatic consensus", () => {
+  const rows = aggregatePersianNameCandidates([observation("solana", "wallex", "سولانا")]);
+  assert.equal(rows[0].status, "single_source");
+  assert.equal(rows[0].canonical_name_fa, null);
+});
+
+test("ignores ambiguous, pending, unmatched and missing-identity observations", () => {
+  const rows = aggregatePersianNameCandidates([
+    observation("bitcoin", "bit24", "بیت کوین", "ambiguous"),
+    observation("ethereum", "kifpool", "اتریوم", "pending"),
+    observation("solana", "wallex", "سولانا", "unmatched"),
+    observation("", "bit24", "بیت کوین"),
+  ]);
+  assert.deepEqual(rows, []);
+});
+
+test("does not merge two different assets merely because their symbols match", () => {
+  const rows = aggregatePersianNameCandidates([
+    { ...observation("token-one", "bit24", "توکن یک"), symbol: "ONE" },
+    { ...observation("token-two", "kifpool", "توکن دو"), symbol: "ONE" },
+  ]);
+  assert.equal(rows.length, 2);
+  assert.deepEqual(rows.map(row => row.coingecko_id), ["token-one", "token-two"]);
+});
+
+test("deduplicates repeated observations from the same exchange without inflating consensus", () => {
+  const rows = aggregatePersianNameCandidates([
+    observation("bitcoin", "bit24", "بیت کوین"),
+    observation("bitcoin", "bit24", "بیت‌کوین"),
+  ]);
+  assert.equal(rows[0].status, "single_source");
+  assert.equal(rows[0].source_count, 1);
+});
