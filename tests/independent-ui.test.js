@@ -715,3 +715,13 @@ test('document IDs are not duplicated', () => {
   const ids = html.match(/id="[^"]+"/g) || [];
   assert.equal(new Set(ids).size, ids.length, 'all document IDs are unique');
 });
+
+
+test('dashboard hides the duplicated legacy header and uses the intended flex section order', () => {
+  assert.match(css, /#appView:has\(#tab-dashboard:not\(\.hidden\)\) > \.hero/);
+  assert.match(css, /#appView:has\(#tab-dashboard:not\(\.hidden\)\) > \.market-announcement/);
+  assert.match(css, /#tab-dashboard\{[\s\S]*?display:flex!important;[\s\S]*?flex-direction:column!important/);
+  assert.match(css, /#tab-dashboard>\.da-v2-account-card\{order:2\}/);
+  assert.match(css, /#tab-dashboard>\.da-v2-quick-grid\{order:3\}/);
+  assert.match(css, /#tab-dashboard \.da-v2-quick-grid button b\{color:var\(--da-text\)!important\}/);
+});
