@@ -57,3 +57,53 @@ export function extractPersianNameCandidate(exchange, payload) {
   }
   return null;
 }
+
+
+function normalizedNetwork(value) {
+  return typeof value === "string" ? value.trim().toLowerCase() : "";
+}
+
+function normalizedContract(value) {
+  if (typeof value !== "string") return "";
+  const address = value.trim();
+  if (!address) return "";
+  // EVM hexadecimal addresses are case-insensitive; preserve case for other chains.
+  return /^0x[0-9a-fA-F]{40}$/.test(address) ? address.toLowerCase() : address;
+}
+
+/**
+ * Resolve an observation only by an explicit CoinGecko ID or an exact
+ * network + contract pair. A ticker/symbol is never an identity key.
+ */
+export function resolveAssetIdentity(observation, assets) {
+  if (!observation || typeof observation !== "object" || !Array.isArray(assets)) {
+    return { status: "unmatched", reason: "invalid_input", asset: null };
+  }
+  const payload = observation.source_payload && typeof observation.source_payload === "object"
+    ? observation.source_payload : {};
+  const explicitId = [observation.coingecko_id, payload.coingecko_id, payload.coingeckoId, payload.coinGeckoId]
+    .find(value => typeof value === "string" && value.trim());
+  if (explicitId) {
+    const matches = assets.filter(asset => asset && asset.coingecko_id === explicitId.trim());
+    if (matches.length === 1) return { status: "matched", reason: "coingecko_id", asset: matches[0] };
+    if (matches.length > 1) return { status: "ambiguous", reason: "duplicate_coingecko_id", asset: null };
+  }
+
+  const network = normalizedNetwork(
+    observation.network || payload.network || payload.chain || payload.chain_id || payload.chainId
+  );
+  const contract = normalizedContract(
+    observation.contract_address || payload.contract_address || payload.contractAddress ||
+    payload.contract || payload.token_address || payload.tokenAddress
+  );
+  if (network && contract) {
+    const matches = assets.filter(asset =>
+      asset &&
+      normalizedNetwork(asset.network || asset.platform || asset.chain) === network &&
+      normalizedContract(asset.contract_address || asset.contractAddress || asset.token_address) === contract
+    );
+    if (matches.length === 1) return { status: "matched", reason: "network_contract", asset: matches[0] };
+    if (matches.length > 1) return { status: "ambiguous", reason: "duplicate_network_contract", asset: null };
+  }
+  return { status: "unmatched", reason: "exact_identity_missing", asset: null };
+}
