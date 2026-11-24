@@ -1,4 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { extractPersianNameCandidate } from "../../../src/persian-asset-names.mjs";
 
 const KIFPOOL_BODY = {
   operationName: "headerCoins",
@@ -98,7 +99,7 @@ function extract(exchange: typeof EXCHANGES[number], payload: unknown) {
     out.set(market, {
       exchange: exchange.id, market_symbol: market, base_symbol: base,
       quote_symbol: quote, asset_name: typeof name === "string" ? name.slice(0,120) : null,
-      source_url: exchange.url, source_payload: o, is_active: !inactive,
+      source_url: exchange.url, source_payload: { ...o, _digiarz_persian_name_candidate: extractPersianNameCandidate(exchange.id, o) }, is_active: !inactive,
     });
   }
   return [...out.values()];
