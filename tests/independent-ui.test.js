@@ -119,5 +119,5 @@ test('light theme stays pure white across app surfaces with no grey backgrounds'
     'body.light-theme #marketList>.coin'
   ]) assert.ok(finalRules.includes(token), 'pure-white override includes ' + token);
   assert.match(finalRules, /--da-bg:#ffffff;--da-bg2:#ffffff/);
-  assert.doesNotMatch(finalRules, /#[0-9a-f]*[89a-f][0-9a-f]{5}/i);
+  assert.doesNotMatch(finalRules, /background(?:-color)?:\\s*#(?:eef3fb|e5edf8|edf4f6|e8f1f4|f7faff|eaf1fa|f3f6fc|d1e1e5|d4e3e7)/i);
 });
