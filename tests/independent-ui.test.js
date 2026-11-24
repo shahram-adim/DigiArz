@@ -452,3 +452,25 @@ test('asset detail workspace keeps premium hierarchy and responsive review/news 
     assert.ok(html.includes('id="' + id + '"'), 'asset detail markup contains ' + id);
   }
 });
+
+
+test('Toman market table keeps price and asset identity visible while scrolling on mobile', () => {
+  const marker = '/* 2026-11-24 Toman market table refinement: readable horizontal data rail on phones. */';
+  const pass = css.slice(css.lastIndexOf(marker));
+  assert.ok(pass.length > 0, 'Toman market refinement layer exists');
+  for (const selector of [
+    '#tab-toman .toman-table-wrap',
+    '#tab-toman .toman-table thead th',
+    '#tab-toman .toman-table th:first-child',
+    '#tab-toman .toman-table td:first-child',
+    '#tab-toman .toman-table th:nth-child(2)',
+    '#tab-toman .toman-table td:nth-child(2)'
+  ]) assert.ok(pass.includes(selector), 'Toman table selector exists: ' + selector);
+  for (const theme of ['dark-theme','light-theme','luxury-theme']) {
+    assert.ok(pass.includes('body.' + theme + ' #tab-toman'), theme + ' sticky cells have opaque surfaces');
+  }
+  assert.match(pass, /@media\(max-width:720px\)/);
+  assert.match(pass, /@media\(max-width:380px\)/);
+  assert.match(html, /id="tomanMarketBody"/);
+  assert.match(html, /class="toman-table-wrap"/);
+});
