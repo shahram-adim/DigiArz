@@ -1425,3 +1425,10 @@
 - [!] GitHub compare reports the PR branch is 146 commits ahead and 3 commits behind `main`; it is not safe to merge/rebase implicitly. Keep Draft and obtain explicit approval before any integration action.
 - [ ] Physical Android installation, launch, and screenshot review remain outstanding; no device acceptance is claimed.
 - [ ] Next: user installs the review APK and shares screenshots from the phone; then address only observed visual defects. No Production/Supabase, DB, migration, cron, merge, deployment or release changes.
+
+### 2026-11-24 — bilingual asset metadata fallback refinement
+- [x] Market rows and dashboard market preview now prefer both canonical `name_fa` / `name_en` and exchange/catalog `asset_name_fa` / `asset_name_en` metadata before existing dictionary/source-name fallbacks.
+- [x] Updated focused regression assertions for market-row and dashboard bilingual metadata fallback order.
+- [ ] Full catalog coverage is not yet certified: some asset sources do not expose Persian/English display names, so remaining ticker fallbacks require a verified curated mapping or reliable catalog source.
+- [ ] CI for the newest PR head and Android visual acceptance remain pending. PR #60 stays Draft/open/unmerged; no merge, APK publication, deployment, or Production/Supabase/DB/migration/cron changes.
+- Next: inventory the actual market catalog name fields and their coverage, then add only verified translations and run the exact-head test suite.
