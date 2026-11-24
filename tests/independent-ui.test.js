@@ -809,3 +809,18 @@ test('mobile dashboard hero is compact and hides decorative art without removing
   assert.ok(v9.includes('min-height:0!important;display:block!important'));
   assert.ok(v9.includes('#tab-dashboard .da-v2-primary{padding:9px 14px!important}'));
 });
+
+
+test('mobile bottom navigation adapts to six user tabs or seven admin tabs', () => {
+  const v10 = css.slice(css.lastIndexOf('dashboard visual audit v10'));
+  assert.ok(v10.includes('grid-template-columns:repeat(auto-fit,minmax(0,1fr))!important'));
+  assert.ok(v10.includes('.mobile-bottom-nav button{'));
+  assert.ok(v10.includes('min-width:0!important'));
+});
+
+test('mobile dashboard wallet block uses compact spacing without hiding balances or actions', () => {
+  const v10 = css.slice(css.lastIndexOf('dashboard visual audit v10'));
+  assert.ok(v10.includes('#tab-dashboard .da-v2-account-card'));
+  assert.ok(v10.includes('#tab-dashboard .da-v2-balance-main'));
+  assert.ok(v10.includes('#tab-dashboard .da-v2-wallet-link'));
+});
