@@ -31,6 +31,13 @@ test('three themes use distinct black-gold, translucent light and indigo-glass p
   assert.match(css, /body\.luxury-theme[\s\S]*?backdrop-filter:blur\(18px\)/);
 });
 
+test('chart canvas palettes match the approved black-gold, pure-white and indigo-glass themes', () => {
+  assert.match(html, /meta\.content=light\?'#ffffff':luxury\?'#090d20':'#090b10'/);
+  assert.match(html, /bg:'#ffffff',text:'#152b40',grid:'#eaf2f8',line:'#d8e7f2'/);
+  assert.match(html, /bg:'#090d20',text:'#f1f3ff',grid:'#26325a',line:'#596ba5'/);
+  assert.match(html, /bg:'#090b10',text:'#f7f4eb',grid:'#272b34',line:'#5b4b2a'/);
+});
+
 test('market rows and coin logos remain frameless in all themes', () => {
   assert.match(css, /#marketList>\.coin,\.market-list>#marketList>\.coin\{\s*border:0!important;outline:0!important;box-shadow:none!important/);
   assert.match(css, /#marketList>\.coin \.coin-icon,#marketList>\.coin \.coin-icon img\{\s*border:0!important/);
