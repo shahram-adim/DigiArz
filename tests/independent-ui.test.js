@@ -688,3 +688,25 @@ test('cross-page premium surfaces keep responsive hierarchy and usable data tabl
     'prefers-reduced-motion:reduce'
   ]) assert.ok(css.includes(token), 'missing cross-page polish rule: ' + token);
 });
+
+
+test('document remains a single well-formed page with no payload after the closing html tag', () => {
+  assert.equal((html.match(/<\\/body>/g) || []).length, 1);
+  assert.equal((html.match(/<\\/html>/g) || []).length, 1);
+  const bodyClose = html.lastIndexOf('</body>');
+  const htmlClose = html.lastIndexOf('</html>');
+  assert.ok(bodyClose >= 0 && htmlClose > bodyClose, 'body closes before html');
+  assert.equal(html.slice(htmlClose + '</html>'.length).trim(), '', 'nothing follows the document');
+});
+
+test('dashboard activity and account alerts remain restricted to the primary administrator', () => {
+  assert.match(html, /id="dashboardAdminActivity"[^>]*hidden/);
+  assert.match(html, /adminActivity\\.hidden=!isSuperAdmin/);
+});
+
+test('document IDs and function declarations are not duplicated', () => {
+  const ids = [...html.matchAll(/\\bid="([^"]+)"/g)].map(match => match[1]);
+  assert.equal(new Set(ids).size, ids.length, 'all document IDs are unique');
+  const functions = [...html.matchAll(/\\bfunction\\s+([\\w$]+)\\s*\\(/g)].map(match => match[1]);
+  assert.equal(new Set(functions).size, functions.length, 'function declarations are unique');
+});
