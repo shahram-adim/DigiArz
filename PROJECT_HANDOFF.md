@@ -1157,3 +1157,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - This is a Debug/review APK, not production-signed. Physical Android installation and screenshot-based visual acceptance remain outstanding.
 - No Production DB, Supabase, migrations, cron, deployment, merge, or release action. PR #60 remains Draft/open/unmerged.
 - Next: continue source audit for remaining pages and responsive edge cases; keep visual acceptance pending until actual device screenshots are reviewed.
+
+
+## 2026-11-24 — narrow-screen responsive audit for remaining pages
+- Rechecked live PR #60 before editing. It remains open, Draft, unmerged; active branch `redesign/phase1-clean-2026`.
+- Audited the actual HTML roots and existing responsive rules for assets, orders, history, settings, admin, asset detail, and trading. The base app already had some mobile rules; the remaining gaps were compact asset/order filters, history table containment, settings-row stacking, admin panel controls, and single-column mobile orderbook/detail trade forms.
+- Added a focused `max-width:560px` responsive layer to `src/digiarz-independent-ui.css` in commit `dc6a9fcd441bc7a1686c49db520ce0b778f9db0e`. It changes layout only; no colors, business logic, auth, trading, or backend behavior.
+- Added a regression test for the real page roots and narrow-screen selectors in `tests/independent-ui.test.js`, commit `2ff9fab0f933cc1c8c59db7c7e057a2c30e2fe7d`.
+- Latest exact-head validation on `2ff9fab...`: exact-decimal run `45361479679` is in progress; Android build run `45361479727` is pending. Earlier CSS-head runs `45361453189` and `45361453218` are also in progress. Do not mark this responsive pass complete or distribute a new APK until the exact-head test and APK jobs both succeed and artifact provenance is checked.
+- Physical device screenshots remain outstanding; CSS/CI validation is not visual acceptance.
+- No Supabase/Production DB, migration, cron, deployment, merge, release, or paid service changes.
+- Next: inspect exact-head test and Android workflow results for `2ff9fab...`; if both pass, verify the APK contents/provenance and update this handoff with the final result. Keep PR #60 Draft/unmerged.
