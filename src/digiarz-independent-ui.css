@@ -1427,3 +1427,83 @@ body.luxury-theme .tag,body.luxury-theme .badge{background:rgba(183,168,255,.12)
 body.luxury-theme .theme-switch,body.luxury-theme .theme-choice-group button{color:#e8e2ff!important}
 body.luxury-theme a,body.luxury-theme .link{color:#c4b8ff!important}
 body.luxury-theme .notice,body.luxury-theme .alert{background:rgba(48,39,95,.38)!important;border-color:rgba(183,168,255,.22)!important;color:#e8e2ff!important}
+
+/* DigiArz theme 2 final correction: pure-white glass, no grey/blue-grey surfaces. */
+html:has(body.light-theme),body.light-theme{
+  color-scheme:light!important;
+  --da-bg:#ffffff;--da-bg2:#ffffff;--da-surface:rgba(255,255,255,.94);--da-surface2:rgba(255,255,255,.82);
+  --da-line:rgba(92,151,204,.22);--da-text:#17324a;--da-muted:#52718a;
+  --da-accent:#2878c7;--da-accent-soft:rgba(40,120,199,.10);
+  background:#ffffff!important;color:#17324a!important;
+}
+body.light-theme *{scrollbar-color:#b9d7ec #ffffff}
+body.light-theme .wrap,body.light-theme main,body.light-theme #appView,
+body.light-theme #authView,body.light-theme .content,body.light-theme .page,
+body.light-theme .market-page,body.light-theme .dashboard-page{
+  background-color:#ffffff!important;color:#17324a!important;
+}
+body.light-theme .top,body.light-theme .tabs,body.light-theme .mobile-bottom-nav,
+body.light-theme .card,body.light-theme .stat,body.light-theme .trade-box,
+body.light-theme .fx-box,body.light-theme .performance-item,body.light-theme .indicator-panel,
+body.light-theme .setting-row,body.light-theme .orderbook-side,body.light-theme .dashboard-panel,
+body.light-theme .detail-section,body.light-theme .volatility-panel,body.light-theme .history-card,
+body.light-theme .market-summary,body.light-theme .review-row,body.light-theme .news-item,
+body.light-theme .orders-center-v36,body.light-theme .advanced-order-form-v36,
+body.light-theme .advanced-order-list-v36{
+  background:rgba(255,255,255,.94)!important;
+  border-color:rgba(92,151,204,.22)!important;
+  color:#17324a!important;
+  box-shadow:0 8px 26px rgba(39,103,151,.055)!important;
+  -webkit-backdrop-filter:blur(16px) saturate(125%)!important;
+  backdrop-filter:blur(16px) saturate(125%)!important;
+}
+body.light-theme .hero,body.light-theme #authView .auth-visual,
+body.light-theme #authView .auth-reference-visual{
+  background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(246,251,255,.98))!important;
+  border-color:rgba(92,151,204,.22)!important;color:#17324a!important;
+}
+body.light-theme #authView .auth-form{
+  background:rgba(255,255,255,.98)!important;border:1px solid rgba(92,151,204,.22)!important;
+  box-shadow:0 16px 40px rgba(39,103,151,.08)!important;color:#17324a!important;
+}
+body.light-theme h1,body.light-theme h2,body.light-theme h3,body.light-theme h4,
+body.light-theme label,body.light-theme .section-title,body.light-theme .brand,
+body.light-theme .hero-title,body.light-theme .hero h1,body.light-theme .hero h2,
+body.light-theme .auth-form h2{color:#17324a!important}
+body.light-theme .muted,body.light-theme .small,body.light-theme .chart-caption,
+body.light-theme .hero-sub,body.light-theme .auth-intro,body.light-theme .auth-security,
+body.light-theme .coin-source,body.light-theme .asset-row-sub{color:#52718a!important}
+body.light-theme input,body.light-theme select,body.light-theme textarea,
+body.light-theme .field input,body.light-theme .field select,
+body.light-theme #authView .auth-form input{
+  background:#ffffff!important;border:1px solid rgba(92,151,204,.28)!important;
+  color:#17324a!important;box-shadow:none!important;
+}
+body.light-theme input::placeholder,body.light-theme textarea::placeholder{color:#66849b!important}
+body.light-theme input:focus,body.light-theme select:focus,body.light-theme textarea:focus{
+  border-color:#2878c7!important;box-shadow:0 0 0 3px rgba(40,120,199,.12)!important;
+}
+body.light-theme #marketList>.coin,body.light-theme .asset-row,
+body.light-theme .market-list>.coin{
+  background:rgba(255,255,255,.72)!important;border:0!important;outline:0!important;
+  box-shadow:none!important;color:#17324a!important;
+}
+body.light-theme #marketList>.coin .price-usd,
+body.light-theme #marketList>.coin .price-toman,
+body.light-theme #marketList>.coin .coin-name,
+body.light-theme #marketList>.coin .coin-symbol{color:#17324a!important}
+body.light-theme #marketList>.coin .coin-icon,
+body.light-theme #marketList>.coin .coin-icon img,
+body.light-theme .coin-logo,body.light-theme .coin-logo img{
+  border:0!important;outline:0!important;box-shadow:none!important;
+}
+body.light-theme .tabs button,body.light-theme .mobile-bottom-nav button,
+body.light-theme .secondary,body.light-theme .theme-choice-group button{
+  background:rgba(255,255,255,.92)!important;border-color:rgba(92,151,204,.22)!important;color:#315b78!important;
+}
+body.light-theme .tabs button.active,body.light-theme .mobile-bottom-nav button.active,
+body.light-theme .theme-choice-group button.active{
+  background:rgba(40,120,199,.10)!important;border-color:rgba(40,120,199,.32)!important;color:#175b98!important;
+}
+body.light-theme th{background:#ffffff!important;color:#244c69!important}
+body.light-theme td{background:#ffffff!important;color:#244c69!important;border-color:rgba(92,151,204,.16)!important}
