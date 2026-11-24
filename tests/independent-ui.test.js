@@ -673,3 +673,18 @@ test('dashboard sections follow a clear visual order and stay responsive without
   assert.match(html, /id="dashboardMarketPreview"/);
   assert.match(html, /id="usdtBalance"/);
 });
+
+
+test('cross-page premium surfaces keep responsive hierarchy and usable data tables'() {
+  for (const id of ['tab-markets','tab-toman','tab-chart','tab-trade','tab-assets','tab-orders','tab-history','tab-admin','tab-settings']) {
+    assert.match(css, new RegExp('#' + id + '[,{]'));
+  }
+  for (const token of [
+    'grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr))!important',
+    '#tab-toman .toman-table-wrap',
+    '#tab-history .table-wrap',
+    '#tab-chart .asset-detail-head',
+    '#tab-settings .theme-choice-group',
+    'prefers-reduced-motion:reduce'
+  ]) assert.ok(css.includes(token), 'missing cross-page polish rule: ' + token);
+});
