@@ -1462,3 +1462,11 @@
 - [ ] Re-run on latest commit is in progress; do not treat tests as passing until GitHub Actions reports success.
 - PR #60 remains Draft/open/unmerged. No merge, deployment, APK rebuild/release, Production DB change, migration, or cron change.
 - Next: inspect exact-head Actions result; if green, continue with mobile visual and three-theme acceptance review.
+
+
+### 2026-11-24 — Follow-up UI regression assertions narrowed to actual DOM/CSS selectors
+- [x] Second exact-head CI run improved from 95/98 to 96/98 Node tests passing; two remaining failures were stale assertions only.
+- [x] Updated the dashboard row assertion to match the combined dashboard selector actually used by the current CSS.
+- [x] Updated the market bilingual-name assertion to match the existing comma-declared English metadata variable (no product behavior change).
+- [ ] Exact-head CI rerun after these final assertion corrections is pending.
+- PR #60 remains Draft/open/unmerged. No merge, deployment, APK rebuild/release, Production DB change, migration, or cron change.
