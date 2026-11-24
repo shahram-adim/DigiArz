@@ -1126,3 +1126,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Exact-head CI for the auth theme commit and the follow-on docs commit must complete successfully before accepting this pass. At checkpoint, runs for commit `42a1471...` were active/pending; verify latest PR head and exact-head runs.
 - PR #60 remains Draft/open/unmerged. No Production DB, Supabase, migration, cron, deployment, merge or release change. Physical Android screenshots are still required for final visual acceptance.
 - Next: verify authentication theme regression, exact-decimal/trading tests and Android APK on the latest head; then continue page-level theme audit.
+
+
+## 2026-11-24 — auth theme regression assertion correction
+- Rechecked live PR #60, branch and handoff. PR remains open, Draft, unmerged; branch `redesign/phase1-clean-2026`.
+- Exact-decimal run `45358673861` on code commit `4b641f9...` failed 1 of 84 source/browser tests (83 passed). The only failure was the new auth-theme test: its selector search concatenated `body.dark-theme` directly with `#authView...`, while the stylesheet correctly uses a descendant space (`body.dark-theme #authView...`). The same incorrect assertion affected all three theme iterations; no runtime/authentication failure was reported.
+- The Android build run `45358673855` for that commit was cancelled. A subsequent Android run `45358710293` on docs head `0e3631d...` completed successfully, but the matching exact-decimal run `45358710731` reproduced the test assertion failure.
+- Corrected only the test assertion in `tests/independent-ui.test.js` to include the descendant space. Test-only commit: `57b28aba37fad1fd4d06a4575ac1702bbca98c7f`. No application CSS, login flow, credentials, passkey, trading, wallet, backend, or database code changed in this correction.
+- Fresh exact-head workflows on `57b28ab...`: Exact decimal run `45359147050` and Android APK run `45359147013`; both were in progress at the time of this entry. Do not accept the auth theme or distribute a new APK until both exact-head runs complete and their logs/artifact provenance are inspected.
+- No Supabase/Production DB, migration, cron, deployment, merge, or release change. Physical Android screenshot QA remains outstanding.
+- Next: inspect the exact-head test and APK results for `57b28ab...`; then continue source audit of remaining visual pages. Keep PR #60 Draft/unmerged.
