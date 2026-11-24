@@ -195,3 +195,21 @@ test('mobile market grid areas match the actual rendered row element order and d
     assert.ok(mobile.includes('grid-area:' + area + '!important'), 'mobile row maps ' + selector + ' to ' + area);
   }
 });
+
+
+test('three themes apply distinct accents and premium surfaces across shared app controls', () => {
+  const marker = '/* 2026-11-24 premium theme system: shared controls and page surfaces use each theme\'s own accent. */';
+  const themeCss = css.slice(css.lastIndexOf(marker));
+  assert.ok(themeCss.length > 0, 'cross-page theme system exists');
+  for (const theme of ['dark-theme', 'light-theme', 'luxury-theme']) {
+    assert.ok(themeCss.includes('body.' + theme + '{'), theme + ' defines its own palette');
+    assert.ok(themeCss.includes('body.' + theme + ' .card'), theme + ' styles page cards');
+    assert.ok(themeCss.includes('body.' + theme + ' .tabs'), theme + ' styles navigation');
+    assert.ok(themeCss.includes('body.' + theme + ' button:not('), theme + ' styles primary controls');
+  }
+  assert.match(themeCss, /--da-accent:#e7b94d!important/);
+  assert.match(themeCss, /--da-accent:#176fc1!important/);
+  assert.match(themeCss, /--da-accent:#aebaff!important/);
+  assert.match(themeCss, /body\.light-theme[\s\S]*?--da-bg:#fff!important;--da-bg2:#fff!important/);
+  assert.match(themeCss, /linear-gradient\(145deg,rgba\(37,47,105/);
+});
