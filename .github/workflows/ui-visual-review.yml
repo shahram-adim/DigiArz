@@ -41,3 +41,4 @@ jobs:
           path: artifacts/ui-visual/
           if-no-files-found: error
           retention-days: 14
+# app-view-active harness: keep the app root visible in screenshot capture.
