@@ -737,3 +737,24 @@ test('dashboard removes its repeated brand masthead and keeps indigo glass accou
   assert.match(css, /body\.luxury-theme #tab-dashboard \.da-v2-account-stats>div\{[\s\S]*?rgba\(65,78,157/);
   assert.match(css, /body\.luxury-theme #tab-dashboard \.da-market-glass input,[\s\S]*?color:#f3f0ff!important/);
 });
+
+
+test('dashboard no longer leaves excessive mobile bottom whitespace and keeps the fixed nav clear', () => {
+  const v6 = css.slice(css.lastIndexOf('dashboard bottom-space and universal frameless logo correction v6'));
+  assert.ok(v6.length > 0);
+  assert.match(v6, /padding-bottom:calc\\(88px \\+ env\\(safe-area-inset-bottom\\)\\)!important/);
+  assert.match(v6, /#tab-dashboard\\{[\\s\\S]*?min-height:0!important;height:auto!important;[\\s\\S]*?padding-bottom:12px!important/);
+  assert.doesNotMatch(v6, /padding-bottom:150px!important/);
+});
+
+test('brand, dashboard, market, wallet and asset-detail logos have no visible frame in any theme', () => {
+  const v6 = css.slice(css.lastIndexOf('dashboard bottom-space and universal frameless logo correction v6'));
+  for (const selector of [
+    '#tab-dashboard .da-v2-logo',
+    '#dashboardMarketPreview .da-market-logo',
+    '#tab-markets #marketList .coin-icon',
+    '#tab-assets #assetList .asset-row .asset-logo',
+    '#tab-chart .asset-detail-head .asset-logo'
+  ]) assert.ok(v6.includes(selector), 'missing frameless logo selector: ' + selector);
+  assert.match(v6, /border:0!important;outline:0!important;box-shadow:none!important;[\\s\\S]*?background:transparent!important/);
+});
