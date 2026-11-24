@@ -349,3 +349,31 @@ test('remaining app pages keep usable layouts at narrow mobile widths', () => {
     assert.match(html, new RegExp('id="' + id + '"'), 'page root exists: ' + id);
   }
 });
+
+
+test('account pages receive a premium theme-specific surface and responsive layout', () => {
+  const marker = '/* 2026-11-24 premium account-page pass: assets, orders, history and settings. */';
+  const pass = css.slice(css.lastIndexOf(marker));
+  assert.ok(pass.length > 0, 'account-page polish layer exists');
+  for (const theme of ['dark-theme', 'light-theme', 'luxury-theme']) {
+    for (const selector of [
+      '#tab-assets #assetSummary .stat',
+      '#tab-assets #assetList .asset-row',
+      '#tab-orders .order-history-card',
+      '#tab-history .table-wrap',
+      '#tab-history .table-wrap th',
+      '#tab-settings .setting-row',
+      '#tab-settings .theme-choice-group button[aria-pressed=true]'
+    ]) {
+      assert.ok(pass.includes('body.' + theme + ' ' + selector), theme + ' styles ' + selector);
+    }
+  }
+  assert.match(pass, /@media\(max-width:720px\)/);
+  assert.match(pass, /@media\(max-width:420px\)/);
+  assert.match(pass, /#tab-assets #assetList \.asset-row\{[\s\S]*?border:0!important/);
+  assert.match(html, /id="assetSummary"/);
+  assert.match(html, /id="assetList"/);
+  assert.match(html, /id="allOrdersList"/);
+  assert.match(html, /id="historyBody"/);
+  assert.match(html, /data-theme-choice="luxury"/);
+});
