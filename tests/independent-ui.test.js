@@ -725,3 +725,8 @@ test('dashboard hides the duplicated legacy header and uses the intended flex se
   assert.match(css, /#tab-dashboard>\.da-v2-quick-grid\{order:3\}/);
   assert.match(css, /#tab-dashboard \.da-v2-quick-grid button b\{color:var\(--da-text\)!important\}/);
 });
+
+test('dashboard is hidden when any other app tab is selected despite its flex layout override', () => {
+  assert.ok(css.includes('#tab-dashboard.hidden{display:none!important}'));
+  assert.ok(css.includes('#tab-dashboard{\n  display:flex!important;'));
+});
