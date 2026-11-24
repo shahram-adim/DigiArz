@@ -40,6 +40,7 @@ export function extractPersianNameCandidate(exchange, payload) {
   if (!payload || typeof payload !== "object") return null;
   const sources = {
     bit24: [["base_coin.fa_name", getPath(payload, "base_coin.fa_name")]],
+    bitpin: [["currency1.title_fa", getPath(payload, "currency1.title_fa")]],
     kifpool: [["faName", payload.faName]],
     abantether: [["persian_name", payload.persian_name]],
     wallex: [
@@ -128,7 +129,7 @@ export function aggregatePersianNameCandidates(observations) {
     if (!coingeckoId) continue;
 
     const sourceExchange = String(observation.exchange || "").toLowerCase().trim();
-    if (!["bit24", "kifpool", "abantether", "wallex"].includes(sourceExchange)) continue;
+    if (!["bit24", "kifpool", "abantether", "wallex", "bitpin"].includes(sourceExchange)) continue;
 
     const payload = observation.source_payload && typeof observation.source_payload === "object"
       ? observation.source_payload : {};
