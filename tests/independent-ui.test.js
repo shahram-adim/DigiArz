@@ -760,3 +760,15 @@ test('brand, dashboard, market, wallet and asset-detail logos have no visible fr
   assert.ok(v6.includes('border:0!important;outline:0!important;box-shadow:none!important;'));
   assert.ok(v6.includes('background:transparent!important;'));
 });
+
+
+test('v7 dashboard footer spacing and theme-specific logo overrides stay compact and frameless', () => {
+  const v7 = css.slice(css.lastIndexOf('dashboard compact footer and theme-proof frameless marks v7'));
+  assert.ok(v7.includes('padding-bottom:calc(68px + env(safe-area-inset-bottom))!important'));
+  assert.ok(v7.includes('margin-top:6px!important;padding:10px 10px 12px!important'));
+  assert.ok(v7.includes('body.dark-theme #tab-dashboard .da-v2-logo'));
+  assert.ok(v7.includes('body.light-theme #tab-dashboard .da-v2-logo'));
+  assert.ok(v7.includes('body.luxury-theme #tab-dashboard .da-v2-logo'));
+  assert.ok(v7.includes('border:0!important;outline:0!important;box-shadow:none!important;'));
+  assert.ok(v7.includes('background:transparent!important;border-radius:0!important;'));
+});
