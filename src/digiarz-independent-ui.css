@@ -2052,3 +2052,70 @@ body.luxury-theme .market-hero-pills i,body.luxury-theme .trade-workspace-badges
 body.dark-theme .da-v2-section-head h2,body.dark-theme .market-board-head strong{color:#f5e6bd!important}
 body.light-theme .da-v2-section-head h2,body.light-theme .market-board-head strong{color:#173b5b!important}
 body.luxury-theme .da-v2-section-head h2,body.luxury-theme .market-board-head strong{color:#e1e6ff!important}
+
+
+/* 2026-11-24 theme identity pass: wallet, orders, history and settings pages. */
+body.dark-theme #tab-wallet .card,body.dark-theme #tab-assets .card,
+body.dark-theme #tab-orders .card,body.dark-theme #tab-history .card,
+body.dark-theme #tab-settings .card,body.dark-theme .orders-center-v36,
+body.dark-theme .advanced-order-form-v36,body.dark-theme .advanced-order-list-v36,
+body.dark-theme .settings-grid .setting-row,body.dark-theme .dashboard-account-alert-panel{
+  background:linear-gradient(145deg,#1b202a,#11151d)!important;border:1px solid rgba(231,185,77,.20)!important;
+  color:#f5e6bd!important;box-shadow:0 12px 32px rgba(0,0,0,.18)!important;
+}
+body.light-theme #tab-wallet .card,body.light-theme #tab-assets .card,
+body.light-theme #tab-orders .card,body.light-theme #tab-history .card,
+body.light-theme #tab-settings .card,body.light-theme .orders-center-v36,
+body.light-theme .advanced-order-form-v36,body.light-theme .advanced-order-list-v36,
+body.light-theme .settings-grid .setting-row,body.light-theme .dashboard-account-alert-panel{
+  background:#fff!important;border:1px solid rgba(23,111,193,.15)!important;
+  color:#173b5b!important;box-shadow:0 12px 32px rgba(23,111,193,.055)!important;
+}
+body.luxury-theme #tab-wallet .card,body.luxury-theme #tab-assets .card,
+body.luxury-theme #tab-orders .card,body.luxury-theme #tab-history .card,
+body.luxury-theme #tab-settings .card,body.luxury-theme .orders-center-v36,
+body.luxury-theme .advanced-order-form-v36,body.luxury-theme .advanced-order-list-v36,
+body.luxury-theme .settings-grid .setting-row,body.luxury-theme .dashboard-account-alert-panel{
+  background:linear-gradient(145deg,rgba(48,59,132,.82),rgba(23,30,78,.96))!important;
+  border:1px solid rgba(174,186,255,.23)!important;color:#e7eaff!important;
+  box-shadow:0 16px 38px rgba(4,8,28,.24)!important;
+}
+body.dark-theme .orders-center-intro h2,body.dark-theme .setting-row strong,
+body.dark-theme .asset-detail-title,body.dark-theme .history-filters label{color:#f5e6bd!important}
+body.light-theme .orders-center-intro h2,body.light-theme .setting-row strong,
+body.light-theme .asset-detail-title,body.light-theme .history-filters label{color:#173b5b!important}
+body.luxury-theme .orders-center-intro h2,body.luxury-theme .setting-row strong,
+body.luxury-theme .asset-detail-title,body.luxury-theme .history-filters label{color:#e7eaff!important}
+body.dark-theme .orders-center-intro p,body.dark-theme .setting-row small,
+body.dark-theme .asset-detail-sub,body.dark-theme .detail-description{color:#c6b98f!important}
+body.light-theme .orders-center-intro p,body.light-theme .setting-row small,
+body.light-theme .asset-detail-sub,body.light-theme .detail-description{color:#52718b!important}
+body.luxury-theme .orders-center-intro p,body.luxury-theme .setting-row small,
+body.luxury-theme .asset-detail-sub,body.luxury-theme .detail-description{color:#bdc7f0!important}
+body.dark-theme .orders-center-kicker,body.dark-theme .orders-center-symbol,
+body.dark-theme .history-date-presets button.active,body.dark-theme .history-date-presets button[aria-pressed=true],
+body.dark-theme .chart-types button.active,body.dark-theme .timeframes button.active{color:#17130a!important;background:#e7b94d!important;border-color:#e7b94d!important}
+body.light-theme .orders-center-kicker,body.light-theme .orders-center-symbol,
+body.light-theme .history-date-presets button.active,body.light-theme .history-date-presets button[aria-pressed=true],
+body.light-theme .chart-types button.active,body.light-theme .timeframes button.active{color:#fff!important;background:#176fc1!important;border-color:#176fc1!important}
+body.luxury-theme .orders-center-kicker,body.luxury-theme .orders-center-symbol,
+body.luxury-theme .history-date-presets button.active,body.luxury-theme .history-date-presets button[aria-pressed=true],
+body.luxury-theme .chart-types button.active,body.luxury-theme .timeframes button.active{color:#20295f!important;background:#b9c5ff!important;border-color:#b9c5ff!important}
+body.dark-theme .toman-table th,body.dark-theme .table-wrap th{background:#242019!important;color:#f0d58f!important}
+body.light-theme .toman-table th,body.light-theme .table-wrap th{background:#fff!important;color:#245b87!important}
+body.luxury-theme .toman-table th,body.luxury-theme .table-wrap th{background:#35418d!important;color:#e7eaff!important}
+body.dark-theme .toman-table td,body.dark-theme .table-wrap td{color:#e9dfc7!important;border-color:rgba(231,185,77,.12)!important}
+body.light-theme .toman-table td,body.light-theme .table-wrap td{color:#244762!important;border-color:rgba(23,111,193,.10)!important}
+body.luxury-theme .toman-table td,body.luxury-theme .table-wrap td{color:#e1e6ff!important;border-color:rgba(174,186,255,.14)!important}
+body.dark-theme .history-date-presets button,body.dark-theme .history-filters input,
+body.dark-theme .history-filters select,body.dark-theme .asset-tools input,body.dark-theme .asset-tools select{background:#121720!important;color:#f5e6bd!important;border-color:rgba(231,185,77,.22)!important}
+body.light-theme .history-date-presets button,body.light-theme .history-filters input,
+body.light-theme .history-filters select,body.light-theme .asset-tools input,body.light-theme .asset-tools select{background:#fff!important;color:#173b5b!important;border-color:rgba(23,111,193,.18)!important}
+body.luxury-theme .history-date-presets button,body.luxury-theme .history-filters input,
+body.luxury-theme .history-filters select,body.luxury-theme .asset-tools input,body.luxury-theme .asset-tools select{background:rgba(21,29,76,.78)!important;color:#e7eaff!important;border-color:rgba(174,186,255,.24)!important}
+body.dark-theme .asset-detail-head .detail-price{color:#e7b94d!important}
+body.light-theme .asset-detail-head .detail-price{color:#176fc1!important}
+body.luxury-theme .asset-detail-head .detail-price{color:#b9c5ff!important}
+body.dark-theme .orders-center-symbol{box-shadow:0 0 28px rgba(231,185,77,.12)!important}
+body.light-theme .orders-center-symbol{box-shadow:0 0 28px rgba(23,111,193,.10)!important}
+body.luxury-theme .orders-center-symbol{box-shadow:0 0 30px rgba(174,186,255,.16)!important}
