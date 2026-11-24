@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { extractPersianNameCandidate, normalizePersianName, resolveAssetIdentity } from "../src/persian-asset-names.mjs";
+import { extractPersianNameCandidate, normalizePersianName, resolveAssetIdentity, aggregatePersianNameCandidates } from "../src/persian-asset-names.mjs";
 
 test("extracts Bit24 nested base_coin.fa_name", () => {
   assert.deepEqual(extractPersianNameCandidate("bit24", { base_coin: { fa_name: "بیت‌کوین" } }), {
@@ -104,8 +104,6 @@ test("does not fall back to a contract match when an explicit CoinGecko ID confl
 });
 
 
-import { aggregatePersianNameCandidates } from "../src/persian-asset-names.mjs";
-
 function observation(coingecko_id, exchange, name, match_status = "matched", source_url = null) {
   return {
     coingecko_id, exchange, match_status, source_url,
@@ -120,7 +118,9 @@ test("aggregates matching Persian names from independent Iranian exchanges", () 
   ]);
   assert.equal(rows.length, 1);
   assert.equal(rows[0].status, "consensus_candidate");
-  assert.equal(rows[0].canonical_name_fa, "بیت‌کوین");
+  assert.equal(rows[0].consensus_name_candidate.normalized_name, "بیتکوین");
+  assert.equal(rows[0].consensus_name_candidate.source_spellings.length, 2);
+  assert.equal("canonical_name_fa" in rows[0], false);
   assert.equal(rows[0].source_count, 2);
   assert.equal(rows[0].variants[0].sources.length, 2);
 });
@@ -131,7 +131,8 @@ test("keeps spelling conflicts for review and does not select a canonical name",
     observation("ethereum", "kifpool", "اتر"),
   ]);
   assert.equal(rows[0].status, "review_required");
-  assert.equal(rows[0].canonical_name_fa, null);
+  assert.equal(rows[0].consensus_name_candidate, null);
+  assert.equal("canonical_name_fa" in rows[0], false);
   assert.equal(rows[0].variants.length, 2);
   assert.deepEqual(rows[0].variants.map(v => v.sources[0].source_exchange), ["kifpool", "bit24"]);
 });
@@ -139,7 +140,8 @@ test("keeps spelling conflicts for review and does not select a canonical name",
 test("one exchange alone is not enough for automatic consensus", () => {
   const rows = aggregatePersianNameCandidates([observation("solana", "wallex", "سولانا")]);
   assert.equal(rows[0].status, "single_source");
-  assert.equal(rows[0].canonical_name_fa, null);
+  assert.equal(rows[0].consensus_name_candidate, null);
+  assert.equal("canonical_name_fa" in rows[0], false);
 });
 
 test("ignores ambiguous, pending, unmatched and missing-identity observations", () => {
@@ -168,4 +170,45 @@ test("deduplicates repeated observations from the same exchange without inflatin
   ]);
   assert.equal(rows[0].status, "single_source");
   assert.equal(rows[0].source_count, 1);
+});
+
+
+test("does not let a supplied candidate spoof a second exchange source", () => {
+  const rows = aggregatePersianNameCandidates([
+    { ...observation("bitcoin", "bit24", "بیت کوین"), candidate: {
+      name: "بیت کوین", source_exchange: "kifpool", source_key: "forged"
+    } },
+    observation("bitcoin", "bit24", "بیت‌کوین"),
+  ]);
+  assert.equal(rows[0].status, "single_source");
+  assert.equal(rows[0].source_count, 1);
+  assert.equal(rows[0].variants[0].sources.length, 1);
+  assert.equal(rows[0].variants[0].sources[0].source_exchange, "bit24");
+});
+
+test("preserves same-exchange conflicting spellings for review", () => {
+  const rows = aggregatePersianNameCandidates([
+    observation("ethereum", "bit24", "اتریوم"),
+    observation("ethereum", "bit24", "اتر"),
+  ]);
+  assert.equal(rows[0].status, "review_required");
+  assert.equal(rows[0].source_count, 1);
+  assert.equal(rows[0].variants.length, 2);
+});
+
+test("reads the persisted candidate envelope written by the sync extractor", () => {
+  const rows = aggregatePersianNameCandidates([{
+    coingecko_id: "bitcoin",
+    exchange: "bit24",
+    match_status: "matched",
+    source_payload: {
+      _digiarz_persian_name_candidate: {
+        name: "بیت‌کوین",
+        source_key: "base_coin.fa_name",
+        source_exchange: "bit24"
+      }
+    }
+  }]);
+  assert.equal(rows[0].status, "single_source");
+  assert.equal(rows[0].variants[0].sources[0].source_key, "base_coin.fa_name");
 });
