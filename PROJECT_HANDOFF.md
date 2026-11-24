@@ -905,3 +905,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - PR #60 remains open and unmerged. No release, deployment, Supabase/database migration, Production data change, or main-branch merge occurred.
 - Next: perform physical Android installation and visual/functional acceptance across all three themes, auth/login and core navigation; fix only observed issues. Keep PR #60 Draft/unmerged pending review and explicit owner approval.
 - Evidence: https://github.com/shahram-adim/DigiArz/actions/runs/45342044314 and https://github.com/shahram-adim/DigiArz/actions/runs/45342076446
+
+
+## 2026-11-24 — latest-head Android APK rebuild verified
+- Follow-up Android workflow run 45342076450 completed SUCCESS after the documentation-only handoff commit 078f00db14ce2083ef970e78b7258837ca74db83 (source PR merge ref refs/pull/60/merge; PR branch parent at build time 088473599f8c6c056ba44dc3b3ef54bb859eaa6a).
+- Artifact ID 14896088369 (DigiArz-Android-debug-APK; 3,554,561 bytes; expires 2026-12-08T06:42:09Z). Downloaded and inspected ZIP: contains app-debug.apk (3,935,301 bytes) and BUILD-INFO.txt. APK ZIP integrity check passed; SHA-256 recomputed as 7479c0a606b0d7ea08abc9324be56b2df007f428393fd77aa8b04a92ffdd0ee8, exactly matching BUILD-INFO. This is the newer artifact and supersedes the earlier run 45342044314 review APK.
+- Build provenance: git_commit 5c0acccbe3a19cae9e569bc120af473a75eac16b (synthetic PR merge commit), git_ref refs/pull/60/merge, workflow_run_id 45342076450, package_version 1.0.0. Artifact is debug-signed/review-only, not a production release.
+- Exact-decimal workflow run 45342076446 has all substantive steps completed successfully (21 steps), including isolated PostgreSQL and Market/Limit/Stop-Limit/TP-SL lifecycle/concurrency validation.
+- PR #60 remains open and unmerged. The APK has not been installed or visually accepted on a physical Android device. No release, deployment, merge to main, Supabase/database migration, Production data change, or user-financial-data change occurred.
+- Next: physical device acceptance of this APK across all three themes, login/biometric where available, dashboard/market and navigation. Do not infer visual correctness from CI/package checks; do not merge until owner approval.
+- Evidence: https://github.com/shahram-adim/DigiArz/actions/runs/45342076450 and https://github.com/shahram-adim/DigiArz/actions/runs/45342076446
