@@ -1261,3 +1261,47 @@
 2. پیش از هر استقرار، diff کامل نسخه main با تابع مستقر، وابستگی‌ها، verify_jwt و secret usage را بازبینی کن؛ deploy بدون تأیید صریح ممنوع است.
 3. پس از تأیید استقرار، ابتدا فقط version و logs را بررسی کن؛ اجرای refresh واقعی جداگانه و با مجوز مستقل انجام شود.
 4. بازیابی منابع Migration مفقود و حل اختلاف timestamp پیش از هر db push ادامه یابد.
+
+
+## گزارش QA و ممیزی schema موتور Stop-Limit — ۲۰۲۶-۱۱-۲۴
+
+### وضعیت مخزن و CI
+- [x] HEAD نهایی پیش از ثبت این گزارش: `e782b54e6d9bc953dfbd94127c6aba4a4367401d`.
+- [x] Commit `cc4f700269bd2c87cbd592e4c8122e420c9c5988`: افزودن fingerprint فقط‌خواندنی Production و آزمون ایمنی آن، به‌روزرسانی `docs/STOP_LIMIT_QA_MATRIX.md`.
+- [x] Commit `e782b54e6d9bc953dfbd94127c6aba4a4367401d`: اصلاح escaping در تست Node fingerprint.
+- [x] Exact-decimal Run #1843 (`45377434232`) روی `e782b54` با نتیجه `success` تمام شد؛ تمام مراحل Node/browser و PostgreSQL 17 دورریختنی، از جمله Stop-Limit child execution/cancel race، parent-child lifecycle و TP/SL lifecycle موفق شدند.
+- [x] Run #1841 (`45377323145`) روی commit اولیهٔ artifact در مرحلهٔ Node/browser شکست خورد؛ علت، escaping نادرست regex در تست تازه بود. اصلاح در `e782b54` ثبت و Run #1843 سبز شد. شکست اولیه پنهان یا به‌عنوان موفقیت گزارش نشده است.
+- [x] Exact-decimal Run #1753 (`45285146268`) روی HEAD قبلی `e5d4af7` نیز موفق بود.
+
+### اقدام اجرایی
+- [x] `supabase/audit/stop_limit_schema_fingerprint.sql` اضافه شد. یک query واحد و فقط‌خواندنی است که نسخه PostgreSQL، ستون‌ها، constraints، indexes، triggers، RLS policies، table grants، تعریف و ACL توابع مالی مرتبط، و زمان‌بندی cron را از catalog می‌گیرد.
+- [x] `tests/stop-limit-production-audit.test.js` اضافه شد؛ آزمون تضمین می‌کند فایل فقط یک query خواندنی باشد، مستقیماً جدول‌های مالی را scan نکند و تمام اجزای لازم برای fingerprint را پوشش دهد.
+- [x] همان query با موفقیت روی Supabase Production اجرا شد؛ فقط metadata و تعریف اشیا خوانده شد، نه ردیف‌های سفارش/معامله/کیف پول.
+
+### وضعیت Supabase Production
+- [x] پروژه `gfoaubfilhttnwjykaox`: `ACTIVE_HEALTHY`، PostgreSQL `17.11.0.018`.
+- [x] Migration ledger: 55 مورد؛ آخرین نسخه `20261121050216`.
+- [x] Development Branchها: فهرست خالی؛ هیچ branch یا پروژهٔ جدیدی ایجاد نشد.
+- [x] cron job 8، `digiarz-limit-orders` و job 12، `digiarz-stop-limit-orders` هر دو هر دقیقه زمان‌بندی شده‌اند؛ هیچ‌کدام تغییر یا دستی اجرا نشد.
+- [x] `place_stop_limit_order`، `cancel_stop_limit_order` و RPCهای ثبت/لغو TP-SL از نوع SECURITY DEFINER، با owner برابر postgres و search_path خالی‌اند؛ EXECUTE برای authenticated و service_role دارند، نه anon.
+- [x] Workerهای `process_stop_limit_orders`، `process_limit_orders` و `process_conditional_orders` فقط برای service_role قابل اجرا هستند؛ anon و authenticated اجازه اجرا ندارند.
+- [x] RLS روی orders، conditional_orders، order_reservations، trades، asset_balances، wallets و market_prices فعال است. policyهای جداول مالی کاربرمحور فقط ردیف‌های متعلق به همان کاربر را برای خواندن می‌دهند؛ market_prices خواندن عمومی دارد.
+- [x] دو trigger پیش از INSERT روی orders و trades، تابع `private.guard_active_account_writes()` را اجرا می‌کنند.
+- [x] Health Advisor بدون یافته است.
+- [!] Security Advisor: 15 مورد RLS enabled/no policy، دو SECURITY DEFINER قابل اجرا برای anon، 23 مورد قابل اجرا برای authenticated و محافظت رمزهای افشاشدهٔ غیرفعال. این موارد هشدار/یافتهٔ advisor هستند و به‌تنهایی اثبات سوءاستفاده نیستند؛ هیچ grant، policy یا Auth setting تغییر نکرد.
+- [!] Performance Advisor: 9 foreign key بدون index پوشاننده، 11 مورد auth_rls_initplan، دو جدول بدون primary key و 13 index بدون استفاده. هیچ index یا policy تغییر نکرد.
+
+### بازبینی ساختار رابط کاربری
+- [x] `index.html` شاخه main از نظر ساختار ایستا بررسی شد: 244 شناسه یکتا و بدون تکرار؛ 9 مقدار مسیر صفحه شامل dashboard، markets، toman، trade، orders، assets، history، settings و admin.
+- [x] PR #60 با عنوان Phase 1 independent UI layer در حالت Draft باز است؛ شاخه `redesign/phase1-clean-2026`، آزمون CI شماره 1840 موفق. این تغییرات UI هنوز merge نشده و هیچ merge یا انتشار انجام نشد.
+
+### دروازه‌های باز و گام بعد
+1. fingerprint فعلی فقط snapshot metadata است؛ هنوز harness کامل PostgreSQL 17 با DDL/ACL دقیق Production ساخته نشده است. گام بعد: تولید fixture ایزوله از fingerprint و تطبیق با migration/source قبل از اجرای source-faithful Stop-Limit.
+2. چرخهٔ parent Stop-Limit → child Limit باید در harness منطبق با Production با partial/full fill، لغو، مصرف/آزادسازی reservation، idempotency و race هم‌زمان دوباره اجرا شود.
+3. Development Branch Supabase در دسترس نیست؛ ایجاد branch/project جدید و هزینه احتمالی بدون تأیید انجام نمی‌شود.
+4. UI PR #60 پس از آزمون بصری WebView/Android بازبینی شود؛ تا قبل از تأیید و QA بصری، merge نشود.
+
+### مرز ایمنی
+- هیچ سفارش، معامله، reservation، wallet، balance، transaction یا سابقهٔ مالی Production ایجاد یا تغییر نکرد.
+- هیچ worker یا RPC مالی روی کاربر واقعی اجرا نشد.
+- هیچ migration، deploy، cron، grant، policy، Auth setting یا انتشار APK انجام نشد.
