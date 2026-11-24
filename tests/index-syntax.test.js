@@ -199,20 +199,18 @@ test('market 24h ranking uses one freshness-aware comparator in both directions'
   assert.equal(context.getMarketChange24h(rows[5]), 2.25, 'fresh stored fallback percentages are accepted');
 });
 
-test('gainer, loser, volatility and market-list views share the same ranking helpers', () => {
-  const gainersStart = html.indexOf('function renderTopGainers(){');
-  const losersStart = html.indexOf('function renderTopLosers(){', gainersStart);
-  const assetsStart = html.indexOf('function renderTopAssets(){', losersStart);
-  const gainers = html.slice(gainersStart, losersStart);
-  const losers = html.slice(losersStart, assetsStart);
+test('volatility, category filters, top assets and dashboard share the freshness-aware ranking helpers', () => {
+  assert.doesNotMatch(html, /function renderTopGainers\(|function renderTopLosers\(/);
+  assert.doesNotMatch(html, /topGainersList|topLosersList|allGainersBtn|allLosersBtn/);
   const marketStart = html.indexOf('function renderMarkets(){');
   const marketEnd = html.indexOf('function renderDashboardPortfolio(', marketStart);
   const market = html.slice(marketStart, marketEnd);
-  assert.ok(gainers.includes("sortMarketRowsByChange(marketRows,'desc')"));
-  assert.ok(losers.includes("sortMarketRowsByChange(marketRows,'asc')"));
   assert.ok(market.includes("compareMarketChange(a,b,'desc')"));
   assert.ok(market.includes("compareMarketChange(a,b,'asc')"));
   assert.ok(html.includes("const valid=sortMarketRowsByChange(marketRows,'desc')"));
+  assert.ok(html.includes("const gain=valid.find(item=>getMarketChange24h(item)>0)"));
+  assert.ok(html.includes("const loss=valid.find(item=>getMarketChange24h(item)<0)"));
+  assert.ok(html.includes('function renderTopAssets(){'));
   const dashboardStart = html.indexOf('function renderDashboardMarketPreview(){');
   const dashboardEnd = html.indexOf('function ', dashboardStart + 10);
   const dashboard = html.slice(dashboardStart, dashboardEnd);
