@@ -1087,3 +1087,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - This is a **debug/review APK**, not a production-signed release. Physical Android installation, screenshot-based visual QA, and user acceptance remain outstanding.
 - No Supabase, Production database, migration, cron, order, wallet, balance, or user data was changed. No merge or deployment occurred.
 - **Next action:** perform real-device visual QA of all three themes and the updated wallet/orders/history/settings screens; log screenshot findings and fix only verified defects. Keep PR #60 Draft/unmerged pending user acceptance.
+
+
+## 2026-11-24 — admin workspace theme consistency
+- Rechecked live PR #60 and PROJECT_HANDOFF.md before editing. PR #60 remains open, Draft, unmerged; current branch redesign/phase1-clean-2026, base main.
+- Source audit found that the administrator workspace (#tab-admin) had no explicit three-theme treatment for its nested management panels, dynamically rendered user adjustment cards, or daily-ad controls. The shared page/card rules did not fully express the approved dark black/gold, pure-white/blue, and indigo-glass identities for these admin-specific elements.
+- Added a scoped visual-only layer to src/digiarz-independent-ui.css for admin detail sections, .admin-user-card, .daily-ad-admin-item, user adjustment inputs/selects, and daily-ad inputs/textareas. The change is scoped to #tab-admin and does not alter admin permissions, RPCs, wallet logic, or data.
+- Added a regression test to tests/independent-ui.test.js covering the three theme selectors and actual admin markup classes.
+- CSS commit: 93940893a6fb6c9c7c11884a99144a4ab0574e5d; test commit / exact PR head at this checkpoint: 7fef0e393996a38269e461d3a558b9e3b323d4f2.
+- Exact-decimal workflow 45355908787 was in progress; Android APK workflow 45355908770 was pending at the checkpoint. Neither is accepted until exact-head completion and logs/results are inspected.
+- No Supabase, Production DB, migration, cron, authentication, wallet, order, balance, deployment, or release change. PR #60 remains Draft/open/unmerged.
+- Next: inspect exact-head regression/financial test workflow and Android package build; if both succeed, inspect the new APK and provenance. Physical-device screenshots remain required for visual acceptance.
