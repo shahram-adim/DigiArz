@@ -3529,3 +3529,45 @@ body.luxury-theme #tab-dashboard .da-market-glass select option{background:#1b24
 #tab-dashboard .da-v2-logo{
   border-radius:0!important;padding:0!important;
 }
+
+
+/* 2026-11-24 dashboard compact footer and theme-proof frameless marks v7. */
+@media(max-width:700px){
+  body.dark-theme .wrap,body.light-theme .wrap,body.luxury-theme .wrap{
+    padding-bottom:calc(68px + env(safe-area-inset-bottom))!important;
+  }
+  body.dark-theme .footer,body.light-theme .footer,body.luxury-theme .footer{
+    margin-top:6px!important;padding:10px 10px 12px!important;
+  }
+  #tab-dashboard{
+    min-height:0!important;height:auto!important;
+    padding-bottom:8px!important;margin-bottom:0!important;
+  }
+}
+/* Theme-specific logo rules used to override older theme palettes. */
+body.dark-theme #tab-dashboard .da-v2-logo,
+body.light-theme #tab-dashboard .da-v2-logo,
+body.luxury-theme #tab-dashboard .da-v2-logo,
+body.dark-theme #dashboardMarketPreview .da-market-logo,
+body.light-theme #dashboardMarketPreview .da-market-logo,
+body.luxury-theme #dashboardMarketPreview .da-market-logo,
+body.dark-theme #dashboardMarketPreview .da-market-logo-inner,
+body.light-theme #dashboardMarketPreview .da-market-logo-inner,
+body.luxury-theme #dashboardMarketPreview .da-market-logo-inner,
+body.dark-theme #tab-markets #marketList .coin-icon,
+body.light-theme #tab-markets #marketList .coin-icon,
+body.luxury-theme #tab-markets #marketList .coin-icon,
+body.dark-theme #tab-assets #assetList .asset-row .asset-logo,
+body.light-theme #tab-assets #assetList .asset-row .asset-logo,
+body.luxury-theme #tab-assets #assetList .asset-row .asset-logo,
+body.dark-theme #tab-chart .asset-detail-head .asset-logo,
+body.light-theme #tab-chart .asset-detail-head .asset-logo,
+body.luxury-theme #tab-chart .asset-detail-head .asset-logo{
+  border:0!important;outline:0!important;box-shadow:none!important;
+  background:transparent!important;border-radius:0!important;
+}
+body.dark-theme #tab-dashboard .da-v2-logo,
+body.light-theme #tab-dashboard .da-v2-logo,
+body.luxury-theme #tab-dashboard .da-v2-logo{
+  padding:0!important;min-width:0!important;min-height:0!important;
+}
