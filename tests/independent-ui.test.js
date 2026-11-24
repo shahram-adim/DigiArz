@@ -290,7 +290,7 @@ test('login hero, market copy and authentication form preserve all three final t
   assert.ok(authTheme.length > 0, 'final auth theme layer exists');
   for (const theme of ['dark-theme', 'light-theme', 'luxury-theme']) {
     for (const selector of ['#authView.auth-reference-layout', '#authView .auth-reference-visual', '#authView .ref-market-copy h1', '#authView .ref-coin-row', '#authView .auth-form', '#authView .auth-form input']) {
-      assert.ok(authTheme.includes('body.' + theme + selector), theme + ' styles ' + selector);
+      assert.ok(authTheme.includes('body.' + theme + ' ' + selector), theme + ' styles ' + selector);
     }
   }
   assert.match(authTheme, /body\.dark-theme[\s\S]*?linear-gradient\(145deg,#090b10/);
