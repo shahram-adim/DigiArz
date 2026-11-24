@@ -862,3 +862,329 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - PR #47 remains Draft/open/unmerged and mergeable. Physical Android installation, fingerprint enrollment, and login/logout/background-relock acceptance tests remain outstanding. APK is a debug review build, not production-signed.
 - No app code was merged to main; no release/deployment/publishing or Supabase/database/user-financial-data changes were made. This handoff entry is documentation-only.
 - Next: user installs the new APK and checks all three themes, password login, fingerprint enrollment/unlock, logout and relock. Fix only observed issues on PR #47; do not merge without explicit user approval.
+
+
+## 2026-11-24 — pure-white glass theme correction on Phase 1 UI branch
+- Continued only on the clean redesign/phase1-clean-2026 branch, whose merge-base is the current main HEAD e5d4af7832db309345d87dfcf7e13f69420f694d; branch was 19 commits ahead and 0 behind before this correction.
+- Identified a requirement mismatch in the independent UI stylesheet: the light theme still used blue-grey page surfaces (#eef3fb, #e5edf8, etc.) despite the approved pure-white/no-grey requirement.
+- Added a final scoped body.light-theme override in src/digiarz-independent-ui.css: pure-white page and panel surfaces, white login form and inputs, navy/blue typography, subtle blue-tinted glass edges, and frameless market rows/logos. Dark black/gold and third indigo-glass theme selectors were not changed.
+- Added a focused regression test in tests/independent-ui.test.js to guard white backgrounds and reject the known grey surface tokens.
+- Commits: CSS 565250474d12c24e6d8230a102dcba49e8bcfd07; test 364e5925b6b10d629b776114ca8cffbcedc3c084; regex correction d9f2454e6d30ed8ba7d748f2e9ff798a5d899b43.
+- Static repository verification: CSS marker and regression test are present on the branch; compare against main reports 22 commits ahead and 0 behind. No CI run/status was returned for the latest commit, so test success is NOT claimed.
+- No merge, release, Pages deployment, APK publication, Supabase change, migration, or Production data change.
+- Next: obtain a CI run for the exact latest branch head, inspect rendered web/Android screens in all three themes (especially pure-white light theme), and fix only verified issues. Keep PR #60 Draft/unmerged until validation and explicit owner approval.
+
+
+## 2026-11-24 — CI correction verified
+- The first Exact decimal tests run after adding the pure-white regression test failed only because the test regex was over-escaped and incorrectly rejected the corrected stylesheet. The run was 45341597831; 74/75 Node tests passed and one test failed.
+- Corrected the test regex in commit d9f2454e6d30ed8ba7d748f2e9ff798a5d899b43.
+- Pull-request CI reran as run 45341676849 and completed successfully. The exact-decimal job passed every step: 75/75 Node tests, PostgreSQL arithmetic/Toman upsert regressions, disposable schema widening rehearsals, lock-timeout and rollback checks, and isolated Market/Limit/Stop-Limit/TP-SL lifecycle and concurrency tests.
+- Evidence: https://github.com/shahram-adim/DigiArz/actions/runs/45341676849
+- This confirms the repository test workflow for the PR head; it does NOT yet confirm an Android APK artifact build or visual WebView rendering on a physical device.
+- Branch remains isolated and unmerged; no Production database, Supabase settings, user data, or release state changed.
+- Next: verify Android APK workflow execution/artifact for the same branch head, then perform visual review of all three themes on mobile and desktop. Keep PR #60 Draft/unmerged until that validation and explicit owner approval.
+
+
+## 2026-11-24 — Android PR build coverage
+- Reviewed `.github/workflows/android-apk.yml`: it creates an installable debug APK only, packages the independent theme CSS, records the source commit and SHA-256, and uploads APK + BUILD-INFO as a 14-day artifact. It does not publish a store/release or deploy production.
+- Added a scoped `pull_request` trigger targeting `main` with the same relevant web/app paths, so PR #60 can produce a verifiable Android debug APK during review rather than relying on an unavailable manual workflow-dispatch action.
+- Workflow trigger change commit: ac8a73d1a15f1c3167154f517234c2eb433c70e6.
+- At handoff time, no Android workflow run had yet appeared for this commit; APK build is pending and must not be described as successful until an artifact exists.
+- Exact-decimal CI remains green on run 45341676849 (75/75 Node tests, all database rehearsal/integration steps successful).
+- Branch remains unmerged; no APK has been released to users; no production deployment or database change was made.
+- Next: inspect the Android workflow run and artifact when it appears; if successful, verify BUILD-INFO commit matches this branch and inspect APK package contents. Then perform visual review of all three themes on mobile/desktop/WebView.
+
+
+## 2026-11-24 — Phase 1 Android review APK built and provenance verified
+- Android PR workflow run 45342044314 completed SUCCESS on PR #60. The job completed all 12 substantive steps, including web asset preparation, verification that src/digiarz-independent-ui.css is packaged, Android sync, debug APK build, provenance recording, and artifact upload.
+- Downloaded artifact ID 14895994029 (DigiArz-Android-debug-APK; 3,554,558 bytes; expires 2026-12-08T06:40:43Z). Archive contains app-debug.apk (3,935,298 bytes) and BUILD-INFO.txt.
+- BUILD-INFO records git_commit 1725b7037c0c6ff206b6cbe8327cb45514c08254 and git_ref refs/pull/60/merge, workflow_run_id 45342044314, package_version 1.0.0, and APK SHA-256 f0a6eaf81fa72e6bf710ef3ffdd6f6b9162f3707290be41c7ecbb9c7ffcf2c8d. Recomputed APK SHA-256 matches exactly. The recorded synthetic PR merge commit has parents main e5d4af7832db309345d87dfcf7e13f69420f694d and PR head ac8a73d1a15f1c3167154f517234c2eb433c70e6; the PR head includes the independent three-theme UI work. The current branch head 088473599f8c6c056ba44dc3b3ef54bb859eaa6a is a later documentation-only handoff update, so the APK contains the same app code plus the PR merge context, not that later documentation-only commit.
+- APK is a valid Android package and is a debug review build, not production-signed or released. Physical installation and actual rendering/function checks on a device are still outstanding.
+- Exact-decimal workflow run 45342076446 completed SUCCESS; all 21 substantive PostgreSQL/Market/Limit/Stop-Limit/TP-SL lifecycle and two-session concurrency steps completed successfully.
+- A subsequent APK run 45342076450 remains in progress at Gradle debug APK compilation and has no artifact yet; do not treat it as the verified deliverable.
+- PR #60 remains open and unmerged. No release, deployment, Supabase/database migration, Production data change, or main-branch merge occurred.
+- Next: perform physical Android installation and visual/functional acceptance across all three themes, auth/login and core navigation; fix only observed issues. Keep PR #60 Draft/unmerged pending review and explicit owner approval.
+- Evidence: https://github.com/shahram-adim/DigiArz/actions/runs/45342044314 and https://github.com/shahram-adim/DigiArz/actions/runs/45342076446
+
+
+## 2026-11-24 — latest-head Android APK rebuild verified
+- Follow-up Android workflow run 45342076450 completed SUCCESS after the documentation-only handoff commit 078f00db14ce2083ef970e78b7258837ca74db83 (source PR merge ref refs/pull/60/merge; PR branch parent at build time 088473599f8c6c056ba44dc3b3ef54bb859eaa6a).
+- Artifact ID 14896088369 (DigiArz-Android-debug-APK; 3,554,561 bytes; expires 2026-12-08T06:42:09Z). Downloaded and inspected ZIP: contains app-debug.apk (3,935,301 bytes) and BUILD-INFO.txt. APK ZIP integrity check passed; SHA-256 recomputed as 7479c0a606b0d7ea08abc9324be56b2df007f428393fd77aa8b04a92ffdd0ee8, exactly matching BUILD-INFO. This is the newer artifact and supersedes the earlier run 45342044314 review APK.
+- Build provenance: git_commit 5c0acccbe3a19cae9e569bc120af473a75eac16b (synthetic PR merge commit), git_ref refs/pull/60/merge, workflow_run_id 45342076450, package_version 1.0.0. Artifact is debug-signed/review-only, not a production release.
+- Exact-decimal workflow run 45342076446 has all substantive steps completed successfully (21 steps), including isolated PostgreSQL and Market/Limit/Stop-Limit/TP-SL lifecycle/concurrency validation.
+- PR #60 remains open and unmerged. The APK has not been installed or visually accepted on a physical Android device. No release, deployment, merge to main, Supabase/database migration, Production data change, or user-financial-data change occurred.
+- Next: physical device acceptance of this APK across all three themes, login/biometric where available, dashboard/market and navigation. Do not infer visual correctness from CI/package checks; do not merge until owner approval.
+- Evidence: https://github.com/shahram-adim/DigiArz/actions/runs/45342076450 and https://github.com/shahram-adim/DigiArz/actions/runs/45342076446
+
+
+## 2026-11-24 — removed obsolete gainers/losers panels from Market
+- Rechecked live PR #60 and the current redesign/phase1-clean-2026 branch before editing. PR #60 remains Draft/open/unmerged; no main-branch or Production changes.
+- Found that Market still rendered two explicitly rejected panels: “5 biggest gainers” and “5 biggest losers”. Removed both sections from index.html, together with their now-unused render functions, navigation handlers, and refresh calls. Kept the market-wide volatility summary (average / highest gain / highest loss), the top-volume assets strip, category filters, and the full vertical asset list.
+- Added a regression test in tests/independent-ui.test.js asserting the two panels and their obsolete DOM/runtime hooks stay absent while the summary metrics, top-assets list, Market list, and dashboard market preview remain present.
+- Commits: index.html 5f71aed6f017394755a181884237028b27997f5e; regression test / current branch head e4680b33f77df25d91119ed258d5297dfb0b1ca7.
+- Latest-head CI for e4680b33f77df25d91119ed258d5297dfb0b1ca7 is still running at handoff update: Exact decimal run 45344221721 (in progress); Android APK run 45344221722 (pending). Earlier duplicate runs on the preceding index-only commit 5f71aed6f017394755a181884237028b27997f5e: exact decimal 45344205785 and Android 45344205629 (both in progress); do not treat those as final-head validation.
+- Previous APK artifact on commit 2c9c615a12895b4080190b9535c8dee01e0be3f3 remains verified, but it predates this panel-removal change and is not the current candidate. The latest-head APK must be downloaded, checked against BUILD-INFO.txt and SHA-256, and then offered only after run 45344221722 succeeds.
+- Physical device/WebView rendering and login/biometric acceptance remain unverified. Do not infer visual QA from CI. No merge, release, deployment, Supabase/database migration, Production data change, or user-financial-data change.
+- Next: wait for exact latest-head CI runs 45344221721 and 45344221722; inspect all substantive test steps and APK provenance; then continue the static UI audit and request only the still-missing real-device acceptance evidence.
+
+
+## 2026-11-24 — panel-removal regression corrected and latest-head integration tests passed
+- The first regression-test revision exposed an obsolete assertion in tests/index-syntax.test.js that still required renderTopGainers()/renderTopLosers(). The implementation was correct; updated that test to verify the remaining freshness-aware volatility summary, category sorting, top-assets strip, and dashboard ranking behavior without requiring the removed panels.
+- A follow-up assertion typo was corrected to match the existing combined declaration of gain/loss summary variables. No production code change was needed for that test-only correction.
+- Latest branch head: 080adaf5e1d241643037dc0eb465f9e8a61d7d23. Latest exact-decimal / PostgreSQL / Market / Limit / Stop-Limit / TP-SL / two-session race workflow run 45344475016 completed SUCCESS. The Node/browser suite passed, and every PostgreSQL rehearsal and lifecycle/concurrency step completed successfully.
+- Latest Android APK workflow run 45344474993 is still in progress at the debug APK build step at this handoff update. Do not provide a new APK until the job succeeds, the artifact exists, and BUILD-INFO plus SHA-256 are verified.
+- The PR remains Draft/open/unmerged. No merge, release, deployment, Supabase/database migration, Production data change, or user-financial-data change. Physical Android/WebView visual acceptance remains unverified.
+- Next: finish Android build/artifact provenance verification; continue remaining theme/page static audit and obtain physical device acceptance for all three themes, login and navigation.
+
+
+## 2026-11-24 — review APK verified with the removed Market panels
+- Verified Android workflow run 45344205629 SUCCESS on app commit 5f71aed6f017394755a181884237028b27997f5e, which contains the Market panel-removal code. Artifact ID 14897805780 (DigiArz-Android-debug-APK), created 2026-11-24T06:58:04Z, expires 2026-12-08T06:58:03Z.
+- Downloaded the artifact, checked ZIP integrity, and recomputed the APK SHA-256. APK size 3,935,296 bytes; SHA-256 368a35bf4e9b90261d1172402d5ac3dc067b3f575cf3bdd7fa96351f5acc655f; BUILD-INFO matches exactly and records git_commit 12a39ef214d6eca6e7fe8f7587f5c49472b3afe9 (synthetic PR merge ref), workflow_run_id 45344205629, package_version 1.0.0.
+- This APK has the same application source (index.html / independent UI CSS) as the later branch head; subsequent commits only adjusted regression tests and handoff documentation. The latest-head exact-decimal / PostgreSQL / trading lifecycle workflow 45344475016 passed on branch commit 080adaf5e1d241643037dc0eb465f9e8a61d7d23.
+- A redundant Android rebuild on latest head, run 45344474993, was still running at this update. The already verified artifact is usable for review and includes the removed Market panels; it is a debug/review APK, not a production-signed release.
+- Branch now has a documentation-only follow-up commit; live branch head before this entry was 1a2681300174bdaa8ac6d882def0eac9fcf57a83. PR #60 remains open, Draft=true, merged=false. No merge, release, deployment, Production DB change, Supabase migration, or user financial-data change.
+- Physical device install/rendering and all three-theme/auth/navigation acceptance remain unverified. Next: user-side device acceptance; continue only with issues demonstrated on device.
+
+
+## 2026-11-24 — latest-head APK build completed and artifact verified
+- Latest-head Android workflow run 45344474993 completed SUCCESS on branch source commit 080adaf5e1d241643037dc0eb465f9e8a61d7d23. Artifact ID 14897388707 (DigiArz-Android-debug-APK), created 2026-11-24T07:01:07Z; expires 2026-12-08T07:01:06Z.
+- Downloaded artifact and verified ZIP integrity. APK size 3,934,677 bytes; SHA-256 4d7c70650a97177d34b99271cc9623504aa1d58eef4af75d5710b7281cbe779a. BUILD-INFO matches and records synthetic PR merge commit 1ab85bc612d3b66dd7bfb26aea6889e9dde75638, refs/pull/60/merge, workflow_run_id 45344474993, package_version 1.0.0.
+- This is the newest verified debug/review APK and includes the removed Market gainers/losers panels. It is not production-signed or publicly released. Physical device install/rendering remains unverified.
+- Exact-decimal / PostgreSQL / Market / Limit / Stop-Limit / TP-SL / two-session race workflow run 45344475016 also completed SUCCESS on source commit 080adaf5e1d241643037dc0eb465f9e8a61d7d23.
+- Branch head at this documentation update: 780ae4de93433e14e750e4b68f3b3b70aefc4591; PR #60 remains Draft/open/unmerged. No merge, release, deployment, Production DB change, Supabase migration, or user-financial-data change.
+- Next: install this APK on a real Android device and verify all three themes, login/logout, dashboard, Market categories/list, and bottom navigation. Fix only reproducible issues; retain PR #60 Draft until explicit approval.
+
+
+## 2026-11-24 — Android screenshot review and premium mobile UI refinement v4
+- User supplied an actual Android screenshot of the light theme / Market page. It showed a basic card-heavy appearance, nested outlines, oversized sticky header, oversized bottom navigation, and overlapping USD/24h-change values. These are confirmed device observations, not inferred preferences.
+- Rechecked live branch and PR #60 before editing. PR remains Draft/open/unmerged; all changes are confined to redesign/phase1-clean-2026.
+- Appended premium mobile refinement v4 to src/digiarz-independent-ui.css: three stronger differentiated palettes (black/gold, pure white glass, indigo glass); compact translucent sticky app header; horizontally scrollable category rail; frameless five-column market rows with separate grid areas for favorite, identity, sparkline, 24h change and USD/toman prices; hides source/freshness metadata as already requested; consistent low-profile dashboard rows; and a smaller floating bottom nav. Small-screen rules preserve the full row instead of wrapping price and change values into each other.
+- Refreshed stylesheet URL to `digiarz-independent-ui.css?v=2` and Service Worker shell cache to `digiarz-shell-v60` so installed devices fetch the updated stylesheet instead of a stale cached copy.
+- Added a regression test for market grid separation, theme palette distinction, frameless rows and bottom-nav sizing in tests/independent-ui.test.js. No authentication, market data, order, wallet, or trading logic was changed.
+- Commits: CSS `0c5757644fe891baff12cd65e9da197723eeee05`; HTML cache-bust `8ccc58abdf5047b7d08ce55bcb16c101e19ef7d1`; Service Worker `ef9f6ee297e4e6156d29760b685a3e8d09e9dacb`; regression test / branch head `d0e4da7f02172f31ad69e31618c6bd5f8ae42a26`.
+- CI triggered for the CSS, HTML and Service Worker commits is in progress; latest regression-test commit is newer than those runs at this update, so do not treat them as final-head validation. A new final-head workflow run must complete before delivering a new APK.
+- The screenshot supplied is from the prior APK, so this CSS refinement is not yet visually verified on-device. No merge, release, deployment, Production DB change, Supabase migration, or user financial-data change.
+- Next: verify final-head CI, build and hash-check the latest review APK, then ask the user to install it and compare the same Market screen in all three themes. Continue page-by-page polish only after device evidence.
+
+
+## 2026-11-24 — premium UI regression assertion corrected
+- The first CSS refinement workflow surfaced a stale test expectation: it still required the old indigo dashboard card gradient, whereas v4 intentionally replaces those cards with frameless divider-separated rows. This was a test-only mismatch, not a runtime CSS failure.
+- Updated the dashboard regression test to assert the new transparent, frameless, divider-separated dashboard rows. The separate v4 regression test continues to assert market five-column layout, separate price/change areas, theme palettes, hidden source labels, and compact bottom navigation.
+- The latest exact-decimal workflow on the prior handoff commit `aa3adcaf77a2c1953e00f8c499f008a2ae638db7` is run `45345608060` (in progress at this update); Android APK run `45345608045` is pending. These runs do not include the newest test-only correction commit `889faf0f3a2d9eb896a419182f6b9c6779d9f228`; wait for the latest-head runs before acceptance.
+- No runtime trading/auth/database behavior was changed by the test correction. PR #60 remains Draft/open/unmerged. No release, deployment, Production DB change, or Supabase migration.
+- Next: verify latest-head CI and APK artifact; then user installs the fresh APK and supplies screenshots of the same Market screen in all three themes for visual acceptance.
+
+
+## 2026-11-24 — premium UI v4 review APK verified; cache-key test updates queued
+- Android build run `45345679844` succeeded for app commit `31f627e6590498a417550be7b15527a4710d345f`; artifact `14898475631` downloaded. ZIP integrity passed. Extracted APK size 3,938,158 bytes; SHA-256 `ce5d15dc39e88e120def6bea54ac77fc1fdf98f8fd0348ee0ff1680a23eec34c`; BUILD-INFO hash exactly matches. This APK includes premium UI v4 CSS, index stylesheet query `?v=2`, and Service Worker cache `digiarz-shell-v60`; it is a debug/review build, not production-signed.
+- Exact-decimal CI run `45345679792` on the same commit failed only because two test files still expected stylesheet cache query `?v=1`, while app and Service Worker correctly moved to `?v=2`. Updated both `tests/independent-ui.test.js` and `tests/service-worker.test.js` to expect `?v=2`; test-only commits `54281b792c86595e1fe5fd863af40c79635d7ca9` and `694a5b05b347465a3dc18b9ef77fae913927888c`.
+- Latest branch head `694a5b05b347465a3dc18b9ef77fae913927888c`; fresh exact-decimal run `45346112235` and Android build run `45346112202` are in progress. Wait for final-head CI and fresh APK artifact before calling the latest branch fully validated. The already verified APK is safe to use for visual review of v4 UI, but its build commit predates only test-file changes.
+- PR #60 remains Draft/open/unmerged. No merge, production release, deployment, Production DB changes, Supabase migrations, or user financial-data changes. Device rendering remains unverified.
+- Next: verify final-head CI and latest APK; request user install and screenshot same Market page in all three themes. No further speculative style changes without device evidence.
+
+
+## 2026-11-24 — second Android screenshot review; mobile market layout v5
+- User supplied a second real Android screenshot, this time the dark theme. It confirms v4 still has visible USD/24h/sparkline collisions, oversized/see-through sticky header, oversized bottom navigation overlay, and nested outlines around search/sort controls. This is a reproducible visual failure; v4 must not be treated as accepted.
+- Inspected the actual `renderMarkets()` DOM construction. Each `.coin` row contains five direct children in order: favorite button, identity button, sparkline span, change wrapper, and price stack. The v4 mobile five-track grid allocated insufficient width for long Toman figures and left all five items on a single line. This explains the screenshot collision; the previous CSS-only layout was too dense for 393px-class phones.
+- Added v5 device-driven mobile override in `src/digiarz-independent-ui.css`: mobile rows now use a four-column/two-row grid (`favorite | identity | 24h change | price`, with sparkline beneath identity); reserve at least 108px for prices; reduce numeric typography carefully; set a compact opaque 76px app header; increase scroll bottom padding so fixed navigation no longer hides rows; and simplify search/sort control borders. All three themes receive the same structural fix while retaining distinct palettes.
+- Updated stylesheet URL to `digiarz-independent-ui.css?v=3`, Service Worker cache to `digiarz-shell-v61`, and added screenshot-driven regression coverage. No market data, trading, authentication, wallet, or database behavior changed.
+- Commits: CSS `4b9222b93a003e9e0fa8081da01ed9721ce73230`; index cache key `f93c3ad022baf94379c73a8a2b8d0153dd9bf48a`; Service Worker `2711ea0e6f2526cfa2a1c1e1dc416ea1d4160778`; UI regression test `8dec4f580a7ea63ebce4aafdd39c3519cf7902f4`; Service Worker test / current branch head `c78d7179f52f52770cb0f8ad374dee4e97659974`.
+- Latest final-head test/build runs are queued/in progress (test `45347705145`, APK `45347705131` on commit `8dec4f580a7ea63ebce4aafdd39c3519cf7902f4`; additional cache-key runs are also executing). Wait for the exact current branch-head workflow and a successful artifact before delivering a new APK.
+- PR #60 remains Draft/open/unmerged. No merge, release, deployment, Production DB change, Supabase migration, or user financial-data change. v5 is not yet visually validated on device.
+- Next: wait for current-head CI/APK, verify artifact provenance and SHA-256, then user retests dark theme first and light/indigo themes after. If layout collisions persist, replace CSS grid with an explicit semantic two-line row component rather than stacking more overrides.
+
+
+## 2026-11-24 — v5 CI diagnosis and regression assertion correction
+- The Android APK build on exact v5 application commit `3fe21823347393b8bd4cf2b6b7ffa0a25aee7b6b` succeeded (run `45347750087`), but Exact decimal tests failed (run `45347750138`). Log diagnosis: `tests/independent-ui.test.js` contained a second stale assertion expecting `digiarz-independent-ui.css?v=2` while the Service Worker correctly precaches `?v=3`. This was a stale test assertion; no runtime test failure was reported.
+- Updated that assertion to `?v=3` in test-only commit `c7570387b0a324203c638566eefc7c5aaa1a0ec0`. Current branch head is this commit. Await its fresh Exact decimal test and Android build workflows before accepting the package.
+- APK built from app commit `3fe218...` contains v5 runtime changes, but do not distribute it as fully validated until the current-head tests pass and its artifact/hash are inspected. PR #60 remains Draft/open/unmerged; no merge, release, deployment, DB or Supabase migration.
+
+
+## 2026-11-24 — v5 exact-decimal CI passed and review APK verified
+- Exact-decimal workflow `45348322725` completed successfully for branch commit `c7570387b0a324203c638566eefc7c5aaa1a0ec0`; all 21 listed steps completed successfully, including exact-decimal/browser tests, PostgreSQL arithmetic/Toman regressions, disposable schema widening and rollback checks, Market/Limit/Stop-Limit/TP-SL lifecycle and race coverage.
+- Android build workflow `45348322748` succeeded for the same branch commit; artifact `14899650765` downloaded and ZIP integrity passed. Extracted APK `/mnt/data/DigiArz-v5-mobile-review.apk`, 3,939,161 bytes; SHA-256 `cb4425ec2faa4a0746b6bf807b03e0c2ca1abacef2eb6f9cf47d6783e97c1cdd`; BUILD-INFO hash matches exactly. Build info identifies workflow run `45348322748`, PR merge ref `refs/pull/60/merge`, merge commit `1ccda8e1b9a0450e0a7922063fef907dd7c62eed`. This is a debug/review APK, not a production-signed release.
+- Current branch head at documentation update is `dfff676f0f3a26b9f8c2d853fb3e746d8ca81ee3`, a handoff documentation commit after the tested source commit. A redundant APK workflow for that documentation-only head `45348347660` remains pending/in progress; the successfully tested and built `c757038...` source includes all v5 runtime and test changes.
+- PR #60 remains Draft/open/unmerged. No merge, release, deployment, Production DB change, Supabase migration, or user financial-data change. Device visual QA remains pending; the new APK must be installed and compared with the user's prior screenshot before claiming the collisions are fixed.
+- Next: user installs v5 review APK, checks dark-theme Market list and sends a screenshot; then verify white and indigo themes. Fix any remaining device-proven issue. No speculative UI changes before device feedback.
+
+
+## 2026-11-24 — latest v5 review APK provenance verified
+- Rechecked live PR #60 and branch `redesign/phase1-clean-2026` before this checkpoint. PR remains Draft/open/unmerged; base is `main`; current app source head at review was `f47af9594f2a31820a2c261c4f58e23125a20507`.
+- Exact-decimal workflow `45348631348` completed SUCCESS on that source head. Its job completed all substantive steps, including Node/browser regression, PostgreSQL arithmetic and Toman upsert tests, disposable schema widening/preflight/lock-timeout/rollback rehearsals, and Market/Limit/Stop-Limit/TP-SL lifecycle and two-session race coverage.
+- Android workflow `45348631341` completed SUCCESS and produced artifact `14898679591`. Downloaded the artifact and inspected the ZIP: it contains `app-debug.apk` (3,939,166 bytes) and `BUILD-INFO.txt`. BUILD-INFO records workflow run `45348631341`, PR merge ref `refs/pull/60/merge`, merge commit `3ab8f2ba12fd33cfda2408fcda9ff0949f408b2c`, and APK SHA-256 `7b48746b48f8547e985ecc78b20969d4e7257993a2cf0a8ee9f315487f46ddd2`; independently recomputed SHA-256 matches exactly.
+- Inspected APK package contents: `assets/public/index.html`, `assets/public/src/digiarz-independent-ui.css` (142,325 bytes), and `assets/public/sw.js` are present. This confirms the independent UI stylesheet is packaged, not that it renders correctly on a physical phone.
+- This artifact is an Android debug/review APK, not production-signed or released. No merge, deployment, release, Supabase change, migration, Production DB write, or user financial-data change occurred.
+- Remaining acceptance blocker: install this exact APK on a physical Android device and review Market in dark, pure-white, and indigo themes, plus auth visibility/navigation. The prior device screenshots exposed layout collisions; v5 is a targeted correction but must not be called visually accepted without a fresh screenshot/device check.
+- Next: obtain device evidence; fix only reproducible issues. Keep PR #60 Draft/unmerged until visual acceptance and explicit owner approval.
+
+
+## 2026-11-24 — latest PR-head CI and v5 APK verified
+- Rechecked PR #60: remains Draft/open/unmerged, base `main`, head branch `redesign/phase1-clean-2026`. No merge, release, deployment, Production DB change, Supabase migration, or financial-data mutation.
+- Latest branch head `0c9d3afbf6e87a67683e554c01709e5e5b48f7f5` completed Exact decimal workflow `45351790445` SUCCESS and Android workflow `45351790444` SUCCESS.
+- Downloaded Android artifact `14900676502` (ZIP digest reported by GitHub: `sha256:dfa756fc9137a88d2094b7c6beb234a914eb975d1c376d815e4a32813634f913`). ZIP integrity verified. Extracted `app-debug.apk` is 3,939,165 bytes; BUILD-INFO identifies merge ref `refs/pull/60/merge`, merge commit `608ae96e8e722c49ce7dfc3d6bde34501c99f58d`, workflow run `45351790444`, and APK SHA-256 `8cc1a2938ed54a8945e64020e4ed76fd0c73fe8d5aa6541fe7097cc0efed9b87`; independently computed hash matches.
+- APK contains `assets/public/index.html`, `assets/public/src/digiarz-independent-ui.css` (142,325 bytes), and `assets/public/sw.js`. This verifies packaging and provenance, not physical-device visual acceptance. It is a debug/review APK, not production-signed.
+- Remaining gate: install this exact APK and inspect the Market page across dark, pure-white, and indigo themes, plus login/dashboard separation. Make only reproducible device-evidenced corrections; keep PR Draft/unmerged until visual acceptance and explicit owner approval.
+
+
+
+## 2026-11-24 — mobile market row regression coverage added
+- Source audit confirmed the market row renderer creates the five expected direct children in order: favorite button, identity/logo/name button, sparkline, 24-hour change wrapper, and price stack. The v5 mobile grid maps these to named areas; prior tests checked CSS fragments but did not verify the live renderer's DOM order against that grid.
+- Added a regression test in `tests/independent-ui.test.js` to assert the actual renderer child order, Persian/English identity fields, USD/Toman price fields, sparkline observer, and each v5 grid-area mapping. Test commit: `a69fc66b08d56c9c14963b159f7cadf4d9fc7e65`.
+- Exact-decimal workflow `45352285859` and Android build workflow `45352285765` were triggered for that commit and were still in progress at this checkpoint. Do not treat this new test as passed until its workflow completes.
+- PR #60 remains Draft/open/unmerged. No production deployment, merge, Supabase migration, Production DB change, or financial-data mutation. Physical-device visual QA is still pending.
+
+
+## 2026-11-24 — market-row source regression test corrected
+- Rechecked live PR #60 and branch before editing. PR #60 remains open, Draft, unmerged; current branch head before the change was `2d2c6eb2aed31b7534ca44da389502ecb5177f0b`.
+- Exact-decimal run `45352456919` failed at test `mobile market grid areas match the actual rendered row element order and data fields` (78/79 passed). The failure was a test-scope mistake: `price-usd` and `price-toman` are produced by the shared `usdMarkup` / `tomanMarkup` formatter outside the local `renderMarkets()` row-renderer slice. The runtime row still inserts the shared `priceMarkup` into `.price-stack`; the assertion incorrectly searched for the formatter's classes inside the row-renderer substring.
+- Corrected only `tests/independent-ui.test.js`: keep DOM order and sparkline assertions scoped to the row renderer, and assert the shared USD/Toman price markup against the full `index.html` source. Commit: `46a5623e963d8e3f3c8b618d4e1935ccf255f1ad`.
+- Android debug APK workflow `45352456912` on the preceding commit `2d2c6eb...` succeeded; artifact `14901121877` was created (GitHub digest `sha256:c333d5a1e18dd1382baa779dea9339dcadc88c23a1d89acaeee80dd8a7728ed1`). It is not the final post-fix artifact and is not promoted as validated.
+- Fresh PR-triggered workflow runs for `46a5623...` were not yet visible at the immediate post-push query; verify Actions status before claiming the test fix passes or distributing a fresh APK.
+- No runtime app code, auth, trading, wallet, Supabase, Production DB, migration, deployment, or release was changed. PR #60 remains Draft/open/unmerged; physical-device visual QA remains pending.
+- Next: verify the exact-head test and Android build runs for `46a5623...`; if successful, inspect the new APK artifact and hash, then continue page-by-page UI audit without speculative CSS stacking.
+
+
+## 2026-11-24 — cross-page premium theme system
+- Source audit found the three theme classes already existed (`dark-theme`, `light-theme`, `luxury-theme`) and the luxury theme's base palette was indigo, but many shared controls still inherited the original mint/teal primary-button color. This weakened the intended visual distinction, especially in the dark black/gold and indigo-glass themes.
+- Updated `src/digiarz-independent-ui.css` in commit `d333fb58c9b02e9afdcbeec2f61a074e04fa961e`: dark controls now use gold, light controls use blue on pure-white surfaces, and luxury controls use indigo/periwinkle. Shared cards, trade/order panels, settings, notices, tabs, bottom navigation, and focus states now consume each theme's own palette; the light theme retains white surfaces.
+- Added source-level regression coverage in `tests/independent-ui.test.js` in commit `c1986e79bf359a50abb919b051d442b6ec517447` for per-theme accent declarations and cross-page card/navigation/control styling.
+- CI for code commit `d333fb5...` and test commit `c1986e7...` was triggered. At this checkpoint, the exact-decimal workflow for `c1986e7...` was still running and Android APK build was queued/running; do not claim the new theme test passes or distribute a new APK until exact-head workflows finish.
+- This is a stylesheet and regression-test change only. No auth/trading/wallet logic, Supabase schema or data, migrations, Production DB, deployment, or release was changed. PR #60 remains Draft/open/unmerged; physical-device screenshots and visual acceptance remain pending.
+- Next: verify CI on the final PR head, inspect the resulting APK's embedded stylesheet/provenance, then continue the page-by-page visual audit (dashboard, market, trade, assets/wallet, orders, history, settings/admin).
+
+## 2026-11-24 — theme identity extended to primary hero and authentication surfaces
+- Rechecked PR #60 and branch before editing. PR remains open, Draft, unmerged; branch head before this work was `175d4170ef0eff472787960b9f70d24a701fa065`.
+- Exact-head Exact decimal workflow `45353735336` and Android APK workflow `45353735407` both completed SUCCESS on `175d417...`.
+- Downloaded Android artifact `14900698584` from run `45353735407`; ZIP integrity passed. APK size 3,940,565 bytes; SHA-256 `bc8b32c31e73e565b54a60318abdf3d8f96ceabaff7f0bca7603956cdf9bded6`; BUILD-INFO matches run ID and APK hash. Verified packaged `index.html`, `src/digiarz-independent-ui.css` (148,946 bytes), and `sw.js`. This is a debug/review APK, not a production-signed release. Physical-device visual QA is still pending.
+- Source audit found that shared controls/cards had distinct theme accents, but prominent dashboard, market, trade and auth hero panels retained older hard-coded teal/blue/gold visual treatments. Added a theme-token identity layer in `src/digiarz-independent-ui.css` (commit `99382351d59f0d2f28c87a021e5e91ca378b9b33`): black/gold, pure-white/blue, and indigo-glass hero, art, authentication and dashboard account surfaces now use their own palette.
+- Added source-level regression coverage in `tests/independent-ui.test.js` (final test commit `93164ed47ecaa3d7f2478b1ffdaaf52ebae17148`) for all three theme identities across dashboard, market, trade, and authentication surfaces. A test selector was corrected to match the actual combined auth class (`auth-visual auth-reference-visual`); no application logic changed.
+- No auth flow, market data, trading, wallet, Supabase schema/data, migration, Production DB, deployment, or release was changed. PR #60 remains Draft/open/unmerged.
+- Latest exact-head CI/APK runs for `93164ed...` must be checked before acceptance. The APK built on `175d417...` is available for review but predates this latest hero/auth theme refinement.
+- Next: verify Exact decimal and Android APK workflows on exact head `93164ed...`; if successful, inspect the artifact and update this handoff with run IDs/hash. Then physical-device review of the Market, Dashboard, and Auth views across all three themes remains the visual acceptance gate.
+
+## 2026-11-24 — wallet, orders, history and settings theme refinement
+- Rechecked live PR #60, branch and handoff before editing. PR remains open, Draft, unmerged; branch before this page refinement was `57c22a2320b2a63c5fff27e53f8ba6605c1e5e18`.
+- Exact-head workflow `45354408336` (Exact decimal tests) and Android workflow `45354408405` both completed SUCCESS on `57c22a2...`. The exact-decimal workflow includes the source regression tests, PostgreSQL arithmetic/Toman upsert, disposable migration atomicity/lock-timeout/rollback checks, and isolated trading lifecycle/race integrations.
+- Downloaded Android artifact `14901473123` from run `45354408405`. ZIP integrity passed; contained `app-debug.apk` (3,942,053 bytes) and `BUILD-INFO.txt`. APK SHA-256 `dd14ef42b5c370a02d471f489ca5abc6e12d09ab4707b5759afc11c03a683c1c`; BUILD-INFO ties it to workflow `45354408405` and synthetic PR merge commit `5d017f5f14b57e8ff77578baaf627e8714ae0a0b`, whose second parent is exact PR head `57c22a2...`. Extracted APK confirms it packages current `index.html`, `src/digiarz-independent-ui.css` including the dashboard/market/trade/auth theme identity marker, and `sw.js`. This is a debug/review APK, not production-signed; device visual QA remains pending.
+- Source audit confirmed actual page elements for `orders-center-v36`, `advanced-order-form-v36`, `advanced-order-list-v36`, `history-filters`, `history-date-presets`, `settings-grid .setting-row`, `asset-tools`, `toman-table-wrap`, and `asset-detail-head`. Added page-specific theme tokens/styles for wallet, assets, orders, history, settings and Toman tables in `src/digiarz-independent-ui.css` (commit `f8a27ebbe532126475ef0a3447bf20bcb9fe325f`): dark black/gold, light pure-white/blue, and luxury indigo glass.
+- Added regression coverage in `tests/independent-ui.test.js` (commit `ea713d7e49b59dd62741190e753b157b8dbce1a4`) for all three themes across wallet, orders, history and settings selectors, including pure-white light surfaces and theme-specific table headers. Exact-head test/APK workflows for `ea713d7...` must be checked before acceptance.
+- No auth/trading/wallet business logic, Supabase schema/data, migration, Production DB, deployment, merge, or release was changed. PR #60 remains Draft/open/unmerged.
+- Next: verify exact-head tests and APK for `ea713d7...`; inspect the APK bundle and hash. Then continue actual page-level source/visual audit; physical Android screenshots remain the visual acceptance gate.
+
+## 2026-11-24 — wallet page selector test correction
+- The first test run for the wallet/orders/history/settings refinement failed only in the newly added source assertion: DigiArz has no separate `tab-wallet` page; wallet/account UI is represented by the dashboard account card. The failure was `page exists: tab-wallet` in test 31; the earlier theme selector assertions passed.
+- Corrected the regression test to assert the actual page roots (`tab-assets`, `tab-orders`, `tab-history`, `tab-settings`) and the existing `da-v2-account-card` wallet/account markup. No app runtime code changed. Test fix commit: `09d2af8d86f2daceeb1ed830805f65b2ffafb5ce`.
+- Exact-head CI and Android APK runs must be checked on the new test-fix commit before accepting the theme refinement. PR #60 remains Draft/open/unmerged; no Production DB, migrations, deployment or release.
+
+
+### Theme refinement CI + Android review build — 2026-11-24
+- Live PR #60 verified open, Draft, unmerged; branch `redesign/phase1-clean-2026`, code head before this handoff update: `337ce733579a13c8320af5a00acb96308716bbd3`.
+- Exact-decimal workflow run `45355203467` completed **success** on that head. All steps passed, including exact-decimal/browser tests, PostgreSQL arithmetic and Toman upsert, disposable schema-widening preflight/lock-timeout/rollback rehearsals, isolated Market/Limit/Stop-Limit/TP-SL lifecycle integration, cumulative fill rounding, and two-session worker/cancellation/execution race tests.
+- Android workflow run `45355203650` completed **success** on that head. Web assets, independent theme stylesheet packaging, Android generation/sync, debug APK build, provenance recording, and artifact upload all passed.
+- Artifact `DigiArz-Android-debug-APK`, ID `14902670369`, ZIP size 3,561,736 bytes; GitHub artifact digest `sha256:886eaf54a0922bcd688a48e3d95b92cf981ecb10132d9a2bfb175e2e134e7067`.
+- Downloaded and inspected artifact ZIP: integrity test passed; contains `app-debug.apk` (3,943,139 bytes) and `BUILD-INFO.txt`. APK SHA-256: `811696c4d256e02c6a673600712d0481c136d62e2bc130bbe10f1fb0fcc87ad8`.
+- APK provenance: workflow run `45355203650`; synthetic PR merge commit `169cdec3a84dc42f185e135d57194340f37cf3a8`; its second parent is the exact branch head `337ce733579a13c8320af5a00acb96308716bbd3`. Packaged assets include `assets/public/src/digiarz-independent-ui.css` with the wallet/orders/history/settings theme pass and `assets/public/index.html` with the account-card markup. APK ZIP test passed.
+- This is a **debug/review APK**, not a production-signed release. Physical Android installation, screenshot-based visual QA, and user acceptance remain outstanding.
+- No Supabase, Production database, migration, cron, order, wallet, balance, or user data was changed. No merge or deployment occurred.
+- **Next action:** perform real-device visual QA of all three themes and the updated wallet/orders/history/settings screens; log screenshot findings and fix only verified defects. Keep PR #60 Draft/unmerged pending user acceptance.
+
+
+## 2026-11-24 — admin workspace theme consistency
+- Rechecked live PR #60 and PROJECT_HANDOFF.md before editing. PR #60 remains open, Draft, unmerged; current branch redesign/phase1-clean-2026, base main.
+- Source audit found that the administrator workspace (#tab-admin) had no explicit three-theme treatment for its nested management panels, dynamically rendered user adjustment cards, or daily-ad controls. The shared page/card rules did not fully express the approved dark black/gold, pure-white/blue, and indigo-glass identities for these admin-specific elements.
+- Added a scoped visual-only layer to src/digiarz-independent-ui.css for admin detail sections, .admin-user-card, .daily-ad-admin-item, user adjustment inputs/selects, and daily-ad inputs/textareas. The change is scoped to #tab-admin and does not alter admin permissions, RPCs, wallet logic, or data.
+- Added a regression test to tests/independent-ui.test.js covering the three theme selectors and actual admin markup classes.
+- CSS commit: 93940893a6fb6c9c7c11884a99144a4ab0574e5d; test commit / exact PR head at this checkpoint: 7fef0e393996a38269e461d3a558b9e3b323d4f2.
+- Exact-decimal workflow 45355908787 was in progress; Android APK workflow 45355908770 was pending at the checkpoint. Neither is accepted until exact-head completion and logs/results are inspected.
+- No Supabase, Production DB, migration, cron, authentication, wallet, order, balance, deployment, or release change. PR #60 remains Draft/open/unmerged.
+- Next: inspect exact-head regression/financial test workflow and Android package build; if both succeed, inspect the new APK and provenance. Physical-device screenshots remain required for visual acceptance.
+
+
+### Admin theme regression test correction — 2026-11-24
+- Exact-decimal workflow `45355908787` on commit `7fef0e3...` failed in the newly added admin theme test only: the test expected `.daily-ad-admin-item` in static index.html, but that element is rendered dynamically by `daily-ads.js`. The actual admin CSS selector and all preceding assertions passed; this was a test-scope error, not an application failure.
+- Corrected the test to verify the runtime-rendered item selector in the admin theme CSS rather than requiring its generated markup in index.html. Test-only correction commit: `7757c3ac477d474ec1d80d4c363a855ca030619d`.
+- Fresh exact-head runs on `7757c3a...`: Exact decimal `45356061857` (in progress at checkpoint) and Android APK `45356061892` (pending). The docs update below will trigger another exact-head run; always verify the latest PR head before accepting results.
+- No runtime admin logic, permissions, RPCs, wallet, Production DB, Supabase, migration, deployment, merge, or release changed. PR #60 remains Draft/open/unmerged.
+- Next: wait for and inspect the latest-head regression run, then verify APK build and provenance. Device screenshot QA remains pending.
+
+
+## 2026-11-24 — admin theme pass exact-head validation and APK
+- Rechecked live PR #60 and handoff before continuing. PR #60 is still open, Draft, unmerged; exact branch head `1bebd8f105afb5f24731080270f24515cb857da7`.
+- Exact-decimal workflow `45356109043` on that exact head completed **success**. Every step passed: browser/source tests, PostgreSQL arithmetic and Toman upsert, disposable schema-widening preflight/lock-timeout/rollback rehearsals, isolated Market/Limit/Stop-Limit/TP-SL integrations, cumulative rounding reserves, and two-session cancellation/execution race tests.
+- Android workflow `45356109063` on the exact head completed **success**. Asset preparation, independent theme stylesheet packaging, Capacitor generation/sync, debug APK build, provenance and artifact upload all passed.
+- Artifact ID `14902372617`, name `DigiArz-Android-debug-APK`, ZIP size 3,562,388 bytes, GitHub digest `sha256:1df12ee8b9bd2503d0787806e67a2a6544e50678966398247597ddc04f663627`.
+- Downloaded ZIP passed `unzip -t`; contains `app-debug.apk` (3,943,579 bytes) and `BUILD-INFO.txt`. APK SHA-256 `a75e8a66f3da00eb956adc19d6dfec5c7cdf49431d8bc131374bc74ff8ed2547`. Provenance records run `45356109063`, merge commit `b35380d69c7c6addcb77a2841c866765ed333cda`, build time `2026-11-24T08:29:38Z`; GitHub confirms merge commit's second parent is exact PR head `1bebd8f105afb5f24731080270f24515cb857da7`. APK contains admin theme marker and `#tab-admin` markup. This is a debug/review APK, not production-signed.
+- Verified APK copied to `/mnt/data/DigiArz-1bebd8f-debug-review.apk` for user review. Physical Android installation and screenshot-based visual acceptance remain pending.
+- No Production DB, Supabase, migrations, cron, wallet/order balances, deployment, merge, or release changed. PR #60 remains Draft/open/unmerged.
+- Next: continue source audit and refine remaining page-specific theme inconsistencies; require actual Android screenshots before claiming visual acceptance.
+
+
+## 2026-11-24 — authentication theme unification
+- Exact-head validation for the preceding admin theme pass succeeded on PR head `1bebd8f105afb5f24731080270f24515cb857da7`: exact-decimal workflow `45356109043` and Android APK workflow `45356109063` both completed success, including every PostgreSQL and trading lifecycle/race step.
+- Downloaded artifact `14902372617`, ZIP integrity passed. APK `app-debug.apk` is 3,943,579 bytes; SHA-256 `a75e8a66f3da00eb956adc19d6dfec5c7cdf49431d8bc131374bc74ff8ed2547`. BUILD-INFO ties it to run `45356109063`; merge commit `b35380d...` has second parent exact PR head `1bebd8f...`. Verified the APK contains the admin theme CSS marker and `#tab-admin` markup. Debug/review only, not production-signed. Copy at `/mnt/data/DigiArz-1bebd8f-debug-review.apk`.
+- Further source audit found legacy/conflicting authentication CSS layers. Added a final scoped theme layer for the login shell, visual hero, market copy, coin rows, auth form and inputs: dark black/gold; light pure white/blue; luxury indigo glass. No auth flow, credentials, passkey, or backend logic changed. CSS commit `42a1471a26e025c9c494e3443dd93e843244c0e1`; regression coverage commit `4b641f9a13b71e4b4557cb5e1cfcf30422420659`.
+- Exact-head CI for the auth theme commit and the follow-on docs commit must complete successfully before accepting this pass. At checkpoint, runs for commit `42a1471...` were active/pending; verify latest PR head and exact-head runs.
+- PR #60 remains Draft/open/unmerged. No Production DB, Supabase, migration, cron, deployment, merge or release change. Physical Android screenshots are still required for final visual acceptance.
+- Next: verify authentication theme regression, exact-decimal/trading tests and Android APK on the latest head; then continue page-level theme audit.
+
+
+## 2026-11-24 — auth theme regression assertion correction
+- Rechecked live PR #60, branch and handoff. PR remains open, Draft, unmerged; branch `redesign/phase1-clean-2026`.
+- Exact-decimal run `45358673861` on code commit `4b641f9...` failed 1 of 84 source/browser tests (83 passed). The only failure was the new auth-theme test: its selector search concatenated `body.dark-theme` directly with `#authView...`, while the stylesheet correctly uses a descendant space (`body.dark-theme #authView...`). The same incorrect assertion affected all three theme iterations; no runtime/authentication failure was reported.
+- The Android build run `45358673855` for that commit was cancelled. A subsequent Android run `45358710293` on docs head `0e3631d...` completed successfully, but the matching exact-decimal run `45358710731` reproduced the test assertion failure.
+- Corrected only the test assertion in `tests/independent-ui.test.js` to include the descendant space. Test-only commit: `57b28aba37fad1fd4d06a4575ac1702bbca98c7f`. No application CSS, login flow, credentials, passkey, trading, wallet, backend, or database code changed in this correction.
+- Fresh exact-head workflows on `57b28ab...`: Exact decimal run `45359147050` and Android APK run `45359147013`; both were in progress at the time of this entry. Do not accept the auth theme or distribute a new APK until both exact-head runs complete and their logs/artifact provenance are inspected.
+- No Supabase/Production DB, migration, cron, deployment, merge, or release change. Physical Android screenshot QA remains outstanding.
+- Next: inspect the exact-head test and APK results for `57b28ab...`; then continue source audit of remaining visual pages. Keep PR #60 Draft/unmerged.
+
+
+## 2026-11-24 — auth theme CI correction passed; Toman/detail/trade theme refinement
+- Exact-head rerun on test-only correction commit `57b28aba37fad1fd4d06a4575ac1702bbca98c7f` completed successfully: Exact decimal run `45359147050` SUCCESS and Android APK run `45359147013` SUCCESS. The auth selector assertion spacing fix is therefore validated; no application logic changed in that correction.
+- Continued page audit found Toman market table/toolbar, asset detail/review surfaces, and trading order-book/timeframe controls lacked a cohesive final theme-specific layer.
+- Added visual-only styling in `src/digiarz-independent-ui.css` commit `eb17e0a06efc62c47ad0321c8ba62080b10e78e2`: dark black/gold, pure-white/blue, and indigo glass surfaces for Toman tables, detail panels/forms, order-book panels, chart timeframe controls and mobile layouts.
+- Added source regression coverage in `tests/independent-ui.test.js` commit `195bf1bd9820fa7a239b5cbf38863509571f7084` for all three theme selectors, pure-white light table headers, indigo detail surfaces, responsive toolbar and the actual Toman/detail/trade roots.
+- Validation runs for CSS commit `eb17e0a...`: Exact decimal `45359412133` was in progress; Android `45359397397` was in progress and `45359412493` pending at the checkpoint. The final test commit `195bf1b...` must also receive fresh exact-head test and APK validation; do not accept this refinement or distribute a build until those complete.
+- No auth/trading business logic, Supabase/Production DB, migration, cron, deployment, merge or release changed. PR #60 remains Draft/open/unmerged. Real-device screenshots remain the visual acceptance gate.
+- Next: inspect the final-head CI/APK for `195bf1b...`, verify artifact provenance and bundle contents, then continue audit of any remaining page-specific inconsistencies.
+
+
+## 2026-11-24 — final-head Toman/detail/trade theme validation and APK
+- Rechecked live PR #60 and this handoff before proceeding. PR remains open, Draft, unmerged; branch `redesign/phase1-clean-2026`.
+- Exact-head test commit `444d8c26e3047f42a1aa37109e2dee333d2d5fdf`: Exact decimal workflow `45359514752` completed SUCCESS. TAP summary: 85 tests, 85 passed, 0 failed. This includes the corrected grouped luxury detail-panel selector test.
+- Exact-head Android workflow `45359515067` completed SUCCESS. Artifact `14904146875`, name `DigiArz-Android-debug-APK`, ZIP size 3,564,929 bytes, digest `sha256:f9c3cba9886edaa36dd6d1373492e51435622e1bde4b5b03839f9e837feeccb0`. ZIP integrity verified; includes `app-debug.apk` (3,945,658 bytes) and `BUILD-INFO.txt`.
+- APK SHA-256: `fbfc32405ab339c2b25c61528dbd2f2b4985371e0d4a1053cab185c26c3c9f21`. BUILD-INFO ties it to run `45359515067`, merge commit `58eef06041c747a69a89364251d5417797726770`, built `2026-11-24T08:51:48Z`. GitHub confirms synthetic merge commit parents include exact PR head `444d8c26...`.
+- Inspected bundled APK CSS and confirmed auth theme plus the newly added Toman table, asset-detail and order-book theme selectors are present. Verified copy: `/mnt/data/DigiArz-444d8c2-debug-review.apk`.
+- This is a Debug/review APK, not production-signed. Physical Android installation and screenshot-based visual acceptance remain outstanding.
+- No Production DB, Supabase, migrations, cron, deployment, merge, or release action. PR #60 remains Draft/open/unmerged.
+- Next: continue source audit for remaining pages and responsive edge cases; keep visual acceptance pending until actual device screenshots are reviewed.
+
+
+## 2026-11-24 — narrow-screen responsive audit for remaining pages
+- Rechecked live PR #60 before editing. It remains open, Draft, unmerged; active branch `redesign/phase1-clean-2026`.
+- Audited the actual HTML roots and existing responsive rules for assets, orders, history, settings, admin, asset detail, and trading. The base app already had some mobile rules; the remaining gaps were compact asset/order filters, history table containment, settings-row stacking, admin panel controls, and single-column mobile orderbook/detail trade forms.
+- Added a focused `max-width:560px` responsive layer to `src/digiarz-independent-ui.css` in commit `dc6a9fcd441bc7a1686c49db520ce0b778f9db0e`. It changes layout only; no colors, business logic, auth, trading, or backend behavior.
+- Added a regression test for the real page roots and narrow-screen selectors in `tests/independent-ui.test.js`, commit `2ff9fab0f933cc1c8c59db7c7e057a2c30e2fe7d`.
+- Latest exact-head validation on `2ff9fab...`: exact-decimal run `45361479679` is in progress; Android build run `45361479727` is pending. Earlier CSS-head runs `45361453189` and `45361453218` are also in progress. Do not mark this responsive pass complete or distribute a new APK until the exact-head test and APK jobs both succeed and artifact provenance is checked.
+- Physical device screenshots remain outstanding; CSS/CI validation is not visual acceptance.
+- No Supabase/Production DB, migration, cron, deployment, merge, release, or paid service changes.
+- Next: inspect exact-head test and Android workflow results for `2ff9fab...`; if both pass, verify the APK contents/provenance and update this handoff with the final result. Keep PR #60 Draft/unmerged.
+
+
+## 2026-11-24 — account-page polish, exact-head CI and APK provenance
+- Rechecked PR #60 before continuing: still open, Draft, unmerged; head branch `redesign/phase1-clean-2026`, exact head `9148ff825d2b1f73a5280134f7c593abadc3d810`.
+- Added premium page-specific styling for Assets, Orders, History and Settings in `src/digiarz-independent-ui.css` (commit `5be3c3eba64c487bcf35f99beec6486158cf28da`) and regression coverage in `tests/independent-ui.test.js` (commit/head `9148ff825d2b1f73a5280134f7c593abadc3d810`). Three palettes remain distinct; mobile layouts stack without changing app logic.
+- Exact-head CI for `9148ff8...`: Exact decimal workflow run `45375180583` completed SUCCESS; Android debug APK workflow run `45375180543` completed SUCCESS. Both jobs report no failed steps.
+- Downloaded and inspected Android artifact `14911191960` (`DigiArz-Android-debug-APK`, ZIP size 3,567,671 bytes; artifact digest `sha256:b668bf620f7ff9937d0ae5377bb3744389fea46b277c95f2237efb5fd6cc7bb1`). ZIP integrity/listing verified; contains `app-debug.apk` (3,947,930 bytes) and `BUILD-INFO.txt`.
+- BUILD-INFO identifies workflow run `45375180543`, PR merge ref `refs/pull/60/merge`, merge commit `88d5422b9313a478e1a05dbc4f75414904c762a9`, built at `2026-11-24T10:30:25Z`. APK SHA-256 verified locally: `8900a9eaccc908d769b1aa21aa52ec4c8ffd9d363c85889aac76bbb975175d99`. Extracted APK includes `assets/public/src/digiarz-independent-ui.css` (188,596 bytes) and `assets/public/index.html` (521,355 bytes); this confirms the UI stylesheet is packaged.
+- This is an installable DEBUG/review APK, not production-signed. No physical-device screenshots or install/visual acceptance have been performed; do not call the design finished based only on CI.
+- No Supabase/Production DB, migrations, cron, deployments, merge, or release actions. PR #60 remains Draft/open/unmerged.
+- Next: continue the remaining-page source audit (especially Admin, asset detail, and trade/order-book on narrow screens), then request/review real-device screenshots before any merge decision.
+
+
+## 2026-11-24 — trading and admin workspace visual pass
+- Rechecked PR #60: open, Draft, unmerged; latest head `9d02ec1b4b6301b1ef766f24407ab01a16654b3b`.
+- Added a focused visual layer for the trade workspace, chart/order-book panels, quick trade forms, admin panels, sync stats and admin user/review cards in `src/digiarz-independent-ui.css` (CSS commit `4dab4d798866839fa790d3b76925bdf6167cc55c`).
+- Added regression coverage for all three theme palettes, trade/admin roots, and narrow mobile breakpoints in `tests/independent-ui.test.js` (latest head `9d02ec1b4b6301b1ef766f24407ab01a16654b3b`).
+- Exact-head workflows have started: Android run `45377590820` (queued at first inspection) and Exact decimal run `45377590939` (in progress at first inspection). Do not claim this pass validated until both exact-head runs finish successfully and APK provenance/package CSS is checked.
+- This pass is CSS and regression-test only. No trading, order, auth, wallet, backend, Supabase, Production DB, migration, cron, deployment, merge, or release behavior was changed. PR remains Draft/open/unmerged.
+- Next: inspect both exact-head workflow results, fix only isolated test/style issues if found, then continue real-device visual acceptance checklist.

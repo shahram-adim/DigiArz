@@ -1261,3 +1261,21 @@
 2. پیش از هر استقرار، diff کامل نسخه main با تابع مستقر، وابستگی‌ها، verify_jwt و secret usage را بازبینی کن؛ deploy بدون تأیید صریح ممنوع است.
 3. پس از تأیید استقرار، ابتدا فقط version و logs را بررسی کن؛ اجرای refresh واقعی جداگانه و با مجوز مستقل انجام شود.
 4. بازیابی منابع Migration مفقود و حل اختلاف timestamp پیش از هر db push ادامه یابد.
+
+
+### 2026-11-24 — account-page polish checkpoint
+- [x] Premium responsive styling added for Assets, Orders, History and Settings across all three themes.
+- [x] Regression tests added for theme/page selectors, frameless asset rows and mobile breakpoints.
+- [x] Exact-head exact-decimal CI passed (run `45375180583`).
+- [x] Exact-head Android debug APK build passed (run `45375180543`); artifact ZIP and BUILD-INFO verified, CSS bundle present.
+- [x] APK SHA-256: `8900a9eaccc908d769b1aa21aa52ec4c8ffd9d363c85889aac76bbb975175d99`.
+- [!] Real Android device installation and screenshot-based visual acceptance remain outstanding.
+- [!] PR #60 remains Draft/open/unmerged; no Production or Supabase changes.
+- Next: audit Admin, asset detail, trade and order-book narrow-screen rendering; then obtain device screenshots.
+
+### 2026-11-24 — trading and admin visual pass
+- [x] Added distinct three-theme visual polish for trading workspace, order book, trade forms and admin panels.
+- [x] Added source regression tests for theme and mobile layout coverage.
+- [ ] Exact-head Android and exact-decimal CI pending; do not accept/release until successful.
+- [ ] Real-device screenshot review remains outstanding.
+- No Production/Supabase changes; PR #60 remains Draft and unmerged.

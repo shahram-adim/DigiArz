@@ -64,7 +64,7 @@ test('trade history loads older pages without losing exact values or changing re
   const body = html.slice(start, end);
   assert.ok(body.includes('.range(0,historyPageSize-1)'), 'first page uses a bounded range');
   assert.ok(body.includes('async function loadMoreHistory()'), 'older page loader exists');
-  assert.ok(body.includes('.range(offset,offset+historyPageSize-1)'), 'older pages use stable offsets');
+  assert.ok(body.includes('historyCursor') && body.includes('.or(`created_at.lt.'), 'older pages use stable keyset cursors with timestamp and ID tie-breakers');
   assert.ok(body.includes("order('id',{ascending:false})"), 'pagination uses a deterministic tie-breaker');
   assert.ok(body.includes('historyRows.push'), 'older rows append instead of replacing current rows');
   assert.ok(body.includes('historyHasMore=next.length===historyPageSize'), 'has-more state follows page size');
@@ -199,20 +199,18 @@ test('market 24h ranking uses one freshness-aware comparator in both directions'
   assert.equal(context.getMarketChange24h(rows[5]), 2.25, 'fresh stored fallback percentages are accepted');
 });
 
-test('gainer, loser, volatility and market-list views share the same ranking helpers', () => {
-  const gainersStart = html.indexOf('function renderTopGainers(){');
-  const losersStart = html.indexOf('function renderTopLosers(){', gainersStart);
-  const assetsStart = html.indexOf('function renderTopAssets(){', losersStart);
-  const gainers = html.slice(gainersStart, losersStart);
-  const losers = html.slice(losersStart, assetsStart);
+test('volatility, category filters, top assets and dashboard share the freshness-aware ranking helpers', () => {
+  assert.doesNotMatch(html, /function renderTopGainers\(|function renderTopLosers\(/);
+  assert.doesNotMatch(html, /topGainersList|topLosersList|allGainersBtn|allLosersBtn/);
   const marketStart = html.indexOf('function renderMarkets(){');
   const marketEnd = html.indexOf('function renderDashboardPortfolio(', marketStart);
   const market = html.slice(marketStart, marketEnd);
-  assert.ok(gainers.includes("sortMarketRowsByChange(marketRows,'desc')"));
-  assert.ok(losers.includes("sortMarketRowsByChange(marketRows,'asc')"));
   assert.ok(market.includes("compareMarketChange(a,b,'desc')"));
   assert.ok(market.includes("compareMarketChange(a,b,'asc')"));
   assert.ok(html.includes("const valid=sortMarketRowsByChange(marketRows,'desc')"));
+  assert.ok(html.includes("const gain=valid.find(item=>getMarketChange24h(item)>0)"));
+  assert.ok(html.includes(",loss=valid.find(item=>getMarketChange24h(item)<0)"));
+  assert.ok(html.includes('function renderTopAssets(){'));
   const dashboardStart = html.indexOf('function renderDashboardMarketPreview(){');
   const dashboardEnd = html.indexOf('function ', dashboardStart + 10);
   const dashboard = html.slice(dashboardStart, dashboardEnd);
