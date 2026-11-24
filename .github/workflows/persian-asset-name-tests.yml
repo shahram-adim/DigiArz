@@ -1,0 +1,27 @@
+name: DigiArz Persian asset-name candidate tests
+
+on:
+  push:
+    branches:
+      - feature/persian-asset-name-candidates-2026
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/persian-asset-names.mjs"
+      - "tests/persian-asset-names.test.mjs"
+      - "supabase/functions/sync-iran-exchange-assets/index.ts"
+      - ".github/workflows/persian-asset-name-tests.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Test Persian asset-name candidate extraction
+        run: node --test tests/persian-asset-names.test.mjs
