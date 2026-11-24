@@ -2816,3 +2816,82 @@ body.luxury-theme #tab-history .table-wrap th:first-child{background:#4753a5}
   #tab-history .table-wrap td:first-child{min-width:116px}
   #tab-settings .theme-setting-row .theme-choice-group{grid-template-columns:minmax(0,1fr)}
 }
+
+
+/* 2026-11-24 trading terminal refinement: chart controls, depth book and demo order forms. */
+#tab-trade .trade-market-grid{align-items:start;min-width:0}
+#tab-trade #chartSection{min-width:0;overflow:hidden}
+#tab-trade .chart-types,
+#tab-trade .timeframes{max-width:100%;scrollbar-width:thin;overscroll-behavior-inline:contain}
+#tab-trade .chart-types{display:flex;flex-wrap:wrap;gap:7px}
+#tab-trade .timeframes{display:flex;flex-wrap:nowrap;overflow-x:auto;padding:4px 2px 9px}
+#tab-trade .timeframes button{flex:0 0 auto;min-height:38px;white-space:nowrap}
+#tab-trade .indicator-panel{margin-top:14px;padding:14px;border-radius:15px}
+#tab-trade .indicator-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+#tab-trade .indicator-grid .performance-item{min-width:0;padding:11px;border-radius:12px}
+#tab-trade .indicator-grid strong{display:block;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+#tab-trade .market-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+#tab-trade .market-summary .stat{min-width:0;padding:12px;border-radius:13px}
+#tab-trade .market-summary .value{overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+#tab-trade .orderbook-grid{align-items:start;min-width:0;gap:12px}
+#tab-trade .orderbook-side{min-width:0;overflow:hidden;border-radius:14px}
+#tab-trade .orderbook-head,
+#tab-trade .orderbook-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+#tab-trade .orderbook-head span,
+#tab-trade .orderbook-row span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:tabular-nums}
+#tab-trade .orderbook-mid{margin-top:10px;padding:12px;border-radius:12px;text-align:center;font-weight:900;font-variant-numeric:tabular-nums}
+#tab-trade .orderbook-status{line-height:1.8;overflow-wrap:anywhere}
+#tab-trade .trade-entry-grid-v35{align-items:stretch}
+#tab-trade .trade-entry-grid-v35 .trade-box{display:flex;flex-direction:column;min-width:0}
+#tab-trade .trade-entry-grid-v35 .trade-estimate{min-height:58px;line-height:1.8;overflow-wrap:anywhere}
+#tab-trade .advanced-order-form-v36 .trade-box{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#tab-trade .advanced-order-form-v36 .trade-box>.field,
+#tab-trade .advanced-order-form-v36 .trade-box>.trade-grid,
+#tab-trade .advanced-order-form-v36 .trade-box>button,
+#tab-trade .advanced-order-form-v36 .trade-box>.notice,
+#tab-trade .advanced-order-form-v36 .trade-box>.chart-caption{min-width:0;grid-column:1/-1}
+#tab-trade .advanced-order-form-v36 .trade-box .trade-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#tab-trade .advanced-order-form-v36 .trade-box input,
+#tab-trade .advanced-order-form-v36 .trade-box select{width:100%;min-width:0;min-height:44px}
+#tab-trade .advanced-order-form-v36 .trade-box button{min-height:45px;border-radius:12px!important;font-weight:850}
+#tab-trade .advanced-order-list-v36 .market-list{min-width:0;overflow-wrap:anywhere}
+body.dark-theme #tab-trade .indicator-panel,
+body.dark-theme #tab-trade .indicator-grid .performance-item{background:linear-gradient(145deg,#191e27,#10151d);border:1px solid rgba(231,185,77,.12)}
+body.light-theme #tab-trade .indicator-panel,
+body.light-theme #tab-trade .indicator-grid .performance-item{background:linear-gradient(145deg,#fff,#f5faff);border:1px solid rgba(23,111,193,.1);box-shadow:0 7px 20px rgba(24,76,116,.04)}
+body.luxury-theme #tab-trade .indicator-panel,
+body.luxury-theme #tab-trade .indicator-grid .performance-item{background:linear-gradient(145deg,#283579,#192354);border:1px solid rgba(174,186,255,.16)}
+body.dark-theme #tab-trade .orderbook-side{background:#111720;border:1px solid rgba(231,185,77,.13)}
+body.light-theme #tab-trade .orderbook-side{background:#fff;border:1px solid rgba(23,111,193,.1)}
+body.luxury-theme #tab-trade .orderbook-side{background:#20295f;border:1px solid rgba(174,186,255,.16)}
+body.dark-theme #tab-trade .orderbook-mid{background:#211b10;color:#f1cf79}
+body.light-theme #tab-trade .orderbook-mid{background:#edf6ff;color:#176fc1}
+body.luxury-theme #tab-trade .orderbook-mid{background:#4753a5;color:#fff}
+@media(max-width:720px){
+  #tab-trade .indicator-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #tab-trade .market-summary{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #tab-trade .advanced-order-form-v36 .trade-box{grid-template-columns:minmax(0,1fr);padding:14px!important}
+  #tab-trade .advanced-order-form-v36 .trade-box .trade-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #tab-trade .trade-entry-grid-v35 .trade-box{padding:14px!important}
+}
+@media(max-width:560px){
+  #tab-trade .orderbook-grid{grid-template-columns:minmax(0,1fr)}
+  #tab-trade .market-summary{grid-template-columns:minmax(0,1fr)}
+  #tab-trade .market-summary .stat{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  #tab-trade .advanced-order-form-v36 .trade-box .trade-grid{grid-template-columns:minmax(0,1fr)}
+  #tab-trade .trade-entry-heading-v35{align-items:flex-start;gap:9px;flex-direction:column}
+  #tab-trade .trade-entry-note{max-width:100%;white-space:normal}
+  #tab-trade .trade-workspace-badges{display:grid;grid-template-columns:minmax(0,1fr);gap:7px}
+  #tab-trade .trade-workspace-badges span{justify-content:flex-start}
+  #tab-trade .indicator-panel{padding:12px}
+}
+@media(max-width:380px){
+  #tab-trade .chart-types button,
+  #tab-trade .timeframes button{font-size:10px;padding:8px 10px}
+  #tab-trade .indicator-grid{gap:6px}
+  #tab-trade .indicator-grid .performance-item{padding:9px}
+  #tab-trade .indicator-grid small{font-size:10px}
+  #tab-trade .orderbook-head,
+  #tab-trade .orderbook-row{gap:3px;font-size:10px}
+  #tab-trade .trade-entry-grid-v35 .trade-box{padding:12px!important}
+}
