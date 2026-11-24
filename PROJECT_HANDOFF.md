@@ -873,3 +873,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Static repository verification: CSS marker and regression test are present on the branch; compare against main reports 22 commits ahead and 0 behind. No CI run/status was returned for the latest commit, so test success is NOT claimed.
 - No merge, release, Pages deployment, APK publication, Supabase change, migration, or Production data change.
 - Next: obtain a CI run for the exact latest branch head, inspect rendered web/Android screens in all three themes (especially pure-white light theme), and fix only verified issues. Keep PR #60 Draft/unmerged until validation and explicit owner approval.
+
+
+## 2026-11-24 — CI correction verified
+- The first Exact decimal tests run after adding the pure-white regression test failed only because the test regex was over-escaped and incorrectly rejected the corrected stylesheet. The run was 45341597831; 74/75 Node tests passed and one test failed.
+- Corrected the test regex in commit d9f2454e6d30ed8ba7d748f2e9ff798a5d899b43.
+- Pull-request CI reran as run 45341676849 and completed successfully. The exact-decimal job passed every step: 75/75 Node tests, PostgreSQL arithmetic/Toman upsert regressions, disposable schema widening rehearsals, lock-timeout and rollback checks, and isolated Market/Limit/Stop-Limit/TP-SL lifecycle and concurrency tests.
+- Evidence: https://github.com/shahram-adim/DigiArz/actions/runs/45341676849
+- This confirms the repository test workflow for the PR head; it does NOT yet confirm an Android APK artifact build or visual WebView rendering on a physical device.
+- Branch remains isolated and unmerged; no Production database, Supabase settings, user data, or release state changed.
+- Next: verify Android APK workflow execution/artifact for the same branch head, then perform visual review of all three themes on mobile and desktop. Keep PR #60 Draft/unmerged until that validation and explicit owner approval.
