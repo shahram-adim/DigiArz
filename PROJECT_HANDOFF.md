@@ -1220,3 +1220,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Android workflow run `45379100763` started for CSS commit `b34e820e...`; at checkpoint APK build step was in progress. Exact-decimal workflow was not observed for the new test head; do not claim full test success.
 - PR #60 remains Draft/open/unmerged. No application logic, market data, trade/wallet operations, Supabase, Production DB, migration, cron, deployment or release changes.
 - Next: verify Android artifact provenance and run status; continue remaining pages (toman market, orders/history, settings) after detail-page validation. Physical Android screenshot review remains a separate acceptance item.
+
+
+## 2026-11-24 — Toman market mobile data-rail pass
+- The Toman market page uses a real 13-column comparison table. The new CSS keeps the first two RTL columns (Toman price and asset identity) visible while the user scrolls horizontally, with sticky headers and theme-specific opaque surfaces.
+- CSS: `b4a1b8e905c3db933d16997de428baef82bb3b1d`; regression test: `3bd6c560253b479e91012a7d975a62741c054fbe`.
+- Android workflow run `45380484051` was triggered by the CSS commit and is still to be verified. It builds commit `b4a1b8e...`, not the later test-only head.
+- Exact Decimal workflow is not currently triggered by branch pushes because its workflow is limited to `push: main` and `pull_request: main`; PR #60 remains Draft, so do not infer a test result for this head.
+- Next: verify Android run/artifact provenance; if the PR remains Draft, keep it so and do not merge. Run the full test suite only through an authorized CI path when available. Continue device screenshot acceptance before release.
+- No Production/Supabase or financial data changes; no migration, cron, deploy, merge or release.
