@@ -53,7 +53,7 @@ const server = http.createServer((req, res) => {
           const auth = document.getElementById('authView');
           const app = document.getElementById('appView');
           if (auth) { auth.classList.add('hidden'); auth.style.display = 'none'; }
-          if (app) { app.classList.remove('hidden'); app.style.display = 'block'; }
+          if (app) { app.classList.remove('hidden'); app.classList.add('app-view-active'); app.style.display = 'block'; }
           try { isSuperAdmin = true; } catch (_) {}
         }, theme);
         for (const tab of tabs) {
@@ -67,6 +67,16 @@ const server = http.createServer((req, res) => {
             return true;
           }, tab);
           if (!visible) throw new Error('Missing UI section: tab-' + tab);
+          const rendered = await page.evaluate(name => {
+            const app = document.getElementById('appView');
+            const section = document.getElementById('tab-' + name);
+            const appStyle = app && getComputedStyle(app);
+            const sectionStyle = section && getComputedStyle(section);
+            const rect = section && section.getBoundingClientRect();
+            return !!app && appStyle.display !== 'none' && app.classList.contains('app-view-active')
+              && !!section && sectionStyle.display !== 'none' && !!rect && rect.height >= 250;
+          }, tab);
+          if (!rendered) throw new Error('Section did not render visibly: tab-' + tab);
           await page.waitForTimeout(180);
           const filename = [viewport.name, theme, tab].join('-') + '.png';
           await page.screenshot({ path: path.join(output, filename), fullPage: true, animations: 'disabled' });
