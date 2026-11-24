@@ -412,9 +412,8 @@ test('dashboard market identity keeps visible favorites and frameless logos and 
     '#dashboardMarketPreview .da-market-coin-card',
     '#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card'
   ]) assert.ok(pass.includes(selector), 'dashboard selector exists: ' + selector);
-  assert.match(pass, /#dashboardMarketPreview \.da-market-favorite\\{[^}]*border:0!important[^}]*background:transparent!important/);
-  assert.match(pass, /#dashboardMarketPreview \.da-market-coin-card,[\\s\\S]*?border:0!important/);
-  assert.match(pass, /#dashboardMarketPreview\\.dashboard-market-preview\\.da-v2-market-list>\\.da-market-coin-card\\{[^}]*border:0!important/);
+  assert.ok(pass.includes('#dashboardMarketPreview .da-market-favorite{\n  border:0!important;outline:0!important;box-shadow:none!important;\n  background:transparent!important;border-radius:0!important;'), 'favorite has no frame');
+  assert.ok(pass.includes('#dashboardMarketPreview .da-market-coin-card,\n#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card{\n  border:0!important;outline:0!important;box-shadow:none!important;'), 'market rows have no frame');
   for (const theme of ['dark-theme', 'light-theme', 'luxury-theme']) {
     assert.ok(pass.includes('body.' + theme + ' #dashboardMarketPreview .da-market-favorite'), theme + ' favorite remains visible');
     assert.ok(pass.includes('body.' + theme + ' #dashboardMarketPreview .da-market-logo'), theme + ' logo styling remains');
