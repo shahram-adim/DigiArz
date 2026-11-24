@@ -2206,3 +2206,92 @@ body.luxury-theme #authView .ref-live-pill,body.luxury-theme #authView .ref-coin
 body.luxury-theme #authView .auth-form{background:linear-gradient(150deg,rgba(48,59,132,.9),rgba(22,29,77,.98))!important;border:1px solid rgba(174,186,255,.3)!important;box-shadow:0 20px 48px rgba(4,8,28,.32)!important;color:#e7eaff!important}
 body.luxury-theme #authView .auth-form input{background:rgba(13,21,64,.78)!important;border-color:rgba(174,186,255,.28)!important;color:#f2f4ff!important}
 body.luxury-theme #authView .auth-form input::placeholder{color:#aab4e2!important}
+
+
+/* 2026-11-24 premium theme pass: Toman market, asset detail and trading data panels. */
+body.dark-theme #tab-toman .toman-table-wrap,
+body.dark-theme #tab-chart .asset-detail-head,
+body.dark-theme #tab-chart .detail-section,
+body.dark-theme #tab-trade .orderbook-side,
+body.dark-theme #tab-trade .market-summary .stat{
+  background:linear-gradient(145deg,#171d27,#10151e)!important;
+  border:1px solid rgba(231,185,77,.19)!important;
+  box-shadow:0 14px 34px rgba(0,0,0,.2)!important;
+}
+body.light-theme #tab-toman .toman-table-wrap,
+body.light-theme #tab-chart .asset-detail-head,
+body.light-theme #tab-chart .detail-section,
+body.light-theme #tab-trade .orderbook-side,
+body.light-theme #tab-trade .market-summary .stat{
+  background:#fff!important;
+  border:1px solid rgba(23,111,193,.14)!important;
+  box-shadow:0 12px 30px rgba(23,111,193,.055)!important;
+}
+body.luxury-theme #tab-toman .toman-table-wrap,
+body.luxury-theme #tab-chart .asset-detail-head,
+body.luxury-theme #tab-chart .detail-section,
+body.luxury-theme #tab-trade .orderbook-side,
+body.luxury-theme #tab-trade .market-summary .stat{
+  background:linear-gradient(145deg,rgba(47,58,130,.78),rgba(20,27,73,.94))!important;
+  border:1px solid rgba(174,186,255,.25)!important;
+  box-shadow:0 16px 40px rgba(4,8,28,.25),inset 0 1px rgba(255,255,255,.05)!important;
+}
+body.dark-theme #tab-toman .toman-table th{background:#211b10!important;color:#f1cc70!important;border-color:rgba(231,185,77,.18)!important}
+body.light-theme #tab-toman .toman-table th{background:#fff!important;color:#176fc1!important;border-color:rgba(23,111,193,.15)!important}
+body.luxury-theme #tab-toman .toman-table th{background:rgba(71,83,165,.62)!important;color:#dce2ff!important;border-color:rgba(174,186,255,.22)!important}
+body.dark-theme #tab-toman .toman-table td{color:#e8e0cf!important;border-color:rgba(231,185,77,.10)!important}
+body.light-theme #tab-toman .toman-table td{color:#244762!important;border-color:rgba(23,111,193,.09)!important}
+body.luxury-theme #tab-toman .toman-table td{color:#e3e8ff!important;border-color:rgba(174,186,255,.12)!important}
+body.dark-theme #tab-toman .toman-table tbody tr:hover{background:rgba(231,185,77,.075)!important}
+body.light-theme #tab-toman .toman-table tbody tr:hover{background:#f1f8ff!important}
+body.luxury-theme #tab-toman .toman-table tbody tr:hover{background:rgba(151,165,255,.12)!important}
+body.dark-theme #tab-toman .toman-toolbar input,
+body.dark-theme #tab-chart .review-form input,
+body.dark-theme #tab-chart .review-form select,
+body.dark-theme #tab-chart .review-form textarea{background:#0c121b!important;border:1px solid rgba(231,185,77,.22)!important;color:#f5e9c9!important}
+body.light-theme #tab-toman .toman-toolbar input,
+body.light-theme #tab-chart .review-form input,
+body.light-theme #tab-chart .review-form select,
+body.light-theme #tab-chart .review-form textarea{background:#fff!important;border:1px solid rgba(23,111,193,.19)!important;color:#173b5b!important}
+body.luxury-theme #tab-toman .toman-toolbar input,
+body.luxury-theme #tab-chart .review-form input,
+body.luxury-theme #tab-chart .review-form select,
+body.luxury-theme #tab-chart .review-form textarea{background:rgba(13,21,64,.72)!important;border:1px solid rgba(174,186,255,.26)!important;color:#f2f4ff!important}
+body.dark-theme #tab-toman .toman-toolbar button,
+body.dark-theme #tab-trade .chart-types button,
+body.dark-theme #tab-trade .timeframes button{background:linear-gradient(145deg,#332814,#1b1c20)!important;border:1px solid rgba(231,185,77,.25)!important;color:#f2d27c!important}
+body.light-theme #tab-toman .toman-toolbar button,
+body.light-theme #tab-trade .chart-types button,
+body.light-theme #tab-trade .timeframes button{background:#fff!important;border:1px solid rgba(23,111,193,.18)!important;color:#176fc1!important}
+body.luxury-theme #tab-toman .toman-toolbar button,
+body.luxury-theme #tab-trade .chart-types button,
+body.luxury-theme #tab-trade .timeframes button{background:linear-gradient(145deg,rgba(73,86,174,.72),rgba(35,45,112,.9))!important;border:1px solid rgba(174,186,255,.28)!important;color:#e4e9ff!important}
+body.dark-theme #tab-trade .chart-types button.active,
+body.dark-theme #tab-trade .timeframes button.active{background:#8a6824!important;color:#fff2cb!important}
+body.light-theme #tab-trade .chart-types button.active,
+body.light-theme #tab-trade .timeframes button.active{background:#eaf5ff!important;color:#105fa9!important}
+body.luxury-theme #tab-trade .chart-types button.active,
+body.luxury-theme #tab-trade .timeframes button.active{background:#687bd4!important;color:#fff!important}
+body.dark-theme #tab-chart .asset-detail-title,
+body.dark-theme #tab-chart .detail-price{color:#f4d27b!important}
+body.light-theme #tab-chart .asset-detail-title,
+body.light-theme #tab-chart .detail-price{color:#176fc1!important}
+body.luxury-theme #tab-chart .asset-detail-title,
+body.luxury-theme #tab-chart .detail-price{color:#dce2ff!important}
+body.dark-theme #tab-trade .orderbook-head,
+body.dark-theme #tab-trade .orderbook-mid,
+body.dark-theme #tab-trade .orderbook-status{color:#d9cba8!important;border-color:rgba(231,185,77,.15)!important}
+body.light-theme #tab-trade .orderbook-head,
+body.light-theme #tab-trade .orderbook-mid,
+body.light-theme #tab-trade .orderbook-status{color:#315b7a!important;border-color:rgba(23,111,193,.13)!important}
+body.luxury-theme #tab-trade .orderbook-head,
+body.luxury-theme #tab-trade .orderbook-mid,
+body.luxury-theme #tab-trade .orderbook-status{color:#d4dcff!important;border-color:rgba(174,186,255,.18)!important}
+@media(max-width:720px){
+  #tab-toman .toman-toolbar{display:grid;grid-template-columns:1fr;gap:10px}
+  #tab-toman .toman-toolbar input,#tab-toman .toman-toolbar button{width:100%;min-height:46px}
+  #tab-chart .asset-detail-head{display:grid;grid-template-columns:52px minmax(0,1fr);gap:12px}
+  #tab-chart .asset-detail-head .detail-price{grid-column:1/-1;text-align:start}
+  #tab-trade .timeframes{display:flex;overflow-x:auto;max-width:100%;padding-bottom:6px}
+  #tab-trade .timeframes button{flex:0 0 auto;white-space:nowrap}
+}
