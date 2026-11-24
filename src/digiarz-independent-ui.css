@@ -1865,3 +1865,97 @@ body.light-theme #tab-markets .market-tools-primary>*,
 body.luxury-theme #tab-markets .market-tools-primary>*{
  min-width:0!important;max-width:100%!important
 }
+
+
+/* 2026-11-24 premium theme system: shared controls and page surfaces use each theme's own accent. */
+body.dark-theme{
+  --da-mint:#e7b94d!important;--da-blue:#d6b25b!important;
+  --da-accent:#e7b94d!important;--da-accent-soft:rgba(231,185,77,.13)!important;
+  --da-surface:rgba(21,26,35,.96)!important;--da-surface2:rgba(28,34,45,.94)!important;
+  --da-line:rgba(220,180,72,.22)!important;
+  color-scheme:dark!important;
+}
+body.light-theme{
+  --da-mint:#176fc1!important;--da-blue:#3b83c8!important;
+  --da-accent:#176fc1!important;--da-accent-soft:rgba(23,111,193,.09)!important;
+  --da-bg:#fff!important;--da-bg2:#fff!important;--da-surface:#fff!important;--da-surface2:#fff!important;
+  --da-line:rgba(30,91,145,.14)!important;
+  color-scheme:light!important;
+}
+body.luxury-theme{
+  --da-mint:#aebaff!important;--da-blue:#849aff!important;
+  --da-accent:#aebaff!important;--da-accent-soft:rgba(143,159,255,.16)!important;
+  --da-bg:#090d20!important;--da-bg2:#11183a!important;
+  --da-surface:rgba(24,31,70,.88)!important;--da-surface2:rgba(34,43,91,.82)!important;
+  --da-line:rgba(160,173,255,.24)!important;
+  color-scheme:dark!important;
+}
+body.dark-theme button:not(.secondary):not(.theme-switch):not(.favorite-btn):not(.danger):not(.buy):not(.sell):not(.mobile-bottom-nav button){
+  background:linear-gradient(135deg,#e7b94d,#f3d58b)!important;color:#191407!important;
+  border-color:rgba(231,185,77,.46)!important;box-shadow:0 8px 24px rgba(196,145,36,.16)!important;
+}
+body.light-theme button:not(.secondary):not(.theme-switch):not(.favorite-btn):not(.danger):not(.buy):not(.sell):not(.mobile-bottom-nav button){
+  background:linear-gradient(135deg,#176fc1,#4b9cda)!important;color:#fff!important;
+  border-color:rgba(23,111,193,.26)!important;box-shadow:0 8px 22px rgba(23,111,193,.12)!important;
+}
+body.luxury-theme button:not(.secondary):not(.theme-switch):not(.favorite-btn):not(.danger):not(.buy):not(.sell):not(.mobile-bottom-nav button){
+  background:linear-gradient(135deg,#6679d8,#aebaff)!important;color:#111735!important;
+  border-color:rgba(174,186,255,.4)!important;box-shadow:0 8px 26px rgba(103,121,216,.22)!important;
+}
+body.dark-theme .secondary,body.dark-theme .theme-switch,
+body.light-theme .secondary,body.light-theme .theme-switch,
+body.luxury-theme .secondary,body.luxury-theme .theme-switch{
+  background:var(--da-surface2)!important;color:var(--da-text)!important;
+  border:1px solid var(--da-line)!important;box-shadow:none!important;
+}
+body.dark-theme input:focus,body.dark-theme select:focus,body.dark-theme textarea:focus,
+body.light-theme input:focus,body.light-theme select:focus,body.light-theme textarea:focus,
+body.luxury-theme input:focus,body.luxury-theme select:focus,body.luxury-theme textarea:focus{
+  border-color:var(--da-accent)!important;
+  box-shadow:0 0 0 3px var(--da-accent-soft)!important;
+}
+body.dark-theme .card,body.dark-theme .stat,body.dark-theme .trade-box,
+body.dark-theme .fx-box,body.dark-theme .performance-item,body.dark-theme .indicator-panel,
+body.dark-theme .setting-row,body.dark-theme .orders-center-v36,
+body.dark-theme .advanced-order-form-v36,body.dark-theme .advanced-order-list-v36{
+  background:linear-gradient(145deg,#171b24,#10141c)!important;
+  border-color:rgba(220,180,72,.18)!important;
+}
+body.light-theme .card,body.light-theme .stat,body.light-theme .trade-box,
+body.light-theme .fx-box,body.light-theme .performance-item,body.light-theme .indicator-panel,
+body.light-theme .setting-row,body.light-theme .orders-center-v36,
+body.light-theme .advanced-order-form-v36,body.light-theme .advanced-order-list-v36{
+  background:rgba(255,255,255,.94)!important;
+  border-color:rgba(30,91,145,.13)!important;
+  box-shadow:0 12px 32px rgba(31,91,142,.055)!important;
+  -webkit-backdrop-filter:blur(16px) saturate(125%)!important;
+  backdrop-filter:blur(16px) saturate(125%)!important;
+}
+body.luxury-theme .card,body.luxury-theme .stat,body.luxury-theme .trade-box,
+body.luxury-theme .fx-box,body.luxury-theme .performance-item,body.luxury-theme .indicator-panel,
+body.luxury-theme .setting-row,body.luxury-theme .orders-center-v36,
+body.luxury-theme .advanced-order-form-v36,body.luxury-theme .advanced-order-list-v36{
+  background:linear-gradient(145deg,rgba(37,47,105,.88),rgba(18,25,62,.94))!important;
+  border:1px solid rgba(160,173,255,.24)!important;
+  box-shadow:0 16px 42px rgba(4,8,28,.24),inset 0 1px rgba(255,255,255,.055)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(140%)!important;
+  backdrop-filter:blur(18px) saturate(140%)!important;
+}
+body.dark-theme .tabs,body.dark-theme .mobile-bottom-nav{background:rgba(18,22,30,.96)!important;border-color:var(--da-line)!important}
+body.light-theme .tabs,body.light-theme .mobile-bottom-nav{background:rgba(255,255,255,.94)!important;border-color:var(--da-line)!important}
+body.luxury-theme .tabs,body.luxury-theme .mobile-bottom-nav{background:rgba(18,25,62,.92)!important;border-color:var(--da-line)!important;box-shadow:0 14px 36px rgba(4,8,28,.24)!important}
+body.dark-theme .tabs button.active,body.dark-theme .theme-choice-group button.active,
+body.dark-theme .mobile-bottom-nav button.active{background:rgba(231,185,77,.15)!important;color:#f0c967!important;border-color:rgba(231,185,77,.38)!important}
+body.light-theme .tabs button.active,body.light-theme .theme-choice-group button.active,
+body.light-theme .mobile-bottom-nav button.active{background:rgba(23,111,193,.10)!important;color:#176fc1!important;border-color:rgba(23,111,193,.28)!important}
+body.luxury-theme .tabs button.active,body.luxury-theme .theme-choice-group button.active,
+body.luxury-theme .mobile-bottom-nav button.active{background:rgba(143,159,255,.18)!important;color:#c2cbff!important;border-color:rgba(174,186,255,.42)!important}
+body.dark-theme .notice{background:rgba(35,31,22,.72)!important;border-color:rgba(220,180,72,.2)!important;color:#eee3c5!important}
+body.light-theme .notice{background:#fff!important;border-color:rgba(30,91,145,.14)!important;color:#294760!important}
+body.luxury-theme .notice{background:rgba(37,47,105,.64)!important;border-color:rgba(160,173,255,.22)!important;color:#e2e7ff!important}
+body.dark-theme .section-title h2,body.dark-theme .market-section-caption strong,
+body.dark-theme .trade-market-heading strong{color:#f5e7bd!important}
+body.light-theme .section-title h2,body.light-theme .market-section-caption strong,
+body.light-theme .trade-market-heading strong{color:#17324a!important}
+body.luxury-theme .section-title h2,body.luxury-theme .market-section-caption strong,
+body.luxury-theme .trade-market-heading strong{color:#dce2ff!important}
