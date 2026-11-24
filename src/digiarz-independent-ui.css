@@ -3143,3 +3143,10 @@ body.luxury-theme #dashboardMarketPreview .da-market-coin-card:hover{border-colo
  #tab-dashboard .da-v2-trust-row{gap:8px 12px;font-size:10px}
  #tab-dashboard .da-v2-bottom{align-items:flex-start;flex-direction:column;margin-top:18px;padding:14px}
 }
+
+/* User-approved: coin marks stay frameless; favorites retain their visible star button. */
+#dashboardMarketPreview .da-market-logo,#dashboardMarketPreview .da-market-logo-inner,
+#dashboardMarketPreview .da-market-logo img,#dashboardMarketPreview .da-market-logo-inner img{border:0!important;outline:0!important}
+body.dark-theme #dashboardMarketPreview .da-market-logo,body.dark-theme #dashboardMarketPreview .da-market-logo-inner{box-shadow:0 0 0 3px rgba(242,202,112,.12),0 5px 14px rgba(0,0,0,.22)!important}
+body.light-theme #dashboardMarketPreview .da-market-logo,body.light-theme #dashboardMarketPreview .da-market-logo-inner{box-shadow:0 0 0 3px rgba(37,111,190,.09),0 5px 14px rgba(42,96,145,.12)!important}
+body.luxury-theme #dashboardMarketPreview .da-market-logo,body.luxury-theme #dashboardMarketPreview .da-market-logo-inner{box-shadow:0 0 0 3px rgba(193,204,255,.13),0 5px 14px rgba(8,14,60,.24)!important}
