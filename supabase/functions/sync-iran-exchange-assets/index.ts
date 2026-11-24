@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { extractPersianNameCandidate } from "../../../src/persian-asset-names.mjs";
+import { collectBitpinMarketPages, isSuperAdminRpcAuthorized } from "../../../src/sync-safety.mjs";
 
 const KIFPOOL_BODY = {
   operationName: "headerCoins",
@@ -126,7 +127,15 @@ Deno.serve(async (req: Request) => {
     headers: { apikey: anonKey, Authorization: auth, "Content-Type": "application/json" },
     body: JSON.stringify({}),
   });
-  if (!adminCheck.ok) return Response.json({ error: "Super administrator access required" }, { status: 403 });
+  let adminCheckBody: unknown = null;
+  try {
+    adminCheckBody = await adminCheck.json();
+  } catch {
+    return Response.json({ error: "Super administrator access required" }, { status: 403 });
+  }
+  if (!isSuperAdminRpcAuthorized(adminCheck.ok, adminCheckBody)) {
+    return Response.json({ error: "Super administrator access required" }, { status: 403 });
+  }
 
   const results: Record<string, unknown>[] = [];
   for (const ex of EXCHANGES) {
@@ -151,28 +160,14 @@ Deno.serve(async (req: Request) => {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       let payload = await response.json();
       if (ex.id === "bitpin") {
-        const marketRows = Array.isArray(payload?.results) ? [...payload.results] : [];
-        let nextPage = typeof payload?.next === "string" ? payload.next : null;
-        let pageCount = 1;
-        const catalogOrigin = new URL(ex.url).origin;
-        while (nextPage && pageCount < 20) {
-          const nextUrl = new URL(nextPage, ex.url);
-          if (nextUrl.origin !== catalogOrigin || !nextUrl.pathname.includes("/mkt/markets/")) {
-            throw new Error("Bitpin pagination returned an unexpected URL");
-          }
-          const pageResponse = await fetch(nextUrl.toString(), {
+        payload = await collectBitpinMarketPages({
+          firstPayload: payload,
+          catalogUrl: ex.url,
+          fetchPage: (url: string) => fetch(url, {
             headers: { accept: "application/json", "user-agent": "DigiArz-market-catalog/1.0" },
             signal: AbortSignal.timeout(12000),
-          });
-          if (!pageResponse.ok) throw new Error(`Bitpin page ${pageCount + 1} HTTP ${pageResponse.status}`);
-          const pagePayload = await pageResponse.json();
-          if (!Array.isArray(pagePayload?.results)) throw new Error("Bitpin pagination response has no results array");
-          marketRows.push(...pagePayload.results);
-          nextPage = typeof pagePayload?.next === "string" ? pagePayload.next : null;
-          pageCount += 1;
-        }
-        if (nextPage) throw new Error("Bitpin catalog exceeded the 20-page safety limit");
-        payload = { ...payload, results: marketRows, next: null };
+          }),
+        });
       }
       if (ex.kind === "kifpool" && (!payload?.data?.coinList?.coins || payload?.errors?.length)) {
         throw new Error("Kifpool persisted GraphQL market query failed");
