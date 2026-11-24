@@ -7,7 +7,7 @@ const css = fs.readFileSync('src/digiarz-independent-ui.css', 'utf8');
 const sw = fs.readFileSync('sw.js', 'utf8');
 
 test('independent stylesheet loads after all inline styles and before the document closes', () => {
-  const link = '<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=1">';
+  const link = '<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=2">';
   assert.ok(html.includes(link));
   assert.ok(html.indexOf(link) > html.lastIndexOf('</style>'));
   assert.ok(html.indexOf(link) < html.lastIndexOf('</body>'));
@@ -51,8 +51,29 @@ test('obsolete five-gainer and five-loser panels are removed while market summar
   assert.match(html, /id="dashboardMarketPreview"/);
 });
 
+test('premium mobile refinement prevents market price collisions and gives the three themes distinct identities', () => {
+  const marker = 'DigiArz premium mobile refinement v4';
+  const finalRules = css.slice(css.lastIndexOf(marker));
+  assert.ok(finalRules.length > 0, 'device-driven premium refinement exists');
+  for (const token of [
+    'grid-template-areas:"fav identity spark change price"',
+    'grid-area:change!important',
+    'grid-area:price!important',
+    'display:none!important',
+    'border-bottom:1px solid var(--da-line)!important',
+    'body.dark-theme #marketList>.coin',
+    'body.light-theme #marketList>.coin',
+    'body.luxury-theme #marketList>.coin',
+    'max(7px,env(safe-area-inset-bottom))',
+    'grid-template-columns:28px minmax(94px,1.16fr)'
+  ]) assert.ok(finalRules.includes(token), 'premium mobile rules include ' + token);
+  assert.match(finalRules, /--da-accent:#e7b94d!important/);
+  assert.match(finalRules, /--da-bg:#fff!important/);
+  assert.match(finalRules, /--da-accent:#a9b7ff!important/);
+});
+
 test('service worker precaches the new stylesheet under a fresh shell cache', () => {
-  assert.match(sw, /digiarz-shell-v59/);
+  assert.match(sw, /digiarz-shell-v60/);
   assert.match(sw, /digiarz-independent-ui\.css\?v=1/);
 });
 
