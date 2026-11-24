@@ -15,7 +15,7 @@ const KIFPOOL_BODY = {
 const EXCHANGES = [
   { id: "nobitex", url: "https://apiv2.nobitex.ir/v2/options", kind: "nobitex" },
   { id: "wallex", url: "https://api.wallex.ir/v1/markets", kind: "markets" },
-  { id: "bitpin", url: "https://api.bitpin.ir/api/v1/mkt/tickers/", kind: "markets" },
+  { id: "bitpin", url: "https://api.bitpin.ir/api/v1/mkt/markets/", kind: "markets" },
   { id: "ramzinex", url: "https://api.ramzinex.ir/exchange/api/v1.0/exchange/pairs", kind: "markets" },
   { id: "tabdeal", url: "https://api-web.tabdeal.org/r/plots/currencies/dynamic-info/", kind: "markets" },
   { id: "ompfinex", url: "https://api.ompfinex.com/v2/market", kind: "markets" },
@@ -49,7 +49,7 @@ function records(root: unknown): Record<string, unknown>[] {
     }
     const o = v as Record<string, unknown>;
     const keys = Object.keys(o);
-    if (keys.some(k => ["symbol","market","pair","baseAsset","base_currency","baseCurrency","currency","coin"].includes(k))) out.push(o);
+    if (keys.some(k => ["symbol","market","pair","baseAsset","base_currency","baseCurrency","currency","coin","currency1"].includes(k))) out.push(o);
     for (const [k, x] of Object.entries(o)) {
       if (["message","description","html"].includes(k)) continue;
       walk(x, depth + 1);
@@ -61,9 +61,17 @@ function records(root: unknown): Record<string, unknown>[] {
 function extract(exchange: typeof EXCHANGES[number], payload: unknown) {
   const out = new Map<string, Record<string, unknown>>();
   for (const o of records(payload)) {
-    const baseRaw = get(o, ["baseAsset","base_asset","baseCurrency","base_currency","base","currency","coin","asset","code"]);
-    const quoteRaw = get(o, ["quoteAsset","quote_asset","quoteCurrency","quote_currency","quote"]);
-    const marketRaw = get(o, ["symbol","market","pair","marketSymbol","market_symbol","name"]);
+    const bitpinBase = exchange.id === "bitpin" ? get(o, ["currency1"]) : null;
+    const baseRaw = bitpinBase && typeof bitpinBase === "object"
+      ? get(bitpinBase as Record<string, unknown>, ["code"])
+      : get(o, ["baseAsset","base_asset","baseCurrency","base_currency","base","currency","coin","asset","code"]);
+    const bitpinQuote = exchange.id === "bitpin" ? get(o, ["currency2"]) : null;
+    const quoteRaw = bitpinQuote && typeof bitpinQuote === "object"
+      ? get(bitpinQuote as Record<string, unknown>, ["code"])
+      : get(o, ["quoteAsset","quote_asset","quoteCurrency","quote_currency","quote"]);
+    const marketRaw = exchange.id === "bitpin"
+      ? get(o, ["code"])
+      : get(o, ["symbol","market","pair","marketSymbol","market_symbol","name"]);
     let base = norm(baseRaw);
     let quote = norm(quoteRaw);
     let market = typeof marketRaw === "string" ? marketRaw.trim().toUpperCase().replace(/[\s_]/g, "") : null;
