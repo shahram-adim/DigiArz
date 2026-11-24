@@ -1441,3 +1441,4 @@
 - [ ] Full runtime Node test suite / CI for the latest PR head remains pending. Some phonetic spellings—especially new/obscure tokens and tokenized equities—still need human curation for best Persian wording.
 - [ ] No APK rebuild, merge, deployment, Production DB change, migration, or cron change. The catalog audit used SELECT-only queries; no database rows or schema were changed. PR #60 remains Draft/open/unmerged.
 - Next: add targeted curated overrides for awkward transliterations, then obtain exact-head CI and visual/device acceptance.
+- [x] Added targeted curated spellings for ambiguous/newer catalog names (including 0G, 1INCH, DoubleZero, The9bit, DeAgentAI, AITECH and OKZOO); all inline scripts and the regression test file pass static JavaScript syntax parsing after the follow-up edits.
