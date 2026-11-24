@@ -1146,3 +1146,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Validation runs for CSS commit `eb17e0a...`: Exact decimal `45359412133` was in progress; Android `45359397397` was in progress and `45359412493` pending at the checkpoint. The final test commit `195bf1b...` must also receive fresh exact-head test and APK validation; do not accept this refinement or distribute a build until those complete.
 - No auth/trading business logic, Supabase/Production DB, migration, cron, deployment, merge or release changed. PR #60 remains Draft/open/unmerged. Real-device screenshots remain the visual acceptance gate.
 - Next: inspect the final-head CI/APK for `195bf1b...`, verify artifact provenance and bundle contents, then continue audit of any remaining page-specific inconsistencies.
+
+
+## 2026-11-24 — final-head Toman/detail/trade theme validation and APK
+- Rechecked live PR #60 and this handoff before proceeding. PR remains open, Draft, unmerged; branch `redesign/phase1-clean-2026`.
+- Exact-head test commit `444d8c26e3047f42a1aa37109e2dee333d2d5fdf`: Exact decimal workflow `45359514752` completed SUCCESS. TAP summary: 85 tests, 85 passed, 0 failed. This includes the corrected grouped luxury detail-panel selector test.
+- Exact-head Android workflow `45359515067` completed SUCCESS. Artifact `14904146875`, name `DigiArz-Android-debug-APK`, ZIP size 3,564,929 bytes, digest `sha256:f9c3cba9886edaa36dd6d1373492e51435622e1bde4b5b03839f9e837feeccb0`. ZIP integrity verified; includes `app-debug.apk` (3,945,658 bytes) and `BUILD-INFO.txt`.
+- APK SHA-256: `fbfc32405ab339c2b25c61528dbd2f2b4985371e0d4a1053cab185c26c3c9f21`. BUILD-INFO ties it to run `45359515067`, merge commit `58eef06041c747a69a89364251d5417797726770`, built `2026-11-24T08:51:48Z`. GitHub confirms synthetic merge commit parents include exact PR head `444d8c26...`.
+- Inspected bundled APK CSS and confirmed auth theme plus the newly added Toman table, asset-detail and order-book theme selectors are present. Verified copy: `/mnt/data/DigiArz-444d8c2-debug-review.apk`.
+- This is a Debug/review APK, not production-signed. Physical Android installation and screenshot-based visual acceptance remain outstanding.
+- No Production DB, Supabase, migrations, cron, deployment, merge, or release action. PR #60 remains Draft/open/unmerged.
+- Next: continue source audit for remaining pages and responsive edge cases; keep visual acceptance pending until actual device screenshots are reviewed.
