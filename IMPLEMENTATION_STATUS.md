@@ -1356,3 +1356,14 @@
 - [ ] Android run `45382671847` for auth CSS commit is in progress; its APK is not yet verified.
 - [ ] Exact Decimal CI on the current PR head remains unverified; physical Android installation/screenshots remain pending.
 - PR #60 stays Draft/open/unmerged. No Production/Supabase, DB, migration, cron, merge, deployment or release changes.
+
+
+### 2026-11-24 — authentication APK verified; dashboard visual pass
+- [x] Auth Android run `45382671847` SUCCESS; artifact `14915450601` downloaded and verified.
+- [x] Artifact ZIP SHA-256: `73150acd68531cf81c4f19246bfe86a07bac894136dae722945105f16e45812c`.
+- [x] APK SHA-256: `df376fceb02ae3e03fa38dc77ab59e9138c3556391677568e0024bd5e28d1d20`; BUILD-INFO provenance and APK archive integrity verified for source commit `e52d9701ea3f419a6c6b688c88a168f7c2d974eb`, run `45382671847`.
+- [x] Dashboard visual layer committed: CSS `a093b9873fb1350194df72535be6e21cadd6bb06`; regression coverage `814c109145432008af714105ca06f89d728e15c4`.
+- [ ] Android run `45385670065` for dashboard CSS commit is in progress; verify artifact before claiming completion.
+- [ ] Exact Decimal CI for current PR head is not verified; current workflow does not run on pushes to this Draft branch.
+- [ ] Real Android install/screenshots remain outstanding.
+- PR #60 remains Draft/open/unmerged. No Production/Supabase/DB, migration, cron, merge, deployment or release changes.
