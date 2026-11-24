@@ -1168,3 +1168,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Physical device screenshots remain outstanding; CSS/CI validation is not visual acceptance.
 - No Supabase/Production DB, migration, cron, deployment, merge, release, or paid service changes.
 - Next: inspect exact-head test and Android workflow results for `2ff9fab...`; if both pass, verify the APK contents/provenance and update this handoff with the final result. Keep PR #60 Draft/unmerged.
+
+
+## 2026-11-24 — account-page polish, exact-head CI and APK provenance
+- Rechecked PR #60 before continuing: still open, Draft, unmerged; head branch `redesign/phase1-clean-2026`, exact head `9148ff825d2b1f73a5280134f7c593abadc3d810`.
+- Added premium page-specific styling for Assets, Orders, History and Settings in `src/digiarz-independent-ui.css` (commit `5be3c3eba64c487bcf35f99beec6486158cf28da`) and regression coverage in `tests/independent-ui.test.js` (commit/head `9148ff825d2b1f73a5280134f7c593abadc3d810`). Three palettes remain distinct; mobile layouts stack without changing app logic.
+- Exact-head CI for `9148ff8...`: Exact decimal workflow run `45375180583` completed SUCCESS; Android debug APK workflow run `45375180543` completed SUCCESS. Both jobs report no failed steps.
+- Downloaded and inspected Android artifact `14911191960` (`DigiArz-Android-debug-APK`, ZIP size 3,567,671 bytes; artifact digest `sha256:b668bf620f7ff9937d0ae5377bb3744389fea46b277c95f2237efb5fd6cc7bb1`). ZIP integrity/listing verified; contains `app-debug.apk` (3,947,930 bytes) and `BUILD-INFO.txt`.
+- BUILD-INFO identifies workflow run `45375180543`, PR merge ref `refs/pull/60/merge`, merge commit `88d5422b9313a478e1a05dbc4f75414904c762a9`, built at `2026-11-24T10:30:25Z`. APK SHA-256 verified locally: `8900a9eaccc908d769b1aa21aa52ec4c8ffd9d363c85889aac76bbb975175d99`. Extracted APK includes `assets/public/src/digiarz-independent-ui.css` (188,596 bytes) and `assets/public/index.html` (521,355 bytes); this confirms the UI stylesheet is packaged.
+- This is an installable DEBUG/review APK, not production-signed. No physical-device screenshots or install/visual acceptance have been performed; do not call the design finished based only on CI.
+- No Supabase/Production DB, migrations, cron, deployments, merge, or release actions. PR #60 remains Draft/open/unmerged.
+- Next: continue the remaining-page source audit (especially Admin, asset detail, and trade/order-book on narrow screens), then request/review real-device screenshots before any merge decision.
