@@ -1442,3 +1442,14 @@
 - [ ] No APK rebuild, merge, deployment, Production DB change, migration, or cron change. The catalog audit used SELECT-only queries; no database rows or schema were changed. PR #60 remains Draft/open/unmerged.
 - Next: add targeted curated overrides for awkward transliterations, then obtain exact-head CI and visual/device acceptance.
 - [x] Added targeted curated spellings for ambiguous/newer catalog names (including 0G, 1INCH, DoubleZero, The9bit, DeAgentAI, AITECH and OKZOO); all inline scripts and the regression test file pass static JavaScript syntax parsing after the follow-up edits.
+
+
+### 2026-11-24 — Persian-name fallback coverage extended to dashboard and wallet views
+- [x] Re-audited all active uses of `persianCoinName` after the 416-asset market catalog fallback work.
+- [x] Fixed the shared helper to use the curated English asset name in `coinInfo` when no Persian dictionary entry or explicit English name is supplied; this also improves wallet/asset-list labels that call the helper with only a ticker.
+- [x] Updated the dashboard top-assets cards to pass exchange/catalog Persian and English name fields before falling back to the English catalog name.
+- [x] Added regression assertions for the shared helper fallback and top-assets metadata handoff.
+- [ ] Exact-head CI/runtime test results for the new commits are pending; static source edits alone are not treated as a passing test suite.
+- [ ] Human editorial review of phonetic Persian transliterations and physical Android visual acceptance remain outstanding.
+- PR #60 remains Draft/open/unmerged. No merge, deployment, APK rebuild/release, Supabase/Production DB change, migration, or cron change.
+- Next: run the exact-head regression workflow and review any failures before further UI edits.
