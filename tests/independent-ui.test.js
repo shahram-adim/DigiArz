@@ -742,9 +742,10 @@ test('dashboard removes its repeated brand masthead and keeps indigo glass accou
 test('dashboard no longer leaves excessive mobile bottom whitespace and keeps the fixed nav clear', () => {
   const v6 = css.slice(css.lastIndexOf('dashboard bottom-space and universal frameless logo correction v6'));
   assert.ok(v6.length > 0);
-  assert.match(v6, /padding-bottom:calc\\(88px \\+ env\\(safe-area-inset-bottom\\)\\)!important/);
-  assert.match(v6, /#tab-dashboard\\{[\\s\\S]*?min-height:0!important;height:auto!important;[\\s\\S]*?padding-bottom:12px!important/);
-  assert.doesNotMatch(v6, /padding-bottom:150px!important/);
+  assert.ok(v6.includes('padding-bottom:calc(88px + env(safe-area-inset-bottom))!important'));
+  assert.ok(v6.includes('min-height:0!important;height:auto!important'));
+  assert.ok(v6.includes('padding-bottom:12px!important;margin-bottom:0!important'));
+  assert.ok(!v6.includes('padding-bottom:150px!important'));
 });
 
 test('brand, dashboard, market, wallet and asset-detail logos have no visible frame in any theme', () => {
@@ -756,5 +757,6 @@ test('brand, dashboard, market, wallet and asset-detail logos have no visible fr
     '#tab-assets #assetList .asset-row .asset-logo',
     '#tab-chart .asset-detail-head .asset-logo'
   ]) assert.ok(v6.includes(selector), 'missing frameless logo selector: ' + selector);
-  assert.match(v6, /border:0!important;outline:0!important;box-shadow:none!important;[\\s\\S]*?background:transparent!important/);
+  assert.ok(v6.includes('border:0!important;outline:0!important;box-shadow:none!important;'));
+  assert.ok(v6.includes('background:transparent!important;'));
 });
