@@ -1209,3 +1209,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - APK contains `assets/public/index.html` (521,355 bytes) and `assets/public/src/digiarz-independent-ui.css` (199,307 bytes), including the frameless CSS layer. This is a Debug/review APK, not production-signed.
 - Structural source validation confirmed all nine target selectors, all three theme hover rules, zero CSS brace imbalance, and the regression test is present. Full Exact decimal workflow for test head `dcbd3186...` has not appeared; prior Exact decimal run `45377590939` passed on preceding code head `9d02ec1...`. Do not claim full exact-head test completion.
 - Latest branch head after documentation checkpoint: `03615a5b907af78e3e5042d16c3ecf358b4623cd`. PR #60 remains Draft/open/unmerged. No Production changes. Physical-device install/screenshot review still pending.
+
+
+## 2026-11-24 — premium asset detail workspace pass
+- Audited the real `#tab-chart` markup and existing theme CSS before editing. Page includes asset logo/name/symbol/price, description, demo buy/sell, user reviews, review form and coin news.
+- Found the detail header flex ordering placed price before name/logo; replaced with responsive grid hierarchy: logo, asset name/symbol, then price; on narrow screens price moves under the name without clipping.
+- Added visual-only three-theme treatments for detail panels, buy/sell cards, review cards and news cards; improved text wrapping and responsive behavior at 560px and 380px.
+- CSS commit: `b34e820e8de8740db36f579a4acdf58cc57c3837`; regression test commit/head: `247fa19a4959da30851a012d6fcd415033cfa2db`.
+- Test covers actual page IDs/selectors, three theme variants and mobile breakpoints. Source inspection confirms CSS and test committed.
+- Android workflow run `45379100763` started for CSS commit `b34e820e...`; at checkpoint APK build step was in progress. Exact-decimal workflow was not observed for the new test head; do not claim full test success.
+- PR #60 remains Draft/open/unmerged. No application logic, market data, trade/wallet operations, Supabase, Production DB, migration, cron, deployment or release changes.
+- Next: verify Android artifact provenance and run status; continue remaining pages (toman market, orders/history, settings) after detail-page validation. Physical Android screenshot review remains a separate acceptance item.
