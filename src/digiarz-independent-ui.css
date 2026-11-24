@@ -4058,3 +4058,15 @@ body.luxury-theme #dashboardMarketPreview .da-market-coin-card{
   box-shadow:none!important;
   background:transparent!important;
 }
+
+
+/* 2026-11-24 dashboard wallet summary moved to the first content position, Bit24-style. */
+#tab-dashboard>.da-v2-account-card{order:1!important;margin-top:0!important}
+#tab-dashboard>.da-v2-hero{order:2!important}
+#tab-dashboard>.da-v2-quick-grid{order:3!important}
+#tab-dashboard>.da-v2-section-head{order:4!important}
+#tab-dashboard>.da-market-glass{order:5!important}
+#tab-dashboard>#dashboardMarketPreviewUpdated{order:6!important}
+#tab-dashboard>.da-v2-trust-row{order:7!important}
+#tab-dashboard>.da-v2-bottom{order:8!important}
+#tab-dashboard>.dashboard-activity-center{order:9!important}
