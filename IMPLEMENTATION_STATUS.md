@@ -1385,3 +1385,13 @@
 - [ ] Exact-decimal workflow result for the latest head is not yet visible through the available commit-run/status query; no CI pass claim.
 - [ ] Physical Android installation and screenshot-based acceptance remain outstanding.
 - PR #60 remains Draft/open/unmerged. No Supabase, Production DB, migration, cron, merge, deployment or release changes.
+
+
+### 2026-11-24 — exact-head CI failure diagnosed and regression assertion corrected
+- [x] Retrieved the actual GitHub Actions run for head `461c9a89a3297bc7f85532e349925b29bbcd181c`: run `45386488065`, job `exact-decimal` failed in the Node test step; PostgreSQL validation steps were skipped because the test step failed first.
+- [x] Test summary: 96 total, 95 passed, 1 failed. The only failure was `tests/independent-ui.test.js` asserting a non-existent `registerBtn` ID in the authentication hero test.
+- [x] Rechecked actual `index.html`: the current signup control is `signupBtn`; runtime signup handler also binds to `signupBtn`. This was a stale test selector, not a missing UI control.
+- [x] Corrected the regression assertion to use `signupBtn`; test commit: `f72ac74da91848cd8569c0455153e8f21cc515d4`.
+- [ ] Rerun the full exact-decimal workflow on the new head; PostgreSQL checks have not yet run for this candidate.
+- [ ] Physical Android installation and screenshot-based visual acceptance remain outstanding.
+- PR #60 remains Draft/open/unmerged. No Production/Supabase, DB, migration, cron, deployment, merge or release changes.
