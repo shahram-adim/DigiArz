@@ -606,17 +606,17 @@ test('admin operations panels preserve responsive controls and all key data regi
 
 
 test('all active market assets receive Persian display names from curated names or English-name transliteration', () => {
-  assert.match(html, /function transliterateAssetNameToPersian\(value\)/);
-  assert.match(html, /function persianCoinName\(symbol,englishName=''/);
-  assert.match(html, /transliterateAssetNameToPersian\(englishName\|\|coinInfo\[base\]\?\.name\|\|''\)/);
-  assert.match(html, /englishName=String\(row\.item\.name_en\|\|row\.item\.asset_name_en\|\|row\.item\.english_name\|\|row\.item\.name\|\|coinInfo\[base\]\?\.name\|\|base\)/);\n  assert.match(html, /persianCoinName\(symbol,englishName\)/);\n  assert.match(html, /class=\\"top-asset-name-en\\" dir=\\"ltr\\"/);
-  assert.match(html, /persianCoinName\(item\.symbol,englishName\)/);
-  assert.match(html, /persianCoinName\(symbol,englishName\)/);
-  assert.match(html, /persianCoinName\(symbol,x\.name_fa\|\|x\.asset_name_fa/);
+  assert.match(html, /function transliterateAssetNameToPersian\\(value\\)/);
+  assert.match(html, /function persianCoinName\\(symbol,englishName=''/);
+  assert.match(html, /transliterateAssetNameToPersian\\(englishName\\|\\|coinInfo\\[base\\]\\?\\.name\\|\\|''\\)/);
+  assert.match(html, /englishName=String\\(row\\.item\\.name_en\\|\\|row\\.item\\.asset_name_en\\|\\|row\\.item\\.english_name\\|\\|row\\.item\\.name\\|\\|coinInfo\\[base\\]\\?\\.name\\|\\|base\\)/);
+  assert.match(html, /persianCoinName\\(symbol,englishName\\)/);
+  assert.match(html, /class="top-asset-name-en" dir="ltr"/);
+  assert.match(html, /persianCoinName\\(item\\.symbol,englishName\\)/);
+  assert.match(html, /persianCoinName\\(symbol,x\\.name_fa\\|\\|x\\.asset_name_fa/);
   assert.match(html, /asset_name_fa/);
   assert.match(html, /asset_name_en/);
 });
-
 
 test('dashboard hides account activity from regular users and keeps it available to admins', () => {
   assert.match(html, /id="dashboardAdminActivity"[^>]*hidden/);
