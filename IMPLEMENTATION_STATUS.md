@@ -1343,3 +1343,9 @@
 2. Add an explicit bounded-retention design only if stale-row growth becomes material; it must never prune based on a non-empty partial provider response.
 3. Deploy the corrected Edge Function only after explicit user approval; then separately authorize any real refresh operation.
 4. Continue reconstructing the missing migration sources and exact Production-to-test PostgreSQL 17 parity before full source-faithful Stop-Limit lifecycle testing.
+
+
+### Regression-guard correction — 2026-11-25
+- [x] Re-read the newly committed test and tightened its source guard to match the SQL/HTTP verb token `DELETE` directly, avoiding an over-escaped whitespace pattern.
+- [x] Test file re-fetched after commit and exact content verified.
+- [ ] Final CI run on the latest main HEAD must complete before the test suite is marked green.
