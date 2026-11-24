@@ -637,6 +637,24 @@ test('top asset cards and wallet rows show Persian and full English names alongs
 });
 
 
+test('active wallet and market renderers preserve bilingual names and clean price markup', () => {
+  const assetsStart = html.lastIndexOf('function renderAssets()');
+  const assetsEnd = html.indexOf('async function loadAssets()', assetsStart);
+  const activeAssets = html.slice(assetsStart, assetsEnd);
+  assert.ok(assetsStart >= 0 && assetsEnd > assetsStart, 'active wallet renderer is located');
+  assert.match(activeAssets, /englishName=asset==='USDT'\?'Tether':String\(market\?\.name_en/);
+  assert.ok(activeAssets.includes("english.className='asset-name-en'"));
+  assert.ok(activeAssets.includes('label.append(name,english,ticker)'));
+
+  const marketsStart = html.lastIndexOf('function renderMarkets()');
+  const marketsEnd = html.indexOf('function renderDashboardPortfolio', marketsStart);
+  const activeMarkets = html.slice(marketsStart, marketsEnd);
+  assert.ok(marketsStart >= 0 && marketsEnd > marketsStart, 'active market renderer is located');
+  assert.ok(activeMarkets.includes('priceMarkup=usdMarkup+tomanMarkup;'));
+  assert.doesNotMatch(activeMarkets, /coin-source fresh|coin-source stale|freshnessMarkup/);
+  assert.ok(activeMarkets.includes('coin-english-name'));
+});
+
 test('market asset rows omit source and freshness labels while retaining USD and Toman prices', () => {
   assert.match(html, /const priceMarkup=usdMarkup\+tomanMarkup;/);
   assert.doesNotMatch(html, /coin-source fresh|coin-source stale|زمان منبع حداکثر ۲ دقیقه/);
