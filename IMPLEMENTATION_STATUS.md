@@ -1470,3 +1470,31 @@
 - [x] Updated the market bilingual-name assertion to match the existing comma-declared English metadata variable (no product behavior change).
 - [ ] Exact-head CI rerun after these final assertion corrections is pending.
 - PR #60 remains Draft/open/unmerged. No merge, deployment, APK rebuild/release, Production DB change, migration, or cron change.
+
+
+## رابط کاربری مستقل — اصلاح renderer فعال و حذف قاب‌های داشبورد (۲۰۲۶-۱۱-۲۴)
+
+### انجام‌شده
+- [x] در CSS نهایی داشبورد، قاب/پس‌زمینهٔ دکمهٔ علاقه‌مندی و border/outline/shadow ردیف‌های پیش‌نمایش بازار حذف شد؛ لوگوها بدون قاب باقی ماندند.
+- [x] آزمون داشبورد از انتظار قدیمی «favorite frame / framed rows» به الزام frameless تغییر کرد.
+- [x] دو تعریف هم‌نام renderer در `index.html` بررسی شد؛ چون تعریف دوم در runtime غالب است، همان نسخهٔ فعال `renderAssets()` اصلاح شد تا نام فارسی، نام کامل انگلیسی و ticker را نمایش دهد.
+- [x] renderer فعال `renderMarkets()` اصلاح شد تا فقط قیمت USD و تومان را در price markup نگه دارد و برچسب‌های source/freshness قدیمی را اضافه نکند.
+- [x] آزمون مستقل جدید برای rendererهای فعال کیف پول و بازار اضافه شد تا بررسی فقط به وجود کد در تعریف قدیمی محدود نماند.
+- [x] تغییرات روی شاخهٔ `redesign/phase1-clean-2026` ثبت شدند؛ آخرین commit ثبت‌شده در زمان گزارش: `b91f8756795ae8ae259a1c7e8100d5a115906ecc`.
+
+### نتیجهٔ بررسی ایستا
+- [x] تعریف فعال کیف پول شامل `englishName` و عنصر `asset-name-en` است.
+- [x] تعریف فعال بازار از `priceMarkup=usdMarkup+tomanMarkup` استفاده می‌کند و freshness markup ندارد.
+- [x] مجموعهٔ آزمون رابط کاربری 38 تست دارد و assertions قدیمی مربوط به قاب ستاره حذف شده‌اند.
+- [!] آزمون‌ها هنوز در محیط GitHub Actions روی آخرین commit نتیجهٔ قابل مشاهده ندارند؛ وضعیت checkها خالی است. آزمون محلی نیز در محیط بررسی به‌دلیل عدم دسترسی شبکه برای دریافت فایل‌ها اجرا نشد.
+- [!] PR #60 باز و Draft است؛ mergeable=false؛ هیچ merge انجام نشده است.
+
+### باقی‌مانده / گام بعد
+1. دریافت نتیجهٔ Exact-decimal و Android APK workflow روی آخرین commit؛ تا آن زمان موفقیت CI یا تولید APK جدید اعلام نشود.
+2. بازبینی بصری واقعی در Android WebView و مرورگر موبایل برای هر سه تم؛ آزمون‌های ساختاری جایگزین بررسی بصری نیستند.
+3. بررسی علت `mergeable=false` و سه commit عقب‌ماندهٔ main؛ بدون rebase/merge تا بررسی کامل و تأیید مالک.
+4. پس از تأیید CI، تولید APK آزمایشی و کنترل BUILD-INFO/SHA؛ انتشار یا توزیع نهایی نیازمند تأیید مستقل است.
+
+### مرز ایمنی
+- هیچ تغییری در main، Supabase Production، schema، data، Auth، cron، سفارش‌ها یا کیف پول‌ها انجام نشد.
+- هیچ APK منتشر یا به‌عنوان نسخهٔ جدید معرفی نشد.
