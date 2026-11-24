@@ -1405,3 +1405,12 @@
 - [ ] Static source audit is not visual acceptance: physical Android installation and screenshot review at phone/tablet/desktop widths remain outstanding.
 - [ ] Continue with runtime/browser visual verification and APK installation evidence; no merge/release/Production/Supabase changes authorized.
 - PR #60 remains Draft/open/unmerged.
+
+
+### 2026-11-24 — Android artifact provenance rechecked against latest UI source
+- [x] Re-fetched Android workflow run `45385670065`: SUCCESS; artifact `14916121853` is present and not expired.
+- [x] Downloaded and integrity-tested artifact ZIP: SHA-256 `a62c5fd390e4298c33ec15a3625d2180faeb57610a080602ca6a015083536f7b`; ZIP test passed with no corrupt entries.
+- [x] Verified embedded `BUILD-INFO.txt`: source commit `a093b9873fb1350194df72535be6e21cadd6bb06`, workflow run `45385670065`, package version `1.0.0`; embedded APK SHA-256 `dce5e8006925fe5760cf9a6d055acf508cd266f8f7ceda8fbaea58919f564c91` matches the extracted APK bytes.
+- [x] Compared Android source commit `a093b987...` with current PR head `f35af18d...`: 11 commits ahead, with changes limited to exact-decimal workflow configuration, tests, and documentation; no application/UI source files changed after the APK build.
+- [ ] Physical device installation, launch, and screenshot review remain outstanding; this environment has no ADB/emulator tooling, so no device acceptance is claimed.
+- PR #60 remains Draft/open/unmerged. No merge, release, deployment, Production/Supabase, database, migration, or cron changes.
