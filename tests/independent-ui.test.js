@@ -213,3 +213,27 @@ test('three themes apply distinct accents and premium surfaces across shared app
   assert.match(themeCss, /body\.light-theme[\s\S]*?--da-bg:#fff!important;--da-bg2:#fff!important/);
   assert.match(themeCss, /linear-gradient\(145deg,rgba\(37,47,105/);
 });
+
+
+test('theme identity carries through dashboard, market, trade and authentication hero surfaces', () => {
+  const marker = '/* 2026-11-24 theme identity pass: unify the hero, auth and dashboard focal surfaces. */';
+  const identity = css.slice(css.lastIndexOf(marker));
+  assert.ok(identity.length > 0, 'theme identity layer exists');
+  for (const theme of ['dark-theme', 'light-theme', 'luxury-theme']) {
+    assert.ok(identity.includes('body.' + theme + '{'), theme + ' defines hero tokens');
+    assert.ok(identity.includes('body.' + theme + ' .da-v2-hero'), theme + ' styles dashboard hero');
+    assert.ok(identity.includes('body.' + theme + ' .market-hero-v34'), theme + ' styles market hero');
+    assert.ok(identity.includes('body.' + theme + ' .trade-workspace-banner-v35'), theme + ' styles trade hero');
+    assert.ok(identity.includes('body.' + theme + ' #authView .auth-visual'), theme + ' styles authentication visual');
+    assert.ok(identity.includes('body.' + theme + ' #authView .auth-form'), theme + ' styles authentication form');
+    assert.ok(identity.includes('body.' + theme + ' .da-v2-account-card'), theme + ' styles dashboard account surface');
+  }
+  assert.match(identity, /--da-hero-accent:#e7b94d/);
+  assert.match(identity, /--da-hero-accent:#176fc1/);
+  assert.match(identity, /--da-hero-accent:#b9c5ff/);
+  assert.match(identity, /body\.light-theme[\s\S]*?--da-hero-bg:linear-gradient\(118deg,#ffffff 0%,#ffffff/);
+  assert.match(html, /class="da-v2-hero"/);
+  assert.match(html, /class="market-hero-v34"/);
+  assert.match(html, /class="trade-workspace-banner-v35"/);
+  assert.match(html, /class="auth-visual"/);
+});
