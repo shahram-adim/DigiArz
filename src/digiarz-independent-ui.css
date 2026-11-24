@@ -1242,3 +1242,19 @@ body.luxury-theme #authView .auth-visual{
   background:radial-gradient(ellipse at 78% 38%,rgba(174,160,255,.22),transparent 44%),linear-gradient(145deg,#272052,#171438 65%,#111027)!important;
 }
 body.luxury-theme #authView .auth-form{background:linear-gradient(155deg,rgba(48,41,100,.86),rgba(22,19,57,.96))!important;border-color:rgba(174,160,255,.32)!important}
+
+
+/* Final indigo-glass correction: dashboard market preview must not inherit the old sky-blue palette. */
+body.luxury-theme #dashboardMarketPreview .da-market-coin-card{
+  background:linear-gradient(145deg,#30275f,#1b1744)!important;
+  border:1px solid rgba(183,168,255,.30)!important;
+  box-shadow:0 5px 20px rgba(9,6,30,.28)!important;
+  color:#f3f0ff!important;
+}
+body.luxury-theme #dashboardMarketPreview .da-market-identity,
+body.luxury-theme #dashboardMarketPreview .da-market-name-wrap b,
+body.luxury-theme #dashboardMarketPreview .da-market-price{color:#f3f0ff!important}
+body.luxury-theme #dashboardMarketPreview .da-market-name-wrap small{color:#c4bce9!important}
+body.luxury-theme #dashboardMarketPreview .da-market-toman{color:#b7a8ff!important}
+body.luxury-theme #dashboardMarketPreview .da-market-change.pos{color:#65d8b5!important}
+body.luxury-theme #dashboardMarketPreview .da-market-change.neg{color:#ff879f!important}
