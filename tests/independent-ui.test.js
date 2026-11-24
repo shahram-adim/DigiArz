@@ -601,8 +601,8 @@ test('admin operations panels preserve responsive controls and all key data regi
     'exchangeSyncIssues','adminUsersList','adminAssetSearch','adminAssetCandidates',
     'adminAssetListings','adminPairReview'
   ]) assert.ok(html.includes('id="' + id + '"'), 'admin markup preserves ' + id);
-  assert.match(pass, /@media\\(max-width:560px\\)/);
-  assert.match(pass, /@media\\(max-width:380px\\)/);
-  assert.match(pass, /#tab-admin \\.detail-section \\.market-tools\\{display:grid/);
-  assert.match(pass, /#tab-admin #exchangeSyncStats\\{grid-template-columns:minmax\\(0,1fr\\)\\}/);
+  assert.ok(pass.includes('@media(max-width:560px)'), 'admin 560px breakpoint exists');
+  assert.ok(pass.includes('@media(max-width:380px)'), 'admin 380px breakpoint exists');
+  assert.ok(pass.includes('#tab-admin .detail-section .market-tools{display:grid'), 'admin controls stack on mobile');
+  assert.ok(pass.includes('#tab-admin #exchangeSyncStats{grid-template-columns:minmax(0,1fr)}'), 'sync stats stack on narrow phones');
 });
