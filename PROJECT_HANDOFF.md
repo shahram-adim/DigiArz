@@ -1188,3 +1188,15 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Exact-head workflows have started: Android run `45377590820` (queued at first inspection) and Exact decimal run `45377590939` (in progress at first inspection). Do not claim this pass validated until both exact-head runs finish successfully and APK provenance/package CSS is checked.
 - This pass is CSS and regression-test only. No trading, order, auth, wallet, backend, Supabase, Production DB, migration, cron, deployment, merge, or release behavior was changed. PR remains Draft/open/unmerged.
 - Next: inspect both exact-head workflow results, fix only isolated test/style issues if found, then continue real-device visual acceptance checklist.
+
+
+## 2026-11-24 — frameless market and wallet asset identity pass
+- Rechecked PR #60 and current source before editing: branch `redesign/phase1-clean-2026`; PR remains open, Draft and unmerged.
+- Audited the actual dashboard market preview, global market rows, wallet asset rows and asset-detail logo markup. Found residual frames/borders/shadows around market-row cards, favorite controls and some coin logos, contrary to the approved frameless row/logo direction.
+- Added visual-only overrides in `src/digiarz-independent-ui.css`, CSS commit `44996118bc91af2598d7d913e45203342e179680`: remove row outlines/shadows, favorite-button frames and logo frames across Dashboard, Markets, Assets and asset detail; preserve each theme's hover tint and narrow-screen sizing.
+- Added regression test in `tests/independent-ui.test.js`, commit/head `dcbd3186c9311c47aff5c33fa56ffbf48ec43c5f`, checking all target selectors and three theme treatments.
+- Android build run `45378240684` was still in progress at the checkpoint (building debug APK). Exact-decimal workflow for the new test commit had not yet appeared; do not claim exact-head validation until confirmed.
+- Prior verified build for source head `9d02ec1b4b6301b1ef766f24407ab01a16654b3b`: Exact decimal run `45377590939` SUCCESS; Android run `45377590820` SUCCESS. Artifact `14911203815` ZIP digest `sha256:a5f569b078bb4d94a6776aad6ead517a6e3431571e31d2a1dcb5d989c2101c08`; BUILD-INFO run `45377590820`, merge commit `6393749e6e001c8e323daceeb6351f0cadc60ebb`; APK SHA-256 `7b90b4a755662c3e4fbed2c02d3d0466472e7215313065ba7eb392b8e3e598af`. Bundled CSS size 197,194 bytes and HTML size 521,355 bytes. This prior artifact predates the frameless pass and is not the final APK for this pass.
+- No business logic, market prices, wallet, orders, trades, auth, Supabase, Production DB, migrations, cron, deployment, merge or release was changed.
+- Physical Android installation and screenshot acceptance remain outstanding.
+- Next: verify final-head CI and APK provenance, then continue page-by-page visual audit. Keep PR #60 Draft/unmerged.
