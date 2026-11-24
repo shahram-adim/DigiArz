@@ -223,3 +223,26 @@ test("rejects candidates that claim an unsupported exchange", () => {
   }]);
   assert.deepEqual(rows, []);
 });
+
+\ntest("extracts Bitpin base currency Persian title without using the pair title", () => {
+  const candidate = extractPersianNameCandidate("bitpin", {
+    currency1: { code: "BTC", title_fa: "بیت کوین" },
+    currency2: { code: "IRT", title_fa: "تومان" },
+    title_fa: "بیت کوین/تومان"
+  });
+  assert.deepEqual(candidate, {
+    name: "بیت کوین",
+    normalized_name: "بیتکوین",
+    source_exchange: "bitpin",
+    source_key: "currency1.title_fa"
+  });
+});
+
+test("aggregates Bitpin as an independent Iranian source", () => {
+  const rows = aggregatePersianNameCandidates([
+    observation("bitcoin", "bit24", "بیت‌کوین"),
+    observation("bitcoin", "bitpin", "بیت کوین")
+  ]);
+  assert.equal(rows[0].status, "consensus_candidate");
+  assert.equal(rows[0].source_count, 2);
+});
