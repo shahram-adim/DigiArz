@@ -1296,3 +1296,13 @@
 - [ ] Full Exact decimal CI for the new regression-test head has not been observed; do not treat it as passed.
 - [ ] Real-device installation and screenshot acceptance remain outstanding.
 - PR #60 stays Draft/unmerged; no Production/Supabase changes.
+
+
+### 2026-11-24 — premium asset detail workspace pass
+- [x] Reworked detail header order and responsive grid for logo, name/symbol and price.
+- [x] Added independent dark/gold, white-glass and indigo-glass styling for detail, demo trade, reviews and news sections.
+- [x] Added 560px/380px responsive rules and regression test coverage.
+- [ ] Android APK for CSS commit `b34e820e...` pending at checkpoint.
+- [ ] Exact-decimal workflow for test head `247fa19a...` not observed; no full test claim.
+- [ ] Physical-device screenshot acceptance remains outstanding.
+- PR #60 remains Draft/unmerged; no Production/Supabase changes.
