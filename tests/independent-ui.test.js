@@ -258,3 +258,26 @@ test('wallet, orders, history and settings use all three theme identities', () =
   }
   assert.ok(html.includes('da-v2-account-card'), 'wallet/account card markup exists');
 });
+
+
+test('admin workspace panels and account-adjustment controls follow all three theme identities', () => {
+  const marker = '/* 2026-11-24 admin workspace theme pass: isolate admin panels and user adjustment cards. */';
+  const adminTheme = css.slice(css.lastIndexOf(marker));
+  assert.ok(adminTheme.length > 0, 'admin theme layer exists');
+  for (const theme of ['dark-theme', 'light-theme', 'luxury-theme']) {
+    for (const selector of ['#tab-admin .detail-section', '#tab-admin .admin-user-card',
+      '#tab-admin .daily-ad-admin-item', '#tab-admin .admin-user-card input',
+      '#tab-admin .admin-user-card select', '#tab-admin .daily-ad-admin-grid textarea']) {
+      assert.ok(adminTheme.includes('body.' + theme + ' ' + selector),
+        theme + ' styles ' + selector);
+    }
+  }
+  assert.match(adminTheme, /body\.dark-theme[\s\S]*?rgba\(231,185,77/);
+  assert.match(adminTheme, /body\.light-theme[\s\S]*?background:#fff!important/);
+  assert.match(adminTheme, /body\.luxury-theme[\s\S]*?rgba\(48,59,132/);
+  assert.match(html, /id="tab-admin"/);
+  assert.match(html, /class="card admin-user-card"/);
+  assert.match(html, /class="admin-adjust-grid"/);
+  assert.match(html, /class="daily-ad-admin-grid"/);
+  assert.match(html, /class="daily-ad-admin-item"/);
+});
