@@ -915,3 +915,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - PR #60 remains open and unmerged. The APK has not been installed or visually accepted on a physical Android device. No release, deployment, merge to main, Supabase/database migration, Production data change, or user-financial-data change occurred.
 - Next: physical device acceptance of this APK across all three themes, login/biometric where available, dashboard/market and navigation. Do not infer visual correctness from CI/package checks; do not merge until owner approval.
 - Evidence: https://github.com/shahram-adim/DigiArz/actions/runs/45342076450 and https://github.com/shahram-adim/DigiArz/actions/runs/45342076446
+
+
+## 2026-11-24 — removed obsolete gainers/losers panels from Market
+- Rechecked live PR #60 and the current redesign/phase1-clean-2026 branch before editing. PR #60 remains Draft/open/unmerged; no main-branch or Production changes.
+- Found that Market still rendered two explicitly rejected panels: “5 biggest gainers” and “5 biggest losers”. Removed both sections from index.html, together with their now-unused render functions, navigation handlers, and refresh calls. Kept the market-wide volatility summary (average / highest gain / highest loss), the top-volume assets strip, category filters, and the full vertical asset list.
+- Added a regression test in tests/independent-ui.test.js asserting the two panels and their obsolete DOM/runtime hooks stay absent while the summary metrics, top-assets list, Market list, and dashboard market preview remain present.
+- Commits: index.html 5f71aed6f017394755a181884237028b27997f5e; regression test / current branch head e4680b33f77df25d91119ed258d5297dfb0b1ca7.
+- Latest-head CI for e4680b33f77df25d91119ed258d5297dfb0b1ca7 is still running at handoff update: Exact decimal run 45344221721 (in progress); Android APK run 45344221722 (pending). Earlier duplicate runs on the preceding index-only commit 5f71aed6f017394755a181884237028b27997f5e: exact decimal 45344205785 and Android 45344205629 (both in progress); do not treat those as final-head validation.
+- Previous APK artifact on commit 2c9c615a12895b4080190b9535c8dee01e0be3f3 remains verified, but it predates this panel-removal change and is not the current candidate. The latest-head APK must be downloaded, checked against BUILD-INFO.txt and SHA-256, and then offered only after run 45344221722 succeeds.
+- Physical device/WebView rendering and login/biometric acceptance remain unverified. Do not infer visual QA from CI. No merge, release, deployment, Supabase/database migration, Production data change, or user-financial-data change.
+- Next: wait for exact latest-head CI runs 45344221721 and 45344221722; inspect all substantive test steps and APK provenance; then continue the static UI audit and request only the still-missing real-device acceptance evidence.
