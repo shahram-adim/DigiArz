@@ -47,7 +47,10 @@ const server = http.createServer((req, res) => {
       await page.waitForTimeout(1200);
       for (const theme of themes) {
         await page.evaluate(selected => {
-          if (typeof applyTheme === 'function') applyTheme(selected);
+          document.body.classList.toggle('light-theme', selected === 'light');
+          document.body.classList.toggle('luxury-theme', selected === 'luxury');
+          document.body.classList.toggle('dark-theme', selected === 'dark');
+          document.documentElement.style.colorScheme = selected === 'light' ? 'light' : 'dark';
           document.body.classList.remove('auth-page-active');
           document.body.classList.add('dashboard-page-active');
           const auth = document.getElementById('authView');
