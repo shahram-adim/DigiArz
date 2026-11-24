@@ -3191,3 +3191,76 @@ body.light-theme #dashboardMarketPreview .da-market-coin-card,
 body.luxury-theme #dashboardMarketPreview .da-market-coin-card{
   border:0!important;outline:0!important;box-shadow:none!important;
 }
+
+
+/* 2026-11-24 dashboard layout refinement: clear hierarchy, aligned sections and responsive balance. */
+#tab-dashboard{
+  width:100%!important;max-width:1440px!important;margin-inline:auto!important;
+  box-sizing:border-box!important;align-items:stretch!important;
+}
+#tab-dashboard>.da-v2-topline{order:0;width:100%;min-width:0}
+#tab-dashboard>.da-v2-hero{order:1;width:100%;min-width:0}
+#tab-dashboard>.da-v2-account-card{order:2;width:100%;min-width:0}
+#tab-dashboard>.da-v2-quick-grid{order:3;width:100%;min-width:0}
+#tab-dashboard>.da-v2-section-head{order:4;width:100%;min-width:0}
+#tab-dashboard>.da-market-glass{order:5;width:100%;min-width:0}
+#tab-dashboard>#dashboardMarketPreviewUpdated{order:6;width:100%;min-width:0}
+#tab-dashboard>.da-v2-trust-row{order:7;width:100%;min-width:0}
+#tab-dashboard>.da-v2-bottom{order:8;width:100%;min-width:0}
+#tab-dashboard>.dashboard-activity-center{order:9;width:100%;min-width:0}
+#tab-dashboard>.da-v2-compat{order:10}
+#tab-dashboard .da-v2-account-card>.da-v2-section-head{margin-bottom:14px}
+#tab-dashboard .da-v2-balance-main{min-width:0;justify-content:flex-start}
+#tab-dashboard .da-v2-account-stats>div{min-width:0}
+#tab-dashboard .da-v2-account-stats small,
+#tab-dashboard .da-v2-account-stats b{overflow-wrap:anywhere}
+#tab-dashboard .da-market-toolbar>*,
+#tab-dashboard .da-market-search input,
+#tab-dashboard .da-market-sort select{min-width:0}
+#tab-dashboard .da-v2-bottom{flex-wrap:wrap}
+#tab-dashboard .da-v2-bottom-meta{display:flex;flex-wrap:wrap;gap:6px 14px;min-width:0}
+#dashboardMarketPreview{min-width:0}
+@media(min-width:1100px){
+ #tab-dashboard{gap:24px!important;padding:26px 30px!important}
+ #tab-dashboard .da-v2-account-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+ #tab-dashboard .da-v2-quick-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media(max-width:720px){
+ #tab-dashboard{gap:15px!important}
+ #tab-dashboard .da-v2-account-card,
+ #tab-dashboard .da-market-glass{padding:14px!important}
+ #tab-dashboard .da-v2-hero{gap:12px!important}
+ #tab-dashboard .da-v2-hero-foot{justify-content:flex-start}
+ #tab-dashboard .da-v2-section-head{align-items:center}
+ #tab-dashboard .da-market-results-head{flex-wrap:wrap}
+}
+@media(max-width:560px){
+ #tab-dashboard{padding:12px 10px 20px!important;gap:14px!important}
+ #tab-dashboard>.da-v2-topline{padding-bottom:12px!important}
+ #tab-dashboard .da-v2-brand{gap:9px;font-size:17px}
+ #tab-dashboard .da-v2-logo{width:36px;height:36px;font-size:20px}
+ #tab-dashboard .da-v2-hero{padding:18px!important;border-radius:20px!important}
+ #tab-dashboard .da-v2-hero-art{right:-44px!important;top:2px!important;width:190px!important;height:165px!important;opacity:.14!important}
+ #tab-dashboard .da-v2-hero h1{max-width:90%;font-size:25px!important;line-height:1.42!important}
+ #tab-dashboard .da-v2-hero-copy p{max-width:94%;font-size:11px;line-height:1.9}
+ #tab-dashboard .da-v2-hero-foot{gap:8px 12px;padding-top:11px}
+ #tab-dashboard .da-v2-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+ #tab-dashboard .da-v2-quick-grid button{min-width:0;min-height:56px!important;padding:9px!important}
+ #tab-dashboard .da-v2-quick-grid button b{line-height:1.5;white-space:normal}
+ #tab-dashboard .da-v2-account-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
+ #tab-dashboard .da-v2-account-stats>div{display:flex!important;flex-direction:column;align-items:flex-start!important;justify-content:center!important;gap:5px!important;padding:10px!important}
+ #tab-dashboard .da-v2-account-stats small{font-size:9px}
+ #tab-dashboard .da-v2-account-stats b{font-size:11px}
+ #tab-dashboard .da-v2-section-head h2{font-size:16px!important}
+ #tab-dashboard .da-v2-section-head>.da-v2-link{flex:0 0 auto;padding:6px 8px;font-size:9px}
+ #tab-dashboard .da-market-toolbar{grid-template-columns:minmax(0,1fr)!important}
+ #tab-dashboard .da-market-search,#tab-dashboard .da-market-sort{min-height:42px}
+ #tab-dashboard .da-v2-trust-row{justify-content:flex-start;gap:8px 12px}
+ #tab-dashboard .da-v2-bottom{gap:10px;padding:13px!important}
+}
+@media(max-width:360px){
+ #tab-dashboard{padding-inline:8px!important}
+ #tab-dashboard .da-v2-account-stats{grid-template-columns:minmax(0,1fr)!important}
+ #tab-dashboard .da-v2-hero h1{font-size:23px!important}
+ #tab-dashboard .da-v2-quick-grid button{gap:6px!important}
+}
