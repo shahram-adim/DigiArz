@@ -3469,3 +3469,6 @@ body.light-theme #tab-dashboard .da-v2-art-label{color:#4a82ba!important}
   #tab-dashboard{gap:14px!important}
   #tab-dashboard>.da-v2-hero{min-height:0}
 }
+
+/* 2026-11-24 navigation regression: hidden dashboard must not override the shared hidden utility. */
+#tab-dashboard.hidden{display:none!important}
