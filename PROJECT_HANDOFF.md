@@ -1117,3 +1117,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Verified APK copied to `/mnt/data/DigiArz-1bebd8f-debug-review.apk` for user review. Physical Android installation and screenshot-based visual acceptance remain pending.
 - No Production DB, Supabase, migrations, cron, wallet/order balances, deployment, merge, or release changed. PR #60 remains Draft/open/unmerged.
 - Next: continue source audit and refine remaining page-specific theme inconsistencies; require actual Android screenshots before claiming visual acceptance.
+
+
+## 2026-11-24 — authentication theme unification
+- Exact-head validation for the preceding admin theme pass succeeded on PR head `1bebd8f105afb5f24731080270f24515cb857da7`: exact-decimal workflow `45356109043` and Android APK workflow `45356109063` both completed success, including every PostgreSQL and trading lifecycle/race step.
+- Downloaded artifact `14902372617`, ZIP integrity passed. APK `app-debug.apk` is 3,943,579 bytes; SHA-256 `a75e8a66f3da00eb956adc19d6dfec5c7cdf49431d8bc131374bc74ff8ed2547`. BUILD-INFO ties it to run `45356109063`; merge commit `b35380d...` has second parent exact PR head `1bebd8f...`. Verified the APK contains the admin theme CSS marker and `#tab-admin` markup. Debug/review only, not production-signed. Copy at `/mnt/data/DigiArz-1bebd8f-debug-review.apk`.
+- Further source audit found legacy/conflicting authentication CSS layers. Added a final scoped theme layer for the login shell, visual hero, market copy, coin rows, auth form and inputs: dark black/gold; light pure white/blue; luxury indigo glass. No auth flow, credentials, passkey, or backend logic changed. CSS commit `42a1471a26e025c9c494e3443dd93e843244c0e1`; regression coverage commit `4b641f9a13b71e4b4557cb5e1cfcf30422420659`.
+- Exact-head CI for the auth theme commit and the follow-on docs commit must complete successfully before accepting this pass. At checkpoint, runs for commit `42a1471...` were active/pending; verify latest PR head and exact-head runs.
+- PR #60 remains Draft/open/unmerged. No Production DB, Supabase, migration, cron, deployment, merge or release change. Physical Android screenshots are still required for final visual acceptance.
+- Next: verify authentication theme regression, exact-decimal/trading tests and Android APK on the latest head; then continue page-level theme audit.
