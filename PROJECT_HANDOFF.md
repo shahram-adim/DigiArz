@@ -1248,3 +1248,15 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - [!] Exact Decimal CI for current head `c196cc457b187ebe83e659921012e3e0dbf9315f` remains unverified. Physical Android installation and screenshot acceptance remain outstanding.
 - PR #60 remains Draft/open/unmerged. No Production/Supabase, database, migration, cron, merge, deployment or release changes.
 - Next: isolate and correct the test-source regex failure on the PR branch without changing production SQL or DB state; then obtain device screenshots for visual acceptance.
+
+
+### 2026-11-24 — responsive trading terminal refinement
+- [x] Added a dedicated visual-only pass for the trading workspace: horizontally scrollable timeframe rail, compact chart-type controls, readable 4→2-column indicator metrics, compact market summary, tighter order-book depth rows and clearer mid-price/status surface.
+- [x] Advanced demo order forms now use consistent two-column field grouping on wide screens and collapse safely on phone widths; inputs/buttons retain usable minimum heights. Quick buy/sell cards and order lists have overflow-safe layouts.
+- [x] Added theme-specific indicator and order-book surfaces for dark/gold, white-glass and indigo-glass, plus 720px/560px/380px responsive rules.
+- [x] CSS commit 9128efa39aba5447b67641167ba3a2ff4aafcaf7; regression test commit 3f6cd625ad5187656d616d8373ae32a3ac34ac5d.
+- [ ] Android workflow 45381917562 is running for CSS commit 9128efa...; artifact not yet available/verified. The later regression-test commit is not part of that APK source commit.
+- [ ] Full Exact Decimal CI has not been verified for current PR head. The earlier failed run was on an older commit and reported 87/88 tests with a JavaScript regex syntax error in tests/stop-limit-production-audit.test.js; no production SQL or database action was taken.
+- [ ] Physical Android installation and screenshots remain outstanding.
+- PR #60 remains Draft/open/unmerged. No Supabase/Production DB, migrations, cron, merge, deployment or release changes.
+- Next: verify Android artifact provenance; then continue visual audit of remaining page surfaces and device acceptance.
