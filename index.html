@@ -2111,7 +2111,7 @@ body.light-theme #tab-markets .market-board-v34 .coin .price-toman{color:#805a0a
  </div><div id="dashboardMarketPreviewUpdated" class="chart-caption da-v2-market-caption">قیمت‌های شاخص از فید عمومی بازار؛ قیمت تسویه معاملات فقط از موتور سرور تعیین می‌شود.</div>
  <div class="da-v2-account-card"><div class="da-v2-section-head"><div><span class="da-v2-kicker">YOUR DEMO WALLET</span><h2>خلاصه دارایی‌های شما</h2></div><button type="button" class="da-v2-refresh" id="dashboardRefreshBtn" aria-label="به‌روزرسانی"><i data-lucide="refresh-cw"></i></button></div><div class="da-v2-balance-main"><span>موجودی قابل معامله</span><strong id="usdtBalance">—</strong><small>USDT</small></div><div class="da-v2-account-stats"><div><small>ارزش کل دارایی‌ها</small><b id="dashboardTotalUsdValue">—</b></div><div><small>ارزش به تومان</small><b id="totalTomanValue">—</b></div><div><small>تعداد دارایی‌ها</small><b id="assetCount">—</b></div></div><button type="button" class="da-v2-wallet-link" data-dashboard-tab="assets">مشاهده کیف پول و دارایی‌ها <i data-lucide="arrow-left"></i></button></div>
  <div class="da-v2-trust-row"><span><i data-lucide="lock-keyhole"></i> معاملات فقط آزمایشی</span><span><i data-lucide="database"></i> قیمت بازار واقعی</span><span><i data-lucide="smartphone"></i> بهینه برای موبایل</span></div>
- <div class="dashboard-activity-center" aria-label="فعالیت و وضعیت حساب">
+ <div class="dashboard-activity-center" id="dashboardAdminActivity" aria-label="فعالیت و وضعیت حساب" hidden>
   <div class="da-v2-section-head"><div><span class="da-v2-kicker">ACCOUNT ACTIVITY</span><h2>فعالیت و هشدارهای حساب</h2></div><button type="button" class="da-v2-link" data-dashboard-tab="orders">همه سفارش‌ها <i data-lucide="arrow-left"></i></button></div>
   <div class="dashboard-activity-grid">
    <div class="dashboard-activity-panel"><div class="dashboard-activity-panel-head"><strong>سفارش‌های باز</strong><button type="button" class="da-v2-link" data-dashboard-tab="orders">مشاهده</button></div><div id="dashboardRecentOrders" class="dashboard-activity-list" aria-live="polite"><div class="muted small">در حال دریافت سفارش‌ها…</div></div></div>
@@ -2797,7 +2797,7 @@ function renderMarkets(){
   const star=document.createElement('button');star.type='button';star.className='favorite-btn'+(isFavorite?' is-favorite':'');star.dataset.favorite=item.symbol;star.setAttribute('aria-label',isFavorite?'حذف از علاقه‌مندی‌ها':'افزودن به علاقه‌مندی‌ها');star.setAttribute('aria-pressed',isFavorite?'true':'false');star.title=isFavorite?'حذف از علاقه‌مندی‌ها':'افزودن به علاقه‌مندی‌ها';star.innerHTML='<i data-lucide="star" aria-hidden="true"></i>';
   star.addEventListener('click',event=>{event.stopPropagation();toggleFavoriteSymbol(item.symbol);renderMarkets();renderDashboardMarketPreview()});
   const identity=document.createElement('button');identity.type='button';identity.className='coin-identity market-coin-open';
-  const englishName=String(coinInfo[base]?.name||item.name||base);
+  const englishName=String(item.name_en||item.english_name||coinInfo[base]?.name||item.name||base);
   identity.innerHTML=coinLogo(base,'coin-icon',item.image_url)+'<span class="coin-name-stack"><b class="coin-name-fa">'+safeText(persianName)+'</b><small class="coin-symbol-en" dir="ltr">'+safeText(base)+'</small><small class="coin-english-name" dir="ltr">'+safeText(englishName)+'</small></span>';
   identity.title=persianName+' · '+base+' · '+englishName;
   identity.setAttribute('role','button');identity.setAttribute('tabindex','0');identity.setAttribute('aria-label','باز کردن جزئیات و نمودار '+base);
@@ -3433,7 +3433,7 @@ function renderDashboardMarketPreview(){
   const top=document.createElement('div');top.className='da-market-card-top';
   const identity=document.createElement('button');identity.type='button';identity.className='da-market-identity';identity.setAttribute('aria-label','نمایش نمودار '+base);identity.addEventListener('click',()=>openChart(symbol));
   const logo=document.createElement('span');logo.className='da-market-logo';logo.innerHTML=coinLogo(base,'da-market-logo-inner',row.item.image_url);
-  const nameWrap=document.createElement('span');nameWrap.className='da-market-name-wrap';const name=document.createElement('b');name.textContent=persianCoinName(symbol)||base;const ticker=document.createElement('small');ticker.textContent=base+'/USDT';nameWrap.append(name,ticker);identity.append(logo,nameWrap);
+  const nameWrap=document.createElement('span');nameWrap.className='da-market-name-wrap';const name=document.createElement('b');name.textContent=String(row.item.name_fa||persianCoinName(symbol)||base);const englishName=String(row.item.name_en||row.item.english_name||row.item.name||coinInfo[base]?.name||base).trim();const english=document.createElement('small');english.className='da-market-name-en';english.dir='ltr';english.textContent=englishName;const ticker=document.createElement('small');ticker.textContent=base+'/USDT';nameWrap.append(name,english,ticker);identity.append(logo,nameWrap);
   const fav=document.createElement('button');fav.type='button';fav.className='da-market-favorite';const isFav=isFavoriteSymbol(symbol);fav.textContent=isFav?'★':'☆';fav.setAttribute('aria-label',isFav?'حذف از علاقه‌مندی‌ها':'افزودن به علاقه‌مندی‌ها');fav.setAttribute('aria-pressed',isFav?'true':'false');fav.addEventListener('click',()=>{toggleFavoriteSymbol(symbol);renderDashboardMarketPreview();renderMarkets()});
   top.append(fav,identity);
   const price=document.createElement('strong');price.className='da-market-price';price.textContent='$'+formatNum(row.price,12);
@@ -3451,6 +3451,7 @@ function renderDashboardMarketPreview(){
 }
 function renderDashboardSummary(){renderDashboardMarketPreview();const count=$('dashboardMarketCount'),fx=$('dashboardFxRate'),prices=$('dashboardPriceCount'),note=$('dashboardMarketNote');if(count)count.textContent=formatNum(marketRows.length,0);if(fx)fx.textContent=currentFxIsValid?formatNum(currentFxRate,0)+' تومان':'نامعتبر / ناموجود';let validPriceCount=0;for(const item of marketRows){if(getTrustedMarketPrice(item)!==null)validPriceCount++}if(prices)prices.textContent=formatNum(validPriceCount,0);if(note)note.textContent=currentFxIsValid?'نرخ تبدیل تومان معتبر است؛ قیمت‌ها از فهرست فعال بازار خوانده می‌شوند.':'نرخ تبدیل تومان در حال حاضر معتبر نیست؛ ارزش تومانی دارایی‌ها نمایش داده نمی‌شود.'}
 function renderDashboardActivity(){
+ const adminActivity=$('dashboardAdminActivity');if(adminActivity)adminActivity.hidden=!isSuperAdmin;
  const open=[],activeStatuses=new Set(['pending','partially_filled','triggered']);let partialCountValue=0;
  for(const order of allOrderRows){if(activeStatuses.has(order.status))open.push(order);if(order.status==='partially_filled')partialCountValue++}
  const openCount=$('dashboardOpenOrderCount'),partialCount=$('dashboardPartialOrderCount'),totalCount=$('dashboardOrderCount');
