@@ -1317,3 +1317,15 @@
 - [ ] Exact Decimal workflow has not run on the current PR head; the workflow is configured for push to main and pull requests targeting main. Do not claim full exact-head CI success.
 - [ ] Physical Android installation and screenshot-based acceptance remain outstanding.
 - PR #60 remains Draft/open/unmerged. No business logic, Supabase, Production DB, migration, cron, deployment, merge or release changes.
+
+
+### Verification correction and account-page continuation — 2026-11-24
+- [x] Android run `45380484051` completed successfully for CSS commit `b4a1b8e905c3db933d16997de428baef82bb3b1d`.
+- [x] Artifact `14913147606` downloaded and verified. ZIP SHA-256: `c7adf1686d58de3b9214acb3222d9529d477bebed454cc673c996c4dad3fa425`.
+- [x] APK SHA-256 from BUILD-INFO and independent calculation: `59a47ac04683995263e6399671e8f0e127bffa7369d6f7ddc1d17a3a69cd5dee`; APK archive integrity passed; packaged CSS size 208,587 bytes.
+- [x] Improved orders/history/settings mobile flow: order cards stack with full-width action buttons; history filters and date presets become responsive grids; sticky time column remains visible in RTL horizontal table; settings theme choices become a mobile grid.
+- [x] CSS commit `e7d5f614b4bc716577a8a22657646f33ee7f0cc7`; regression test commit `1479492859dd255695c3be02942bb01408fb3c61`.
+- [ ] Android run `45380895062` for CSS commit `e7d5f61...` is in progress; no artifact claim until downloaded and verified.
+- [ ] Exact Decimal CI has not run for the current PR head. Existing successful Exact Decimal runs are older commits and are not evidence for the current test head.
+- [ ] Physical Android installation and screenshots still required.
+- PR #60 remains Draft/open/unmerged. No Production/Supabase, database, migration, cron, merge or release changes.
