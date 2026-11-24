@@ -1042,3 +1042,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Fresh PR-triggered workflow runs for `46a5623...` were not yet visible at the immediate post-push query; verify Actions status before claiming the test fix passes or distributing a fresh APK.
 - No runtime app code, auth, trading, wallet, Supabase, Production DB, migration, deployment, or release was changed. PR #60 remains Draft/open/unmerged; physical-device visual QA remains pending.
 - Next: verify the exact-head test and Android build runs for `46a5623...`; if successful, inspect the new APK artifact and hash, then continue page-by-page UI audit without speculative CSS stacking.
+
+
+## 2026-11-24 — cross-page premium theme system
+- Source audit found the three theme classes already existed (`dark-theme`, `light-theme`, `luxury-theme`) and the luxury theme's base palette was indigo, but many shared controls still inherited the original mint/teal primary-button color. This weakened the intended visual distinction, especially in the dark black/gold and indigo-glass themes.
+- Updated `src/digiarz-independent-ui.css` in commit `d333fb58c9b02e9afdcbeec2f61a074e04fa961e`: dark controls now use gold, light controls use blue on pure-white surfaces, and luxury controls use indigo/periwinkle. Shared cards, trade/order panels, settings, notices, tabs, bottom navigation, and focus states now consume each theme's own palette; the light theme retains white surfaces.
+- Added source-level regression coverage in `tests/independent-ui.test.js` in commit `c1986e79bf359a50abb919b051d442b6ec517447` for per-theme accent declarations and cross-page card/navigation/control styling.
+- CI for code commit `d333fb5...` and test commit `c1986e7...` was triggered. At this checkpoint, the exact-decimal workflow for `c1986e7...` was still running and Android APK build was queued/running; do not claim the new theme test passes or distribute a new APK until exact-head workflows finish.
+- This is a stylesheet and regression-test change only. No auth/trading/wallet logic, Supabase schema or data, migrations, Production DB, deployment, or release was changed. PR #60 remains Draft/open/unmerged; physical-device screenshots and visual acceptance remain pending.
+- Next: verify CI on the final PR head, inspect the resulting APK's embedded stylesheet/provenance, then continue the page-by-page visual audit (dashboard, market, trade, assets/wallet, orders, history, settings/admin).
