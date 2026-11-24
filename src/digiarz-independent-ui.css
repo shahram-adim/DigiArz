@@ -1959,3 +1959,96 @@ body.light-theme .section-title h2,body.light-theme .market-section-caption stro
 body.light-theme .trade-market-heading strong{color:#17324a!important}
 body.luxury-theme .section-title h2,body.luxury-theme .market-section-caption strong,
 body.luxury-theme .trade-market-heading strong{color:#dce2ff!important}
+
+
+/* 2026-11-24 theme identity pass: unify the hero, auth and dashboard focal surfaces. */
+body.dark-theme{
+  --da-hero-bg:linear-gradient(118deg,#211b10 0%,#151923 58%,#10141c 100%);
+  --da-hero-edge:rgba(231,185,77,.34);--da-hero-glow:rgba(231,185,77,.22);
+  --da-hero-ink:#f5e6bd;--da-hero-muted:#c6b98f;--da-hero-accent:#e7b94d;
+  --da-hero-art:linear-gradient(145deg,#473719,#201b13 72%);--da-hero-art-ink:#f4d27b;
+}
+body.light-theme{
+  --da-hero-bg:linear-gradient(118deg,#ffffff 0%,#ffffff 72%,#f4faff 100%);
+  --da-hero-edge:rgba(23,111,193,.20);--da-hero-glow:rgba(65,151,218,.14);
+  --da-hero-ink:#173b5b;--da-hero-muted:#52718b;--da-hero-accent:#176fc1;
+  --da-hero-art:linear-gradient(145deg,#eaf5ff,#ffffff 76%);--da-hero-art-ink:#176fc1;
+}
+body.luxury-theme{
+  --da-hero-bg:linear-gradient(118deg,rgba(50,61,132,.96) 0%,rgba(31,39,94,.97) 58%,rgba(19,26,68,.98) 100%);
+  --da-hero-edge:rgba(174,186,255,.34);--da-hero-glow:rgba(143,159,255,.25);
+  --da-hero-ink:#e7eaff;--da-hero-muted:#bdc7f0;--da-hero-accent:#b9c5ff;
+  --da-hero-art:linear-gradient(145deg,#596bc2,#252f78 78%);--da-hero-art-ink:#e0e5ff;
+}
+body.dark-theme .da-v2-hero,body.dark-theme .market-hero-v34,
+body.dark-theme .trade-workspace-banner-v35,body.dark-theme #authView .auth-visual{
+  background:var(--da-hero-bg)!important;border:1px solid var(--da-hero-edge)!important;
+  box-shadow:0 22px 58px rgba(0,0,0,.25),inset 0 1px rgba(255,255,255,.035)!important;
+}
+body.light-theme .da-v2-hero,body.light-theme .market-hero-v34,
+body.light-theme .trade-workspace-banner-v35,body.light-theme #authView .auth-visual{
+  background:var(--da-hero-bg)!important;border:1px solid var(--da-hero-edge)!important;
+  box-shadow:0 20px 50px rgba(23,111,193,.075),inset 0 1px #fff!important;
+}
+body.luxury-theme .da-v2-hero,body.luxury-theme .market-hero-v34,
+body.luxury-theme .trade-workspace-banner-v35,body.luxury-theme #authView .auth-visual{
+  background:var(--da-hero-bg)!important;border:1px solid var(--da-hero-edge)!important;
+  box-shadow:0 24px 64px rgba(4,8,28,.34),inset 0 1px rgba(255,255,255,.09)!important;
+}
+body.dark-theme .da-v2-hero h1,body.dark-theme .market-hero-v34 h1,
+body.dark-theme .trade-workspace-banner-v35 h1,body.dark-theme #authView .ref-market-copy h1{color:var(--da-hero-ink)!important}
+body.light-theme .da-v2-hero h1,body.light-theme .market-hero-v34 h1,
+body.light-theme .trade-workspace-banner-v35 h1,body.light-theme #authView .ref-market-copy h1{color:var(--da-hero-ink)!important}
+body.luxury-theme .da-v2-hero h1,body.luxury-theme .market-hero-v34 h1,
+body.luxury-theme .trade-workspace-banner-v35 h1,body.luxury-theme #authView .ref-market-copy h1{color:var(--da-hero-ink)!important}
+body.dark-theme .da-v2-hero p,body.dark-theme .market-hero-v34 p,body.dark-theme .trade-workspace-banner-v35 p,
+body.dark-theme .da-v2-hero-foot,body.dark-theme .trade-workspace-badges{color:var(--da-hero-muted)!important}
+body.light-theme .da-v2-hero p,body.light-theme .market-hero-v34 p,body.light-theme .trade-workspace-banner-v35 p,
+body.light-theme .da-v2-hero-foot,body.light-theme .trade-workspace-badges{color:var(--da-hero-muted)!important}
+body.luxury-theme .da-v2-hero p,body.luxury-theme .market-hero-v34 p,body.luxury-theme .trade-workspace-banner-v35 p,
+body.luxury-theme .da-v2-hero-foot,body.luxury-theme .trade-workspace-badges{color:var(--da-hero-muted)!important}
+body.dark-theme .da-v2-eyebrow,body.dark-theme .da-v2-hero h1 em,body.dark-theme .market-hero-kicker,
+body.dark-theme .trade-workspace-kicker,body.dark-theme .da-v2-kicker{color:var(--da-hero-accent)!important}
+body.light-theme .da-v2-eyebrow,body.light-theme .da-v2-hero h1 em,body.light-theme .market-hero-kicker,
+body.light-theme .trade-workspace-kicker,body.light-theme .da-v2-kicker{color:var(--da-hero-accent)!important}
+body.luxury-theme .da-v2-eyebrow,body.luxury-theme .da-v2-hero h1 em,body.luxury-theme .market-hero-kicker,
+body.luxury-theme .trade-workspace-kicker,body.luxury-theme .da-v2-kicker{color:var(--da-hero-accent)!important}
+body.dark-theme .da-v2-coin,body.dark-theme .market-coin-mark,body.dark-theme #authView .ref-monogram{
+  background:var(--da-hero-art)!important;color:var(--da-hero-art-ink)!important;border:1px solid var(--da-hero-edge)!important;
+  box-shadow:0 12px 34px rgba(0,0,0,.24),0 0 34px var(--da-hero-glow)!important;
+}
+body.light-theme .da-v2-coin,body.light-theme .market-coin-mark,body.light-theme #authView .ref-monogram{
+  background:var(--da-hero-art)!important;color:var(--da-hero-art-ink)!important;border:1px solid var(--da-hero-edge)!important;
+  box-shadow:0 12px 34px rgba(23,111,193,.10),0 0 34px var(--da-hero-glow)!important;
+}
+body.luxury-theme .da-v2-coin,body.luxury-theme .market-coin-mark,body.luxury-theme #authView .ref-monogram{
+  background:var(--da-hero-art)!important;color:var(--da-hero-art-ink)!important;border:1px solid var(--da-hero-edge)!important;
+  box-shadow:0 12px 34px rgba(4,8,28,.3),0 0 38px var(--da-hero-glow)!important;
+}
+body.dark-theme .da-v2-orbit,body.dark-theme .market-orbit{border-color:var(--da-hero-edge)!important}
+body.light-theme .da-v2-orbit,body.light-theme .market-orbit{border-color:var(--da-hero-edge)!important}
+body.luxury-theme .da-v2-orbit,body.luxury-theme .market-orbit{border-color:var(--da-hero-edge)!important}
+body.dark-theme .da-v2-hero-art,body.dark-theme .market-hero-mark{background:radial-gradient(circle,var(--da-hero-glow),transparent 68%)!important}
+body.light-theme .da-v2-hero-art,body.light-theme .market-hero-mark{background:radial-gradient(circle,var(--da-hero-glow),transparent 68%)!important}
+body.luxury-theme .da-v2-hero-art,body.luxury-theme .market-hero-mark{background:radial-gradient(circle,var(--da-hero-glow),transparent 68%)!important}
+body.dark-theme #authView .auth-form{background:linear-gradient(155deg,#171b24,#10141c)!important;border-color:var(--da-hero-edge)!important}
+body.light-theme #authView .auth-form{background:#ffffff!important;border-color:var(--da-hero-edge)!important}
+body.luxury-theme #authView .auth-form{background:linear-gradient(155deg,rgba(37,47,105,.96),rgba(18,25,62,.98))!important;border-color:var(--da-hero-edge)!important}
+body.dark-theme .da-v2-account-card,body.dark-theme .da-market-glass,
+body.dark-theme .dashboard-activity-panel{background:linear-gradient(145deg,#171b24,#10141c)!important;border:1px solid rgba(220,180,72,.18)!important}
+body.light-theme .da-v2-account-card,body.light-theme .da-market-glass,
+body.light-theme .dashboard-activity-panel{background:#ffffff!important;border:1px solid rgba(23,111,193,.14)!important;box-shadow:0 14px 36px rgba(23,111,193,.06)!important}
+body.luxury-theme .da-v2-account-card,body.luxury-theme .da-market-glass,
+body.luxury-theme .dashboard-activity-panel{background:linear-gradient(145deg,rgba(37,47,105,.88),rgba(18,25,62,.94))!important;border:1px solid rgba(160,173,255,.24)!important;box-shadow:0 18px 44px rgba(4,8,28,.22),inset 0 1px rgba(255,255,255,.05)!important}
+body.dark-theme .da-v2-quick-grid button{background:linear-gradient(145deg,#211b10,#171b24)!important;border-color:rgba(231,185,77,.22)!important;color:#f5e6bd!important}
+body.light-theme .da-v2-quick-grid button{background:#ffffff!important;border-color:rgba(23,111,193,.16)!important;color:#173b5b!important}
+body.luxury-theme .da-v2-quick-grid button{background:linear-gradient(145deg,rgba(53,65,143,.88),rgba(28,36,91,.94))!important;border-color:rgba(174,186,255,.25)!important;color:#e7eaff!important}
+body.dark-theme .da-v2-quick-grid button i,body.dark-theme .da-v2-hero-foot i,
+body.dark-theme .market-hero-pills i,body.dark-theme .trade-workspace-badges i{color:var(--da-hero-accent)!important}
+body.light-theme .da-v2-quick-grid button i,body.light-theme .da-v2-hero-foot i,
+body.light-theme .market-hero-pills i,body.light-theme .trade-workspace-badges i{color:var(--da-hero-accent)!important}
+body.luxury-theme .da-v2-quick-grid button i,body.luxury-theme .da-v2-hero-foot i,
+body.luxury-theme .market-hero-pills i,body.luxury-theme .trade-workspace-badges i{color:var(--da-hero-accent)!important}
+body.dark-theme .da-v2-section-head h2,body.dark-theme .market-board-head strong{color:#f5e6bd!important}
+body.light-theme .da-v2-section-head h2,body.light-theme .market-board-head strong{color:#173b5b!important}
+body.luxury-theme .da-v2-section-head h2,body.luxury-theme .market-board-head strong{color:#e1e6ff!important}
