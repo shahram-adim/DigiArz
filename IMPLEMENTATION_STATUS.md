@@ -1347,3 +1347,12 @@
 - [ ] Exact Decimal on current PR head unverified; historical failed run was on older commit with 87/88 tests and a regex SyntaxError. No production database impact indicated.
 - [ ] Physical device install/screenshots pending.
 - PR #60 remains Draft/open/unmerged; no Production/Supabase/DB changes.
+
+
+### 2026-11-24 — trading terminal APK verified; authentication hero refinement
+- [x] Android run `45381917562` SUCCESS; artifact `14913059879` ZIP SHA-256 `56f92f85f3caec03fd50cb3321c331688a492c8c97b4b7c810a2c99e9dcfa674`.
+- [x] APK SHA-256 `d0185d529808e658ebe1c17f15f76d65c2e26e825a10114e5bfeeae41aeab83d`; BUILD-INFO provenance and APK ZIP integrity verified for CSS source commit `9128efa39aba5447b67641167ba3a2ff4aafcaf7`, run `45381917562`.
+- [x] Login visual refinement added for all three themes with responsive device/globe composition, benefits grid and reduced-motion support. CSS `e52d9701ea3f419a6c6b688c88a168f7c2d974eb`; regression test `10775527db0bf7323965920d93fb5cf279c4bf63`.
+- [ ] Android run `45382671847` for auth CSS commit is in progress; its APK is not yet verified.
+- [ ] Exact Decimal CI on the current PR head remains unverified; physical Android installation/screenshots remain pending.
+- PR #60 stays Draft/open/unmerged. No Production/Supabase, DB, migration, cron, merge, deployment or release changes.
