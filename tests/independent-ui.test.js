@@ -605,7 +605,18 @@ test('admin operations panels preserve responsive controls and all key data regi
 });
 
 
-test('all active market assets receive Persian display names from curated names or English-name transliteration', () => {\n  assert.match(html, /function transliterateAssetNameToPersian\\(value\\)/);\n  assert.match(html, /function persianCoinName\\(symbol,englishName=''/);\n  assert.match(html, /persianCoinName\\(item\\.symbol,englishName\\)/);\n  assert.match(html, /persianCoinName\\(symbol,englishName\\)/);\n  assert.match(html, /persianCoinName\\(symbol,x\\.name_fa\\|\\|x\\.asset_name_fa/);\n  assert.match(html, /asset_name_fa/);\n  assert.match(html, /asset_name_en/);\n});\n\n\ntest('dashboard hides account activity from regular users and keeps it available to admins', () => {
+test('all active market assets receive Persian display names from curated names or English-name transliteration', () => {
+  assert.match(html, /function transliterateAssetNameToPersian\(value\)/);
+  assert.match(html, /function persianCoinName\(symbol,englishName=''/);
+  assert.match(html, /persianCoinName\(item\.symbol,englishName\)/);
+  assert.match(html, /persianCoinName\(symbol,englishName\)/);
+  assert.match(html, /persianCoinName\(symbol,x\.name_fa\|\|x\.asset_name_fa/);
+  assert.match(html, /asset_name_fa/);
+  assert.match(html, /asset_name_en/);
+});
+
+
+test('dashboard hides account activity from regular users and keeps it available to admins', () => {
   assert.match(html, /id="dashboardAdminActivity"[^>]*hidden/);
   assert.match(html, /function renderDashboardActivity\(\)\{\s*const adminActivity=\$\('dashboardAdminActivity'\);if\(adminActivity\)adminActivity\.hidden=!isSuperAdmin;/);
   assert.match(html, /const englishName=String\(row\.item\.name_en\|\|row\.item\.asset_name_en\|\|row\.item\.english_name\|\|row\.item\.name\|\|coinInfo\[base\]\?\.name\|\|base\)/);
