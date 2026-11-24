@@ -3571,3 +3571,21 @@ body.light-theme #tab-dashboard .da-v2-logo,
 body.luxury-theme #tab-dashboard .da-v2-logo{
   padding:0!important;min-width:0!important;min-height:0!important;
 }
+
+/* 2026-11-24 final mobile dashboard audit: remove legacy header monogram tile and reserve nav clearance. */
+/* The textual DigiArz wordmark remains; its decorative pseudo-element was the visible blue D tile. */
+.top .brand::before{
+  content:none!important;
+  display:none!important;
+  width:0!important;height:0!important;
+  border:0!important;box-shadow:none!important;
+}
+/* The fixed six-item mobile bar needs a measured scroll reserve, not a short 68px guess. */
+@media(max-width:700px){
+  body.dark-theme .wrap,body.light-theme .wrap,body.luxury-theme .wrap{
+    padding-bottom:calc(96px + env(safe-area-inset-bottom))!important;
+  }
+  .mobile-bottom-nav{
+    padding-bottom:calc(8px + env(safe-area-inset-bottom))!important;
+  }
+}
