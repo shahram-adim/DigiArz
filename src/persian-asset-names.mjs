@@ -3,7 +3,7 @@ const PERSIAN_MARKS = /[\u064B-\u065F\u0670\u0640]/g;
 
 function cleanCandidate(value) {
   if (typeof value !== "string") return null;
-  const name = value.normalize("NFKC").replace(/[\u200B\u200C\u200D\uFEFF]/g, " ").replace(/\s+/g, " ").trim();
+  const name = value.replace(/[\u200B\u200C\u200D\uFEFF]/g, " ").replace(/\s+/g, " ").trim();
   if (!name || name.length > 80 || !PERSIAN_LETTERS.test(name)) return null;
   if (/^[\d\s.,+\-_/]+$/.test(name)) return null;
   return name;
