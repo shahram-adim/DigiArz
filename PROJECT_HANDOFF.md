@@ -883,3 +883,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - This confirms the repository test workflow for the PR head; it does NOT yet confirm an Android APK artifact build or visual WebView rendering on a physical device.
 - Branch remains isolated and unmerged; no Production database, Supabase settings, user data, or release state changed.
 - Next: verify Android APK workflow execution/artifact for the same branch head, then perform visual review of all three themes on mobile and desktop. Keep PR #60 Draft/unmerged until that validation and explicit owner approval.
+
+
+## 2026-11-24 — Android PR build coverage
+- Reviewed `.github/workflows/android-apk.yml`: it creates an installable debug APK only, packages the independent theme CSS, records the source commit and SHA-256, and uploads APK + BUILD-INFO as a 14-day artifact. It does not publish a store/release or deploy production.
+- Added a scoped `pull_request` trigger targeting `main` with the same relevant web/app paths, so PR #60 can produce a verifiable Android debug APK during review rather than relying on an unavailable manual workflow-dispatch action.
+- Workflow trigger change commit: ac8a73d1a15f1c3167154f517234c2eb433c70e6.
+- At handoff time, no Android workflow run had yet appeared for this commit; APK build is pending and must not be described as successful until an artifact exists.
+- Exact-decimal CI remains green on run 45341676849 (75/75 Node tests, all database rehearsal/integration steps successful).
+- Branch remains unmerged; no APK has been released to users; no production deployment or database change was made.
+- Next: inspect the Android workflow run and artifact when it appears; if successful, verify BUILD-INFO commit matches this branch and inspect APK package contents. Then perform visual review of all three themes on mobile/desktop/WebView.
