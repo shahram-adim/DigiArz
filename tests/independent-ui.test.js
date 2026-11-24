@@ -78,5 +78,5 @@ test('luxury theme final overrides neutralize legacy sky-blue auth and dashboard
     '#b7a8ff', '#d0c6ff', 'body.luxury-theme .da-v2-coin',
     'body.luxury-theme .mobile-bottom-nav button.active'
   ]) assert.ok(finalRules.includes(token), 'final indigo rules include ' + token);
-  assert.ok(finalRules.indexOf('body.luxury-theme #authView.auth-reference-layout') > css.indexOf('background:rgba(239,249,255,.92)'));
+  assert.ok(css.lastIndexOf('body.luxury-theme #authView.auth-reference-layout') > css.indexOf('background:rgba(239,249,255,.92)'));
 });
