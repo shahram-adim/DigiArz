@@ -80,3 +80,20 @@ test('luxury theme final overrides neutralize legacy sky-blue auth and dashboard
   ]) assert.ok(finalRules.includes(token), 'final indigo rules include ' + token);
   assert.ok(css.lastIndexOf('body.luxury-theme #authView.auth-reference-layout') > css.indexOf('background:rgba(239,249,255,.92)'));
 });
+
+test('full indigo-glass foundation covers trading wallet and navigation surfaces', () => {
+  const marker = '/* Full indigo-glass theme foundation for every application surface. */';
+  const foundation = css.slice(css.lastIndexOf(marker));
+  assert.ok(foundation.length > 0);
+  for (const token of [
+    '--bg:#111027!important', '--panel:rgba(31,26,72,.78)!important',
+    'body.luxury-theme .tabs', 'body.luxury-theme .mobile-bottom-nav',
+    'body.luxury-theme .trade-box', 'body.luxury-theme .asset-row',
+    'body.luxury-theme .advanced-order-form-v36',
+    'body.luxury-theme .orders-center-v36',
+    'body.luxury-theme input', 'body.luxury-theme #priceChart'
+  ]) assert.ok(foundation.includes(token), 'indigo foundation includes ' + token);
+  assert.match(html, /luxury\?\{bg:'#111027',text:'#f3f0ff',grid:'#30275f',line:'#7565c4'\}/);
+  assert.match(html, /luxury\?'#111027'/);
+  assert.ok(!html.includes('لوکس شیشه‌ای'));
+});
