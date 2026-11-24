@@ -108,3 +108,69 @@ export function resolveAssetIdentity(observation, assets) {
   }
   return { status: "unmatched", reason: "exact_identity_missing", asset: null };
 }
+
+
+/**
+ * Aggregate already-extracted candidates by exact, previously matched
+ * CoinGecko identity. Never uses symbol as a grouping key.
+ *
+ * Automatic consensus requires at least two independent exchanges and one
+ * normalized spelling. Conflicts remain review-only with every source kept.
+ */
+export function aggregatePersianNameCandidates(observations) {
+  if (!Array.isArray(observations)) return [];
+  const byAsset = new Map();
+
+  for (const observation of observations) {
+    if (!observation || observation.match_status !== "matched") continue;
+    const coingeckoId = typeof observation.coingecko_id === "string"
+      ? observation.coingecko_id.trim() : "";
+    if (!coingeckoId) continue;
+
+    const candidate = observation.candidate && typeof observation.candidate === "object"
+      ? observation.candidate
+      : extractPersianNameCandidate(observation.exchange, observation.source_payload);
+    if (!candidate || !cleanCandidate(candidate.name)) continue;
+    const normalizedName = normalizePersianName(candidate.name);
+    if (!normalizedName) continue;
+
+    const sourceExchange = String(candidate.source_exchange || observation.exchange || "").toLowerCase().trim();
+    if (!sourceExchange) continue;
+
+    if (!byAsset.has(coingeckoId)) byAsset.set(coingeckoId, new Map());
+    const byName = byAsset.get(coingeckoId);
+    if (!byName.has(normalizedName)) byName.set(normalizedName, new Map());
+    const bySource = byName.get(normalizedName);
+    if (!bySource.has(sourceExchange)) {
+      bySource.set(sourceExchange, {
+        name: candidate.name,
+        source_exchange: sourceExchange,
+        source_key: candidate.source_key || null,
+        source_url: observation.source_url || null,
+      });
+    }
+  }
+
+  return [...byAsset.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([coingeckoId, byName]) => {
+    const variants = [...byName.entries()].map(([normalizedName, bySource]) => ({
+      normalized_name: normalizedName,
+      sources: [...bySource.values()].sort((a, b) => a.source_exchange.localeCompare(b.source_exchange)),
+    })).sort((a, b) => a.normalized_name.localeCompare(b.normalized_name));
+    const sourceCount = new Set(variants.flatMap(variant => variant.sources.map(source => source.source_exchange))).size;
+
+    if (variants.length > 1) {
+      return { coingecko_id: coingeckoId, status: "review_required", canonical_name_fa: null, variants, source_count: sourceCount };
+    }
+    if (sourceCount < 2) {
+      return { coingecko_id: coingeckoId, status: "single_source", canonical_name_fa: null, variants, source_count: sourceCount };
+    }
+    return {
+      coingecko_id: coingeckoId,
+      status: "consensus_candidate",
+      canonical_name_fa: variants[0].sources[0].name,
+      normalized_name: variants[0].normalized_name,
+      variants,
+      source_count: sourceCount,
+    };
+  });
+}
