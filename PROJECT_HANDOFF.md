@@ -1075,3 +1075,15 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - The first test run for the wallet/orders/history/settings refinement failed only in the newly added source assertion: DigiArz has no separate `tab-wallet` page; wallet/account UI is represented by the dashboard account card. The failure was `page exists: tab-wallet` in test 31; the earlier theme selector assertions passed.
 - Corrected the regression test to assert the actual page roots (`tab-assets`, `tab-orders`, `tab-history`, `tab-settings`) and the existing `da-v2-account-card` wallet/account markup. No app runtime code changed. Test fix commit: `09d2af8d86f2daceeb1ed830805f65b2ffafb5ce`.
 - Exact-head CI and Android APK runs must be checked on the new test-fix commit before accepting the theme refinement. PR #60 remains Draft/open/unmerged; no Production DB, migrations, deployment or release.
+
+
+### Theme refinement CI + Android review build — 2026-11-24
+- Live PR #60 verified open, Draft, unmerged; branch `redesign/phase1-clean-2026`, code head before this handoff update: `337ce733579a13c8320af5a00acb96308716bbd3`.
+- Exact-decimal workflow run `45355203467` completed **success** on that head. All steps passed, including exact-decimal/browser tests, PostgreSQL arithmetic and Toman upsert, disposable schema-widening preflight/lock-timeout/rollback rehearsals, isolated Market/Limit/Stop-Limit/TP-SL lifecycle integration, cumulative fill rounding, and two-session worker/cancellation/execution race tests.
+- Android workflow run `45355203650` completed **success** on that head. Web assets, independent theme stylesheet packaging, Android generation/sync, debug APK build, provenance recording, and artifact upload all passed.
+- Artifact `DigiArz-Android-debug-APK`, ID `14902670369`, ZIP size 3,561,736 bytes; GitHub artifact digest `sha256:886eaf54a0922bcd688a48e3d95b92cf981ecb10132d9a2bfb175e2e134e7067`.
+- Downloaded and inspected artifact ZIP: integrity test passed; contains `app-debug.apk` (3,943,139 bytes) and `BUILD-INFO.txt`. APK SHA-256: `811696c4d256e02c6a673600712d0481c136d62e2bc130bbe10f1fb0fcc87ad8`.
+- APK provenance: workflow run `45355203650`; synthetic PR merge commit `169cdec3a84dc42f185e135d57194340f37cf3a8`; its second parent is the exact branch head `337ce733579a13c8320af5a00acb96308716bbd3`. Packaged assets include `assets/public/src/digiarz-independent-ui.css` with the wallet/orders/history/settings theme pass and `assets/public/index.html` with the account-card markup. APK ZIP test passed.
+- This is a **debug/review APK**, not a production-signed release. Physical Android installation, screenshot-based visual QA, and user acceptance remain outstanding.
+- No Supabase, Production database, migration, cron, order, wallet, balance, or user data was changed. No merge or deployment occurred.
+- **Next action:** perform real-device visual QA of all three themes and the updated wallet/orders/history/settings screens; log screenshot findings and fix only verified defects. Keep PR #60 Draft/unmerged pending user acceptance.
