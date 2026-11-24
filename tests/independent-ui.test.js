@@ -9,7 +9,7 @@ const sw = fs.readFileSync('sw.js', 'utf8');
 test('independent stylesheet loads after all inline styles and before the document closes', () => {
   const link = '<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=3">';
   assert.ok(html.includes(link));
-  assert.ok(html.indexOf(link) > html.lastIndexOf('</style>'));
+  assert.ok(html.lastIndexOf(link) > html.lastIndexOf('</style>'));
   assert.ok(html.indexOf(link) < html.lastIndexOf('</body>'));
 });
 
@@ -609,7 +609,7 @@ test('all active market assets receive Persian display names from curated names 
   assert.match(html, /function transliterateAssetNameToPersian\(value\)/);
   assert.match(html, /function persianCoinName\(symbol,englishName=''/);
   assert.match(html, /transliterateAssetNameToPersian\(englishName\|\|coinInfo\[base\]\?\.name\|\|''\)/);
-  assert.match(html, /persianCoinName\(symbol,row\.item\.name_fa\|\|row\.item\.asset_name_fa\|\|row\.item\.name_en\|\|row\.item\.asset_name_en/);
+  assert.match(html, /englishName=String\(row\.item\.name_en\|\|row\.item\.asset_name_en\|\|row\.item\.english_name\|\|row\.item\.name\|\|coinInfo\[base\]\?\.name\|\|base\)/);\n  assert.match(html, /persianCoinName\(symbol,englishName\)/);\n  assert.match(html, /class=\\"top-asset-name-en\\" dir=\\"ltr\\"/);
   assert.match(html, /persianCoinName\(item\.symbol,englishName\)/);
   assert.match(html, /persianCoinName\(symbol,englishName\)/);
   assert.match(html, /persianCoinName\(symbol,x\.name_fa\|\|x\.asset_name_fa/);
