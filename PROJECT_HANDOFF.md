@@ -1238,3 +1238,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Android run `45380895062` was triggered for the CSS commit and is still in progress at checkpoint; it does not include the later test-only commit.
 - Exact Decimal workflow is not green for this PR head; do not infer from older successful runs. Physical Android installation/screenshots remain acceptance requirements.
 - PR #60 remains Draft/open/unmerged. No Production/Supabase, financial data, migration, cron, deployment, merge or release changes.
+
+
+### 2026-11-24 — orders/history/settings APK verification
+- [x] Android run `45380895062` completed SUCCESS for CSS source commit `e7d5f614b4bc716577a8a22657646f33ee7f0cc7`; all build steps succeeded.
+- [x] Artifact `14914075886` downloaded. ZIP SHA-256: `6bb47508b756b0f1b5bf659832aa1be90c181b51ca48d2b9fdb2fd0556754d66`; archive integrity passed.
+- [x] APK SHA-256 independently verified: `c3eb9f20a7af46b1905568881874e79d15ead54b4efe8fcfd8fae3e893f11fc5`; APK ZIP integrity passed. BUILD-INFO confirms commit `e7d5f614b4bc716577a8a22657646f33ee7f0cc7`, run `45380895062`, and same APK hash. Bundled independent UI CSS is 212,038 bytes and contains the responsive orders/history rules.
+- [!] Exact Decimal run `45377422152` failed on earlier head `9aff30e0b100f30e97425c3e5d1408b0f974d9bf`: 87/88 tests passed; failure is a JavaScript SyntaxError (Invalid regular expression flags) loading `tests/stop-limit-production-audit.test.js:11`. This is a test-source/CI blocker, not evidence of a production database failure. It has not been changed in this UI-only pass.
+- [!] Exact Decimal CI for current head `c196cc457b187ebe83e659921012e3e0dbf9315f` remains unverified. Physical Android installation and screenshot acceptance remain outstanding.
+- PR #60 remains Draft/open/unmerged. No Production/Supabase, database, migration, cron, merge, deployment or release changes.
+- Next: isolate and correct the test-source regex failure on the PR branch without changing production SQL or DB state; then obtain device screenshots for visual acceptance.
