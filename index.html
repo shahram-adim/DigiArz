@@ -2769,7 +2769,7 @@ function renderMarkets(){
  const q=String($('marketSearch')?.value||'').trim().toUpperCase(),sort=$('marketSort')?.value||'symbol';
  const changeOf=item=>getMarketChange24h(item);
  const volumeOf=item=>{const live=getFreshMarketTicker(item)?.quoteVolume,stored=isMarketTimestampFresh(item.updated_at)?item.quoteVolume:null,value=live??stored;return value===null||value===undefined||!Number.isFinite(Number(value))?null:Number(value)};
- const sourceRows=activeMarketCategory==='new'?featuredMarketRows:marketRows;let rows=sourceRows.filter(x=>{const symbol=String(x.symbol||'').toUpperCase(),base=symbol.replace(/USDT$/i,''),english=String(coinInfo[base]?.name||x.name||'').toUpperCase(),persian=String(persianCoinName(symbol)||'').toUpperCase();return !q||symbol.includes(q)||base.includes(q)||english.includes(q)||persian.includes(q)});
+ const sourceRows=activeMarketCategory==='new'?featuredMarketRows:marketRows;let rows=sourceRows.filter(x=>{const symbol=String(x.symbol||'').toUpperCase(),base=symbol.replace(/USDT$/i,''),english=String(coinInfo[base]?.name||x.name||'').toUpperCase(),persian=String(persianCoinName(symbol,x.name_fa||x.asset_name_fa||x.name_en||x.asset_name_en||x.name||coinInfo[base]?.name||base)||'').toUpperCase();return !q||symbol.includes(q)||base.includes(q)||english.includes(q)||persian.includes(q)});
  if(activeMarketCategory==='gainers')rows=rows.filter(x=>changeOf(x)!==null&&changeOf(x)>0);
  else if(activeMarketCategory==='losers')rows=rows.filter(x=>changeOf(x)!==null&&changeOf(x)<0);
  else if(activeMarketCategory==='trending')rows=rows.filter(x=>volumeOf(x)!==null&&volumeOf(x)>0);
