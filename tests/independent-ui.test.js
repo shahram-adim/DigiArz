@@ -609,8 +609,8 @@ test('all active market assets receive Persian display names from curated names 
   assert.match(html, /englishName=String\(row\.item\.name_en\|\|row\.item\.asset_name_en\|\|row\.item\.english_name\|\|row\.item\.name\|\|coinInfo\[base\]\?\.name\|\|base\)/);
   assert.match(html, /persianCoinName\(symbol,englishName\)/);
   assert.match(html, /class="top-asset-name-en" dir="ltr"/);
-  assert.match(html, /persianCoinName\\(item\\.symbol,englishName\\)/);
-  assert.match(html, /persianCoinName\\(symbol,x\\.name_fa\\|\\|x\\.asset_name_fa/);
+  assert.match(html, /persianCoinName\(item\.symbol,englishName\)/);
+  assert.match(html, /persianCoinName\(symbol,x\.name_fa\|\|x\.asset_name_fa/);
   assert.match(html, /asset_name_fa/);
   assert.match(html, /asset_name_en/);
 });
