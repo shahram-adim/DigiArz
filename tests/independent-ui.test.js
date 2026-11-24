@@ -546,7 +546,7 @@ test('authentication hero stays visually rich and readable across all three them
   assert.match(pass, /@media\(max-width:720px\)/);
   assert.match(pass, /@media\(max-width:560px\)/);
   assert.match(pass, /prefers-reduced-motion:reduce/);
-  for (const id of ['authView','email','password','loginBtn','registerBtn']) {
+  for (const id of ['authView','email','password','loginBtn','signupBtn']) {
     assert.ok(html.includes('id="' + id + '"'), 'authentication control exists: ' + id);
   }
 });
