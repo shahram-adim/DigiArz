@@ -7,7 +7,7 @@ const css = fs.readFileSync('src/digiarz-independent-ui.css', 'utf8');
 const sw = fs.readFileSync('sw.js', 'utf8');
 
 test('independent stylesheet loads after all inline styles and before the document closes', () => {
-  const link = '<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=2">';
+  const link = '<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=3">';
   assert.ok(html.includes(link));
   assert.ok(html.indexOf(link) > html.lastIndexOf('</style>'));
   assert.ok(html.indexOf(link) < html.lastIndexOf('</body>'));
@@ -72,8 +72,19 @@ test('premium mobile refinement prevents market price collisions and gives the t
   assert.match(finalRules, /--da-accent:#a9b7ff!important/);
 });
 
+test('Android screenshot correction uses a two-row mobile market layout and compact opaque app chrome', () => {
+  const marker = 'DigiArz mobile screenshot correction v5';
+  const rules = css.slice(css.lastIndexOf(marker));
+  assert.ok(rules.length > 0);
+  assert.match(rules, /grid-template-areas:[\s\S]*"fav identity change price"[\s\S]*"\. spark change price"/);
+  assert.match(rules, /grid-template-columns:27px minmax\(82px,1fr\) minmax\(68px,auto\) minmax\(108px,auto\)/);
+  assert.match(rules, /height:76px!important;min-height:76px!important;max-height:76px!important/);
+  assert.match(rules, /background:var\(--da-surface\)!important/);
+  assert.match(rules, /padding-bottom:150px!important/);
+});
+
 test('service worker precaches the new stylesheet under a fresh shell cache', () => {
-  assert.match(sw, /digiarz-shell-v60/);
+  assert.match(sw, /digiarz-shell-v61/);
   assert.match(sw, /digiarz-independent-ui\.css\?v=2/);
 });
 
