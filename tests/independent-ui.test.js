@@ -377,3 +377,25 @@ test('account pages receive a premium theme-specific surface and responsive layo
   assert.match(html, /id="historyBody"/);
   assert.match(html, /data-theme-choice="luxury"/);
 });
+
+
+test('trade and admin workspaces retain premium three-theme and narrow-screen coverage', () => {
+  const marker = '/* 2026-11-24 premium trading and admin workspace pass. */';
+  const pass = css.slice(css.lastIndexOf(marker));
+  assert.ok(pass.length > 0, 'trade/admin polish layer exists');
+  for (const theme of ['dark-theme', 'light-theme', 'luxury-theme']) {
+    for (const selector of [
+      '#tab-trade .trade-workspace-banner-v35',
+      '#tab-trade #chartSection',
+      '#tab-trade .orderbook-side',
+      '#tab-admin .detail-section',
+      '#tab-admin .admin-user-card'
+    ]) assert.ok(pass.includes('body.' + theme + ' ' + selector), theme + ' styles ' + selector);
+  }
+  assert.match(pass, /#tab-trade \.trade-market-grid\{grid-template-columns:minmax\(0,1fr\)\}/);
+  assert.match(pass, /#tab-admin \.daily-ad-admin-grid\{grid-template-columns:minmax\(0,1fr\)\}/);
+  assert.match(pass, /@media\(max-width:380px\)/);
+  for (const id of ['tab-trade','tab-admin','orderBookBids','orderBookAsks','dailyAdAdminPanel','exchangeAssetSyncPanel','adminUsersList']) {
+    assert.ok(html.includes('id="' + id + '"'), 'HTML contains ' + id);
+  }
+});
