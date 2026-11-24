@@ -824,3 +824,12 @@ test('mobile dashboard wallet block uses compact spacing without hiding balances
   assert.ok(v10.includes('#tab-dashboard .da-v2-balance-main'));
   assert.ok(v10.includes('#tab-dashboard .da-v2-wallet-link'));
 });
+
+
+test('mobile wallet metrics stay in one compact row above the fixed navigation', () => {
+  const v11 = css.slice(css.lastIndexOf('mobile wallet/nav overlap correction v11'));
+  assert.ok(v11.includes('grid-template-columns:repeat(3,minmax(0,1fr))!important'));
+  assert.ok(v11.includes('#tab-dashboard .da-v2-account-stats small'));
+  assert.ok(v11.includes('#tab-dashboard .da-v2-wallet-link'));
+  assert.ok(v11.includes('min-height:34px!important'));
+});
