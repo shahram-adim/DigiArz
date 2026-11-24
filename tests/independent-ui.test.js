@@ -253,7 +253,8 @@ test('wallet, orders, history and settings use all three theme identities', () =
   assert.match(identity, /body\.light-theme[\s\S]*?background:#fff!important/);
   assert.match(identity, /body\.dark-theme[\s\S]*?background:#242019!important/);
   assert.match(identity, /body\.luxury-theme[\s\S]*?background:#35418d!important/);
-  for (const id of ['tab-wallet', 'tab-assets', 'tab-orders', 'tab-history', 'tab-settings']) {
+  for (const id of ['tab-assets', 'tab-orders', 'tab-history', 'tab-settings']) {
     assert.ok(html.includes('id="' + id + '"'), 'page exists: ' + id);
   }
+  assert.ok(html.includes('da-v2-account-card'), 'wallet/account card markup exists');
 });
