@@ -1106,3 +1106,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Fresh exact-head runs on `7757c3a...`: Exact decimal `45356061857` (in progress at checkpoint) and Android APK `45356061892` (pending). The docs update below will trigger another exact-head run; always verify the latest PR head before accepting results.
 - No runtime admin logic, permissions, RPCs, wallet, Production DB, Supabase, migration, deployment, merge, or release changed. PR #60 remains Draft/open/unmerged.
 - Next: wait for and inspect the latest-head regression run, then verify APK build and provenance. Device screenshot QA remains pending.
+
+
+## 2026-11-24 — admin theme pass exact-head validation and APK
+- Rechecked live PR #60 and handoff before continuing. PR #60 is still open, Draft, unmerged; exact branch head `1bebd8f105afb5f24731080270f24515cb857da7`.
+- Exact-decimal workflow `45356109043` on that exact head completed **success**. Every step passed: browser/source tests, PostgreSQL arithmetic and Toman upsert, disposable schema-widening preflight/lock-timeout/rollback rehearsals, isolated Market/Limit/Stop-Limit/TP-SL integrations, cumulative rounding reserves, and two-session cancellation/execution race tests.
+- Android workflow `45356109063` on the exact head completed **success**. Asset preparation, independent theme stylesheet packaging, Capacitor generation/sync, debug APK build, provenance and artifact upload all passed.
+- Artifact ID `14902372617`, name `DigiArz-Android-debug-APK`, ZIP size 3,562,388 bytes, GitHub digest `sha256:1df12ee8b9bd2503d0787806e67a2a6544e50678966398247597ddc04f663627`.
+- Downloaded ZIP passed `unzip -t`; contains `app-debug.apk` (3,943,579 bytes) and `BUILD-INFO.txt`. APK SHA-256 `a75e8a66f3da00eb956adc19d6dfec5c7cdf49431d8bc131374bc74ff8ed2547`. Provenance records run `45356109063`, merge commit `b35380d69c7c6addcb77a2841c866765ed333cda`, build time `2026-11-24T08:29:38Z`; GitHub confirms merge commit's second parent is exact PR head `1bebd8f105afb5f24731080270f24515cb857da7`. APK contains admin theme marker and `#tab-admin` markup. This is a debug/review APK, not production-signed.
+- Verified APK copied to `/mnt/data/DigiArz-1bebd8f-debug-review.apk` for user review. Physical Android installation and screenshot-based visual acceptance remain pending.
+- No Production DB, Supabase, migrations, cron, wallet/order balances, deployment, merge, or release changed. PR #60 remains Draft/open/unmerged.
+- Next: continue source audit and refine remaining page-specific theme inconsistencies; require actual Android screenshots before claiming visual acceptance.
