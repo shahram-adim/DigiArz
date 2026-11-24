@@ -500,3 +500,29 @@ test('orders, trade history and theme settings remain usable on narrow RTL scree
   assert.ok(html.includes('data-theme-choice="dark"'));
   assert.ok(html.includes('data-theme-choice="luxury"'));
 });
+
+
+test('trading terminal keeps chart, order book and demo order forms usable on narrow RTL screens', () => {
+  const marker = '/* 2026-11-24 trading terminal refinement: chart controls, depth book and demo order forms. */';
+  const pass = css.slice(css.lastIndexOf(marker));
+  assert.ok(pass.length > 0, 'trading terminal refinement layer exists');
+  for (const selector of [
+    '#tab-trade .timeframes',
+    '#tab-trade .indicator-grid',
+    '#tab-trade .market-summary',
+    '#tab-trade .orderbook-side',
+    '#tab-trade .orderbook-mid',
+    '#tab-trade .advanced-order-form-v36 .trade-box',
+    '#tab-trade .advanced-order-form-v36 .trade-box .trade-grid'
+  ]) assert.ok(pass.includes(selector), 'trading terminal selector exists: ' + selector);
+  for (const theme of ['dark-theme','light-theme','luxury-theme']) {
+    assert.ok(pass.includes('body.' + theme + ' #tab-trade .indicator-panel'), theme + ' indicator surface exists');
+    assert.ok(pass.includes('body.' + theme + ' #tab-trade .orderbook-side'), theme + ' order book surface exists');
+  }
+  assert.match(pass, /@media\(max-width:720px\)/);
+  assert.match(pass, /@media\(max-width:560px\)/);
+  assert.match(pass, /@media\(max-width:380px\)/);
+  for (const id of ['chartTypes','timeframes','indicatorRsi','indicatorMacd','orderBookBids','orderBookAsks','buyAmount','sellAmount','placeLimitBtn','placeConditionalBtn','stopLimitSide']) {
+    assert.ok(html.includes('id="' + id + '"'), 'trading control exists: ' + id);
+  }
+});
