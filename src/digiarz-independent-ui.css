@@ -3895,3 +3895,46 @@ body.luxury-theme #dashboardMarketPreview .da-market-coin-card{
     grid-template-columns:19px minmax(0,1fr) 26px 48px 58px!important;gap:3px!important;
   }
 }
+
+
+/* 2026-11-24 mobile dashboard viewport balance v13.
+   The v12 screenshot confirms frameless styling rules load, but the hero/wallet
+   stack still pushes the market heading beneath the fixed bottom navigation. */
+@media(max-width:700px){
+  #tab-dashboard{gap:9px!important;padding-top:7px!important}
+  #tab-dashboard>.da-v2-topline{padding:4px 2px 8px!important;margin-bottom:0!important}
+  #tab-dashboard .da-v2-hero{
+    padding:10px 12px!important;margin:0!important;border-radius:15px!important;
+  }
+  #tab-dashboard .da-v2-hero h1{
+    font-size:18px!important;line-height:1.35!important;margin:2px 0 4px!important;
+  }
+  #tab-dashboard .da-v2-hero p{
+    font-size:9px!important;line-height:1.5!important;margin:3px 0 6px!important;
+  }
+  #tab-dashboard .da-v2-hero .da-v2-hero-kicker{font-size:8px!important}
+  #tab-dashboard .da-v2-hero-foot{display:none!important}
+  #tab-dashboard .da-v2-hero .da-v2-primary,
+  #tab-dashboard .da-v2-hero button{min-height:36px!important;padding:7px 12px!important}
+  #tab-dashboard .da-v2-account-card{
+    padding:9px!important;margin:0!important;border-radius:15px!important;
+  }
+  #tab-dashboard .da-v2-account-card .da-v2-section-head{
+    margin:0 0 5px!important;padding:0!important;
+  }
+  #tab-dashboard .da-v2-balance-main{
+    min-height:45px!important;padding:5px 9px!important;
+  }
+  #tab-dashboard .da-v2-balance-main strong{font-size:19px!important}
+  #tab-dashboard .da-v2-account-stats>div{min-height:43px!important;padding:5px 3px!important}
+  #tab-dashboard .da-v2-wallet-link{min-height:29px!important;margin-top:4px!important}
+  #tab-dashboard .da-v2-quick-grid{
+    gap:5px!important;margin:0!important;
+  }
+  #tab-dashboard .da-v2-quick-grid button{
+    min-height:40px!important;padding:5px 6px!important;border-radius:10px!important;
+  }
+  #tab-dashboard .da-v2-quick-grid button b{font-size:10px!important}
+  #tab-dashboard>.da-v2-section-head{margin:3px 0 2px!important}
+  #tab-dashboard .da-market-glass{padding:9px!important}
+}
