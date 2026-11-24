@@ -3775,3 +3775,123 @@ body.light-theme #tab-dashboard .da-market-glass .da-market-search input::placeh
     margin-top:6px!important;min-height:34px!important;padding:6px 10px!important;
   }
 }
+
+
+/* 2026-11-24 corrective dashboard pass v12.
+   Theme-specific rules above were reintroducing logo tiles and card frames after
+   the earlier frameless pass. These selectors intentionally win in every theme. */
+body.dark-theme #dashboardMarketPreview .da-market-logo,
+body.dark-theme #dashboardMarketPreview .da-market-logo-inner,
+body.dark-theme #dashboardMarketPreview .da-market-logo-inner img,
+body.light-theme #dashboardMarketPreview .da-market-logo,
+body.light-theme #dashboardMarketPreview .da-market-logo-inner,
+body.light-theme #dashboardMarketPreview .da-market-logo-inner img,
+body.luxury-theme #dashboardMarketPreview .da-market-logo,
+body.luxury-theme #dashboardMarketPreview .da-market-logo-inner,
+body.luxury-theme #dashboardMarketPreview .da-market-logo-inner img{
+  border:0!important;outline:0!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;
+}
+body.dark-theme #dashboardMarketPreview .da-market-logo,
+body.dark-theme #dashboardMarketPreview .da-market-logo-inner,
+body.light-theme #dashboardMarketPreview .da-market-logo,
+body.light-theme #dashboardMarketPreview .da-market-logo-inner,
+body.luxury-theme #dashboardMarketPreview .da-market-logo,
+body.luxury-theme #dashboardMarketPreview .da-market-logo-inner{
+  overflow:visible!important;padding:0!important;
+}
+#dashboardMarketPreview .da-market-logo-inner img{
+  width:100%!important;height:100%!important;object-fit:contain!important;
+}
+body.dark-theme #dashboardMarketPreview .da-market-favorite,
+body.light-theme #dashboardMarketPreview .da-market-favorite,
+body.luxury-theme #dashboardMarketPreview .da-market-favorite{
+  border:0!important;outline:0!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;
+}
+body.dark-theme #dashboardMarketPreview .da-market-coin-card,
+body.light-theme #dashboardMarketPreview .da-market-coin-card,
+body.luxury-theme #dashboardMarketPreview .da-market-coin-card{
+  border:0!important;outline:0!important;box-shadow:none!important;
+  border-radius:0!important;background:transparent!important;
+}
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card{
+  min-width:0!important;align-items:center!important;
+  padding:10px 7px!important;column-gap:8px!important;
+}
+#dashboardMarketPreview .da-market-name-wrap{min-width:0!important}
+#dashboardMarketPreview .da-market-name-wrap b,
+#dashboardMarketPreview .da-market-name-wrap small{
+  display:block!important;overflow:hidden!important;text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+@media(max-width:700px){
+  #tab-dashboard{padding:9px 10px 16px!important;gap:12px!important}
+  #tab-dashboard .da-v2-hero{
+    display:block!important;min-height:0!important;
+    padding:13px 14px 12px!important;margin:0 0 4px!important;
+  }
+  #tab-dashboard .da-v2-hero-art{display:none!important}
+  #tab-dashboard .da-v2-hero-copy{max-width:none!important}
+  #tab-dashboard .da-v2-hero h1{
+    font-size:20px!important;line-height:1.45!important;margin:4px 0!important;
+  }
+  #tab-dashboard .da-v2-hero p{
+    font-size:10px!important;line-height:1.65!important;margin:4px 0 7px!important;
+  }
+  #tab-dashboard .da-v2-hero-foot{
+    gap:6px!important;padding-top:7px!important;font-size:8px!important;
+  }
+  #tab-dashboard .da-v2-account-card{
+    margin:4px 0!important;padding:10px!important;border-radius:17px!important;
+  }
+  #tab-dashboard .da-v2-balance-main{
+    display:flex!important;align-items:center!important;justify-content:space-between!important;
+    min-height:54px!important;padding:7px 10px!important;gap:5px!important;
+  }
+  #tab-dashboard .da-v2-balance-main strong{font-size:22px!important}
+  #tab-dashboard .da-v2-account-stats{
+    display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    grid-auto-flow:row!important;gap:5px!important;margin:6px 0!important;
+  }
+  #tab-dashboard .da-v2-account-stats>div{
+    grid-column:auto!important;min-width:0!important;min-height:52px!important;
+    padding:6px 4px!important;border-radius:10px!important;
+  }
+  #tab-dashboard .da-v2-account-stats small{
+    font-size:8px!important;line-height:1.35!important;overflow-wrap:anywhere!important;
+  }
+  #tab-dashboard .da-v2-account-stats b{font-size:10px!important;line-height:1.3!important}
+  #tab-dashboard .da-v2-wallet-link{
+    min-height:32px!important;margin-top:5px!important;padding:5px 9px!important;
+  }
+  #tab-dashboard .da-v2-quick-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:7px!important;margin:4px 0 9px!important;
+  }
+  #tab-dashboard .da-v2-quick-grid button{
+    min-height:48px!important;padding:8px!important;border-radius:12px!important;
+  }
+  #tab-dashboard .da-v2-section-head{margin:8px 0 6px!important}
+  #tab-dashboard .da-market-glass{padding:11px!important;border-radius:16px!important}
+  #dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card{
+    grid-template-columns:22px minmax(0,1fr) 30px minmax(54px,.75fr) minmax(66px,.9fr)!important;
+    gap:5px!important;padding:8px 2px!important;
+  }
+  #dashboardMarketPreview .da-market-logo,
+  #dashboardMarketPreview .da-market-logo-inner{
+    width:27px!important;height:27px!important;flex-basis:27px!important;
+  }
+  #dashboardMarketPreview .da-market-favorite{
+    width:22px!important;height:22px!important;min-width:22px!important;flex-basis:22px!important;
+  }
+  #dashboardMarketPreview .da-market-price{font-size:10px!important}
+  #dashboardMarketPreview .da-market-toman{font-size:9px!important}
+  #tab-dashboard>.da-v2-bottom{margin-top:8px!important}
+}
+@media(max-width:360px){
+  #tab-dashboard .da-v2-account-stats{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  #dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card{
+    grid-template-columns:19px minmax(0,1fr) 26px 48px 58px!important;gap:3px!important;
+  }
+}
