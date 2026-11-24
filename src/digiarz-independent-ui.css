@@ -3938,3 +3938,51 @@ body.luxury-theme #dashboardMarketPreview .da-market-coin-card{
   #tab-dashboard>.da-v2-section-head{margin:3px 0 2px!important}
   #tab-dashboard .da-market-glass{padding:9px!important}
 }
+
+
+/* 2026-11-24 mobile dashboard viewport balance v14: expose market controls above fixed navigation. */
+@media(max-width:700px){
+  #tab-dashboard{gap:7px!important}
+  #tab-dashboard .da-v2-hero{
+    padding:8px 10px!important;min-height:0!important;
+  }
+  #tab-dashboard .da-v2-hero h1{
+    font-size:16px!important;line-height:1.3!important;margin:1px 0 3px!important;
+  }
+  #tab-dashboard .da-v2-hero p{
+    font-size:8px!important;line-height:1.4!important;margin:2px 0 4px!important;
+  }
+  #tab-dashboard .da-v2-hero .da-v2-primary,
+  #tab-dashboard .da-v2-hero button{
+    min-height:31px!important;padding:5px 10px!important;font-size:10px!important;
+  }
+  #tab-dashboard .da-v2-account-card{
+    padding:7px!important;
+  }
+  #tab-dashboard .da-v2-account-card .da-v2-section-head{
+    margin-bottom:3px!important;
+  }
+  #tab-dashboard .da-v2-balance-main{
+    min-height:38px!important;padding:4px 8px!important;
+  }
+  #tab-dashboard .da-v2-balance-main strong{font-size:17px!important}
+  #tab-dashboard .da-v2-account-stats{margin:4px 0!important;gap:4px!important}
+  #tab-dashboard .da-v2-account-stats>div{
+    min-height:34px!important;padding:3px!important;
+  }
+  #tab-dashboard .da-v2-account-stats small{font-size:7px!important}
+  #tab-dashboard .da-v2-account-stats b{font-size:9px!important}
+  #tab-dashboard .da-v2-wallet-link{
+    min-height:25px!important;margin-top:3px!important;padding:3px 8px!important;font-size:9px!important;
+  }
+  #tab-dashboard .da-v2-quick-grid{
+    gap:4px!important;margin:0 0 3px!important;
+  }
+  #tab-dashboard .da-v2-quick-grid button{
+    min-height:34px!important;padding:4px!important;
+  }
+  #tab-dashboard>.da-v2-section-head{margin:0!important}
+  #tab-dashboard .da-v2-section-head h2{font-size:15px!important}
+  #tab-dashboard .da-market-glass{padding:7px!important}
+  #tab-dashboard .da-market-filters{padding:5px 0!important}
+}
