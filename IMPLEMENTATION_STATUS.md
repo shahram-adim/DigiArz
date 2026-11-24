@@ -1367,3 +1367,12 @@
 - [ ] Exact Decimal CI for current PR head is not verified; current workflow does not run on pushes to this Draft branch.
 - [ ] Real Android install/screenshots remain outstanding.
 - PR #60 remains Draft/open/unmerged. No Production/Supabase/DB, migration, cron, merge, deployment or release changes.
+
+
+### 2026-11-24 — exact-decimal CI branch coverage correction
+- [x] Found that `.github/workflows/exact-decimal-tests.yml` only triggered on pushes to `main`, leaving the active Phase 1 branch without push-triggered exact-decimal validation.
+- [x] Added `redesign/phase1-clean-2026` to the push branch filter; workflow commit `dc12e579b5544660812bd24ef9302a4e0942f32a`.
+- [x] Re-fetched the workflow from the branch and confirmed the trigger now includes both `main` and `redesign/phase1-clean-2026`.
+- [ ] A workflow run for the new head has not yet appeared in the commit-associated run query; do not claim the suite passed until a run completes.
+- [ ] Android device installation and screenshot-based visual acceptance remain outstanding.
+- PR #60 remains Draft/open/unmerged. No Supabase, Production DB, migration, cron, merge, deployment or release changes.
