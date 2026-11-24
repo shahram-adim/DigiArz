@@ -3150,3 +3150,8 @@ body.luxury-theme #dashboardMarketPreview .da-market-coin-card:hover{border-colo
 body.dark-theme #dashboardMarketPreview .da-market-logo,body.dark-theme #dashboardMarketPreview .da-market-logo-inner{box-shadow:0 0 0 3px rgba(242,202,112,.12),0 5px 14px rgba(0,0,0,.22)!important}
 body.light-theme #dashboardMarketPreview .da-market-logo,body.light-theme #dashboardMarketPreview .da-market-logo-inner{box-shadow:0 0 0 3px rgba(37,111,190,.09),0 5px 14px rgba(42,96,145,.12)!important}
 body.luxury-theme #dashboardMarketPreview .da-market-logo,body.luxury-theme #dashboardMarketPreview .da-market-logo-inner{box-shadow:0 0 0 3px rgba(193,204,255,.13),0 5px 14px rgba(8,14,60,.24)!important}
+
+/* Bilingual asset identity in every market overview and wallet list. */
+.top-asset-card .top-asset-name-en{display:block;font-size:9px;line-height:1.35;direction:ltr;text-align:center;opacity:.72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.top-asset-card .top-asset-symbol{display:block;font-size:9px;line-height:1.25;letter-spacing:.04em;opacity:.62}
+#tab-assets #assetList .asset-row-main .asset-name-en{display:block;margin-top:1px;font-size:10px;line-height:1.35;direction:ltr;text-align:right;letter-spacing:0;opacity:.72}
