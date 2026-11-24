@@ -171,7 +171,7 @@ test('mobile market grid areas match the actual rendered row element order and d
   const rowEnd = html.indexOf('renderLucideIcons();', rowStart);
   assert.ok(rowStart >= 0 && rowEnd > rowStart, 'market row renderer exists');
   const renderer = html.slice(rowStart, rowEnd);
-  assert.match(renderer, /div\\.append\\(star,identity,sparkline,changeWrap,price\\)/);
+  assert.match(renderer, /div\.append\(star,identity,sparkline,changeWrap,price\)/);
   assert.match(renderer, /coin-name-fa/);
   assert.match(renderer, /coin-symbol-en/);
   assert.match(renderer, /coin-english-name/);
@@ -179,7 +179,7 @@ test('mobile market grid areas match the actual rendered row element order and d
   assert.match(renderer, /price-stack/);
   assert.match(renderer, /price-usd/);
   assert.match(renderer, /price-toman/);
-  assert.match(renderer, /observeMarketSparklines\\(list\\)/);
+  assert.match(renderer, /observeMarketSparklines\(list\)/);
 
   const mobile = css.slice(css.lastIndexOf('DigiArz mobile screenshot correction v5'));
   assert.match(mobile, /grid-template-areas:[\\s\\S]*"fav identity change price"[\\s\\S]*"\\. spark change price"/);
