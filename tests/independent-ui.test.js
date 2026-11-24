@@ -792,3 +792,20 @@ test('dashboard light theme uses clean white glass surfaces without grey wash an
   assert.ok(v8.includes('body.luxury-theme #tab-dashboard .da-market-glass select option'));
   assert.ok(v8.includes('min-height:0!important;padding:clamp(16px,3vw,26px)!important'));
 });
+
+
+test('dashboard toolbar styles the real search and sort label shells in light and indigo themes', () => {
+  const v9 = css.slice(css.lastIndexOf('dashboard visual audit v9'));
+  assert.ok(v9.includes('.da-market-glass .da-market-search'));
+  assert.ok(v9.includes('.da-market-glass .da-market-sort'));
+  assert.ok(v9.includes('background:rgba(9,16,58,.72)!important'));
+  assert.ok(v9.includes('background:#fff!important'));
+  assert.ok(v9.includes('input::placeholder'));
+});
+
+test('mobile dashboard hero is compact and hides decorative art without removing its actions', () => {
+  const v9 = css.slice(css.lastIndexOf('dashboard visual audit v9'));
+  assert.ok(v9.includes('#tab-dashboard .da-v2-hero-art{display:none!important}'));
+  assert.ok(v9.includes('min-height:0!important;display:block!important'));
+  assert.ok(v9.includes('#tab-dashboard .da-v2-primary{padding:9px 14px!important}'));
+});
