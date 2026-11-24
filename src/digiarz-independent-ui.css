@@ -1755,3 +1755,113 @@ body.luxury-theme .mobile-bottom-nav button i{font-size:18px!important}
   body.dark-theme .mobile-bottom-nav button,body.light-theme .mobile-bottom-nav button,
   body.luxury-theme .mobile-bottom-nav button{min-height:49px!important;font-size:9px!important}
 }
+
+
+/* =========================================================
+   DigiArz mobile screenshot correction v5
+   The Android capture proved the five-track row was too dense
+   for long Toman values. Use a two-line mobile grid and make
+   app chrome opaque/compact; do not rely on overflow clipping.
+   ========================================================= */
+@media(max-width:560px){
+ body.dark-theme #marketList>.coin,body.light-theme #marketList>.coin,
+ body.luxury-theme #marketList>.coin{
+   grid-template-columns:27px minmax(82px,1fr) minmax(68px,auto) minmax(108px,auto)!important;
+   grid-template-areas:
+     "fav identity change price"
+     ". spark change price"!important;
+   grid-template-rows:minmax(34px,auto) 19px!important;
+   column-gap:6px!important;row-gap:1px!important;
+   min-height:76px!important;padding:9px 5px!important;
+   align-items:center!important;
+ }
+ body.dark-theme #marketList>.coin .favorite-btn,body.light-theme #marketList>.coin .favorite-btn,
+ body.luxury-theme #marketList>.coin .favorite-btn{grid-area:fav!important}
+ body.dark-theme #marketList>.coin .coin-identity,body.light-theme #marketList>.coin .coin-identity,
+ body.luxury-theme #marketList>.coin .coin-identity{grid-area:identity!important;max-width:100%!important}
+ body.dark-theme #marketList>.coin .coin-sparkline,body.light-theme #marketList>.coin .coin-sparkline,
+ body.luxury-theme #marketList>.coin .coin-sparkline{
+   grid-area:spark!important;width:100%!important;height:18px!important;
+   max-width:100%!important;justify-content:flex-start!important;
+ }
+ body.dark-theme #marketList>.coin .coin-change-wrap,body.light-theme #marketList>.coin .coin-change-wrap,
+ body.luxury-theme #marketList>.coin .coin-change-wrap{
+   grid-area:change!important;align-self:stretch!important;
+   justify-content:center!important;min-width:0!important;
+ }
+ body.dark-theme #marketList>.coin .price-stack,body.light-theme #marketList>.coin .price-stack,
+ body.luxury-theme #marketList>.coin .price-stack{
+   grid-area:price!important;align-self:stretch!important;
+   justify-content:center!important;min-width:0!important;
+ }
+ body.dark-theme #marketList>.coin .price-usd,body.light-theme #marketList>.coin .price-usd,
+ body.luxury-theme #marketList>.coin .price-usd{
+   font-size:10px!important;letter-spacing:-.25px!important;
+   white-space:nowrap!important;line-height:1.35!important;
+ }
+ body.dark-theme #marketList>.coin .price-toman,body.light-theme #marketList>.coin .price-toman,
+ body.luxury-theme #marketList>.coin .price-toman{
+   font-size:8px!important;letter-spacing:-.3px!important;
+   white-space:nowrap!important;line-height:1.35!important;
+ }
+ body.dark-theme #marketList>.coin .coin-change,body.light-theme #marketList>.coin .coin-change,
+ body.luxury-theme #marketList>.coin .coin-change{font-size:10px!important;min-width:0!important;padding:3px 2px!important}
+ body.dark-theme #marketList>.coin .coin-change-label,body.light-theme #marketList>.coin .coin-change-label,
+ body.luxury-theme #marketList>.coin .coin-change-label{font-size:8px!important}
+}
+body.dark-theme .top,body.light-theme .top,body.luxury-theme .top{
+ display:flex!important;flex-direction:row!important;align-items:center!important;
+ justify-content:space-between!important;gap:10px!important;
+ height:76px!important;min-height:76px!important;max-height:76px!important;
+ padding:8px 12px!important;margin:0 0 10px!important;
+ overflow:hidden!important;
+ background:var(--da-surface)!important;
+ -webkit-backdrop-filter:blur(18px) saturate(140%)!important;
+ backdrop-filter:blur(18px) saturate(140%)!important;
+}
+body.dark-theme .top>div:first-child,body.light-theme .top>div:first-child,
+body.luxury-theme .top>div:first-child{min-width:0!important;display:flex!important;flex-direction:column!important;gap:1px!important}
+body.dark-theme .top .brand,body.light-theme .top .brand,body.luxury-theme .top .brand{
+ font-size:20px!important;line-height:1.2!important;white-space:nowrap!important
+}
+body.dark-theme .top .muted,body.light-theme .top .muted,body.luxury-theme .top .muted{
+ font-size:9px!important;line-height:1.25!important;white-space:nowrap!important;
+ overflow:hidden!important;text-overflow:ellipsis!important
+}
+body.dark-theme .top-actions,body.light-theme .top-actions,body.luxury-theme .top-actions{
+ display:flex!important;flex:0 0 auto!important;gap:6px!important;align-items:center!important
+}
+body.dark-theme .top-actions button,body.light-theme .top-actions button,
+body.luxury-theme .top-actions button{min-height:38px!important;padding:6px 10px!important}
+body.dark-theme .wrap,body.light-theme .wrap,body.luxury-theme .wrap{
+ padding-bottom:150px!important
+}
+body.dark-theme .mobile-bottom-nav,body.light-theme .mobile-bottom-nav,
+body.luxury-theme .mobile-bottom-nav{
+ bottom:max(8px,env(safe-area-inset-bottom))!important;
+ min-height:66px!important;padding:5px 7px!important;
+ background:var(--da-surface)!important;
+}
+body.dark-theme #tab-markets .market-tools-primary,
+body.light-theme #tab-markets .market-tools-primary,
+body.luxury-theme #tab-markets .market-tools-primary{
+ display:grid!important;grid-template-columns:minmax(0,1fr) 46px!important;
+ gap:7px!important;align-items:stretch!important;
+}
+body.dark-theme #tab-markets .market-tools-primary input,
+body.light-theme #tab-markets .market-tools-primary input,
+body.luxury-theme #tab-markets .market-tools-primary input{
+ grid-column:1!important;min-height:44px!important;
+ border:0!important;box-shadow:none!important;background:transparent!important;
+}
+body.dark-theme #tab-markets .market-tools-primary select,
+body.light-theme #tab-markets .market-tools-primary select,
+body.luxury-theme #tab-markets .market-tools-primary select{
+ min-height:44px!important;border:0!important;box-shadow:none!important;
+ background:transparent!important;
+}
+body.dark-theme #tab-markets .market-tools-primary>*,
+body.light-theme #tab-markets .market-tools-primary>*,
+body.luxury-theme #tab-markets .market-tools-primary>*{
+ min-width:0!important;max-width:100%!important
+}
