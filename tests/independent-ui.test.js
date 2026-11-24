@@ -526,3 +526,27 @@ test('trading terminal keeps chart, order book and demo order forms usable on na
     assert.ok(html.includes('id="' + id + '"'), 'trading control exists: ' + id);
   }
 });
+
+
+test('authentication hero stays visually rich and readable across all three themes', () => {
+  const markerCss = '/* 2026-11-24 authentication hero refinement: cinematic responsive device/globe composition. */';
+  const pass = css.slice(css.lastIndexOf(markerCss));
+  assert.ok(pass.length > 0, 'authentication hero refinement layer exists');
+  for (const selector of [
+    '#authView .auth-visual:before',
+    '#authView .auth-visual:after',
+    '#authView .auth-benefits',
+    '#authView .auth-benefit'
+  ]) assert.ok(pass.includes(selector), 'authentication hero selector exists: ' + selector);
+  for (const theme of ['dark-theme','light-theme','luxury-theme']) {
+    assert.ok(pass.includes('body.' + theme + ' #authView .auth-visual:before'), theme + ' globe treatment exists');
+    assert.ok(pass.includes('body.' + theme + ' #authView .auth-visual:after'), theme + ' device treatment exists');
+    assert.ok(pass.includes('body.' + theme + ' #authView .auth-benefit'), theme + ' benefit surfaces exist');
+  }
+  assert.match(pass, /@media\(max-width:720px\)/);
+  assert.match(pass, /@media\(max-width:560px\)/);
+  assert.match(pass, /prefers-reduced-motion:reduce/);
+  for (const id of ['authView','email','password','loginBtn','registerBtn']) {
+    assert.ok(html.includes('id="' + id + '"'), 'authentication control exists: ' + id);
+  }
+});
