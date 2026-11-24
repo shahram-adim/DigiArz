@@ -69,6 +69,16 @@ test('hidden authentication view stays hidden despite the ID-based layout rule',
   assert.ok(hiddenRule > layoutRule, 'hidden-state override follows the layout rule');
 });
 
+test('history and order feeds use stable keyset pagination with timestamp and ID tie-breakers', () => {
+  assert.match(html, /historyCursor=historyRows\.length\?historyRows\[historyRows\.length-1\]:null/);
+  assert.match(html, /created_at\.lt\.\\?\$\{cursor\.created_at\},and\(created_at\.eq\.\\?\$\{cursor\.created_at\},id\.lt\.\\?\$\{cursor\.id\}\)/);
+  assert.match(html, /allOrdersPageSize=100/);
+  assert.match(html, /id="loadMoreOrdersBtn"/);
+  assert.match(html, /loadMoreAllOrders\(\)/);
+  assert.doesNotMatch(html, /range\(offset,offset\+historyPageSize-1\)/);
+  assert.doesNotMatch(html, /\.limit\(200\)/);
+});
+
 test('luxury theme final overrides neutralize legacy sky-blue auth and dashboard accents', () => {
   const marker = '/* Final luxury palette harmonization: neutralize legacy sky-blue login and dashboard accents. */';
   const finalRules = css.slice(css.lastIndexOf(marker));
