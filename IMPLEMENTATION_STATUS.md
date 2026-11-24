@@ -1272,3 +1272,10 @@
 - [!] Real Android device installation and screenshot-based visual acceptance remain outstanding.
 - [!] PR #60 remains Draft/open/unmerged; no Production or Supabase changes.
 - Next: audit Admin, asset detail, trade and order-book narrow-screen rendering; then obtain device screenshots.
+
+### 2026-11-24 — trading and admin visual pass
+- [x] Added distinct three-theme visual polish for trading workspace, order book, trade forms and admin panels.
+- [x] Added source regression tests for theme and mobile layout coverage.
+- [ ] Exact-head Android and exact-decimal CI pending; do not accept/release until successful.
+- [ ] Real-device screenshot review remains outstanding.
+- No Production/Supabase changes; PR #60 remains Draft and unmerged.
