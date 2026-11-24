@@ -965,3 +965,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - CI triggered for the CSS, HTML and Service Worker commits is in progress; latest regression-test commit is newer than those runs at this update, so do not treat them as final-head validation. A new final-head workflow run must complete before delivering a new APK.
 - The screenshot supplied is from the prior APK, so this CSS refinement is not yet visually verified on-device. No merge, release, deployment, Production DB change, Supabase migration, or user financial-data change.
 - Next: verify final-head CI, build and hash-check the latest review APK, then ask the user to install it and compare the same Market screen in all three themes. Continue page-by-page polish only after device evidence.
+
+
+## 2026-11-24 — premium UI regression assertion corrected
+- The first CSS refinement workflow surfaced a stale test expectation: it still required the old indigo dashboard card gradient, whereas v4 intentionally replaces those cards with frameless divider-separated rows. This was a test-only mismatch, not a runtime CSS failure.
+- Updated the dashboard regression test to assert the new transparent, frameless, divider-separated dashboard rows. The separate v4 regression test continues to assert market five-column layout, separate price/change areas, theme palettes, hidden source labels, and compact bottom navigation.
+- The latest exact-decimal workflow on the prior handoff commit `aa3adcaf77a2c1953e00f8c499f008a2ae638db7` is run `45345608060` (in progress at this update); Android APK run `45345608045` is pending. These runs do not include the newest test-only correction commit `889faf0f3a2d9eb896a419182f6b9c6779d9f228`; wait for the latest-head runs before acceptance.
+- No runtime trading/auth/database behavior was changed by the test correction. PR #60 remains Draft/open/unmerged. No release, deployment, Production DB change, or Supabase migration.
+- Next: verify latest-head CI and APK artifact; then user installs the fresh APK and supplies screenshots of the same Market screen in all three themes for visual acceptance.
