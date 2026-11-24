@@ -893,3 +893,15 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Exact-decimal CI remains green on run 45341676849 (75/75 Node tests, all database rehearsal/integration steps successful).
 - Branch remains unmerged; no APK has been released to users; no production deployment or database change was made.
 - Next: inspect the Android workflow run and artifact when it appears; if successful, verify BUILD-INFO commit matches this branch and inspect APK package contents. Then perform visual review of all three themes on mobile/desktop/WebView.
+
+
+## 2026-11-24 — Phase 1 Android review APK built and provenance verified
+- Android PR workflow run 45342044314 completed SUCCESS on PR #60. The job completed all 12 substantive steps, including web asset preparation, verification that src/digiarz-independent-ui.css is packaged, Android sync, debug APK build, provenance recording, and artifact upload.
+- Downloaded artifact ID 14895994029 (DigiArz-Android-debug-APK; 3,554,558 bytes; expires 2026-12-08T06:40:43Z). Archive contains app-debug.apk (3,935,298 bytes) and BUILD-INFO.txt.
+- BUILD-INFO records git_commit 1725b7037c0c6ff206b6cbe8327cb45514c08254 and git_ref refs/pull/60/merge, workflow_run_id 45342044314, package_version 1.0.0, and APK SHA-256 f0a6eaf81fa72e6bf710ef3ffdd6f6b9162f3707290be41c7ecbb9c7ffcf2c8d. Recomputed APK SHA-256 matches exactly. The recorded synthetic PR merge commit has parents main e5d4af7832db309345d87dfcf7e13f69420f694d and PR head ac8a73d1a15f1c3167154f517234c2eb433c70e6; the PR head includes the independent three-theme UI work. The current branch head 088473599f8c6c056ba44dc3b3ef54bb859eaa6a is a later documentation-only handoff update, so the APK contains the same app code plus the PR merge context, not that later documentation-only commit.
+- APK is a valid Android package and is a debug review build, not production-signed or released. Physical installation and actual rendering/function checks on a device are still outstanding.
+- Exact-decimal workflow run 45342076446 completed SUCCESS; all 21 substantive PostgreSQL/Market/Limit/Stop-Limit/TP-SL lifecycle and two-session concurrency steps completed successfully.
+- A subsequent APK run 45342076450 remains in progress at Gradle debug APK compilation and has no artifact yet; do not treat it as the verified deliverable.
+- PR #60 remains open and unmerged. No release, deployment, Supabase/database migration, Production data change, or main-branch merge occurred.
+- Next: perform physical Android installation and visual/functional acceptance across all three themes, auth/login and core navigation; fix only observed issues. Keep PR #60 Draft/unmerged pending review and explicit owner approval.
+- Evidence: https://github.com/shahram-adim/DigiArz/actions/runs/45342044314 and https://github.com/shahram-adim/DigiArz/actions/runs/45342076446
