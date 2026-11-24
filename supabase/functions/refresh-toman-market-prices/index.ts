@@ -258,23 +258,10 @@ Deno.serve(async (req: Request) => {
       throw new Error("Toman market upsert failed: " + writeResponse.status + " " + (await writeResponse.text()).slice(0, 220));
     }
 
-    // Keep the current-price table compact; long-term snapshots live in the history table.
-    stage = "current_price_cleanup";
-    let cleanupWarning: string | null = null;
-    try {
-      const cleanupUrl = new URL(supabaseUrl + "/rest/v1/market_toman_prices");
-      const refreshedExchanges = [...new Set(rows.map(row => row.exchange))];
-      cleanupUrl.searchParams.set("exchange", "in.(" + refreshedExchanges.join(",") + ")");
-      cleanupUrl.searchParams.set("fetched_at", "lt." + fetchedAt);
-      const cleanupResponse = await fetch(cleanupUrl.toString(), {
-        method: "DELETE",
-        headers: { ...serviceHeaders, Prefer: "return=minimal" },
-        signal: AbortSignal.timeout(10000),
-      });
-      if (!cleanupResponse.ok) throw new Error("Current-price cleanup failed: " + cleanupResponse.status);
-    } catch (error) {
-      cleanupWarning = String(error).slice(0, 180);
-    }
+    // A non-empty provider response is not proof of a complete exchange snapshot.
+    // Retain omitted rows: market_toman_performance marks old fetched_at values as stale.
+    // Automatic pruning is intentionally disabled to avoid deleting valid rows after
+    // a partial or truncated upstream response.
 
     stage = "history_read";
     let historySaved = 0;
@@ -318,7 +305,6 @@ Deno.serve(async (req: Request) => {
       success: true, saved: rows.length, duplicate_rows_dropped: duplicateCount, history_saved: historySaved,
       updated_at: fetchedAt, sources,
       ...(historyWarning ? { history_warning: historyWarning } : {}),
-      ...(cleanupWarning ? { cleanup_warning: cleanupWarning } : {}),
       note: "Prices are read-only market references in Toman. They are not used to execute demo trades.",
     });
   } catch (error) {
