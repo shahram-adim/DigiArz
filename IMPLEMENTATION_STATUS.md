@@ -1306,3 +1306,14 @@
 - [ ] Exact-decimal workflow for test head `247fa19a...` not observed; no full test claim.
 - [ ] Physical-device screenshot acceptance remains outstanding.
 - PR #60 remains Draft/unmerged; no Production/Supabase changes.
+
+
+### 2026-11-24 — Toman market mobile data-rail pass
+- [x] Audited the real `#tab-toman` markup: the comparison table contains 13 columns, including Toman price, asset identity, source, bid/ask, multiple return windows, volume and freshness.
+- [x] Added visual-only horizontal table rail with sticky header and sticky price/asset identity columns; added compact 720px and 380px behavior and opaque sticky-cell surfaces for dark/gold, white-glass and indigo-glass themes.
+- [x] CSS commit: `b4a1b8e905c3db933d16997de428baef82bb3b1d`.
+- [x] Regression test commit: `3bd6c560253b479e91012a7d975a62741c054fbe`; test checks actual table selectors, all three theme surfaces and mobile breakpoints.
+- [ ] Android run `45380484051` was started for CSS commit `b4a1b8e...`; its artifact is not yet verified and does not include the subsequent test-only commit.
+- [ ] Exact Decimal workflow has not run on the current PR head; the workflow is configured for push to main and pull requests targeting main. Do not claim full exact-head CI success.
+- [ ] Physical Android installation and screenshot-based acceptance remain outstanding.
+- PR #60 remains Draft/open/unmerged. No business logic, Supabase, Production DB, migration, cron, deployment, merge or release changes.
