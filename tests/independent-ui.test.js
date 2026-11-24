@@ -414,9 +414,9 @@ test('dashboard market identity restores visible favorites, frameless logos and 
     '#tab-dashboard .da-v2-hero-art:before',
     '#tab-dashboard .da-v2-quick-grid button'
   ]) assert.ok(pass.includes(selector), 'dashboard identity selector exists: ' + selector);
-  assert.match(pass, /#dashboardMarketPreview\s+\\.da-market-favorite\s*\{[\s\S]*?border:1px solid!important/);
-  assert.match(pass, /#dashboardMarketPreview\s+\\.da-market-logo,#dashboardMarketPreview\s+\\.da-market-logo-inner\s*\{[^}]*border:0!important/);
-  assert.match(pass, /#dashboardMarketPreview\s+\\.da-market-favorite\s*\{[^}]*border:1px solid!important/);
+  assert.match(pass, /#dashboardMarketPreview\s+\.da-market-favorite\s*\{[\s\S]*?border:1px solid!important/);
+  assert.match(pass, /#dashboardMarketPreview\s+\.da-market-logo,#dashboardMarketPreview\s+\.da-market-logo-inner\s*\{[^}]*border:0!important/);
+  assert.match(pass, /#dashboardMarketPreview\s+\.da-market-favorite\s*\{[^}]*border:1px solid!important/);
   assert.match(pass, /#dashboardMarketPreview \.da-market-coin-card\{[\s\S]*?border:1px solid!important/);
   for (const theme of ['dark-theme', 'light-theme', 'luxury-theme']) {
     assert.ok(pass.includes('body.' + theme + ' #dashboardMarketPreview .da-market-favorite'), theme + ' favorite frame exists');
