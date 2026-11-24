@@ -3589,3 +3589,82 @@ body.luxury-theme #tab-dashboard .da-v2-logo{
     padding-bottom:calc(8px + env(safe-area-inset-bottom))!important;
   }
 }
+
+
+/* 2026-11-24 dashboard visual correction v8: true white glass + coherent indigo controls. */
+/* Light theme: pure white surfaces only; no grey wash or blue-grey panel fills. */
+body.light-theme{
+  background:#fff!important;
+  color:#173452!important;
+}
+body.light-theme .wrap{background:#fff!important}
+body.light-theme #tab-dashboard .da-v2-hero{
+  min-height:0!important;padding:clamp(16px,3vw,26px)!important;
+  background:linear-gradient(135deg,#fff 0%,#fff 68%,#fafdff 100%)!important;
+  border:1px solid rgba(42,117,190,.15)!important;
+  box-shadow:0 14px 36px rgba(33,104,166,.055),inset 0 1px #fff!important;
+}
+body.light-theme #tab-dashboard .da-market-glass,
+body.light-theme #tab-dashboard .da-v2-account-card,
+body.light-theme #tab-dashboard .dashboard-activity-panel,
+body.light-theme #tab-dashboard .da-v2-quick-grid button,
+body.light-theme #dashboardMarketPreview .da-market-coin-card{
+  background:#fff!important;
+  border-color:rgba(42,117,190,.13)!important;
+  box-shadow:0 8px 24px rgba(33,104,166,.045),inset 0 1px #fff!important;
+}
+body.light-theme #tab-dashboard .da-market-search,
+body.light-theme #tab-dashboard .da-market-sort,
+body.light-theme #tab-dashboard .da-v2-balance-main,
+body.light-theme #tab-dashboard .da-v2-account-stats>div{
+  background:#fff!important;border-color:rgba(42,117,190,.12)!important;
+}
+body.light-theme #tab-dashboard .da-v2-section-head h2,
+body.light-theme #tab-dashboard .da-v2-quick-grid button b,
+body.light-theme #tab-dashboard .da-v2-account-stats b{
+  color:#173b60!important;
+}
+body.light-theme #tab-dashboard .da-v2-balance-main span,
+body.light-theme #tab-dashboard .da-v2-account-stats small,
+body.light-theme #tab-dashboard .da-v2-trust-row{color:#58738e!important}
+body.light-theme #tab-dashboard .da-v2-hero-foot{border-color:rgba(42,117,190,.12)!important}
+body.light-theme #tab-dashboard .da-market-filters button{
+  color:#245d91!important;background:#fff!important;
+  border:1px solid rgba(42,117,190,.16)!important;
+  box-shadow:0 3px 10px rgba(33,104,166,.04)!important;
+}
+body.light-theme #tab-dashboard .da-market-filters button.active,
+body.light-theme #tab-dashboard .da-market-filters button[aria-pressed="true"]{
+  color:#fff!important;background:linear-gradient(135deg,#286fc0,#4b91d8)!important;
+  border-color:transparent!important;
+}
+/* Indigo theme: make dashboard filters and form controls part of the same glass system. */
+body.luxury-theme #tab-dashboard .da-market-filters button{
+  color:#e5eaff!important;
+  background:linear-gradient(145deg,rgba(54,68,151,.92),rgba(28,39,105,.96))!important;
+  border:1px solid rgba(177,190,255,.24)!important;
+  box-shadow:0 5px 14px rgba(7,13,55,.18),inset 0 1px rgba(255,255,255,.08)!important;
+}
+body.luxury-theme #tab-dashboard .da-market-filters button.active,
+body.luxury-theme #tab-dashboard .da-market-filters button[aria-pressed="true"]{
+  color:#111b52!important;background:linear-gradient(135deg,#dce3ff,#aebdff)!important;
+  border-color:rgba(225,232,255,.7)!important;
+}
+body.luxury-theme #tab-dashboard .da-market-glass input,
+body.luxury-theme #tab-dashboard .da-market-glass select,
+body.luxury-theme #tab-dashboard .da-market-search input,
+body.luxury-theme #tab-dashboard .da-market-sort select{
+  color:#f3f0ff!important;background:rgba(9,16,58,.58)!important;
+  border:1px solid rgba(177,190,255,.25)!important;
+}
+body.luxury-theme #tab-dashboard .da-market-glass input:focus,
+body.luxury-theme #tab-dashboard .da-market-glass select:focus{
+  border-color:#aebdff!important;box-shadow:0 0 0 3px rgba(174,189,255,.14)!important;
+}
+body.luxury-theme #tab-dashboard .da-market-glass select option{background:#202a70!important;color:#f3f0ff!important}
+@media(max-width:700px){
+  #tab-dashboard .da-v2-hero{margin-bottom:12px!important}
+  #tab-dashboard .da-v2-section-head{margin:14px 0 8px!important}
+  #tab-dashboard .da-market-filters{gap:6px!important;padding:9px 0 8px!important}
+  #tab-dashboard .da-market-filters button{min-height:34px!important;padding:5px 11px!important}
+}
