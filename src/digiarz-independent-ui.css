@@ -1,0 +1,1244 @@
+/* DigiArz Independent Experience — 2026 */
+:root{
+  --da-bg:#07131c;--da-bg2:#0a1c27;--da-surface:#0e222e;--da-surface2:#142d3a;
+  --da-line:#244351;--da-text:#eaf5f7;--da-muted:#8da8b2;--da-mint:#45e0c0;
+  --da-blue:#6aaeff;--da-red:#ff6f86;--da-green:#4ce0ad;--da-radius:20px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{background:var(--da-bg);scroll-behavior:smooth}
+body{margin:0!important;min-height:100vh;background:radial-gradient(ellipse at 12% -5%,rgba(69,224,192,.12),transparent 36%),radial-gradient(ellipse at 92% 12%,rgba(106,174,255,.10),transparent 32%),var(--da-bg)!important;color:var(--da-text)!important;font-family:"Vazirmatn",Tahoma,Arial,sans-serif!important;line-height:1.8}
+body,button,input,select,textarea{font-family:"Vazirmatn",Tahoma,Arial,sans-serif!important}
+button{border-radius:13px!important;background:linear-gradient(135deg,var(--da-mint),#73f0d5)!important;color:#05221f!important;font-weight:900!important;box-shadow:0 7px 22px rgba(69,224,192,.12);transition:transform .18s ease,filter .18s ease,border-color .18s ease}
+button:hover{filter:brightness(1.06);transform:translateY(-1px)}
+button:active{transform:translateY(0) scale(.985)}
+button:disabled{filter:grayscale(.4);box-shadow:none}
+input,select,textarea{background:#091a24!important;color:var(--da-text)!important;border:1px solid var(--da-line)!important;border-radius:12px!important;min-height:44px}
+input:focus,select:focus,textarea:focus{border-color:var(--da-mint)!important;box-shadow:0 0 0 3px rgba(69,224,192,.12)!important;outline:0}
+a{color:var(--da-mint)}
+.wrap{width:min(1480px,100%);max-width:1480px;margin:0 auto;padding:18px 24px 100px!important}
+.top{position:sticky;top:0;z-index:80;display:flex;align-items:center;gap:16px;padding:13px 18px!important;margin:0 -4px 18px;border:1px solid rgba(83,135,151,.24)!important;border-radius:18px;background:rgba(7,19,28,.86)!important;backdrop-filter:blur(18px);box-shadow:0 12px 38px rgba(0,0,0,.18)}
+.brand{font-size:25px!important;letter-spacing:-.7px;color:#f3fbfc}.brand span{color:var(--da-mint)!important}.brand .tag{background:rgba(69,224,192,.12)!important;border:1px solid rgba(69,224,192,.35)!important;color:var(--da-mint)!important;border-radius:30px!important}
+.top .muted{color:var(--da-muted)!important}.top-actions{display:flex;align-items:center;gap:9px}
+.theme-switch,.secondary{background:var(--da-surface2)!important;color:var(--da-text)!important;border:1px solid var(--da-line)!important;box-shadow:none!important}
+.pwa-install-banner{border:1px solid rgba(69,224,192,.28)!important;background:var(--da-surface)!important;border-radius:16px!important}
+.auth-top-banner{display:none!important}
+.daily-ad-card{border-radius:18px!important;border:1px solid var(--da-line)!important;background:var(--da-surface)!important;color:var(--da-text)!important}
+.card,.stat,.trade-box,.fx-box,.performance-item,.indicator-panel,.asset-row,.market-list>div,.news-item,.review-row{background:linear-gradient(145deg,rgba(17,42,55,.96),rgba(10,28,39,.98))!important;border:1px solid rgba(73,125,142,.28)!important;border-radius:var(--da-radius)!important;box-shadow:0 16px 44px rgba(0,0,0,.13)}
+.card{padding:22px!important;margin:16px 0!important}
+h1,h2,h3,h4{color:var(--da-text)!important;letter-spacing:-.35px}
+h2{font-size:20px!important;font-weight:900!important}
+h3{font-size:16px!important;font-weight:800!important}
+.muted,.chart-caption,.small{color:var(--da-muted)!important}
+.tag,.live,.announcement-pill{border-radius:30px!important;background:rgba(69,224,192,.1)!important;color:var(--da-mint)!important;border:1px solid rgba(69,224,192,.25)!important;padding:5px 11px!important}
+.notice{background:#102b39!important;border:1px solid #244b5b!important;color:#d8edf1!important;border-radius:13px!important}
+.notice.warn{background:rgba(235,177,69,.10)!important;color:#f5d18a!important;border-color:rgba(235,177,69,.28)!important}
+.notice.err{background:rgba(255,111,134,.10)!important;color:#ffb3c0!important;border-color:rgba(255,111,134,.28)!important}
+.notice.ok{background:rgba(76,224,173,.10)!important;color:#a8f3d7!important;border-color:rgba(76,224,173,.28)!important}
+.hidden{display:none!important}
+/* Authentication — new split-screen composition */
+#authView{display:grid!important;grid-template-columns:minmax(0,1.15fr) minmax(340px,.85fr);gap:0;max-width:1120px;min-height:640px;margin:22px auto 36px!important;padding:0!important;overflow:hidden;border:1px solid rgba(69,224,192,.25)!important;border-radius:28px!important;background:linear-gradient(145deg,#0d2531,#091923)!important;box-shadow:0 30px 90px rgba(0,0,0,.34)!important}
+#authView .auth-visual{position:relative;min-width:0;padding:30px!important;display:flex;flex-direction:column;justify-content:flex-start;gap:24px;background:radial-gradient(circle at 70% 40%,rgba(69,224,192,.16),transparent 40%),linear-gradient(150deg,#102f3c,#0b202c 65%,#091923)!important;border:0!important;border-left:1px solid rgba(94,151,166,.22)!important;overflow:hidden}
+#authView .auth-visual:after{width:360px;height:360px;left:-150px;bottom:-190px;border-color:rgba(69,224,192,.13);box-shadow:0 0 0 34px rgba(69,224,192,.025),0 0 0 72px rgba(69,224,192,.018)}
+#authView .ref-brandbar{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:12px}
+#authView .ref-brand-lockup{display:flex;align-items:center;gap:12px}
+#authView .ref-monogram{width:46px;height:46px;display:grid;place-items:center;border-radius:15px;background:linear-gradient(145deg,var(--da-mint),#a0f6e4);color:#06241f;font-weight:1000;font-size:17px;box-shadow:0 8px 24px rgba(69,224,192,.18)}
+#authView .ref-brand-lockup strong{font-size:22px;color:#f2fbfc;display:block;line-height:1.3}
+#authView .ref-brand-lockup em{font-size:11px;color:var(--da-muted);font-style:normal}
+#authView .ref-live-pill{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:30px;background:rgba(69,224,192,.09);border:1px solid rgba(69,224,192,.25);color:var(--da-mint);font-size:11px}
+#authView .ref-live-pill i,#authView .auth-top-banner-live i{width:7px;height:7px;border-radius:50%;background:var(--da-mint);box-shadow:0 0 0 5px rgba(69,224,192,.12)}
+#authView .ref-hero-grid{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,.85fr) minmax(260px,1.15fr);align-items:center;gap:12px;flex:1}
+#authView .ref-market-copy h1{font-size:clamp(25px,3vw,39px)!important;line-height:1.65;font-weight:1000;margin:0 0 8px}
+#authView .ref-market-copy h1 span{color:var(--da-mint)!important}
+#authView .ref-market-copy p{color:#a8c0c9;font-size:13px}
+#authView .ref-coin-list{display:grid;gap:8px;margin-top:22px}
+#authView .ref-coin-row{display:grid;grid-template-columns:28px 48px minmax(0,1fr);align-items:center;gap:8px;padding:8px 10px;border-radius:12px;background:rgba(5,20,29,.55);border:1px solid rgba(100,156,171,.18)}
+#authView .ref-coin-row img{width:25px;height:25px}
+#authView .ref-coin-row b{color:#e6f5f7;font-size:11px}
+#authView .ref-coin-row span{font-size:10px;color:var(--da-muted)}
+#authView .ref-coin-row strong{display:none}
+#authView .ref-scene{height:390px;min-height:390px!important;max-width:100%;overflow:visible}
+#authView .ref-earth{filter:drop-shadow(0 0 35px rgba(69,224,192,.22))}
+#authView .ref-phone{filter:drop-shadow(0 24px 35px rgba(0,0,0,.38))}
+#authView .ref-gold-coin{filter:hue-rotate(95deg) saturate(.72) drop-shadow(0 10px 18px rgba(0,0,0,.25))}
+#authView .auth-form{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;padding:42px!important;background:linear-gradient(180deg,#102631,#0b1d28)!important;color:var(--da-text)}
+#authView .auth-form h2{font-size:26px!important;margin:0 0 7px!important}
+#authView .auth-intro{font-size:12px;color:var(--da-muted)!important;line-height:2}
+#authView .auth-form .field{margin:12px 0}
+#authView .auth-form label{color:#c8dce1;font-size:12px}
+#authView .auth-form input{min-height:52px!important;padding:13px 15px!important}
+#authView .auth-actions{display:grid;gap:10px;margin-top:12px}
+#authView .auth-actions button{min-height:52px!important}
+#authView .auth-security{color:var(--da-muted)!important}
+#authView .ref-daily-promo{border:1px solid rgba(69,224,192,.2)!important;background:rgba(5,20,29,.6)!important;border-radius:15px!important}
+#authView .ref-demo-footer{color:var(--da-mint)!important;font-size:12px}
+/* App header, navigation and dashboard */
+.market-announcement{display:flex;align-items:center;gap:10px;padding:11px 15px;margin:10px 0 15px;border:1px solid rgba(69,224,192,.18);border-radius:14px;background:rgba(13,42,53,.75);color:#c4e5e8;font-size:12px}
+.announcement-icon{color:var(--da-mint)}
+.hero{padding:18px 20px!important;border-radius:20px!important;background:linear-gradient(115deg,#123746,#0c2532 65%,#102b3a)!important;border:1px solid rgba(69,224,192,.22)!important}
+.hero-title{font-size:23px!important;color:#f3fbfc!important}.hero-label{color:var(--da-mint)!important}.hero-sub{color:#a6c1c9!important}
+.hero-mark{color:var(--da-mint)!important}
+.quick{gap:9px!important}.quick button{min-height:45px}
+.tabs{display:flex;gap:7px;align-items:center;flex-wrap:wrap;padding:8px!important;margin:16px 0!important;border:1px solid rgba(73,125,142,.25)!important;border-radius:17px!important;background:rgba(10,29,40,.88)!important}
+.tabs button{flex:1 1 auto;min-height:43px;padding:9px 13px!important;background:transparent!important;color:#a9c2ca!important;border:1px solid transparent!important;box-shadow:none!important;font-size:12px}
+.tabs button.active,.tabs button[aria-current="page"]{background:rgba(69,224,192,.13)!important;border-color:rgba(69,224,192,.3)!important;color:var(--da-mint)!important}
+.mobile-bottom-nav{background:rgba(7,20,29,.94)!important;border:1px solid rgba(83,135,151,.28)!important;border-radius:19px 19px 0 0!important;box-shadow:0 -12px 40px rgba(0,0,0,.3)!important;backdrop-filter:blur(18px)}
+.mobile-bottom-nav button{background:transparent!important;color:#90aab4!important;box-shadow:none!important;border-radius:12px!important}
+.mobile-bottom-nav button.active,.mobile-bottom-nav button[aria-current="page"]{color:var(--da-mint)!important;background:rgba(69,224,192,.1)!important}
+#tab-dashboard{overflow:hidden}
+.da-v2-topline{display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:1px solid var(--da-line)}
+.da-v2-brand{color:#f1fbfc!important}.da-v2-brand small{color:var(--da-muted)!important}
+.da-v2-logo{background:linear-gradient(145deg,var(--da-mint),#9af5e2)!important;color:#05251f!important;border-radius:14px!important}
+.da-v2-demo{color:var(--da-mint)!important;border-color:rgba(69,224,192,.3)!important;background:rgba(69,224,192,.09)!important}
+.da-v2-hero{background:radial-gradient(circle at 78% 40%,rgba(69,224,192,.15),transparent 34%),linear-gradient(120deg,#102f3b,#0a1c27)!important;border:1px solid rgba(69,224,192,.2)!important;border-radius:22px!important}
+.da-v2-hero h1 em{color:var(--da-mint)!important}
+.da-v2-primary{background:linear-gradient(135deg,var(--da-mint),#9af5e2)!important;color:#05251f!important}
+.da-v2-coin{background:linear-gradient(145deg,#1b5361,#0b2834)!important;border-color:rgba(69,224,192,.45)!important;color:var(--da-mint)!important;box-shadow:0 0 60px rgba(69,224,192,.12)!important}
+.da-v2-orbit{border-color:rgba(69,224,192,.22)!important}
+.da-v2-quick-grid button{background:var(--da-surface)!important;border:1px solid var(--da-line)!important;color:var(--da-text)!important;box-shadow:none!important}
+.da-v2-quick-grid button i{color:var(--da-mint)!important}
+.da-v2-stat-grid .stat,.dashboard-stats .stat{background:linear-gradient(145deg,#112c39,#0b1d28)!important}
+.stat .value{color:var(--da-text)!important}
+.section-title,.market-section-caption,.trade-market-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.market-hero-v34,.trade-workspace-banner-v35{background:radial-gradient(circle at 85% 35%,rgba(69,224,192,.14),transparent 34%),linear-gradient(115deg,#123543,#0b202c)!important;border:1px solid rgba(69,224,192,.2)!important;border-radius:20px!important}
+.market-hero-kicker,.trade-workspace-kicker{color:var(--da-mint)!important}
+.market-hero-mark,.trade-workspace-badges span{color:#c6e5e8!important}
+.market-orbit{border-color:rgba(69,224,192,.2)!important}.market-coin-mark{color:var(--da-mint)!important}
+.market-tools,.toman-toolbar{gap:10px!important}
+.market-tools input,.market-tools select,.toman-toolbar input{min-width:0}
+.market-list{display:grid;gap:9px}
+.market-list>div,.coin,.asset-row,.order-row,.history-row{background:rgba(7,24,34,.72)!important;border:1px solid rgba(73,125,142,.22)!important;border-radius:14px!important}
+.coin:hover,.asset-row:hover{border-color:rgba(69,224,192,.45)!important;background:#102b37!important}
+.coin-icon{background:#143543!important;color:var(--da-mint)!important}
+.coin-change.pos,.performance-item .pos{color:var(--da-green)!important}.coin-change.neg,.performance-item .neg{color:var(--da-red)!important}
+.price-toman,.chart-price,.detail-price{color:var(--da-mint)!important}
+.favorite-btn{color:var(--da-mint)!important;border-color:rgba(69,224,192,.28)!important}
+.trade-workspace-copy h1{color:#f1fbfc!important}.trade-workspace-badges i{color:var(--da-mint)!important}
+.trade-box,.trade-form,.order-form,.indicator-panel{background:#0b1e29!important;border:1px solid var(--da-line)!important;border-radius:17px!important}
+.chart-types button,.timeframes button{background:#17313e!important;color:#b9d0d6!important;border:1px solid #2b4b59!important;box-shadow:none!important}
+.chart-types button.active,.timeframes button.active{background:var(--da-mint)!important;color:#05251f!important}
+#priceChart,#volumeChart{border:1px solid var(--da-line)!important;border-radius:15px!important}
+.table-wrap,.toman-table-wrap{border:1px solid var(--da-line)!important;border-radius:15px!important;overflow:auto}
+table{border-collapse:separate!important;border-spacing:0!important;min-width:640px;background:transparent!important}
+th{background:#14313e!important;color:#bce0e3!important;font-weight:800!important}
+td{border-color:rgba(73,125,142,.18)!important;color:#d8e9ec!important}
+tr:nth-child(even) td{background:rgba(18,46,59,.42)!important}
+.history-date-presets button{background:#153441!important;color:#bcd4da!important;box-shadow:none!important}
+.history-date-presets button.active{background:var(--da-mint)!important;color:#05251f!important}
+.settings-grid .setting-row{background:#0b202c!important;border-color:var(--da-line)!important;border-radius:14px!important}
+.setting-row strong{color:var(--da-text)!important}.setting-row small{color:var(--da-muted)!important}
+.volatility-panel,.gainers-panel,.top-assets-panel{background:linear-gradient(145deg,#102d39,#0a1c27)!important;border-color:rgba(69,224,192,.22)!important;border-radius:18px!important}
+.volatility-title{color:var(--da-mint)!important}
+.gainer-card,.top-asset-card{background:#0b202b!important;border-color:var(--da-line)!important;color:var(--da-text)!important}
+.gainer-card strong{color:var(--da-green)!important}.gainers-more{color:var(--da-mint)!important;border-color:rgba(69,224,192,.35)!important}
+body.light-theme{--da-bg:#edf4f6;--da-bg2:#e8f1f4;--da-surface:#fff;--da-surface2:#edf5f6;--da-line:#d1e1e5;--da-text:#172d38;--da-muted:#607b86;--da-mint:#087f70;--da-blue:#286fba;color-scheme:light}
+body.light-theme,body.light-theme html{background:#edf4f6!important;color:#172d38!important}
+body.light-theme .top,body.light-theme .tabs{background:rgba(255,255,255,.9)!important}
+body.light-theme .card,body.light-theme .stat,body.light-theme .trade-box,body.light-theme .fx-box,body.light-theme .performance-item{background:#fff!important;border-color:#d4e3e7!important}
+body.light-theme #authView{background:#fff!important}
+body.light-theme #authView .auth-form{background:#f5fafb!important}
+body.light-theme #authView .auth-form h2,body.light-theme #authView .auth-form label{color:#172d38!important}
+body.light-theme input,body.light-theme select,body.light-theme textarea{background:#fff!important;color:#172d38!important}
+body.light-theme td{color:#213b47!important}
+@media(max-width:900px){
+ .wrap{padding:12px 14px 100px!important}
+ #authView{grid-template-columns:1fr;max-width:640px;min-height:0}
+ #authView .auth-visual{padding:24px!important;border-left:0!important;border-bottom:1px solid rgba(94,151,166,.22)!important}
+ #authView .ref-hero-grid{grid-template-columns:minmax(0,.9fr) minmax(210px,1.1fr);min-height:300px}
+ #authView .ref-scene{height:310px;min-height:310px!important}
+ #authView .auth-form{padding:28px!important}
+ .tabs{display:none!important}
+ .mobile-bottom-nav{position:fixed!important;left:10px!important;right:10px!important;bottom:env(safe-area-inset-bottom,0)!important;z-index:1000!important;display:flex!important;justify-content:space-around!important;gap:2px!important;padding:8px 5px!important}
+ .mobile-bottom-nav button{flex:1;min-width:0;padding:7px 2px!important;display:flex!important;flex-direction:column;align-items:center;gap:2px;font-size:10px!important}
+ .mobile-bottom-nav button i{font-size:17px}
+ .hero{margin-top:8px}
+}
+@media(max-width:560px){
+ .wrap{padding:8px 10px 105px!important}
+ .top{padding:10px 12px!important;border-radius:15px!important;margin-bottom:12px}
+ .brand{font-size:21px!important}
+ .top .muted{font-size:10px!important}
+ .card{padding:14px!important;border-radius:17px!important;margin:11px 0!important}
+ #authView{margin:10px auto 24px!important;border-radius:21px!important}
+ #authView .auth-visual{padding:18px!important;gap:12px}
+ #authView .ref-brand-lockup strong{font-size:19px}
+ #authView .ref-monogram{width:40px;height:40px}
+ #authView .ref-hero-grid{grid-template-columns:1fr;gap:0;min-height:0}
+ #authView .ref-market-copy h1{font-size:25px!important;margin-top:8px}
+ #authView .ref-market-copy p{font-size:11px;margin:2px 0}
+ #authView .ref-coin-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:12px}
+ #authView .ref-coin-row{grid-template-columns:23px 38px minmax(0,1fr);padding:6px}
+ #authView .ref-coin-row img{width:21px;height:21px}
+ #authView .ref-scene{height:250px;min-height:250px!important;margin-top:-4px}
+ #authView .ref-earth{width:100%!important;left:0!important;top:10px!important}
+ #authView .ref-phone{width:54%!important;right:5%!important;top:25px!important}
+ #authView .auth-form{padding:22px 18px!important}
+ #authView .auth-form h2{font-size:23px!important}
+ #authView .auth-form input{min-height:50px!important}
+ .market-announcement{font-size:10px;padding:9px 11px}
+ .hero{padding:14px!important}
+ .hero-title{font-size:19px!important}
+ .quick{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .quick button{min-width:0;padding:10px 8px!important;font-size:11px}
+ .section-title h2{font-size:17px!important}
+ .market-tools,.asset-tools,.history-filters{grid-template-columns:1fr!important}
+ .market-categories{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+ .coin{grid-template-columns:minmax(0,1fr) auto!important;gap:7px!important}
+ .coin-actions{grid-column:1/-1;justify-content:flex-start!important}
+ .asset-row{grid-template-columns:minmax(0,1fr) auto!important}
+ .dashboard-market-grid,.dashboard-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .dashboard-portfolio{grid-template-columns:1fr!important}
+ .performance-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .indicator-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .trade-grid,.trade-market-grid{grid-template-columns:1fr!important}
+ .volatility-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ .volatility-stat strong{font-size:12px!important}
+}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Explicit page-surface coverage for the primary app sections. */
+#tab-markets,#tab-trade,#tab-assets,#tab-orders,#tab-history,#tab-settings{scroll-margin-top:96px}
+
+
+/* =========================================================
+   DigiArz visual correction v3
+   Theme isolation, semantic controls, login + dashboard polish.
+   No authentication, navigation, market, wallet or trade logic.
+   ========================================================= */
+:root{
+  --da-bg:#101318;--da-bg2:#171b22;--da-surface:#1b2028;--da-surface2:#242b35;
+  --da-line:#343d49;--da-text:#f4f6fa;--da-muted:#9ca7b5;
+  --da-accent:#f0b90b;--da-accent-soft:rgba(240,185,11,.13);
+  --da-blue:#6ea8ff;--da-green:#19c889;--da-red:#f06478;--da-purple:#b29aff;
+  --da-radius:20px;
+}
+body.dark-theme{
+  color-scheme:dark!important;
+  --da-bg:#101318;--da-bg2:#171b22;--da-surface:#1b2028;--da-surface2:#242b35;
+  --da-line:#343d49;--da-text:#f4f6fa;--da-muted:#9ca7b5;
+  --da-accent:#f0b90b;--da-accent-soft:rgba(240,185,11,.13);
+  --da-blue:#6ea8ff;--da-green:#19c889;--da-red:#f06478;--da-purple:#b29aff;
+  background:radial-gradient(ellipse at 8% 0%,rgba(240,185,11,.075),transparent 32%),linear-gradient(145deg,#0d1015,#151a22 58%,#101318)!important;
+  color:var(--da-text)!important;
+}
+body.light-theme{
+  color-scheme:light!important;
+  --da-bg:#f3f6fb;--da-bg2:#eaf0f8;--da-surface:#fff;--da-surface2:#edf2f9;
+  --da-line:#d7e0ec;--da-text:#17263b;--da-muted:#64758c;
+  --da-accent:#2868d7;--da-accent-soft:rgba(40,104,215,.10);
+  --da-blue:#2868d7;--da-green:#13865e;--da-red:#d64e61;--da-purple:#7554c7;
+  background:radial-gradient(ellipse at 90% 0%,rgba(40,104,215,.10),transparent 34%),linear-gradient(145deg,#f8faff,#edf3fa 58%,#f4f7fc)!important;
+  color:var(--da-text)!important;
+}
+body.luxury-theme{
+  color-scheme:dark!important;
+  --da-bg:#071525;--da-bg2:#0b2034;--da-surface:rgba(14,37,59,.9);--da-surface2:rgba(21,51,76,.92);
+  --da-line:rgba(164,190,211,.25);--da-text:#f0f4f8;--da-muted:#a6b7c9;
+  --da-accent:#78c8ff;--da-accent-soft:rgba(120,200,255,.16);
+  --da-blue:#83b9ed;--da-green:#62d6b1;--da-red:#ff8494;--da-purple:#c3a8f3;
+  background:radial-gradient(ellipse at 12% 0%,rgba(30,105,153,.24),transparent 34%),radial-gradient(ellipse at 90% 14%,rgba(88,174,235,.16),transparent 30%),linear-gradient(145deg,#061321,#0b263d 55%,#071525)!important;
+  color:var(--da-text)!important;
+}
+html{background:var(--da-bg)!important}
+body,body.dark-theme,body.light-theme,body.luxury-theme{font-family:"Vazirmatn",Tahoma,Arial,sans-serif!important}
+body.dark-theme .top,body.light-theme .top,body.luxury-theme .top{
+  border:1px solid var(--da-line)!important;border-radius:18px!important;
+  background:color-mix(in srgb,var(--da-surface) 90%,transparent)!important;
+  box-shadow:0 10px 30px rgba(0,0,0,.10)!important;backdrop-filter:blur(16px)
+}
+body.dark-theme .brand,body.light-theme .brand,body.luxury-theme .brand{color:var(--da-text)!important}
+body.dark-theme .brand span:first-child,body.light-theme .brand span:first-child,body.luxury-theme .brand span:first-child{color:var(--da-accent)!important}
+body.dark-theme .card,body.light-theme .card,body.luxury-theme .card,
+body.dark-theme .stat,body.light-theme .stat,body.luxury-theme .stat,
+body.dark-theme .trade-box,body.light-theme .trade-box,body.luxury-theme .trade-box,
+body.dark-theme .fx-box,body.light-theme .fx-box,body.luxury-theme .fx-box,
+body.dark-theme .indicator-panel,body.light-theme .indicator-panel,body.luxury-theme .indicator-panel{
+  background:var(--da-surface)!important;border:1px solid var(--da-line)!important;
+  color:var(--da-text)!important;box-shadow:0 12px 34px rgba(0,0,0,.08)!important
+}
+body.light-theme .card,body.light-theme .stat,body.light-theme .trade-box,body.light-theme .fx-box,body.light-theme .indicator-panel{box-shadow:0 8px 26px rgba(31,57,91,.055)!important}
+body.luxury-theme .card,body.luxury-theme .stat,body.luxury-theme .trade-box,body.luxury-theme .fx-box,body.luxury-theme .indicator-panel{backdrop-filter:blur(16px);box-shadow:0 16px 42px rgba(0,0,0,.20),inset 0 1px rgba(255,255,255,.055)!important}
+body.dark-theme h1,body.dark-theme h2,body.dark-theme h3,body.dark-theme h4,
+body.light-theme h1,body.light-theme h2,body.light-theme h3,body.light-theme h4,
+body.luxury-theme h1,body.luxury-theme h2,body.luxury-theme h3,body.luxury-theme h4{color:var(--da-text)!important}
+body.dark-theme .muted,body.dark-theme .small,body.dark-theme .chart-caption,
+body.light-theme .muted,body.light-theme .small,body.light-theme .chart-caption,
+body.luxury-theme .muted,body.luxury-theme .small,body.luxury-theme .chart-caption{color:var(--da-muted)!important}
+
+/* Controls are neutral by default; only true primary actions use the theme accent. */
+body.dark-theme button,body.light-theme button,body.luxury-theme button{
+  border-radius:12px!important;font-family:inherit!important;font-weight:750!important;
+  box-shadow:none!important;transition:background .18s,border-color .18s,color .18s,transform .18s
+}
+body.dark-theme button:not(.da-v2-primary):not(.buy):not(.sell):not(.danger):not(.active),
+body.light-theme button:not(.da-v2-primary):not(.buy):not(.sell):not(.danger):not(.active),
+body.luxury-theme button:not(.da-v2-primary):not(.buy):not(.sell):not(.danger):not(.active){
+  background:var(--da-surface2)!important;color:var(--da-text)!important;border:1px solid var(--da-line)!important
+}
+body.dark-theme button:hover,body.light-theme button:hover,body.luxury-theme button:hover{filter:brightness(1.06);transform:translateY(-1px)}
+body.dark-theme .da-v2-primary,body.light-theme .da-v2-primary,body.luxury-theme .da-v2-primary,
+body.dark-theme .auth-actions button:first-child,body.light-theme .auth-actions button:first-child,body.luxury-theme .auth-actions button:first-child{
+  background:linear-gradient(125deg,var(--da-accent),color-mix(in srgb,var(--da-accent) 72%,white))!important;
+  color:#101820!important;border:1px solid color-mix(in srgb,var(--da-accent) 75%,white)!important;
+  box-shadow:0 8px 22px color-mix(in srgb,var(--da-accent) 22%,transparent)!important
+}
+body.dark-theme .secondary,body.light-theme .secondary,body.luxury-theme .secondary,
+body.dark-theme .theme-switch,body.light-theme .theme-switch,body.luxury-theme .theme-switch{background:var(--da-surface2)!important;color:var(--da-text)!important;border:1px solid var(--da-line)!important}
+body.dark-theme .buy,body.light-theme .buy,body.luxury-theme .buy{background:var(--da-green)!important;color:#071b14!important}
+body.dark-theme .sell,body.light-theme .sell,body.luxury-theme .sell{background:var(--da-red)!important;color:#fff!important}
+body.dark-theme .danger,body.light-theme .danger,body.luxury-theme .danger{background:#9e3445!important;color:#fff!important}
+body.dark-theme input,body.dark-theme select,body.dark-theme textarea,
+body.light-theme input,body.light-theme select,body.light-theme textarea,
+body.luxury-theme input,body.luxury-theme select,body.luxury-theme textarea{
+  min-height:46px!important;padding:11px 14px!important;border-radius:12px!important;
+  background:var(--da-bg2)!important;color:var(--da-text)!important;border:1px solid var(--da-line)!important;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.035)!important
+}
+body.light-theme input,body.light-theme select,body.light-theme textarea{background:#fff!important}
+body.dark-theme input:focus,body.dark-theme select:focus,body.dark-theme textarea:focus,
+body.light-theme input:focus,body.light-theme select:focus,body.light-theme textarea:focus,
+body.luxury-theme input:focus,body.luxury-theme select:focus,body.luxury-theme textarea:focus{
+  border-color:var(--da-accent)!important;box-shadow:0 0 0 3px var(--da-accent-soft)!important;outline:0
+}
+
+/* Icons inherit their component's semantic color; no site-wide turquoise paint. */
+body.dark-theme i[data-lucide],body.light-theme i[data-lucide],body.luxury-theme i[data-lucide],
+body.dark-theme svg.lucide,body.light-theme svg.lucide,body.luxury-theme svg.lucide{color:inherit!important;stroke:currentColor}
+body.dark-theme .da-v2-quick-grid button:nth-child(1) i{color:var(--da-accent)!important}
+body.dark-theme .da-v2-quick-grid button:nth-child(2) i{color:var(--da-blue)!important}
+body.dark-theme .da-v2-quick-grid button:nth-child(3) i{color:var(--da-green)!important}
+body.dark-theme .da-v2-quick-grid button:nth-child(4) i{color:var(--da-purple)!important}
+body.light-theme .da-v2-quick-grid button:nth-child(1) i{color:#2868d7!important}
+body.light-theme .da-v2-quick-grid button:nth-child(2) i{color:#7554c7!important}
+body.light-theme .da-v2-quick-grid button:nth-child(3) i{color:#13865e!important}
+body.light-theme .da-v2-quick-grid button:nth-child(4) i{color:#c07824!important}
+body.luxury-theme .da-v2-quick-grid button:nth-child(1) i{color:#a8ddff!important}
+body.luxury-theme .da-v2-quick-grid button:nth-child(2) i{color:#83b9ed!important}
+body.luxury-theme .da-v2-quick-grid button:nth-child(3) i{color:#62d6b1!important}
+body.luxury-theme .da-v2-quick-grid button:nth-child(4) i{color:#c3a8f3!important}
+body.dark-theme .tabs button.active,body.dark-theme .mobile-bottom-nav button.active{color:var(--da-accent)!important;border-color:var(--da-accent)!important;background:var(--da-accent-soft)!important}
+body.light-theme .tabs button.active,body.light-theme .mobile-bottom-nav button.active{color:var(--da-accent)!important;border-color:var(--da-accent)!important;background:var(--da-accent-soft)!important}
+body.luxury-theme .tabs button.active,body.luxury-theme .mobile-bottom-nav button.active{color:var(--da-accent)!important;border-color:var(--da-accent)!important;background:var(--da-accent-soft)!important}
+body.dark-theme .mobile-bottom-nav,body.light-theme .mobile-bottom-nav,body.luxury-theme .mobile-bottom-nav{background:var(--da-surface)!important;border-color:var(--da-line)!important}
+
+/* Login: preserve the existing auth markup/hooks, but give each theme a distinct premium identity. */
+body.dark-theme #authView.auth-reference-layout,
+body.light-theme #authView.auth-reference-layout,
+body.luxury-theme #authView.auth-reference-layout{
+  max-width:1060px!important;border:1px solid var(--da-line)!important;border-radius:30px!important;
+  overflow:hidden!important;box-shadow:0 28px 78px rgba(0,0,0,.20)!important
+}
+body.dark-theme #authView.auth-reference-layout{background:#10151d!important;color:#f4f6fa!important}
+body.dark-theme #authView .auth-reference-visual{background:radial-gradient(ellipse at 78% 38%,rgba(240,185,11,.17),transparent 45%),linear-gradient(145deg,#1b2029,#10151d 68%,#171b22)!important}
+body.dark-theme #authView .ref-brand-lockup strong,body.dark-theme #authView .ref-brand-lockup em,
+body.dark-theme #authView .ref-market-copy h1 span,body.dark-theme #authView .ref-demo-footer{color:#f0c44e!important}
+body.dark-theme #authView .ref-live-pill{background:rgba(25,200,137,.10)!important;border-color:rgba(25,200,137,.35)!important;color:#6be0b4!important}
+body.dark-theme #authView.auth-reference-layout .auth-form{background:linear-gradient(160deg,#202630,#171c25)!important;border:1px solid #3b4655!important;border-radius:26px!important}
+body.dark-theme #authView .auth-form h2{color:#f5d47b!important}
+body.dark-theme #authView .auth-form input{background:#111720!important;border-color:#465365!important;color:#f4f6fa!important}
+body.light-theme #authView.auth-reference-layout{background:#f4f7fc!important;color:#17263b!important;box-shadow:0 24px 65px rgba(31,57,91,.12)!important}
+body.light-theme #authView .auth-reference-visual{background:radial-gradient(ellipse at 78% 35%,rgba(40,104,215,.16),transparent 46%),linear-gradient(145deg,#e8f0fc,#f6f9ff 68%,#eaf1fa)!important}
+body.light-theme #authView .ref-brand-lockup strong,body.light-theme #authView .ref-brand-lockup em,
+body.light-theme #authView .ref-market-copy h1,body.light-theme #authView .ref-market-copy h1 span,
+body.light-theme #authView .ref-demo-footer{color:#1b3e70!important;text-shadow:none!important}
+body.light-theme #authView .ref-market-copy>p,body.light-theme #authView .ref-coin-row,
+body.light-theme #authView .ref-coin-row b,body.light-theme #authView .ref-coin-row span{color:#304763!important}
+body.light-theme #authView .ref-coin-row{background:rgba(255,255,255,.72)!important;border-color:#d5e1f1!important}
+body.light-theme #authView .ref-live-pill{background:#e4f6ed!important;border-color:#9edbbd!important;color:#16734e!important}
+body.light-theme #authView .ref-platform{background:linear-gradient(180deg,#fff,#dce8f7 55%,#c6d8ef)!important;border-color:#9db9dc!important;box-shadow:0 10px 25px rgba(50,83,130,.15)!important}
+body.light-theme #authView.auth-reference-layout .auth-form{background:#fff!important;border:1px solid #d7e2f0!important;border-radius:26px!important;box-shadow:0 14px 36px rgba(37,72,121,.08)!important;color:#17263b!important}
+body.light-theme #authView .auth-form h2{color:#173f78!important}
+body.light-theme #authView .auth-form .auth-intro,body.light-theme #authView .auth-form .field label{color:#64758c!important}
+body.light-theme #authView .auth-form input{background:#f7faff!important;border-color:#d4dfed!important;color:#17263b!important}
+body.light-theme #authView .auth-form input::placeholder{color:#91a0b4!important}
+body.light-theme #authView .auth-form .auth-security{color:#64758c!important;border-color:#e1e8f1!important}
+body.luxury-theme #authView.auth-reference-layout{background:#071525!important;color:#f0f4f8!important}
+body.luxury-theme #authView .auth-reference-visual{background:radial-gradient(ellipse at 78% 38%,rgba(120,200,255,.20),transparent 44%),radial-gradient(ellipse at 10% 90%,rgba(42,125,171,.16),transparent 42%),linear-gradient(145deg,#0c2942,#071a2c 65%,#061321)!important}
+body.luxury-theme #authView .ref-brand-lockup strong,body.luxury-theme #authView .ref-brand-lockup em,
+body.luxury-theme #authView .ref-market-copy h1 span,body.luxury-theme #authView .ref-demo-footer{color:#a8ddff!important}
+body.luxury-theme #authView .auth-form{background:linear-gradient(155deg,rgba(21,54,79,.94),rgba(8,29,47,.98))!important;border:1px solid rgba(120,200,255,.38)!important;border-radius:26px!important}
+body.luxury-theme #authView .auth-form h2{color:#d9efff!important}
+body.luxury-theme #authView .auth-form input{background:rgba(4,20,34,.82)!important;border-color:rgba(147,177,198,.38)!important;color:#f0f4f8!important}
+body.dark-theme #authView .auth-form .auth-actions #signupBtn,
+body.light-theme #authView .auth-form .auth-actions #signupBtn,
+body.luxury-theme #authView .auth-form .auth-actions #signupBtn{background:transparent!important;color:var(--da-text)!important;border:1px solid var(--da-line)!important;box-shadow:none!important}
+body.dark-theme #authView .auth-form #forgotBtn,body.light-theme #authView .auth-form #forgotBtn,body.luxury-theme #authView .auth-form #forgotBtn{background:transparent!important;color:var(--da-muted)!important;border:0!important}
+
+/* Dashboard: coherent hierarchy, balanced cards and resilient responsive grids. */
+body.dark-theme #tab-dashboard,body.light-theme #tab-dashboard,body.luxury-theme #tab-dashboard{
+  padding:clamp(14px,2.6vw,28px)!important;border-radius:26px!important;
+  background:var(--da-surface)!important;border:1px solid var(--da-line)!important;
+  box-shadow:0 18px 50px rgba(0,0,0,.10)!important;overflow:hidden!important
+}
+body.dark-theme .da-v2-topline,body.light-theme .da-v2-topline,body.luxury-theme .da-v2-topline{padding-bottom:15px!important;border-color:var(--da-line)!important}
+body.dark-theme .da-v2-brand,body.light-theme .da-v2-brand,body.luxury-theme .da-v2-brand{color:var(--da-text)!important}
+body.dark-theme .da-v2-brand strong,body.light-theme .da-v2-brand strong,body.luxury-theme .da-v2-brand strong{color:var(--da-accent)!important}
+body.dark-theme .da-v2-logo,body.light-theme .da-v2-logo,body.luxury-theme .da-v2-logo{background:var(--da-accent-soft)!important;border:1px solid var(--da-accent)!important;color:var(--da-accent)!important;box-shadow:none!important}
+body.dark-theme .da-v2-demo,body.light-theme .da-v2-demo,body.luxury-theme .da-v2-demo{color:var(--da-accent)!important;background:var(--da-accent-soft)!important;border:1px solid var(--da-line)!important;border-radius:30px!important}
+body.dark-theme .da-v2-hero{background:radial-gradient(ellipse at 78% 35%,rgba(240,185,11,.15),transparent 38%),linear-gradient(120deg,#202630,#171d27 62%,#252a32)!important;border:1px solid #414a57!important}
+body.light-theme .da-v2-hero{background:radial-gradient(ellipse at 78% 35%,rgba(40,104,215,.15),transparent 38%),linear-gradient(120deg,#e5efff,#f7faff 62%,#e9f1fb)!important;border:1px solid #cbdcf2!important}
+body.luxury-theme .da-v2-hero{background:radial-gradient(ellipse at 78% 35%,rgba(120,200,255,.18),transparent 38%),linear-gradient(120deg,#102e49,#0b2238 62%,#0b1b2d)!important;border:1px solid rgba(120,200,255,.34)!important}
+body.dark-theme .da-v2-hero h1 em{color:#f0c44e!important}
+body.light-theme .da-v2-hero h1 em{color:#2868d7!important}
+body.luxury-theme .da-v2-hero h1 em{color:#a8ddff!important}
+body.dark-theme .da-v2-hero p{color:#c1c8d2!important}
+body.light-theme .da-v2-hero p{color:#536781!important}
+body.luxury-theme .da-v2-hero p{color:#b8c9d8!important}
+body.dark-theme .da-v2-eyebrow,body.dark-theme .da-v2-hero-foot{color:#f0c44e!important}
+body.light-theme .da-v2-eyebrow,body.light-theme .da-v2-hero-foot{color:#2868d7!important}
+body.luxury-theme .da-v2-eyebrow,body.luxury-theme .da-v2-hero-foot{color:#a8ddff!important}
+body.dark-theme .da-v2-orbit{border-color:rgba(240,185,11,.27)!important}
+body.light-theme .da-v2-orbit{border-color:rgba(40,104,215,.25)!important}
+body.luxury-theme .da-v2-orbit{border-color:rgba(120,200,255,.38)!important}
+body.dark-theme .da-v2-coin{background:linear-gradient(145deg,#f7d66e,#b98414)!important;color:#332509!important;box-shadow:0 14px 35px rgba(240,185,11,.18)!important}
+body.light-theme .da-v2-coin{background:linear-gradient(145deg,#78a9f4,#2868d7)!important;color:#fff!important;box-shadow:0 14px 35px rgba(40,104,215,.18)!important}
+body.luxury-theme .da-v2-coin{background:linear-gradient(145deg,#d8f1ff,#3e8fc8)!important;color:#1a2c3d!important;box-shadow:0 14px 35px rgba(120,200,255,.20)!important}
+body.dark-theme .da-v2-quick-grid,body.light-theme .da-v2-quick-grid,body.luxury-theme .da-v2-quick-grid{gap:12px!important;margin:17px 0 24px!important}
+body.dark-theme .da-v2-quick-grid button,body.light-theme .da-v2-quick-grid button,body.luxury-theme .da-v2-quick-grid button{
+  min-height:76px!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:12px!important;
+  padding:15px 17px!important;background:var(--da-bg2)!important;border:1px solid var(--da-line)!important;
+  border-radius:17px!important;color:var(--da-text)!important;text-align:right!important
+}
+body.dark-theme .da-v2-quick-grid button:hover,body.light-theme .da-v2-quick-grid button:hover,body.luxury-theme .da-v2-quick-grid button:hover{border-color:var(--da-accent)!important;background:var(--da-accent-soft)!important}
+body.dark-theme .da-v2-section-head,body.light-theme .da-v2-section-head,body.luxury-theme .da-v2-section-head{margin:24px 0 12px!important}
+body.dark-theme .da-v2-kicker,body.light-theme .da-v2-kicker,body.luxury-theme .da-v2-kicker{color:var(--da-accent)!important;letter-spacing:1.2px!important;font-weight:850!important}
+body.dark-theme .da-market-glass,body.light-theme .da-market-glass,body.luxury-theme .da-market-glass,
+body.dark-theme .da-v2-account-card,body.light-theme .da-v2-account-card,body.luxury-theme .da-v2-account-card,
+body.dark-theme .dashboard-activity-panel,body.light-theme .dashboard-activity-panel,body.luxury-theme .dashboard-activity-panel{
+  background:var(--da-bg2)!important;border:1px solid var(--da-line)!important;border-radius:19px!important;
+  box-shadow:none!important;color:var(--da-text)!important
+}
+body.dark-theme .da-market-glass,body.light-theme .da-market-glass,body.luxury-theme .da-market-glass{padding:16px!important}
+body.dark-theme .da-market-search,body.dark-theme .da-market-sort,
+body.light-theme .da-market-search,body.light-theme .da-market-sort,
+body.luxury-theme .da-market-search,body.luxury-theme .da-market-sort{background:var(--da-surface)!important;border:1px solid var(--da-line)!important;border-radius:13px!important}
+body.dark-theme .da-market-filters button,body.light-theme .da-market-filters button,body.luxury-theme .da-market-filters button{background:var(--da-surface)!important;border:1px solid var(--da-line)!important;color:var(--da-muted)!important}
+body.dark-theme .da-market-filters button.active,body.light-theme .da-market-filters button.active,body.luxury-theme .da-market-filters button.active{background:var(--da-accent-soft)!important;border-color:var(--da-accent)!important;color:var(--da-accent)!important}
+body.dark-theme .da-v2-market-list>*,body.light-theme .da-v2-market-list>*,body.luxury-theme .da-v2-market-list>*{background:var(--da-surface)!important;border-color:var(--da-line)!important;color:var(--da-text)!important}
+body.dark-theme .da-v2-balance-main,body.light-theme .da-v2-balance-main,body.luxury-theme .da-v2-balance-main{border-color:var(--da-line)!important}
+body.dark-theme .da-v2-balance-main strong,body.light-theme .da-v2-balance-main strong,body.luxury-theme .da-v2-balance-main strong{color:var(--da-accent)!important}
+body.dark-theme .da-v2-account-stats>div,body.light-theme .da-v2-account-stats>div,body.luxury-theme .da-v2-account-stats>div{background:var(--da-surface)!important;border:1px solid var(--da-line)!important;border-radius:13px!important}
+body.dark-theme .da-v2-link,body.light-theme .da-v2-link,body.luxury-theme .da-v2-link,
+body.dark-theme .da-v2-wallet-link,body.light-theme .da-v2-wallet-link,body.luxury-theme .da-v2-wallet-link{color:var(--da-accent)!important;background:transparent!important;border:0!important;box-shadow:none!important}
+body.dark-theme .dashboard-activity-panel-head,body.light-theme .dashboard-activity-panel-head,body.luxury-theme .dashboard-activity-panel-head{border-color:var(--da-line)!important}
+body.dark-theme .da-v2-trust-row,body.light-theme .da-v2-trust-row,body.luxury-theme .da-v2-trust-row{border-color:var(--da-line)!important;color:var(--da-muted)!important}
+body.dark-theme .da-v2-trust-row i{color:var(--da-accent)!important}
+body.light-theme .da-v2-trust-row i{color:var(--da-blue)!important}
+body.luxury-theme .da-v2-trust-row i{color:var(--da-accent)!important}
+
+/* Shared page surfaces follow the selected theme without flattening semantic status colors. */
+body.dark-theme .market-hero-v34,body.dark-theme .trade-workspace-banner-v35{background:linear-gradient(120deg,#202630,#171d27)!important;border-color:var(--da-line)!important}
+body.light-theme .market-hero-v34,body.light-theme .trade-workspace-banner-v35{background:linear-gradient(120deg,#e5efff,#f7faff)!important;border-color:var(--da-line)!important}
+body.luxury-theme .market-hero-v34,body.luxury-theme .trade-workspace-banner-v35{background:linear-gradient(120deg,#102e49,#0b2238)!important;border-color:var(--da-line)!important}
+body.dark-theme .market-hero-kicker,body.dark-theme .trade-workspace-kicker{color:var(--da-accent)!important}
+body.light-theme .market-hero-kicker,body.light-theme .trade-workspace-kicker{color:var(--da-blue)!important}
+body.luxury-theme .market-hero-kicker,body.luxury-theme .trade-workspace-kicker{color:var(--da-accent)!important}
+body.dark-theme .coin,body.dark-theme .asset-row,body.dark-theme .order-row,body.dark-theme .history-row,
+body.light-theme .coin,body.light-theme .asset-row,body.light-theme .order-row,body.light-theme .history-row,
+body.luxury-theme .coin,body.luxury-theme .asset-row,body.luxury-theme .order-row,body.luxury-theme .history-row{background:var(--da-bg2)!important;border-color:var(--da-line)!important;color:var(--da-text)!important}
+body.dark-theme .coin-icon{background:#3a3018!important;color:#f0c44e!important}
+body.light-theme .coin-icon{background:#e4edfb!important;color:#2868d7!important}
+body.luxury-theme .coin-icon{background:rgba(120,200,255,.14)!important;color:#a8ddff!important}
+body.dark-theme .price-toman,body.dark-theme .chart-price,body.dark-theme .detail-price{color:#f0c44e!important}
+body.light-theme .price-toman,body.light-theme .chart-price,body.light-theme .detail-price{color:#2868d7!important}
+body.luxury-theme .price-toman,body.luxury-theme .chart-price,body.luxury-theme .detail-price{color:#a8ddff!important}
+body.dark-theme th{background:#252c36!important;color:#c7d0dc!important}
+body.light-theme th{background:#e8eff8!important;color:#344d6c!important}
+body.luxury-theme th{background:#15344e!important;color:#d8e4ef!important}
+body.dark-theme td{color:#e0e5ed!important}body.light-theme td{color:#243a55!important}body.luxury-theme td{color:#dce7f0!important}
+body.dark-theme .tabs,body.light-theme .tabs,body.luxury-theme .tabs{background:var(--da-surface)!important;border-color:var(--da-line)!important}
+body.dark-theme .tabs button,body.light-theme .tabs button,body.luxury-theme .tabs button{background:transparent!important;color:var(--da-muted)!important;border-color:transparent!important}
+body.dark-theme .tabs button.active,body.light-theme .tabs button.active,body.luxury-theme .tabs button.active{background:var(--da-accent-soft)!important;color:var(--da-accent)!important;border-color:var(--da-line)!important}
+body.dark-theme .notice,body.light-theme .notice,body.luxury-theme .notice{background:var(--da-bg2)!important;color:var(--da-text)!important;border-color:var(--da-line)!important}
+body.dark-theme .notice.warn,body.light-theme .notice.warn,body.luxury-theme .notice.warn{background:rgba(225,164,47,.12)!important;color:#d69b2c!important}
+body.dark-theme .notice.err,body.light-theme .notice.err,body.luxury-theme .notice.err{background:rgba(220,74,94,.11)!important;color:var(--da-red)!important}
+body.dark-theme .notice.ok,body.light-theme .notice.ok,body.luxury-theme .notice.ok{background:rgba(25,160,105,.11)!important;color:var(--da-green)!important}
+@media(max-width:760px){
+ body.dark-theme #authView.auth-reference-layout,body.light-theme #authView.auth-reference-layout,body.luxury-theme #authView.auth-reference-layout{margin:8px auto 20px!important;border-radius:22px!important}
+ body.dark-theme #tab-dashboard,body.light-theme #tab-dashboard,body.luxury-theme #tab-dashboard{padding:12px!important;border-radius:20px!important}
+ body.dark-theme .da-v2-quick-grid,body.light-theme .da-v2-quick-grid,body.luxury-theme .da-v2-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ body.dark-theme .da-v2-quick-grid button,body.light-theme .da-v2-quick-grid button,body.luxury-theme .da-v2-quick-grid button{min-height:64px!important;padding:11px!important;font-size:11px!important}
+ body.dark-theme .da-v2-hero,body.light-theme .da-v2-hero,body.luxury-theme .da-v2-hero{grid-template-columns:minmax(0,1fr) minmax(90px,.65fr)!important;padding:17px 15px 62px!important;min-height:220px!important}
+ body.dark-theme .da-v2-hero-foot,body.light-theme .da-v2-hero-foot,body.luxury-theme .da-v2-hero-foot{gap:7px!important;flex-wrap:wrap!important}
+ body.dark-theme .da-v2-hero-foot span,body.light-theme .da-v2-hero-foot span,body.luxury-theme .da-v2-hero-foot span{font-size:9px!important}
+ body.dark-theme .da-market-glass,body.light-theme .da-market-glass,body.luxury-theme .da-market-glass{padding:10px!important}
+ body.dark-theme .da-market-toolbar,body.light-theme .da-market-toolbar,body.luxury-theme .da-market-toolbar{grid-template-columns:1fr!important}
+ body.dark-theme .da-market-filters,body.light-theme .da-market-filters,body.luxury-theme .da-market-filters{display:flex!important;overflow-x:auto!important;flex-wrap:nowrap!important}
+ body.dark-theme .da-market-filters button,body.light-theme .da-market-filters button,body.luxury-theme .da-market-filters button{flex:0 0 auto!important}
+ body.dark-theme .dashboard-activity-grid,body.light-theme .dashboard-activity-grid,body.luxury-theme .dashboard-activity-grid{grid-template-columns:1fr!important}
+}
+@media(max-width:420px){
+ body.dark-theme .da-v2-hero,body.light-theme .da-v2-hero,body.luxury-theme .da-v2-hero{grid-template-columns:1fr!important}
+ body.dark-theme .da-v2-hero-art,body.light-theme .da-v2-hero-art,body.luxury-theme .da-v2-hero-art{display:none!important}
+ body.dark-theme .da-v2-hero-foot,body.light-theme .da-v2-hero-foot,body.luxury-theme .da-v2-hero-foot{position:static!important;margin-top:15px!important}
+}
+@media(prefers-reduced-motion:reduce){body.dark-theme *,body.light-theme *,body.luxury-theme *{transition:none!important;animation:none!important}}
+
+/* Legacy accent alias: every remaining legacy mint token follows the selected theme. */
+:root{--da-mint:var(--da-accent)}
+body.dark-theme{--da-mint:#f0b90b}
+body.light-theme{--da-mint:#2868d7}
+body.luxury-theme{--da-mint:#a8ddff}
+
+
+/* Mobile login composition repair — keep the hero and auth form in one readable column. */
+@media(max-width:760px){
+  #authView.auth-reference-layout{
+    display:flex!important;flex-direction:column!important;align-items:stretch!important;
+    width:calc(100% - 20px)!important;max-width:640px!important;min-width:0!important;
+    min-height:0!important;margin:10px auto calc(112px + env(safe-area-inset-bottom))!important;
+    overflow:hidden!important;
+  }
+  #authView .auth-reference-visual{
+    width:100%!important;min-width:0!important;box-sizing:border-box!important;
+    padding:clamp(16px,3.2vw,24px)!important;gap:14px!important;
+    border:0!important;border-bottom:1px solid var(--da-line)!important;
+  }
+  #authView .ref-brandbar{min-width:0!important;flex-wrap:wrap!important}
+  #authView .ref-brand-lockup{min-width:0!important}
+  #authView .ref-live-pill{flex:0 0 auto!important}
+  #authView .ref-hero-grid{
+    display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+    width:100%!important;min-width:0!important;min-height:0!important;gap:8px!important;
+  }
+  #authView .ref-market-copy{width:100%!important;min-width:0!important}
+  #authView .ref-market-copy h1{font-size:clamp(24px,5vw,32px)!important;line-height:1.45!important}
+  #authView .ref-coin-list{grid-template-columns:repeat(2,minmax(0,1fr))!important;min-width:0!important;gap:7px!important;margin-top:12px!important}
+  #authView .ref-coin-row{
+    grid-template-columns:24px 38px minmax(0,1fr)!important;min-width:0!important;
+    gap:5px!important;padding:7px!important;overflow:hidden!important;
+  }
+  #authView .ref-coin-row span{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+  #authView .ref-scene{width:100%!important;height:clamp(190px,38vw,250px)!important;min-height:0!important;margin:0!important;overflow:hidden!important}
+  #authView .ref-earth{max-width:76%!important;left:8%!important;top:0!important}
+  #authView .ref-phone{max-width:48%!important;right:8%!important;top:5%!important}
+  #authView .auth-form{
+    width:100%!important;min-width:0!important;box-sizing:border-box!important;
+    padding:clamp(20px,4vw,30px)!important;border-radius:0!important;
+  }
+  #authView .auth-form .field,#authView .auth-form input{width:100%!important;min-width:0!important;box-sizing:border-box!important}
+  .mobile-bottom-nav{padding-bottom:calc(8px + env(safe-area-inset-bottom))!important}
+  #appView{padding-bottom:calc(112px + env(safe-area-inset-bottom))!important}
+}
+@media(max-width:420px){
+  #authView .ref-coin-list{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #authView .ref-scene{height:190px!important}
+  #authView .auth-form{padding:20px 16px!important}
+}
+
+
+/* Indigo glass theme — replace the former navy/gold luxury palette with luminous blue-indigo glass. */
+body.luxury-theme{
+  --da-bg:#080f2b;--da-bg2:rgba(23,35,82,.72);
+  --da-surface:rgba(34,48,111,.48);--da-surface2:rgba(55,72,151,.36);
+  --da-line:rgba(151,180,255,.25);--da-text:#f1f5ff;--da-muted:#b2c2ed;
+  --da-accent:#8da8ff;--da-accent-soft:rgba(116,145,255,.19);
+  --da-blue:#78c8ff;--da-green:#55dfbd;--da-red:#ff829e;--da-purple:#b9a0ff;
+  background:
+    radial-gradient(ellipse at 12% 4%,rgba(86,112,255,.32),transparent 36%),
+    radial-gradient(ellipse at 88% 18%,rgba(91,91,230,.25),transparent 32%),
+    radial-gradient(ellipse at 50% 100%,rgba(33,130,220,.17),transparent 42%),
+    linear-gradient(145deg,#080f2b 0%,#111b49 48%,#0a1538 100%)!important;
+  color:var(--da-text)!important;
+}
+body.luxury-theme .top,
+body.luxury-theme .mobile-bottom-nav,
+body.luxury-theme .tabs,
+body.luxury-theme #tab-dashboard,
+body.luxury-theme .card,body.luxury-theme .stat,
+body.luxury-theme .trade-box,body.luxury-theme .fx-box,
+body.luxury-theme .indicator-panel,
+body.luxury-theme .da-market-glass,
+body.luxury-theme .da-v2-account-card,
+body.luxury-theme .dashboard-activity-panel,
+body.luxury-theme .da-v2-quick-grid button,
+body.luxury-theme .da-v2-market-list>*,
+body.luxury-theme .da-v2-account-stats>div,
+body.luxury-theme .coin,body.luxury-theme .asset-row,
+body.luxury-theme .order-row,body.luxury-theme .history-row,
+body.luxury-theme .market-hero-v34,body.luxury-theme .trade-workspace-banner-v35{
+  background:linear-gradient(135deg,rgba(66,88,177,.27),rgba(25,39,101,.30))!important;
+  border:1px solid rgba(160,185,255,.24)!important;
+  box-shadow:0 12px 38px rgba(3,8,35,.22),inset 0 1px rgba(255,255,255,.10)!important;
+  -webkit-backdrop-filter:blur(22px) saturate(145%)!important;
+  backdrop-filter:blur(22px) saturate(145%)!important;
+}
+body.luxury-theme .top{background:rgba(20,32,82,.56)!important}
+body.luxury-theme .mobile-bottom-nav{background:rgba(13,24,67,.72)!important;border-color:rgba(157,183,255,.30)!important}
+body.luxury-theme .da-v2-hero{
+  background:radial-gradient(ellipse at 78% 25%,rgba(126,145,255,.30),transparent 42%),
+    linear-gradient(125deg,rgba(63,83,174,.52),rgba(21,35,91,.64) 60%,rgba(18,43,107,.48))!important;
+  border:1px solid rgba(169,190,255,.34)!important;
+  box-shadow:0 18px 48px rgba(4,9,42,.28),inset 0 1px rgba(255,255,255,.16)!important;
+  -webkit-backdrop-filter:blur(24px) saturate(150%)!important;backdrop-filter:blur(24px) saturate(150%)!important;
+}
+body.luxury-theme .da-v2-hero h1 em,
+body.luxury-theme .da-v2-eyebrow,
+body.luxury-theme .da-v2-hero-foot,
+body.luxury-theme .da-v2-kicker,
+body.luxury-theme .market-hero-kicker,
+body.luxury-theme .trade-workspace-kicker,
+body.luxury-theme .price-toman,
+body.luxury-theme .chart-price,
+body.luxury-theme .detail-price{color:#a9baff!important}
+body.luxury-theme .da-v2-hero p{color:#c4d1fa!important}
+body.luxury-theme .da-v2-orbit{border-color:rgba(151,177,255,.45)!important}
+body.luxury-theme .da-v2-coin{
+  background:linear-gradient(145deg,#b6c7ff,#647ff0 58%,#465bc5)!important;
+  color:#fff!important;box-shadow:0 14px 38px rgba(89,113,255,.30)!important
+}
+body.luxury-theme .da-v2-brand strong,
+body.luxury-theme .brand span:first-child{color:#aebeff!important}
+body.luxury-theme .da-v2-logo{
+  background:linear-gradient(145deg,rgba(122,151,255,.40),rgba(65,88,194,.30))!important;
+  border:1px solid rgba(177,197,255,.48)!important;color:#dce5ff!important;
+  box-shadow:0 0 24px rgba(111,137,255,.22)!important
+}
+body.luxury-theme .da-v2-demo,
+body.luxury-theme .tabs button.active,
+body.luxury-theme .mobile-bottom-nav button.active{
+  color:#c4d0ff!important;background:rgba(108,133,255,.20)!important;
+  border-color:rgba(166,187,255,.48)!important
+}
+body.luxury-theme button:not(.buy):not(.sell):not(.danger){
+  border-color:rgba(156,180,255,.25)!important
+}
+body.luxury-theme .da-v2-primary,
+body.luxury-theme .auth-actions button:first-child{
+  background:linear-gradient(125deg,#829bff,#6678e8 58%,#5363cf)!important;
+  color:#fff!important;border:1px solid rgba(199,211,255,.55)!important;
+  box-shadow:0 8px 26px rgba(91,112,235,.30)!important
+}
+body.luxury-theme input,body.luxury-theme select,body.luxury-theme textarea,
+body.luxury-theme .da-market-search,body.luxury-theme .da-market-sort{
+  background:rgba(9,18,57,.48)!important;color:#f1f5ff!important;
+  border:1px solid rgba(151,177,255,.30)!important;
+  -webkit-backdrop-filter:blur(14px)!important;backdrop-filter:blur(14px)!important
+}
+body.luxury-theme .coin-icon{background:rgba(126,150,255,.18)!important;color:#b5c5ff!important}
+body.luxury-theme th{background:rgba(76,96,180,.40)!important;color:#e1e9ff!important}
+body.luxury-theme td{color:#e1e9ff!important}
+body.luxury-theme #authView.auth-reference-layout{
+  background:rgba(15,27,75,.58)!important;border:1px solid rgba(162,186,255,.32)!important;
+  box-shadow:0 26px 80px rgba(3,8,36,.34),inset 0 1px rgba(255,255,255,.12)!important;
+  -webkit-backdrop-filter:blur(26px) saturate(145%)!important;backdrop-filter:blur(26px) saturate(145%)!important
+}
+body.luxury-theme #authView .auth-reference-visual{
+  background:radial-gradient(ellipse at 78% 28%,rgba(132,151,255,.28),transparent 43%),
+    radial-gradient(ellipse at 10% 90%,rgba(59,160,255,.20),transparent 42%),
+    linear-gradient(145deg,rgba(45,63,145,.58),rgba(13,26,76,.72) 68%,rgba(10,22,63,.74))!important
+}
+body.luxury-theme #authView .ref-brand-lockup strong,
+body.luxury-theme #authView .ref-brand-lockup em,
+body.luxury-theme #authView .ref-market-copy h1 span,
+body.luxury-theme #authView .ref-demo-footer{color:#b6c5ff!important}
+body.luxury-theme #authView .ref-live-pill{
+  background:rgba(80,215,190,.12)!important;border-color:rgba(99,230,207,.35)!important;color:#82ecd4!important
+}
+body.luxury-theme #authView .ref-coin-row{
+  background:rgba(105,129,222,.16)!important;border-color:rgba(167,188,255,.26)!important;
+  -webkit-backdrop-filter:blur(14px)!important;backdrop-filter:blur(14px)!important
+}
+body.luxury-theme #authView .auth-form{
+  background:linear-gradient(145deg,rgba(57,76,158,.48),rgba(17,31,88,.66))!important;
+  border:1px solid rgba(171,192,255,.34)!important;
+  box-shadow:0 18px 48px rgba(4,9,42,.24),inset 0 1px rgba(255,255,255,.12)!important;
+  -webkit-backdrop-filter:blur(24px) saturate(145%)!important;backdrop-filter:blur(24px) saturate(145%)!important
+}
+body.luxury-theme #authView .auth-form h2{color:#d0d9ff!important}
+body.luxury-theme #authView .auth-form input{background:rgba(8,17,54,.52)!important;border-color:rgba(164,187,255,.34)!important;color:#f1f5ff!important}
+body.luxury-theme .da-v2-trust-row i{color:#a9baff!important}
+body.luxury-theme .da-v2-quick-grid button i{color:#a9baff!important}
+
+
+/* Login hero cinematic 3D motion — premium materials, depth and realistic lighting. */
+#authView .ref-scene{perspective:1100px!important;transform-style:preserve-3d!important;isolation:isolate!important}
+#authView .ref-earth{
+  transform-style:preserve-3d!important;filter:drop-shadow(0 24px 30px rgba(0,0,0,.42)) drop-shadow(0 0 22px rgba(74,145,255,.28))!important;
+  animation:daGlobeDrift 10s ease-in-out infinite!important
+}
+#authView .ref-earth svg{overflow:visible;filter:contrast(1.08) saturate(1.18)}
+#authView .ref-earth svg circle:first-child{filter:drop-shadow(0 0 15px rgba(79,164,255,.42))}
+#authView .ref-earth svg g[clip-path]{
+  transform-box:fill-box;transform-origin:center;animation:daGlobeSpin 34s linear infinite
+}
+#authView .ref-phone{
+  transform-origin:50% 55%!important;transform-style:preserve-3d!important;
+  animation:daPhoneFloat 7.5s cubic-bezier(.45,0,.55,1) infinite!important;
+  border:2px solid rgba(235,244,255,.9)!important;
+  box-shadow:0 34px 65px rgba(0,0,0,.62),0 0 34px rgba(87,145,255,.22),inset 0 1px 3px #fff,inset 0 -4px 9px rgba(0,0,0,.75)!important
+}
+#authView .ref-phone:after{
+  content:"";position:absolute;inset:3px;border-radius:32px;pointer-events:none;
+  background:linear-gradient(115deg,rgba(255,255,255,.24),transparent 16%,transparent 72%,rgba(124,174,255,.13));
+  z-index:5
+}
+#authView .ref-phone .auth-phone-preview{
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.1),inset 0 14px 28px rgba(111,167,255,.12),0 0 28px rgba(58,129,255,.22)!important
+}
+#authView .ref-gold-coin,#authView .ref-usdt-coin{
+  transform-style:preserve-3d;filter:drop-shadow(0 12px 14px rgba(0,0,0,.42));
+  animation:daCoinHover 5.8s ease-in-out infinite!important
+}
+#authView .ref-gold-coin:before,#authView .ref-usdt-coin:before{
+  content:"";position:absolute;inset:5px;border-radius:50%;pointer-events:none;
+  border:1px solid rgba(255,255,255,.46);box-shadow:inset 0 0 0 3px rgba(255,255,255,.09),inset 0 -5px 9px rgba(0,0,0,.22)
+}
+#authView .ref-gold-coin img,#authView .ref-usdt-coin img{
+  filter:drop-shadow(0 3px 3px rgba(0,0,0,.38));transform:translateZ(8px)
+}
+#authView .ref-gold-coin.auth-floating-coin-eth{animation-delay:-1.7s!important}
+#authView .ref-gold-coin.auth-floating-coin-bnb{animation-delay:-3.1s!important}
+#authView .ref-usdt-coin{animation-delay:-2.3s!important}
+#authView #authMiniChart{position:relative;overflow:hidden}
+#authView #authMiniChart svg{overflow:visible;filter:drop-shadow(0 0 4px rgba(79,190,255,.14))}
+#authView #authMiniChart svg .da-live-price-line{stroke:#8bd8ff;stroke-width:1;stroke-dasharray:3 3;opacity:.85}
+#authView #authMiniChart svg .da-live-price-dot{fill:#a8f5dc;stroke:#fff;stroke-width:1.2;filter:drop-shadow(0 0 5px #53e6bd)}
+#authView #authMiniChart svg .da-live-price-halo{fill:#53e6bd;opacity:.24}
+@keyframes daGlobeDrift{0%,100%{transform:translate3d(0,0,0) rotate(-1.5deg)}50%{transform:translate3d(0,-12px,8px) rotate(1.5deg)}}
+@keyframes daGlobeSpin{0%{transform:rotateY(-7deg) scale(1)}50%{transform:rotateY(7deg) scale(1.015)}100%{transform:rotateY(-7deg) scale(1)}}
+@keyframes daPhoneFloat{0%,100%{transform:translate3d(0,0,18px) rotate(9deg)}50%{transform:translate3d(0,-12px,28px) rotate(6.5deg)}}
+@keyframes daCoinHover{0%,100%{transform:translate3d(0,0,10px) rotateY(-12deg) rotateZ(-5deg)}50%{transform:translate3d(0,-13px,24px) rotateY(18deg) rotateZ(7deg)}}
+body.luxury-theme #authView .ref-gold-coin,body.luxury-theme #authView .ref-usdt-coin{
+  border-color:rgba(185,203,255,.9)!important;
+  box-shadow:0 14px 30px rgba(2,8,35,.55),0 0 22px rgba(115,145,255,.34),inset 0 0 0 4px rgba(235,241,255,.3)!important
+}
+body.luxury-theme #authView .ref-gold-coin{background:radial-gradient(circle at 28% 20%,#eff4ff 0%,#aebfff 18%,#667fe7 48%,#293d9b 78%,#111d58 100%)!important}
+body.luxury-theme #authView .ref-platform{border-color:#9eafff!important;box-shadow:0 12px 26px rgba(0,0,0,.6),0 0 25px rgba(105,135,255,.42),inset 0 5px 12px rgba(207,219,255,.32)!important}
+@media(prefers-reduced-motion:reduce){
+ #authView .ref-earth,#authView .ref-earth svg g[clip-path],#authView .ref-phone,
+ #authView .ref-gold-coin,#authView .ref-usdt-coin{animation:none!important}
+}
+
+/* DigiArz third theme — Sky Blue (clear, bright and distinct from dark/light). */
+body.luxury-theme{
+  --da-bg:#e8f6ff;--da-bg2:#d9efff;
+  --da-surface:rgba(255,255,255,.88);--da-surface2:#dff2ff;
+  --da-line:#a9d8f4;--da-text:#12334b;--da-muted:#52758d;
+  --da-accent:#159fe8;--da-accent-soft:rgba(21,159,232,.13);
+  --da-mint:#159fe8;--da-blue:#168ed7;--da-green:#119b78;--da-red:#e34f70;
+  color-scheme:light;
+  background:
+    radial-gradient(ellipse at 10% 0%,rgba(78,190,255,.36),transparent 38%),
+    radial-gradient(ellipse at 92% 12%,rgba(26,153,230,.22),transparent 34%),
+    radial-gradient(ellipse at 50% 100%,rgba(133,218,255,.32),transparent 44%),
+    linear-gradient(145deg,#eaf8ff 0%,#d9f0ff 48%,#effaff 100%)!important;
+  color:var(--da-text)!important;
+}
+body.luxury-theme .top,
+body.luxury-theme .tabs,
+body.luxury-theme .mobile-bottom-nav{
+  background:rgba(239,249,255,.88)!important;
+  border:1px solid rgba(87,174,224,.35)!important;
+  box-shadow:0 12px 34px rgba(31,112,164,.10)!important;
+  -webkit-backdrop-filter:blur(20px) saturate(145%)!important;
+  backdrop-filter:blur(20px) saturate(145%)!important;
+}
+body.luxury-theme .brand,
+body.luxury-theme .da-v2-brand,
+body.luxury-theme .da-v2-brand strong{color:#123b58!important}
+body.luxury-theme .brand span:first-child,
+body.luxury-theme .da-v2-kicker,
+body.luxury-theme .da-v2-eyebrow,
+body.luxury-theme .da-v2-hero-foot,
+body.luxury-theme .section-title,
+body.luxury-theme .market-hero-kicker,
+body.luxury-theme .trade-workspace-kicker,
+body.luxury-theme .price-toman,
+body.luxury-theme .chart-price,
+body.luxury-theme .detail-price,
+body.luxury-theme .volatility-title{color:#078ed5!important}
+body.luxury-theme .card,
+body.luxury-theme .stat,
+body.luxury-theme .trade-box,
+body.luxury-theme .fx-box,
+body.luxury-theme .indicator-panel,
+body.luxury-theme .da-market-glass,
+body.luxury-theme .da-v2-account-card,
+body.luxury-theme .dashboard-activity-panel,
+body.luxury-theme .da-v2-quick-grid button,
+body.luxury-theme .da-v2-market-list>*,
+body.luxury-theme .da-v2-account-stats>div,
+body.luxury-theme .coin,
+body.luxury-theme .asset-row,
+body.luxury-theme .order-row,
+body.luxury-theme .history-row,
+body.luxury-theme .market-hero-v34,
+body.luxury-theme .trade-workspace-banner-v35,
+body.luxury-theme .volatility-panel,
+body.luxury-theme .gainers-panel,
+body.luxury-theme .top-assets-panel{
+  background:linear-gradient(145deg,rgba(255,255,255,.94),rgba(222,243,255,.92))!important;
+  border:1px solid rgba(112,187,229,.38)!important;
+  box-shadow:0 12px 34px rgba(35,119,170,.09),inset 0 1px rgba(255,255,255,.95)!important;
+  color:#173b55!important;
+  -webkit-backdrop-filter:blur(18px) saturate(135%)!important;
+  backdrop-filter:blur(18px) saturate(135%)!important;
+}
+body.luxury-theme .da-v2-hero,
+body.luxury-theme .hero{
+  background:
+    radial-gradient(ellipse at 82% 22%,rgba(255,255,255,.34),transparent 38%),
+    linear-gradient(120deg,#8bd5ff 0%,#48b6f1 52%,#168ed7 100%)!important;
+  border:1px solid rgba(31,142,207,.38)!important;
+  box-shadow:0 18px 42px rgba(29,137,198,.20),inset 0 1px rgba(255,255,255,.48)!important;
+  color:#073452!important;
+}
+body.luxury-theme .da-v2-hero h1,
+body.luxury-theme .da-v2-hero h1 em,
+body.luxury-theme .hero-title,
+body.luxury-theme .hero-label,
+body.luxury-theme .da-v2-hero p,
+body.luxury-theme .hero-sub{color:#073452!important}
+body.luxury-theme .da-v2-logo{
+  background:linear-gradient(145deg,#8bd5ff,#28a8ec)!important;
+  border:1px solid #69c5f5!important;color:#063c5d!important;
+  box-shadow:0 7px 22px rgba(28,151,214,.18)!important
+}
+body.luxury-theme .da-v2-demo,
+body.luxury-theme .tabs button.active,
+body.luxury-theme .mobile-bottom-nav button.active,
+body.luxury-theme .da-market-filters button.active,
+body.luxury-theme .history-date-presets button.active{
+  color:#087cbd!important;background:rgba(67,177,239,.17)!important;
+  border-color:rgba(34,151,216,.42)!important
+}
+body.luxury-theme button:not(.buy):not(.sell):not(.danger){
+  background:linear-gradient(135deg,#62c5f7,#239ee5)!important;
+  color:#073452!important;border:1px solid rgba(18,137,202,.24)!important;
+  box-shadow:0 7px 20px rgba(30,147,211,.15)!important
+}
+body.luxury-theme .secondary,
+body.luxury-theme .theme-switch,
+body.luxury-theme .chart-types button,
+body.luxury-theme .timeframes button,
+body.luxury-theme .da-v2-quick-grid button{
+  background:rgba(226,244,255,.95)!important;color:#24536f!important;
+  border:1px solid #b5def5!important;box-shadow:none!important
+}
+body.luxury-theme .da-v2-primary,
+body.luxury-theme .auth-actions button:first-child{
+  background:linear-gradient(125deg,#4bb9f2,#087fca)!important;
+  color:#fff!important;border:1px solid rgba(255,255,255,.55)!important;
+  box-shadow:0 9px 25px rgba(16,135,204,.24)!important
+}
+body.luxury-theme input,
+body.luxury-theme select,
+body.luxury-theme textarea,
+body.luxury-theme .da-market-search,
+body.luxury-theme .da-market-sort{
+  background:rgba(250,253,255,.96)!important;color:#173b55!important;
+  border:1px solid #a9d5ef!important;box-shadow:inset 0 1px 2px rgba(30,105,151,.04)!important
+}
+body.luxury-theme input::placeholder,
+body.luxury-theme textarea::placeholder{color:#7899ad!important}
+body.luxury-theme input:focus,
+body.luxury-theme select:focus,
+body.luxury-theme textarea:focus{
+  border-color:#159fe8!important;box-shadow:0 0 0 3px rgba(21,159,232,.14)!important
+}
+body.luxury-theme .coin-icon{background:#d8efff!important;color:#078ed5!important}
+body.luxury-theme th{background:#cceaff!important;color:#174b6c!important}
+body.luxury-theme td{color:#244b65!important}
+body.luxury-theme tr:nth-child(even) td{background:rgba(220,241,253,.56)!important}
+body.luxury-theme .market-announcement,
+body.luxury-theme .notice{background:#e0f2ff!important;border-color:#acd9f4!important;color:#285571!important}
+body.luxury-theme .notice.warn{background:#fff4d9!important;color:#805b12!important}
+body.luxury-theme .notice.err{background:#ffebef!important;color:#a52e4a!important}
+body.luxury-theme .notice.ok{background:#e3f8ef!important;color:#176b50!important}
+body.luxury-theme #authView.auth-reference-layout{
+  background:rgba(239,249,255,.92)!important;border:1px solid rgba(85,171,220,.42)!important;
+  box-shadow:0 26px 70px rgba(30,115,166,.17),inset 0 1px rgba(255,255,255,.95)!important;
+  -webkit-backdrop-filter:blur(24px) saturate(140%)!important;backdrop-filter:blur(24px) saturate(140%)!important
+}
+body.luxury-theme #authView .auth-reference-visual{
+  background:
+    radial-gradient(ellipse at 78% 28%,rgba(255,255,255,.38),transparent 43%),
+    radial-gradient(ellipse at 10% 90%,rgba(91,195,247,.30),transparent 42%),
+    linear-gradient(145deg,#9cddff 0%,#58baf0 54%,#238fce 100%)!important
+}
+body.luxury-theme #authView .ref-brand-lockup strong,
+body.luxury-theme #authView .ref-brand-lockup em,
+body.luxury-theme #authView .ref-market-copy h1,
+body.luxury-theme #authView .ref-market-copy h1 span,
+body.luxury-theme #authView .ref-market-copy p,
+body.luxury-theme #authView .ref-demo-footer{color:#073b5b!important}
+body.luxury-theme #authView .ref-live-pill{
+  background:rgba(255,255,255,.42)!important;border-color:rgba(255,255,255,.72)!important;color:#075783!important
+}
+body.luxury-theme #authView .ref-coin-row{
+  background:rgba(255,255,255,.38)!important;border-color:rgba(255,255,255,.62)!important;color:#123e5b!important;
+  -webkit-backdrop-filter:blur(14px)!important;backdrop-filter:blur(14px)!important
+}
+body.luxury-theme #authView .ref-coin-row b,
+body.luxury-theme #authView .ref-coin-row span{color:#174b6c!important}
+body.luxury-theme #authView .auth-form{
+  background:linear-gradient(145deg,rgba(255,255,255,.97),rgba(224,244,255,.96))!important;
+  border:1px solid rgba(112,187,229,.48)!important;
+  box-shadow:0 18px 44px rgba(29,120,173,.13),inset 0 1px rgba(255,255,255,.96)!important;
+  color:#173b55!important
+}
+body.luxury-theme #authView .auth-form h2,
+body.luxury-theme #authView .auth-form label{color:#174b6c!important}
+body.luxury-theme #authView .auth-form .auth-intro,
+body.luxury-theme #authView .auth-form .auth-security{color:#5b7d93!important}
+body.luxury-theme #authView .auth-form input{
+  background:#f8fcff!important;border-color:#acd5ee!important;color:#173b55!important
+}
+body.luxury-theme #authView .auth-form input::placeholder{color:#7899ad!important}
+body.luxury-theme #authView .auth-form .auth-actions #signupBtn{
+  background:#e5f4ff!important;color:#17608b!important;border:1px solid #b7ddf3!important
+}
+body.luxury-theme #authView .auth-form #forgotBtn{background:transparent!important;color:#39799e!important}
+body.luxury-theme .da-v2-trust-row i,
+body.luxury-theme .da-v2-quick-grid button i{color:#168fd0!important}
+body.luxury-theme .da-v2-coin{
+  background:linear-gradient(145deg,#a7e2ff,#35a9e8 62%,#137fc0)!important;
+  color:#fff!important;box-shadow:0 14px 36px rgba(26,143,204,.24)!important
+}
+body.luxury-theme .da-v2-orbit{border-color:rgba(35,145,205,.32)!important}
+body.luxury-theme .da-v2-balance-main strong{color:#078ed5!important}
+body.luxury-theme .mobile-bottom-nav button{color:#5c7e94!important}
+body.luxury-theme .mobile-bottom-nav button.active{color:#087fca!important;background:rgba(67,177,239,.17)!important}
+body.luxury-theme .auth-reference-visual .ref-platform{
+  border-color:#8bd5ff!important;box-shadow:0 12px 26px rgba(24,111,165,.24),0 0 25px rgba(67,177,239,.32),inset 0 5px 12px rgba(255,255,255,.48)!important
+}
+body.luxury-theme #authView .ref-gold-coin,
+body.luxury-theme #authView .ref-usdt-coin{
+  border-color:rgba(255,255,255,.92)!important;
+  box-shadow:0 14px 30px rgba(19,105,157,.30),0 0 22px rgba(72,181,240,.38),inset 0 0 0 4px rgba(255,255,255,.38)!important
+}
+body.luxury-theme #authView .ref-gold-coin{
+  background:radial-gradient(circle at 28% 20%,#ffffff 0%,#bfeaff 22%,#58bdf1 54%,#178acb 82%,#08639b 100%)!important
+}
+body.luxury-theme #authView .ref-usdt-coin{
+  background:radial-gradient(circle at 28% 20%,#ffffff 0%,#b7f1e6 24%,#35b9a2 70%,#147e78 100%)!important
+}
+@media(max-width:760px){
+  body.luxury-theme #tab-dashboard{background:transparent!important}
+  body.luxury-theme .da-v2-hero{box-shadow:0 15px 34px rgba(23,133,194,.18)!important}
+  body.luxury-theme #authView.auth-reference-layout{margin:8px auto 20px!important}
+}
+
+/* Ensure the login screen is actually removed after a successful sign-in. */
+#authView.hidden{display:none!important}
+
+
+
+/* DigiArz market page — single authoritative layout layer.
+   Scoped to the real #marketList element generated by renderMarkets(). */
+#tab-markets{min-width:0;overflow:hidden}
+#tab-markets .market-hero-v34{display:grid;grid-template-columns:minmax(0,1fr) 132px;gap:16px;align-items:center;min-width:0;padding:20px;margin:10px 0 16px}
+#tab-markets .market-hero-copy{min-width:0}
+#tab-markets .market-hero-copy h1{font-size:clamp(20px,3vw,28px);line-height:1.5;margin:8px 0}
+#tab-markets .market-hero-copy p{line-height:1.9;margin:0}
+#tab-markets .market-hero-pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+#tab-markets .market-categories{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}
+#tab-markets .market-tools-primary{display:grid;grid-template-columns:minmax(0,1fr) minmax(140px,190px) minmax(160px,210px);gap:9px;margin:12px 0;min-width:0}
+#tab-markets .market-tools-primary>*{min-width:0;width:100%;max-width:100%}
+#tab-markets .volatility-panel,#tab-markets .gainers-panel,#tab-markets .top-assets-panel{min-width:0;overflow:hidden;border-radius:14px;padding:13px;margin:11px 0}
+#tab-markets .volatility-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+#tab-markets .volatility-stat{min-width:0;padding:9px}
+#tab-markets .volatility-stat strong{display:block;overflow-wrap:anywhere;margin-top:4px}
+#tab-markets .gainers-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:9px}
+#tab-markets .gainers-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;min-width:0}
+#tab-markets .gainers-grid>*{min-width:0;overflow-wrap:anywhere}
+#tab-markets .top-assets-strip{display:flex;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;padding:2px 1px 8px}
+#tab-markets .top-assets-strip>*{flex:0 0 145px;min-width:0}
+#tab-markets .market-board-v34{min-width:0;overflow:hidden;margin-top:14px;padding:13px;border-radius:15px}
+#tab-markets .market-board-head{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap;margin-bottom:10px}
+#tab-markets .market-board-head>div{display:grid;gap:3px;min-width:0}
+#tab-markets .market-head{font-size:11px;line-height:1.8;padding:8px 10px;margin-bottom:9px;border-radius:9px}
+#marketList{display:grid;grid-template-columns:minmax(0,1fr);gap:9px;min-width:0}
+#marketList>.coin{
+ direction:rtl!important;display:grid!important;
+ grid-template-columns:34px minmax(0,1.25fr) minmax(78px,.75fr) minmax(125px,1fr) minmax(150px,1.1fr)!important;
+ grid-template-rows:minmax(62px,auto)!important;
+ grid-template-areas:"fav identity spark change price"!important;
+ align-items:center!important;gap:9px!important;
+ width:100%!important;max-width:100%!important;min-width:0!important;
+ margin:0!important;padding:11px 12px!important;box-sizing:border-box!important;overflow:hidden!important;border-radius:13px!important;
+}
+#marketList>.coin>.favorite-btn{grid-area:fav!important;display:flex!important;align-items:center!important;justify-content:center!important;width:30px!important;min-width:30px!important;height:34px!important;margin:0!important;padding:0!important;border:0!important;outline:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+#marketList>.coin>.favorite-btn:focus,#marketList>.coin>.favorite-btn:focus-visible{outline:0!important;box-shadow:none!important}
+#marketList>.coin>.favorite-btn svg{width:21px;height:21px}
+#marketList>.coin>.coin-identity{grid-area:identity!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:8px!important;width:100%!important;min-width:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;text-align:right!important;color:inherit!important}
+#marketList>.coin .coin-icon{display:flex!important;flex:0 0 40px!important;width:40px!important;height:40px!important;min-width:40px!important;max-width:40px!important;align-items:center!important;justify-content:center!important;margin:0!important;padding:0!important;border:0!important;outline:0!important;border-radius:50%!important;background:transparent!important;box-shadow:none!important;overflow:hidden!important}
+#marketList>.coin .coin-icon img{display:block;width:100%;height:100%;object-fit:contain}
+#marketList>.coin .coin-name-stack{display:flex!important;flex-direction:column!important;gap:1px!important;min-width:0!important;overflow:hidden}
+#marketList>.coin .coin-name-fa{display:block!important;font-size:13px!important;line-height:1.55!important;font-weight:900!important;white-space:normal!important;overflow-wrap:anywhere}
+#marketList>.coin .coin-symbol-en{display:block!important;font-size:10px!important;line-height:1.5!important;direction:ltr!important;text-align:right!important;white-space:nowrap!important}
+#marketList>.coin .coin-english-name{display:block!important;font-size:9px!important;line-height:1.4!important;direction:ltr!important;text-align:right!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+#marketList>.coin>.coin-sparkline{grid-area:spark!important;display:block!important;width:100%!important;height:27px!important;min-width:0!important;overflow:hidden!important}
+#marketList>.coin>.coin-change-wrap{grid-area:change!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important;width:100%!important;min-width:0!important;text-align:center!important}
+#marketList>.coin .coin-change-label{font-size:10px!important;line-height:1.5!important}
+#marketList>.coin .coin-change{display:inline-flex!important;max-width:100%!important;padding:4px 7px!important;font-size:11px!important;white-space:nowrap!important}
+#marketList>.coin .coin-volume{font-size:9px!important;line-height:1.5!important;white-space:normal!important;overflow-wrap:anywhere!important;text-align:center!important}
+#marketList>.coin>.price-stack{grid-area:price!important;display:flex!important;flex-direction:column!important;align-items:flex-end!important;justify-content:center!important;gap:4px!important;width:100%!important;min-width:0!important;text-align:left!important;overflow:hidden!important}
+#marketList>.coin .price-usd,#marketList>.coin .price-usd strong{display:block!important;color:#17334c!important;font-size:13px!important;line-height:1.5!important;font-weight:900!important;opacity:1!important;visibility:visible!important;white-space:nowrap!important}
+#marketList>.coin .price-toman,#marketList>.coin .price-toman strong{display:block!important;color:#087e65!important;font-size:11px!important;line-height:1.5!important;font-weight:900!important;opacity:1!important;visibility:visible!important;white-space:nowrap!important}
+#marketList>.coin .coin-source{display:block!important;font-size:8px!important;line-height:1.45!important;color:#52677e!important;white-space:normal!important}
+#marketList>.coin .coin-source.fresh{color:#087e65!important}
+#marketList>.coin .coin-source.stale{color:#a65c18!important}
+body.dark-theme #marketList>.coin .price-usd,body.dark-theme #marketList>.coin .price-usd strong,body.luxury-theme #marketList>.coin .price-usd,body.luxury-theme #marketList>.coin .price-usd strong{color:#f4f7fc!important}
+body.dark-theme #marketList>.coin .price-toman,body.dark-theme #marketList>.coin .price-toman strong,body.luxury-theme #marketList>.coin .price-toman,body.luxury-theme #marketList>.coin .price-toman strong{color:#55dfbd!important}
+body.dark-theme #marketList>.coin .coin-source,body.luxury-theme #marketList>.coin .coin-source{color:#b9c8dc!important}
+body.dark-theme #marketList>.coin .coin-source.fresh,body.luxury-theme #marketList>.coin .coin-source.fresh{color:#55dfbd!important}
+body.dark-theme #marketList>.coin .coin-source.stale,body.luxury-theme #marketList>.coin .coin-source.stale{color:#ffbd76!important}
+#tab-markets .market-list button,#tab-markets .market-list .coin-identity{touch-action:manipulation}
+@media(max-width:760px){
+ #tab-markets{padding:12px!important}
+ #tab-markets .market-hero-v34{grid-template-columns:minmax(0,1fr) 78px!important;gap:8px!important;padding:14px!important;margin:8px 0 12px!important}
+ #tab-markets .market-hero-copy h1{font-size:18px!important;margin:5px 0!important}
+ #tab-markets .market-hero-copy p{font-size:11px!important;line-height:1.8!important}
+ #tab-markets .market-hero-mark{min-height:78px!important}
+ #tab-markets .market-coin-mark{width:52px!important;height:52px!important;font-size:28px!important}
+ #tab-markets .market-orbit{width:72px!important;height:72px!important}
+ #tab-markets .market-orbit-two{width:86px!important;height:86px!important}
+ #tab-markets .market-hero-pills{gap:5px!important;margin-top:8px!important}
+ #tab-markets .market-hero-pills span{font-size:8px!important;padding:4px 6px!important}
+ #tab-markets .market-categories{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}
+ #tab-markets .market-tools-primary{grid-template-columns:minmax(0,1fr)!important;gap:7px!important}
+ #tab-markets .market-tools-primary>*{width:100%!important;min-height:42px!important}
+ #tab-markets .volatility-panel,#tab-markets .gainers-panel,#tab-markets .top-assets-panel{padding:10px!important;margin:8px 0!important}
+ #tab-markets .gainers-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #tab-markets .market-board-v34{padding:8px!important;margin-top:11px!important}
+ #tab-markets .market-board-unit{font-size:9px!important}
+ #tab-markets .market-head{font-size:9px!important}
+ #marketList>.coin{
+  grid-template-columns:27px minmax(0,1fr) minmax(105px,auto)!important;
+  grid-template-rows:auto auto!important;
+  grid-template-areas:"fav identity price" "fav change price"!important;
+  gap:5px 7px!important;padding:9px 7px!important;
+ }
+ #marketList>.coin>.favorite-btn{grid-area:fav!important;width:25px!important;min-width:25px!important;height:32px!important}
+ #marketList>.coin>.coin-identity{grid-area:identity!important;gap:6px!important}
+ #marketList>.coin .coin-icon{flex-basis:33px!important;width:33px!important;height:33px!important;min-width:33px!important;max-width:33px!important}
+ #marketList>.coin .coin-name-fa{font-size:12px!important;line-height:1.5!important}
+ #marketList>.coin .coin-symbol-en{font-size:9px!important}
+ #marketList>.coin .coin-english-name{display:none!important}
+ #marketList>.coin>.coin-sparkline{display:none!important}
+ #marketList>.coin>.coin-change-wrap{grid-area:change!important;flex-direction:row!important;justify-content:flex-start!important;align-items:center!important;flex-wrap:wrap!important;gap:3px 6px!important;text-align:right!important}
+ #marketList>.coin .coin-change-label{font-size:9px!important}
+ #marketList>.coin .coin-change{font-size:10px!important;padding:3px 6px!important}
+ #marketList>.coin .coin-volume{display:none!important}
+ #marketList>.coin>.price-stack{grid-area:price!important;align-items:flex-end!important;justify-content:center!important;gap:4px!important}
+ #marketList>.coin .price-usd,#marketList>.coin .price-usd strong{font-size:11px!important}
+ #marketList>.coin .price-toman,#marketList>.coin .price-toman strong{font-size:10px!important}
+ #marketList>.coin .coin-source{font-size:7px!important}
+}
+@media(max-width:380px){
+ #tab-markets .market-categories{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #tab-markets .volatility-grid{grid-template-columns:1fr!important}
+ #marketList>.coin{grid-template-columns:24px minmax(0,1fr) minmax(92px,auto)!important;gap:4px 5px!important;padding:8px 5px!important}
+ #marketList>.coin .coin-icon{flex-basis:29px!important;width:29px!important;height:29px!important;min-width:29px!important;max-width:29px!important}
+ #marketList>.coin .coin-name-fa{font-size:11px!important}
+ #marketList>.coin .price-usd,#marketList>.coin .price-usd strong{font-size:10px!important}
+ #marketList>.coin .price-toman,#marketList>.coin .price-toman strong{font-size:9px!important}
+}
+
+
+/* Market navigation: horizontal category rail at the top, vertical coin results. */
+#tab-markets>.section-title{order:0}
+#tab-markets>.market-categories{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:stretch!important;gap:8px!important;width:100%!important;max-width:100%!important;margin:10px 0 14px!important;padding:5px 2px 10px!important;overflow-x:auto!important;overflow-y:hidden!important;overscroll-behavior-x:contain;scrollbar-width:thin;direction:rtl}
+#tab-markets>.market-categories>.category-btn{flex:0 0 auto!important;min-width:88px!important;min-height:52px!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;gap:7px!important;padding:9px 13px!important;border-radius:12px!important;white-space:nowrap!important}
+#tab-markets>.market-categories>.category-btn .category-icon{display:inline-flex!important;align-items:center!important;justify-content:center!important}
+#tab-markets>.market-categories>.category-btn .category-icon svg{width:19px!important;height:19px!important}
+#tab-markets #marketList{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-auto-flow:row!important;gap:9px!important;width:100%!important;overflow:visible!important;padding:0!important}
+#tab-markets #marketList>.coin{width:100%!important;min-width:0!important;max-width:100%!important;flex:initial!important;scroll-snap-align:unset!important}
+#tab-markets .gainers-panel,#tab-markets .losers-panel,#tab-markets .top-assets-panel{display:none!important}
+@media(max-width:760px){#tab-markets>.market-categories{gap:6px!important;margin:8px 0 12px!important}#tab-markets>.market-categories>.category-btn{min-width:78px!important;min-height:46px!important;padding:7px 10px!important;font-size:10px!important}}
+
+
+/* Market polish v15: compact one-line rows, centered 24h change, clearer category icons. */
+#tab-markets .market-hero-kicker{display:none!important}
+.hero .hero-label{display:none!important}
+#tab-markets>.market-categories>.category-btn{min-height:58px!important;min-width:96px!important;padding:10px 15px!important;gap:9px!important;border-radius:14px!important;font-weight:800!important}
+#tab-markets>.market-categories>.category-btn .category-icon{width:30px!important;height:30px!important;flex:0 0 30px!important}
+#tab-markets>.market-categories>.category-btn .category-icon svg{width:27px!important;height:27px!important;stroke-width:2.2!important}
+#tab-markets #marketList>.coin{
+ display:grid!important;
+ grid-template-columns:30px minmax(0,1fr) minmax(76px,auto) minmax(112px,auto)!important;
+ grid-template-rows:minmax(56px,auto)!important;
+ grid-template-areas:"fav identity change price"!important;
+ align-items:center!important;gap:7px!important;padding:10px 12px!important;
+}
+#tab-markets #marketList>.coin>.favorite-btn{grid-area:fav!important}
+#tab-markets #marketList>.coin>.coin-identity{grid-area:identity!important;min-width:0!important}
+#tab-markets #marketList>.coin>.coin-sparkline{display:none!important}
+#tab-markets #marketList>.coin>.coin-change-wrap{
+ grid-area:change!important;display:flex!important;flex-direction:column!important;
+ align-items:center!important;justify-content:center!important;gap:0!important;
+ min-width:0!important;text-align:center!important;
+}
+#tab-markets #marketList>.coin .coin-change-label{display:none!important}
+#tab-markets #marketList>.coin .coin-change{font-size:13px!important;font-weight:900!important;padding:6px 8px!important;min-width:0!important}
+#tab-markets #marketList>.coin .coin-volume{display:none!important}
+#tab-markets #marketList>.coin>.price-stack{grid-area:price!important;align-items:flex-end!important;justify-content:center!important;gap:2px!important}
+#tab-markets #marketList>.coin .coin-source{display:none!important}
+#tab-markets #marketList>.coin .coin-icon{width:44px!important;height:44px!important;min-width:44px!important;max-width:44px!important;flex-basis:44px!important}
+#tab-markets #marketList>.coin .coin-name-fa{font-size:14px!important}
+#tab-markets #marketList>.coin .coin-symbol-en{font-size:10px!important}
+@media(max-width:760px){
+ #tab-markets>.market-categories>.category-btn{min-width:88px!important;min-height:54px!important;padding:8px 11px!important}
+ #tab-markets>.market-categories>.category-btn .category-icon{width:28px!important;height:28px!important;flex-basis:28px!important}
+ #tab-markets>.market-categories>.category-btn .category-icon svg{width:25px!important;height:25px!important}
+ #tab-markets #marketList>.coin{grid-template-columns:24px minmax(0,1fr) minmax(62px,auto) minmax(92px,auto)!important;grid-template-rows:minmax(50px,auto)!important;gap:5px!important;padding:8px 6px!important}
+ #tab-markets #marketList>.coin .coin-icon{width:36px!important;height:36px!important;min-width:36px!important;max-width:36px!important;flex-basis:36px!important}
+ #tab-markets #marketList>.coin .coin-name-fa{font-size:12px!important}
+ #tab-markets #marketList>.coin .coin-symbol-en{font-size:9px!important}
+ #tab-markets #marketList>.coin .coin-change{font-size:11px!important;padding:4px 5px!important}
+ #tab-markets #marketList>.coin .price-usd,#tab-markets #marketList>.coin .price-usd strong{font-size:11px!important}
+ #tab-markets #marketList>.coin .price-toman,#tab-markets #marketList>.coin .price-toman strong{font-size:9px!important}
+}
+@media(max-width:360px){
+ #tab-markets #marketList>.coin{grid-template-columns:21px minmax(0,1fr) 54px 82px!important;gap:3px!important;padding:7px 4px!important}
+ #tab-markets #marketList>.coin .coin-icon{width:31px!important;height:31px!important;min-width:31px!important;max-width:31px!important;flex-basis:31px!important}
+ #tab-markets #marketList>.coin .coin-name-fa{font-size:11px!important}
+ #tab-markets #marketList>.coin .coin-change{font-size:10px!important}
+ #tab-markets #marketList>.coin .price-usd,#tab-markets #marketList>.coin .price-usd strong{font-size:10px!important}
+}
+
+
+/* DigiArz dashboard market rows: same single-line hierarchy as Markets, with the sparkline beside 24h change. */
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:8px!important;width:100%!important;overflow:visible!important}
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card{
+ display:grid!important;
+ grid-template-columns:28px minmax(0,1.35fr) 58px minmax(68px,.82fr) minmax(88px,1fr)!important;
+ grid-template-rows:minmax(58px,auto)!important;
+ grid-template-areas:"fav identity spark change price"!important;
+ align-items:center!important;gap:6px!important;width:100%!important;min-width:0!important;
+ padding:8px 9px!important;border-radius:13px!important;
+}
+#dashboardMarketPreview .da-market-card-top{display:contents!important}
+#dashboardMarketPreview .da-market-favorite{grid-area:fav!important;justify-self:center!important;width:26px!important;height:26px!important;min-width:26px!important;padding:0!important}
+#dashboardMarketPreview .da-market-identity{grid-area:identity!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:7px!important;min-width:0!important;overflow:hidden!important}
+#dashboardMarketPreview .da-market-logo,#dashboardMarketPreview .da-market-logo-inner{width:35px!important;height:35px!important;min-width:35px!important;flex:0 0 35px!important}
+#dashboardMarketPreview .da-market-name-wrap{min-width:0!important;gap:1px!important}
+#dashboardMarketPreview .da-market-name-wrap b{font-size:11px!important;line-height:1.45!important}
+#dashboardMarketPreview .da-market-name-wrap small{font-size:9px!important}
+#dashboardMarketPreview .da-market-sparkline{grid-area:spark!important;display:flex!important;align-items:center!important;justify-content:center!important;width:58px!important;height:30px!important;min-width:0!important;overflow:visible!important}
+#dashboardMarketPreview .da-market-sparkline svg{display:block!important;width:100%!important;height:100%!important;overflow:visible!important}
+#dashboardMarketPreview .da-market-card-foot{grid-area:change!important;display:flex!important;align-items:center!important;justify-content:center!important;min-width:0!important;margin:0!important;padding:0!important;border:0!important}
+#dashboardMarketPreview .da-market-change{font-size:10px!important;font-weight:900!important;white-space:nowrap!important;text-align:center!important}
+#dashboardMarketPreview .da-market-price{grid-area:price!important;align-self:center!important;min-width:0!important;font-size:12px!important;line-height:1.4!important;text-align:right!important;white-space:nowrap!important}
+#dashboardMarketPreview .da-market-toman{grid-area:price!important;align-self:end!important;min-width:0!important;margin:27px 0 0!important;font-size:9px!important;font-weight:800!important;white-space:nowrap!important;text-align:right!important}
+#dashboardMarketPreview .da-market-coin-card,
+#dashboardMarketPreview .da-market-identity,
+#dashboardMarketPreview .da-market-name-wrap,
+#dashboardMarketPreview .da-market-price,
+#dashboardMarketPreview .da-market-toman,
+#dashboardMarketPreview .da-market-change{filter:none!important;text-shadow:none!important;opacity:1!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+#dashboardMarketPreview .da-market-coin-card{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+body.light-theme #dashboardMarketPreview .da-market-coin-card{background:#fff!important;border:1px solid #d3deeb!important;box-shadow:0 3px 12px rgba(31,57,91,.06)!important;color:#17263b!important}
+body.light-theme #dashboardMarketPreview .da-market-identity,
+body.light-theme #dashboardMarketPreview .da-market-name-wrap b,
+body.light-theme #dashboardMarketPreview .da-market-price{color:#17263b!important}
+body.light-theme #dashboardMarketPreview .da-market-name-wrap small{color:#52677f!important}
+body.light-theme #dashboardMarketPreview .da-market-toman{color:#805b13!important}
+body.light-theme #dashboardMarketPreview .da-market-change.pos{color:#087448!important}
+body.light-theme #dashboardMarketPreview .da-market-change.neg{color:#b52d45!important}
+body.luxury-theme #dashboardMarketPreview .da-market-coin-card{background:linear-gradient(145deg,#102c43,#0b2034)!important;border:1px solid rgba(120,200,255,.3)!important;box-shadow:0 5px 18px rgba(0,0,0,.2)!important;color:#f2f7fb!important}
+body.luxury-theme #dashboardMarketPreview .da-market-identity,
+body.luxury-theme #dashboardMarketPreview .da-market-name-wrap b,
+body.luxury-theme #dashboardMarketPreview .da-market-price{color:#f2f7fb!important}
+body.luxury-theme #dashboardMarketPreview .da-market-name-wrap small{color:#b5cadd!important}
+body.luxury-theme #dashboardMarketPreview .da-market-toman{color:#f0d28e!important}
+body.luxury-theme #dashboardMarketPreview .da-market-change.pos{color:#72e4bd!important}
+body.luxury-theme #dashboardMarketPreview .da-market-change.neg{color:#ff9aa8!important}
+body.dark-theme #dashboardMarketPreview .da-market-coin-card{background:#1b2028!important;border:1px solid #343d49!important;box-shadow:none!important}
+body.dark-theme #dashboardMarketPreview .da-market-identity,
+body.dark-theme #dashboardMarketPreview .da-market-name-wrap b,
+body.dark-theme #dashboardMarketPreview .da-market-price{color:#f4f6fa!important}
+body.dark-theme #dashboardMarketPreview .da-market-name-wrap small{color:#b0bac8!important}
+body.dark-theme #dashboardMarketPreview .da-market-toman{color:#f0c85a!important}
+@media(max-width:520px){
+ #dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card{grid-template-columns:24px minmax(0,1.2fr) 44px minmax(55px,.78fr) minmax(76px,.95fr)!important;gap:4px!important;padding:7px 5px!important}
+ #dashboardMarketPreview .da-market-logo,#dashboardMarketPreview .da-market-logo-inner{width:30px!important;height:30px!important;min-width:30px!important;flex-basis:30px!important}
+ #dashboardMarketPreview .da-market-name-wrap b{font-size:10px!important}
+ #dashboardMarketPreview .da-market-sparkline{width:44px!important;height:25px!important}
+ #dashboardMarketPreview .da-market-change{font-size:9px!important}
+ #dashboardMarketPreview .da-market-price{font-size:10px!important}
+ #dashboardMarketPreview .da-market-toman{font-size:8px!important;margin-top:25px!important}
+}
+@media(max-width:370px){
+ #dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card{grid-template-columns:21px minmax(0,1fr) 36px 49px 69px!important;gap:3px!important;padding:6px 3px!important}
+ #dashboardMarketPreview .da-market-logo,#dashboardMarketPreview .da-market-logo-inner{width:26px!important;height:26px!important;min-width:26px!important;flex-basis:26px!important}
+ #dashboardMarketPreview .da-market-name-wrap b{font-size:9px!important}
+ #dashboardMarketPreview .da-market-sparkline{width:36px!important;height:22px!important}
+ #dashboardMarketPreview .da-market-change{font-size:8px!important}
+ #dashboardMarketPreview .da-market-price{font-size:9px!important}
+ #dashboardMarketPreview .da-market-toman{font-size:7px!important}
+}
+
+/* Secure Passkey controls */
+#authView #passkeySignInBtn{display:flex;align-items:center;justify-content:center;gap:9px;min-height:48px;border:1px solid rgba(66,133,244,.32);border-radius:12px;font-weight:850}
+#authView #passkeySignInBtn[hidden]{display:none!important}
+#authView #passkeySignInBtn svg{width:19px;height:19px}
+#passkeySettingsRow{border-color:rgba(69,224,192,.28)}
+#passkeySettingsRow button{white-space:nowrap;min-height:42px}
+#passkeySettingsMsg{margin-top:9px}
+@media(max-width:520px){#passkeySettingsRow{align-items:flex-start;flex-direction:column}#passkeySettingsRow button{width:100%}}
+
+
+/* Phase 1 palette alignment: black/gold, translucent light glass, indigo glass. */
+body.dark-theme{
+  --da-bg:#0b0d12;--da-bg2:#121722;--da-surface:#171b24;--da-surface2:#202631;
+  --da-line:rgba(240,185,11,.18);--da-text:#f4f5f7;--da-muted:#a5adba;
+  --da-accent:#f0b90b;--da-accent-soft:rgba(240,185,11,.14);
+  --da-blue:#8bb5ff;--da-green:#32d49a;--da-red:#ff687d;--da-purple:#b29aff;
+  background:radial-gradient(ellipse at 8% 0%,rgba(240,185,11,.08),transparent 34%),linear-gradient(145deg,#090b10,#141923 58%,#0b0d12)!important;
+  color:var(--da-text)!important;
+}
+body.light-theme{
+  --da-bg:#eef3fb;--da-bg2:#e5edf8;--da-surface:rgba(255,255,255,.68);--da-surface2:rgba(255,255,255,.48);
+  --da-line:rgba(116,145,184,.22);--da-text:#17263b;--da-muted:#65758d;
+  --da-accent:#2868d7;--da-accent-soft:rgba(40,104,215,.10);
+  --da-blue:#2868d7;--da-green:#13865e;--da-red:#d64e61;--da-purple:#7554c7;
+  background:radial-gradient(ellipse at 90% 0%,rgba(87,139,220,.13),transparent 36%),linear-gradient(145deg,#f7faff,#eaf1fa 58%,#f3f6fc)!important;
+  color:var(--da-text)!important;
+}
+body.luxury-theme{
+  --da-bg:#111027;--da-bg2:#19163a;--da-surface:rgba(31,27,68,.72);--da-surface2:rgba(45,39,91,.66);
+  --da-line:rgba(174,160,255,.26);--da-text:#f3f0ff;--da-muted:#b8b2d4;
+  --da-accent:#b7a8ff;--da-accent-soft:rgba(183,168,255,.18);
+  --da-blue:#a99aff;--da-green:#65d8b5;--da-red:#ff879f;--da-purple:#c9baff;
+  background:radial-gradient(ellipse at 12% 0%,rgba(124,103,220,.24),transparent 36%),radial-gradient(ellipse at 90% 14%,rgba(91,76,179,.18),transparent 32%),linear-gradient(145deg,#0d0b22,#1b1741 56%,#111027)!important;
+  color:var(--da-text)!important;
+}
+body.light-theme .top,body.light-theme .tabs,body.light-theme .card,body.light-theme .stat,
+body.light-theme .trade-box,body.light-theme .fx-box,body.light-theme .performance-item,
+body.light-theme .indicator-panel,body.light-theme .asset-row,body.light-theme .market-list>div{
+  background:rgba(255,255,255,.58)!important;border-color:rgba(116,145,184,.20)!important;
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+}
+body.luxury-theme .top,body.luxury-theme .tabs,body.luxury-theme .card,body.luxury-theme .stat,
+body.luxury-theme .trade-box,body.luxury-theme .fx-box,body.luxury-theme .performance-item,
+body.luxury-theme .indicator-panel,body.luxury-theme .asset-row,body.luxury-theme .market-list>div{
+  background:linear-gradient(145deg,rgba(43,37,91,.72),rgba(25,22,59,.76))!important;
+  border-color:rgba(174,160,255,.23)!important;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+}
+body.dark-theme .top,body.dark-theme .tabs,body.dark-theme .card,body.dark-theme .stat,
+body.dark-theme .trade-box,body.dark-theme .fx-box,body.dark-theme .performance-item,
+body.dark-theme .indicator-panel,body.dark-theme .asset-row,body.dark-theme .market-list>div{
+  background:linear-gradient(145deg,rgba(28,32,42,.98),rgba(16,19,27,.98))!important;
+  border-color:rgba(240,185,11,.14)!important;
+}
+/* Market rows and coin logos stay frameless in every theme. */
+#marketList>.coin,.market-list>#marketList>.coin{
+  border:0!important;outline:0!important;box-shadow:none!important;
+}
+#marketList>.coin .coin-icon,#marketList>.coin .coin-icon img{
+  border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;
+}
+body.light-theme #marketList>.coin{background:rgba(255,255,255,.34)!important}
+body.dark-theme #marketList>.coin{background:rgba(23,27,36,.62)!important}
+body.luxury-theme #marketList>.coin{background:rgba(42,35,86,.42)!important;border:0!important;box-shadow:none!important}
+body.luxury-theme #marketList>.coin .price-usd,body.luxury-theme #marketList>.coin .price-usd strong{color:#f3f0ff!important}
+body.luxury-theme #marketList>.coin .price-toman,body.luxury-theme #marketList>.coin .price-toman strong{color:#a99aff!important}
+body.luxury-theme #marketList>.coin .coin-source{color:#c2b8ff!important}
+body.luxury-theme #authView .auth-reference-visual,
+body.luxury-theme #authView .auth-visual{
+  background:radial-gradient(ellipse at 78% 38%,rgba(174,160,255,.22),transparent 44%),linear-gradient(145deg,#272052,#171438 65%,#111027)!important;
+}
+body.luxury-theme #authView .auth-form{background:linear-gradient(155deg,rgba(48,41,100,.86),rgba(22,19,57,.96))!important;border-color:rgba(174,160,255,.32)!important}
