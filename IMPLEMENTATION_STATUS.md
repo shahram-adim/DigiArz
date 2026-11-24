@@ -1333,7 +1333,7 @@
 ### Verification and safety
 - [x] The exact `market_toman_performance` view definition was read-only inspected; it marks non-Iran-market rows stale after five minutes.
 - [x] The Stop-Limit production fingerprint SQL was executed as a read-only catalog query; it reads schema metadata and cron metadata, not order/trade/wallet/reservation rows.
-- [ ] GitHub Actions for the final commit must complete before CI is reported as passed.
+- [x] GitHub Actions Run #1964 (`45503827911`) on final code/test commit `0baf402c211bc8165057bdd1323cd17c52d9f797` completed with `success`; all 25 steps passed, including Node/browser, PostgreSQL 17, Toman upsert, exact-decimal widening, Market/Limit, Stop-Limit/TP-SL lifecycle and two-session race tests.
 - [ ] Deno type-check / deployed-function parity has not been run in this turn.
 - [x] No Supabase migration, function deployment, refresh invocation, worker/RPC, cron, grant, policy, Auth setting, or financial row was changed.
 - [x] No order, trade, reservation, wallet, balance, transaction, or financial-history data was created, updated, or deleted.
@@ -1348,4 +1348,4 @@
 ### Regression-guard correction — 2026-11-25
 - [x] Re-read the newly committed test and tightened its source guard to match the SQL/HTTP verb token `DELETE` directly, avoiding an over-escaped whitespace pattern.
 - [x] Test file re-fetched after commit and exact content verified.
-- [ ] Final CI run on the latest main HEAD must complete before the test suite is marked green.
+- [x] Final GitHub Actions Run #1964 (`45503827911`) completed with `success` on `0baf402`; the tightened `DELETE` regression guard passed in the Node/browser step and all remaining PostgreSQL lifecycle steps passed.
