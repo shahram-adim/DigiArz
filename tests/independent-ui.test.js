@@ -107,3 +107,17 @@ test('full indigo-glass foundation covers trading wallet and navigation surfaces
   assert.match(html, /luxury\?'#111027'/);
   assert.ok(!html.includes('لوکس شیشه‌ای'));
 });
+
+test('light theme stays pure white across app surfaces with no grey backgrounds', () => {
+  const marker = '/* DigiArz theme 2 final correction: pure-white glass, no grey/blue-grey surfaces. */';
+  const finalRules = css.slice(css.lastIndexOf(marker));
+  assert.ok(finalRules.length > 0, 'pure-white theme override exists');
+  for (const token of [
+    'background:#ffffff!important', 'background-color:#ffffff!important',
+    'background:rgba(255,255,255,.94)!important', 'background:#ffffff!important;border:1px solid',
+    'body.light-theme input', 'body.light-theme #authView .auth-form',
+    'body.light-theme #marketList>.coin'
+  ]) assert.ok(finalRules.includes(token), 'pure-white override includes ' + token);
+  assert.match(finalRules, /--da-bg:#ffffff;--da-bg2:#ffffff/);
+  assert.doesNotMatch(finalRules, /#[0-9a-f]*[89a-f][0-9a-f]{5}/i);
+});
