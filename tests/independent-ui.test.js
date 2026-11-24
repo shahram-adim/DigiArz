@@ -550,3 +550,30 @@ test('authentication hero stays visually rich and readable across all three them
     assert.ok(html.includes('id="' + id + '"'), 'authentication control exists: ' + id);
   }
 });
+
+
+test('dashboard workspace keeps premium hierarchy and independent surfaces across all three themes', () => {
+  const marker = '/* 2026-11-24 premium dashboard pass: elevated hero, market rail, wallet and activity hierarchy. */';
+  const pass = css.slice(css.lastIndexOf(marker));
+  assert.ok(pass.length > 0, 'dashboard refinement layer exists');
+  for (const selector of [
+    '#tab-dashboard .da-v2-hero',
+    '#tab-dashboard .da-v2-hero-art',
+    '#tab-dashboard .da-v2-quick-grid',
+    '#tab-dashboard .da-market-glass',
+    '#tab-dashboard .da-v2-account-card',
+    '#tab-dashboard .dashboard-activity-grid'
+  ]) assert.ok(pass.includes(selector), 'dashboard selector exists: ' + selector);
+  for (const theme of ['dark-theme','light-theme','luxury-theme']) {
+    assert.ok(pass.includes('body.' + theme + ' #tab-dashboard .da-v2-hero'), theme + ' hero theme exists');
+    assert.ok(pass.includes('body.' + theme + ' #tab-dashboard .da-market-glass'), theme + ' market surface exists');
+    assert.ok(pass.includes('body.' + theme + ' #tab-dashboard .da-v2-account-card'), theme + ' wallet surface exists');
+  }
+  assert.match(pass, /@media\(max-width:900px\)/);
+  assert.match(pass, /@media\(max-width:720px\)/);
+  assert.match(pass, /@media\(max-width:560px\)/);
+  assert.match(pass, /@media\(max-width:380px\)/);
+  for (const id of ['tab-dashboard','dashboardMarketPreview','dashboardMarketSearch','dashboardMarketSort','usdtBalance','dashboardRecentOrders','dashboardRecentTrades','dashboardAccountAlerts']) {
+    assert.ok(html.includes('id="' + id + '"'), 'dashboard markup preserves ' + id);
+  }
+});
