@@ -2435,3 +2435,116 @@ body.luxury-theme #tab-settings .theme-choice-group button[aria-pressed=true]{ba
   #tab-assets #assetSummary{grid-template-columns:minmax(0,1fr)}
   #tab-history .history-date-presets button{flex:1 1 calc(50% - 7px)}
 }
+
+
+/* 2026-11-24 premium trading and admin workspace pass. */
+#tab-trade .trade-workspace-banner-v35{
+  position:relative;overflow:hidden;border-radius:22px!important;padding:22px!important;
+  margin:14px 0 20px!important;
+}
+#tab-trade .trade-workspace-copy{max-width:760px;min-width:0}
+#tab-trade .trade-workspace-copy h1{font-size:clamp(22px,3vw,32px)!important;line-height:1.45}
+#tab-trade .trade-workspace-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+#tab-trade .trade-workspace-badges span{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border-radius:30px;font-size:10px}
+#tab-trade .trade-market-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:16px 0}
+#tab-trade .trade-market-grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(280px,.85fr);gap:16px;align-items:start}
+#tab-trade #chartSection,#tab-trade .orderbook-panel,#tab-trade .detail-section{
+  min-width:0;border-radius:19px!important;padding:16px!important;
+}
+#tab-trade .orderbook-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#tab-trade .orderbook-side{min-width:0;border-radius:14px!important;padding:10px!important}
+#tab-trade .orderbook-head,
+#tab-trade .orderbook-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;align-items:center}
+#tab-trade .orderbook-head{padding:8px 5px;font-size:10px;font-weight:900}
+#tab-trade .orderbook-row{padding:7px 5px;font-size:11px;font-variant-numeric:tabular-nums}
+#tab-trade .orderbook-mid{margin-top:10px;padding:12px;border-radius:12px;text-align:center;font-weight:900}
+#tab-trade .orderbook-status,#tab-trade #recentTradesStatus{font-size:10px;line-height:1.9}
+#tab-trade .trade-entry-heading-v35{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:20px 0 12px}
+#tab-trade .trade-entry-grid-v35{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+#tab-trade .trade-entry-grid-v35 .trade-box{min-width:0;padding:18px!important;border-radius:18px!important}
+#tab-trade .trade-entry-grid-v35 .trade-estimate{min-height:48px;padding:11px;border-radius:12px;font-size:11px;line-height:1.8}
+#tab-trade .quick-percent-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+#tab-trade .quick-percent-row button{min-width:0;padding:7px 4px!important;font-size:10px}
+#tab-admin>.section-title{margin-bottom:14px}
+#tab-admin>.notice{border-radius:14px!important;padding:13px 15px!important;line-height:1.9}
+#tab-admin .detail-section{min-width:0;border-radius:18px!important;padding:17px!important;margin:14px 0!important}
+#tab-admin .detail-section>.section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+#tab-admin .detail-section .market-tools{display:flex;gap:8px;flex-wrap:wrap}
+#tab-admin .daily-ad-admin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:end}
+#tab-admin .daily-ad-admin-grid .daily-ad-admin-body{grid-column:1/-1}
+#tab-admin .daily-ad-admin-grid .field{min-width:0}
+#tab-admin .daily-ad-admin-grid input,
+#tab-admin .daily-ad-admin-grid textarea,
+#tab-admin .admin-user-card input,
+#tab-admin .admin-user-card select{max-width:100%;min-width:0}
+#tab-admin #exchangeSyncStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+#tab-admin #exchangeSyncSources,
+#tab-admin #exchangeSyncIssues,
+#tab-admin #adminUsersList,
+#tab-admin #adminAssetCandidates,
+#tab-admin #adminAssetListings,
+#tab-admin #adminPairReview,
+#tab-admin #adminDailyAdList{display:grid;gap:9px;min-width:0}
+#tab-admin .admin-user-card,
+#tab-admin .review-row{min-width:0;overflow-wrap:anywhere;border-radius:14px!important;padding:13px!important}
+#tab-admin .admin-user-card button,
+#tab-admin .review-row button{min-height:38px}
+body.dark-theme #tab-trade .trade-workspace-banner-v35{
+  background:radial-gradient(ellipse at 90% 0,rgba(226,184,77,.17),transparent 48%),linear-gradient(135deg,#20212a,#111720)!important;
+  border:1px solid rgba(231,185,77,.2)!important;color:#f5e6bd!important;
+}
+body.dark-theme #tab-trade .trade-workspace-badges span{background:rgba(231,185,77,.09);border:1px solid rgba(231,185,77,.17);color:#ead7a4}
+body.dark-theme #tab-trade #chartSection,body.dark-theme #tab-trade .orderbook-panel,
+body.dark-theme #tab-trade .detail-section,body.dark-theme #tab-admin .detail-section{
+  background:linear-gradient(145deg,#191e28,#111720)!important;border:1px solid rgba(231,185,77,.14)!important;
+}
+body.dark-theme #tab-trade .orderbook-side{background:rgba(9,14,22,.58)!important;border:1px solid rgba(231,185,77,.11)!important}
+body.dark-theme #tab-trade .orderbook-mid{background:rgba(231,185,77,.09);color:#f0cf75}
+body.dark-theme #tab-admin .admin-user-card,body.dark-theme #tab-admin .review-row{background:rgba(11,16,24,.55)!important;border:1px solid rgba(231,185,77,.13)!important}
+body.light-theme #tab-trade .trade-workspace-banner-v35{
+  background:radial-gradient(ellipse at 90% 0,rgba(89,163,222,.15),transparent 48%),linear-gradient(135deg,#fff,#f4faff)!important;
+  border:1px solid rgba(23,111,193,.13)!important;color:#173b5b!important;box-shadow:0 16px 36px rgba(23,111,193,.07)!important;
+}
+body.light-theme #tab-trade .trade-workspace-badges span{background:#fff;border:1px solid rgba(23,111,193,.12);color:#315b7a}
+body.light-theme #tab-trade #chartSection,body.light-theme #tab-trade .orderbook-panel,
+body.light-theme #tab-trade .detail-section,body.light-theme #tab-admin .detail-section{
+  background:#fff!important;border:1px solid rgba(23,111,193,.12)!important;box-shadow:0 12px 28px rgba(23,111,193,.045)!important;
+}
+body.light-theme #tab-trade .orderbook-side{background:#f7fbff!important;border:1px solid rgba(23,111,193,.1)!important}
+body.light-theme #tab-trade .orderbook-mid{background:#edf6ff;color:#176fc1}
+body.light-theme #tab-admin .admin-user-card,body.light-theme #tab-admin .review-row{background:#f8fbff!important;border:1px solid rgba(23,111,193,.1)!important}
+body.luxury-theme #tab-trade .trade-workspace-banner-v35{
+  background:radial-gradient(ellipse at 90% 0,rgba(174,186,255,.2),transparent 48%),linear-gradient(135deg,#343f91,#1c255f)!important;
+  border:1px solid rgba(174,186,255,.25)!important;color:#edf0ff!important;box-shadow:0 18px 42px rgba(9,13,48,.2)!important;
+}
+body.luxury-theme #tab-trade .trade-workspace-badges span{background:rgba(15,22,73,.42);border:1px solid rgba(174,186,255,.22);color:#e4e9ff}
+body.luxury-theme #tab-trade #chartSection,body.luxury-theme #tab-trade .orderbook-panel,
+body.luxury-theme #tab-trade .detail-section,body.luxury-theme #tab-admin .detail-section{
+  background:linear-gradient(145deg,rgba(48,59,132,.72),rgba(23,30,78,.94))!important;border:1px solid rgba(174,186,255,.19)!important;
+}
+body.luxury-theme #tab-trade .orderbook-side{background:rgba(12,19,62,.45)!important;border:1px solid rgba(174,186,255,.16)!important}
+body.luxury-theme #tab-trade .orderbook-mid{background:rgba(185,197,255,.13);color:#dfe5ff}
+body.luxury-theme #tab-admin .admin-user-card,body.luxury-theme #tab-admin .review-row{background:rgba(12,19,62,.38)!important;border:1px solid rgba(174,186,255,.16)!important}
+@media(max-width:900px){
+  #tab-trade .trade-market-grid{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:560px){
+  #tab-trade .trade-workspace-banner-v35{padding:15px!important;border-radius:17px!important}
+  #tab-trade .trade-market-grid,#tab-trade .trade-entry-grid-v35{grid-template-columns:minmax(0,1fr)}
+  #tab-trade .orderbook-grid{grid-template-columns:minmax(0,1fr)}
+  #tab-trade #chartSection,#tab-trade .orderbook-panel,#tab-trade .detail-section{padding:12px!important}
+  #tab-trade .trade-market-heading{align-items:flex-start;flex-direction:column}
+  #tab-trade .trade-entry-heading-v35{align-items:flex-start;flex-direction:column}
+  #tab-admin .daily-ad-admin-grid{grid-template-columns:minmax(0,1fr)}
+  #tab-admin .daily-ad-admin-grid .daily-ad-admin-body{grid-column:auto}
+  #tab-admin #exchangeSyncStats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #tab-admin .detail-section{padding:12px!important}
+  #tab-admin .detail-section>.section-title{align-items:flex-start;flex-direction:column}
+  #tab-admin .detail-section .market-tools{display:grid;grid-template-columns:minmax(0,1fr);width:100%}
+  #tab-admin .detail-section .market-tools button{width:100%}
+}
+@media(max-width:380px){
+  #tab-admin #exchangeSyncStats{grid-template-columns:minmax(0,1fr)}
+  #tab-trade .quick-percent-row{gap:4px}
+  #tab-trade .quick-percent-row button{font-size:9px}
+}
