@@ -401,7 +401,7 @@ test('trade and admin workspaces retain premium three-theme and narrow-screen co
 });
 
 
-test('dashboard market identity restores framed favorites, framed logos and premium theme-specific rows', () => {
+test('dashboard market identity restores visible favorites, frameless logos and premium theme-specific rows', () => {
   const marker = '/* 2026-11-24 dashboard identity restoration: premium framed rows, visible favorites and richer theme depth. */';
   const pass = css.slice(css.lastIndexOf(marker));
   assert.ok(pass.length > 0, 'dashboard identity restoration layer exists');
@@ -415,7 +415,8 @@ test('dashboard market identity restores framed favorites, framed logos and prem
     '#tab-dashboard .da-v2-quick-grid button'
   ]) assert.ok(pass.includes(selector), 'dashboard identity selector exists: ' + selector);
   assert.match(pass, /#dashboardMarketPreview \.da-market-favorite\{[\\s\\S]*?border:1px solid!important/);
-  assert.match(pass, /#dashboardMarketPreview \.da-market-logo,#dashboardMarketPreview \.da-market-logo-inner\{[\\s\\S]*?border:1\.5px solid!important/);
+  assert.match(pass, /#dashboardMarketPreview \.da-market-logo,#dashboardMarketPreview \.da-market-logo-inner\{[^}]*border:0!important/);
+  assert.match(pass, /#dashboardMarketPreview \.da-market-favorite\{[^}]*border:1px solid!important/);
   assert.match(pass, /#dashboardMarketPreview \.da-market-coin-card\{[\\s\\S]*?border:1px solid!important/);
   for (const theme of ['dark-theme', 'light-theme', 'luxury-theme']) {
     assert.ok(pass.includes('body.' + theme + ' #dashboardMarketPreview .da-market-favorite'), theme + ' favorite frame exists');
@@ -601,4 +602,13 @@ test('admin operations panels preserve responsive controls and all key data regi
   assert.ok(pass.includes('@media(max-width:380px)'), 'admin 380px breakpoint exists');
   assert.ok(pass.includes('#tab-admin .detail-section .market-tools{display:grid'), 'admin controls stack on mobile');
   assert.ok(pass.includes('#tab-admin #exchangeSyncStats{grid-template-columns:minmax(0,1fr)}'), 'sync stats stack on narrow phones');
+});
+
+
+test('dashboard hides account activity from regular users and keeps it available to admins', () => {
+  assert.match(html, /id="dashboardAdminActivity"[^>]*hidden/);
+  assert.match(html, /function renderDashboardActivity\(\)\{\s*const adminActivity=\$\('dashboardAdminActivity'\);if\(adminActivity\)adminActivity\.hidden=!isSuperAdmin;/);
+  assert.match(html, /const englishName=String\(row\.item\.name_en\|\|row\.item\.english_name\|\|row\.item\.name\|\|coinInfo\[base\]\?\.name\|\|base\)/);
+  assert.match(html, /className='da-market-name-en'/);
+  assert.match(html, /class="da-v2-bottom"/);
 });
