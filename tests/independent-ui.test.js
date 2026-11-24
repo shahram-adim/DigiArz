@@ -237,3 +237,23 @@ test('theme identity carries through dashboard, market, trade and authentication
   assert.match(html, /class="trade-workspace-banner-v35"/);
   assert.match(html, /class="auth-visual\b/);
 });
+
+
+test('wallet, orders, history and settings use all three theme identities', () => {
+  const marker = '/* 2026-11-24 theme identity pass: wallet, orders, history and settings pages. */';
+  const identity = css.slice(css.lastIndexOf(marker));
+  assert.ok(identity.length > 0, 'page theme identity layer exists');
+  for (const theme of ['dark-theme', 'light-theme', 'luxury-theme']) {
+    for (const selector of ['.orders-center-v36', '.advanced-order-form-v36', '.advanced-order-list-v36',
+      '.settings-grid .setting-row', '.history-date-presets button.active', '.toman-table th',
+      '.toman-table td', '.asset-detail-head .detail-price']) {
+      assert.ok(identity.includes('body.' + theme + ' ' + selector), theme + ' styles ' + selector);
+    }
+  }
+  assert.match(identity, /body\.light-theme[\s\S]*?background:#fff!important/);
+  assert.match(identity, /body\.dark-theme[\s\S]*?background:#242019!important/);
+  assert.match(identity, /body\.luxury-theme[\s\S]*?background:#35418d!important/);
+  for (const id of ['tab-wallet', 'tab-assets', 'tab-orders', 'tab-history', 'tab-settings']) {
+    assert.ok(html.includes('id="' + id + '"'), 'page exists: ' + id);
+  }
+});
