@@ -15,6 +15,18 @@ on:
       - "package.json"
       - "capacitor.config.json"
       - ".github/workflows/android-apk.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "index.html"
+      - "manifest.webmanifest"
+      - "sw.js"
+      - "icon*.svg"
+      - "src/**"
+      - "package.json"
+      - "capacitor.config.json"
+      - ".github/workflows/android-apk.yml"
 
 permissions:
   contents: read
