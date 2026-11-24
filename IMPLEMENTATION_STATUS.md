@@ -1395,3 +1395,13 @@
 - [ ] Rerun the full exact-decimal workflow on the new head; PostgreSQL checks have not yet run for this candidate.
 - [ ] Physical Android installation and screenshot-based visual acceptance remain outstanding.
 - PR #60 remains Draft/open/unmerged. No Production/Supabase, DB, migration, cron, deployment, merge or release changes.
+
+
+### 2026-11-24 — exact-head CI green and three-theme static audit
+- [x] Exact-head run `45386815824` for commit `b98d8de2d5cfc21f9d37f218fe09f5a18d2450ac` completed SUCCESS; all 43 job steps completed, including PostgreSQL arithmetic/Toman regressions, disposable schema-widening rehearsals, atomic rollback/timeout checks, Market/Limit/Stop-Limit/TP-SL lifecycle and two-session race tests.
+- [x] Follow-up run `45386809066` for test commit `f72ac74da91848cd8569c0455153e8f21cc515d4` also completed SUCCESS.
+- [x] Static stylesheet audit confirms theme-specific selectors exist across authentication, dashboard, trading, Toman market and Admin for dark-gold, pure-white glass and indigo-glass themes; responsive CSS includes 720px, 560px and 380px breakpoints.
+- [x] Rechecked core page IDs for authentication, dashboard, trading, Toman market and Admin; all audited IDs exist. UI regression file contains 33 named test groups, including explicit theme and responsive coverage for these workspaces.
+- [ ] Static source audit is not visual acceptance: physical Android installation and screenshot review at phone/tablet/desktop widths remain outstanding.
+- [ ] Continue with runtime/browser visual verification and APK installation evidence; no merge/release/Production/Supabase changes authorized.
+- PR #60 remains Draft/open/unmerged.
