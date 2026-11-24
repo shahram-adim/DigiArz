@@ -1507,3 +1507,251 @@ body.light-theme .theme-choice-group button.active{
 }
 body.light-theme th{background:#ffffff!important;color:#244c69!important}
 body.light-theme td{background:#ffffff!important;color:#244c69!important;border-color:rgba(92,151,204,.16)!important}
+
+
+/* =========================================================
+   DigiArz premium mobile refinement v4
+   Grounded in Android device screenshot review (2026-11-24).
+   Refines hierarchy, removes nested frames, prevents market
+   value collisions, and differentiates the three themes.
+   ========================================================= */
+:root{
+  --da-motion:180ms;
+  --da-market-row-radius:18px;
+}
+body.dark-theme{
+  --da-bg:#090b10!important;--da-bg2:#11151d!important;
+  --da-surface:#151a23!important;--da-surface2:#1b222d!important;
+  --da-line:rgba(220,180,72,.22)!important;--da-text:#f7f4eb!important;
+  --da-muted:#a8a294!important;--da-accent:#e7b94d!important;
+  --da-accent-soft:rgba(231,185,77,.12)!important;
+  background:radial-gradient(ellipse at 8% -8%,rgba(208,158,48,.17),transparent 34%),
+    radial-gradient(ellipse at 100% 25%,rgba(132,96,28,.08),transparent 30%),
+    linear-gradient(155deg,#080a0e,#11151c 55%,#090b10)!important;
+}
+body.light-theme{
+  --da-bg:#fff!important;--da-bg2:#fff!important;
+  --da-surface:#fff!important;--da-surface2:#fff!important;
+  --da-line:rgba(30,91,145,.13)!important;--da-text:#152b40!important;
+  --da-muted:#647d91!important;--da-accent:#176fc1!important;
+  --da-accent-soft:rgba(23,111,193,.09)!important;
+  background:
+    radial-gradient(ellipse at 90% 0%,rgba(70,157,225,.08),transparent 30%),
+    #fff!important;
+  color:#152b40!important;
+}
+body.luxury-theme{
+  --da-bg:#090d20!important;--da-bg2:#11183a!important;
+  --da-surface:rgba(24,31,70,.88)!important;--da-surface2:rgba(34,43,91,.76)!important;
+  --da-line:rgba(160,173,255,.22)!important;--da-text:#f1f3ff!important;
+  --da-muted:#aab5dc!important;--da-accent:#a9b7ff!important;
+  --da-accent-soft:rgba(143,159,255,.14)!important;
+  background:radial-gradient(ellipse at 12% 0%,rgba(89,112,220,.24),transparent 35%),
+    radial-gradient(ellipse at 90% 18%,rgba(111,91,198,.15),transparent 30%),
+    linear-gradient(150deg,#080c1d,#121a3a 54%,#090d20)!important;
+}
+
+/* App chrome: smaller, more deliberate, never obscures the page. */
+body.dark-theme .top,body.light-theme .top,body.luxury-theme .top{
+  position:sticky!important;top:0!important;z-index:80!important;
+  min-height:66px!important;padding:10px 16px!important;margin:0 0 14px!important;
+  border-radius:0 0 20px 20px!important;
+  border:1px solid var(--da-line)!important;border-top:0!important;
+  background:color-mix(in srgb,var(--da-surface) 92%,transparent)!important;
+  box-shadow:0 8px 26px rgba(8,18,35,.09)!important;
+  -webkit-backdrop-filter:blur(22px) saturate(145%)!important;
+  backdrop-filter:blur(22px) saturate(145%)!important;
+}
+body.dark-theme .top .brand,body.light-theme .top .brand,body.luxury-theme .top .brand{
+  font-size:clamp(19px,4vw,25px)!important;font-weight:950!important;letter-spacing:-.8px!important;
+}
+body.dark-theme .top .muted,body.light-theme .top .muted,body.luxury-theme .top .muted{
+  font-size:11px!important;line-height:1.5!important;
+}
+body.dark-theme .top-actions button,body.light-theme .top-actions button,body.luxury-theme .top-actions button{
+  min-height:42px!important;border-radius:13px!important;
+}
+body.dark-theme .card,body.light-theme .card,body.luxury-theme .card{
+  border-radius:22px!important;
+  box-shadow:0 12px 34px rgba(10,24,42,.055)!important;
+}
+body.dark-theme .card{border-color:rgba(220,180,72,.16)!important}
+body.light-theme .card{border-color:rgba(30,91,145,.10)!important}
+body.luxury-theme .card{border-color:rgba(160,173,255,.18)!important}
+
+/* Market tools and category rail: compact, intentional, horizontally scrollable. */
+body.dark-theme #marketCategories,body.light-theme #marketCategories,body.luxury-theme #marketCategories{
+  display:flex!important;flex-wrap:nowrap!important;gap:9px!important;
+  overflow-x:auto!important;overscroll-behavior-x:contain!important;
+  padding:5px 2px 11px!important;margin:8px 0 12px!important;
+  scrollbar-width:none!important;
+}
+body.dark-theme #marketCategories::-webkit-scrollbar,
+body.light-theme #marketCategories::-webkit-scrollbar,
+body.luxury-theme #marketCategories::-webkit-scrollbar{display:none!important}
+body.dark-theme #marketCategories button,body.light-theme #marketCategories button,
+body.luxury-theme #marketCategories button{
+  flex:0 0 auto!important;min-height:43px!important;padding:9px 15px!important;
+  border-radius:14px!important;font-size:12px!important;font-weight:800!important;
+  transition:transform var(--da-motion) ease,background var(--da-motion) ease!important;
+}
+body.dark-theme #marketCategories button.active{background:linear-gradient(135deg,#d8a63b,#f2d27e)!important;color:#17120a!important;border-color:#d8a63b!important}
+body.light-theme #marketCategories button.active{background:#eaf4fc!important;color:#155e9d!important;border-color:#6aa6d8!important}
+body.luxury-theme #marketCategories button.active{background:linear-gradient(135deg,#5d70c9,#394b9e)!important;color:#fff!important;border-color:#9cafff!important}
+
+/* Five-column market row: identity, micro-chart, 24h move and prices never collide. */
+body.dark-theme #marketList>.coin,body.light-theme #marketList>.coin,
+body.luxury-theme #marketList>.coin{
+  display:grid!important;
+  grid-template-columns:34px minmax(112px,1.28fr) minmax(54px,.62fr) minmax(76px,.78fr) minmax(102px,1fr)!important;
+  grid-template-areas:"fav identity spark change price"!important;
+  align-items:center!important;column-gap:10px!important;row-gap:0!important;
+  min-height:88px!important;padding:13px 12px!important;margin:0!important;
+  border:0!important;border-bottom:1px solid var(--da-line)!important;
+  border-radius:0!important;outline:0!important;box-shadow:none!important;
+  background:transparent!important;overflow:visible!important;
+}
+body.dark-theme #marketList>.coin:first-child,body.light-theme #marketList>.coin:first-child,
+body.luxury-theme #marketList>.coin:first-child{
+  border-top:1px solid var(--da-line)!important;
+}
+body.dark-theme #marketList>.coin .favorite-btn,body.light-theme #marketList>.coin .favorite-btn,
+body.luxury-theme #marketList>.coin .favorite-btn{
+  grid-area:fav!important;justify-self:center!important;
+  width:32px!important;height:38px!important;min-width:32px!important;
+  padding:0!important;border:0!important;border-radius:10px!important;
+  background:transparent!important;box-shadow:none!important;
+}
+body.dark-theme #marketList>.coin .coin-identity,body.light-theme #marketList>.coin .coin-identity,
+body.luxury-theme #marketList>.coin .coin-identity{
+  grid-area:identity!important;display:flex!important;align-items:center!important;
+  justify-content:flex-start!important;gap:9px!important;min-width:0!important;
+  padding:0!important;border:0!important;background:transparent!important;
+  box-shadow:none!important;text-align:right!important;overflow:hidden!important;
+}
+body.dark-theme #marketList>.coin .coin-icon,body.light-theme #marketList>.coin .coin-icon,
+body.luxury-theme #marketList>.coin .coin-icon{
+  width:43px!important;height:43px!important;min-width:43px!important;flex:0 0 43px!important;
+  border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;
+}
+body.dark-theme #marketList>.coin .coin-name-stack,body.light-theme #marketList>.coin .coin-name-stack,
+body.luxury-theme #marketList>.coin .coin-name-stack{
+  display:flex!important;flex-direction:column!important;gap:1px!important;
+  min-width:0!important;overflow:hidden!important;
+}
+body.dark-theme #marketList>.coin .coin-name-fa,body.light-theme #marketList>.coin .coin-name-fa,
+body.luxury-theme #marketList>.coin .coin-name-fa{
+  font-size:13px!important;font-weight:900!important;line-height:1.5!important;
+  white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+}
+body.dark-theme #marketList>.coin .coin-symbol-en,body.light-theme #marketList>.coin .coin-symbol-en,
+body.luxury-theme #marketList>.coin .coin-symbol-en{
+  font-size:10px!important;font-weight:800!important;letter-spacing:.25px!important;
+}
+body.dark-theme #marketList>.coin .coin-english-name,body.light-theme #marketList>.coin .coin-english-name,
+body.luxury-theme #marketList>.coin .coin-english-name{display:none!important}
+body.dark-theme #marketList>.coin .coin-sparkline,body.light-theme #marketList>.coin .coin-sparkline,
+body.luxury-theme #marketList>.coin .coin-sparkline{
+  grid-area:spark!important;display:flex!important;align-items:center!important;
+  justify-content:center!important;min-width:0!important;width:100%!important;height:32px!important;
+  overflow:hidden!important;
+}
+body.dark-theme #marketList>.coin .coin-sparkline svg,body.light-theme #marketList>.coin .coin-sparkline svg,
+body.luxury-theme #marketList>.coin .coin-sparkline svg{width:100%!important;height:100%!important}
+body.dark-theme #marketList>.coin .coin-change-wrap,body.light-theme #marketList>.coin .coin-change-wrap,
+body.luxury-theme #marketList>.coin .coin-change-wrap{
+  grid-area:change!important;display:flex!important;flex-direction:column!important;
+  align-items:center!important;justify-content:center!important;gap:4px!important;
+  min-width:0!important;margin:0!important;padding:0!important;text-align:center!important;
+}
+body.dark-theme #marketList>.coin .coin-change-label,body.light-theme #marketList>.coin .coin-change-label,
+body.luxury-theme #marketList>.coin .coin-change-label{font-size:9px!important;white-space:nowrap!important;opacity:.7!important}
+body.dark-theme #marketList>.coin .coin-change,body.light-theme #marketList>.coin .coin-change,
+body.luxury-theme #marketList>.coin .coin-change{font-size:12px!important;font-weight:950!important;white-space:nowrap!important;line-height:1.4!important}
+body.dark-theme #marketList>.coin .coin-volume,body.light-theme #marketList>.coin .coin-volume,
+body.luxury-theme #marketList>.coin .coin-volume{display:none!important}
+body.dark-theme #marketList>.coin .price-stack,body.light-theme #marketList>.coin .price-stack,
+body.luxury-theme #marketList>.coin .price-stack{
+  grid-area:price!important;display:flex!important;flex-direction:column!important;
+  align-items:flex-end!important;justify-content:center!important;gap:4px!important;
+  min-width:0!important;margin:0!important;padding:0!important;text-align:right!important;
+}
+body.dark-theme #marketList>.coin .price-usd,body.light-theme #marketList>.coin .price-usd,
+body.luxury-theme #marketList>.coin .price-usd{font-size:13px!important;font-weight:900!important;white-space:nowrap!important;line-height:1.4!important}
+body.dark-theme #marketList>.coin .price-toman,body.light-theme #marketList>.coin .price-toman,
+body.luxury-theme #marketList>.coin .price-toman{font-size:10px!important;font-weight:800!important;white-space:nowrap!important;line-height:1.4!important}
+body.dark-theme #marketList>.coin .coin-source,body.light-theme #marketList>.coin .coin-source,
+body.luxury-theme #marketList>.coin .coin-source{display:none!important}
+body.dark-theme #marketList>.coin .price-usd,body.dark-theme #marketList>.coin .price-usd strong{color:#f7f4eb!important}
+body.dark-theme #marketList>.coin .price-toman{color:#e7b94d!important}
+body.light-theme #marketList>.coin .price-usd,body.light-theme #marketList>.coin .price-usd strong{color:#152b40!important}
+body.light-theme #marketList>.coin .price-toman{color:#8a671b!important}
+body.luxury-theme #marketList>.coin .price-usd,body.luxury-theme #marketList>.coin .price-usd strong{color:#f1f3ff!important}
+body.luxury-theme #marketList>.coin .price-toman{color:#b9c4ff!important}
+body.dark-theme #marketList>.coin .coin-change.pos{color:#45d6a0!important}
+body.light-theme #marketList>.coin .coin-change.pos{color:#13865e!important}
+body.luxury-theme #marketList>.coin .coin-change.pos{color:#66ddb9!important}
+body.dark-theme #marketList>.coin .coin-change.neg{color:#ff7185!important}
+body.light-theme #marketList>.coin .coin-change.neg{color:#c83e55!important}
+body.luxury-theme #marketList>.coin .coin-change.neg{color:#ff8fa7!important}
+
+/* Dashboard market rows receive the same spacing discipline without nested card borders. */
+body.dark-theme #dashboardMarketPreview .da-market-coin-card,
+body.light-theme #dashboardMarketPreview .da-market-coin-card,
+body.luxury-theme #dashboardMarketPreview .da-market-coin-card{
+  border:0!important;border-bottom:1px solid var(--da-line)!important;border-radius:0!important;
+  box-shadow:none!important;background:transparent!important;padding:12px 8px!important;
+}
+body.dark-theme #dashboardMarketPreview .da-market-coin-card:first-child,
+body.light-theme #dashboardMarketPreview .da-market-coin-card:first-child,
+body.luxury-theme #dashboardMarketPreview .da-market-coin-card:first-child{border-top:1px solid var(--da-line)!important}
+
+/* Bottom navigation: lighter footprint and more breathing room for content. */
+body.dark-theme .mobile-bottom-nav,body.light-theme .mobile-bottom-nav,
+body.luxury-theme .mobile-bottom-nav{
+  left:12px!important;right:12px!important;bottom:max(7px,env(safe-area-inset-bottom))!important;
+  padding:7px 8px!important;gap:4px!important;border-radius:20px!important;
+  border:1px solid var(--da-line)!important;
+  box-shadow:0 12px 34px rgba(8,18,35,.16)!important;
+}
+body.dark-theme .mobile-bottom-nav button,body.light-theme .mobile-bottom-nav button,
+body.luxury-theme .mobile-bottom-nav button{
+  min-height:54px!important;padding:6px 2px!important;border:0!important;
+  border-radius:13px!important;font-size:10px!important;font-weight:800!important;
+  background:transparent!important;box-shadow:none!important;
+}
+body.dark-theme .mobile-bottom-nav button.active{background:rgba(231,185,77,.12)!important;color:#e7b94d!important}
+body.light-theme .mobile-bottom-nav button.active{background:#eaf4fc!important;color:#176fc1!important}
+body.luxury-theme .mobile-bottom-nav button.active{background:rgba(143,159,255,.15)!important;color:#b9c4ff!important}
+body.dark-theme .mobile-bottom-nav button i,body.light-theme .mobile-bottom-nav button i,
+body.luxury-theme .mobile-bottom-nav button i{font-size:18px!important}
+
+/* Small screens retain the complete row instead of wrapping prices below it. */
+@media(max-width:560px){
+  body.dark-theme .wrap,body.light-theme .wrap,body.luxury-theme .wrap{padding:0 10px 94px!important}
+  body.dark-theme .top,body.light-theme .top,body.luxury-theme .top{min-height:60px!important;padding:8px 11px!important;margin-bottom:10px!important}
+  body.dark-theme .card,body.light-theme .card,body.luxury-theme .card{padding:13px!important;margin:9px 0!important;border-radius:18px!important}
+  body.dark-theme #marketList>.coin,body.light-theme #marketList>.coin,
+  body.luxury-theme #marketList>.coin{
+    grid-template-columns:28px minmax(94px,1.16fr) minmax(40px,.48fr) minmax(65px,.68fr) minmax(91px,.92fr)!important;
+    column-gap:5px!important;min-height:78px!important;padding:10px 5px!important;
+  }
+  body.dark-theme #marketList>.coin .favorite-btn,body.light-theme #marketList>.coin .favorite-btn,
+  body.luxury-theme #marketList>.coin .favorite-btn{width:26px!important;min-width:26px!important}
+  body.dark-theme #marketList>.coin .coin-icon,body.light-theme #marketList>.coin .coin-icon,
+  body.luxury-theme #marketList>.coin .coin-icon{width:35px!important;height:35px!important;min-width:35px!important;flex-basis:35px!important}
+  body.dark-theme #marketList>.coin .coin-name-fa,body.light-theme #marketList>.coin .coin-name-fa,
+  body.luxury-theme #marketList>.coin .coin-name-fa{font-size:11px!important}
+  body.dark-theme #marketList>.coin .coin-change,body.light-theme #marketList>.coin .coin-change,
+  body.luxury-theme #marketList>.coin .coin-change{font-size:10px!important}
+  body.dark-theme #marketList>.coin .price-usd,body.light-theme #marketList>.coin .price-usd,
+  body.luxury-theme #marketList>.coin .price-usd{font-size:11px!important}
+  body.dark-theme #marketList>.coin .price-toman,body.light-theme #marketList>.coin .price-toman,
+  body.luxury-theme #marketList>.coin .price-toman{font-size:9px!important}
+  body.dark-theme #marketList>.coin .coin-sparkline,body.light-theme #marketList>.coin .coin-sparkline,
+  body.luxury-theme #marketList>.coin .coin-sparkline{height:24px!important}
+  body.dark-theme .mobile-bottom-nav,body.light-theme .mobile-bottom-nav,
+  body.luxury-theme .mobile-bottom-nav{left:8px!important;right:8px!important;padding:6px!important}
+  body.dark-theme .mobile-bottom-nav button,body.light-theme .mobile-bottom-nav button,
+  body.luxury-theme .mobile-bottom-nav button{min-height:49px!important;font-size:9px!important}
+}
