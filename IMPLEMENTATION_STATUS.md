@@ -1432,3 +1432,12 @@
 - [ ] Full catalog coverage is not yet certified: some asset sources do not expose Persian/English display names, so remaining ticker fallbacks require a verified curated mapping or reliable catalog source.
 - [ ] CI for the newest PR head and Android visual acceptance remain pending. PR #60 stays Draft/open/unmerged; no merge, APK publication, deployment, or Production/Supabase/DB/migration/cron changes.
 - Next: inventory the actual market catalog name fields and their coverage, then add only verified translations and run the exact-head test suite.
+
+### 2026-11-24 — Persian display-name fallback for the live active catalog
+- [x] Read-only catalog audit: 416 enabled demo trading pairs are linked to 416 distinct `crypto_assets` records; every linked record has an English `name`, while the table has no dedicated Persian-name column.
+- [x] Added a Persian display-name resolution order: exchange-provided Persian metadata, existing curated Persian dictionaries, then a Persian-script phonetic fallback based on the English catalog name. English display names remain visible alongside the Persian name and ticker in market rows and dashboard preview; market search uses the same fallback.
+- [x] Ran a direct helper-level check against all 416 active catalog English names: 416 non-empty Persian-script fallback strings, with no Latin characters left in the generated fallback output. This validates script coverage, not editorial correctness of every phonetic transliteration.
+- [x] Fixed a duplicate `englishName` declaration and repaired/updated the focused regression test. Static JavaScript syntax checks pass for all three inline scripts and the updated Node test file.
+- [ ] Full runtime Node test suite / CI for the latest PR head remains pending. Some phonetic spellings—especially new/obscure tokens and tokenized equities—still need human curation for best Persian wording.
+- [ ] No APK rebuild, merge, deployment, Production DB change, migration, or cron change. The catalog audit used SELECT-only queries; no database rows or schema were changed. PR #60 remains Draft/open/unmerged.
+- Next: add targeted curated overrides for awkward transliterations, then obtain exact-head CI and visual/device acceptance.
