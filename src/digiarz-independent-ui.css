@@ -2119,3 +2119,63 @@ body.luxury-theme .asset-detail-head .detail-price{color:#b9c5ff!important}
 body.dark-theme .orders-center-symbol{box-shadow:0 0 28px rgba(231,185,77,.12)!important}
 body.light-theme .orders-center-symbol{box-shadow:0 0 28px rgba(23,111,193,.10)!important}
 body.luxury-theme .orders-center-symbol{box-shadow:0 0 30px rgba(174,186,255,.16)!important}
+
+
+/* 2026-11-24 admin workspace theme pass: isolate admin panels and user adjustment cards. */
+body.dark-theme #tab-admin .detail-section,
+body.dark-theme #tab-admin .admin-user-card,
+body.dark-theme #tab-admin .daily-ad-admin-item{
+  background:linear-gradient(145deg,#1b202a,#11151d)!important;
+  border:1px solid rgba(231,185,77,.20)!important;
+  color:#f5e6bd!important;
+  box-shadow:0 12px 32px rgba(0,0,0,.18)!important;
+}
+body.light-theme #tab-admin .detail-section,
+body.light-theme #tab-admin .admin-user-card,
+body.light-theme #tab-admin .daily-ad-admin-item{
+  background:#fff!important;
+  border:1px solid rgba(23,111,193,.15)!important;
+  color:#173b5b!important;
+  box-shadow:0 12px 32px rgba(23,111,193,.055)!important;
+}
+body.luxury-theme #tab-admin .detail-section,
+body.luxury-theme #tab-admin .admin-user-card,
+body.luxury-theme #tab-admin .daily-ad-admin-item{
+  background:linear-gradient(145deg,rgba(48,59,132,.82),rgba(23,30,78,.96))!important;
+  border:1px solid rgba(174,186,255,.23)!important;
+  color:#e7eaff!important;
+  box-shadow:0 16px 38px rgba(4,8,28,.24)!important;
+}
+body.dark-theme #tab-admin .admin-user-card .admin-adjust-grid,
+body.dark-theme #tab-admin .daily-ad-admin-grid{border-color:rgba(231,185,77,.18)!important}
+body.light-theme #tab-admin .admin-user-card .admin-adjust-grid,
+body.light-theme #tab-admin .daily-ad-admin-grid{border-color:rgba(23,111,193,.14)!important}
+body.luxury-theme #tab-admin .admin-user-card .admin-adjust-grid,
+body.luxury-theme #tab-admin .daily-ad-admin-grid{border-color:rgba(174,186,255,.22)!important}
+body.dark-theme #tab-admin .admin-user-card strong,
+body.dark-theme #tab-admin .detail-section h3,
+body.dark-theme #tab-admin .detail-section h4{color:#f5e6bd!important}
+body.light-theme #tab-admin .admin-user-card strong,
+body.light-theme #tab-admin .detail-section h3,
+body.light-theme #tab-admin .detail-section h4{color:#173b5b!important}
+body.luxury-theme #tab-admin .admin-user-card strong,
+body.luxury-theme #tab-admin .detail-section h3,
+body.luxury-theme #tab-admin .detail-section h4{color:#e7eaff!important}
+body.dark-theme #tab-admin .admin-user-card small,
+body.dark-theme #tab-admin .daily-ad-admin-copy small{color:#c6b98f!important}
+body.light-theme #tab-admin .admin-user-card small,
+body.light-theme #tab-admin .daily-ad-admin-copy small{color:#52718b!important}
+body.luxury-theme #tab-admin .admin-user-card small,
+body.luxury-theme #tab-admin .daily-ad-admin-copy small{color:#bdc7f0!important}
+body.dark-theme #tab-admin .admin-user-card input,
+body.dark-theme #tab-admin .admin-user-card select,
+body.dark-theme #tab-admin .daily-ad-admin-grid input,
+body.dark-theme #tab-admin .daily-ad-admin-grid textarea{background:#111720!important;color:#f5e6bd!important;border-color:rgba(231,185,77,.22)!important}
+body.light-theme #tab-admin .admin-user-card input,
+body.light-theme #tab-admin .admin-user-card select,
+body.light-theme #tab-admin .daily-ad-admin-grid input,
+body.light-theme #tab-admin .daily-ad-admin-grid textarea{background:#fff!important;color:#173b5b!important;border-color:rgba(23,111,193,.18)!important}
+body.luxury-theme #tab-admin .admin-user-card input,
+body.luxury-theme #tab-admin .admin-user-card select,
+body.luxury-theme #tab-admin .daily-ad-admin-grid input,
+body.luxury-theme #tab-admin .daily-ad-admin-grid textarea{background:rgba(21,29,76,.78)!important;color:#e7eaff!important;border-color:rgba(174,186,255,.24)!important}
