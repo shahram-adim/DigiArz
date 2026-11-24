@@ -165,3 +165,32 @@ test('light theme stays pure white across app surfaces with no grey backgrounds'
   assert.match(finalRules, /--da-bg:#ffffff;--da-bg2:#ffffff/);
   assert.doesNotMatch(finalRules, /background(?:-color)?:\s*#(?:eef3fb|e5edf8|edf4f6|e8f1f4|f7faff|eaf1fa|f3f6fc|d1e1e5|d4e3e7)/i);
 });
+
+test('mobile market grid areas match the actual rendered row element order and data fields', () => {
+  const rowStart = html.indexOf("const star=document.createElement('button')");
+  const rowEnd = html.indexOf('renderLucideIcons();', rowStart);
+  assert.ok(rowStart >= 0 && rowEnd > rowStart, 'market row renderer exists');
+  const renderer = html.slice(rowStart, rowEnd);
+  assert.match(renderer, /div\\.append\\(star,identity,sparkline,changeWrap,price\\)/);
+  assert.match(renderer, /coin-name-fa/);
+  assert.match(renderer, /coin-symbol-en/);
+  assert.match(renderer, /coin-english-name/);
+  assert.match(renderer, /coin-change-wrap/);
+  assert.match(renderer, /price-stack/);
+  assert.match(renderer, /price-usd/);
+  assert.match(renderer, /price-toman/);
+  assert.match(renderer, /observeMarketSparklines\\(list\\)/);
+
+  const mobile = css.slice(css.lastIndexOf('DigiArz mobile screenshot correction v5'));
+  assert.match(mobile, /grid-template-areas:[\\s\\S]*"fav identity change price"[\\s\\S]*"\\. spark change price"/);
+  for (const [selector, area] of [
+    ['.favorite-btn', 'fav'],
+    ['.coin-identity', 'identity'],
+    ['.coin-sparkline', 'spark'],
+    ['.coin-change-wrap', 'change'],
+    ['.price-stack', 'price']
+  ]) {
+    assert.ok(mobile.includes(selector), 'mobile row styles include ' + selector);
+    assert.ok(mobile.includes('grid-area:' + area + '!important'), 'mobile row maps ' + selector + ' to ' + area);
+  }
+});
