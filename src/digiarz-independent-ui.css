@@ -3122,3 +3122,24 @@ body.luxury-theme #dashboardMarketPreview .da-market-coin-card:hover{border-colo
  #dashboardMarketPreview .da-market-price{font-size:10px!important}
 }
 @media(prefers-reduced-motion:reduce){#tab-dashboard .da-v2-quick-grid button,#dashboardMarketPreview .da-market-coin-card{transition:none!important}}
+
+/* 2026-11-24 dashboard role visibility and page-edge polish */
+#tab-dashboard .dashboard-activity-center[hidden]{display:none!important}
+#tab-dashboard .da-v2-topline{padding:8px 3px 17px!important;border-bottom:1px solid var(--da-line);margin-bottom:3px}
+#tab-dashboard .da-v2-hero{overflow:hidden;isolation:isolate}
+#tab-dashboard .da-v2-hero:after{content:"";position:absolute;inset:auto -8% -48% 38%;height:65%;border-radius:50%;pointer-events:none;background:radial-gradient(ellipse,rgba(255,255,255,.12),transparent 68%);filter:blur(16px);z-index:0}
+#tab-dashboard .da-v2-section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:22px 2px 13px}
+#tab-dashboard .da-v2-section-head h2{margin:3px 0 0;font-size:clamp(17px,2.5vw,22px);font-weight:900;letter-spacing:-.3px}
+#tab-dashboard .da-v2-trust-row{display:flex;justify-content:center;flex-wrap:wrap;gap:10px 20px;padding:14px 8px;margin:3px 0 8px;border-block:1px solid var(--da-line);font-size:11px}
+#tab-dashboard .da-v2-bottom{margin-top:24px;padding:17px 14px;border-radius:18px;border:1px solid var(--da-line);background:linear-gradient(120deg,rgba(255,255,255,.045),transparent);display:flex;align-items:center;justify-content:space-between;gap:12px}
+#tab-dashboard .da-v2-bottom small{color:var(--muted);line-height:1.9}
+#dashboardMarketPreview .da-market-name-wrap{display:flex!important;flex-direction:column!important;gap:3px!important;min-width:0!important}
+#dashboardMarketPreview .da-market-name-wrap b{line-height:1.5!important}
+#dashboardMarketPreview .da-market-name-wrap .da-market-name-en{display:block!important;font-size:9px!important;line-height:1.35!important;direction:ltr!important;text-align:right!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;opacity:.72!important}
+#tab-dashboard .dashboard-activity-center{margin-top:20px}
+@media(max-width:560px){
+ #tab-dashboard .da-v2-topline{padding:5px 1px 12px!important}
+ #tab-dashboard .da-v2-section-head{margin:16px 1px 10px}
+ #tab-dashboard .da-v2-trust-row{gap:8px 12px;font-size:10px}
+ #tab-dashboard .da-v2-bottom{align-items:flex-start;flex-direction:column;margin-top:18px;padding:14px}
+}
