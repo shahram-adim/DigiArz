@@ -87,6 +87,7 @@ export function resolveAssetIdentity(observation, assets) {
     const matches = assets.filter(asset => asset && asset.coingecko_id === explicitId.trim());
     if (matches.length === 1) return { status: "matched", reason: "coingecko_id", asset: matches[0] };
     if (matches.length > 1) return { status: "ambiguous", reason: "duplicate_coingecko_id", asset: null };
+    return { status: "unmatched", reason: "coingecko_id_not_found", asset: null };
   }
 
   const network = normalizedNetwork(
