@@ -4034,3 +4034,27 @@ body.luxury-theme #dashboardMarketPreview .da-market-coin-card{
   }
   #dashboardMarketPreview .da-market-change{font-size:9px!important}
 }
+
+
+/* 2026-11-24 final dashboard logo frame override.
+   Must stay last: an earlier legacy theme rule re-added a halo/shadow. */
+#tab-dashboard #dashboardMarketPreview .da-market-logo,
+#tab-dashboard #dashboardMarketPreview .da-market-logo-inner,
+#tab-dashboard #dashboardMarketPreview .da-market-logo-inner img{
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+  background-image:none!important;
+  filter:none!important;
+}
+#tab-dashboard #dashboardMarketPreview .da-market-logo::before,
+#tab-dashboard #dashboardMarketPreview .da-market-logo::after,
+#tab-dashboard #dashboardMarketPreview .da-market-logo-inner::before,
+#tab-dashboard #dashboardMarketPreview .da-market-logo-inner::after{
+  content:none!important;
+  display:none!important;
+  border:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
