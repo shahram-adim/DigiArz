@@ -944,3 +944,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - A redundant Android rebuild on latest head, run 45344474993, was still running at this update. The already verified artifact is usable for review and includes the removed Market panels; it is a debug/review APK, not a production-signed release.
 - Branch now has a documentation-only follow-up commit; live branch head before this entry was 1a2681300174bdaa8ac6d882def0eac9fcf57a83. PR #60 remains open, Draft=true, merged=false. No merge, release, deployment, Production DB change, Supabase migration, or user financial-data change.
 - Physical device install/rendering and all three-theme/auth/navigation acceptance remain unverified. Next: user-side device acceptance; continue only with issues demonstrated on device.
+
+
+## 2026-11-24 — latest-head APK build completed and artifact verified
+- Latest-head Android workflow run 45344474993 completed SUCCESS on branch source commit 080adaf5e1d241643037dc0eb465f9e8a61d7d23. Artifact ID 14897388707 (DigiArz-Android-debug-APK), created 2026-11-24T07:01:07Z; expires 2026-12-08T07:01:06Z.
+- Downloaded artifact and verified ZIP integrity. APK size 3,934,677 bytes; SHA-256 4d7c70650a97177d34b99271cc9623504aa1d58eef4af75d5710b7281cbe779a. BUILD-INFO matches and records synthetic PR merge commit 1ab85bc612d3b66dd7bfb26aea6889e9dde75638, refs/pull/60/merge, workflow_run_id 45344474993, package_version 1.0.0.
+- This is the newest verified debug/review APK and includes the removed Market gainers/losers panels. It is not production-signed or publicly released. Physical device install/rendering remains unverified.
+- Exact-decimal / PostgreSQL / Market / Limit / Stop-Limit / TP-SL / two-session race workflow run 45344475016 also completed SUCCESS on source commit 080adaf5e1d241643037dc0eb465f9e8a61d7d23.
+- Branch head at this documentation update: 780ae4de93433e14e750e4b68f3b3b70aefc4591; PR #60 remains Draft/open/unmerged. No merge, release, deployment, Production DB change, Supabase migration, or user-financial-data change.
+- Next: install this APK on a real Android device and verify all three themes, login/logout, dashboard, Market categories/list, and bottom navigation. Fix only reproducible issues; retain PR #60 Draft until explicit approval.
