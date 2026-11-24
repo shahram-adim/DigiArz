@@ -3495,3 +3495,37 @@ body.luxury-theme #tab-dashboard .da-market-glass select{
 }
 body.luxury-theme #tab-dashboard .da-market-glass input::placeholder{color:#b7b9dc!important}
 body.luxury-theme #tab-dashboard .da-market-glass select option{background:#1b245e!important;color:#f3f0ff!important}
+
+
+/* 2026-11-24 dashboard bottom-space and universal frameless logo correction v6. */
+/* 2026-11-24 dashboard bottom-space and universal frameless logo correction v6. */
+@media(max-width:700px){
+  /* Keep only enough scroll clearance for the fixed bottom navigation. */
+  body.dark-theme .wrap,body.light-theme .wrap,body.luxury-theme .wrap{
+    padding-bottom:calc(88px + env(safe-area-inset-bottom))!important;
+  }
+  #tab-dashboard{
+    min-height:0!important;height:auto!important;
+    padding-bottom:12px!important;margin-bottom:0!important;
+  }
+  #tab-dashboard>.da-v2-bottom{margin-bottom:0!important}
+}
+/* Frameless brand and asset marks: preserve the image itself, remove its tile. */
+#tab-dashboard .da-v2-logo,
+#dashboardMarketPreview .da-market-logo,
+#dashboardMarketPreview .da-market-logo-inner,
+#dashboardMarketPreview .da-market-logo-inner img,
+#tab-markets .market-board-v34 .coin-identity .coin-icon,
+#tab-markets .market-board-v34 .coin-identity .coin-icon img,
+#tab-markets #marketList .coin-icon,
+#tab-markets #marketList .coin-icon img,
+#tab-assets #assetList .asset-row .asset-logo,
+#tab-assets #assetList .asset-row .asset-logo img,
+#tab-chart .asset-detail-head .asset-logo,
+#tab-chart .asset-detail-head .asset-logo img{
+  border:0!important;outline:0!important;box-shadow:none!important;
+  background:transparent!important;
+}
+#tab-dashboard .da-v2-logo{
+  border-radius:0!important;padding:0!important;
+}
