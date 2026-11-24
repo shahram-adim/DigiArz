@@ -3393,3 +3393,39 @@ body.luxury-theme #tab-chart .asset-detail-head,body.luxury-theme #tab-admin .de
     scroll-behavior:auto!important;transition:none!important;animation:none!important;
   }
 }
+
+/* Light glass dashboard contrast and surface correction */
+body.light-theme #tab-dashboard .da-v2-hero-foot{
+  background:linear-gradient(100deg,rgba(239,247,255,.96),rgba(225,239,255,.92))!important;
+  border-top:1px solid rgba(37,111,190,.16)!important;
+  color:#244b73!important;
+}
+body.light-theme #tab-dashboard .da-v2-hero-foot svg{color:#2878cf!important}
+body.light-theme #tab-dashboard .da-v2-quick-grid button{
+  color:#193b60!important;
+  background:linear-gradient(145deg,#fff,#f2f8ff)!important;
+  border-color:rgba(37,111,190,.2)!important;
+}
+body.light-theme #tab-dashboard .da-v2-quick-grid button b{color:#193b60!important}
+body.light-theme #tab-dashboard .da-v2-quick-grid button i{color:#2878cf!important}
+body.light-theme #tab-dashboard .da-v2-section-head h2{color:#193b60!important}
+body.light-theme #tab-dashboard .da-v2-kicker,
+body.light-theme #tab-dashboard .da-v2-market-caption{color:#3975ad!important}
+body.light-theme #tab-dashboard .da-v2-account-card{
+  background:linear-gradient(145deg,#fff,#f1f7ff)!important;
+  border-color:rgba(37,111,190,.2)!important;
+}
+body.light-theme #tab-dashboard .da-v2-balance-main{
+  background:linear-gradient(110deg,#fff,#eaf4ff)!important;
+  border-color:rgba(37,111,190,.2)!important;
+}
+body.light-theme #tab-dashboard .da-v2-balance-main span,
+body.light-theme #tab-dashboard .da-v2-account-stats small{color:#54718f!important}
+body.light-theme #tab-dashboard .da-v2-balance-main strong,
+body.light-theme #tab-dashboard .da-v2-account-stats b{color:#175fae!important}
+body.light-theme #tab-dashboard .da-v2-account-stats>div{
+  background:linear-gradient(145deg,#fff,#f5faff)!important;
+  border-color:rgba(37,111,190,.15)!important;
+}
+body.light-theme #tab-dashboard .da-v2-trust-row{color:#527293!important}
+body.light-theme #tab-dashboard .da-v2-art-label{color:#4a82ba!important}
