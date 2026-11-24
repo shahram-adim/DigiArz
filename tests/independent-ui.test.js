@@ -675,7 +675,7 @@ test('dashboard sections follow a clear visual order and stay responsive without
 });
 
 
-test('cross-page premium surfaces keep responsive hierarchy and usable data tables'() {
+test('cross-page premium surfaces keep responsive hierarchy and usable data tables', () => {
   for (const id of ['tab-markets','tab-toman','tab-chart','tab-trade','tab-assets','tab-orders','tab-history','tab-admin','tab-settings']) {
     assert.match(css, new RegExp('#' + id + '[,{]'));
   }
