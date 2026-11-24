@@ -50,3 +50,14 @@ test('mobile layouts and reduced-motion accessibility rules are present', () => 
   assert.match(css, /@media\(prefers-reduced-motion:reduce\)/);
   assert.equal((css.match(/\{/g) || []).length, (css.match(/\}/g) || []).length);
 });
+
+test('indigo glass dashboard preview overrides the legacy sky-blue palette', () => {
+  const oldBlue = css.indexOf('body.luxury-theme #dashboardMarketPreview .da-market-coin-card{background:linear-gradient(145deg,#102c43,#0b2034)');
+  const indigo = css.lastIndexOf('body.luxury-theme #dashboardMarketPreview .da-market-coin-card{');
+  assert.ok(oldBlue >= 0, 'legacy dashboard palette remains identifiable');
+  assert.ok(indigo > oldBlue, 'final indigo override comes after legacy rules');
+  const finalPalette = css.slice(indigo, indigo + 600);
+  assert.match(finalPalette, /#30275f/);
+  assert.match(finalPalette, /#1b1744/);
+  assert.match(finalPalette, /rgba\(183,168,255/);
+});
