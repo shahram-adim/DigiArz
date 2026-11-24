@@ -323,3 +323,29 @@ test('Toman market, asset detail and trading data panels keep distinct premium s
   assert.match(html, /id="tab-chart"/);
   assert.match(html, /id="tab-trade"/);
 });
+
+
+test('remaining app pages keep usable layouts at narrow mobile widths', () => {
+  const audit = css.slice(css.lastIndexOf('/* 2026-11-24 responsive audit: assets, orders, history, settings, admin and trade on narrow screens. */'));
+  assert.ok(audit.length > 0, 'narrow-screen audit layer exists');
+  for (const selector of [
+    '#tab-assets .asset-tools',
+    '#tab-orders .market-tools',
+    '#tab-history .history-filters',
+    '#tab-history .table-wrap table',
+    '#tab-settings .settings-grid .setting-row',
+    '#tab-settings .theme-choice-group',
+    '#tab-admin .section-title',
+    '#tab-admin #exchangeSyncStats',
+    '#tab-trade .orderbook-grid',
+    '#tab-chart .trade-grid'
+  ]) {
+    assert.ok(audit.includes(selector), 'responsive layout exists for ' + selector);
+  }
+  assert.match(audit, /@media\(max-width:560px\)/);
+  assert.match(audit, /#tab-history \.table-wrap table\{min-width:540px\}/);
+  assert.match(audit, /#tab-admin \.daily-ad-admin-grid>button\{width:100%;min-height:44px\}/);
+  for (const id of ['tab-assets','tab-orders','tab-history','tab-settings','tab-admin','tab-trade','tab-chart']) {
+    assert.match(html, new RegExp('id="' + id + '"'), 'page root exists: ' + id);
+  }
+});
