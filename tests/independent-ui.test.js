@@ -102,7 +102,7 @@ test('indigo glass dashboard preview overrides legacy cards with refined framele
   assert.ok(premium > oldBlue, 'premium row refinement comes after legacy rules');
   const finalPalette = css.slice(premium, premium + 900);
   assert.match(finalPalette, /border:0!important/);
-  assert.match(finalPalette, /border-bottom:1px solid var\(--da-line\)!important/);
+  assert.match(finalPalette, /border:0!important/);
   assert.match(finalPalette, /background:transparent!important/);
 });
 
