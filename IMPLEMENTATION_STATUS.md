@@ -1453,3 +1453,12 @@
 - [ ] Human editorial review of phonetic Persian transliterations and physical Android visual acceptance remain outstanding.
 - PR #60 remains Draft/open/unmerged. No merge, deployment, APK rebuild/release, Supabase/Production DB change, migration, or cron change.
 - Next: run the exact-head regression workflow and review any failures before further UI edits.
+
+
+### 2026-11-24 — UI regression suite brought in line with current market design
+- [x] Investigated the first exact-head GitHub Actions run: 95/98 Node tests passed; 3 UI assertions failed.
+- [x] Root causes were stale expectations, not a reported runtime exception: dashboard CSS assertions assumed a single-line selector and incorrectly expected logo frames; dashboard/market name assertions expected the previous Persian-name expression instead of the current bilingual metadata fallback.
+- [x] Updated regression tests to require visible framed favorite controls, borderless logo shells, and the current Persian+English metadata flow. No product CSS or production behavior was changed in this test-only correction.
+- [ ] Re-run on latest commit is in progress; do not treat tests as passing until GitHub Actions reports success.
+- PR #60 remains Draft/open/unmerged. No merge, deployment, APK rebuild/release, Production DB change, migration, or cron change.
+- Next: inspect exact-head Actions result; if green, continue with mobile visual and three-theme acceptance review.
