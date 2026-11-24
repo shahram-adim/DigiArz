@@ -603,11 +603,11 @@ test('admin operations panels preserve responsive controls and all key data regi
 
 
 test('all active market assets receive Persian display names from curated names or English-name transliteration', () => {
-  assert.match(html, /function transliterateAssetNameToPersian\\(value\\)/);
-  assert.match(html, /function persianCoinName\\(symbol,englishName=''/);
-  assert.match(html, /transliterateAssetNameToPersian\\(englishName\\|\\|coinInfo\\[base\\]\\?\\.name\\|\\|''\\)/);
-  assert.match(html, /englishName=String\\(row\\.item\\.name_en\\|\\|row\\.item\\.asset_name_en\\|\\|row\\.item\\.english_name\\|\\|row\\.item\\.name\\|\\|coinInfo\\[base\\]\\?\\.name\\|\\|base\\)/);
-  assert.match(html, /persianCoinName\\(symbol,englishName\\)/);
+  assert.match(html, /function transliterateAssetNameToPersian\(value\)/);
+  assert.match(html, /function persianCoinName\(symbol,englishName=''/);
+  assert.match(html, /transliterateAssetNameToPersian\(englishName\|\|coinInfo\[base\]\?\.name\|\|''\)/);
+  assert.match(html, /englishName=String\(row\.item\.name_en\|\|row\.item\.asset_name_en\|\|row\.item\.english_name\|\|row\.item\.name\|\|coinInfo\[base\]\?\.name\|\|base\)/);
+  assert.match(html, /persianCoinName\(symbol,englishName\)/);
   assert.match(html, /class="top-asset-name-en" dir="ltr"/);
   assert.match(html, /persianCoinName\\(item\\.symbol,englishName\\)/);
   assert.match(html, /persianCoinName\\(symbol,x\\.name_fa\\|\\|x\\.asset_name_fa/);
