@@ -3717,3 +3717,30 @@ body.light-theme #tab-dashboard .da-market-glass .da-market-search input::placeh
     gap:8px!important;padding-top:9px!important;font-size:9px!important;
   }
 }
+
+
+/* 2026-11-24 dashboard visual audit v10: admin-aware bottom navigation and tighter wallet block. */
+@media(max-width:700px){
+  .mobile-bottom-nav{
+    grid-template-columns:repeat(auto-fit,minmax(0,1fr))!important;
+    gap:3px!important;
+    padding:6px 5px calc(6px + env(safe-area-inset-bottom))!important;
+  }
+  .mobile-bottom-nav button{
+    min-width:0!important;
+    padding:6px 1px!important;
+    gap:3px!important;
+    font-size:9px!important;
+  }
+  .mobile-bottom-nav button svg{width:17px!important;height:17px!important}
+  #tab-dashboard .da-v2-account-card{
+    margin-top:14px!important;padding:13px!important;
+  }
+  #tab-dashboard .da-v2-balance-main{
+    padding:10px 12px!important;gap:7px!important;
+  }
+  #tab-dashboard .da-v2-account-stats{gap:7px!important;margin-top:8px!important}
+  #tab-dashboard .da-v2-account-stats>div{padding:9px!important}
+  #tab-dashboard .da-v2-wallet-link{margin-top:8px!important;min-height:38px!important}
+  #tab-dashboard .da-v2-quick-grid{margin-top:11px!important;margin-bottom:15px!important}
+}
