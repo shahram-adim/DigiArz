@@ -730,3 +730,10 @@ test('dashboard is hidden when any other app tab is selected despite its flex la
   assert.ok(css.includes('#tab-dashboard.hidden{display:none!important}'));
   assert.ok(css.includes('#tab-dashboard{\n  display:flex!important;'));
 });
+
+
+test('dashboard removes its repeated brand masthead and keeps indigo glass account controls legible', () => {
+  assert.ok(css.includes('#tab-dashboard>.da-v2-topline{display:none!important}'));
+  assert.match(css, /body\.luxury-theme #tab-dashboard \.da-v2-account-stats>div\{[\s\S]*?rgba\(65,78,157/);
+  assert.match(css, /body\.luxury-theme #tab-dashboard \.da-market-glass input,[\s\S]*?color:#f3f0ff!important/);
+});

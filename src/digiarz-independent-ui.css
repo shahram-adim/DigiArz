@@ -3472,3 +3472,26 @@ body.light-theme #tab-dashboard .da-v2-art-label{color:#4a82ba!important}
 
 /* 2026-11-24 navigation regression: hidden dashboard must not override the shared hidden utility. */
 #tab-dashboard.hidden{display:none!important}
+
+
+/* 2026-11-24 visual audit follow-up: remove repeated dashboard identity and restore indigo glass contrast. */
+#tab-dashboard>.da-v2-topline{display:none!important}
+body.luxury-theme #tab-dashboard .da-v2-account-stats>div{
+  background:linear-gradient(145deg,rgba(65,78,157,.62),rgba(23,33,84,.82))!important;
+  border:1px solid rgba(183,168,255,.26)!important;
+  color:#f3f0ff!important;
+}
+body.luxury-theme #tab-dashboard .da-v2-account-stats small{color:#c3c8ed!important}
+body.luxury-theme #tab-dashboard .da-v2-account-stats b{color:#f6f3ff!important}
+body.luxury-theme #tab-dashboard .da-v2-balance-main{
+  background:linear-gradient(145deg,rgba(36,48,117,.78),rgba(17,27,76,.92))!important;
+  border-color:rgba(183,168,255,.26)!important;
+}
+body.luxury-theme #tab-dashboard .da-market-glass input,
+body.luxury-theme #tab-dashboard .da-market-glass select{
+  background:rgba(20,30,82,.88)!important;
+  border:1px solid rgba(183,168,255,.30)!important;
+  color:#f3f0ff!important;
+}
+body.luxury-theme #tab-dashboard .da-market-glass input::placeholder{color:#b7b9dc!important}
+body.luxury-theme #tab-dashboard .da-market-glass select option{background:#1b245e!important;color:#f3f0ff!important}
