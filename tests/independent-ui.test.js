@@ -399,3 +399,30 @@ test('trade and admin workspaces retain premium three-theme and narrow-screen co
     assert.ok(html.includes('id="' + id + '"'), 'HTML contains ' + id);
   }
 });
+
+
+test('market and wallet asset identities stay frameless in all three themes', () => {
+  const marker = '/* 2026-11-24 frameless asset identity pass: remove logo/star frames without changing data layout. */';
+  const pass = css.slice(css.lastIndexOf(marker));
+  assert.ok(pass.length > 0, 'frameless asset identity layer exists');
+  for (const selector of [
+    '#tab-markets .market-board-v34 .coin',
+    '#dashboardMarketPreview .da-market-coin-card',
+    '#tab-assets #assetList .asset-row'
+  ]) {
+    assert.ok(pass.includes(selector), 'frameless row selector exists: ' + selector);
+  }
+  for (const selector of [
+    '#tab-markets .market-board-v34 .coin-identity .favorite-btn',
+    '#dashboardMarketPreview .da-market-favorite',
+    '#tab-markets .market-board-v34 .coin-identity .coin-icon',
+    '#dashboardMarketPreview .da-market-logo',
+    '#tab-assets #assetList .asset-row .asset-logo',
+    '#tab-chart .asset-detail-head .asset-logo'
+  ]) assert.ok(pass.includes(selector), 'frameless identity selector exists: ' + selector);
+  assert.match(pass, /border:0!important/);
+  assert.match(pass, /box-shadow:none!important/);
+  for (const theme of ['dark-theme', 'light-theme', 'luxury-theme']) {
+    assert.ok(pass.includes('body.' + theme), theme + ' retains its own hover treatment');
+  }
+});
