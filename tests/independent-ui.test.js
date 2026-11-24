@@ -74,7 +74,7 @@ test('premium mobile refinement prevents market price collisions and gives the t
 
 test('service worker precaches the new stylesheet under a fresh shell cache', () => {
   assert.match(sw, /digiarz-shell-v60/);
-  assert.match(sw, /digiarz-independent-ui\.css\?v=1/);
+  assert.match(sw, /digiarz-independent-ui\.css\?v=2/);
 });
 
 test('mobile layouts and reduced-motion accessibility rules are present', () => {
