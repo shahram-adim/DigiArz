@@ -1229,3 +1229,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Exact Decimal workflow is not currently triggered by branch pushes because its workflow is limited to `push: main` and `pull_request: main`; PR #60 remains Draft, so do not infer a test result for this head.
 - Next: verify Android run/artifact provenance; if the PR remains Draft, keep it so and do not merge. Run the full test suite only through an authorized CI path when available. Continue device screenshot acceptance before release.
 - No Production/Supabase or financial data changes; no migration, cron, deploy, merge or release.
+
+
+## 2026-11-24 — account workflow mobile refinement and APK verification
+- Confirmed Android run `45380484051` success for CSS source commit `b4a1b8e...`; artifact `14913147606` was downloaded and verified. APK SHA-256: `59a47ac04683995263e6399671e8f0e127bffa7369d6f7ddc1d17a3a69cd5dee`. BUILD-INFO provenance matches run and commit; archive integrity passed; Toman table CSS is bundled.
+- Follow-on visual-only pass for orders/history/settings: order cards stack on mobile with accessible full-width action; history filters/presets reflow; sticky first (time) column improves RTL scanability; theme controls stack on narrow settings screens.
+- CSS commit `e7d5f614b4bc716577a8a22657646f33ee7f0cc7`; regression test commit `1479492859dd255695c3be02942bb01408fb3c61`.
+- Android run `45380895062` was triggered for the CSS commit and is still in progress at checkpoint; it does not include the later test-only commit.
+- Exact Decimal workflow is not green for this PR head; do not infer from older successful runs. Physical Android installation/screenshots remain acceptance requirements.
+- PR #60 remains Draft/open/unmerged. No Production/Supabase, financial data, migration, cron, deployment, merge or release changes.
