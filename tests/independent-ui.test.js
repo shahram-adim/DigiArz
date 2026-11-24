@@ -68,3 +68,15 @@ test('hidden authentication view stays hidden despite the ID-based layout rule',
   assert.ok(layoutRule >= 0, 'independent auth layout rule exists');
   assert.ok(hiddenRule > layoutRule, 'hidden-state override follows the layout rule');
 });
+
+test('luxury theme final overrides neutralize legacy sky-blue auth and dashboard accents', () => {
+  const marker = '/* Final luxury palette harmonization: neutralize legacy sky-blue login and dashboard accents. */';
+  const finalRules = css.slice(css.lastIndexOf(marker));
+  assert.ok(finalRules.length > 0, 'final palette harmonization block exists');
+  for (const token of [
+    'rgba(43,37,91,.82)', 'rgba(183,168,255,.30)', '#30275f',
+    '#b7a8ff', '#d0c6ff', 'body.luxury-theme .da-v2-coin',
+    'body.luxury-theme .mobile-bottom-nav button.active'
+  ]) assert.ok(finalRules.includes(token), 'final indigo rules include ' + token);
+  assert.ok(finalRules.indexOf('body.luxury-theme #authView.auth-reference-layout') > css.indexOf('background:rgba(239,249,255,.92)'));
+});
