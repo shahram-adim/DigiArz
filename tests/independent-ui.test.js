@@ -279,5 +279,6 @@ test('admin workspace panels and account-adjustment controls follow all three th
   assert.match(html, /class="card admin-user-card"/);
   assert.match(html, /class="admin-adjust-grid"/);
   assert.match(html, /class="daily-ad-admin-grid"/);
-  assert.match(html, /class="daily-ad-admin-item"/);
+  // daily-ad-admin-item is rendered by daily-ads.js at runtime, not static index.html.
+  assert.ok(adminTheme.includes('.daily-ad-admin-item'), 'runtime daily-ad item receives theme styling');
 });
