@@ -39,6 +39,18 @@ test('market rows and coin logos remain frameless in all themes', () => {
   assert.match(css, /body\.luxury-theme #marketList>\.coin/);
 });
 
+test('obsolete five-gainer and five-loser panels are removed while market summaries and asset lists remain', () => {
+  assert.doesNotMatch(html, /topGainersList|topLosersList|allGainersBtn|allLosersBtn/);
+  assert.doesNotMatch(html, /<section class="gainers-panel/);
+  assert.doesNotMatch(html, /function renderTopGainers|function renderTopLosers|function showAllGainers|function showAllLosers/);
+  assert.match(html, /id="marketAvgChange"/);
+  assert.match(html, /id="marketTopGain"/);
+  assert.match(html, /id="marketTopLoss"/);
+  assert.match(html, /id="topAssetsList"/);
+  assert.match(html, /id="marketList"/);
+  assert.match(html, /id="dashboardMarketPreview"/);
+});
+
 test('service worker precaches the new stylesheet under a fresh shell cache', () => {
   assert.match(sw, /digiarz-shell-v59/);
   assert.match(sw, /digiarz-independent-ui\.css\?v=1/);
