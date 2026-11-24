@@ -2179,3 +2179,30 @@ body.luxury-theme #tab-admin .admin-user-card input,
 body.luxury-theme #tab-admin .admin-user-card select,
 body.luxury-theme #tab-admin .daily-ad-admin-grid input,
 body.luxury-theme #tab-admin .daily-ad-admin-grid textarea{background:rgba(21,29,76,.78)!important;color:#e7eaff!important;border-color:rgba(174,186,255,.24)!important}
+
+
+/* 2026-11-24 auth final theme pass: make login surfaces follow the selected product theme. */
+body.dark-theme #authView.auth-reference-layout{background:radial-gradient(ellipse at 18% 12%,rgba(217,170,69,.12),transparent 42%),linear-gradient(145deg,#090b10,#111722 58%,#090c12)!important;border:1px solid rgba(222,180,82,.18)!important;color:#f5e9c9!important}
+body.dark-theme #authView .auth-reference-visual{background:linear-gradient(145deg,rgba(24,29,39,.94),rgba(12,16,23,.98))!important;border-color:rgba(222,180,82,.2)!important}
+body.dark-theme #authView .ref-brand-lockup strong,body.dark-theme #authView .ref-market-copy h1,body.dark-theme #authView .auth-form h2{color:#f6e8c4!important}
+body.dark-theme #authView .ref-brand-lockup em,body.dark-theme #authView .ref-market-copy p,body.dark-theme #authView .ref-demo-footer,body.dark-theme #authView .auth-form .auth-intro,body.dark-theme #authView .auth-form label{color:#c9bd9e!important}
+body.dark-theme #authView .ref-live-pill,body.dark-theme #authView .ref-coin-row{background:rgba(25,30,39,.88)!important;border-color:rgba(222,180,82,.2)!important;color:#f5e9c9!important}
+body.dark-theme #authView .auth-form{background:linear-gradient(150deg,#1a1e27,#10141c)!important;border:1px solid rgba(222,180,82,.24)!important;box-shadow:0 18px 48px rgba(0,0,0,.28)!important;color:#f5e9c9!important}
+body.dark-theme #authView .auth-form input{background:#0c1119!important;border-color:rgba(222,180,82,.25)!important;color:#fff5dc!important}
+body.dark-theme #authView .auth-form input::placeholder{color:#9e947b!important}
+body.light-theme #authView.auth-reference-layout{background:radial-gradient(ellipse at 18% 12%,rgba(41,133,207,.08),transparent 42%),#fff!important;border:1px solid rgba(30,112,180,.12)!important;color:#173b5b!important}
+body.light-theme #authView .auth-reference-visual{background:linear-gradient(145deg,#fff,#fafdff)!important;border-color:rgba(30,112,180,.12)!important}
+body.light-theme #authView .ref-brand-lockup strong,body.light-theme #authView .ref-market-copy h1,body.light-theme #authView .auth-form h2{color:#173b5b!important}
+body.light-theme #authView .ref-brand-lockup em,body.light-theme #authView .ref-market-copy p,body.light-theme #authView .ref-demo-footer,body.light-theme #authView .auth-form .auth-intro,body.light-theme #authView .auth-form label{color:#52718b!important}
+body.light-theme #authView .ref-live-pill,body.light-theme #authView .ref-coin-row{background:#fff!important;border-color:rgba(30,112,180,.13)!important;color:#173b5b!important;box-shadow:0 8px 24px rgba(30,112,180,.055)!important}
+body.light-theme #authView .auth-form{background:#fff!important;border:1px solid rgba(30,112,180,.13)!important;box-shadow:0 18px 44px rgba(30,112,180,.07)!important;color:#173b5b!important}
+body.light-theme #authView .auth-form input{background:#fff!important;border-color:rgba(30,112,180,.2)!important;color:#173b5b!important}
+body.light-theme #authView .auth-form input::placeholder{color:#7894a9!important}
+body.luxury-theme #authView.auth-reference-layout{background:radial-gradient(ellipse at 18% 12%,rgba(137,153,255,.22),transparent 45%),linear-gradient(145deg,#11183f,#202b70 58%,#11183f)!important;border:1px solid rgba(174,186,255,.28)!important;color:#e7eaff!important}
+body.luxury-theme #authView .auth-reference-visual{background:linear-gradient(145deg,rgba(47,58,130,.72),rgba(22,29,77,.9))!important;border-color:rgba(174,186,255,.25)!important}
+body.luxury-theme #authView .ref-brand-lockup strong,body.luxury-theme #authView .ref-market-copy h1,body.luxury-theme #authView .auth-form h2{color:#edf0ff!important}
+body.luxury-theme #authView .ref-brand-lockup em,body.luxury-theme #authView .ref-market-copy p,body.luxury-theme #authView .ref-demo-footer,body.luxury-theme #authView .auth-form .auth-intro,body.luxury-theme #authView .auth-form label{color:#c3cafa!important}
+body.luxury-theme #authView .ref-live-pill,body.luxury-theme #authView .ref-coin-row{background:rgba(35,45,111,.72)!important;border-color:rgba(174,186,255,.25)!important;color:#e7eaff!important}
+body.luxury-theme #authView .auth-form{background:linear-gradient(150deg,rgba(48,59,132,.9),rgba(22,29,77,.98))!important;border:1px solid rgba(174,186,255,.3)!important;box-shadow:0 20px 48px rgba(4,8,28,.32)!important;color:#e7eaff!important}
+body.luxury-theme #authView .auth-form input{background:rgba(13,21,64,.78)!important;border-color:rgba(174,186,255,.28)!important;color:#f2f4ff!important}
+body.luxury-theme #authView .auth-form input::placeholder{color:#aab4e2!important}
