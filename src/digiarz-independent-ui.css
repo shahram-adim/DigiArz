@@ -3744,3 +3744,34 @@ body.light-theme #tab-dashboard .da-market-glass .da-market-search input::placeh
   #tab-dashboard .da-v2-wallet-link{margin-top:8px!important;min-height:38px!important}
   #tab-dashboard .da-v2-quick-grid{margin-top:11px!important;margin-bottom:15px!important}
 }
+
+
+/* 2026-11-24 mobile wallet/nav overlap correction v11.
+   Keep the three wallet metrics on one compact row so the primary wallet action
+   remains above the fixed mobile navigation at the initial dashboard position. */
+@media(max-width:700px){
+  #tab-dashboard .da-v2-account-stats{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:5px!important;margin:7px 0!important;
+  }
+  #tab-dashboard .da-v2-account-stats>div{
+    min-width:0!important;padding:7px 5px!important;gap:3px!important;
+  }
+  #tab-dashboard .da-v2-account-stats small{
+    font-size:9px!important;line-height:1.45!important;
+    overflow-wrap:anywhere!important;
+  }
+  #tab-dashboard .da-v2-account-stats b{
+    font-size:11px!important;line-height:1.35!important;
+    overflow-wrap:anywhere!important;
+  }
+  #tab-dashboard .da-v2-balance-main{
+    padding:8px 11px!important;gap:4px 8px!important;
+  }
+  #tab-dashboard .da-v2-balance-main span{font-size:10px!important}
+  #tab-dashboard .da-v2-balance-main strong{font-size:25px!important}
+  #tab-dashboard .da-v2-account-card .da-v2-section-head{margin-bottom:7px!important}
+  #tab-dashboard .da-v2-wallet-link{
+    margin-top:6px!important;min-height:34px!important;padding:6px 10px!important;
+  }
+}
