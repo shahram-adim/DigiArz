@@ -1305,3 +1305,41 @@
 - هیچ سفارش، معامله، reservation، wallet، balance، transaction یا سابقهٔ مالی Production ایجاد یا تغییر نکرد.
 - هیچ worker یا RPC مالی روی کاربر واقعی اجرا نشد.
 - هیچ migration، deploy، cron، grant، policy، Auth setting یا انتشار APK انجام نشد.
+
+
+## Nightly QA — protect Toman current-price rows from partial provider snapshots — 2026-11-25
+
+### Fresh starting state
+- [x] Re-read `main`, the latest commits, `IMPLEMENTATION_STATUS.md`, tests, and the live Supabase project before making changes. Starting HEAD: `394c4dd9922cb2cdfa3d14e1a354a09c38840999`.
+- [x] The latest completed work from 2026-11-24 was the Stop-Limit production schema fingerprint and its read-only safety test. That work was not repeated.
+- [x] Production project `gfoaubfilhttnwjykaox` is `ACTIVE_HEALTHY`, PostgreSQL `17.11.0.018`; migration ledger contains 55 entries and latest version is `20261121050216`.
+- [x] `refresh-toman-market-prices` is still deployed at version 3 with `verify_jwt=true`. Its deployed source still uses the older plain POST and destructive current-price cleanup. The main-branch source already uses upsert, but still contained the same cleanup block before this fix.
+- [x] The live `market_toman_performance` view selects the latest row per exchange/asset and marks non-`iran_market` data stale after five minutes. Retaining older rows therefore preserves a truthful stale marker instead of presenting them as fresh.
+- [x] Security Advisor: 15 RLS-enabled/no-policy findings, 2 anon-executable SECURITY DEFINER functions (`get_admin_market_listings`, `get_exchange_discovered_market_assets`), 23 authenticated-executable SECURITY DEFINER findings, and leaked-password protection disabled. Health Advisor returned no findings. Performance Advisor reported 9 unindexed foreign keys, 11 RLS initplan warnings, 2 backup tables without primary keys, and 13 unused indexes.
+- [x] The 2 anon-executable functions remain a separate security-review item; no grants or function privileges were changed.
+
+### Priority gap and correction
+- [x] Found a destructive path in `refresh-toman-market-prices/index.ts`: after accepting any non-empty set of fulfilled provider rows, the function deleted every older current-price row for each exchange represented in that batch.
+- [!] Because provider calls use `Promise.allSettled` and individual source responses can be partial/truncated while still non-empty, the returned rows do not prove a complete exchange snapshot. The cleanup could therefore delete valid symbols omitted from a partial response.
+- [x] Removed automatic DELETE cleanup from the GitHub source. Omitted rows are retained and the existing performance view marks old `fetched_at` values stale. A separate reviewed retention policy can be designed later if table growth warrants it.
+- [x] Added a regression test that rejects the destructive DELETE path and confirms the handler retains omitted rows.
+- [!] This is a repository-only correction. Production Edge Function version 3 has not been deployed or changed.
+
+### Files and commits
+- `supabase/functions/refresh-toman-market-prices/index.ts` — remove automatic stale-row deletion.
+- `tests/toman-market-persistence.test.js` — guard against reintroducing DELETE cleanup.
+- Commits are recorded in the GitHub commit history for this section; file contents and blob SHAs were re-fetched after each commit.
+
+### Verification and safety
+- [x] The exact `market_toman_performance` view definition was read-only inspected; it marks non-Iran-market rows stale after five minutes.
+- [x] The Stop-Limit production fingerprint SQL was executed as a read-only catalog query; it reads schema metadata and cron metadata, not order/trade/wallet/reservation rows.
+- [ ] GitHub Actions for the final commit must complete before CI is reported as passed.
+- [ ] Deno type-check / deployed-function parity has not been run in this turn.
+- [x] No Supabase migration, function deployment, refresh invocation, worker/RPC, cron, grant, policy, Auth setting, or financial row was changed.
+- [x] No order, trade, reservation, wallet, balance, transaction, or financial-history data was created, updated, or deleted.
+
+### Next steps
+1. Review the two anon-executable SECURITY DEFINER functions and verify they expose only intentionally public market metadata; do not change grants until owner approval.
+2. Add an explicit bounded-retention design only if stale-row growth becomes material; it must never prune based on a non-empty partial provider response.
+3. Deploy the corrected Edge Function only after explicit user approval; then separately authorize any real refresh operation.
+4. Continue reconstructing the missing migration sources and exact Production-to-test PostgreSQL 17 parity before full source-faithful Stop-Limit lifecycle testing.
