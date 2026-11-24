@@ -299,3 +299,27 @@ test('login hero, market copy and authentication form preserve all three final t
   assert.match(html, /id="authView" class="card auth auth-reference-layout"/);
   assert.match(html, /class="auth-form"/);
 });
+
+
+test('Toman market, asset detail and trading data panels keep distinct premium surfaces in all themes', () => {
+  for (const theme of ['dark-theme', 'light-theme', 'luxury-theme']) {
+    for (const selector of [
+      '#tab-toman .toman-table-wrap',
+      '#tab-toman .toman-table th',
+      '#tab-toman .toman-toolbar input',
+      '#tab-chart .asset-detail-head',
+      '#tab-chart .detail-section',
+      '#tab-chart .review-form textarea',
+      '#tab-trade .orderbook-side',
+      '#tab-trade .timeframes button'
+    ]) {
+      assert.ok(css.includes('body.' + theme + ' ' + selector), theme + ' styles ' + selector);
+    }
+  }
+  assert.match(css, /body\.light-theme #tab-toman \.toman-table th\{background:#fff!important/);
+  assert.match(css, /body\.luxury-theme #tab-chart \.detail-section\{/);
+  assert.match(css, /@media\(max-width:720px\)[\s\S]*?#tab-toman \.toman-toolbar/);
+  assert.match(html, /id="tab-toman"/);
+  assert.match(html, /id="tab-chart"/);
+  assert.match(html, /id="tab-trade"/);
+});
