@@ -414,13 +414,13 @@ test('dashboard market identity restores visible favorites, frameless logos and 
     '#tab-dashboard .da-v2-hero-art:before',
     '#tab-dashboard .da-v2-quick-grid button'
   ]) assert.ok(pass.includes(selector), 'dashboard identity selector exists: ' + selector);
-  assert.match(pass, /#dashboardMarketPreview \.da-market-favorite\{[\\s\\S]*?border:1px solid!important/);
-  assert.match(pass, /#dashboardMarketPreview \.da-market-logo,#dashboardMarketPreview \.da-market-logo-inner\{[^}]*border:0!important/);
-  assert.match(pass, /#dashboardMarketPreview \.da-market-favorite\{[^}]*border:1px solid!important/);
+  assert.match(pass, /#dashboardMarketPreview\\s+\\.da-market-favorite\\s*\\{[\\s\\S]*?border:1px solid!important/);
+  assert.match(pass, /#dashboardMarketPreview\\s+\\.da-market-logo,#dashboardMarketPreview\\s+\\.da-market-logo-inner\\s*\\{[^}]*border:0!important/);
+  assert.match(pass, /#dashboardMarketPreview\\s+\\.da-market-favorite\\s*\\{[^}]*border:1px solid!important/);
   assert.match(pass, /#dashboardMarketPreview \.da-market-coin-card\{[\\s\\S]*?border:1px solid!important/);
   for (const theme of ['dark-theme', 'light-theme', 'luxury-theme']) {
     assert.ok(pass.includes('body.' + theme + ' #dashboardMarketPreview .da-market-favorite'), theme + ' favorite frame exists');
-    assert.ok(pass.includes('body.' + theme + ' #dashboardMarketPreview .da-market-logo'), theme + ' logo frame exists');
+    assert.ok(pass.includes('body.' + theme + ' #dashboardMarketPreview .da-market-logo'), theme + ' logo styling exists');
     assert.ok(pass.includes('body.' + theme + ' #dashboardMarketPreview .da-market-coin-card'), theme + ' market row has theme identity');
   }
 });
@@ -623,7 +623,7 @@ test('dashboard hides account activity from regular users and keeps it available
   assert.match(html, /function renderDashboardActivity\(\)\{\s*const adminActivity=\$\('dashboardAdminActivity'\);if\(adminActivity\)adminActivity\.hidden=!isSuperAdmin;/);
   assert.match(html, /const englishName=String\(row\.item\.name_en\|\|row\.item\.asset_name_en\|\|row\.item\.english_name\|\|row\.item\.name\|\|coinInfo\[base\]\?\.name\|\|base\)/);
   assert.match(html, /className='da-market-name-en'/);
-  assert.match(html, /persianName=String\(item\.name_fa\|\|item\.asset_name_fa\|\|persianCoinName\(item\.symbol\)\)/);
+  assert.match(html, /name\.textContent=String\(row\.item\.name_fa\|\|row\.item\.asset_name_fa\|\|persianCoinName\(symbol,englishName\)/);
   assert.match(html, /const englishName=String\(item\.name_en\|\|item\.asset_name_en\|\|item\.english_name\|\|coinInfo\[base\]\?\.name\|\|item\.name\|\|base\)/);
   assert.match(html, /class="da-v2-bottom"/);
 });
