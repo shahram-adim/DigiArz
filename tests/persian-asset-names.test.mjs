@@ -90,3 +90,15 @@ test("preserves case-sensitive non-EVM contract identifiers", () => {
   const asset = { coingecko_id: "sol-token", network: "solana", contract_address: "AbC123" };
   assert.equal(resolveAssetIdentity({ network: "solana", contract_address: "abc123" }, [asset]).status, "unmatched");
 });
+
+
+test("does not fall back to a contract match when an explicit CoinGecko ID conflicts", () => {
+  const asset = { coingecko_id: "correct-id", network: "ethereum", contract_address: "0x1234567890123456789012345678901234567890" };
+  const result = resolveAssetIdentity({
+    coingecko_id: "wrong-id",
+    network: "ethereum",
+    contract_address: "0x1234567890123456789012345678901234567890"
+  }, [asset]);
+  assert.equal(result.status, "unmatched");
+  assert.equal(result.reason, "coingecko_id_not_found");
+});
