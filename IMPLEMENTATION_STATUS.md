@@ -1279,3 +1279,11 @@
 - [ ] Exact-head Android and exact-decimal CI pending; do not accept/release until successful.
 - [ ] Real-device screenshot review remains outstanding.
 - No Production/Supabase changes; PR #60 remains Draft and unmerged.
+
+### 2026-11-24 — frameless market and wallet asset identity pass
+- [x] Audited dashboard market preview, global market rows, wallet rows and asset-detail logo selectors.
+- [x] Removed residual borders/shadows from asset rows, favorite controls and coin logos across the three themes; CSS commit `44996118bc91af2598d7d913e45203342e179680`.
+- [x] Added regression coverage in `tests/independent-ui.test.js`; source head `dcbd3186c9311c47aff5c33fa56ffbf48ec43c5f`.
+- [ ] Final-head Exact decimal CI and Android APK provenance verification pending.
+- [ ] Physical-device installation/screenshots still required for visual acceptance.
+- No backend, Production/Supabase, migration, cron, merge or release changes.
