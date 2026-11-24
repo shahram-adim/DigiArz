@@ -1414,3 +1414,14 @@
 - [x] Compared Android source commit `a093b987...` with current PR head `f35af18d...`: 11 commits ahead, with changes limited to exact-decimal workflow configuration, tests, and documentation; no application/UI source files changed after the APK build.
 - [ ] Physical device installation, launch, and screenshot review remain outstanding; this environment has no ADB/emulator tooling, so no device acceptance is claimed.
 - PR #60 remains Draft/open/unmerged. No merge, release, deployment, Production/Supabase, database, migration, or cron changes.
+
+
+### 2026-11-24 — latest exact-head verification and Android artifact handoff
+- [x] Re-read live PR #60: Draft/open, base `main`, head `redesign/phase1-clean-2026`, exact head `54bb3d55d6cd6b4784184d9616502ffd883ba418`; no merge or release performed.
+- [x] Exact Decimal workflow run `45388642212` completed SUCCESS on the exact PR head `54bb3d55...`; all 24 job steps passed, including Node/browser tests, PostgreSQL/Toman regressions, disposable schema-widening rehearsals, rollback/timeout checks, Market/Limit/Stop-Limit/TP-SL lifecycle and two-session race tests.
+- [x] Re-downloaded Android artifact `14916121853` from successful APK workflow run `45385670065`; ZIP SHA-256 `a62c5fd390e4298c33ec15a3625d2180faeb57610a080602ca6a015083536f7b`, archive integrity passed.
+- [x] Verified APK `BUILD-INFO.txt`: source commit `a093b9873fb1350194df72535be6e21cadd6bb06`, run `45385670065`, package version `1.0.0`; APK SHA-256 `dce5e8006925fe5760cf9a6d055acf508cd266f8f7ceda8fbaea58919f564c91` matches extracted APK bytes and APK ZIP integrity passed.
+- [x] Compared APK source commit to current PR head: 12 commits ahead, with differences limited to workflow configuration, tests and documentation; no app/UI source file changed after the APK source commit. This APK therefore contains the current UI source, but remains a debug/review build, not a release-signed APK.
+- [!] GitHub compare reports the PR branch is 146 commits ahead and 3 commits behind `main`; it is not safe to merge/rebase implicitly. Keep Draft and obtain explicit approval before any integration action.
+- [ ] Physical Android installation, launch, and screenshot review remain outstanding; no device acceptance is claimed.
+- [ ] Next: user installs the review APK and shares screenshots from the phone; then address only observed visual defects. No Production/Supabase, DB, migration, cron, merge, deployment or release changes.
