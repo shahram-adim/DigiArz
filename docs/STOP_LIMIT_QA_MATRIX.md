@@ -375,3 +375,31 @@ See \`docs/superpowers/reports/2026-11-15-exact-decimal-implementation-checkpoin
 - [!] This is an isolated GitHub Actions PostgreSQL service, not the production Supabase database or a dedicated Supabase Development Branch. Workflow tests use the repository's draft candidate SQL; they do not prove full Production migration/ACL parity.
 - [x] Production Supabase was not used for any test. No orders, trades, reservations, wallets, balances, migrations, grants, policies, cron jobs, or financial RPCs were changed.
 - [ ] Still required: a fresh schema-only PostgreSQL 17 harness with exact Production DDL/ACL parity, then source-faithful Stop-Limit tests. Supabase project currently has no Development Branch; the separate Recovery-Test project contains backup data and is not a disposable financial test database.
+
+## Stop-Limit production schema fingerprint and current CI verification — 2026-11-24
+
+### Latest isolated CI evidence
+- [x] Main HEAD at the start of this review: `e5d4af7832db309345d87dfcf7e13f69420f694d`.
+- [x] Exact-decimal workflow Run #1677 (`45165054735`) completed with `success` on code commit `83f0e3ceedaf7ce69129790a930e3916f5103e35`. All 21 substantive job steps completed, including the two-session Stop-Limit child execution/cancellation race and parent-child lifecycle integration.
+- [x] Main Exact-decimal workflow Run #1753 (`45285146268`) completed with `success` on current main HEAD `e5d4af7832db309345d87dfcf7e13f69420f694d`. All 21 substantive job steps completed, including Stop-Limit/TP-SL placement, worker/cancellation, two-session races, parent-child lifecycle, and exact-decimal PostgreSQL checks.
+- [x] The current workflow uses a disposable PostgreSQL 17 service and runs `node --test tests/*.test.js`; these results are isolated CI evidence, not a Production financial test.
+
+### Read-only Production schema and access snapshot
+- [x] Project `gfoaubfilhttnwjykaox` is `ACTIVE_HEALTHY`, PostgreSQL `17.11.0.018`; the migration ledger contains 55 entries and latest version `20261121050216`.
+- [x] Supabase Development Branch listing is empty. No new branch or paid project was created.
+- [x] The live Stop-Limit worker schedule is job 12, `digiarz-stop-limit-orders`, every minute. The Limit worker is job 8, `digiarz-limit-orders`, every minute. Neither schedule was changed or invoked manually.
+- [x] Live RPC metadata: `place_stop_limit_order`, `cancel_stop_limit_order`, and conditional-exit placement/cancellation are `SECURITY DEFINER`, owned by `postgres`, use an empty `search_path`, and are executable by `authenticated` and `service_role`, not `anon`. Worker RPCs `process_stop_limit_orders`, `process_limit_orders`, and `process_conditional_orders` are executable by `service_role` only, not `anon` or `authenticated`.
+- [x] RLS is enabled on `orders`, `conditional_orders`, `order_reservations`, `trades`, `asset_balances`, `wallets`, and `market_prices`. Sensitive user tables expose own-row SELECT policies; market prices have public read policies.
+- [x] Two live account-state triggers were verified: `guard_active_account_orders` and `guard_active_account_trades`, both calling `private.guard_active_account_writes()`.
+- [x] Reservation accounting and order accounting constraints, partial indexes for pending Stop-Limit rows, function definitions/ACL, table grants, RLS policies, and cron metadata were captured by a single read-only catalog query. No business-table rows were read.
+- [x] The query executed successfully against Production as a read-only `SELECT`; it changed no schema, rows, permissions, functions, or schedules.
+
+### New parity-review artifact
+- [x] Added `supabase/audit/stop_limit_schema_fingerprint.sql`: one read-only query returning the PostgreSQL version, target table columns, constraints, indexes, triggers, policies, table grants, relevant function definitions/ACL, RLS flags, and Stop-Limit/Limit cron metadata.
+- [x] Added `tests/stop-limit-production-audit.test.js` to reject DDL/DML or direct reads from financial tables and to require coverage of the relevant schema/ACL objects. The existing workflow automatically discovers this test through `tests/*.test.js`.
+- [!] The fingerprint is a capture artifact, not yet an exact Production-to-CI schema/ACL harness. It does not make the existing draft-candidate tests source-faithful by itself.
+
+### Remaining gates
+1. Build a disposable PostgreSQL 17 harness from the captured Production DDL, constraints, indexes, triggers, function bodies, grants, and RLS contract; compare it to the migration/draft candidate before running lifecycle tests.
+2. Re-run the full Stop-Limit parent → child Limit lifecycle in that source-faithful harness, including partial/full fills, cancellation, reservation consumption/release, idempotency, and concurrent worker/cancel races.
+3. Keep Production untouched. No order, trade, reservation, wallet, balance, transaction, cron job, RPC, migration, grant, or policy was changed or used as a test.
