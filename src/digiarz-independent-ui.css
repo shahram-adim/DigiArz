@@ -2295,3 +2295,32 @@ body.luxury-theme #tab-trade .orderbook-status{color:#d4dcff!important;border-co
   #tab-trade .timeframes{display:flex;overflow-x:auto;max-width:100%;padding-bottom:6px}
   #tab-trade .timeframes button{flex:0 0 auto;white-space:nowrap}
 }
+
+
+/* 2026-11-24 responsive audit: assets, orders, history, settings, admin and trade on narrow screens. */
+@media(max-width:560px){
+  #tab-assets .asset-tools{grid-template-columns:minmax(0,1fr)}
+  #tab-assets .asset-tools>*{width:100%;min-width:0;min-height:44px}
+  #tab-orders .market-tools{grid-template-columns:minmax(0,1fr)}
+  #tab-orders .market-tools select{width:100%;min-width:0;min-height:44px}
+  #tab-history .history-filters{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #tab-history .history-filters input[type=search],
+  #tab-history .history-filters button{grid-column:1/-1}
+  #tab-history .table-wrap{max-width:100%;overflow-x:auto}
+  #tab-history .table-wrap table{min-width:540px}
+  #tab-settings .settings-grid{grid-template-columns:minmax(0,1fr)}
+  #tab-settings .settings-grid .setting-row{align-items:stretch;flex-direction:column;min-width:0}
+  #tab-settings .settings-grid .setting-row>button,
+  #tab-settings .theme-choice-group{width:100%;min-width:0}
+  #tab-settings .theme-choice-group button{flex:1 1 0;min-width:0;white-space:normal}
+  #tab-admin .section-title{align-items:flex-start;flex-wrap:wrap}
+  #tab-admin .section-title .market-tools{display:grid;grid-template-columns:minmax(0,1fr);width:100%}
+  #tab-admin .market-tools button,
+  #tab-admin .daily-ad-admin-grid>button{width:100%;min-height:44px}
+  #tab-admin #exchangeSyncStats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #tab-admin .detail-section{min-width:0;padding:12px}
+  #tab-trade .orderbook-grid{grid-template-columns:minmax(0,1fr)}
+  #tab-trade .trade-market-heading{align-items:flex-start;flex-wrap:wrap}
+  #tab-chart .trade-grid{grid-template-columns:minmax(0,1fr)}
+  #tab-chart .asset-detail-head{min-width:0}
+}
