@@ -282,3 +282,20 @@ test('admin workspace panels and account-adjustment controls follow all three th
   // daily-ad-admin-item is rendered by daily-ads.js at runtime, not static index.html.
   assert.ok(adminTheme.includes('.daily-ad-admin-item'), 'runtime daily-ad item receives theme styling');
 });
+
+
+test('login hero, market copy and authentication form preserve all three final theme identities', () => {
+  const marker = '/* 2026-11-24 auth final theme pass: make login surfaces follow the selected product theme. */';
+  const authTheme = css.slice(css.lastIndexOf(marker));
+  assert.ok(authTheme.length > 0, 'final auth theme layer exists');
+  for (const theme of ['dark-theme', 'light-theme', 'luxury-theme']) {
+    for (const selector of ['#authView.auth-reference-layout', '#authView .auth-reference-visual', '#authView .ref-market-copy h1', '#authView .ref-coin-row', '#authView .auth-form', '#authView .auth-form input']) {
+      assert.ok(authTheme.includes('body.' + theme + selector), theme + ' styles ' + selector);
+    }
+  }
+  assert.match(authTheme, /body\.dark-theme[\s\S]*?linear-gradient\(145deg,#090b10/);
+  assert.match(authTheme, /body\.light-theme[\s\S]*?background:#fff!important/);
+  assert.match(authTheme, /body\.luxury-theme[\s\S]*?linear-gradient\(145deg,#11183f/);
+  assert.match(html, /id="authView" class="card auth auth-reference-layout"/);
+  assert.match(html, /class="auth-form"/);
+});
