@@ -638,3 +638,9 @@ test('top asset cards and wallet rows show Persian and full English names alongs
   assert.match(css, /\.top-asset-card \.top-asset-name-en/);
   assert.match(css, /#tab-assets #assetList \.asset-row-main \.asset-name-en/);
 });
+
+
+test('market asset rows omit source and freshness labels while retaining USD and Toman prices', () => {
+  assert.match(html, /const priceMarkup=usdMarkup\+tomanMarkup;/);
+  assert.doesNotMatch(html, /coin-source fresh|coin-source stale|زمان منبع حداکثر ۲ دقیقه/);
+});
