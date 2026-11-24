@@ -780,3 +780,15 @@ test('mobile header wordmark removes its legacy blue D tile and restores fixed-n
   assert.ok(audit.includes('padding-bottom:calc(96px + env(safe-area-inset-bottom))!important'));
   assert.ok(audit.includes('.mobile-bottom-nav{'));
 });
+
+
+test('dashboard light theme uses clean white glass surfaces without grey wash and keeps market controls coherent', () => {
+  const v8 = css.slice(css.lastIndexOf('dashboard visual correction v8'));
+  assert.ok(v8.includes('body.light-theme{'));
+  assert.ok(v8.includes('background:#fff!important'));
+  assert.ok(v8.includes('body.light-theme #tab-dashboard .da-market-glass'));
+  assert.ok(v8.includes('body.light-theme #tab-dashboard .da-market-filters button.active'));
+  assert.ok(v8.includes('body.luxury-theme #tab-dashboard .da-market-filters button'));
+  assert.ok(v8.includes('body.luxury-theme #tab-dashboard .da-market-glass select option'));
+  assert.ok(v8.includes('min-height:0!important;padding:clamp(16px,3vw,26px)!important'));
+});
