@@ -3158,6 +3158,21 @@ body.luxury-theme #dashboardMarketPreview .da-market-logo,body.luxury-theme #das
 
 
 /* 2026-11-24 dashboard market correction: remove favorite and row frames in every theme. */
+#dashboardMarketPreview .da-market-logo,
+#dashboardMarketPreview .da-market-logo-inner{
+  border:0!important;outline:0!important;box-shadow:none!important;
+  background:transparent!important;
+}
+body.dark-theme #dashboardMarketPreview .da-market-logo,
+body.light-theme #dashboardMarketPreview .da-market-logo,
+body.luxury-theme #dashboardMarketPreview .da-market-logo,
+body.dark-theme #dashboardMarketPreview .da-market-logo-inner,
+body.light-theme #dashboardMarketPreview .da-market-logo-inner,
+body.luxury-theme #dashboardMarketPreview .da-market-logo-inner{
+  border:0!important;outline:0!important;box-shadow:none!important;
+  background:transparent!important;
+}
+
 #dashboardMarketPreview .da-market-favorite{
   border:0!important;outline:0!important;box-shadow:none!important;
   background:transparent!important;border-radius:0!important;
