@@ -992,3 +992,9 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Latest final-head test/build runs are queued/in progress (test `45347705145`, APK `45347705131` on commit `8dec4f580a7ea63ebce4aafdd39c3519cf7902f4`; additional cache-key runs are also executing). Wait for the exact current branch-head workflow and a successful artifact before delivering a new APK.
 - PR #60 remains Draft/open/unmerged. No merge, release, deployment, Production DB change, Supabase migration, or user financial-data change. v5 is not yet visually validated on device.
 - Next: wait for current-head CI/APK, verify artifact provenance and SHA-256, then user retests dark theme first and light/indigo themes after. If layout collisions persist, replace CSS grid with an explicit semantic two-line row component rather than stacking more overrides.
+
+
+## 2026-11-24 — v5 CI diagnosis and regression assertion correction
+- The Android APK build on exact v5 application commit `3fe21823347393b8bd4cf2b6b7ffa0a25aee7b6b` succeeded (run `45347750087`), but Exact decimal tests failed (run `45347750138`). Log diagnosis: `tests/independent-ui.test.js` contained a second stale assertion expecting `digiarz-independent-ui.css?v=2` while the Service Worker correctly precaches `?v=3`. This was a stale test assertion; no runtime test failure was reported.
+- Updated that assertion to `?v=3` in test-only commit `c7570387b0a324203c638566eefc7c5aaa1a0ec0`. Current branch head is this commit. Await its fresh Exact decimal test and Android build workflows before accepting the package.
+- APK built from app commit `3fe218...` contains v5 runtime changes, but do not distribute it as fully validated until the current-head tests pass and its artifact/hash are inspected. PR #60 remains Draft/open/unmerged; no merge, release, deployment, DB or Supabase migration.
