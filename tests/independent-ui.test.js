@@ -577,3 +577,32 @@ test('dashboard workspace keeps premium hierarchy and independent surfaces acros
     assert.ok(html.includes('id="' + id + '"'), 'dashboard markup preserves ' + id);
   }
 });
+
+
+test('admin operations panels preserve responsive controls and all key data regions', () => {
+  const marker = '/* 2026-11-24 premium trading and admin workspace pass. */';
+  const pass = css.slice(css.lastIndexOf(marker));
+  assert.ok(pass.length > 0, 'admin responsive workspace layer exists');
+  for (const selector of [
+    '#tab-admin #exchangeSyncStats',
+    '#tab-admin #exchangeSyncSources',
+    '#tab-admin #exchangeSyncIssues',
+    '#tab-admin #adminUsersList',
+    '#tab-admin #adminAssetCandidates',
+    '#tab-admin #adminAssetListings',
+    '#tab-admin #adminPairReview',
+    '#tab-admin #adminDailyAdList',
+    '#tab-admin .daily-ad-admin-grid',
+    '#tab-admin .detail-section .market-tools'
+  ]) assert.ok(pass.includes(selector), 'admin data/control region is styled: ' + selector);
+  for (const id of [
+    'dailyAdAdminPanel','adminDailyAdTitle','adminDailyAdImage','adminDailyAdBody',
+    'adminSaveDailyAdBtn','exchangeAssetSyncPanel','exchangeSyncStats','exchangeSyncSources',
+    'exchangeSyncIssues','adminUsersList','adminAssetSearch','adminAssetCandidates',
+    'adminAssetListings','adminPairReview'
+  ]) assert.ok(html.includes('id="' + id + '"'), 'admin markup preserves ' + id);
+  assert.match(pass, /@media\\(max-width:560px\\)/);
+  assert.match(pass, /@media\\(max-width:380px\\)/);
+  assert.match(pass, /#tab-admin \\.detail-section \\.market-tools\\{display:grid/);
+  assert.match(pass, /#tab-admin #exchangeSyncStats\\{grid-template-columns:minmax\\(0,1fr\\)\\}/);
+});
