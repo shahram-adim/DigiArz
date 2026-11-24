@@ -1287,3 +1287,12 @@
 - [ ] Final-head Exact decimal CI and Android APK provenance verification pending.
 - [ ] Physical-device installation/screenshots still required for visual acceptance.
 - No backend, Production/Supabase, migration, cron, merge or release changes.
+
+
+### Frameless pass verification update — 2026-11-24
+- [x] Android debug APK run `45378240684` succeeded; artifact `14912007533` integrity and BUILD-INFO verified.
+- [x] APK SHA-256: `0aedc2eaea0abda27771c0f2395a22c97eedf15657e5ba020ebc208029abe0da`; bundled CSS includes the frameless layer.
+- [x] Structural selector/theme/brace validation passed.
+- [ ] Full Exact decimal CI for the new regression-test head has not been observed; do not treat it as passed.
+- [ ] Real-device installation and screenshot acceptance remain outstanding.
+- PR #60 stays Draft/unmerged; no Production/Supabase changes.
