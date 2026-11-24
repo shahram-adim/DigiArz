@@ -426,3 +426,29 @@ test('market and wallet asset identities stay frameless in all three themes', ()
     assert.ok(pass.includes('body.' + theme), theme + ' retains its own hover treatment');
   }
 });
+
+
+test('asset detail workspace keeps premium hierarchy and responsive review/news layout', () => {
+  const marker = '/* 2026-11-24 premium asset detail workspace: hierarchy, review/news cards and responsive flow. */';
+  const pass = css.slice(css.lastIndexOf(marker));
+  assert.ok(pass.length > 0, 'asset detail visual layer exists');
+  for (const selector of [
+    '#tab-chart .asset-detail-head',
+    '#tab-chart .asset-detail-head>.asset-logo',
+    '#tab-chart .asset-detail-head>.detail-price',
+    '#tab-chart .detail-description',
+    '#tab-chart .detail-trade .trade-box',
+    '#tab-chart #reviewList',
+    '#tab-chart #coinNewsList',
+    '#tab-chart .review-row',
+    '#tab-chart .news-item'
+  ]) assert.ok(pass.includes(selector), 'asset detail selector exists: ' + selector);
+  for (const theme of ['dark-theme','light-theme','luxury-theme']) {
+    assert.ok(pass.includes('body.' + theme + ' #tab-chart'), theme + ' asset detail theme exists');
+  }
+  assert.match(pass, /@media\(max-width:560px\)/);
+  assert.match(pass, /@media\(max-width:380px\)/);
+  for (const id of ['tab-chart','detailLogo','detailName','chartSymbol','chartLastPrice','detailDescription','detailBuyBtn','detailSellBtn','reviewList','coinNewsList']) {
+    assert.ok(html.includes('id="' + id + '"'), 'asset detail markup contains ' + id);
+  }
+});
