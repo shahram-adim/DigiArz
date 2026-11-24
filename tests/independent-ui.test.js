@@ -608,6 +608,8 @@ test('admin operations panels preserve responsive controls and all key data regi
 test('all active market assets receive Persian display names from curated names or English-name transliteration', () => {
   assert.match(html, /function transliterateAssetNameToPersian\(value\)/);
   assert.match(html, /function persianCoinName\(symbol,englishName=''/);
+  assert.match(html, /transliterateAssetNameToPersian\(englishName\|\|coinInfo\[base\]\?\.name\|\|''\)/);
+  assert.match(html, /persianCoinName\(symbol,row\.item\.name_fa\|\|row\.item\.asset_name_fa\|\|row\.item\.name_en\|\|row\.item\.asset_name_en/);
   assert.match(html, /persianCoinName\(item\.symbol,englishName\)/);
   assert.match(html, /persianCoinName\(symbol,englishName\)/);
   assert.match(html, /persianCoinName\(symbol,x\.name_fa\|\|x\.asset_name_fa/);
