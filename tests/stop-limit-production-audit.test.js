@@ -7,22 +7,22 @@ const sql = fs.readFileSync('supabase/audit/stop_limit_schema_fingerprint.sql', 
 
 function stripCommentsAndStringLiterals(source) {
   return source
-    .replace(/--[^\\n]*/g, '')
-    .replace(/\\/\\*[\\s\\S]*?\\*\\//g, '')
+    .replace(/--[^\n]*/g, '')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/'(?:''|[^'])*'/g, "''");
 }
 
 test('Stop-Limit production fingerprint is a single read-only catalog query', () => {
   const executable = stripCommentsAndStringLiterals(sql);
-  assert.match(executable, /^\\s*WITH\\b/i);
-  assert.match(executable, /\\bSELECT\\b/i);
+  assert.match(executable, /^\s*WITH\b/i);
+  assert.match(executable, /\bSELECT\b/i);
   assert.doesNotMatch(
     executable,
-    /\\b(?:INSERT|UPDATE|DELETE|MERGE|CREATE|ALTER|DROP|TRUNCATE|GRANT|REVOKE|CALL|DO|COPY)\\b/i
+    /\b(?:INSERT|UPDATE|DELETE|MERGE|CREATE|ALTER|DROP|TRUNCATE|GRANT|REVOKE|CALL|DO|COPY)\b/i
   );
   assert.doesNotMatch(
     executable,
-    /\\b(?:FROM|JOIN)\\s+public\\.(?:orders|conditional_orders|order_reservations|trades|asset_balances|wallets|market_prices)\\b/i
+    /\b(?:FROM|JOIN)\s+public\.(?:orders|conditional_orders|order_reservations|trades|asset_balances|wallets|market_prices)\b/i
   );
   assert.equal((executable.match(/;/g) || []).length, 1);
 });
