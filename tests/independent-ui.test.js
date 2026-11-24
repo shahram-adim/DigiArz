@@ -844,3 +844,12 @@ test('v12 frameless dashboard logo rules override theme-specific tile shadows an
   assert.ok(v12.includes('grid-template-columns:repeat(3,minmax(0,1fr))!important'));
   assert.ok(v12.includes('#tab-dashboard .da-v2-quick-grid'));
 });
+
+
+test('v13 mobile dashboard compacts hero, wallet and quick actions before market section', () => {
+  const v13 = css.slice(css.lastIndexOf('mobile dashboard viewport balance v13'));
+  assert.ok(v13.includes('#tab-dashboard .da-v2-hero-foot{display:none!important}'));
+  assert.ok(v13.includes('#tab-dashboard .da-v2-account-stats>div{min-height:43px!important'));
+  assert.ok(v13.includes('#tab-dashboard .da-v2-quick-grid button{'));
+  assert.ok(v13.includes('min-height:40px!important'));
+});
