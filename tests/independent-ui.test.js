@@ -474,3 +474,29 @@ test('Toman market table keeps price and asset identity visible while scrolling 
   assert.match(html, /id="tomanMarketBody"/);
   assert.match(html, /class="toman-table-wrap"/);
 });
+
+
+test('orders, trade history and theme settings remain usable on narrow RTL screens', () => {
+  const marker = '/* 2026-11-24 order and history mobile refinement: action clarity and RTL scanability. */';
+  const pass = css.slice(css.lastIndexOf(marker));
+  assert.ok(pass.length > 0, 'orders/history responsive refinement exists');
+  for (const selector of [
+    '#tab-orders .order-history-card',
+    '#tab-orders .order-history-card>button',
+    '#tab-history .history-filters',
+    '#tab-history .table-wrap',
+    '#tab-history .table-wrap td:first-child',
+    '#tab-settings .theme-setting-row .theme-choice-group'
+  ]) assert.ok(pass.includes(selector), 'account workflow selector exists: ' + selector);
+  for (const theme of ['dark-theme','light-theme','luxury-theme']) {
+    assert.ok(pass.includes('body.' + theme + ' #tab-history .table-wrap td:first-child'), theme + ' sticky history cell surface exists');
+  }
+  assert.match(pass, /@media\(max-width:720px\)/);
+  assert.match(pass, /@media\(max-width:380px\)/);
+  for (const id of ['allOrdersList','historyBody','historySearch','historyDateFrom','historyDateTo','theme-choice']) {
+    if (id !== 'theme-choice') assert.ok(html.includes('id="' + id + '"'), 'expected page control exists: ' + id);
+  }
+  assert.ok(html.includes('data-theme-choice="light"'));
+  assert.ok(html.includes('data-theme-choice="dark"'));
+  assert.ok(html.includes('data-theme-choice="luxury"'));
+});
