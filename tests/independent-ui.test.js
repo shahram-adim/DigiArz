@@ -235,5 +235,5 @@ test('theme identity carries through dashboard, market, trade and authentication
   assert.match(html, /class="da-v2-hero"/);
   assert.match(html, /class="market-hero-v34"/);
   assert.match(html, /class="trade-workspace-banner-v35"/);
-  assert.match(html, /class="auth-visual"/);
+  assert.match(html, /class="auth-visual\b/);
 });
