@@ -127,15 +127,19 @@ export function aggregatePersianNameCandidates(observations) {
       ? observation.coingecko_id.trim() : "";
     if (!coingeckoId) continue;
 
+    const sourceExchange = String(observation.exchange || "").toLowerCase().trim();
+    if (!["bit24", "kifpool", "abantether", "wallex"].includes(sourceExchange)) continue;
+
+    const payload = observation.source_payload && typeof observation.source_payload === "object"
+      ? observation.source_payload : {};
     const candidate = observation.candidate && typeof observation.candidate === "object"
       ? observation.candidate
-      : extractPersianNameCandidate(observation.exchange, observation.source_payload);
+      : (payload._digiarz_persian_name_candidate && typeof payload._digiarz_persian_name_candidate === "object"
+        ? payload._digiarz_persian_name_candidate
+        : extractPersianNameCandidate(sourceExchange, payload));
     if (!candidate || !cleanCandidate(candidate.name)) continue;
     const normalizedName = normalizePersianName(candidate.name);
     if (!normalizedName) continue;
-
-    const sourceExchange = String(candidate.source_exchange || observation.exchange || "").toLowerCase().trim();
-    if (!sourceExchange) continue;
 
     if (!byAsset.has(coingeckoId)) byAsset.set(coingeckoId, new Map());
     const byName = byAsset.get(coingeckoId);
@@ -159,16 +163,18 @@ export function aggregatePersianNameCandidates(observations) {
     const sourceCount = new Set(variants.flatMap(variant => variant.sources.map(source => source.source_exchange))).size;
 
     if (variants.length > 1) {
-      return { coingecko_id: coingeckoId, status: "review_required", canonical_name_fa: null, variants, source_count: sourceCount };
+      return { coingecko_id: coingeckoId, status: "review_required", consensus_name_candidate: null, variants, source_count: sourceCount };
     }
     if (sourceCount < 2) {
-      return { coingecko_id: coingeckoId, status: "single_source", canonical_name_fa: null, variants, source_count: sourceCount };
+      return { coingecko_id: coingeckoId, status: "single_source", consensus_name_candidate: null, variants, source_count: sourceCount };
     }
     return {
       coingecko_id: coingeckoId,
       status: "consensus_candidate",
-      canonical_name_fa: variants[0].sources[0].name,
-      normalized_name: variants[0].normalized_name,
+      consensus_name_candidate: {
+        normalized_name: variants[0].normalized_name,
+        source_spellings: variants[0].sources,
+      },
       variants,
       source_count: sourceCount,
     };
