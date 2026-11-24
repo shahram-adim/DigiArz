@@ -1273,3 +1273,16 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - [ ] Physical Android installation and screenshots remain outstanding.
 - PR #60 remains Draft/open/unmerged. No Supabase/Production DB, financial data, migration, cron, merge, deployment or release changes.
 - Next: verify Android artifact for the auth refinement, then continue page-by-page visual audit and device acceptance.
+
+
+## 2026-11-24 — verified authentication APK and dashboard visual continuation
+- Live PR #60 rechecked: open, Draft, unmerged; branch `redesign/phase1-clean-2026`. Latest PR head after this checkpoint's commits is recorded in GitHub, not inferred from this note.
+- Auth hero Android build run `45382671847` completed SUCCESS for CSS source commit `e52d9701ea3f419a6c6b688c88a168f7c2d974eb`; artifact `14915450601` downloaded.
+- Artifact ZIP SHA-256: `73150acd68531cf81c4f19246bfe86a07bac894136dae722945105f16e45812c`; APK SHA-256 independently verified: `df376fceb02ae3e03fa38dc77ab59e9138c3556391677568e0024bd5e28d1d20`. BUILD-INFO matches source commit, branch and run; APK archive integrity passed.
+- Dashboard audit found its real structure: hero/quick actions, live market search/filter/list, demo-wallet summary, recent orders/trades and account alerts. Added a dedicated visual-only dashboard layer with independent dark/gold, white-glass and indigo-glass surfaces and responsive 900/720/560/380px layouts.
+- Dashboard CSS commit: `a093b9873fb1350194df72535be6e21cadd6bb06`; regression-test commit: `814c109145432008af714105ca06f89d728e15c4`.
+- Android build run `45385670065` started for the dashboard CSS commit; verify final status and artifact provenance before claiming it built successfully. The later test-only commit is not part of that APK source.
+- Exact Decimal workflow is not configured for this Draft branch's push event; the latest known successful run is older than the current head. Do not infer exact-head CI success. Dashboard regression assertions have been committed but are not yet reported as executed by CI.
+- Physical Android installation and screenshot-based visual acceptance remain outstanding.
+- No Supabase/Production DB, financial data, migration, cron, deployment, merge or release changes.
+**Next:** verify dashboard APK run/artifact, then continue visual audit only if a materially unfinished page remains; prioritize real-device screenshot acceptance over duplicating already-polished page work.
