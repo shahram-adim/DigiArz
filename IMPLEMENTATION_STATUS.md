@@ -1376,3 +1376,12 @@
 - [ ] A workflow run for the new head has not yet appeared in the commit-associated run query; do not claim the suite passed until a run completes.
 - [ ] Android device installation and screenshot-based visual acceptance remain outstanding.
 - PR #60 remains Draft/open/unmerged. No Supabase, Production DB, migration, cron, merge, deployment or release changes.
+
+
+### 2026-11-24 — admin mobile regression coverage
+- [x] Re-audited the Admin page markup and responsive CSS for daily ads, Iranian exchange sync, user/virtual-credit list, asset candidates/listings, and pair review panels.
+- [x] Confirmed existing layout stacks admin action controls at 560px and sync statistics to one column at 380px; existing theme rules remain distinct across dark/gold, white-glass, and indigo-glass.
+- [x] Added regression assertions for admin data regions, key markup IDs, and narrow-screen breakpoints; test commit `37c3a1361e0fa4f46124903dd3686262b8986ffa`.
+- [ ] Exact-decimal workflow result for the latest head is not yet visible through the available commit-run/status query; no CI pass claim.
+- [ ] Physical Android installation and screenshot-based acceptance remain outstanding.
+- PR #60 remains Draft/open/unmerged. No Supabase, Production DB, migration, cron, merge, deployment or release changes.
