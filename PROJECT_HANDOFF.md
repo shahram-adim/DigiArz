@@ -1179,3 +1179,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - This is an installable DEBUG/review APK, not production-signed. No physical-device screenshots or install/visual acceptance have been performed; do not call the design finished based only on CI.
 - No Supabase/Production DB, migrations, cron, deployments, merge, or release actions. PR #60 remains Draft/open/unmerged.
 - Next: continue the remaining-page source audit (especially Admin, asset detail, and trade/order-book on narrow screens), then request/review real-device screenshots before any merge decision.
+
+
+## 2026-11-24 — trading and admin workspace visual pass
+- Rechecked PR #60: open, Draft, unmerged; latest head `9d02ec1b4b6301b1ef766f24407ab01a16654b3b`.
+- Added a focused visual layer for the trade workspace, chart/order-book panels, quick trade forms, admin panels, sync stats and admin user/review cards in `src/digiarz-independent-ui.css` (CSS commit `4dab4d798866839fa790d3b76925bdf6167cc55c`).
+- Added regression coverage for all three theme palettes, trade/admin roots, and narrow mobile breakpoints in `tests/independent-ui.test.js` (latest head `9d02ec1b4b6301b1ef766f24407ab01a16654b3b`).
+- Exact-head workflows have started: Android run `45377590820` (queued at first inspection) and Exact decimal run `45377590939` (in progress at first inspection). Do not claim this pass validated until both exact-head runs finish successfully and APK provenance/package CSS is checked.
+- This pass is CSS and regression-test only. No trading, order, auth, wallet, backend, Supabase, Production DB, migration, cron, deployment, merge, or release behavior was changed. PR remains Draft/open/unmerged.
+- Next: inspect both exact-head workflow results, fix only isolated test/style issues if found, then continue real-device visual acceptance checklist.
