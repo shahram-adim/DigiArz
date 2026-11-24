@@ -862,3 +862,14 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - PR #47 remains Draft/open/unmerged and mergeable. Physical Android installation, fingerprint enrollment, and login/logout/background-relock acceptance tests remain outstanding. APK is a debug review build, not production-signed.
 - No app code was merged to main; no release/deployment/publishing or Supabase/database/user-financial-data changes were made. This handoff entry is documentation-only.
 - Next: user installs the new APK and checks all three themes, password login, fingerprint enrollment/unlock, logout and relock. Fix only observed issues on PR #47; do not merge without explicit user approval.
+
+
+## 2026-11-24 — pure-white glass theme correction on Phase 1 UI branch
+- Continued only on the clean redesign/phase1-clean-2026 branch, whose merge-base is the current main HEAD e5d4af7832db309345d87dfcf7e13f69420f694d; branch was 19 commits ahead and 0 behind before this correction.
+- Identified a requirement mismatch in the independent UI stylesheet: the light theme still used blue-grey page surfaces (#eef3fb, #e5edf8, etc.) despite the approved pure-white/no-grey requirement.
+- Added a final scoped body.light-theme override in src/digiarz-independent-ui.css: pure-white page and panel surfaces, white login form and inputs, navy/blue typography, subtle blue-tinted glass edges, and frameless market rows/logos. Dark black/gold and third indigo-glass theme selectors were not changed.
+- Added a focused regression test in tests/independent-ui.test.js to guard white backgrounds and reject the known grey surface tokens.
+- Commits: CSS 565250474d12c24e6d8230a102dcba49e8bcfd07; test 364e5925b6b10d629b776114ca8cffbcedc3c084; regex correction d9f2454e6d30ed8ba7d748f2e9ff798a5d899b43.
+- Static repository verification: CSS marker and regression test are present on the branch; compare against main reports 22 commits ahead and 0 behind. No CI run/status was returned for the latest commit, so test success is NOT claimed.
+- No merge, release, Pages deployment, APK publication, Supabase change, migration, or Production data change.
+- Next: obtain a CI run for the exact latest branch head, inspect rendered web/Android screens in all three themes (especially pure-white light theme), and fix only verified issues. Keep PR #60 Draft/unmerged until validation and explicit owner approval.
