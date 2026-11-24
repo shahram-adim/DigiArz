@@ -1032,3 +1032,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Added a regression test in `tests/independent-ui.test.js` to assert the actual renderer child order, Persian/English identity fields, USD/Toman price fields, sparkline observer, and each v5 grid-area mapping. Test commit: `a69fc66b08d56c9c14963b159f7cadf4d9fc7e65`.
 - Exact-decimal workflow `45352285859` and Android build workflow `45352285765` were triggered for that commit and were still in progress at this checkpoint. Do not treat this new test as passed until its workflow completes.
 - PR #60 remains Draft/open/unmerged. No production deployment, merge, Supabase migration, Production DB change, or financial-data mutation. Physical-device visual QA is still pending.
+
+
+## 2026-11-24 — market-row source regression test corrected
+- Rechecked live PR #60 and branch before editing. PR #60 remains open, Draft, unmerged; current branch head before the change was `2d2c6eb2aed31b7534ca44da389502ecb5177f0b`.
+- Exact-decimal run `45352456919` failed at test `mobile market grid areas match the actual rendered row element order and data fields` (78/79 passed). The failure was a test-scope mistake: `price-usd` and `price-toman` are produced by the shared `usdMarkup` / `tomanMarkup` formatter outside the local `renderMarkets()` row-renderer slice. The runtime row still inserts the shared `priceMarkup` into `.price-stack`; the assertion incorrectly searched for the formatter's classes inside the row-renderer substring.
+- Corrected only `tests/independent-ui.test.js`: keep DOM order and sparkline assertions scoped to the row renderer, and assert the shared USD/Toman price markup against the full `index.html` source. Commit: `46a5623e963d8e3f3c8b618d4e1935ccf255f1ad`.
+- Android debug APK workflow `45352456912` on the preceding commit `2d2c6eb...` succeeded; artifact `14901121877` was created (GitHub digest `sha256:c333d5a1e18dd1382baa779dea9339dcadc88c23a1d89acaeee80dd8a7728ed1`). It is not the final post-fix artifact and is not promoted as validated.
+- Fresh PR-triggered workflow runs for `46a5623...` were not yet visible at the immediate post-push query; verify Actions status before claiming the test fix passes or distributing a fresh APK.
+- No runtime app code, auth, trading, wallet, Supabase, Production DB, migration, deployment, or release was changed. PR #60 remains Draft/open/unmerged; physical-device visual QA remains pending.
+- Next: verify the exact-head test and Android build runs for `46a5623...`; if successful, inspect the new APK artifact and hash, then continue page-by-page UI audit without speculative CSS stacking.
