@@ -2548,3 +2548,53 @@ body.luxury-theme #tab-admin .admin-user-card,body.luxury-theme #tab-admin .revi
   #tab-trade .quick-percent-row{gap:4px}
   #tab-trade .quick-percent-row button{font-size:9px}
 }
+
+
+/* 2026-11-24 frameless asset identity pass: remove logo/star frames without changing data layout. */
+#tab-markets .market-board-v34 .coin,
+#dashboardMarketPreview .da-market-coin-card,
+#tab-assets #assetList .asset-row{
+  border:0!important;
+  box-shadow:none!important;
+}
+#tab-markets .market-board-v34 .coin{
+  border-radius:0!important;
+  background:transparent!important;
+}
+#dashboardMarketPreview .da-market-coin-card{
+  border-radius:0!important;
+  background:transparent!important;
+}
+#tab-markets .market-board-v34 .coin-identity .favorite-btn,
+#dashboardMarketPreview .da-market-favorite,
+#tab-assets #assetList .asset-row .favorite-btn{
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  outline-offset:3px;
+}
+#tab-markets .market-board-v34 .coin-identity .coin-icon,
+#tab-markets .market-board-v34 .coin-identity .coin-icon img,
+#dashboardMarketPreview .da-market-logo,
+#dashboardMarketPreview .da-market-logo-inner,
+#dashboardMarketPreview .da-market-logo-inner img,
+#tab-assets #assetList .asset-row .asset-logo,
+#tab-chart .asset-detail-head .asset-logo{
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
+body.dark-theme #tab-markets .market-board-v34 .coin:hover,
+body.dark-theme #dashboardMarketPreview .da-market-coin-card:hover{background:rgba(231,185,77,.035)!important}
+body.light-theme #tab-markets .market-board-v34 .coin:hover,
+body.light-theme #dashboardMarketPreview .da-market-coin-card:hover{background:rgba(23,111,193,.035)!important}
+body.luxury-theme #tab-markets .market-board-v34 .coin:hover,
+body.luxury-theme #dashboardMarketPreview .da-market-coin-card:hover{background:rgba(185,197,255,.055)!important}
+@media(max-width:560px){
+  #tab-markets .market-board-v34 .coin,
+  #dashboardMarketPreview .da-market-coin-card{padding-inline:5px!important}
+  #tab-markets .market-board-v34 .coin-identity .favorite-btn,
+  #dashboardMarketPreview .da-market-favorite{width:26px!important;height:26px!important;flex-basis:26px!important;padding:0!important}
+}
