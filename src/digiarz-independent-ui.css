@@ -2598,3 +2598,109 @@ body.luxury-theme #dashboardMarketPreview .da-market-coin-card:hover{background:
   #tab-markets .market-board-v34 .coin-identity .favorite-btn,
   #dashboardMarketPreview .da-market-favorite{width:26px!important;height:26px!important;flex-basis:26px!important;padding:0!important}
 }
+
+
+/* 2026-11-24 premium asset detail workspace: hierarchy, review/news cards and responsive flow. */
+#tab-chart .asset-detail-head{
+  display:grid!important;
+  grid-template-columns:58px minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:12px!important;
+  padding:17px 18px!important;
+  margin:8px 0 14px!important;
+  border-radius:20px!important;
+  min-width:0;
+}
+#tab-chart .asset-detail-head>.asset-logo{
+  order:0!important;
+  width:52px!important;height:52px!important;flex:0 0 52px!important;
+  object-fit:contain!important;
+}
+#tab-chart .asset-detail-head>div:not(.detail-price){order:0!important;min-width:0}
+#tab-chart .asset-detail-head>.detail-price{
+  order:0!important;
+  margin:0!important;
+  text-align:end!important;
+  white-space:nowrap!important;
+  font-size:clamp(16px,2.2vw,23px)!important;
+  font-variant-numeric:tabular-nums;
+}
+#tab-chart .asset-detail-title{font-size:clamp(17px,2vw,22px)!important;line-height:1.4}
+#tab-chart .asset-detail-sub{display:inline-block;margin-top:3px;letter-spacing:.04em}
+#tab-chart .detail-description{
+  padding:13px 16px!important;
+  border-radius:14px!important;
+  line-height:1.9!important;
+  overflow-wrap:anywhere;
+}
+#tab-chart .detail-section{
+  margin-top:16px!important;
+  padding:17px!important;
+  border:1px solid transparent!important;
+  border-radius:18px!important;
+  min-width:0;
+}
+#tab-chart .detail-section>.section-title{gap:10px;align-items:center;flex-wrap:wrap}
+#tab-chart .detail-trade .trade-grid{gap:12px}
+#tab-chart .detail-trade .trade-box{
+  min-width:0;padding:15px!important;border-radius:15px!important;
+  border:1px solid transparent!important;
+}
+#tab-chart .detail-trade .trade-box h3{margin:0 0 12px;font-size:15px}
+#tab-chart .detail-trade .trade-box .field{margin-bottom:10px}
+#tab-chart .detail-trade .trade-box input{min-height:44px}
+#tab-chart .detail-trade .trade-box button{min-height:44px;border-radius:11px!important;font-weight:800}
+#tab-chart #reviewSummary{padding:9px 0 12px;line-height:1.8}
+#tab-chart #reviewList,#tab-chart #coinNewsList{display:grid;gap:10px;min-width:0}
+#tab-chart .review-row,#tab-chart .news-item{
+  margin:0!important;padding:14px!important;border:1px solid transparent!important;
+  border-radius:14px!important;min-width:0;overflow-wrap:anywhere;
+}
+#tab-chart .review-meta,#tab-chart .news-meta{align-items:center;flex-wrap:wrap;gap:8px}
+#tab-chart .review-row p,#tab-chart .news-item p{line-height:1.9;overflow-wrap:anywhere}
+#tab-chart .news-item a{display:block;overflow-wrap:anywhere}
+#tab-chart .review-form{gap:11px}
+#tab-chart .review-form select,#tab-chart .review-form textarea{min-height:44px;border-radius:11px!important}
+#tab-chart .review-form textarea{min-height:108px}
+#tab-chart .review-form button{min-height:44px;border-radius:11px!important;font-weight:800}
+#tab-chart #reviewMsg,#tab-chart #detailTradeMsg{overflow-wrap:anywhere;line-height:1.8}
+body.dark-theme #tab-chart .asset-detail-head{
+  background:linear-gradient(125deg,rgba(43,34,17,.96),rgba(18,22,29,.98))!important;
+  border:1px solid rgba(231,185,77,.24)!important;box-shadow:0 16px 40px rgba(0,0,0,.26),inset 0 1px rgba(255,255,255,.045)!important;
+}
+body.light-theme #tab-chart .asset-detail-head{
+  background:linear-gradient(125deg,#fff,#f4faff)!important;
+  border:1px solid rgba(23,111,193,.13)!important;box-shadow:0 14px 34px rgba(24,76,116,.08)!important;
+}
+body.luxury-theme #tab-chart .asset-detail-head{
+  background:linear-gradient(125deg,rgba(51,62,139,.9),rgba(21,28,78,.98))!important;
+  border:1px solid rgba(174,186,255,.24)!important;box-shadow:0 16px 40px rgba(4,8,28,.24),inset 0 1px rgba(255,255,255,.055)!important;
+}
+body.dark-theme #tab-chart .detail-section{background:linear-gradient(145deg,rgba(28,32,40,.94),rgba(17,21,28,.97))!important;border-color:rgba(231,185,77,.12)!important}
+body.light-theme #tab-chart .detail-section{background:linear-gradient(145deg,#fff,#f8fbff)!important;border-color:rgba(23,111,193,.1)!important;box-shadow:0 10px 26px rgba(24,76,116,.045)!important}
+body.luxury-theme #tab-chart .detail-section{background:linear-gradient(145deg,rgba(43,54,125,.72),rgba(19,26,73,.9))!important;border-color:rgba(174,186,255,.17)!important}
+body.dark-theme #tab-chart .detail-trade .trade-box{background:rgba(8,12,18,.5)!important;border-color:rgba(231,185,77,.12)!important}
+body.light-theme #tab-chart .detail-trade .trade-box{background:#fff!important;border-color:rgba(23,111,193,.1)!important;box-shadow:0 5px 18px rgba(24,76,116,.04)!important}
+body.luxury-theme #tab-chart .detail-trade .trade-box{background:rgba(11,18,60,.48)!important;border-color:rgba(174,186,255,.16)!important}
+body.dark-theme #tab-chart .review-row,body.dark-theme #tab-chart .news-item{background:rgba(8,12,18,.5)!important;border-color:rgba(231,185,77,.12)!important}
+body.light-theme #tab-chart .review-row,body.light-theme #tab-chart .news-item{background:#fff!important;border-color:rgba(23,111,193,.1)!important;box-shadow:0 5px 16px rgba(24,76,116,.035)!important}
+body.luxury-theme #tab-chart .review-row,body.luxury-theme #tab-chart .news-item{background:rgba(11,18,60,.48)!important;border-color:rgba(174,186,255,.16)!important}
+body.dark-theme #tab-chart .news-item a:hover{color:#f4d27b!important}
+body.light-theme #tab-chart .news-item a:hover{color:#176fc1!important}
+body.luxury-theme #tab-chart .news-item a:hover{color:#dce2ff!important}
+@media(max-width:560px){
+  #tab-chart .asset-detail-head{grid-template-columns:46px minmax(0,1fr)!important;gap:9px!important;padding:13px!important}
+  #tab-chart .asset-detail-head>.asset-logo{width:44px!important;height:44px!important;flex-basis:44px!important}
+  #tab-chart .asset-detail-head>.detail-price{grid-column:2;text-align:start!important;font-size:18px!important;white-space:normal!important}
+  #tab-chart .detail-section{padding:13px!important;border-radius:15px!important}
+  #tab-chart .detail-trade .trade-grid{grid-template-columns:minmax(0,1fr)!important}
+  #tab-chart .detail-trade .trade-box{padding:13px!important}
+  #tab-chart .detail-section>.section-title{align-items:flex-start}
+  #tab-chart .review-meta{align-items:flex-start;flex-direction:column}
+}
+@media(max-width:380px){
+  #tab-chart .asset-detail-head{grid-template-columns:40px minmax(0,1fr)!important;padding:11px!important}
+  #tab-chart .asset-detail-head>.asset-logo{width:38px!important;height:38px!important;flex-basis:38px!important}
+  #tab-chart .asset-detail-title{font-size:16px!important}
+  #tab-chart .asset-detail-head>.detail-price{font-size:16px!important}
+}
