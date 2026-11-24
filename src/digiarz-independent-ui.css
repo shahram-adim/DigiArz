@@ -3275,3 +3275,121 @@ body.luxury-theme #dashboardMarketPreview .da-market-coin-card{
 @media(max-width:560px){
  #tab-dashboard .da-v2-account-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 }
+
+
+/* 2026-11-24 cross-page premium consistency pass: markets, trading, wallet and account surfaces. */
+#tab-markets,#tab-toman,#tab-chart,#tab-trade,#tab-assets,#tab-orders,
+#tab-history,#tab-admin,#tab-settings{
+  width:100%!important;max-width:1440px!important;margin:0 auto 18px!important;
+  padding:clamp(14px,2vw,26px)!important;box-sizing:border-box!important;
+  overflow:hidden;
+}
+#tab-markets>.section-title,#tab-toman>.section-title,#tab-chart>.section-title,
+#tab-trade>.section-title,#tab-assets>.section-title,#tab-orders>.section-title,
+#tab-history>.section-title,#tab-admin>.section-title,#tab-settings>.section-title{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  flex-wrap:wrap!important;gap:12px!important;margin-bottom:20px!important;
+}
+#tab-markets .section-title>.row,#tab-history .section-title>.market-tools{
+  display:flex!important;align-items:center!important;flex-wrap:wrap!important;gap:8px!important;
+}
+#tab-markets .market-tools,#tab-toman .toman-toolbar,#tab-assets .asset-tools,
+#tab-orders .market-tools,#tab-history .history-filters{
+  display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr))!important;
+  align-items:center!important;gap:10px!important;margin:14px 0!important;
+}
+#tab-markets .market-tools input,#tab-markets .market-tools select,
+#tab-toman .toman-toolbar input,#tab-assets .asset-tools input,
+#tab-assets .asset-tools select,#tab-orders .market-tools select,
+#tab-history .history-filters input,#tab-history .history-filters select{
+  width:100%!important;min-width:0!important;min-height:46px!important;
+}
+#tab-markets .market-categories{display:flex!important;gap:9px!important;flex-wrap:wrap!important;margin:16px 0!important}
+#tab-markets .market-categories button{min-height:40px!important;padding:8px 14px!important}
+#tab-markets .fx-box,#tab-assets .asset-summary-grid>.stat{
+  border-radius:18px!important;padding:16px!important;min-width:0!important;
+}
+#tab-chart .asset-detail-head{
+  display:grid!important;grid-template-columns:64px minmax(0,1fr) auto!important;
+  align-items:center!important;gap:14px!important;padding:18px!important;margin:8px 0 16px!important;
+  border-radius:20px!important;
+}
+#tab-chart .asset-detail-head .asset-logo{width:56px!important;height:56px!important;object-fit:contain!important}
+#tab-chart .detail-price{font-size:clamp(18px,3vw,28px)!important;font-weight:900!important;direction:ltr!important}
+#tab-chart .detail-section,#tab-admin .detail-section{
+  margin:18px 0!important;padding:clamp(13px,1.8vw,20px)!important;border-radius:20px!important;
+}
+#tab-chart .trade-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important}
+#tab-chart .trade-box{min-width:0!important;padding:16px!important}
+#tab-trade .trade-market-heading{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  flex-wrap:wrap!important;gap:10px!important;margin:18px 0 12px!important;
+}
+#tab-trade .trade-market-grid{min-width:0!important;gap:16px!important}
+#tab-trade #chartSection,#tab-trade .trade-box,#tab-trade .indicator-panel{
+  min-width:0!important;border-radius:20px!important;overflow:hidden!important;
+}
+#tab-assets .asset-summary-grid{
+  display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr))!important;
+  gap:12px!important;margin:14px 0!important;
+}
+#tab-assets #assetList,#tab-orders #allOrdersList{min-width:0!important}
+#tab-assets #assetList>.asset-row,#tab-orders #allOrdersList>.order-row{
+  border-radius:16px!important;margin:8px 0!important;
+}
+#tab-toman .toman-table-wrap,#tab-history .table-wrap{
+  width:100%!important;max-width:100%!important;overflow:auto!important;
+  border-radius:16px!important;border:1px solid var(--da-line)!important;
+}
+#tab-toman .toman-table,#tab-history table{min-width:760px!important;width:100%!important;border-collapse:separate!important;border-spacing:0!important}
+#tab-toman .toman-table th,#tab-history table th{
+  position:sticky!important;top:0!important;z-index:2!important;
+  background:var(--da-surface2)!important;color:var(--da-text)!important;
+  font-weight:800!important;white-space:nowrap!important;
+}
+#tab-toman .toman-table td,#tab-history table td{white-space:nowrap!important}
+#tab-toman .toman-table tr:hover td,#tab-history table tbody tr:hover td{
+  background:color-mix(in srgb,var(--da-accent) 7%,transparent)!important;
+}
+#tab-history .history-date-presets{display:flex!important;flex-wrap:wrap!important;gap:8px!important;margin:12px 0!important}
+#tab-admin .daily-ad-admin-grid,#tab-admin .exchange-sync-grid{
+  display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr))!important;
+  gap:12px!important;align-items:end!important;
+}
+#tab-settings .settings-grid{display:grid!important;gap:12px!important}
+#tab-settings .setting-row{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  flex-wrap:wrap!important;gap:12px!important;padding:16px!important;border-radius:17px!important;
+}
+#tab-settings .setting-row>div{min-width:0!important;flex:1 1 220px!important}
+#tab-settings .setting-row small{display:block!important;line-height:1.9!important;margin-top:4px!important}
+#tab-settings .theme-choice-group{display:flex!important;flex-wrap:wrap!important;gap:8px!important}
+body.dark-theme #tab-markets .market-hero-v34,body.dark-theme #tab-trade .trade-workspace-banner-v35,
+body.dark-theme #tab-chart .asset-detail-head,body.dark-theme #tab-admin .detail-section{
+  border-color:rgba(240,185,11,.18)!important;
+}
+body.light-theme #tab-markets .market-hero-v34,body.light-theme #tab-trade .trade-workspace-banner-v35,
+body.light-theme #tab-chart .asset-detail-head,body.light-theme #tab-admin .detail-section{
+  border-color:rgba(45,116,190,.14)!important;
+}
+body.luxury-theme #tab-markets .market-hero-v34,body.luxury-theme #tab-trade .trade-workspace-banner-v35,
+body.luxury-theme #tab-chart .asset-detail-head,body.luxury-theme #tab-admin .detail-section{
+  border-color:rgba(183,168,255,.2)!important;
+}
+@media(max-width:640px){
+  #tab-markets,#tab-toman,#tab-chart,#tab-trade,#tab-assets,#tab-orders,
+  #tab-history,#tab-admin,#tab-settings{padding:13px 11px 20px!important;border-radius:18px!important}
+  #tab-chart .asset-detail-head{grid-template-columns:48px minmax(0,1fr)!important;padding:13px!important}
+  #tab-chart .asset-detail-head .asset-logo{width:44px!important;height:44px!important}
+  #tab-chart .detail-price{grid-column:1/-1;text-align:right!important;padding-top:5px}
+  #tab-chart .trade-grid{grid-template-columns:minmax(0,1fr)!important}
+  #tab-history .section-title>.market-tools{width:100%!important}
+  #tab-history .section-title>.market-tools button{flex:1 1 130px!important}
+  #tab-settings .setting-row{align-items:flex-start!important}
+}
+@media(prefers-reduced-motion:reduce){
+  #tab-markets *,#tab-toman *,#tab-chart *,#tab-trade *,#tab-assets *,
+  #tab-orders *,#tab-history *,#tab-admin *,#tab-settings *{
+    scroll-behavior:auto!important;transition:none!important;animation:none!important;
+  }
+}
