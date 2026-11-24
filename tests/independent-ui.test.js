@@ -401,29 +401,27 @@ test('trade and admin workspaces retain premium three-theme and narrow-screen co
 });
 
 
-test('dashboard market identity restores visible favorites, frameless logos and premium theme-specific rows', () => {
-  const marker = '/* 2026-11-24 dashboard identity restoration: premium framed rows, visible favorites and richer theme depth. */';
+test('dashboard market identity keeps visible favorites and frameless logos and rows in all themes', () => {
+  const marker = '/* 2026-11-24 dashboard market correction: remove favorite and row frames in every theme. */';
   const pass = css.slice(css.lastIndexOf(marker));
-  assert.ok(pass.length > 0, 'dashboard identity restoration layer exists');
+  assert.ok(pass.length > 0, 'dashboard frameless correction exists');
   for (const selector of [
-    '#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card',
     '#dashboardMarketPreview .da-market-favorite',
     '#dashboardMarketPreview .da-market-logo',
     '#dashboardMarketPreview .da-market-logo-inner',
-    '#tab-dashboard .da-v2-hero:before',
-    '#tab-dashboard .da-v2-hero-art:before',
-    '#tab-dashboard .da-v2-quick-grid button'
-  ]) assert.ok(pass.includes(selector), 'dashboard identity selector exists: ' + selector);
-  assert.match(pass, /#dashboardMarketPreview\s+\.da-market-favorite\s*\{[\s\S]*?border:1px solid!important/);
-  assert.match(pass, /#dashboardMarketPreview\s+\.da-market-logo,#dashboardMarketPreview\s+\.da-market-logo-inner\s*\{[^}]*border:0!important/);
-  assert.match(pass, /#dashboardMarketPreview\s+\.da-market-favorite\s*\{[^}]*border:1px solid!important/);
-  assert.match(pass, /#dashboardMarketPreview\.dashboard-market-preview\.da-v2-market-list>\.da-market-coin-card\s*\{[\s\S]*?border:1px solid!important/);
+    '#dashboardMarketPreview .da-market-coin-card',
+    '#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card'
+  ]) assert.ok(pass.includes(selector), 'dashboard selector exists: ' + selector);
+  assert.match(pass, /#dashboardMarketPreview \.da-market-favorite\\{[^}]*border:0!important[^}]*background:transparent!important/);
+  assert.match(pass, /#dashboardMarketPreview \.da-market-coin-card,[\\s\\S]*?border:0!important/);
+  assert.match(pass, /#dashboardMarketPreview\\.dashboard-market-preview\\.da-v2-market-list>\\.da-market-coin-card\\{[^}]*border:0!important/);
   for (const theme of ['dark-theme', 'light-theme', 'luxury-theme']) {
-    assert.ok(pass.includes('body.' + theme + ' #dashboardMarketPreview .da-market-favorite'), theme + ' favorite frame exists');
-    assert.ok(pass.includes('body.' + theme + ' #dashboardMarketPreview .da-market-logo'), theme + ' logo styling exists');
-    assert.ok(pass.includes('body.' + theme + ' #dashboardMarketPreview .da-market-coin-card'), theme + ' market row has theme identity');
+    assert.ok(pass.includes('body.' + theme + ' #dashboardMarketPreview .da-market-favorite'), theme + ' favorite remains visible');
+    assert.ok(pass.includes('body.' + theme + ' #dashboardMarketPreview .da-market-logo'), theme + ' logo styling remains');
+    assert.ok(pass.includes('body.' + theme + ' #dashboardMarketPreview .da-market-coin-card'), theme + ' frameless row theme exists');
   }
 });
+
 
 test('asset detail workspace keeps premium hierarchy and responsive review/news layout', () => {
   const marker = '/* 2026-11-24 premium asset detail workspace: hierarchy, review/news cards and responsive flow. */';
