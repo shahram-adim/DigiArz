@@ -212,3 +212,14 @@ test("reads the persisted candidate envelope written by the sync extractor", () 
   assert.equal(rows[0].status, "single_source");
   assert.equal(rows[0].variants[0].sources[0].source_key, "base_coin.fa_name");
 });
+
+
+test("rejects candidates that claim an unsupported exchange", () => {
+  const rows = aggregatePersianNameCandidates([{
+    coingecko_id: "bitcoin",
+    exchange: "unknown-exchange",
+    match_status: "matched",
+    candidate: { name: "بیت کوین", source_exchange: "bit24" }
+  }]);
+  assert.deepEqual(rows, []);
+});
