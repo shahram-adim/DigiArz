@@ -1200,3 +1200,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - No business logic, market prices, wallet, orders, trades, auth, Supabase, Production DB, migrations, cron, deployment, merge or release was changed.
 - Physical Android installation and screenshot acceptance remain outstanding.
 - Next: verify final-head CI and APK provenance, then continue page-by-page visual audit. Keep PR #60 Draft/unmerged.
+
+
+### Follow-up verification — frameless pass APK provenance
+- Android run `45378240684` completed SUCCESS for CSS commit `44996118bc91af2598d7d913e45203342e179680`; all 12 build steps succeeded.
+- Artifact `14912007533`, ZIP size 3,569,868 bytes, digest `sha256:eaeadb7b1677719922d277d4de63ce7944c7b648b67fbc37776c53a08b6f7c87`. ZIP integrity and inner APK ZIP integrity both verified.
+- BUILD-INFO ties the APK to commit `44996118bc91af2598d7d913e45203342e179680`, run `45378240684`, built `2026-11-24T10:49:42Z`; APK SHA-256 `0aedc2eaea0abda27771c0f2395a22c97eedf15657e5ba020ebc208029abe0da`.
+- APK contains `assets/public/index.html` (521,355 bytes) and `assets/public/src/digiarz-independent-ui.css` (199,307 bytes), including the frameless CSS layer. This is a Debug/review APK, not production-signed.
+- Structural source validation confirmed all nine target selectors, all three theme hover rules, zero CSS brace imbalance, and the regression test is present. Full Exact decimal workflow for test head `dcbd3186...` has not appeared; prior Exact decimal run `45377590939` passed on preceding code head `9d02ec1...`. Do not claim full exact-head test completion.
+- Latest branch head after documentation checkpoint: `03615a5b907af78e3e5042d16c3ecf358b4623cd`. PR #60 remains Draft/open/unmerged. No Production changes. Physical-device install/screenshot review still pending.
