@@ -1260,3 +1260,16 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - [ ] Physical Android installation and screenshots remain outstanding.
 - PR #60 remains Draft/open/unmerged. No Supabase/Production DB, migrations, cron, merge, deployment or release changes.
 - Next: verify Android artifact provenance; then continue visual audit of remaining page surfaces and device acceptance.
+
+
+### 2026-11-24 — trading terminal APK verified; authentication hero refined
+- [x] Android run `45381917562` completed SUCCESS for CSS source commit `9128efa39aba5447b67641167ba3a2ff4aafcaf7`; all 12 build/upload steps completed.
+- [x] Artifact `14913059879` downloaded. ZIP SHA-256: `56f92f85f3caec03fd50cb3321c331688a492c8c97b4b7c810a2c99e9dcfa674`; ZIP contains `app-debug.apk` and `BUILD-INFO.txt`.
+- [x] APK SHA-256 independently verified: `d0185d529808e658ebe1c17f15f76d65c2e26e825a10114e5bfeeae41aeab83d`; APK archive integrity passed; BUILD-INFO confirms source commit, branch, workflow run and identical APK hash. Bundled independent UI CSS is 217,829 bytes.
+- [x] Continued login-page visual audit: replaced the plain auth visual area with a responsive CSS-only device/globe composition, theme-specific gold/white/indigo treatments, clearer benefit chips, mobile breakpoints and reduced-motion handling. No authentication behavior or form IDs were changed.
+- [x] Auth CSS commit `e52d9701ea3f419a6c6b688c88a168f7c2d974eb`; regression test commit `10775527db0bf7323965920d93fb5cf279c4bf63`.
+- [ ] Android run `45382671847` is building the new auth CSS source commit `e52d970...`; verify its artifact separately. The verified APK above predates this auth visual refinement.
+- [ ] Exact Decimal CI has not been verified for the current PR head; do not infer a pass from prior Android builds.
+- [ ] Physical Android installation and screenshots remain outstanding.
+- PR #60 remains Draft/open/unmerged. No Supabase/Production DB, financial data, migration, cron, merge, deployment or release changes.
+- Next: verify Android artifact for the auth refinement, then continue page-by-page visual audit and device acceptance.
