@@ -1136,3 +1136,13 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Fresh exact-head workflows on `57b28ab...`: Exact decimal run `45359147050` and Android APK run `45359147013`; both were in progress at the time of this entry. Do not accept the auth theme or distribute a new APK until both exact-head runs complete and their logs/artifact provenance are inspected.
 - No Supabase/Production DB, migration, cron, deployment, merge, or release change. Physical Android screenshot QA remains outstanding.
 - Next: inspect the exact-head test and APK results for `57b28ab...`; then continue source audit of remaining visual pages. Keep PR #60 Draft/unmerged.
+
+
+## 2026-11-24 — auth theme CI correction passed; Toman/detail/trade theme refinement
+- Exact-head rerun on test-only correction commit `57b28aba37fad1fd4d06a4575ac1702bbca98c7f` completed successfully: Exact decimal run `45359147050` SUCCESS and Android APK run `45359147013` SUCCESS. The auth selector assertion spacing fix is therefore validated; no application logic changed in that correction.
+- Continued page audit found Toman market table/toolbar, asset detail/review surfaces, and trading order-book/timeframe controls lacked a cohesive final theme-specific layer.
+- Added visual-only styling in `src/digiarz-independent-ui.css` commit `eb17e0a06efc62c47ad0321c8ba62080b10e78e2`: dark black/gold, pure-white/blue, and indigo glass surfaces for Toman tables, detail panels/forms, order-book panels, chart timeframe controls and mobile layouts.
+- Added source regression coverage in `tests/independent-ui.test.js` commit `195bf1bd9820fa7a239b5cbf38863509571f7084` for all three theme selectors, pure-white light table headers, indigo detail surfaces, responsive toolbar and the actual Toman/detail/trade roots.
+- Validation runs for CSS commit `eb17e0a...`: Exact decimal `45359412133` was in progress; Android `45359397397` was in progress and `45359412493` pending at the checkpoint. The final test commit `195bf1b...` must also receive fresh exact-head test and APK validation; do not accept this refinement or distribute a build until those complete.
+- No auth/trading business logic, Supabase/Production DB, migration, cron, deployment, merge or release changed. PR #60 remains Draft/open/unmerged. Real-device screenshots remain the visual acceptance gate.
+- Next: inspect the final-head CI/APK for `195bf1b...`, verify artifact provenance and bundle contents, then continue audit of any remaining page-specific inconsistencies.
