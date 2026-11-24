@@ -1070,3 +1070,8 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Added regression coverage in `tests/independent-ui.test.js` (commit `ea713d7e49b59dd62741190e753b157b8dbce1a4`) for all three themes across wallet, orders, history and settings selectors, including pure-white light surfaces and theme-specific table headers. Exact-head test/APK workflows for `ea713d7...` must be checked before acceptance.
 - No auth/trading/wallet business logic, Supabase schema/data, migration, Production DB, deployment, merge, or release was changed. PR #60 remains Draft/open/unmerged.
 - Next: verify exact-head tests and APK for `ea713d7...`; inspect the APK bundle and hash. Then continue actual page-level source/visual audit; physical Android screenshots remain the visual acceptance gate.
+
+## 2026-11-24 — wallet page selector test correction
+- The first test run for the wallet/orders/history/settings refinement failed only in the newly added source assertion: DigiArz has no separate `tab-wallet` page; wallet/account UI is represented by the dashboard account card. The failure was `page exists: tab-wallet` in test 31; the earlier theme selector assertions passed.
+- Corrected the regression test to assert the actual page roots (`tab-assets`, `tab-orders`, `tab-history`, `tab-settings`) and the existing `da-v2-account-card` wallet/account markup. No app runtime code changed. Test fix commit: `09d2af8d86f2daceeb1ed830805f65b2ffafb5ce`.
+- Exact-head CI and Android APK runs must be checked on the new test-fix commit before accepting the theme refinement. PR #60 remains Draft/open/unmerged; no Production DB, migrations, deployment or release.
