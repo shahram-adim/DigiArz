@@ -4070,3 +4070,22 @@ body.luxury-theme #dashboardMarketPreview .da-market-coin-card{
 #tab-dashboard>.da-v2-trust-row{order:7!important}
 #tab-dashboard>.da-v2-bottom{order:8!important}
 #tab-dashboard>.dashboard-activity-center{order:9!important}
+
+
+/* Dashboard wallet holdings: Bit24-inspired owned-assets list */
+#tab-dashboard>.da-v2-wallet-card{order:1!important;margin-top:0!important}
+.da-v2-wallet-card .da-v2-wallet-subtitle{margin:3px 0 0;color:var(--da-muted);font-size:11px}
+.da-v2-wallet-toolbar{display:grid;grid-template-columns:minmax(0,1fr) 170px;gap:9px;margin-top:14px}
+.da-v2-wallet-toolbar label{position:relative;display:flex;align-items:center;min-width:0}
+.da-v2-wallet-toolbar label>svg{position:absolute;right:12px;width:16px;height:16px;color:var(--da-muted);pointer-events:none}
+.da-v2-wallet-toolbar input{width:100%;padding-inline:36px 12px;min-width:0}
+.da-v2-wallet-toolbar select{min-width:0}
+.da-v2-wallet-count{margin:12px 2px 7px;color:var(--da-muted);font-size:10px}
+.da-v2-wallet-assets{display:flex;flex-direction:column;gap:8px;min-width:0}
+.da-v2-wallet-assets .asset-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(145px,1.1fr) auto;align-items:center;gap:12px;padding:12px 13px;border-radius:13px;background:var(--da-surface)!important;border:1px solid var(--da-line)!important}
+.da-v2-wallet-assets .asset-row-main{min-width:0}
+.da-v2-wallet-assets .asset-row .price-stack{min-width:0}
+.da-v2-wallet-assets .asset-row .secondary{white-space:nowrap}
+.da-v2-wallet-assets .asset-row-share,.da-v2-wallet-assets .asset-share{display:none!important}
+@media(max-width:700px){.da-v2-wallet-toolbar{grid-template-columns:minmax(0,1fr) 125px;gap:7px}.da-v2-wallet-assets .asset-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;padding:11px}.da-v2-wallet-assets .asset-row .secondary{grid-column:1/-1;width:100%}.da-v2-wallet-assets .asset-row .price-stack{font-size:11px}}
+@media(max-width:380px){.da-v2-wallet-toolbar{grid-template-columns:1fr}.da-v2-wallet-assets .asset-row{grid-template-columns:1fr}.da-v2-wallet-assets .asset-row .secondary{grid-column:auto}}
