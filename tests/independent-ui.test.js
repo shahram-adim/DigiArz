@@ -659,3 +659,17 @@ test('market asset rows omit source and freshness labels while retaining USD and
   assert.match(html, /const priceMarkup=usdMarkup\+tomanMarkup;/);
   assert.doesNotMatch(html, /coin-source fresh|coin-source stale|زمان منبع حداکثر ۲ دقیقه/);
 });
+
+
+test('dashboard sections follow a clear visual order and stay responsive without horizontal overflow', () => {
+  assert.match(css, /#tab-dashboard\{[\s\S]*?max-width:1440px!important/);
+  assert.match(css, /#tab-dashboard>\.da-v2-topline\{order:0/);
+  assert.match(css, /#tab-dashboard>\.da-v2-hero\{order:1/);
+  assert.match(css, /#tab-dashboard>\.da-v2-account-card\{order:2/);
+  assert.match(css, /#tab-dashboard>\.da-v2-quick-grid\{order:3/);
+  assert.match(css, /#tab-dashboard>\.da-market-glass\{order:5/);
+  assert.match(css, /@media\(max-width:560px\)[\s\S]*?#tab-dashboard \.da-v2-account-stats\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important\}/);
+  assert.match(css, /#tab-dashboard \.da-market-toolbar\{grid-template-columns:minmax\(0,1fr\)!important\}/);
+  assert.match(html, /id="dashboardMarketPreview"/);
+  assert.match(html, /id="usdtBalance"/);
+});
