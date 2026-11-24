@@ -3155,3 +3155,24 @@ body.luxury-theme #dashboardMarketPreview .da-market-logo,body.luxury-theme #das
 .top-asset-card .top-asset-name-en{display:block;font-size:9px;line-height:1.35;direction:ltr;text-align:center;opacity:.72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .top-asset-card .top-asset-symbol{display:block;font-size:9px;line-height:1.25;letter-spacing:.04em;opacity:.62}
 #tab-assets #assetList .asset-row-main .asset-name-en{display:block;margin-top:1px;font-size:10px;line-height:1.35;direction:ltr;text-align:right;letter-spacing:0;opacity:.72}
+
+
+/* 2026-11-24 dashboard market correction: remove favorite and row frames in every theme. */
+#dashboardMarketPreview .da-market-favorite{
+  border:0!important;outline:0!important;box-shadow:none!important;
+  background:transparent!important;border-radius:0!important;
+}
+#dashboardMarketPreview .da-market-coin-card,
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list>.da-market-coin-card{
+  border:0!important;outline:0!important;box-shadow:none!important;
+}
+body.dark-theme #dashboardMarketPreview .da-market-favorite,
+body.light-theme #dashboardMarketPreview .da-market-favorite,
+body.luxury-theme #dashboardMarketPreview .da-market-favorite{
+  border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;
+}
+body.dark-theme #dashboardMarketPreview .da-market-coin-card,
+body.light-theme #dashboardMarketPreview .da-market-coin-card,
+body.luxury-theme #dashboardMarketPreview .da-market-coin-card{
+  border:0!important;outline:0!important;box-shadow:none!important;
+}
