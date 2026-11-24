@@ -182,7 +182,7 @@ test('mobile market grid areas match the actual rendered row element order and d
   assert.match(renderer, /observeMarketSparklines\(list\)/);
 
   const mobile = css.slice(css.lastIndexOf('DigiArz mobile screenshot correction v5'));
-  assert.match(mobile, /grid-template-areas :[\s\S]*"fav identity change price"[\\s\\S]*"\. spark change price"/);
+  assert.match(mobile, /grid-template-areas:[\s\S]*"fav identity change price"[\s\S]*"\. spark change price"/);
   for (const [selector, area] of [
     ['.favorite-btn', 'fav'],
     ['.coin-identity', 'identity'],
