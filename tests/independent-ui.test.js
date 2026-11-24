@@ -833,3 +833,14 @@ test('mobile wallet metrics stay in one compact row above the fixed navigation',
   assert.ok(v11.includes('#tab-dashboard .da-v2-wallet-link'));
   assert.ok(v11.includes('min-height:34px!important'));
 });
+
+
+test('v12 frameless dashboard logo rules override theme-specific tile shadows and borders', () => {
+  const v12 = css.slice(css.lastIndexOf('corrective dashboard pass v12'));
+  assert.ok(v12.includes('body.light-theme #dashboardMarketPreview .da-market-logo-inner img'));
+  assert.ok(v12.includes('box-shadow:none!important'));
+  assert.ok(v12.includes('background:transparent!important'));
+  assert.ok(v12.includes('border-radius:0!important'));
+  assert.ok(v12.includes('grid-template-columns:repeat(3,minmax(0,1fr))!important'));
+  assert.ok(v12.includes('#tab-dashboard .da-v2-quick-grid'));
+});
