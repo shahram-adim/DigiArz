@@ -209,7 +209,7 @@ test('volatility, category filters, top assets and dashboard share the freshness
   assert.ok(market.includes("compareMarketChange(a,b,'asc')"));
   assert.ok(html.includes("const valid=sortMarketRowsByChange(marketRows,'desc')"));
   assert.ok(html.includes("const gain=valid.find(item=>getMarketChange24h(item)>0)"));
-  assert.ok(html.includes("const loss=valid.find(item=>getMarketChange24h(item)<0)"));
+  assert.ok(html.includes(",loss=valid.find(item=>getMarketChange24h(item)<0)"));
   assert.ok(html.includes('function renderTopAssets(){'));
   const dashboardStart = html.indexOf('function renderDashboardMarketPreview(){');
   const dashboardEnd = html.indexOf('function ', dashboardStart + 10);
