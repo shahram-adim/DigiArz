@@ -177,8 +177,9 @@ test('mobile market grid areas match the actual rendered row element order and d
   assert.match(renderer, /coin-english-name/);
   assert.match(renderer, /coin-change-wrap/);
   assert.match(renderer, /price-stack/);
-  assert.match(renderer, /price-usd/);
-  assert.match(renderer, /price-toman/);
+  // Price markup is built by the shared market formatter outside the row renderer.
+  assert.match(html, /class="price-usd"/);
+  assert.match(html, /class="price-toman"/);
   assert.match(renderer, /observeMarketSparklines\(list\)/);
 
   const mobile = css.slice(css.lastIndexOf('DigiArz mobile screenshot correction v5'));
