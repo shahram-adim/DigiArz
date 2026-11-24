@@ -1024,3 +1024,11 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Downloaded Android artifact `14900676502` (ZIP digest reported by GitHub: `sha256:dfa756fc9137a88d2094b7c6beb234a914eb975d1c376d815e4a32813634f913`). ZIP integrity verified. Extracted `app-debug.apk` is 3,939,165 bytes; BUILD-INFO identifies merge ref `refs/pull/60/merge`, merge commit `608ae96e8e722c49ce7dfc3d6bde34501c99f58d`, workflow run `45351790444`, and APK SHA-256 `8cc1a2938ed54a8945e64020e4ed76fd0c73fe8d5aa6541fe7097cc0efed9b87`; independently computed hash matches.
 - APK contains `assets/public/index.html`, `assets/public/src/digiarz-independent-ui.css` (142,325 bytes), and `assets/public/sw.js`. This verifies packaging and provenance, not physical-device visual acceptance. It is a debug/review APK, not production-signed.
 - Remaining gate: install this exact APK and inspect the Market page across dark, pure-white, and indigo themes, plus login/dashboard separation. Make only reproducible device-evidenced corrections; keep PR Draft/unmerged until visual acceptance and explicit owner approval.
+
+
+
+## 2026-11-24 — mobile market row regression coverage added
+- Source audit confirmed the market row renderer creates the five expected direct children in order: favorite button, identity/logo/name button, sparkline, 24-hour change wrapper, and price stack. The v5 mobile grid maps these to named areas; prior tests checked CSS fragments but did not verify the live renderer's DOM order against that grid.
+- Added a regression test in `tests/independent-ui.test.js` to assert the actual renderer child order, Persian/English identity fields, USD/Toman price fields, sparkline observer, and each v5 grid-area mapping. Test commit: `a69fc66b08d56c9c14963b159f7cadf4d9fc7e65`.
+- Exact-decimal workflow `45352285859` and Android build workflow `45352285765` were triggered for that commit and were still in progress at this checkpoint. Do not treat this new test as passed until its workflow completes.
+- PR #60 remains Draft/open/unmerged. No production deployment, merge, Supabase migration, Production DB change, or financial-data mutation. Physical-device visual QA is still pending.
