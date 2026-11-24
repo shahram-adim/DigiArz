@@ -2759,3 +2759,60 @@ body.luxury-theme #tab-toman .toman-table thead th:nth-child(2){background:#4753
   #tab-toman .toman-table th:first-child,#tab-toman .toman-table td:first-child{min-width:104px}
   #tab-toman .toman-table th:nth-child(2),#tab-toman .toman-table td:nth-child(2){right:104px;min-width:96px}
 }
+
+
+/* 2026-11-24 order and history mobile refinement: action clarity and RTL scanability. */
+#tab-orders .order-history-card{min-width:0}
+#tab-orders .order-history-title .tag,
+#tab-orders .order-history-title .badge{flex:0 0 auto}
+#tab-orders .order-history-meta{display:flex;flex-wrap:wrap;gap:3px 12px}
+#tab-orders .order-history-card>button{min-height:42px}
+#tab-history .history-filters{align-items:center;gap:9px}
+#tab-history .history-filters input,
+#tab-history .history-filters select,
+#tab-history .history-filters button{min-width:0;min-height:43px}
+#tab-history .history-date-presets button{transition:background .18s ease,transform .18s ease}
+#tab-history .history-date-presets button[aria-pressed=true]{font-weight:900;transform:translateY(-1px)}
+#tab-history .table-wrap{max-width:100%;overscroll-behavior-inline:contain;scrollbar-width:thin}
+#tab-history .table-wrap table{min-width:600px;font-variant-numeric:tabular-nums}
+#tab-history .table-wrap th:first-child,
+#tab-history .table-wrap td:first-child{position:sticky;right:0;z-index:2;min-width:148px}
+#tab-history .table-wrap th:first-child{z-index:4}
+body.dark-theme #tab-history .table-wrap td:first-child{background:#111720}
+body.light-theme #tab-history .table-wrap td:first-child{background:#fff}
+body.luxury-theme #tab-history .table-wrap td:first-child{background:#20295f}
+body.dark-theme #tab-history .table-wrap th:first-child{background:#211b10}
+body.light-theme #tab-history .table-wrap th:first-child{background:#fff}
+body.luxury-theme #tab-history .table-wrap th:first-child{background:#4753a5}
+@media(max-width:720px){
+  #tab-orders .order-history-card{grid-template-columns:minmax(0,1fr);gap:10px;padding:15px 4px!important}
+  #tab-orders .order-history-card>button{justify-self:stretch;width:100%;min-width:0}
+  #tab-orders .order-history-title{align-items:flex-start}
+  #tab-history .history-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  #tab-history .history-filters input[type=search],
+  #tab-history .history-filters button{grid-column:1/-1;width:100%}
+  #tab-history .history-filters select,
+  #tab-history .history-filters input[type=date]{width:100%;max-width:100%}
+  #tab-history .history-date-presets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  #tab-history .history-date-presets button{width:100%;min-width:0}
+  #tab-history .table-wrap table{min-width:560px}
+  #tab-history .table-wrap th:first-child,
+  #tab-history .table-wrap td:first-child{min-width:128px}
+  #tab-settings .theme-setting-row{display:grid;grid-template-columns:minmax(0,1fr)}
+  #tab-settings .theme-setting-row .theme-choice-group{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+  #tab-settings .theme-setting-row .theme-cycle-button{width:100%}
+}
+@media(max-width:380px){
+  #tab-orders .order-history-title strong{font-size:12px}
+  #tab-orders .order-history-meta{font-size:10px}
+  #tab-history .history-filters{grid-template-columns:minmax(0,1fr)}
+  #tab-history .history-filters input,
+  #tab-history .history-filters select,
+  #tab-history .history-filters button{grid-column:1;width:100%}
+  #tab-history .history-date-presets{gap:6px}
+  #tab-history .table-wrap th,
+  #tab-history .table-wrap td{padding:10px 9px;font-size:11px}
+  #tab-history .table-wrap th:first-child,
+  #tab-history .table-wrap td:first-child{min-width:116px}
+  #tab-settings .theme-setting-row .theme-choice-group{grid-template-columns:minmax(0,1fr)}
+}
