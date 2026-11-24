@@ -627,3 +627,14 @@ test('dashboard hides account activity from regular users and keeps it available
   assert.match(html, /englishName=String\(item\.name_en\|\|item\.asset_name_en\|\|item\.english_name\|\|coinInfo\[base\]\?\.name\|\|item\.name\|\|base\)/);
   assert.match(html, /class="da-v2-bottom"/);
 });
+
+
+test('top asset cards and wallet rows show Persian and full English names alongside the ticker', () => {
+  assert.match(html, /class="top-asset-name-fa"/);
+  assert.match(html, /class="top-asset-name-en" dir="ltr"/);
+  assert.match(html, /const englishName=asset==='USDT'\?'Tether':String\(market\?\.name_en/);
+  assert.match(html, /className='asset-name-en'/);
+  assert.match(html, /label\.append\(name,english,ticker\)/);
+  assert.match(css, /\.top-asset-card \.top-asset-name-en/);
+  assert.match(css, /#tab-assets #assetList \.asset-row-main \.asset-name-en/);
+});
