@@ -2704,3 +2704,58 @@ body.luxury-theme #tab-chart .news-item a:hover{color:#dce2ff!important}
   #tab-chart .asset-detail-title{font-size:16px!important}
   #tab-chart .asset-detail-head>.detail-price{font-size:16px!important}
 }
+
+
+/* 2026-11-24 Toman market table refinement: readable horizontal data rail on phones. */
+#tab-toman .toman-table-wrap{
+  max-width:100%;overflow:auto;overscroll-behavior-inline:contain;
+  scrollbar-width:thin;scrollbar-gutter:stable;
+}
+#tab-toman .toman-table{
+  width:100%;min-width:1120px;border-collapse:separate;border-spacing:0;
+  font-variant-numeric:tabular-nums;
+}
+#tab-toman .toman-table thead th{
+  position:sticky;top:0;z-index:3;white-space:nowrap;
+  padding:13px 12px;font-size:11px;font-weight:900;
+}
+#tab-toman .toman-table tbody td{
+  padding:12px 12px;white-space:nowrap;font-size:12px;line-height:1.75;
+}
+#tab-toman .toman-table tbody tr{transition:background .18s ease}
+#tab-toman .toman-table th:first-child,
+#tab-toman .toman-table td:first-child{
+  position:sticky;right:0;z-index:2;min-width:124px;
+  font-weight:900;text-align:right;
+}
+#tab-toman .toman-table th:nth-child(2),
+#tab-toman .toman-table td:nth-child(2){
+  position:sticky;right:124px;z-index:2;min-width:112px;
+  text-align:right;
+}
+#tab-toman .toman-table thead th:first-child,
+#tab-toman .toman-table thead th:nth-child(2){z-index:5}
+body.dark-theme #tab-toman .toman-table tbody td:first-child,
+body.dark-theme #tab-toman .toman-table tbody td:nth-child(2){background:#141a23}
+body.light-theme #tab-toman .toman-table tbody td:first-child,
+body.light-theme #tab-toman .toman-table tbody td:nth-child(2){background:#fff}
+body.luxury-theme #tab-toman .toman-table tbody td:first-child,
+body.luxury-theme #tab-toman .toman-table tbody td:nth-child(2){background:#20295f}
+body.dark-theme #tab-toman .toman-table thead th:first-child,
+body.dark-theme #tab-toman .toman-table thead th:nth-child(2){background:#211b10}
+body.light-theme #tab-toman .toman-table thead th:first-child,
+body.light-theme #tab-toman .toman-table thead th:nth-child(2){background:#fff}
+body.luxury-theme #tab-toman .toman-table thead th:first-child,
+body.luxury-theme #tab-toman .toman-table thead th:nth-child(2){background:#4753a5}
+@media(max-width:720px){
+  #tab-toman .toman-table{min-width:1080px}
+  #tab-toman .toman-table th,#tab-toman .toman-table td{padding:10px 9px}
+  #tab-toman .toman-table th:first-child,#tab-toman .toman-table td:first-child{min-width:112px}
+  #tab-toman .toman-table th:nth-child(2),#tab-toman .toman-table td:nth-child(2){right:112px;min-width:104px}
+}
+@media(max-width:380px){
+  #tab-toman .toman-table{min-width:1040px}
+  #tab-toman .toman-table th,#tab-toman .toman-table td{font-size:10px;padding:9px 8px}
+  #tab-toman .toman-table th:first-child,#tab-toman .toman-table td:first-child{min-width:104px}
+  #tab-toman .toman-table th:nth-child(2),#tab-toman .toman-table td:nth-child(2){right:104px;min-width:96px}
+}
