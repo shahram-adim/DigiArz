@@ -64,7 +64,7 @@ test('the Edge Function handler uses the tested upsert and de-duplication helper
 
 test('the refresh handler never deletes current-price rows from a partial provider snapshot', () => {
   const source = fs.readFileSync(path.join(__dirname, '../supabase/functions/refresh-toman-market-prices/index.ts'), 'utf8');
-  assert.doesNotMatch(source, /method:\\s*["']DELETE["']/i);
+  assert.doesNotMatch(source, /\bDELETE\b/i);
   assert.doesNotMatch(source, /current_price_cleanup/);
   assert.match(source, /Retain omitted rows/);
   assert.match(source, /old fetched_at values as stale/);
