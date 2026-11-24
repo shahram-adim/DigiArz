@@ -935,3 +935,12 @@ Verified directly against GitHub and Supabase after the previous handoff snapsho
 - Latest Android APK workflow run 45344474993 is still in progress at the debug APK build step at this handoff update. Do not provide a new APK until the job succeeds, the artifact exists, and BUILD-INFO plus SHA-256 are verified.
 - The PR remains Draft/open/unmerged. No merge, release, deployment, Supabase/database migration, Production data change, or user-financial-data change. Physical Android/WebView visual acceptance remains unverified.
 - Next: finish Android build/artifact provenance verification; continue remaining theme/page static audit and obtain physical device acceptance for all three themes, login and navigation.
+
+
+## 2026-11-24 — review APK verified with the removed Market panels
+- Verified Android workflow run 45344205629 SUCCESS on app commit 5f71aed6f017394755a181884237028b27997f5e, which contains the Market panel-removal code. Artifact ID 14897805780 (DigiArz-Android-debug-APK), created 2026-11-24T06:58:04Z, expires 2026-12-08T06:58:03Z.
+- Downloaded the artifact, checked ZIP integrity, and recomputed the APK SHA-256. APK size 3,935,296 bytes; SHA-256 368a35bf4e9b90261d1172402d5ac3dc067b3f575cf3bdd7fa96351f5acc655f; BUILD-INFO matches exactly and records git_commit 12a39ef214d6eca6e7fe8f7587f5c49472b3afe9 (synthetic PR merge ref), workflow_run_id 45344205629, package_version 1.0.0.
+- This APK has the same application source (index.html / independent UI CSS) as the later branch head; subsequent commits only adjusted regression tests and handoff documentation. The latest-head exact-decimal / PostgreSQL / trading lifecycle workflow 45344475016 passed on branch commit 080adaf5e1d241643037dc0eb465f9e8a61d7d23.
+- A redundant Android rebuild on latest head, run 45344474993, was still running at this update. The already verified artifact is usable for review and includes the removed Market panels; it is a debug/review APK, not a production-signed release.
+- Branch now has a documentation-only follow-up commit; live branch head before this entry was 1a2681300174bdaa8ac6d882def0eac9fcf57a83. PR #60 remains open, Draft=true, merged=false. No merge, release, deployment, Production DB change, Supabase migration, or user financial-data change.
+- Physical device install/rendering and all three-theme/auth/navigation acceptance remain unverified. Next: user-side device acceptance; continue only with issues demonstrated on device.
