@@ -154,8 +154,8 @@ test('full indigo-glass foundation covers trading wallet and navigation surfaces
     'body.luxury-theme .orders-center-v36',
     'body.luxury-theme input', 'body.luxury-theme #priceChart'
   ]) assert.ok(foundation.includes(token), 'indigo foundation includes ' + token);
-  assert.match(html, /luxury\?\{bg:'#111027',text:'#f3f0ff',grid:'#30275f',line:'#7565c4'\}/);
-  assert.match(html, /luxury\?'#111027'/);
+  assert.match(html, /luxury\?\{bg:'#090d20',text:'#f1f3ff',grid:'#26325a',line:'#596ba5'\}/);
+  assert.match(html, /luxury\?'#090d20'/);
   assert.ok(!html.includes('لوکس شیشه‌ای'));
 });
 
