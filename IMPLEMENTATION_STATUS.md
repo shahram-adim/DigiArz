@@ -1430,3 +1430,13 @@
 - [x] Added `supabase/audit/production_rpc_relation_dependencies_2026-11-25.json` and extended `tests/production-rpc-manifest.test.js` to validate its counts and references.
 - [!] Static scanning does not prove full dependency coverage for dynamic SQL, unqualified identifiers, trigger-only dependencies or indirect calls.
 - CI Run #45634861182 on test commit `311d2e0f9f5ad57aa29090a3165c6ed5d17dfa21` completed with `success`; all 26 workflow steps passed, including the Node/browser suite and disposable PostgreSQL arithmetic, widening, lifecycle and two-session race tests.
+
+
+### Production migration-source recovery — reconciliation completed 2026-11-25
+- [x] Re-read the live Supabase migration ledger and GitHub `main` recursive tree; exact count: 55 Production ledger entries and 40 local SQL files.
+- [x] Matched migration identities by normalized migration name rather than timestamp alone: 38 names match, of which 18 timestamps match and 20 have timestamp drift.
+- [x] Confirmed 17 ledger entries have no matching SQL source file in `main`; two local SQL files have no matching ledger name.
+- [x] Searched 12 relevant existing branches for the missing migration source files; none of the 17 files was present in those branch trees.
+- [x] Added `supabase/audit/production_migration_source_reconciliation_2026-11-25.json` and CI assertions so timestamp drift is not misreported as a missing source.
+- [!] No missing migration was reconstructed from live catalog state, no SQL was applied, and no db push was run.
+- Next: seek original source artifacts from authoritative backup/CI/developer artifacts; if unavailable, prepare per-migration evidence packages from live definitions, ACL/RLS, triggers and dependency metadata, clearly labeled as reconstructions and requiring manual approval. Keep db push and Production changes blocked.
