@@ -6,6 +6,7 @@ const fs = require('node:fs');
 const manifest = JSON.parse(fs.readFileSync('supabase/audit/production_security_definer_manifest_2026-11-25.json', 'utf8'));
 const inventory = JSON.parse(fs.readFileSync('supabase/audit/production_rpc_relation_rls_inventory_2026-11-25.json', 'utf8'));
 const review = JSON.parse(fs.readFileSync('supabase/audit/production_anon_access_review_2026-11-25.json', 'utf8'));
+const dependencies = JSON.parse(fs.readFileSync('supabase/audit/production_rpc_relation_dependencies_2026-11-25.json', 'utf8'));
 
 test('Production SECURITY DEFINER snapshot is complete and internally consistent', () => {
   assert.equal(manifest.source.project_ref, 'gfoaubfilhttnwjykaox');
@@ -93,5 +94,27 @@ test('Production admin RPC definitions contain an explicit super-administrator g
       'missing explicit super-admin guard: ' + fn.schema_name + '.' + fn.function_name
     );
     assert.doesNotMatch(fn.raw_acl, /(?:^|,)anon=X\//, 'admin RPC is executable by anon: ' + fn.function_name);
+  }
+});
+
+test('Production RPC body relation scan resolves to live schema metadata', () => {
+  assert.equal(dependencies.scan.functions_scanned, 46);
+  assert.equal(dependencies.scan.unique_schema_qualified_relation_candidates, 27);
+  assert.equal(dependencies.scan.resolved_relations, 27);
+  assert.deepEqual(dependencies.scan.unresolved_candidates, []);
+  assert.equal(dependencies.scan.columns_captured, 175);
+  const functions = new Set(manifest.functions.map(fn => fn.schema_name + '.' + fn.function_name));
+  const relations = new Set();
+  for (const relation of dependencies.relations) {
+    const key = relation.schema + '.' + relation.relation;
+    assert.equal(relations.has(key), false, 'duplicate relation: ' + key);
+    relations.add(key);
+    assert.ok(['public', 'private', 'auth'].includes(relation.schema));
+    assert.ok(Array.isArray(relation.columns) && relation.columns.length > 0, 'missing columns: ' + key);
+    assert.ok(Array.isArray(relation.referenced_by) && relation.referenced_by.length > 0, 'missing function references: ' + key);
+    assert.equal(typeof relation.rls_enabled, 'boolean');
+    for (const caller of relation.referenced_by) {
+      assert.ok(functions.has(caller), 'unknown function reference: ' + caller);
+    }
   }
 });
