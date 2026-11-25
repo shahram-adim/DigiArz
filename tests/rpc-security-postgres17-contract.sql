@@ -118,6 +118,48 @@ END
 $market_listings_contract$;
 
 
+DO $admin_add_listing_contract$
+DECLARE
+  fn oid := 'public.admin_add_market_listing(text)'::regprocedure;
+  result_type text;
+BEGIN
+  SELECT pg_get_function_result(fn) INTO result_type;
+  IF result_type <> 'jsonb' THEN
+    RAISE EXCEPTION 'admin_add_market_listing must return jsonb; got %',result_type;
+  END IF;
+  IF NOT (SELECT prosecdef AND provolatile='v' AND proowner='postgres'::regrole FROM pg_proc WHERE oid=fn) THEN
+    RAISE EXCEPTION 'admin_add_market_listing owner/volatility/SECURITY DEFINER mismatch';
+  END IF;
+  IF NOT COALESCE((SELECT proconfig @> ARRAY['search_path=""'] FROM pg_proc WHERE oid=fn),false) THEN
+    RAISE EXCEPTION 'admin_add_market_listing must have empty search_path';
+  END IF;
+  IF has_function_privilege('anon',fn,'EXECUTE')
+     OR NOT has_function_privilege('authenticated',fn,'EXECUTE')
+     OR NOT has_function_privilege('service_role',fn,'EXECUTE') THEN
+    RAISE EXCEPTION 'admin_add_market_listing effective API ACL mismatch';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM aclexplode(COALESCE((SELECT proacl FROM pg_proc WHERE oid=fn),
+                                    acldefault('f',(SELECT proowner FROM pg_proc WHERE oid=fn)))) a
+    WHERE a.grantee=0 AND a.privilege_type='EXECUTE'
+  ) THEN
+    RAISE EXCEPTION 'PUBLIC must not execute admin_add_market_listing';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger t
+    WHERE t.tgrelid='public.admin_market_listings'::regclass
+      AND t.tgname='admin_market_listing_unique_ticker'
+      AND NOT t.tgisinternal
+      AND pg_get_triggerdef(t.oid) ILIKE '%BEFORE INSERT OR UPDATE OF coingecko_id%'
+      AND t.tgfoid='private.enforce_unique_admin_market_listing_symbol()'::regprocedure
+  ) THEN
+    RAISE EXCEPTION 'admin_market_listing_unique_ticker trigger binding is missing';
+  END IF;
+  RAISE NOTICE 'PASS: admin_add_market_listing exact return, owner, volatility, path, ACL and trigger binding';
+END
+$admin_add_listing_contract$;
+
+
 DO $admin_search_contract$
 DECLARE
   fn oid;
