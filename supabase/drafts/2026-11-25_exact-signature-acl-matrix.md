@@ -49,7 +49,7 @@ Effective API role summary:
 | `public.place_stop_limit_order(text,text,numeric,numeric,numeric)` | authenticated, service_role | Browser `.rpc()` inventory | User-session order lifecycle RPC |
 | `public.reactivate_my_account()` | authenticated, service_role | Browser `.rpc()` inventory | User-session account lifecycle RPC |
 | `public.request_market_price_refresh()` | authenticated, service_role | Browser `.rpc()` inventory | User-session market refresh request RPC |
-| `public.claim_admin_asset_refresh(text,uuid)` | service_role | No caller found in browser, reviewed Edge Functions, DB function bodies, Cron jobs, or application triggers | **UNRESOLVED**; explicit grant is unexplained. Do not revoke until external/manual callers and intended rate-limit design are checked |
+| `public.claim_admin_asset_refresh(text,uuid)` | service_role | Active Production Edge Function `admin-refresh-crypto-asset` v2 (`verify_jwt=true`); validates Bearer token and super-admin status via user-scoped RPC, then calls this function using a server-side service-role client | **CONFIRMED CALLER**; preserve this exact function-specific service_role grant unless the deployed caller is intentionally redesigned and re-reviewed |
 | `public.new_user_setup()` | service_role | Enabled `auth.users.on_auth_user_created` trigger | Trigger executes in postgres-owned context; observed path does not require service_role EXECUTE |
 | `public.process_bit24_exchange_sync()` | service_role | Active Cron job, `username='postgres'`, schedule 16,46 | Observed Cron path does not require service_role EXECUTE |
 | `public.process_conditional_orders()` | service_role | Active Cron job, `username='postgres'`, every minute | Observed Cron path does not require service_role EXECUTE; preserve worker behavior |
@@ -256,3 +256,10 @@ The test `tests/rpc-security-catalog.sql` was revised to compare the complete tu
 The catalog query was SELECT-only. The revised SQL test has been committed to the PR branch but has NOT been executed against Production or the non-parity Recovery-Test project. CI integration remains intentionally skipped until a valid disposable parity environment exists.
 
 No GRANT/REVOKE, function change, default ACL change, migration, db push, Cron/trigger change, Edge Function deployment, or Production write was performed.
+
+
+## Superseding caller and source-faithful test evidence — 2026-11-25
+
+The previous unresolved caller row for `public.claim_admin_asset_refresh(text,uuid)` is superseded: the active Production Edge Function `admin-refresh-crypto-asset` v2 is the confirmed deployed-source caller. It validates the Bearer token using `auth.getUser(token)`, verifies super-admin access using the user-scoped RPC, derives the subject from the verified Auth response, and invokes the claim RPC with a server-side service-role client. The explicit service_role EXECUTE grant is required by this path.
+
+The exact Production Migration source now supplies the real function body in the disposable PostgreSQL 17 fixture. Its `boolean` return type and service_role-only API ACL are asserted; positive/negative behavior and the 30-second cooldown passed CI run `45600501368`. This does not resolve the separate default-function-ACL policy decision.
