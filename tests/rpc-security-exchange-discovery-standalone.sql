@@ -119,7 +119,13 @@ BEGIN
   IF has_function_privilege('service_role',fn,'EXECUTE') THEN
     RAISE EXCEPTION 'source migration unexpectedly grants service_role; review source ACL discrepancy';
   END IF;
-  IF has_function_privilege('PUBLIC',fn,'EXECUTE') THEN
+  IF EXISTS (
+    SELECT 1 FROM aclexplode(COALESCE(
+      (SELECT proacl FROM pg_proc WHERE oid=fn),
+      acldefault('f',(SELECT proowner FROM pg_proc WHERE oid=fn))
+    )) AS a
+    WHERE a.grantee=0 AND a.privilege_type='EXECUTE'
+  ) THEN
     RAISE EXCEPTION 'PUBLIC must not have EXECUTE';
   END IF;
 END
