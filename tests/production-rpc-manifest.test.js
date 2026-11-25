@@ -159,6 +159,7 @@ test('Migration source recovery report records bounded search evidence and limit
   assert.equal(migrationAuthoritySearch.migration_reconciliation_document.current_missing_sources, 17);
   assert.equal(migrationAuthoritySearch.migration_reconciliation_document.later_additions.length, 3);
   assert.equal(migrationAuthoritySearch.git_history.returned_commits, 44);
+  assert.equal(migrationAuthoritySearch.pull_request_search.inspected_pr_count, 28);
   assert.equal(migrationAuthoritySearch.branch_search.unique_topic_branches_examined, 20);
   assert.equal(migrationAuthoritySearch.actions_artifacts.runs_checked.length, 2);
   assert.ok(migrationAuthoritySearch.actions_artifacts.runs_checked.every(x => x.artifact_count === 0));
