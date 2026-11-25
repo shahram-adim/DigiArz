@@ -1450,3 +1450,13 @@
 - [!] The live `wallets` schema currently declares defaults `balance_usdt=200` and `balance_irr=1000000000`; reconcile this with the separately approved product defaults before any future onboarding/default changes. No data/default was changed.
 - [!] Live function bodies and cron metadata represent current state, not the exact historical SQL/order or dropped intermediate states. The recovery map is evidence-only and must not be used as an executable migration.
 - Next: obtain original SQL from a trusted backup/developer artifact; otherwise prepare review-only per-object reconstruction dossiers with explicit provenance and unknowns. Keep `db push`, migrations, grants, RLS changes, cron changes and all Production writes blocked.
+
+
+### Authoritative-source search expansion — 2026-11-25
+- [x] Re-read the historical `supabase/MIGRATION_RECONCILIATION.md`: it documented 14 missing sources on 2026-11-17; the current ledger's 17 are those 14 plus three later entries from 2026-11-21.
+- [x] Inspected GitHub migration-directory commit history (44 returned commits), 20 unique topic-branch trees, relevant PR changed-file lists, and code-search results for representative missing migration names and worker functions.
+- [x] Confirmed PR #7's three migration files, PR #39's Bit24 deduplication migration, and PR #40's observation-bloat migration are distinct from the 17 missing sources.
+- [x] Checked downloadable artifacts for two prior relevant CI runs; both returned zero artifacts.
+- [x] Added `supabase/audit/production_migration_authority_search_2026-11-25.json` and a CI assertion for the evidence and bounded-search limitations.
+- [!] No authoritative SQL source was recovered by these checks. This is not proof that external backups, developer clones, unexamined refs or other deployment artifacts do not contain a copy.
+- Next: obtain owner-controlled backup/export or original deployment/SQL-editor transcript; alternatively inspect the developer workstation's original clone, reflogs and dangling Git objects. Do not reconstruct executable SQL from current Production catalog state alone.
