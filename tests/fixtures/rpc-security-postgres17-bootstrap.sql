@@ -285,9 +285,28 @@ CREATE POLICY admin_market_listings_public_read
   FOR SELECT TO anon, authenticated
   USING (true);
 
+DROP POLICY IF EXISTS crypto_assets_public_read ON public.crypto_assets;
+CREATE POLICY crypto_assets_public_read
+  ON public.crypto_assets
+  FOR SELECT TO anon, authenticated
+  USING (true);
+
+DROP POLICY IF EXISTS "Authenticated users can view market prices" ON public.market_prices;
+CREATE POLICY "Authenticated users can view market prices"
+  ON public.market_prices
+  FOR SELECT TO authenticated
+  USING (true);
+
+DROP POLICY IF EXISTS market_prices_anon_public_read ON public.market_prices;
+CREATE POLICY market_prices_anon_public_read
+  ON public.market_prices
+  FOR SELECT TO anon
+  USING (true);
+
 REVOKE ALL ON public.admin_market_listings, public.crypto_assets, public.market_prices
   FROM PUBLIC, anon, authenticated, service_role;
-GRANT SELECT ON public.admin_market_listings TO anon, authenticated;
+GRANT SELECT ON public.crypto_assets, public.market_prices TO anon, authenticated;
+GRANT ALL ON public.admin_market_listings, public.crypto_assets, public.market_prices TO service_role;
 
 -- Exact read-only function body from the final reviewed migration source.
 CREATE OR REPLACE FUNCTION public.get_admin_market_listings()
