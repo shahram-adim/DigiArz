@@ -36,7 +36,7 @@ Production evidence already recorded in `2026-11-25_rpc-caller-inventory.md`:
 - 14 relevant Cron jobs are active and owned/run as `postgres`.
 - `auth.users.on_auth_user_created` invokes `public.new_user_setup()`.
 - reviewed Edge Functions use service key for direct PostgREST table operations, not the 13 service_role-only RPCs.
-- `public.claim_admin_asset_refresh(text,uuid)` has no caller found in the active browser entrypoint, reviewed Edge Functions, database function bodies, Cron jobs, or application triggers. This remains unexplained, not proven unused outside the inspected sources.
+- Historical snapshot only: at the time of this initial catalog review, no caller was found. This conclusion is superseded by section 11, which confirms the active `admin-refresh-crypto-asset` Edge Function v2 calls `public.claim_admin_asset_refresh(text,uuid)` using service_role.
 
 ## 3. Preconditions for a disposable parity environment
 
@@ -103,7 +103,7 @@ Before deciding the fate of `public.claim_admin_asset_refresh(text,uuid)`:
 
 The current `tests/default-function-acl-hardening.sql` asserts that the `postgres` public-schema default continues to grant EXECUTE to `service_role`.
 
-The current review draft `2026-11-25_proposed_restrict_default_public_function_exec.sql` instead proposes revoking default EXECUTE from `service_role` as well, because no service-role RPC caller was found in the reviewed Edge Functions and Cron runs as `postgres`.
+The current review draft `2026-11-25_proposed_restrict_default_public_function_exec.sql` proposes revoking default EXECUTE from `service_role` as well. Its original caller rationale was corrected in section 11 after a live Edge Function caller was confirmed. The future-default policy remains a separate owner decision; preserve the explicit grant for `claim_admin_asset_refresh(text,uuid)`.
 
 These two artifacts express different target policies. Do not run or enable the integration gate until the owner/reviewer chooses one policy and the SQL contract test is updated to match it. Preserve the current CI skip; do not change repository secrets, variables, or the gate as part of this plan.
 
@@ -162,7 +162,7 @@ Additional static review findings:
 4. `tests/rpc-security.integration.sql` temporarily grants public-schema USAGE and EXECUTE to anon/authenticated inside a transaction, then tests the function body's super-admin guard and rolls back. It is useful as a function-body authorization test, but it does not prove the real catalog ACL contract; temporary grants deliberately bypass that part of the test. Its fixture also requires exactly one synthetic super-admin row.
 5. Both current workflow runs confirm the integration job remains skipped; do not enable it until a disposable parity environment and the policy contract are approved.
 
-Recommended next review unit: prepare a separate, non-executable exact-signature ACL matrix (current Production state versus proposed target state), with each function's owner, SECURITY DEFINER flag, search_path, current effective API roles, observed caller, and proposed required roles. Mark `claim_admin_asset_refresh(text,uuid)` as unresolved. Do not generate executable GRANT/REVOKE statements until every row has a verified caller and the owner approves the target policy.
+Recommended next review unit: prepare a separate, non-executable exact-signature ACL matrix (current Production state versus proposed target state), with each function's owner, SECURITY DEFINER flag, search_path, current effective API roles, observed caller, and proposed required roles. The earlier unresolved classification for `claim_admin_asset_refresh(text,uuid)` is superseded by section 11. Do not generate executable GRANT/REVOKE statements until every row has a verified caller and the owner approves the target policy.
 
 This section is evidence/review documentation only. No SQL test was run, no CI workflow or gate was changed, and no database object or privilege was modified.
 
@@ -188,10 +188,10 @@ This section is evidence/review documentation only. No SQL test was run, no CI w
 2. Decide and approve the isolated environment provisioning method and any cost. Preferred route is a zero-real-data disposable database with synthetic Auth identities, no copied secrets, and inert Cron fixtures. If the supported route costs money or requires a paid tier, stop.
 3. Build a parity manifest and compare exact signatures, owners, security modes, search_path, effective API-role ACLs, default ACLs per grantor, schema USAGE, extensions, Auth trigger, and Cron identities before running any test.
 4. Preserve all production schedules as evidence only. Never import live worker commands or invoke real exchange, price, order, notification, or payment side effects in the disposable environment.
-5. Keep `claim_admin_asset_refresh(text,uuid)` unresolved until external/manual callers and its intended rate-limit design are investigated.
+5. Preserve the confirmed service_role caller grant for `claim_admin_asset_refresh(text,uuid)`; investigate any additional external/manual callers and the intended rate-limit design before proposing a runtime redesign.
 6. Only after the policy conflict and parity preconditions are resolved, prepare positive/negative per-signature authorization tests and inert Auth/Cron tests. Enable the CI integration job only after a separate explicit approval.
 
-The test environment is NOT ready. The only completed work in this follow-up is read-only inspection plus repository documentation; no environment provisioning or database test execution occurred.
+At the time this section was written, no test environment had been provisioned. Section 11 records the subsequent disposable PostgreSQL 17 smoke harness and its passing first run. Full Production parity remains NOT ready.
 
 ## 11. Disposable PostgreSQL 17 smoke harness — first execution result (2026-11-25)
 
