@@ -372,7 +372,7 @@ BEGIN
         'fee_rate', v_fee_rate
     );
 END;
-$function$
+$function$;
 
 
 INSERT INTO public.profiles VALUES
