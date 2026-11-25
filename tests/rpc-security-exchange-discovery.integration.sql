@@ -1,6 +1,6 @@
 -- Source-faithful, read-only exchange-discovery RPC test.
 -- Only synthetic non-financial market metadata is inserted; transaction rolls back.
-\\set ON_ERROR_STOP on
+\set ON_ERROR_STOP on
 BEGIN;
 
 INSERT INTO public.crypto_assets
