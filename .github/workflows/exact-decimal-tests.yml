@@ -260,4 +260,13 @@ jobs:
             -f supabase/tests/exact_decimal_conditional_exit_worker.sql \
             -f supabase/tests/exact_decimal_conditional_exit_integration.sql
 
+      - name: Run isolated two-session account deactivation/order placement race
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_deactivation_race_test;"
+          psql -h localhost -U postgres -d digiarz_deactivation_race_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/account_deactivation_race_setup.sql
+          bash supabase/tests/account_deactivation_race.sh
+
 # TP/SL conditional worker diagnostics are enabled in the isolated CI fixture.
