@@ -167,6 +167,7 @@ BEGIN
 END
 $service$;
 RESET ROLE;
+SET LOCAL ROLE postgres;
 
 DO $audit_assert$
 BEGIN
