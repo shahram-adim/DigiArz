@@ -230,3 +230,35 @@ This report is an inventory and safety analysis only. It changes no database obj
 - شواهد زنده برای سه Migration بالا قوی‌تر شد، اما هیچ‌یک از SQLهای اصلی آن‌ها از این مرحله بازیابی نشد.
 - هیچ Cron، تابع، grant، RLS، جدول، صف، داده، Migration یا تنظیم Production تغییر نکرد.
 - این شواهد را نباید به‌عنوان مجوز db push، تغییر ACL یا بازنویسی migration ledger تفسیر کرد.
+
+
+## ممیزی تکمیلی صف pg_net و اجرای Worker — ۲۵ نوامبر ۲۰۲۶
+
+این بخش از SELECTهای فقط‌خواندنی روی Production به دست آمده است. زمان مشاهدهٔ داده‌های runtime حدود ۲۰۲۶-۱۱-۲۵ ساعت ۰۶:۵۷ UTC بود.
+
+### وضعیت صف درخواست‌های همگام‌سازی
+- جدول `public.exchange_asset_sync_requests` دارای ۳٬۴۹۷ رکورد تاریخی است؛ ۷ درخواست هنوز `processed_at IS NULL` دارند، اما هیچ درخواست pending قدیمی‌تر از ۳۰ دقیقه نیست.
+- ۳٬۴۱۲ درخواست دارای HTTP status موفق ۲xx و ۴ درخواست دارای status خطای ۴xx/۵xx هستند؛ سایر رکوردها لزوماً شکست محسوب نمی‌شوند و ممکن است status نداشته باشند.
+- جدیدترین درخواست ثبت‌شده در این snapshot ساعت ۰۶:۴۰ UTC بود.
+- جدول `public.bit24_exchange_sync_requests` نیز وجود دارد؛ در این مرحله آمار تفصیلی صف آن جداگانه محاسبه نشده است.
+
+### وضعیت واقعی pg_net
+- هر دو جدول `net.http_request_queue` و `net._http_response` از نوع UNLOGGED هستند؛ `relpersistence='u'`.
+- اندازهٔ کل `net._http_response` حدود **۱۲۸ MiB** و اندازهٔ `net.http_request_queue` حدود **۲۴۰ KiB** بود.
+- تعداد ردیف‌های فعلی `http_request_queue` صفر بود.
+- `net._http_response` در snapshot شامل ۱٬۲۴۶ پاسخ بود؛ قدیمی‌ترین پاسخ ساعت ۰۰:۵۸ UTC و جدیدترین ساعت ۰۶:۵۷ UTC ثبت شده بود. سه پاسخ timeout داشتند و پاسخ با HTTP status خطا در این بازه صفر بود.
+- تعداد ۱٬۱۱۴ پاسخ در `net._http_response` با شناسهٔ درخواست‌های دو جدول عمومی `exchange_asset_sync_requests` و `bit24_exchange_sync_requests` تطبیق داده نشد. این فقط به معنی «عدم تطبیق با این دو جدول» است؛ نمی‌توان بدون بررسی سایر مصرف‌کنندگان pg_net آن‌ها را درخواست یتیم یا قابل‌حذف نامید.
+- تخمین آماری PostgreSQL برای `net._http_response` حدود ۱٬۲۴۶ ردیف زنده و ۲۱۱ ردیف مرده و برای `net.http_request_queue` صفر ردیف زنده و ۴۹ ردیف مرده نشان می‌داد. این‌ها تخمین pg_stat هستند، نه شمارش دقیق heap.
+- روی `net._http_response` شاخص `_http_response_created_idx` برای ستون `created` وجود دارد؛ شاخص دیگری در خروجی این بررسی مشاهده نشد.
+
+### سلامت اجرای Cron در پنجرهٔ اخیر
+- در ۲۴ ساعت منتهی به snapshot، برای هر یک از jobهای ۱۳، ۱۴، ۱۵ و ۱۶ دقیقاً ۴۸ یا ۱۴۴ اجرای زمان‌بندی‌شده مطابق cadence ثبت‌شده مشاهده شد؛ همهٔ اجراهای برگشتی در این چهار job با status برابر `succeeded` بودند.
+- میانگین زمان اجرا در همین پنجره: job 13 حدود ۰٫۰۶ ثانیه، job 14 حدود ۲۳٫۵۳ ثانیه، job 15 حدود ۰٫۰۵ ثانیه و job 16 حدود ۱٫۲۰ ثانیه.
+- آخرین اجرای job 14 در این snapshot ساعت ۰۶:۳۱ UTC پایان یافت؛ job 13 آخرین بار ساعت ۰۶:۵۰ و job 16 ساعت ۰۶:۴۶ UTC اجرا شده بود.
+- این snapshot نشانهٔ موفقیت اجرای زمان‌بندی‌شده در پنجرهٔ اخیر است، اما به‌تنهایی سلامت کامل شبکهٔ بیرونی، کامل‌بودن داده‌های هر صرافی یا علت اندازهٔ ۱۲۸ MiB جدول پاسخ را اثبات نمی‌کند.
+
+### ارتباط با Migrationهای مفقود ۲۱ نوامبر
+- اندازه و نوع UNLOGGED جدول‌های pg_net با موضوع Migration دارای نام `snapshot_pg_net_unlogged_queue_before_recovery` مرتبط است، اما هیچ مدرکی در این مرحله نشان نمی‌دهد که Migration مذکور چه snapshotی گرفته، کجا ذخیره کرده، چه داده‌ای را بازیابی کرده یا چه cleanupی انجام داده است.
+- وجود صف خالی و ۷ درخواست pending بدون تأخیر بیش از ۳۰ دقیقه، رفتار فعلی را توصیف می‌کند؛ این داده‌ها محتوای Migrationهای `digiarz_backpressure_and_exchange_sync_bloat_guards` و `temporarily_throttle_exchange_asset_processors_20261121` را بازسازی نمی‌کنند.
+- **هیچ پاک‌سازی، VACUUM، DELETE، snapshot، بازیابی، تغییر Cron، اجرای دستی Worker یا تغییر در pg_net انجام نشد.** برای بازیابی SQL اصلی همچنان باید deployment artifact یا backup معتبر پیدا شود.
+
