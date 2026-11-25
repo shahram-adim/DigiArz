@@ -6,8 +6,8 @@
 --
 -- Target contract:
 --   * postgres-created functions do not inherit EXECUTE from PUBLIC globally.
---   * postgres-created public functions do not inherit direct EXECUTE for
---     anon/authenticated from schema-specific defaults.
+--   * postgres-created public functions do not inherit additive schema-level
+--     EXECUTE for PUBLIC or direct EXECUTE for anon/authenticated.
 --   * service_role retains its explicit schema-specific default EXECUTE grant.
 --   * supabase_admin is deliberately not altered by this contract.
 
@@ -62,10 +62,10 @@ BEGIN
   IF schema_acl IS NOT NULL AND EXISTS (
     SELECT 1
     FROM aclexplode(schema_acl) a
-    WHERE a.grantee IN (anon_oid,authenticated_oid)
+    WHERE a.grantee IN (0,anon_oid,authenticated_oid)
       AND a.privilege_type='EXECUTE'
   ) THEN
-    RAISE EXCEPTION 'postgres public-schema function defaults still grant EXECUTE directly to anon/authenticated';
+    RAISE EXCEPTION 'postgres public-schema function defaults still add EXECUTE for PUBLIC/anon/authenticated';
   END IF;
 
   IF schema_acl IS NULL OR NOT EXISTS (
