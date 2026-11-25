@@ -283,3 +283,32 @@
 - هیچ row از wallets، users، transactions، pg_net queues یا backup tables خوانده نشده است.
 - هیچ grant/revoke، policy، function، trigger، cron، queue، دادهٔ مالی یا schema در Production تغییر نکرده است.
 - این پیوست صرفاً سند ممیزی است و executable نیست.
+
+
+### پیوست تکمیلی: fingerprint واقعی cron و فهرست کامل triggerها
+
+این بخش با query فقط‌خواندنی روی metadata جدول `cron.job` در Production تهیه شده است. متن فرمان cron، payload صف‌ها یا داده‌های مالی خوانده نشده‌اند؛ فقط طول فرمان و MD5 آن ثبت شده است.
+
+| Job ID | Job name | Schedule | Active | Command length | Command MD5 |
+|---:|---|---|---:|---:|---|
+| 11 | `digiarz-crypto-assets-stale-request-recovery` | `3-59/5 * * * *` | true | 49 | `5c182585822f912c390e2ed687cf9e74` |
+| 13 | `digiarz-iran-exchange-request` | `*/10 * * * *` | true | 49 | `62655c28a0daceec20aca5364a5fcce3` |
+| 14 | `digiarz-iran-exchange-process` | `1,31 * * * *` | true | 49 | `3e06c306d02133389ef070049aa6576c` |
+| 18 | `digiarz-auto-activate-verified-exchange-pairs` | `9-59/10 * * * *` | true | 55 | `a6a3e9093cf3b72ab84897f43d320f41` |
+
+Metadata اتصال ثبت‌شده برای هر چهار job: database=`postgres`، username=`postgres`. این fingerprintها وضعیت فعلی command را ثبت می‌کنند و تاریخچهٔ تغییر schedule/command یا انتساب قطعی به یک Migration خاص را ثابت نمی‌کنند.
+
+**تمام شش trigger binding ثبت‌شده در snapshot Production:**
+
+| Trigger | Relation | Function | Function MD5 |
+|---|---|---|---|
+| `trg_auto_list_verified_exchange_asset` | `public.exchange_asset_observations` | `private.auto_list_verified_exchange_asset()` | `49880c0892cad6081acb6ce071090a5d` |
+| `admin_market_listing_unique_ticker` | `public.admin_market_listings` | `private.enforce_unique_admin_market_listing_symbol()` | `6e9a7e9f7d8cd5f0ac20f3216ee5f0b3` |
+| `guard_active_account_orders` | `public.orders` | `private.guard_active_account_writes()` | `29b8e23c1de8eb4762a8cf1a9c9343ce` |
+| `guard_active_account_trades` | `public.trades` | `private.guard_active_account_writes()` | `29b8e23c1de8eb4762a8cf1a9c9343ce` |
+| `guard_active_account_transactions` | `public.transactions` | `private.guard_active_account_writes()` | `29b8e23c1de8eb4762a8cf1a9c9343ce` |
+| `on_auth_user_created` | `auth.users` | `public.new_user_setup()` | `9ad150e007399b8feeca58399d8187d7` |
+
+این فهرست تمام trigger bindingهای موجود در snapshot ممیزی است، نه ادعای جامعیت همهٔ triggerهای دیتابیس؛ scope manifest فقط توابع SECURITY DEFINER است.
+
+**محدودیت ایمنی:** jobهای 11/13/14/18 فقط fingerprint شدند؛ هیچ jobی متوقف، کند، زمان‌بندی مجدد یا اجرا نشد. به‌ویژه هیچ تغییری در jobهای موتور سفارش اعمال نشد.
