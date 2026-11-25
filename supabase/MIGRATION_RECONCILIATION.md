@@ -894,3 +894,40 @@ PostgreSQL به‌صورت پیش‌فرض EXECUTE را به نقش PUBLIC بر�
 - Supabase Knowledge Base: محدودیت تغییر Default ACL نقش supabase_admin در schema public.
 
 قفل ایمنی برقرار است: هیچ Default ACL، ACL تابع، schema، داده، Auth، Cron یا Worker در هیچ پروژه‌ای تغییر نکرده؛ Migration اجرا نشده و PR ادغام نشده است.
+
+
+## وضعیت جدید: CI موفق و ممیزی مسیر فراخوانی RPC — ۲۵ نوامبر ۲۰۲۶
+
+### CI روی آخرین commit قبل از ثبت این گزارش
+برای commit `1f0db5efe87f03fad1510be36954195d0e52d6d4`:
+- Push run #179: موفق.
+- Pull request run #180: موفق.
+- در هر دو، `unit-tests` و type-check تابع Edge موفق شدند.
+- `rpc-security-integration` در هر دو عمداً skipped بود؛ gate و secret دست‌نخورده باقی ماندند.
+این CI موفقیت تست‌های واحد و type-check را تأیید می‌کند، نه آزمون اتصال RPC به دیتابیس.
+
+### نقشهٔ اولیهٔ فراخوانی‌ها
+فایل `supabase/drafts/2026-11-25_rpc-caller-inventory.md` اضافه شد. در آن، فراخوانی مستقیم مرورگر از `index.html` با allowlistهای موجود مقایسه شده است:
+- ۲ endpoint بازار در allowlist anon.
+- ۲۶ نام تابع در allowlist authenticated.
+- ۳۶ نام تابع در allowlist service_role.
+- ۲۴ تابع دارای call-site مستقیم `supabaseClient.rpc(...)` در صفحهٔ اصلی.
+- مسیرهای worker، trigger و زمان‌بندی از مسیرهای UI جدا شده‌اند و مواردی که هنوز caller دقیقشان از سورس قابل اثبات نیست، صریحاً نیازمند بررسی بیشتر علامت‌گذاری شده‌اند.
+
+این سند هنوز inventory نهایی امضای توابع نیست: برای صدور GRANTهای دقیق، owner، identity arguments، تعریف تابع و caller واقعی هر تابع باید از کاتالوگ و تعریف‌های فعال استخراج شود. نام تابع یا وجود یک draft زمان‌بندی، به‌تنهایی اثبات اجرای فعال آن نیست.
+
+### اصلاح تکمیلی تست Default ACL
+در بازبینی دوباره مشخص شد ACL سطح schema می‌تواند یک EXECUTE افزایشی برای PUBLIC داشته باشد. بنابراین تست آینده‌نگر اصلاح شد تا هم:
+- مجوز PUBLIC در Default ACL سراسری را رد کند؛ و
+- مجوز افزایشی PUBLIC در Default ACL مربوط به public را نیز رد کند.
+Draft توضیحی نیز با همین نکته به‌روزرسانی شد. تست هنوز به workflow متصل نشده و روی Production اجرا نشده است.
+
+### وضعیت PR
+PR #62 در آخرین بررسی:
+- open و Draft، merged=false.
+- head برابر `1f0db5efe87f03fad1510be36954195d0e52d6d4` در زمان بررسی اولیهٔ CI؛ commitهای مستندات و اصلاحات بعدی پس از آن روی همان شاخه ثبت شده‌اند.
+- ۱۰۱ commit جلوتر و صفر عقب‌تر از base.
+- GitHub در آخرین بررسی اولیه mergeable=true و mergeable_state=clean گزارش کرد؛ این وضعیت، مجوز Merge محسوب نمی‌شود.
+
+### قفل ایمنی
+هیچ SQL تغییردهنده‌ای اجرا نشد؛ هیچ Default ACL، ACL تابع، جدول، داده، Auth، Cron یا Worker تغییر نکرد. هیچ Migration/db push، secret/variable، هزینه، ارتقای زیرساخت یا Merge انجام نشد.
