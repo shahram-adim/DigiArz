@@ -69,3 +69,18 @@ This is a confirmed input-validation defect in the helper. It is **not evidence 
 4. Record the defect as limited to NULL liquidity-type validation; do not claim a live trading-fee accounting defect without further evidence.
 
 No Production mutation, function invocation, migration, ACL change, CI workflow change, merge, deployment, Cron change, or cost was incurred by this inspection.
+
+## PostgreSQL 17 regression result — 2026-11-25
+
+The isolated regression was added as `tests/demo-trading-fee-rate-null-regression.pg17.sql` and wired into `.github/workflows/persian-asset-name-tests.yml`.
+
+- Test commit: `a1a65229c2b1b6d69a0e0755f7477a193bdf73a1`.
+- Workflow commit: `3078043b24b4788fe21ce7afee6b79a8bca81c12`.
+- GitHub Actions run: `45669028813` — completed successfully.
+- `postgres17-rpc-smoke`: success; the new step “Reproduce and verify NULL liquidity-type fee-rate fix in disposable PostgreSQL 17” passed.
+- `unit-tests`: success.
+- `rpc-security-integration`: skipped by its existing opt-in guard; no remote test project was contacted.
+
+The regression demonstrates the NULL fall-through in a synthetic transaction, applies the proposed explicit NULL guard in that same disposable transaction, verifies Maker/Taker rates remain distinct, verifies invalid liquidity values and disabled fee rows are rejected, and rolls back all changes.
+
+**Scope limitation:** the test reconstructs the reviewed helper definition in the isolated PostgreSQL fixture; it is not a live Production invocation and does not validate the three full trading entrypoints, partial fills, reservation recalculation, cancellation, or two-user RLS. The 46-signature fixture remains 12 source-backed/reviewed function bodies plus 34 inert metadata stubs. The fix remains unapplied to Production and is not a migration.
