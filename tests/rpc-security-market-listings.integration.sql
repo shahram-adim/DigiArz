@@ -60,11 +60,14 @@ RESET ROLE;
 
 DO $market_table_acl_test$
 BEGIN
-  IF has_table_privilege('anon','public.crypto_assets','SELECT')
-     OR has_table_privilege('anon','public.market_prices','SELECT') THEN
-    RAISE EXCEPTION 'anon unexpectedly has direct SELECT on underlying tables';
+  IF NOT has_table_privilege('anon','public.crypto_assets','SELECT')
+     OR NOT has_table_privilege('anon','public.market_prices','SELECT') THEN
+    RAISE EXCEPTION 'anon is missing observed Production public-read grants on market metadata tables';
   END IF;
-  RAISE NOTICE 'PASS: public market RPC exposes only active listings and redacts stale USD prices; base tables remain non-readable directly';
+  IF has_table_privilege('anon','public.admin_market_listings','SELECT') THEN
+    RAISE EXCEPTION 'anon unexpectedly has direct SELECT on curated listing table';
+  END IF;
+  RAISE NOTICE 'PASS: public market RPC exposes active listings and redacts stale USD prices; underlying market metadata grants match Production';
 END
 $market_table_acl_test$;
 
