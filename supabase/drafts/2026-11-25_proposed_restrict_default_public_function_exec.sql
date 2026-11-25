@@ -1,0 +1,41 @@
+-- DIGIARZ — REVIEW DRAFT ONLY / NOT EXECUTABLE
+-- This file is intentionally comments-only. It changes no database state.
+-- Do NOT remove the comment prefixes or run this file as a migration.
+--
+-- Purpose:
+-- The current production default ACL for functions created by postgres and
+-- supabase_admin in schema public grants EXECUTE to anon, authenticated,
+-- and service_role. The proposal below removes only the first two defaults.
+--
+-- Proposed statements for a separately reviewed migration, subject to:
+-- (1) explicit owner approval,
+-- (2) confirming the migration execution role can alter defaults for both
+--     function creators (especially supabase_admin),
+-- (3) inventorying functions that must remain callable by anon/authenticated,
+-- (4) adding explicit GRANT EXECUTE allowlists for those public/user RPCs,
+-- (5) verifying the resulting ACLs in a disposable test project first.
+--
+-- Proposed SQL (kept commented intentionally):
+--
+-- ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
+--   REVOKE EXECUTE ON FUNCTIONS FROM anon, authenticated;
+--
+-- ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public
+--   REVOKE EXECUTE ON FUNCTIONS FROM anon, authenticated;
+--
+-- service_role is intentionally preserved.
+-- Existing functions are NOT changed by ALTER DEFAULT PRIVILEGES.
+-- Existing explicit grants must be reviewed separately; this proposal does
+-- not REVOKE privileges from any existing function.
+--
+-- Expected follow-up:
+--   * Explicit grants for approved public read endpoints:
+--       get_admin_market_listings()
+--       get_exchange_discovered_market_assets()
+--   * Explicit grants for authenticated user RPCs that are part of the app:
+--       inventory from the reviewed allowlist, not a blanket schema grant.
+--   * Keep worker functions restricted to service_role/postgres.
+--   * Catalog test must fail if a newly added SECURITY DEFINER function
+--     inherits anon/authenticated EXECUTE without an approved allowlist entry.
+--
+-- No SQL in this file is active. No migration has been created or applied.
