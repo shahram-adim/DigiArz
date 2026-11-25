@@ -1,0 +1,2974 @@
+{
+  "captured_on": "2026-11-25",
+  "source": {
+    "provider": "Supabase",
+    "project_ref": "gfoaubfilhttnwjykaox",
+    "postgres_version": "17.11.0.018",
+    "method": "read-only PostgreSQL catalogs; function-body schema-qualified relation token scan followed by catalog resolution"
+  },
+  "scan": {
+    "functions_scanned": 46,
+    "unique_schema_qualified_relation_candidates": 27,
+    "resolved_relations": 27,
+    "unresolved_candidates": [],
+    "columns_captured": 175
+  },
+  "relations": [
+    {
+      "owner": "postgres",
+      "schema": "private",
+      "columns": [
+        {
+          "name": "coingecko_id",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "last_requested_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "requested_by",
+          "type": "uuid",
+          "default": null,
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "name": "admin_asset_refresh_limits_pkey",
+          "definition": "CREATE UNIQUE INDEX admin_asset_refresh_limits_pkey ON private.admin_asset_refresh_limits USING btree (coingecko_id)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [],
+      "relation": "admin_asset_refresh_limits",
+      "triggers": [],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": false,
+        "anon_update": false,
+        "service_role_delete": false,
+        "service_role_insert": false,
+        "service_role_select": false,
+        "service_role_update": false,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": false,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "admin_asset_refresh_limits_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (coingecko_id)"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "public.claim_admin_asset_refresh"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "private",
+      "columns": [
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "role",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "granted_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        },
+        {
+          "name": "granted_by",
+          "type": "uuid",
+          "default": null,
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "name": "admin_users_pkey",
+          "definition": "CREATE UNIQUE INDEX admin_users_pkey ON private.admin_users USING btree (user_id)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [],
+      "relation": "admin_users",
+      "triggers": [],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": false,
+        "anon_update": false,
+        "service_role_delete": false,
+        "service_role_insert": false,
+        "service_role_select": false,
+        "service_role_update": false,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": false,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "admin_users_granted_by_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (granted_by) REFERENCES auth.users(id) ON DELETE RESTRICT"
+        },
+        {
+          "name": "admin_users_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (user_id)"
+        },
+        {
+          "name": "admin_users_role_check",
+          "type": "c",
+          "definition": "CHECK (role = 'super_admin'::text)"
+        },
+        {
+          "name": "admin_users_user_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE RESTRICT"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "private.is_super_admin",
+        "public.claim_admin_asset_refresh"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "private",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "nullable": false
+        },
+        {
+          "name": "admin_user_id",
+          "type": "uuid",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "target_user_id",
+          "type": "uuid",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "currency",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "direction",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "amount",
+          "type": "numeric(30,10)",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "balance_before",
+          "type": "numeric(30,10)",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "balance_after",
+          "type": "numeric(30,10)",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "name": "admin_wallet_adjustments_pkey",
+          "definition": "CREATE UNIQUE INDEX admin_wallet_adjustments_pkey ON private.admin_wallet_adjustments USING btree (id)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [],
+      "relation": "admin_wallet_adjustments",
+      "triggers": [],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": false,
+        "anon_update": false,
+        "service_role_delete": false,
+        "service_role_insert": false,
+        "service_role_select": false,
+        "service_role_update": false,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": false,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "admin_wallet_adjustments_admin_user_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (admin_user_id) REFERENCES auth.users(id) ON DELETE RESTRICT"
+        },
+        {
+          "name": "admin_wallet_adjustments_amount_check",
+          "type": "c",
+          "definition": "CHECK (amount > 0::numeric)"
+        },
+        {
+          "name": "admin_wallet_adjustments_currency_check",
+          "type": "c",
+          "definition": "CHECK (currency = ANY (ARRAY['USDT'::text, 'TOMAN'::text]))"
+        },
+        {
+          "name": "admin_wallet_adjustments_direction_check",
+          "type": "c",
+          "definition": "CHECK (direction = ANY (ARRAY['credit'::text, 'debit'::text]))"
+        },
+        {
+          "name": "admin_wallet_adjustments_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "admin_wallet_adjustments_reason_check",
+          "type": "c",
+          "definition": "CHECK (char_length(reason) >= 5 AND char_length(reason) <= 500)"
+        },
+        {
+          "name": "admin_wallet_adjustments_target_user_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (target_user_id) REFERENCES auth.users(id) ON DELETE RESTRICT"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "private.admin_adjust_wallet"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "private",
+      "columns": [
+        {
+          "name": "request_id",
+          "type": "bigint",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "page_number",
+          "type": "integer",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "queued_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "name": "crypto_assets_sync_queued_at_idx",
+          "definition": "CREATE INDEX crypto_assets_sync_queued_at_idx ON private.crypto_assets_sync_requests USING btree (queued_at)"
+        },
+        {
+          "name": "crypto_assets_sync_requests_pkey",
+          "definition": "CREATE UNIQUE INDEX crypto_assets_sync_requests_pkey ON private.crypto_assets_sync_requests USING btree (request_id)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [],
+      "relation": "crypto_assets_sync_requests",
+      "triggers": [],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": false,
+        "anon_update": false,
+        "service_role_delete": false,
+        "service_role_insert": false,
+        "service_role_select": false,
+        "service_role_update": false,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": false,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "crypto_assets_sync_requests_page_number_check",
+          "type": "c",
+          "definition": "CHECK (page_number > 0)"
+        },
+        {
+          "name": "crypto_assets_sync_requests_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (request_id)"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "public.recover_stale_crypto_assets_sync",
+        "public.refresh_crypto_assets"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "private",
+      "columns": [
+        {
+          "name": "singleton",
+          "type": "boolean",
+          "default": "true",
+          "nullable": false
+        },
+        {
+          "name": "next_page",
+          "type": "integer",
+          "default": "1",
+          "nullable": false
+        },
+        {
+          "name": "scan_complete",
+          "type": "boolean",
+          "default": "false",
+          "nullable": false
+        },
+        {
+          "name": "last_full_sync_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "name": "crypto_assets_sync_state_pkey",
+          "definition": "CREATE UNIQUE INDEX crypto_assets_sync_state_pkey ON private.crypto_assets_sync_state USING btree (singleton)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [],
+      "relation": "crypto_assets_sync_state",
+      "triggers": [],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": false,
+        "anon_update": false,
+        "service_role_delete": false,
+        "service_role_insert": false,
+        "service_role_select": false,
+        "service_role_update": false,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": false,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "crypto_assets_sync_state_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (singleton)"
+        },
+        {
+          "name": "crypto_assets_sync_state_singleton_check",
+          "type": "c",
+          "definition": "CHECK (singleton)"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "public.recover_stale_crypto_assets_sync",
+        "public.refresh_crypto_assets"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "private",
+      "columns": [
+        {
+          "name": "request_id",
+          "type": "bigint",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "queued_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        },
+        {
+          "name": "processed_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "name": "market_fx_sync_requests_pkey",
+          "definition": "CREATE UNIQUE INDEX market_fx_sync_requests_pkey ON private.market_fx_sync_requests USING btree (request_id)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [],
+      "relation": "market_fx_sync_requests",
+      "triggers": [],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": false,
+        "anon_update": false,
+        "service_role_delete": false,
+        "service_role_insert": false,
+        "service_role_select": false,
+        "service_role_update": false,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": false,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "market_fx_sync_requests_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (request_id)"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "public.refresh_market_fx_rate"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "private",
+      "columns": [
+        {
+          "name": "id",
+          "type": "boolean",
+          "default": "true",
+          "nullable": false
+        },
+        {
+          "name": "last_requested_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "name": "market_fx_sync_state_pkey",
+          "definition": "CREATE UNIQUE INDEX market_fx_sync_state_pkey ON private.market_fx_sync_state USING btree (id)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [],
+      "relation": "market_fx_sync_state",
+      "triggers": [],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": false,
+        "anon_update": false,
+        "service_role_delete": false,
+        "service_role_insert": false,
+        "service_role_select": false,
+        "service_role_update": false,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": false,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "market_fx_sync_state_id_check",
+          "type": "c",
+          "definition": "CHECK (id = true)"
+        },
+        {
+          "name": "market_fx_sync_state_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "public.refresh_market_fx_rate"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "private",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "pair_symbol",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "coingecko_id",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "action",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "admin_user_id",
+          "type": "uuid",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "validation_snapshot",
+          "type": "jsonb",
+          "default": "'{}'::jsonb",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "name": "market_pair_admin_audit_admin_user_idx",
+          "definition": "CREATE INDEX market_pair_admin_audit_admin_user_idx ON private.market_pair_admin_audit USING btree (admin_user_id) WHERE (admin_user_id IS NOT NULL)"
+        },
+        {
+          "name": "market_pair_admin_audit_pair_created_idx",
+          "definition": "CREATE INDEX market_pair_admin_audit_pair_created_idx ON private.market_pair_admin_audit USING btree (pair_symbol, created_at DESC)"
+        },
+        {
+          "name": "market_pair_admin_audit_pkey",
+          "definition": "CREATE UNIQUE INDEX market_pair_admin_audit_pkey ON private.market_pair_admin_audit USING btree (id)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [],
+      "relation": "market_pair_admin_audit",
+      "triggers": [],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": false,
+        "anon_update": false,
+        "service_role_delete": false,
+        "service_role_insert": false,
+        "service_role_select": false,
+        "service_role_update": false,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": false,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "market_pair_admin_audit_action_check",
+          "type": "c",
+          "definition": "CHECK (action = ANY (ARRAY['enabled'::text, 'disabled'::text]))"
+        },
+        {
+          "name": "market_pair_admin_audit_admin_user_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (admin_user_id) REFERENCES auth.users(id) ON DELETE SET NULL"
+        },
+        {
+          "name": "market_pair_admin_audit_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "public.admin_disable_market_pair",
+        "public.admin_enable_market_pair"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "private",
+      "columns": [
+        {
+          "name": "id",
+          "type": "boolean",
+          "default": "true",
+          "nullable": false
+        },
+        {
+          "name": "last_requested_at",
+          "type": "timestamp with time zone",
+          "default": "(now() - '01:00:00'::interval)",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "name": "market_price_refresh_control_pkey",
+          "definition": "CREATE UNIQUE INDEX market_price_refresh_control_pkey ON private.market_price_refresh_control USING btree (id)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [],
+      "relation": "market_price_refresh_control",
+      "triggers": [],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": false,
+        "anon_update": false,
+        "service_role_delete": false,
+        "service_role_insert": false,
+        "service_role_select": false,
+        "service_role_update": false,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": false,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "market_price_refresh_control_id_check",
+          "type": "c",
+          "definition": "CHECK (id IS TRUE)"
+        },
+        {
+          "name": "market_price_refresh_control_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "public.request_market_price_refresh"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "private",
+      "columns": [
+        {
+          "name": "request_id",
+          "type": "bigint",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "queued_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        },
+        {
+          "name": "provider",
+          "type": "text",
+          "default": "'CoinGecko'::text",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "name": "market_price_sync_requests_pkey",
+          "definition": "CREATE UNIQUE INDEX market_price_sync_requests_pkey ON private.market_price_sync_requests USING btree (request_id)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [],
+      "relation": "market_price_sync_requests",
+      "triggers": [],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": false,
+        "anon_update": false,
+        "service_role_delete": false,
+        "service_role_insert": false,
+        "service_role_select": false,
+        "service_role_update": false,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": false,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "market_price_sync_requests_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (request_id)"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "private.request_market_price_overflow",
+        "public.refresh_market_prices"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "coingecko_id",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "added_by",
+          "type": "uuid",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "name": "admin_market_listings_added_by_idx",
+          "definition": "CREATE INDEX admin_market_listings_added_by_idx ON public.admin_market_listings USING btree (added_by) WHERE (added_by IS NOT NULL)"
+        },
+        {
+          "name": "admin_market_listings_pkey",
+          "definition": "CREATE UNIQUE INDEX admin_market_listings_pkey ON public.admin_market_listings USING btree (coingecko_id)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [
+        {
+          "name": "admin_market_listings_public_read",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "true",
+          "command": "SELECT",
+          "with_check": null
+        }
+      ],
+      "relation": "admin_market_listings",
+      "triggers": [
+        {
+          "name": "admin_market_listing_unique_ticker",
+          "definition": "CREATE TRIGGER admin_market_listing_unique_ticker BEFORE INSERT OR UPDATE OF coingecko_id ON admin_market_listings FOR EACH ROW EXECUTE FUNCTION private.enforce_unique_admin_market_listing_symbol()"
+        }
+      ],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": false,
+        "anon_update": false,
+        "service_role_delete": true,
+        "service_role_insert": true,
+        "service_role_select": true,
+        "service_role_update": true,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": false,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "admin_market_listings_added_by_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (added_by) REFERENCES auth.users(id) ON DELETE SET NULL"
+        },
+        {
+          "name": "admin_market_listings_coingecko_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (coingecko_id) REFERENCES crypto_assets(coingecko_id) ON DELETE RESTRICT"
+        },
+        {
+          "name": "admin_market_listings_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (coingecko_id)"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "private.auto_activate_verified_exchange_pairs",
+        "private.auto_list_verified_exchange_asset",
+        "private.enforce_unique_admin_market_listing_symbol",
+        "private.request_market_price_overflow",
+        "public.admin_add_market_listing",
+        "public.admin_enable_market_pair",
+        "public.admin_exchange_asset_sync_report",
+        "public.admin_remove_market_listing",
+        "public.admin_review_market_listings",
+        "public.get_admin_market_listings",
+        "public.get_exchange_discovered_market_assets",
+        "public.refresh_market_prices"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "nullable": false
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "asset",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "balance",
+          "type": "numeric(28,8)",
+          "default": "0",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "name": "asset_balances_pkey",
+          "definition": "CREATE UNIQUE INDEX asset_balances_pkey ON public.asset_balances USING btree (id)"
+        },
+        {
+          "name": "asset_balances_user_asset_unique",
+          "definition": "CREATE UNIQUE INDEX asset_balances_user_asset_unique ON public.asset_balances USING btree (user_id, asset)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [
+        {
+          "name": "Users can view own asset balances",
+          "roles": [
+            "authenticated"
+          ],
+          "using": "((auth.uid() = user_id) AND current_account_is_active())",
+          "command": "SELECT",
+          "with_check": null
+        }
+      ],
+      "relation": "asset_balances",
+      "triggers": [],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": false,
+        "anon_update": false,
+        "service_role_delete": true,
+        "service_role_insert": true,
+        "service_role_select": true,
+        "service_role_update": true,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": true,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "asset_balances_asset_upper",
+          "type": "c",
+          "definition": "CHECK (asset = upper(asset))"
+        },
+        {
+          "name": "asset_balances_nonnegative",
+          "type": "c",
+          "definition": "CHECK (balance >= 0::numeric)"
+        },
+        {
+          "name": "asset_balances_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "asset_balances_user_asset_unique",
+          "type": "u",
+          "definition": "UNIQUE (user_id, asset)"
+        },
+        {
+          "name": "asset_balances_user_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "public.execute_demo_trade",
+        "public.place_conditional_exit_order",
+        "public.place_limit_order",
+        "public.place_stop_limit_order",
+        "public.process_limit_orders"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "request_id",
+          "type": "bigint",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "requested_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        },
+        {
+          "name": "processed_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "http_status",
+          "type": "integer",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "error_message",
+          "type": "text",
+          "default": null,
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "name": "bit24_exchange_sync_requests_pkey",
+          "definition": "CREATE UNIQUE INDEX bit24_exchange_sync_requests_pkey ON public.bit24_exchange_sync_requests USING btree (request_id)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [],
+      "relation": "bit24_exchange_sync_requests",
+      "triggers": [],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": false,
+        "anon_update": false,
+        "service_role_delete": true,
+        "service_role_insert": true,
+        "service_role_select": true,
+        "service_role_update": true,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": false,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "bit24_exchange_sync_requests_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (request_id)"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "public.admin_exchange_asset_sync_report",
+        "public.process_bit24_exchange_sync",
+        "public.request_bit24_exchange_sync"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "nullable": false
+        },
+        {
+          "name": "order_id",
+          "type": "uuid",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "symbol",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "side",
+          "type": "text",
+          "default": "'sell'::text",
+          "nullable": false
+        },
+        {
+          "name": "order_kind",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "trigger_price",
+          "type": "numeric",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "amount",
+          "type": "numeric",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "default": "'pending'::text",
+          "nullable": false
+        },
+        {
+          "name": "execution_order_id",
+          "type": "uuid",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "executed_price",
+          "type": "numeric",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "attempt_count",
+          "type": "integer",
+          "default": "0",
+          "nullable": false
+        },
+        {
+          "name": "last_error",
+          "type": "text",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "triggered_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "executed_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        },
+        {
+          "name": "limit_price",
+          "type": "numeric",
+          "default": null,
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "name": "conditional_orders_execution_order_id_idx",
+          "definition": "CREATE INDEX conditional_orders_execution_order_id_idx ON public.conditional_orders USING btree (execution_order_id)"
+        },
+        {
+          "name": "conditional_orders_order_id_key",
+          "definition": "CREATE UNIQUE INDEX conditional_orders_order_id_key ON public.conditional_orders USING btree (order_id)"
+        },
+        {
+          "name": "conditional_orders_pending_created_idx",
+          "definition": "CREATE INDEX conditional_orders_pending_created_idx ON public.conditional_orders USING btree (created_at) WHERE (status = 'pending'::text)"
+        },
+        {
+          "name": "conditional_orders_pkey",
+          "definition": "CREATE UNIQUE INDEX conditional_orders_pkey ON public.conditional_orders USING btree (id)"
+        },
+        {
+          "name": "conditional_orders_stop_limit_pending_idx",
+          "definition": "CREATE INDEX conditional_orders_stop_limit_pending_idx ON public.conditional_orders USING btree (created_at) WHERE ((order_kind = 'stop_limit'::text) AND (status = 'pending'::text))"
+        },
+        {
+          "name": "conditional_orders_user_status_created_idx",
+          "definition": "CREATE INDEX conditional_orders_user_status_created_idx ON public.conditional_orders USING btree (user_id, status, created_at DESC)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [
+        {
+          "name": "conditional_orders_select_own",
+          "roles": [
+            "authenticated"
+          ],
+          "using": "(( SELECT auth.uid() AS uid) = user_id)",
+          "command": "SELECT",
+          "with_check": null
+        }
+      ],
+      "relation": "conditional_orders",
+      "triggers": [],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": true,
+        "anon_update": false,
+        "service_role_delete": true,
+        "service_role_insert": true,
+        "service_role_select": true,
+        "service_role_update": true,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": true,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "conditional_orders_amount_check",
+          "type": "c",
+          "definition": "CHECK (amount > 0::numeric)"
+        },
+        {
+          "name": "conditional_orders_attempt_count_check",
+          "type": "c",
+          "definition": "CHECK (attempt_count >= 0)"
+        },
+        {
+          "name": "conditional_orders_executed_price_check",
+          "type": "c",
+          "definition": "CHECK (executed_price IS NULL OR executed_price > 0::numeric)"
+        },
+        {
+          "name": "conditional_orders_execution_order_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (execution_order_id) REFERENCES orders(id) ON DELETE SET NULL"
+        },
+        {
+          "name": "conditional_orders_order_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE"
+        },
+        {
+          "name": "conditional_orders_order_id_key",
+          "type": "u",
+          "definition": "UNIQUE (order_id)"
+        },
+        {
+          "name": "conditional_orders_order_kind_check",
+          "type": "c",
+          "definition": "CHECK (order_kind = ANY (ARRAY['take_profit'::text, 'stop_loss'::text, 'stop_limit'::text]))"
+        },
+        {
+          "name": "conditional_orders_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "conditional_orders_side_check",
+          "type": "c",
+          "definition": "CHECK (side = ANY (ARRAY['buy'::text, 'sell'::text]))"
+        },
+        {
+          "name": "conditional_orders_status_check",
+          "type": "c",
+          "definition": "CHECK (status = ANY (ARRAY['pending'::text, 'triggered'::text, 'filled'::text, 'cancelled'::text, 'rejected'::text]))"
+        },
+        {
+          "name": "conditional_orders_stop_limit_fields_chk",
+          "type": "c",
+          "definition": "CHECK (order_kind = 'stop_limit'::text AND limit_price IS NOT NULL AND limit_price > 0::numeric OR (order_kind = ANY (ARRAY['take_profit'::text, 'stop_loss'::text])) AND limit_price IS NULL)"
+        },
+        {
+          "name": "conditional_orders_symbol_check",
+          "type": "c",
+          "definition": "CHECK (symbol ~ '^[A-Z0-9]{2,15}USDT$'::text)"
+        },
+        {
+          "name": "conditional_orders_trigger_price_check",
+          "type": "c",
+          "definition": "CHECK (trigger_price > 0::numeric)"
+        },
+        {
+          "name": "conditional_orders_user_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "public.admin_disable_market_pair",
+        "public.cancel_conditional_exit_order",
+        "public.cancel_stop_limit_order",
+        "public.deactivate_my_account",
+        "public.place_conditional_exit_order",
+        "public.place_stop_limit_order",
+        "public.process_conditional_orders",
+        "public.process_stop_limit_orders"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "coingecko_id",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "symbol",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "image_url",
+          "type": "text",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "market_cap_rank",
+          "type": "integer",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "current_price_usd",
+          "type": "numeric(30,12)",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "price_toman",
+          "type": "numeric(30,2)",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "price_change_percentage_24h",
+          "type": "numeric(20,8)",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "market_cap_usd",
+          "type": "numeric(30,2)",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "total_volume_usd",
+          "type": "numeric(30,2)",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "last_updated",
+          "type": "timestamp with time zone",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "is_active",
+          "type": "boolean",
+          "default": "true",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "name": "crypto_assets_market_cap_idx",
+          "definition": "CREATE INDEX crypto_assets_market_cap_idx ON public.crypto_assets USING btree (market_cap_usd DESC)"
+        },
+        {
+          "name": "crypto_assets_name_idx",
+          "definition": "CREATE INDEX crypto_assets_name_idx ON public.crypto_assets USING btree (lower(name))"
+        },
+        {
+          "name": "crypto_assets_pkey",
+          "definition": "CREATE UNIQUE INDEX crypto_assets_pkey ON public.crypto_assets USING btree (coingecko_id)"
+        },
+        {
+          "name": "crypto_assets_rank_idx",
+          "definition": "CREATE INDEX crypto_assets_rank_idx ON public.crypto_assets USING btree (market_cap_rank)"
+        },
+        {
+          "name": "crypto_assets_symbol_idx",
+          "definition": "CREATE INDEX crypto_assets_symbol_idx ON public.crypto_assets USING btree (lower(symbol))"
+        },
+        {
+          "name": "crypto_assets_upper_symbol_active_idx",
+          "definition": "CREATE INDEX crypto_assets_upper_symbol_active_idx ON public.crypto_assets USING btree (upper(symbol)) WHERE (is_active IS TRUE)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [
+        {
+          "name": "crypto_assets_public_read",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "true",
+          "command": "SELECT",
+          "with_check": null
+        }
+      ],
+      "relation": "crypto_assets",
+      "triggers": [],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": true,
+        "anon_update": false,
+        "service_role_delete": true,
+        "service_role_insert": true,
+        "service_role_select": true,
+        "service_role_update": true,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": true,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "crypto_assets_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (coingecko_id)"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "private.auto_activate_verified_exchange_pairs",
+        "private.auto_list_verified_exchange_asset",
+        "private.enforce_unique_admin_market_listing_symbol",
+        "private.request_market_price_overflow",
+        "public.admin_add_market_listing",
+        "public.admin_enable_market_pair",
+        "public.admin_review_market_listings",
+        "public.admin_search_market_assets",
+        "public.get_admin_market_listings",
+        "public.get_exchange_discovered_market_assets",
+        "public.process_bit24_exchange_sync",
+        "public.process_iran_exchange_asset_sync",
+        "public.refresh_crypto_assets",
+        "public.refresh_crypto_assets_toman",
+        "public.refresh_market_prices"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "quote_asset",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "maker_fee_rate",
+          "type": "numeric(10,8)",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "taker_fee_rate",
+          "type": "numeric(10,8)",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "is_enabled",
+          "type": "boolean",
+          "default": "true",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "name": "demo_trading_fees_pkey",
+          "definition": "CREATE UNIQUE INDEX demo_trading_fees_pkey ON public.demo_trading_fees USING btree (quote_asset)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [],
+      "relation": "demo_trading_fees",
+      "triggers": [],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": false,
+        "anon_update": false,
+        "service_role_delete": true,
+        "service_role_insert": true,
+        "service_role_select": true,
+        "service_role_update": true,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": false,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "demo_trading_fees_maker_fee_rate_check",
+          "type": "c",
+          "definition": "CHECK (maker_fee_rate >= 0::numeric AND maker_fee_rate <= 0.05)"
+        },
+        {
+          "name": "demo_trading_fees_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (quote_asset)"
+        },
+        {
+          "name": "demo_trading_fees_quote_asset_check",
+          "type": "c",
+          "definition": "CHECK (quote_asset ~ '^[A-Z0-9]{2,12}$'::text)"
+        },
+        {
+          "name": "demo_trading_fees_taker_fee_rate_check",
+          "type": "c",
+          "definition": "CHECK (taker_fee_rate >= 0::numeric AND taker_fee_rate <= 0.05)"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "public.get_demo_trading_fee_rate"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "pair_symbol",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "base_coingecko_id",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "quote_asset",
+          "type": "text",
+          "default": "'USDT'::text",
+          "nullable": false
+        },
+        {
+          "name": "is_enabled",
+          "type": "boolean",
+          "default": "true",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "name": "demo_trading_pairs_pkey",
+          "definition": "CREATE UNIQUE INDEX demo_trading_pairs_pkey ON public.demo_trading_pairs USING btree (pair_symbol)"
+        },
+        {
+          "name": "demo_trading_pairs_unique_base",
+          "definition": "CREATE UNIQUE INDEX demo_trading_pairs_unique_base ON public.demo_trading_pairs USING btree (base_coingecko_id)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [
+        {
+          "name": "demo_trading_pairs_public_read",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "true",
+          "command": "SELECT",
+          "with_check": null
+        }
+      ],
+      "relation": "demo_trading_pairs",
+      "triggers": [],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": true,
+        "anon_update": false,
+        "service_role_delete": true,
+        "service_role_insert": true,
+        "service_role_select": true,
+        "service_role_update": true,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": true,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "demo_trading_pairs_base_coingecko_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (base_coingecko_id) REFERENCES crypto_assets(coingecko_id)"
+        },
+        {
+          "name": "demo_trading_pairs_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (pair_symbol)"
+        },
+        {
+          "name": "demo_trading_pairs_quote_check",
+          "type": "c",
+          "definition": "CHECK (quote_asset = 'USDT'::text)"
+        },
+        {
+          "name": "demo_trading_pairs_symbol_format",
+          "type": "c",
+          "definition": "CHECK (pair_symbol ~ '^[A-Z0-9]{2,15}USDT$'::text)"
+        },
+        {
+          "name": "demo_trading_pairs_unique_base",
+          "type": "u",
+          "definition": "UNIQUE (base_coingecko_id)"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "private.auto_activate_verified_exchange_pairs",
+        "private.auto_list_verified_exchange_asset",
+        "private.enforce_unique_admin_market_listing_symbol",
+        "private.request_market_price_overflow",
+        "public.admin_add_market_listing",
+        "public.admin_disable_market_pair",
+        "public.admin_enable_market_pair",
+        "public.admin_review_market_listings",
+        "public.execute_demo_trade",
+        "public.get_exchange_discovered_market_assets",
+        "public.place_conditional_exit_order",
+        "public.place_limit_order",
+        "public.place_stop_limit_order",
+        "public.process_limit_orders",
+        "public.refresh_market_prices"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "exchange",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "market_symbol",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "base_symbol",
+          "type": "text",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "quote_symbol",
+          "type": "text",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "asset_name",
+          "type": "text",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "coingecko_id",
+          "type": "text",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "match_status",
+          "type": "text",
+          "default": "'pending'::text",
+          "nullable": false
+        },
+        {
+          "name": "source_url",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "source_payload",
+          "type": "jsonb",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "is_active",
+          "type": "boolean",
+          "default": "true",
+          "nullable": false
+        },
+        {
+          "name": "first_seen_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        },
+        {
+          "name": "last_seen_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "name": "exchange_asset_observations_exchange_market_symbol_key",
+          "definition": "CREATE UNIQUE INDEX exchange_asset_observations_exchange_market_symbol_key ON public.exchange_asset_observations USING btree (exchange, market_symbol)"
+        },
+        {
+          "name": "exchange_asset_observations_match_idx",
+          "definition": "CREATE INDEX exchange_asset_observations_match_idx ON public.exchange_asset_observations USING btree (match_status, last_seen_at DESC)"
+        },
+        {
+          "name": "exchange_asset_observations_pkey",
+          "definition": "CREATE UNIQUE INDEX exchange_asset_observations_pkey ON public.exchange_asset_observations USING btree (id)"
+        },
+        {
+          "name": "exchange_asset_observations_symbol_idx",
+          "definition": "CREATE INDEX exchange_asset_observations_symbol_idx ON public.exchange_asset_observations USING btree (upper(base_symbol))"
+        }
+      ],
+      "relkind": "r",
+      "policies": [],
+      "relation": "exchange_asset_observations",
+      "triggers": [
+        {
+          "name": "trg_auto_list_verified_exchange_asset",
+          "definition": "CREATE TRIGGER trg_auto_list_verified_exchange_asset AFTER INSERT OR UPDATE OF match_status, coingecko_id, is_active ON exchange_asset_observations FOR EACH ROW EXECUTE FUNCTION private.auto_list_verified_exchange_asset()"
+        }
+      ],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": false,
+        "anon_update": false,
+        "service_role_delete": true,
+        "service_role_insert": true,
+        "service_role_select": true,
+        "service_role_update": true,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": false,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "exchange_asset_observations_coingecko_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (coingecko_id) REFERENCES crypto_assets(coingecko_id) ON UPDATE CASCADE ON DELETE SET NULL"
+        },
+        {
+          "name": "exchange_asset_observations_exchange_check",
+          "type": "c",
+          "definition": "CHECK (exchange = ANY (ARRAY['nobitex'::text, 'wallex'::text, 'bitpin'::text, 'ramzinex'::text, 'tabdeal'::text, 'ompfinex'::text, 'exir'::text, 'bit24'::text, 'balinex'::text, 'abantether'::text, 'okex'::text, 'tetherland'::text, 'kifpool'::text]))"
+        },
+        {
+          "name": "exchange_asset_observations_exchange_market_symbol_key",
+          "type": "u",
+          "definition": "UNIQUE (exchange, market_symbol)"
+        },
+        {
+          "name": "exchange_asset_observations_match_status_check",
+          "type": "c",
+          "definition": "CHECK (match_status = ANY (ARRAY['pending'::text, 'matched'::text, 'ambiguous'::text, 'unmatched'::text]))"
+        },
+        {
+          "name": "exchange_asset_observations_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "private.auto_activate_verified_exchange_pairs",
+        "public.admin_exchange_asset_sync_report",
+        "public.get_exchange_discovered_market_assets",
+        "public.process_bit24_exchange_sync",
+        "public.process_iran_exchange_asset_sync"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "request_id",
+          "type": "bigint",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "exchange",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "requested_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        },
+        {
+          "name": "processed_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "http_status",
+          "type": "integer",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "error_message",
+          "type": "text",
+          "default": null,
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "name": "exchange_asset_sync_requests_pkey",
+          "definition": "CREATE UNIQUE INDEX exchange_asset_sync_requests_pkey ON public.exchange_asset_sync_requests USING btree (request_id)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [],
+      "relation": "exchange_asset_sync_requests",
+      "triggers": [],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": false,
+        "anon_update": false,
+        "service_role_delete": true,
+        "service_role_insert": true,
+        "service_role_select": true,
+        "service_role_update": true,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": false,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "exchange_asset_sync_requests_exchange_check",
+          "type": "c",
+          "definition": "CHECK (exchange = ANY (ARRAY['nobitex'::text, 'wallex'::text, 'tabdeal'::text, 'ompfinex'::text, 'exir'::text, 'abantether'::text, 'kifpool'::text]))"
+        },
+        {
+          "name": "exchange_asset_sync_requests_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (request_id)"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "public.admin_exchange_asset_sync_report",
+        "public.process_iran_exchange_asset_sync",
+        "public.request_iran_exchange_asset_sync"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "symbol",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "price_toman",
+          "type": "numeric",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "source",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        },
+        {
+          "name": "source_updated_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "is_stale",
+          "type": "boolean",
+          "default": "true",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "name": "market_fx_rates_pkey",
+          "definition": "CREATE UNIQUE INDEX market_fx_rates_pkey ON public.market_fx_rates USING btree (symbol)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [
+        {
+          "name": "Allow public read FX rates",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "true",
+          "command": "SELECT",
+          "with_check": null
+        }
+      ],
+      "relation": "market_fx_rates",
+      "triggers": [],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": true,
+        "anon_update": false,
+        "service_role_delete": true,
+        "service_role_insert": true,
+        "service_role_select": true,
+        "service_role_update": true,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": true,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "market_fx_rates_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (symbol)"
+        },
+        {
+          "name": "market_fx_rates_price_toman_check",
+          "type": "c",
+          "definition": "CHECK (price_toman > 0::numeric)"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "public.refresh_crypto_assets",
+        "public.refresh_crypto_assets_toman",
+        "public.refresh_market_fx_rate"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "symbol",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "price",
+          "type": "numeric(38,18)",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "source",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "name": "market_prices_pkey",
+          "definition": "CREATE UNIQUE INDEX market_prices_pkey ON public.market_prices USING btree (symbol)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [
+        {
+          "name": "Authenticated users can view market prices",
+          "roles": [
+            "authenticated"
+          ],
+          "using": "true",
+          "command": "SELECT",
+          "with_check": null
+        },
+        {
+          "name": "market_prices_anon_public_read",
+          "roles": [
+            "anon"
+          ],
+          "using": "true",
+          "command": "SELECT",
+          "with_check": null
+        }
+      ],
+      "relation": "market_prices",
+      "triggers": [],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": true,
+        "anon_update": false,
+        "service_role_delete": true,
+        "service_role_insert": true,
+        "service_role_select": true,
+        "service_role_update": true,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": true,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "market_prices_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (symbol)"
+        },
+        {
+          "name": "market_prices_price_check",
+          "type": "c",
+          "definition": "CHECK (price > 0::numeric)"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "private.auto_activate_verified_exchange_pairs",
+        "public.admin_enable_market_pair",
+        "public.admin_review_market_listings",
+        "public.execute_demo_trade",
+        "public.get_admin_market_listings",
+        "public.get_exchange_discovered_market_assets",
+        "public.process_conditional_orders",
+        "public.process_limit_orders",
+        "public.process_stop_limit_orders",
+        "public.refresh_market_prices"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "nullable": false
+        },
+        {
+          "name": "order_id",
+          "type": "uuid",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "asset",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "reserved_amount",
+          "type": "numeric",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "released_amount",
+          "type": "numeric",
+          "default": "0",
+          "nullable": false
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "default": "'reserved'::text",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": false
+        },
+        {
+          "name": "consumed_amount",
+          "type": "numeric",
+          "default": "0",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "name": "order_reservations_order_unique",
+          "definition": "CREATE UNIQUE INDEX order_reservations_order_unique ON public.order_reservations USING btree (order_id)"
+        },
+        {
+          "name": "order_reservations_pkey",
+          "definition": "CREATE UNIQUE INDEX order_reservations_pkey ON public.order_reservations USING btree (id)"
+        },
+        {
+          "name": "order_reservations_user_status_idx",
+          "definition": "CREATE INDEX order_reservations_user_status_idx ON public.order_reservations USING btree (user_id, status)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [
+        {
+          "name": "Users can view own order reservations",
+          "roles": [
+            "authenticated"
+          ],
+          "using": "(auth.uid() = user_id)",
+          "command": "SELECT",
+          "with_check": null
+        }
+      ],
+      "relation": "order_reservations",
+      "triggers": [],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": false,
+        "anon_update": false,
+        "service_role_delete": true,
+        "service_role_insert": true,
+        "service_role_select": true,
+        "service_role_update": true,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": false,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "order_reservations_accounting_check",
+          "type": "c",
+          "definition": "CHECK (consumed_amount >= 0::numeric AND (consumed_amount + released_amount) <= reserved_amount)"
+        },
+        {
+          "name": "order_reservations_amount_check",
+          "type": "c",
+          "definition": "CHECK (released_amount <= reserved_amount)"
+        },
+        {
+          "name": "order_reservations_order_user_fk",
+          "type": "f",
+          "definition": "FOREIGN KEY (order_id, user_id) REFERENCES orders(id, user_id) ON DELETE CASCADE"
+        },
+        {
+          "name": "order_reservations_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "order_reservations_released_amount_check",
+          "type": "c",
+          "definition": "CHECK (released_amount >= 0::numeric)"
+        },
+        {
+          "name": "order_reservations_reserved_amount_check",
+          "type": "c",
+          "definition": "CHECK (reserved_amount > 0::numeric)"
+        },
+        {
+          "name": "order_reservations_status_check",
+          "type": "c",
+          "definition": "CHECK (status = ANY (ARRAY['reserved'::text, 'released'::text, 'consumed'::text]))"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "private.admin_adjust_wallet",
+        "public.admin_disable_market_pair",
+        "public.cancel_conditional_exit_order",
+        "public.cancel_limit_order",
+        "public.cancel_stop_limit_order",
+        "public.deactivate_my_account",
+        "public.execute_demo_trade",
+        "public.get_my_order_reservations",
+        "public.place_conditional_exit_order",
+        "public.place_limit_order",
+        "public.place_stop_limit_order",
+        "public.process_conditional_orders",
+        "public.process_limit_orders",
+        "public.process_stop_limit_orders"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "nullable": false
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "symbol",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "side",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "order_type",
+          "type": "text",
+          "default": "'market'::text",
+          "nullable": false
+        },
+        {
+          "name": "amount",
+          "type": "numeric(24,8)",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "price",
+          "type": "numeric(24,8)",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "default": "'pending'::text",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": true
+        },
+        {
+          "name": "filled_amount",
+          "type": "numeric",
+          "default": "0",
+          "nullable": false
+        },
+        {
+          "name": "remaining_amount",
+          "type": "numeric",
+          "default": null,
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "name": "orders_id_user_id_unique",
+          "definition": "CREATE UNIQUE INDEX orders_id_user_id_unique ON public.orders USING btree (id, user_id)"
+        },
+        {
+          "name": "orders_limit_active_created_at_idx",
+          "definition": "CREATE INDEX orders_limit_active_created_at_idx ON public.orders USING btree (created_at) WHERE ((order_type = 'limit'::text) AND (status = ANY (ARRAY['pending'::text, 'partially_filled'::text])))"
+        },
+        {
+          "name": "orders_pkey",
+          "definition": "CREATE UNIQUE INDEX orders_pkey ON public.orders USING btree (id)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [
+        {
+          "name": "View own orders",
+          "roles": [
+            "authenticated"
+          ],
+          "using": "((auth.uid() = user_id) AND current_account_is_active())",
+          "command": "SELECT",
+          "with_check": null
+        }
+      ],
+      "relation": "orders",
+      "triggers": [
+        {
+          "name": "guard_active_account_orders",
+          "definition": "CREATE TRIGGER guard_active_account_orders BEFORE INSERT ON orders FOR EACH ROW EXECUTE FUNCTION private.guard_active_account_writes()"
+        }
+      ],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": false,
+        "anon_update": false,
+        "service_role_delete": true,
+        "service_role_insert": true,
+        "service_role_select": true,
+        "service_role_update": true,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": true,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "orders_amount_accounting_chk",
+          "type": "c",
+          "definition": "CHECK ((filled_amount + remaining_amount) = amount)"
+        },
+        {
+          "name": "orders_amount_positive",
+          "type": "c",
+          "definition": "CHECK (amount > 0::numeric)"
+        },
+        {
+          "name": "orders_filled_amount_range_chk",
+          "type": "c",
+          "definition": "CHECK (filled_amount >= 0::numeric AND filled_amount <= amount)"
+        },
+        {
+          "name": "orders_id_user_id_unique",
+          "type": "u",
+          "definition": "UNIQUE (id, user_id)"
+        },
+        {
+          "name": "orders_limit_price_required_chk",
+          "type": "c",
+          "definition": "CHECK (order_type <> 'limit'::text OR price IS NOT NULL)"
+        },
+        {
+          "name": "orders_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "orders_price_positive",
+          "type": "c",
+          "definition": "CHECK (price IS NULL OR price > 0::numeric)"
+        },
+        {
+          "name": "orders_remaining_amount_range_chk",
+          "type": "c",
+          "definition": "CHECK (remaining_amount >= 0::numeric AND remaining_amount <= amount)"
+        },
+        {
+          "name": "orders_side_check",
+          "type": "c",
+          "definition": "CHECK (side = ANY (ARRAY['buy'::text, 'sell'::text]))"
+        },
+        {
+          "name": "orders_status_valid",
+          "type": "c",
+          "definition": "CHECK (status = ANY (ARRAY['pending'::text, 'partially_filled'::text, 'triggered'::text, 'filled'::text, 'cancelled'::text, 'rejected'::text]))"
+        },
+        {
+          "name": "orders_type_valid",
+          "type": "c",
+          "definition": "CHECK (order_type = ANY (ARRAY['market'::text, 'limit'::text, 'conditional'::text]))"
+        },
+        {
+          "name": "orders_user_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "public.admin_disable_market_pair",
+        "public.cancel_conditional_exit_order",
+        "public.cancel_limit_order",
+        "public.cancel_stop_limit_order",
+        "public.deactivate_my_account",
+        "public.execute_demo_trade",
+        "public.place_conditional_exit_order",
+        "public.place_limit_order",
+        "public.place_stop_limit_order",
+        "public.process_conditional_orders",
+        "public.process_limit_orders",
+        "public.process_stop_limit_orders"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "email",
+          "type": "text",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": true
+        },
+        {
+          "name": "is_active",
+          "type": "boolean",
+          "default": "true",
+          "nullable": false
+        },
+        {
+          "name": "deactivated_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "name": "profiles_pkey",
+          "definition": "CREATE UNIQUE INDEX profiles_pkey ON public.profiles USING btree (id)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [
+        {
+          "name": "View own profile",
+          "roles": [
+            "public"
+          ],
+          "using": "(auth.uid() = id)",
+          "command": "SELECT",
+          "with_check": null
+        }
+      ],
+      "relation": "profiles",
+      "triggers": [],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": false,
+        "anon_update": false,
+        "service_role_delete": true,
+        "service_role_insert": true,
+        "service_role_select": true,
+        "service_role_update": true,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": true,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "profiles_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE"
+        },
+        {
+          "name": "profiles_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "private.admin_adjust_wallet",
+        "private.admin_list_users",
+        "private.guard_active_account_writes",
+        "public.current_account_is_active",
+        "public.deactivate_my_account",
+        "public.new_user_setup",
+        "public.process_conditional_orders",
+        "public.process_limit_orders",
+        "public.process_stop_limit_orders",
+        "public.reactivate_my_account",
+        "public.request_market_price_refresh"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "nullable": false
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "symbol",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "side",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "amount",
+          "type": "numeric(24,8)",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "price",
+          "type": "numeric(24,8)",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": true
+        },
+        {
+          "name": "order_id",
+          "type": "uuid",
+          "default": null,
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "name": "trades_order_id_created_at_idx",
+          "definition": "CREATE INDEX trades_order_id_created_at_idx ON public.trades USING btree (order_id, created_at)"
+        },
+        {
+          "name": "trades_pkey",
+          "definition": "CREATE UNIQUE INDEX trades_pkey ON public.trades USING btree (id)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [
+        {
+          "name": "View own trades",
+          "roles": [
+            "authenticated"
+          ],
+          "using": "((auth.uid() = user_id) AND current_account_is_active())",
+          "command": "SELECT",
+          "with_check": null
+        }
+      ],
+      "relation": "trades",
+      "triggers": [
+        {
+          "name": "guard_active_account_trades",
+          "definition": "CREATE TRIGGER guard_active_account_trades BEFORE INSERT ON trades FOR EACH ROW EXECUTE FUNCTION private.guard_active_account_writes()"
+        }
+      ],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": false,
+        "anon_update": false,
+        "service_role_delete": true,
+        "service_role_insert": true,
+        "service_role_select": true,
+        "service_role_update": true,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": true,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "trades_amount_positive",
+          "type": "c",
+          "definition": "CHECK (amount > 0::numeric)"
+        },
+        {
+          "name": "trades_order_id_fk",
+          "type": "f",
+          "definition": "FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL"
+        },
+        {
+          "name": "trades_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "trades_price_positive",
+          "type": "c",
+          "definition": "CHECK (price > 0::numeric)"
+        },
+        {
+          "name": "trades_side_valid",
+          "type": "c",
+          "definition": "CHECK (side = ANY (ARRAY['buy'::text, 'sell'::text]))"
+        },
+        {
+          "name": "trades_user_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "public.execute_demo_trade",
+        "public.process_limit_orders"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "nullable": false
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "currency",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "amount",
+          "type": "numeric(24,8)",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "transaction_type",
+          "type": "text",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "default": null,
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "name": "transactions_pkey",
+          "definition": "CREATE UNIQUE INDEX transactions_pkey ON public.transactions USING btree (id)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [
+        {
+          "name": "View own transactions",
+          "roles": [
+            "authenticated"
+          ],
+          "using": "((auth.uid() = user_id) AND current_account_is_active())",
+          "command": "SELECT",
+          "with_check": null
+        }
+      ],
+      "relation": "transactions",
+      "triggers": [
+        {
+          "name": "guard_active_account_transactions",
+          "definition": "CREATE TRIGGER guard_active_account_transactions BEFORE INSERT ON transactions FOR EACH ROW EXECUTE FUNCTION private.guard_active_account_writes()"
+        }
+      ],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": false,
+        "anon_update": false,
+        "service_role_delete": true,
+        "service_role_insert": true,
+        "service_role_select": true,
+        "service_role_update": true,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": true,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "transactions_amount_nonzero",
+          "type": "c",
+          "definition": "CHECK (amount <> 0::numeric)"
+        },
+        {
+          "name": "transactions_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "transactions_user_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "private.admin_adjust_wallet",
+        "public.execute_demo_trade",
+        "public.process_limit_orders"
+      ]
+    },
+    {
+      "owner": "postgres",
+      "schema": "public",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "nullable": false
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "default": null,
+          "nullable": false
+        },
+        {
+          "name": "balance_usdt",
+          "type": "numeric(24,8)",
+          "default": "200",
+          "nullable": false
+        },
+        {
+          "name": "balance_irr",
+          "type": "numeric(24,0)",
+          "default": "1000000000",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "name": "wallets_pkey",
+          "definition": "CREATE UNIQUE INDEX wallets_pkey ON public.wallets USING btree (id)"
+        },
+        {
+          "name": "wallets_user_id_key",
+          "definition": "CREATE UNIQUE INDEX wallets_user_id_key ON public.wallets USING btree (user_id)"
+        }
+      ],
+      "relkind": "r",
+      "policies": [
+        {
+          "name": "View own wallet",
+          "roles": [
+            "authenticated"
+          ],
+          "using": "((auth.uid() = user_id) AND current_account_is_active())",
+          "command": "SELECT",
+          "with_check": null
+        }
+      ],
+      "relation": "wallets",
+      "triggers": [],
+      "privileges": {
+        "anon_delete": false,
+        "anon_insert": false,
+        "anon_select": false,
+        "anon_update": false,
+        "service_role_delete": true,
+        "service_role_insert": true,
+        "service_role_select": true,
+        "service_role_update": true,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": true,
+        "authenticated_update": false
+      },
+      "rls_forced": false,
+      "constraints": [
+        {
+          "name": "wallets_nonnegative_balance",
+          "type": "c",
+          "definition": "CHECK (balance_usdt >= 0::numeric AND balance_irr >= 0::numeric)"
+        },
+        {
+          "name": "wallets_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "wallets_user_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+        },
+        {
+          "name": "wallets_user_id_key",
+          "type": "u",
+          "definition": "UNIQUE (user_id)"
+        }
+      ],
+      "rls_enabled": true,
+      "referenced_by": [
+        "private.admin_adjust_wallet",
+        "private.admin_list_users",
+        "public.execute_demo_trade",
+        "public.new_user_setup",
+        "public.place_conditional_exit_order",
+        "public.place_limit_order",
+        "public.place_stop_limit_order",
+        "public.process_limit_orders"
+      ]
+    }
+  ],
+  "limitations": [
+    "Relation references are discovered by a static scan for schema-qualified FROM, JOIN, UPDATE, INTO, REFERENCES and TRUNCATE tokens. Dynamic SQL, unqualified identifiers, trigger-only dependencies and indirect calls may not be captured.",
+    "A candidate is retained only if it resolves to an actual catalog relation in Production. CTE names and non-relation tokens are therefore excluded.",
+    "This file captures schema metadata, not table rows. No user, wallet, order, trade, reservation or transaction row data was read.",
+    "The inventory is a timestamped Production snapshot, not an executable schema migration or a substitute for authoritative migration history."
+  ]
+}
