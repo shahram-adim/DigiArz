@@ -1435,3 +1435,11 @@
 3. پس از بازیابی schema، snapshotهای واقعی `place_limit_order`, `cancel_limit_order` و worker را در PostgreSQL 17 دورریختنی اجرا کن؛ سپس partial/full fill، cancel/trigger race و idempotency را روی همان source اجرا کن.
 4. اختلاف قفل child row در worker Production (`c,parent`) با candidate (`c,parent,child`) را جداگانه تحلیل کن؛ بدون تأیید، Production را تغییر نده.
 5. `db push`، deploy تابع و هر تغییر مجوز حساس همچنان مسدود بماند.
+
+
+### پس‌آزمون محلی و بازبینی نهایی — ۲۰۲۶-۱۱-۲۶
+- [x] محتوای سه فایل جدید از main دریافت شد و با نسخه‌های محلی آزمون از طریق Git blob SHA تطبیق byte-for-byte داشت: test `2cadc6bc7773a15a458b648557c4d15efc249bd2`، snapshot ثبت Limit `9e9d619196bc9ce4104d6208aed7cbe853465d18`، snapshot لغو Limit `18c363097173939429756f56fe9773e554937f39`.
+- [x] `node --check` با Node.js `v22.16.0` روی همان محتوای دقیق آزمون موفق شد.
+- [x] `node --test` برای `stop-limit-production-entrypoint-source.test.js` اجرا شد: ۵ آزمون، ۵ موفق، صفر شکست.
+- [x] تطبیق مستقیم snapshotهای GitHub با خروجی تازه `pg_get_functiondef` در Production نیز byte-for-byte موفق شد؛ fingerprintها و ACLهای ثبت‌شده با وضعیت زنده برابرند.
+- [!] GitHub Combined Status برای کامیت نهایی در این اتصال خالی برگشت و ابزار workflow فقط اجراهای pull-request را نمایش می‌دهد؛ بنابراین نتیجهٔ push-triggered CI برای کامیت‌های جدید هنوز قابل تأیید نیست. CI قبلی Run #1974 روی commit `e9339bd` موفق بود، اما آن را به این commitهای جدید تعمیم نمی‌دهیم.
