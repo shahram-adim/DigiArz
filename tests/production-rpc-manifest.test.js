@@ -301,3 +301,28 @@ test('security-invoker market views cannot exceed captured underlying anon base-
     'public.market_toman_performance'
   ]);
 });
+
+
+test('Production RPC role ACL matrix covers all 46 signatures and preserves the captured role expectations', () => {
+  const matrix = JSON.parse(fs.readFileSync('supabase/audit/production_rpc_role_matrix_2026-11-25.json', 'utf8'));
+  assert.equal(matrix.function_count, 46);
+  assert.equal(matrix.functions.length, 46);
+  assert.deepEqual(matrix.roles, ['anon', 'authenticated', 'service_role', 'postgres']);
+  const identities = new Set(matrix.functions.map(fn => fn.identity));
+  assert.equal(identities.size, 46, 'role matrix must contain every function identity exactly once');
+  for (const fn of matrix.functions) {
+    assert.equal(fn.owner, 'postgres', fn.identity);
+    assert.match(fn.definition_md5, /^[a-f0-9]{32}$/i, fn.identity);
+    assert.equal(fn.expected_execute.postgres, true, fn.identity);
+    assert.equal(fn.expected_execute.anon, fn.public_execute ? fn.expected_execute.anon : fn.expected_execute.anon);
+    assert.equal(fn.expected_execute.anon, /(?:^|,)anon=X\\//.test(fn.acl_snapshot), fn.identity + ' anon ACL mismatch');
+    assert.equal(fn.expected_execute.authenticated, /(?:^|,)authenticated=X\\//.test(fn.acl_snapshot), fn.identity + ' authenticated ACL mismatch');
+    assert.equal(fn.expected_execute.service_role, /(?:^|,)service_role=X\\//.test(fn.acl_snapshot), fn.identity + ' service_role ACL mismatch');
+    assert.equal(fn.public_execute, /(?:^|\\{)X\\//.test(fn.acl_snapshot), fn.identity + ' PUBLIC ACL mismatch');
+  }
+  assert.deepEqual(
+    matrix.functions.filter(fn => fn.expected_execute.anon).map(fn => fn.identity).sort(),
+    ['public.get_admin_market_listings()', 'public.get_exchange_discovered_market_assets()']
+  );
+  assert.ok(matrix.limitations.some(x => /does not execute functions/.test(x)));
+});
