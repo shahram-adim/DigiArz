@@ -202,12 +202,13 @@ The plan above remains the authority for full Production-parity testing. The fol
 - The test-only `auth.uid()` shim reads the transaction-local synthetic subject; it is not a JWT verifier and is not production code.
 - The exact read-only Production body of `public.admin_exchange_asset_sync_report()` was exercised against empty synthetic reporting tables.
 - The separate fixture contract passed: exact zero-argument signature, SECURITY DEFINER, empty search_path, anon EXECUTE denied, authenticated/service_role EXECUTE present, and no direct PUBLIC EXECUTE.
+- The complete current-state catalog contract also passed for all **46 exact SECURITY DEFINER signatures**, including effective EXECUTE booleans for anon/authenticated/service_role, constrained search_path, no direct PUBLIC EXECUTE, and the six schema-USAGE expectations. The 43 non-exercised function bodies are inert metadata-only stubs; only the three reviewed helper/report bodies are installed, and only the read-only report RPC is invoked.
 - Function-body tests passed: anon and ordinary authenticated both received SQLSTATE `42501`; the synthetic super-admin received the expected JSON report. The transaction rolled back and the post-check confirmed exactly one synthetic admin fixture.
 - Both GitHub Actions runs associated with head `2ccd668038adddf7cdee0944f02089dacad34f5d` completed the `postgres17-rpc-smoke` and `unit-tests` jobs successfully. The pre-existing remote `rpc-security-integration` job remained skipped.
 
 ### What this result does not prove
 
-This is a PostgreSQL 17 behavior smoke test for one read-only admin RPC, **not** a Production-parity pass. It does not test all 46 SECURITY DEFINER signatures, the future-function default ACL contract, all RLS/table grants, the real Supabase Auth trigger, `pg_cron`, or the remaining function dependency graphs. It does not resolve the owner decision about the future `service_role` EXECUTE defaults.
+This is a PostgreSQL 17 smoke test that validates the 46-signature current-state ACL metadata contract and exercises one read-only admin RPC body, **not** a Production-parity pass. It does not validate the future-function default ACL contract, all RLS/table grants, the real Supabase Auth trigger, `pg_cron`, or the 43 stubbed function bodies and their dependency graphs. It does not resolve the owner decision about the future `service_role` EXECUTE defaults.
 
 The Recovery-Test project remains unsuitable and untouched. The missing-migration/source reconciliation remains a blocker to full schema replay. No persistent Supabase database, GitHub secret, CI variable, Production object, ACL, trigger, Cron job, or financial record was changed.
 
