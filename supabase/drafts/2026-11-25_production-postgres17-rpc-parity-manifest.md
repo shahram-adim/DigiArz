@@ -143,3 +143,15 @@ Owner decision remains OPEN. Do not run `GRANT`, `REVOKE`, `ALTER DEFAULT PRIVIL
 - Baseline CI for the 46-signature metadata contract passed previously; four real bodies now exist in the disposable fixture, with 42 metadata-only stubs.
 - CI #277 passed after the claim rollback post-check: https://github.com/shahram-adim/DigiArz/actions/runs/45600722397
 - This manifest is an evidence tracker, not proof that all fields are complete or that Production parity is achieved.
+
+
+### Exact return types established for the four real fixture bodies
+
+| Function | Return type in reviewed source |
+|---|---|
+| `private.is_super_admin()` | `boolean` |
+| `private.is_current_user_super_admin()` | `boolean` |
+| `public.admin_exchange_asset_sync_report()` | `jsonb` |
+| `public.claim_admin_asset_refresh(text,uuid)` | `boolean` |
+
+These four types are source-backed for the reviewed fixture bodies only. The remaining 42 Production return types are still unknown in this artifact; their fixture `void` type is deliberately excluded as evidence.
