@@ -374,7 +374,10 @@ AS $function$
            o.exchange, o.last_seen_at, o.match_status
     FROM public.exchange_asset_observations AS o
     WHERE o.is_active IS TRUE
-      AND o.base_symbol ~ '^[A-Z0-9]{2,20}      AND o.last_seen_at >= pg_catalog.now() - interval '48 hours'
+      AND o.base_symbol ~ '^[A-Z0-9]{2,20}'
+      AND o.base_symbol !~ '[^A-Z0-9]'
+      AND pg_catalog.length(o.base_symbol) BETWEEN 2 AND 20
+      AND o.last_seen_at >= pg_catalog.now() - interval '48 hours'
       AND o.match_status IN ('pending', 'ambiguous', 'unmatched')
       AND coalesce(o.asset_name, '') !~* '(stock|equity|shares|xstock|tokenized)'
       AND NOT EXISTS (
