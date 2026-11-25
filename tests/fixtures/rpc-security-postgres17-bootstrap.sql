@@ -261,10 +261,15 @@ CREATE TABLE public.crypto_assets (
   name text NOT NULL,
   image_url text,
   market_cap_rank integer,
+  current_price_usd numeric,
+  market_cap_usd numeric,
   price_toman numeric,
   price_change_percentage_24h numeric,
   total_volume_usd numeric,
-  is_active boolean NOT NULL DEFAULT true
+  last_updated timestamptz,
+  is_active boolean NOT NULL DEFAULT true,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE TABLE public.market_prices (
