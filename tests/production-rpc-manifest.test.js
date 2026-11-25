@@ -207,6 +207,12 @@ test('migration dossier includes all captured cron command and trigger fingerpri
   assert.equal(cronFingerprints.length, 4);
   const triggerFingerprints = [...dossier.matchAll(/\| `(?:trg_auto_list_verified_exchange_asset|admin_market_listing_unique_ticker|guard_active_account_orders|guard_active_account_trades|guard_active_account_transactions|on_auth_user_created)` \| `[^`]+` \| `[^`]+` \| `[a-f0-9]{32}` \|/g)];
   assert.equal(triggerFingerprints.length, 6);
+  const invokedRoutineRows = [...dossier.matchAll(/\\| \\d+ \\| `(?:public|private)\\.[^`]+\\(\\)` \\| `[a-f0-9]{32}` \| `[a-f0-9]{32}` \|/g)];
+  assert.equal(invokedRoutineRows.length, 4);
+  assert.ok(dossier.includes('public.recover_stale_crypto_assets_sync()'));
+  assert.ok(dossier.includes('public.request_iran_exchange_asset_sync()'));
+  assert.ok(dossier.includes('public.process_iran_exchange_asset_sync()'));
+  assert.ok(dossier.includes('private.auto_activate_verified_exchange_pairs()'));
   for (const trigger of ['trg_auto_list_verified_exchange_asset', 'admin_market_listing_unique_ticker', 'guard_active_account_orders', 'guard_active_account_trades', 'guard_active_account_transactions', 'on_auth_user_created']) {
     assert.ok(dossier.includes(trigger));
   }
