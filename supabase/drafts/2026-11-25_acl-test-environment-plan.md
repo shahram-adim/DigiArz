@@ -165,3 +165,30 @@ Additional static review findings:
 Recommended next review unit: prepare a separate, non-executable exact-signature ACL matrix (current Production state versus proposed target state), with each function's owner, SECURITY DEFINER flag, search_path, current effective API roles, observed caller, and proposed required roles. Mark `claim_admin_asset_refresh(text,uuid)` as unresolved. Do not generate executable GRANT/REVOKE statements until every row has a verified caller and the owner approves the target policy.
 
 This section is evidence/review documentation only. No SQL test was run, no CI workflow or gate was changed, and no database object or privilege was modified.
+
+
+## 10. Follow-up: exact-signature contract and parity preflight (2026-11-25)
+
+### Repository state revalidated
+- PR #62 remains open, Draft, unmerged; latest head at the start of this review was `40cb62b7c74861441862bb42bd5a45ca683a2bb7`.
+- The workflow on that head completed successfully for `unit-tests`; `rpc-security-integration` remains intentionally skipped.
+- The updated `tests/rpc-security-catalog.sql` now compares exact tuples of schema, function name, identity arguments, and effective EXECUTE booleans for anon/authenticated/service_role. Its inventory contains 46 reviewed SECURITY DEFINER signatures.
+- The SQL test also asserts the observed schema USAGE matrix and constrained search_path / no direct PUBLIC EXECUTE conditions.
+- The schema USAGE matrix was independently re-read from Production: public USAGE is true for anon/authenticated/service_role; private USAGE is false for anon/service_role and true for authenticated. These six values match the test contract.
+- This contract is a current-state regression snapshot only. It is not the proposed post-hardening target.
+
+### Test environment decision
+- Existing `DigiArz-Recovery-Test` is currently `ACTIVE_HEALTHY` on PostgreSQL 17.11, but remains non-parity: it lacks matching Production explicit function ACLs, relevant default ACL rows, `cron.job`, and the Auth user-creation trigger.
+- Its healthy status does not make it safe or valid for this test. Do not run the exact Production snapshot test there and do not claim a pass/fail based on its known structural mismatch.
+- No new Supabase project or branch was created. No branch provisioning was attempted because it can incur compute/usage charges and requires explicit cost approval.
+- No production or test database DDL, grants, revokes, function invocation, fixture insertion, trigger change, or Cron action was performed.
+
+### Remaining parity blockers
+1. The owner/reviewer must choose between the two conflicting service_role future-function default policies encoded in `tests/default-function-acl-hardening.sql` and `supabase/drafts/2026-11-25_proposed_restrict_default_public_function_exec.sql`. Do not silently align either artifact.
+2. Decide and approve the isolated environment provisioning method and any cost. Preferred route is a zero-real-data disposable database with synthetic Auth identities, no copied secrets, and inert Cron fixtures. If the supported route costs money or requires a paid tier, stop.
+3. Build a parity manifest and compare exact signatures, owners, security modes, search_path, effective API-role ACLs, default ACLs per grantor, schema USAGE, extensions, Auth trigger, and Cron identities before running any test.
+4. Preserve all production schedules as evidence only. Never import live worker commands or invoke real exchange, price, order, notification, or payment side effects in the disposable environment.
+5. Keep `claim_admin_asset_refresh(text,uuid)` unresolved until external/manual callers and its intended rate-limit design are investigated.
+6. Only after the policy conflict and parity preconditions are resolved, prepare positive/negative per-signature authorization tests and inert Auth/Cron tests. Enable the CI integration job only after a separate explicit approval.
+
+The test environment is NOT ready. The only completed work in this follow-up is read-only inspection plus repository documentation; no environment provisioning or database test execution occurred.
