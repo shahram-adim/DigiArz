@@ -128,3 +128,30 @@ This report is an inventory and safety analysis only. It changes no database obj
 - [!] این داده‌ها نشانهٔ پایداری بهتر worker در پنجرهٔ اخیرند، اما علت ریشه‌ای شکست‌های قبلی یا اثر مستقل هر Migration را اثبات نمی‌کنند. زمان اجرای job 14 همچنان حدود ۲۰ تا ۲۸ ثانیه است و باید در محیط ایزوله تحلیل شود.
 - [x] هیچ cron، Migration، تابع، schema، grant، queue، سفارش، معامله، رزرو، کیف پول، موجودی یا سابقهٔ مالی در Production تغییر نکرد.
 - [ ] اقدام بعدی: SQL سه Migration جدید را از deployment artifact/backup معتبر بازیابی کن؛ با محتوای live function و schedule تطبیق بده؛ سپس مجموعهٔ بازسازی‌شده را در PostgreSQL 17 دورریختنی replay کن. تا آن زمان `supabase db push` ممنوع بماند.
+
+## ممیزی تکمیلی ۲۵ نوامبر ۲۰۲۶ — مسیر واقعی Worker و وضعیت نام فارسی
+
+این بخش با خواندن فقط‌خواندنی Production در تاریخ ۲۰۲۶-۱۱-۲۵ اضافه شده است.
+
+### تأیید زمان‌بندی زنده
+- job 13 فعال است: `*/10 * * * *` و `public.request_iran_exchange_asset_sync()`.
+- job 14 فعال است: `1,31 * * * *` و `public.process_iran_exchange_asset_sync()`.
+- job 17 فعال است: `5-59/10 * * * *` و `private.request_market_price_overflow()`.
+- این snapshot با cadence ثبت‌شده در بخش ۲۲ نوامبر (job 14 هر ۳۰ دقیقه) سازگار است؛ هیچ زمان‌بندی تغییر نکرد.
+
+### مسیر واقعی همگام‌سازی
+- Cronهای ۱۳ و ۱۴ مستقیماً توابع SQL را اجرا می‌کنند؛ این مسیر با فراخوانی Edge Function یکسان نیست.
+- تعریف زندهٔ `public.process_iran_exchange_asset_sync()` پاسخ‌های صف را در `public.exchange_asset_observations` ذخیره و تطبیق می‌کند؛ در بدنهٔ فعلی آن هیچ فراخوانی به `extractPersianNameCandidate` یا افزودن کلید `_digiarz_persian_name_candidate` وجود ندارد.
+- Edge Function زندهٔ `sync-iran-exchange-assets` در Production نسخهٔ ۷ و فعال است. سورس مستقر آن نیز `source_payload: o` را ذخیره می‌کند و استخراج‌کنندهٔ نام فارسی در آن وجود ندارد.
+- سورس جدید شاخهٔ آزمایشی `feature/persian-asset-name-candidates-2026` شامل استخراج‌کننده است؛ اما این تفاوت هنوز به Production منتقل نشده و Worker زمان‌بندی‌شدهٔ SQL هم مستقل از آن باقی است.
+- در ممیزی قبلی Production تعداد ۴٬۹۷۰ مشاهده و صفر candidate envelope ثبت شده بود. این وضعیت با سورس مستقر Edge Function و مسیر SQL زنده سازگار است؛ بنابراین وجود کد در شاخهٔ Git به‌تنهایی به معنای فعال‌شدن استخراج نام فارسی در داده‌های زنده نیست.
+
+### وضعیت پروژهٔ آزمایشی موجود
+- پروژهٔ `DigiArz-Recovery-Test` با شناسهٔ `zrriqwyolcjhbappocuw` فعال و سالم است.
+- دفتر Migration آن فقط ۲ رکورد دارد و فهرست Edge Functionهای آن خالی است.
+- جدول مشاهدات در آن موجود و دارای ۴٬۹۶۰ رکورد است؛ پس این پروژه نیز محیط تمیز و مستقل برای replay کامل تاریخچه نیست و نباید بدون آماده‌سازی و مجوز جداگانه برای تست Migration استفاده شود.
+
+### نتیجه و قفل ایمنی
+- هیچ Edge Function مستقر، تابع SQL، Cron، جدول، مجوز، داده یا Migration در Production یا پروژهٔ آزمایشی تغییر نکرد.
+- سورس Worker آزمایشی با نسخهٔ مستقر Production متفاوت است. پیش از فعال‌سازی candidate extraction باید مسیر زمان‌بندی‌شدهٔ SQL و مسیر Edge Function به‌صورت یکپارچه طراحی و تست شوند؛ از اجرای دستی Worker روی Production برای آزمایش خودداری شود.
+- بازیابی SQL سه Migration کنترل فشار/صف در ۲۱ نوامبر و ۱۴ Migration قدیمی‌تر همچنان باز است. هیچ محتوایی از روی نام Migration حدس زده نشده است.
