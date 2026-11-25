@@ -312,3 +312,22 @@ Metadata اتصال ثبت‌شده برای هر چهار job: database=`postgr
 این فهرست تمام trigger bindingهای موجود در snapshot ممیزی است، نه ادعای جامعیت همهٔ triggerهای دیتابیس؛ scope manifest فقط توابع SECURITY DEFINER است.
 
 **محدودیت ایمنی:** jobهای 11/13/14/18 فقط fingerprint شدند؛ هیچ jobی متوقف، کند، زمان‌بندی مجدد یا اجرا نشد. به‌ویژه هیچ تغییری در jobهای موتور سفارش اعمال نشد.
+
+
+### اصلاح انتساب cron به routine — query فقط‌خواندنی تکمیلی
+
+برای چهار job، فقط نام routine فراخوانی‌شده از متن فرمان با regex استخراج شد؛ متن کامل command نمایش یا ذخیره نشد. این نتیجه، انتساب اجرای فعلی job به routine را روشن می‌کند، اما منشأ تاریخی Migration را اثبات نمی‌کند.
+
+| Job ID | Invoked routine | Routine definition MD5 | Command MD5 |
+|---:|---|---|---|
+| 11 | `public.recover_stale_crypto_assets_sync()` | `9ab6efcdb72cce454244f81aecc1da86` | `5c182585822f912c390e2ed687cf9e74` |
+| 13 | `public.request_iran_exchange_asset_sync()` | `22e4150dd0ae30a2e3abf81887c52897` | `62655c28a0daceec20aca5364a5fcce3` |
+| 14 | `public.process_iran_exchange_asset_sync()` | `889c3728e54154a799e55ed8b9bc2edb` | `3e06c306d02133389ef070049aa6576c` |
+| 18 | `private.auto_activate_verified_exchange_pairs()` | `fd177baeee1a5bdd927458413f69bfb6` | `a6a3e9093cf3b72ab84897f43d320f41` |
+
+**تطبیق گروهی دقیق‌تر:**
+- گروه Migrationهای 2026-11-15: job 13 مستقیماً `public.request_iran_exchange_asset_sync()` و job 14 مستقیماً `public.process_iran_exchange_asset_sync()` را فراخوانی می‌کند.
+- گروه Migrationهای 2026-11-16: job 18 مستقیماً `private.auto_activate_verified_exchange_pairs()` را فراخوانی می‌کند.
+- گروه Migrationهای 2026-11-21: job 11 مستقیماً `public.recover_stale_crypto_assets_sync()` را فراخوانی می‌کند. این routine در snapshot manifest موجود است؛ fingerprint بالا از همان manifest گرفته شده است.
+
+این crosswalk اجرای فعلی job را به routine وصل می‌کند؛ برای اثبات اینکه کدام یک از Migrationهای گروه، آن routine یا cron job را ایجاد/تغییر داده، همچنان SQL اصلی یا transcript تاریخی معتبر لازم است. هیچ job یا routine اجرا یا تغییر داده نشد.
