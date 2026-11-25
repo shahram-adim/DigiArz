@@ -108,12 +108,31 @@ A stub may be replaced only when all are true:
 
 ## 6. Migration source recovery — unresolved
 
-The existing recovered-source artifact contains at least the two 2026-11-21 records:
-- `20261121045434_digiarz_backpressure_and_exchange_sync_bloat_guards`
-- `20261121045531_snapshot_pg_net_unlogged_queue_before_recovery`
-- `20261121050216_temporarily_throttle_exchange_asset_processors_20261121`
+The repository evidence has two dated inventory snapshots that must not be conflated:
 
-This file is a partial recovered-source bundle, not a complete inventory of the 17 missing source files. The complete 17-item list, migration ledger comparison, duplicate/timestamp conflicts, and source checksum reconciliation remain pending. Do not replay any recovered SQL.
+- The 2026-11-17 reconciliation snapshot listed 14 missing sources and 20 timestamp mismatches.
+- The 2026-11-22/25 checkpoint in `IMPLEMENTATION_STATUS.md` adds three applied Production entries dated 2026-11-21, taking the tracked missing-source count to 17 (14 earlier + 3 later). The three added versions are:
+  - `20261121045434` — `digiarz_backpressure_and_exchange_sync_bloat_guards`
+  - `20261121045531` — `snapshot_pg_net_unlogged_queue_before_recovery`
+  - `20261121050216` — `temporarily_throttle_exchange_asset_processors_20261121`
+
+The 14 earlier missing versions recorded in the 2026-11-17 inventory are:
+- `20261113153808` — `approved_wallet_defaults_fees_and_coin_reviews`
+- `20261113154323` — `assign_confirmed_super_admin`
+- `20261113154736` — `secure_admin_wallet_management`
+- `20261113154750` — `add_admin_role_probe`
+- `20261113154844` — `use_toman_units_in_admin_credit_ui`
+- `20261113154926` — `move_admin_privilege_logic_to_private_schema`
+- `20261115101709` — `create_exchange_asset_observations`
+- `20261115102729` — `schedule_iran_exchange_asset_sync`
+- `20261115102927` — `fix_exchange_sync_response_json_cast`
+- `20261115103227` — `auto_list_verified_exchange_assets`
+- `20261115103507` — `schedule_bit24_exchange_asset_sync`
+- `20261115105721` — `admin_exchange_asset_sync_monitoring`
+- `20261115105956` — `restrict_exchange_sync_worker_execution`
+- `20261116201639` — `auto_activate_verified_exchange_pairs`
+
+The 2026-11-17 inventory itself reports 20 timestamp-prefix mismatches, two local-only files, and four exact matches at that snapshot. The current ledger/file inventory must be refreshed before treating those counts as current. The full SQL source of the three later entries is partially preserved in `2026-11-25_recovered-production-migration-sources.md`, but it is not a complete canonical migration set. Recover exact sources from authoritative deployment/backup evidence, compare full content and checksums, and do not replay any recovered SQL.
 
 ## 7. Default ACL policy
 
