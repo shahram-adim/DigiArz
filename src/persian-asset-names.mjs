@@ -187,3 +187,17 @@ export function aggregatePersianNameCandidates(observations) {
     };
   });
 }
+
+
+/**
+ * Read-only projection for a separately persisted, explicitly approved name.
+ * Consensus candidates are intentionally not accepted as approvals.
+ */
+export function getApprovedPersianAssetName(coingeckoId, approval) {
+  const id = typeof coingeckoId === "string" ? coingeckoId.trim() : "";
+  if (!id || !approval || typeof approval !== "object") return null;
+  if (approval.coingecko_id !== id || approval.status !== "approved") return null;
+  if (typeof approval.approved_by !== "string" || !approval.approved_by.trim()) return null;
+  if (typeof approval.approved_at !== "string" || !Number.isFinite(Date.parse(approval.approved_at))) return null;
+  return cleanCandidate(approval.name_fa);
+}
