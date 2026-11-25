@@ -389,3 +389,12 @@ Commit: `7ef1932c49744b88408f3b80118eb3e574ed9c8a` (branch `feature/persian-asse
 
 ### کنترل ایمنی
 فقط SELECT از ledger اجرا شد و فایل Markdown/SQL متنی در پوشه drafts شاخهٔ آزمایشی ایجاد شد. هیچ Migration اجرا یا ledger ویرایش نشد؛ هیچ Cron، Worker، جدول، داده یا تابع Production تغییر نکرد؛ هیچ Merge یا هزینه‌ای ایجاد نشد.
+
+
+### بازبینی نهایی زمان‌بندی Cron و وضعیت PR — ۲۵ نوامبر ۲۰۲۶
+- Cron job 8 با نام `digiarz-limit-orders` فعال و روی `* * * * *` باقی است؛ command آن `public.process_limit_orders()` است.
+- Jobهای 13 و 15 (request) فعال و با برنامه‌های قبلی خود باقی‌اند: ایران هر ۱۰ دقیقه و Bit24 هر ۳۰ دقیقه.
+- Jobهای 14 و 16 (processor) فعال‌اند و دقیقاً schedule ثبت‌شده در Migration throttling را دارند: دقیقه‌های 1 و 31 برای ایران، و 16 و 46 برای Bit24.
+- Job 17 (market-price overflow) فعال و روی `5-59/10` باقی است.
+- نتیجهٔ روشن: تغییر زمان‌بندی Migration شمارهٔ 20261121050216 محدود به processorهای کشف دارایی است؛ موتور سفارش‌های limit همچنان هر دقیقه فعال است. هیچ jobی تغییر داده نشد.
+- در آخرین دریافت GitHub، PR #62 همچنان open، Draft و merged=false است و mergeable=false گزارش شد. این فیلد در دریافت‌های متوالی ناپایدار بوده است؛ به‌عنوان وضعیت قطعی conflict تفسیر نشود. هیچ Merge یا update-branch انجام نشده است.
