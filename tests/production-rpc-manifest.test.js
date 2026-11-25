@@ -85,9 +85,9 @@ test('Production admin RPC definitions contain an explicit super-administrator g
   for (const fn of adminFunctions) {
     assert.match(
       fn.definition,
-      /private\\.is_(?:current_user_)?super_admin\\s*\\(/i,
+      /private\.is_(?:current_user_)?super_admin\s*\(/i,
       'missing explicit super-admin guard: ' + fn.schema_name + '.' + fn.function_name
     );
-    assert.doesNotMatch(fn.raw_acl, /(?:^|,)anon=X\\//, 'admin RPC is executable by anon: ' + fn.function_name);
+    assert.doesNotMatch(fn.raw_acl, /(?:^|,)anon=X\//, 'admin RPC is executable by anon: ' + fn.function_name);
   }
 });
