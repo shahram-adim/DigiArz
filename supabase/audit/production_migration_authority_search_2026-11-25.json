@@ -61,18 +61,8 @@
       24,
       25,
       26,
-      27,
-      28,
-      29,
-      30,
-      31,
       32,
       33,
-      34,
-      35,
-      36,
-      37,
-      38,
       39,
       40
     ],
@@ -100,7 +90,8 @@
         ],
         "finding": "Different migration; not one of the 17 missing sources."
       }
-    ]
+    ],
+    "inspected_pr_count": 28
   },
   "code_search": {
     "terms": [
