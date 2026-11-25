@@ -42,3 +42,30 @@ Use non-default synthetic rates (not only 0.001) so the tests can detect acciden
 - Do not apply the recovered dynamic-rewrite DO blocks or replay historical migrations.
 - Keep PR #62 Draft until source-faithful end-to-end tests and the missing RLS cases are complete.
 - Any Production migration, function change, ACL change, cron change, or release remains subject to explicit owner approval.
+
+## Confirmed NULL-liquidity validation defect — 2026-11-25
+
+A fresh SELECT-only read of the live Production catalog retrieved the exact current definition of `public.get_demo_trading_fee_rate(text,text)`:
+
+- Definition MD5: `546d80d7105228ed97da26c5ed0c7b7f`; length: 772 bytes.
+- Owner: `postgres`; `SECURITY DEFINER`; `STABLE`; empty `search_path`.
+- The current guard is `IF p_liquidity_type NOT IN ('maker', 'taker') THEN` and does not explicitly test `p_liquidity_type IS NULL`.
+- In PostgreSQL, `NULL NOT IN ('maker','taker')` evaluates to NULL, not TRUE. A PL/pgSQL IF does not enter its branch for NULL. The following CASE chooses the ELSE expression for a NULL comparison, so with a configured enabled fee row the helper returns the taker rate instead of raising `Invalid liquidity type`.
+
+This is a confirmed input-validation defect in the helper. It is **not evidence that the three current trade entrypoints are mispricing normal orders**: the inspected live callers pass explicit non-NULL `'taker'` for market execution and `'maker'` for limit placement/processing. No Production function was invoked to establish this finding; it follows from the SELECT-retrieved function body and PostgreSQL NULL semantics.
+
+### Existing regression assets and CI omission
+
+- The repository already contains `tests/demo-trading-fee-rate-validation.sql`, which explicitly expects NULL to raise `Invalid liquidity type`.
+- The current PostgreSQL 17 workflow does **not** execute that file. It executes `tests/rpc-security-demo-fee-rate.integration.sql`, which tests an unsupported non-NULL liquidity string but does not test NULL.
+- The source-backed CI fixture therefore does not currently catch this defect.
+- A review-only correction already exists at `supabase/drafts/2026-11-25_fix_demo_trading_fee_rate_null_validation.sql`; it adds `p_liquidity_type IS NULL OR` while preserving the signature, return type, volatility, security mode and empty search_path. It is not a migration and has not been applied.
+
+### Disposition
+
+1. Keep the proposed correction as a draft until a PostgreSQL 17 isolated test demonstrates NULL rejection and maker/taker behavior remains unchanged.
+2. Add the NULL case to the ephemeral CI path (or execute the existing validation script there) only after ensuring its fixture contains the exact reviewed helper body and synthetic enabled fee row.
+3. Do not invoke the helper or any trading function in Production as a test. Do not apply the draft SQL, alter ACLs, or change any order/worker/Cron behavior without explicit owner approval.
+4. Record the defect as limited to NULL liquidity-type validation; do not claim a live trading-fee accounting defect without further evidence.
+
+No Production mutation, function invocation, migration, ACL change, CI workflow change, merge, deployment, Cron change, or cost was incurred by this inspection.
