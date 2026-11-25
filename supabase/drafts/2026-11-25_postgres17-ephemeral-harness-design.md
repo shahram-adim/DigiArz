@@ -97,13 +97,10 @@ This remains a narrow source-faithful function test, not a full Production-parit
 The read-only `public.get_admin_market_listings()` body from `20261113181000_show_live_prices_for_curated_assets.sql` is now installed in the disposable PostgreSQL 17 fixture as the fifth real function body. The fixture therefore contains 5 source-backed/reviewed bodies and 41 metadata-only stubs across the 46-signature contract. CI run #313 (run ID `45603853118`) passed: unit/type checks and every PostgreSQL 17 step, including the new role/price-freshness test and post-rollback empty-table checks. The remote `rpc-security-integration` job remained skipped. No Production/Recovery-Test operation, ACL/default ACL change, migration, deploy or merge occurred.
 
 
-## Superseding fixture coverage checkpoint — exchange discovery RPC — 2026-11-25
+## Source mapping only — exchange discovery RPC — 2026-11-25
 
-The source-backed read-only body `public.get_exchange_discovered_market_assets()` from migration `20261116200009_auto_list_unmatched_iran_exchange_assets.sql` (blob `901f6e3004a1fd51995ea159d840ce5b5b39dbeb`) is now installed in the disposable PostgreSQL 17 fixture. The fixture now contains **6 real bodies + 40 metadata-only stubs** across the exact 46-signature contract.
+The source for `public.get_exchange_discovered_market_assets()` was recovered from `20261116200009_auto_list_unmatched_iran_exchange_assets.sql` (blob `901f6e3004a1fd51995ea159d840ce5b5b39dbeb`). Its return shape, five read-only dependencies, empty search_path, STABLE/SECURITY DEFINER attributes, filters and absence of DML/HTTP/financial side effects were statically mapped in the RPC parity manifest.
 
-- The function is SQL, STABLE, SECURITY DEFINER, with an empty search_path and an eight-column TABLE result.
-- Its dependencies are synthetic `exchange_asset_observations`, `admin_market_listings`, `crypto_assets`, `demo_trading_pairs`, and `market_prices` tables; RLS is enabled and direct anon table SELECT is absent.
-- Role tests cover anon, authenticated and service_role; aggregation across exchanges; ambiguous status; 48-hour, active/status, tokenized-stock, curated-listing and enabled-pair filters; fresh versus stale price behavior; and rollback.
-- The source migration explicitly grants anon/authenticated but not service_role, while the reviewed current-state catalog contract records service_role EXECUTE=true. The reason for that effective privilege is unresolved. The disposable fixture reproduces the observed bit with a function-specific test-only grant; no Production ACL/default privilege is changed.
-- No financial table or row is involved, and no order/trade/reservation/wallet/balance mutation or external HTTP occurs in this function.
-- CI evidence is pending for the code/test commits. The remote RPC integration job remains separate and is not represented by the local PostgreSQL 17 harness.
+An attempted promotion into the shared disposable fixture caused repeated PostgreSQL 17 harness parser failures. The attempted body, test and workflow changes were reverted. The stable fixture remains at **5 real bodies + 41 metadata-only stubs**. No successful behavior-test evidence is claimed for this candidate. A standalone minimal PostgreSQL 17 reproduction must isolate the parser issue before any retry.
+
+The source migration grants anon/authenticated but the current catalog snapshot also records service_role EXECUTE=true. That effective ACL origin is unresolved; no Production ACL or default privilege was changed. All prior safety boundaries remain in force.
