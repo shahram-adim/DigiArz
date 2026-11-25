@@ -185,3 +185,14 @@ This report is an inventory and safety analysis only. It changes no database obj
 - شواهد زنده برای وجود و رفتار بخشی از اشیای مربوط به ۱۴ Migration مفقود به دست آمد، اما SQL اصلی هیچ‌یک از ۱۴ Migration به‌عنوان منبع معتبر بازیابی نشد.
 - این شواهد برای طراحی یک baseline بازسازی‌شده مفیدند، ولی برای بازنویسی migration history یا ساخت Migrationهای جایگزین کافی نیستند.
 - هیچ تغییری در Production، جدول‌ها، توابع، grants، RLS، Cronها، داده‌های مالی یا migration ledger انجام نشد.
+
+
+## وضعیت اصلاح‌شدهٔ گزارش و CI — ۲۵ نوامبر ۲۰۲۶
+
+این یادداشت، snapshotهای تاریخی بالاتر را حذف نمی‌کند؛ فقط وضعیت نهایی‌تر را مشخص می‌کند:
+
+- inventory فعلی Migration در Production برابر **۵۵ رکورد** است؛ در شاخهٔ `main` تعداد **۴۰ فایل SQL** موجود است. در فهرست ممیزی‌شده، **۱۷ Migration اعمال‌شده فاقد فایل SQL متناظر با نام canonical** هستند. این به معنی اثبات نابودی همهٔ نسخه‌ها نیست؛ بازیابی از artifact یا backup معتبر همچنان لازم است.
+- زمان‌بندی زندهٔ تأییدشده در ممیزی ۲۵ نوامبر برای job 14 برابر `1,31 * * * *` است؛ jobهای 13 و 17 نیز مطابق جدول ممیزی همان تاریخ فعال‌اند. مقادیر قدیمی‌تر در بخش‌های تاریخی، snapshot زمان خودشان هستند.
+- بخش «وضعیت CI و PR» در snapshot قبلی پیش از اجرای نهایی CI نوشته شده بود و دیگر وضعیت جاری را نشان نمی‌دهد. برای commit فعلی PR #62 یعنی `ea8b541af8fa8037627c16ba3258506698370cfa`، GitHub Actions run **45563453868** (run #67) با نتیجهٔ **success** تکمیل شده است. Job `unit-tests` و هر دو مرحلهٔ «Test Persian asset-name candidate extraction» و «Type-check the isolated exchange-sync Edge Function» موفق بوده‌اند.
+- PR #62 همچنان open، Draft و ادغام‌نشده است. موفقیت CI مجوز merge، deploy، اجرای SQL یا تغییر Production محسوب نمی‌شود.
+- این اصلاح صرفاً مستندسازی در شاخهٔ آزمایشی است؛ هیچ Migration، جدول، تابع، grant، RLS، cron، صف یا دادهٔ Production تغییر نکرده است.
