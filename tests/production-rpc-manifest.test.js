@@ -218,3 +218,17 @@ test('migration dossier includes all captured cron command and trigger fingerpri
   }
   assert.match(dossier, /هیچ jobی متوقف، کند، زمان‌بندی مجدد یا اجرا نشد/);
 });
+
+
+test('live cron-invoked routine fingerprints match the captured Production manifest', () => {
+  const dossier = fs.readFileSync('supabase/audit/production_missing_migration_dossiers_2026-11-25.md', 'utf8');
+  for (const fingerprint of [
+    '9ab6efcdb72cce454244f81aecc1da86',
+    '22e4150dd0ae30a2e3abf81887c52897',
+    '889c3728e54154a799e55ed8b9bc2edb',
+    'fd177baeee1a5bdd927458413f69bfb6'
+  ]) {
+    assert.ok(dossier.includes(fingerprint));
+  }
+  assert.match(dossier, /تطبیق fingerprint فعلی Production با manifest برای این چهار routine برابر است \(۴\/۴\)/);
+});
