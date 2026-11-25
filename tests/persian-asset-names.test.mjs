@@ -20,6 +20,23 @@ test("prefers Wallex faBaseAsset and only accepts a safe faName fallback", () =>
   assert.equal(extractPersianNameCandidate("wallex", { faName: "سولانا" }).source_key, "faName");
 });
 
+test("extracts additional Persian names from Ramzinex, OK-EX and Tetherland", () => {
+  assert.equal(extractPersianNameCandidate("ramzinex", {
+    base_currency_symbol: { en: "btc", fa: "بیت کوین" },
+    name: { fa: "بیت کوین", en: "bitcoin/rial" }
+  }).source_key, "base_currency_symbol.fa");
+  assert.equal(extractPersianNameCandidate("okex", { nameFa: "اتریوم" }).name, "اتریوم");
+  assert.equal(extractPersianNameCandidate("tetherland", { fa_name: "تتر" }).source_key, "fa_name");
+});
+
+test("does not treat Tabdeal pair labels or unsupported fields as asset names", () => {
+  assert.equal(extractPersianNameCandidate("tabdeal", {
+    representation_name: "بیت کوین-تتر",
+    symbol_fa: "بیت کوین-تتر",
+    baseAsset: "BTC"
+  }), null);
+});
+
 test("rejects missing, English-only, numeric and blank candidates", () => {
   for (const value of [undefined, null, "", "Bitcoin", "12345", "   "]) {
     assert.equal(extractPersianNameCandidate("bit24", { base_coin: { fa_name: value } }), null);
@@ -123,6 +140,15 @@ test("aggregates matching Persian names from independent Iranian exchanges", () 
   assert.equal("canonical_name_fa" in rows[0], false);
   assert.equal(rows[0].source_count, 2);
   assert.equal(rows[0].variants[0].sources.length, 2);
+});
+
+test("aggregates additional Iranian exchange sources independently", () => {
+  const rows = aggregatePersianNameCandidates([
+    observation("bitcoin", "ramzinex", "بیت کوین"),
+    observation("bitcoin", "okex", "بیت‌کوین"),
+  ]);
+  assert.equal(rows[0].status, "consensus_candidate");
+  assert.equal(rows[0].source_count, 2);
 });
 
 test("keeps spelling conflicts for review and does not select a canonical name", () => {
