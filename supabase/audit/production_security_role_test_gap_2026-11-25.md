@@ -155,3 +155,14 @@ https://github.com/shahram-adim/DigiArz/blob/feature/persian-asset-name-candidat
 - The splitter's SHA-256 implementation was validated against standard test vectors.
 
 The manifest contains no runnable SQL bodies and is not a replay approval. Target extraction is best-effort, and statement classification still requires independent review against full SQL bodies. Replay remains NOT RUN / BLOCKED. No SQL, workflow, database, ACL, RLS policy, Cron job, queue, deployment, or financial row was changed.
+
+
+#### Statement-manifest target review refinement
+
+The static manifest was refined after inspecting the four previously unresolved policy-target previews:
+- 136/136 statement units now have a best-effort target locator.
+- 0 target locators remain unresolved.
+- 0 units remain in the unclassified-unknown category.
+- Three dynamic rewrites still require manual review: execute_demo_trade, place_limit_order and process_limit_orders.
+
+A resolved target is only a locator, not proof of dependencies or permission to replay. The complete source bodies still require reviewer inspection. The manifest remains non-executable and the replay remains blocked.
