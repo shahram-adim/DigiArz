@@ -98,3 +98,29 @@ test('schema candidate widens base precision but retains 8-place quote ledgers',
   assert.match(widening, /DO \$preflight\$/);
   assert.match(widening, /LOCK TABLE public\.orders[\s\S]*DO \$preflight\$/);
 });
+
+const stopLimitMigration = read('supabase/migrations/20261113181827_add_stop_limit_order_engine.sql');
+
+test('Stop-Limit rollout candidate locks the child while the checked-in migration divergence stays explicit', () => {
+  const extractWorker = (sql, label) => {
+    const match = sql.match(/CREATE OR REPLACE FUNCTION public\.process_stop_limit_orders\(\)[\s\S]*?AS \$function\$([\s\S]*?)\$function\$/);
+    assert.ok(match, label + ' process_stop_limit_orders() definition is present');
+    return match[1];
+  };
+  const extractFirstSyncQuery = (sql, label) => {
+    const workerSql = extractWorker(sql, label);
+    const loop = workerSql.match(/FOR v_cond IN([\s\S]*?)LOOP/);
+    assert.ok(loop, label + ' first parent-child synchronization loop is present');
+    return loop[1];
+  };
+
+  const candidateSync = extractFirstSyncQuery(rollout, 'rollout candidate');
+  const migrationSync = extractFirstSyncQuery(stopLimitMigration, 'checked-in migration');
+
+  assert.match(candidateSync, /FOR UPDATE OF c,parent,child SKIP LOCKED/,
+    'candidate must skip parent synchronization while the child worker owns its row');
+  assert.match(migrationSync, /FOR UPDATE OF c,parent SKIP LOCKED/,
+    'current migration divergence must remain explicit until migration source is deliberately reconciled');
+  assert.doesNotMatch(migrationSync, /FOR UPDATE OF [^;]*\bchild\b/,
+    'checked-in migration must not be mistaken for the candidate with the child lock');
+});
