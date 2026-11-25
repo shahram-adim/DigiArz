@@ -265,7 +265,7 @@
 - `public.bit24_exchange_sync_requests`: owner `postgres`، RLS `true`، forced RLS `false`، columns=5، indexes=1، constraints=1، policies=0، triggers=0.
 
 **روتین‌های زنده و fingerprint:**
-- در recovery map برای این گروه routine مستقیمی نام‌گذاری نشده؛ انتساب مستقیم routine: **not established**.
+- recovery map اولیه routine مستقیمی نام‌گذاری نکرده بود؛ query فقط‌خواندنی cron بعدی نشان داد job 11 تابع `public.recover_stale_crypto_assets_sync()` را فراخوانی می‌کند. این انتساب، اجرای فعلی job را ثابت می‌کند نه اینکه کدام Migration آن را ایجاد/تغییر داده باشد.
 
 **Trigger bindings زنده:**
 - هیچ trigger binding مستقیم از توابع فهرست‌شدهٔ این گروه در snapshot ثبت نشده است؛ این به‌معنای نبودن triggerهای دیگر در Production نیست.
