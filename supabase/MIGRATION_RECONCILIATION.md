@@ -861,3 +861,36 @@ Advisor امنیتی Production در 2026-11-25 این موارد را گزار�
 2. تکمیل parity قرارداد Default ACL و ACLهای role/service_role بدون تغییر دادن محیط‌ها.
 3. تهیهٔ طرح clone دورریختنی و fixture احراز هویت آزمایشی برای آزمون end-to-end؛ تا آن زمان پروژهٔ تست موجود برای اجرای job RPC قابل اعتماد نیست.
 4. بازبینی مستقل draft محدودسازی Default EXECUTE، به‌ویژه اثر آن بر توابع public فعلی و مسیرهای worker، پیش از هر پیشنهاد اجرا.
+
+
+## اصلاح طرح Default ACL و قرارداد امنیت توابع آینده — ۲۵ نوامبر ۲۰۲۶
+
+بازبینی مستندات جاری Supabase و PostgreSQL نشان داد نسخهٔ قبلی draft دو ایراد مهم داشت و به‌روزرسانی شد.
+
+### ایراد اول: PUBLIC سراسری
+PostgreSQL به‌صورت پیش‌فرض EXECUTE را به نقش PUBLIC برای توابع جدید اعطا می‌کند. حذف EXECUTE فقط از anon و authenticated در سطح schema عمومی، این مجوز inherited را حذف نمی‌کند. طبق راهنمای Supabase، برای حذف این مسیر باید default privilege سراسری نقش سازنده (در این طرح postgres) جداگانه بررسی و اصلاح شود؛ سپس مجوزهای مستقیم schema-level برای anon/authenticated مدیریت شوند.
+
+### ایراد دوم: supabase_admin
+مستند رسمی Supabase توضیح می‌دهد Default ACL داخلی supabase_admin در public قابل تغییر با ALTER DEFAULT PRIVILEGES توسط کاربر پروژه نیست و تلاش برای آن می‌تواند با SQLSTATE 42501 رد شود. بنابراین دستور مربوط به supabase_admin از طرح اجرایی پیشنهادی حذف شد. این نقش به‌عنوان استثنای platform-managed باقی می‌ماند و هیچ ادعایی مبنی بر harden شدن توابعی که آن نقش ایجاد می‌کند وجود ندارد.
+
+### تغییرات شاخه
+- فایل `supabase/drafts/2026-11-25_proposed_restrict_default_public_function_exec.sql` به‌صورت comments-only اصلاح شد؛ اکنون صرفاً پیشنهاد مربوط به توابع ساخته‌شده توسط postgres را شرح می‌دهد و هیچ SQL اجرایی ندارد.
+- فایل جدید `tests/default-function-acl-hardening.sql` اضافه شد. این تست فقط کاتالوگ را می‌خواند و قرارداد هدف آینده را کنترل می‌کند:
+  - عدم EXECUTE سراسری PUBLIC در default ACL توابع ساخته‌شده توسط postgres.
+  - عدم EXECUTE مستقیم anon/authenticated در default ACL مربوط به public.
+  - حفظ EXECUTE پیش‌فرض service_role در public.
+- این تست عمداً هنوز به workflow فعال اضافه نشده و انتظار می‌رود روی baseline فعلی Production پیش از اعمال تغییرات، fail شود. اجرای آن روی Production در این مرحله انجام نشده است؛ فقط فایل تست آماده شده است.
+- تست‌های جدید و تغییرات مستندات در شاخه آزمایشی هستند؛ هیچ Migration یا SQL تغییردهنده‌ای ساخته یا اجرا نشده است.
+
+### شرط لازم پیش از فعال‌سازی
+1. تأیید شود migration runner واقعاً با نقش postgres اشیا را ایجاد می‌کند.
+2. هر تابع جدید با امضای دقیق و نقش فراخوانندهٔ مجاز ثبت شود.
+3. برای توابع عمومی مجاز، GRANTهای دقیق و مستقل از default ACL تهیه شود.
+4. آزمون روی clone دورریختنی اجرا شود؛ نه روی Production و نه روی پروژهٔ تست فعلی که ACL آن drift دارد.
+5. استثنای supabase_admin جداگانه پایش شود.
+
+### منابع فنی بازبینی‌شده
+- Supabase Database Functions: تفاوت default EXECUTE سراسری PUBLIC و schema-specific grants.
+- Supabase Knowledge Base: محدودیت تغییر Default ACL نقش supabase_admin در schema public.
+
+قفل ایمنی برقرار است: هیچ Default ACL، ACL تابع، schema، داده، Auth، Cron یا Worker در هیچ پروژه‌ای تغییر نکرده؛ Migration اجرا نشده و PR ادغام نشده است.
