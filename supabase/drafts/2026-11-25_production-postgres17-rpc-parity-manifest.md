@@ -151,7 +151,7 @@ For `private.enforce_unique_admin_market_listing_symbol()` the read-only depende
 - `admin_market_listings`: RLS enabled, FORCE RLS off; `admin_market_listings_public_read` policy for anon/authenticated; service_role ALL, with no direct anon/authenticated table grant.
 - `demo_trading_pairs`: RLS enabled, FORCE RLS off; `demo_trading_pairs_public_read` policy for anon/authenticated; anon/authenticated SELECT and service_role ALL.
 - Trigger `admin_market_listing_unique_ticker` is attached BEFORE INSERT OR UPDATE OF `coingecko_id` on `public.admin_market_listings`.
-| `public.claim_admin_asset_refresh(text,uuid)` | Migration `20261113190000_admin_on_demand_crypto_asset_refresh.sql` | Synthetic `private.admin_asset_refresh_limits` + synthetic admin identity | positive service_role call, non-admin 42501, invalid input 22023, cooldown 55000; rollback checked | Edge Function not executed in harness; validate migration/source hash and exact live definition before claiming full parity |
+| `public.claim_admin_asset_refresh(text,uuid)` | Applied Production ledger version `20261113173506` (`admin_on_demand_crypto_asset_refresh`); repository file `20261113190000_admin_on_demand_crypto_asset_refresh.sql` has a timestamp mismatch and is not treated as the applied version | Synthetic `private.admin_asset_refresh_limits` + synthetic admin identity | positive service_role call, non-admin 42501, invalid input 22023, cooldown 55000; rollback checked | Edge Function not executed in harness; validate migration/source hash and exact live definition before claiming full parity |
 
 ## 3. Known caller classifications
 
