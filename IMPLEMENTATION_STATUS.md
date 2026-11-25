@@ -1463,3 +1463,11 @@
 
 
 - [x] Scope correction: the authority-search artifact and test list exactly 28 PR changed-file inventories actually queried; PRs not queried are not claimed as searched.
+
+
+### Final PR-head CI verification — 2026-11-25
+- [x] Re-fetched PR #63 metadata and confirmed the exact branch HEAD was `46ffca599929b7596e004171ee776915ce867c67`; PR remains open, Draft, unmerged, base `main`.
+- [x] GitHub Actions run `45637284651` (run #1996) for that exact HEAD completed with `success`; its `exact-decimal` job completed successfully.
+- [x] All 22 substantive workflow steps passed, including Node/browser integration, PostgreSQL 17 arithmetic and widening rehearsals, Market/Limit/Stop-Limit/TP-SL lifecycle tests, and two-session race tests.
+- [!] This confirms only the CI suite on disposable test infrastructure. It does not validate or authorize any Production migration, grant/policy/function change, deployment, cron change, or financial write.
+- [ ] Continue recovery of the 17 authoritative missing migration SQL sources from owner-controlled backups, original SQL Editor/deployment transcripts, or the original developer clone/reflogs. Until then, keep migration replay and `supabase db push` blocked.
