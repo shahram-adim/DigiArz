@@ -1501,3 +1501,6 @@
 - [x] تست تکمیلی برای ۴ cron fingerprint، شش trigger binding و عدم توقف/تغییر jobها افزوده شد؛ commit تست `ca932241e46d097cf6b99322f32d61bffa6e5110`.
 - [!] CI run `45639843226` مربوط به crosswalk اولیه در آخرین poll هنوز in_progress بود؛ تست‌های افزوده‌شدهٔ cron/trigger هنوز نتیجهٔ CI تأییدشده ندارند.
 - [!] هر چهار cron job در وضعیت مشاهده‌شده active=true بودند؛ این فقط snapshot زمان ممیزی است و هیچ jobی اجرا/توقف/کند/زمان‌بندی مجدد نشد.
+
+- [x] CI run `45639843226` برای commit `16bf19eae0ad115432cadfbc8ddf9b58d65e8d5c` اکنون completed/success شد؛ تمام ۲۲ مرحلهٔ substantive شامل PostgreSQL 17 و lifecycle/race tests موفق بودند.
+- [!] این run قبل از افزودن cron command MD5ها و تست تکمیلی شش trigger/چهار cron اجرا شده است؛ بنابراین هنوز CI commit نهایی `2185566256384654c1eea64665d074044c3b60fd` را پوشش نداده است.
