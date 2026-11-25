@@ -31,4 +31,4 @@ jobs:
         with:
           deno-version: v2.x
       - name: Type-check the isolated exchange-sync Edge Function
-        run: deno check --no-lock supabase/functions/sync-iran-exchange-assets/index.ts
+        run: deno check --no-lock --node-modules-dir=auto supabase/functions/sync-iran-exchange-assets/index.ts
