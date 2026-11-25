@@ -27,9 +27,9 @@ The only acceptable future execution target is a PostgreSQL 17 service container
 - Seventeen recovered SQL bodies in PR #62 have already been independently verified byte-for-byte against their matching Production ledger text[] bodies after removing only the nine-line provenance header.
 - Among 20 timestamp-mismatched local files: 16 are byte-exact; 3 differ only by a single leading/trailing newline; one is a substantive Kifpool processor divergence. That divergent local file must not be treated as the Production historical body.
 - Two local-only KuCoin/Gate.io refresh migrations are not in the Production ledger and remain excluded; their older function definitions may supersede the current 515-ID cap.
-- Current PR #62 PostgreSQL 17 workflow run 45617838082 passed the targeted RPC smoke job (27 steps) and unit/type-check job; the remote database integration job was skipped.
-- The existing harness is not full parity: after installing the exchange-discovery body it contains 13 source-backed/reviewed function bodies and 33 inert metadata stubs for the 46-signature inventory. The synthetic auth.uid() shim is not Supabase Auth/JWT verification.
-- The current workflow uses an ephemeral postgres:17 service container, no Production URL/secrets, and keeps rpc-security-integration skipped. This is the desired isolation pattern; it is not yet a migration replay harness.
+- Latest verified PR #62 workflow run 45665750807 passed the unit/type-check job and PostgreSQL 17 RPC smoke job; the remote database integration job was intentionally skipped.
+- The current harness is not full parity: after installing the exchange-discovery body it contains 12 source-backed/reviewed function bodies and 34 inert metadata stubs for the 46-signature inventory, as reported by the latest CI step. The synthetic auth.uid() shim is not Supabase Auth/JWT verification.
+- The latest verified workflow uses an ephemeral postgres:17 service container, no Production URL/secrets, and keeps rpc-security-integration skipped. The job validates the 46-signature ACL fixture and targeted source-backed behavior; it is not yet a full migration replay harness or complete two-user RLS matrix.
 
 ## 3. Classification of recovered SQL bodies
 
