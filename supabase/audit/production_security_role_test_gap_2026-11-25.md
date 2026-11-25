@@ -140,3 +140,18 @@ The current PR #62 workflow uses a postgres:17 service container and no Producti
 The remote rpc-security-integration job was skipped as configured. The harness remains a targeted smoke suite, not full Supabase parity or a migration replay.
 
 The new replay plan is documentation only. No workflow or test code was changed, no CI gate was enabled, no SQL was executed, and no Production/Recovery-Test object, privilege, data, queue, Cron schedule, or financial record was changed. The plan's next bounded unit is a static statement-classification manifest; execution remains blocked until the acceptance gates are reviewed.
+
+
+### Static statement-classification manifest — 2026-11-25
+
+PR #62 now contains a review-only static manifest for all 17 recovered migration bodies:
+https://github.com/shahram-adim/DigiArz/blob/feature/persian-asset-name-candidates-2026/supabase/drafts/2026-11-25_recovered-migration-statement-classification.json
+
+- 17 source bodies; 136 lexically split statement units.
+- Per-file body SHA-256 and byte length; per-statement ordinal and SHA-256.
+- Classification separates schema/function candidates, synthetic-only DML, financial-data-only units, ACL assertion-only units, external HTTP/pg_net, Cron, privileged identity seed, transaction wrappers, and manual-review blocks.
+- Zero statements remain in the unclassified-unknown category after refinement.
+- Three dynamic trading-function rewrite blocks remain explicitly blocked for manual review: execute_demo_trade, place_limit_order, process_limit_orders.
+- The splitter's SHA-256 implementation was validated against standard test vectors.
+
+The manifest contains no runnable SQL bodies and is not a replay approval. Target extraction is best-effort, and statement classification still requires independent review against full SQL bodies. Replay remains NOT RUN / BLOCKED. No SQL, workflow, database, ACL, RLS policy, Cron job, queue, deployment, or financial row was changed.
