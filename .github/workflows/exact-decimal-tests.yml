@@ -45,6 +45,15 @@ jobs:
         run: |
           psql -h localhost -U postgres -d digiarz_test -v ON_ERROR_STOP=1 \
             -f tests/production-user-rls-two-user.pg17.sql
+
+      - name: Verify captured Production RPC EXECUTE ACLs in disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: |
+          node tests/generate-production-rpc-acl-fixture.js
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_rpc_acl_test;"
+          psql -h localhost -U postgres -d digiarz_rpc_acl_test -v ON_ERROR_STOP=1 \
+            -f /tmp/digiarz-production-rpc-acl-fixture.sql
       - name: Rehearse exact-decimal schema widening in disposable PostgreSQL
         env:
           PGPASSWORD: postgres
