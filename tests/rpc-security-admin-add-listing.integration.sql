@@ -20,7 +20,8 @@ VALUES
   ('ci-add-pair-conflict','COLL','CI Add Pair Conflict',7,100,now(),true),
   ('ci-add-same-pair','PAIR','CI Add Same Pair',8,100,now(),true),
   ('ci-add-curated-a','DUP','CI Add Duplicate A',9,100,now(),true),
-  ('ci-add-curated-b','dup','CI Add Duplicate B',10,100,now(),true);
+  ('ci-add-curated-b','dup','CI Add Duplicate B',10,100,now(),true),
+  ('different-asset','OTHR','CI Existing Pair Owner',11,100,now(),true);
 
 INSERT INTO public.demo_trading_pairs(pair_symbol,base_coingecko_id,quote_asset,is_enabled)
 VALUES
