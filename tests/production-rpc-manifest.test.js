@@ -78,3 +78,16 @@ test('anonymous excess grants remain documented as constrained by RLS or securit
   assert.equal(review.safety.grants_changed, false);
   assert.equal(review.safety.policies_changed, false);
 });
+
+test('Production admin RPC definitions contain an explicit super-administrator guard', () => {
+  const adminFunctions = manifest.functions.filter(fn => fn.function_name.startsWith('admin_'));
+  assert.equal(adminFunctions.length, 10);
+  for (const fn of adminFunctions) {
+    assert.match(
+      fn.definition,
+      /private\\.is_(?:current_user_)?super_admin\\s*\\(/i,
+      'missing explicit super-admin guard: ' + fn.schema_name + '.' + fn.function_name
+    );
+    assert.doesNotMatch(fn.raw_acl, /(?:^|,)anon=X\\//, 'admin RPC is executable by anon: ' + fn.function_name);
+  }
+});
