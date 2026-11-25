@@ -1390,3 +1390,48 @@
 3. Review the Production-versus-candidate child-row lock difference before proposing any migration.
 4. Keep `supabase db push`, function deployment, grant/policy changes, and all Production financial writes blocked pending explicit approval.
 5. After the Stop-Limit gate, return to the Toman market page/provider work and the four approved Iranian sources; do not report stale prices as live.
+
+
+## گزارش تضمین کیفیت شبانه — ۲۰۲۶-۱۱-۲۶ — ثبت منبع واقعی RPCهای Limit
+
+### وضعیت آغاز
+- HEAD شاخه `main` در شروع این نوبت: `16913f81808c022351c05fa12c69e649db552b39`.
+- آخرین کار تکمیل‌شده، آزمون شاخه fail-closed مربوط به worker واقعی Stop-Limit و ثبت تفاوت lock scope بین worker Production و candidate بود؛ تکرار نشد.
+- Supabase `gfoaubfilhttnwjykaox` در وضعیت `ACTIVE_HEALTHY` و PostgreSQL `17.11.0.018` است؛ ledger برابر ۵۵ Migration و آخرین نسخه `20261121050216`.
+- CI Run #1974 (`45602256035`) روی commit `e9339bd` دوباره خوانده شد؛ هر ۲۲ مرحله اصلی و cleanup موفق‌اند.
+- Worker زنده `process_stop_limit_orders()` همچنان fingerprint برابر `66357ab4a2247019f22a8b6ab6eac6fe` دارد؛ بنابراین snapshot ثبت‌شده در نوبت قبل هنوز با تعریف زنده منطبق است.
+- Cron job 8 و 12 فعال‌اند و هر دو هر دقیقه زمان‌بندی شده‌اند؛ هیچ‌کدام دستی اجرا نشدند.
+
+### شکاف اولویت‌دار
+- آزمون جدید Production-source قبلی فقط بدنه واقعی `process_stop_limit_orders()` و شاخه invalid-reservation را پوشش می‌داد.
+- دو entrypoint واقعی که worker/لغو Stop-Limit به آن‌ها وابسته‌اند، یعنی `place_limit_order()` و `cancel_limit_order()`، هنوز snapshot منبع Production و guard مستقل در CI نداشتند. در نتیجه lifecycle کامل candidate به‌تنهایی parity واقعی این دو RPC را اثبات نمی‌کرد.
+
+### اقدام انجام‌شده در GitHub
+- [x] تعریف زنده هر دو RPC با یک SELECT از `pg_proc` و `pg_get_functiondef` خوانده شد؛ هیچ جدول سفارش، معامله، رزرو، موجودی یا کیف پول خوانده نشد.
+- [x] fingerprintهای زنده ثبت شدند: `place_limit_order=3eab167c47bf8ff2e1705b9f243380ec` و `cancel_limit_order=69360684173b6aabebc5ff4e4de2eed9`.
+- [x] مالک هر دو `postgres`، نوع هر دو `SECURITY DEFINER` و `search_path` خالی تأیید شد.
+- [x] ACL هر دو: `anon=false`، `authenticated=true`، `service_role=true`.
+- [x] دو snapshot صرفاً آزمایشی در `supabase/tests/stop_limit_production_place_limit_order_snapshot.sql` و `supabase/tests/stop_limit_production_cancel_limit_order_snapshot.sql` اضافه شد. هر دو header صریح دارند که migration نیستند و نباید روی Production اجرا شوند.
+- [x] آزمون Node جدید برای fingerprint دقیق و قراردادهای امنیت/حسابداری مهم اضافه شد: احراز هویت از `auth.uid()`، فعال بودن حساب، pair مجاز، قفل ردیف wallet/asset، محاسبه رزروهای فعال، درج atomic سفارش و رزرو، لغو user-scoped و آزادسازی دقیق مانده رزرو.
+- [x] workflow موجود از طریق `node --test tests/*.test.js` آزمون جدید را خودکار کشف می‌کند؛ workflow تغییر نکرد.
+- [!] نتیجه CI کامیت‌های این نوبت تا زمان بازخوانی run جدید تأیید نشده و موفقیت آن ادعا نمی‌شود.
+
+### فایل‌ها
+- `supabase/tests/stop_limit_production_place_limit_order_snapshot.sql`
+- `supabase/tests/stop_limit_production_cancel_limit_order_snapshot.sql`
+- `tests/stop-limit-production-entrypoint-source.test.js`
+- `docs/STOP_LIMIT_QA_MATRIX.md`
+- `IMPLEMENTATION_STATUS.md`
+
+### محدودیت‌ها و ایمنی
+- این تغییر منبع دو RPC را برای QA قابل بازبینی می‌کند؛ جایگزین base DDL مفقود و harness کامل PostgreSQL 17 با schema/ACL دقیق Production نیست.
+- ۱۷ منبع Migration اعمال‌شده هنوز در main فایل SQL ندارند، ۲۰ اختلاف timestamp و دو فایل local-only پرریسک همچنان باز هستند؛ `supabase db push` ایمن نیست.
+- هیچ RPC/worker روی Production اجرا نشد؛ هیچ سفارش، معامله، رزرو، موجودی، کیف پول یا سابقه مالی ایجاد/تغییر نشد.
+- هیچ Migration، تابع، grant، policy، cron، Edge Function یا تنظیم Auth تغییر نکرد.
+
+### گام بعد
+1. CI اجراشده روی commit جدید را از GitHub Actions بازخوانی کن؛ در صورت شکست فقط آزمون source-contract را اصلاح کن.
+2. منبع معتبر DDL جداول `orders`, `order_reservations`, `wallets`, `asset_balances`, `conditional_orders` و trigger/constraintهای وابسته را از artifact یا migration معتبر بازیابی کن.
+3. پس از بازیابی schema، snapshotهای واقعی `place_limit_order`, `cancel_limit_order` و worker را در PostgreSQL 17 دورریختنی اجرا کن؛ سپس partial/full fill، cancel/trigger race و idempotency را روی همان source اجرا کن.
+4. اختلاف قفل child row در worker Production (`c,parent`) با candidate (`c,parent,child`) را جداگانه تحلیل کن؛ بدون تأیید، Production را تغییر نده.
+5. `db push`، deploy تابع و هر تغییر مجوز حساس همچنان مسدود بماند.
