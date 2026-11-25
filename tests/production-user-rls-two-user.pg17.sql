@@ -3,13 +3,13 @@
 -- Policy predicates, table RLS flags and effective table grants are copied from
 -- the read-only Production catalog snapshot dated 2026-11-25.
 --
--- This is deliberately NOT a full schema/trigger/helper parity test:
--- public.current_account_is_active() is a test shim returning TRUE so this
--- suite isolates auth.uid()-based row ownership. The live helper body,
--- Auth/JWT verification, triggers, RPC bodies and non-SELECT write paths are
--- outside this test. order_reservations has no authenticated SELECT grant in
--- Production; its policy is exercised only after a transaction-scoped grant,
--- and the grant is rolled back with all fixture objects/data.
+-- This is deliberately NOT a full schema/trigger parity test:
+-- public.current_account_is_active() uses the captured Production body and
+-- auth.uid() remains a test shim backed by a transaction-local claim, not
+-- Supabase JWT verification. Triggers, RPC bodies and non-SELECT write paths
+-- remain outside this test. order_reservations has no authenticated SELECT
+-- grant in Production; its policy is exercised only after a transaction-scoped
+-- grant, and the grant is rolled back with all fixture objects/data.
 --
 -- Never point this file at a persistent database. The workflow invokes it
 -- only against the job-local postgres:17 service container.
