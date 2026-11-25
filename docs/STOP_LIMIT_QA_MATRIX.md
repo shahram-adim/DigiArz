@@ -442,3 +442,10 @@ See \`docs/superpowers/reports/2026-11-15-exact-decimal-implementation-checkpoin
 - Added test-only snapshots under `supabase/tests/` and Node source-contract tests for identity derivation, account/pair validation, balance row locks, active-reservation arithmetic, order/reservation creation, owner-scoped cancellation, and exact remaining-reservation release.
 - The exact-decimal workflow discovers the new Node test through `node --test tests/*.test.js`; a new run is expected from the push, but its result must be checked separately.
 - This narrows the missing Stop-Limit source gap for two called entrypoints. It does **not** replace the missing base table DDL or create a complete Production schema/ACL parity harness. No production function, grant, migration, worker, cron, or financial row was changed.
+
+
+### Post-capture local verification — 2026-11-26
+- The new source-contract test and both captured SQL files were fetched from GitHub and their Git blob SHA values matched the local test copies exactly.
+- Node.js v22.16.0 syntax check passed; `node --test` ran the focused test file with 5/5 passing and no failures.
+- A fresh read-only Production query returned the same `pg_get_functiondef` text and MD5 fingerprints for both Limit entrypoints.
+- The GitHub combined status for the latest push commit was empty; push-triggered CI is not reported as passed. The earlier Run #1974 passed on the previous worker-test commit only.
