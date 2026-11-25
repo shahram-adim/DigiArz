@@ -27,3 +27,8 @@ jobs:
           node-version: "20"
       - name: Test Persian asset-name candidate extraction
         run: node --test tests/persian-asset-names.test.mjs tests/sync-safety.test.mjs
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Type-check the isolated exchange-sync Edge Function
+        run: deno check --no-lock supabase/functions/sync-iran-exchange-assets/index.ts
