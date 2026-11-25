@@ -1426,3 +1426,20 @@
 - [ ] ۱۷ Migration source مفقود و timestamp/content drift پیش از هر replay نیازمند reconciliation تازه‌اند؛ هیچ Migration replay نشده است.
 - [ ] تصمیم مالک درباره default EXECUTE برای service_role همچنان باز است.
 - [x] هیچ Production/Recovery-Test DB، داده مالی، سفارش، معامله، رزرو، کیف پول، balance، Auth، Cron، Edge Function یا Migration ledger تغییر نکرد؛ هیچ Merge، Deploy، db push، پروژه/زیرساخت جدید یا هزینه‌ای ایجاد نشد.
+
+
+## Checkpoint 2026-11-25 — sixth RPC promoted into shared PostgreSQL 17 fixture
+
+- [x] وضعیت PR #62 مجدداً بررسی شد: open، Draft، unmerged؛ base=`redesign/ui-clean-rebuild-2026`. HEAD در زمان این یادداشت `88d0a9fbb6fd9d67be2fdfc19ee3e682f1df0a87`.
+- [x] تابع `public.get_exchange_discovered_market_assets()` با روش اجرای فایل Migration اصلی، بدون کپی/بازنویسی بدنه، در shared PostgreSQL 17 fixture نصب شد. ابتدا فقط stub هم‌امضا حذف شد، سپس Migration `20261116200009_auto_list_unmatched_iran_exchange_assets.sql` اجرا شد.
+- [x] Dependency fixture: جدول `exchange_asset_observations` موجود در bootstrap به‌همراه `admin_market_listings`, `crypto_assets`, `market_prices` و جدول synthetic `demo_trading_pairs`; RLS روی هر پنج وابستگی فعال است. anon روی جداول محافظت‌شده SELECT مستقیم ندارد.
+- [x] Fixture اکنون ۶ بدنه واقعی + ۴۰ stub metadata-only دارد؛ ۴۰ stub هنوز هیچ ادعایی دربارهٔ return type/body واقعی Production ندارند.
+- [x] contract assertion برای TABLE result دقیق ۸ ستونی، STABLE، SECURITY DEFINER، search_path خالی، owner postgres در fixture، ACL نقش‌ها، نبود PUBLIC EXECUTE و RLS dependencies اضافه شد.
+- [x] integration tests برای anon، authenticated و service_role، تجمیع دو صرافی، ambiguous، قیمت تازه/کهنه، بازه ۴۸ ساعت، حذف stock/tokenized، حذف curated listing و enabled pair، عدم SELECT مستقیم anon و rollback اضافه شد.
+- [x] CI run #386 (`45607713609`) روی commit `a0b173aaf37c67ae05f3f076b5edeb99344f428d` موفق شد؛ `postgres17-rpc-smoke` و `unit-tests` سبز و remote `rpc-security-integration` عمداً skipped. لاگ PostgreSQL 17 تأیید می‌کند migration `CREATE FUNCTION`، contract، تست‌های سه نقش و `ROLLBACK` بدون خطا اجرا شده‌اند. Runs #387/#388 نیز روی commit مستندات `10c05e...` موفق بودند.
+- [!] Migration اصلی فقط anon/authenticated را grant می‌کند. برای بازنمایی ACL snapshot فعلی که service_role را نیز مجاز نشان می‌دهد، shared fixture بعد از Migration یک GRANT صریح و مختص همین تابع به service_role اعمال می‌کند. این grant صرفاً تستی است؛ منشأ Production privilege همچنان unresolved است. هیچ default privilege یا ACL Production تغییر نکرد.
+- [!] علت ریشه‌ای parser failure تلاش قبلی هنوز نامشخص است؛ اکنون اجرای Migration اصلی در standalone و shared harness هر دو موفق‌اند، اما علت قبلی را حدس نمی‌زنیم.
+- [ ] گام بعدی: انتخاب یک تابع read-only دیگر از ۴۰ stub با منبع Migration معتبر؛ ابتدا بررسی دقیق بدنه، return type، owner/search_path، ACL، dependencies/RLS و اثرات جانبی، سپس فقط در صورت امکان تست synthetic metadata و rollback.
+- [ ] ۱۷ Migration مفقود و timestamp/content drift هنوز نیازمند reconciliation تازه‌اند؛ هیچ replay انجام نشده است.
+- [ ] owner/ACL/default ACL و RLS/grants دقیق Production برای هر تابع و جدول وابسته همچنان نیازمند مستندات مستقیم catalog هستند. تصمیم مالک درباره default EXECUTE برای service_role باز است.
+- [x] هیچ Production/Recovery-Test DB، داده مالی، سفارش، معامله، رزرو، کیف پول، balance، Auth، Cron، Edge Function یا Migration ledger تغییر نکرد؛ Merge، Deploy، db push، پروژه/زیرساخت جدید و هزینه‌ای ایجاد نشد.
