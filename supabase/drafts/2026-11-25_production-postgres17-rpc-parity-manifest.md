@@ -239,21 +239,30 @@ This is a security-sensitive default: future public SECURITY DEFINER functions m
 
 ## 8. Latest checkpoint
 
-- Baseline CI for the 46-signature metadata contract passed previously; five real bodies now exist in the disposable fixture, with 41 metadata-only stubs.
+- The final disposable harness models all 46 exact signatures: 13 source-backed bodies and 33 metadata-only stubs after the exchange-discovery migration replacement. The latest PostgreSQL 17 smoke run passed the admin-enable pair eligibility/audit/rollback tests as well as the existing admin-add, admin-search, trigger, fee, reservation and discovery tests.
 - CI #277 passed after the claim rollback post-check: https://github.com/shahram-adim/DigiArz/actions/runs/45600722397
 - This manifest is an evidence tracker, not proof that all fields are complete or that Production parity is achieved.
 
 
-### Exact return types established for the four real fixture bodies
+### Exact Production return types captured for the 13 source-backed fixture bodies
 
-| Function | Return type in reviewed source |
+| Function | Production return type |
 |---|---|
 | `private.is_super_admin()` | `boolean` |
 | `private.is_current_user_super_admin()` | `boolean` |
+| `private.auto_list_verified_exchange_asset()` | `trigger` |
+| `private.enforce_unique_admin_market_listing_symbol()` | `trigger` |
 | `public.admin_exchange_asset_sync_report()` | `jsonb` |
 | `public.claim_admin_asset_refresh(text,uuid)` | `boolean` |
+| `public.admin_add_market_listing(text)` | `jsonb` |
+| `public.admin_enable_market_pair(text)` | `jsonb` |
+| `public.get_admin_market_listings()` | `TABLE` (11 columns; see §2A) |
+| `public.admin_search_market_assets(text,integer)` | `TABLE` (7 columns) |
+| `public.get_demo_trading_fee_rate(text,text)` | `numeric` |
+| `public.get_exchange_discovered_market_assets()` | `TABLE` (8 columns; see §2B) |
+| `public.get_my_order_reservations(uuid[])` | `TABLE` (6 columns) |
 
-These four types are source-backed for the reviewed fixture bodies only. The remaining 42 Production return types are still unknown in this artifact; their fixture `void` type is deliberately excluded as evidence.
+These 13 return types are captured from the live Production catalog on 2026-11-25. The other 33 fixture signatures remain metadata stubs; their fixture `RETURNS void` declarations are not Production evidence.
 
 
 ## 2A. Additional source-backed body: `public.get_admin_market_listings()`
