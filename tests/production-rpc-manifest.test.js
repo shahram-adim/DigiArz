@@ -192,10 +192,21 @@ test('missing-migration dossiers cross-reference only captured live fingerprints
   assert.match(dossier, /no direct live attribution/);
   assert.match(dossier, /command text\/fingerprint در این crosswalk موجود نیست/);
   const fingerprints = [...dossier.matchAll(/MD5 `[a-f0-9]{32}`/g)];
-  assert.equal(fingerprints.length, 12);
+  assert.equal(fingerprints.length, 18);
   assert.match(dossier, /20261113153808/);
   assert.match(dossier, /20261115105956/);
   assert.match(dossier, /20261116201639/);
   assert.match(dossier, /20261121050216/);
   assert.match(dossier, /هیچ grant\/revoke، policy، function، trigger، cron، queue/);
+});
+
+
+test('migration dossier includes all captured cron command and trigger fingerprints', () => {
+  const dossier = fs.readFileSync('supabase/audit/production_missing_migration_dossiers_2026-11-25.md', 'utf8');
+  const cronFingerprints = [...dossier.matchAll(/Command MD5 \| `[a-f0-9]{32}`/g)];
+  assert.equal(cronFingerprints.length, 4);
+  for (const trigger of ['trg_auto_list_verified_exchange_asset', 'admin_market_listing_unique_ticker', 'guard_active_account_orders', 'guard_active_account_trades', 'guard_active_account_transactions', 'on_auth_user_created']) {
+    assert.ok(dossier.includes(trigger));
+  }
+  assert.match(dossier, /هیچ jobی متوقف، کند، زمان‌بندی مجدد یا اجرا نشد/);
 });
