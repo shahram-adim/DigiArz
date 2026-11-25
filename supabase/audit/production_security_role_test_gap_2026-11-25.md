@@ -87,3 +87,36 @@ No recovered migration may be blindly replayed as a batch. Do not restore, repla
 - The PostgreSQL 17 smoke run used only an ephemeral CI container; the remote-database job was skipped.
 - No Production migration, SQL, grant, revoke, RLS policy, function, view, data, Cron schedule, queue, Edge Function, deployment, or financial row was changed.
 - No cost-creating project or database branch was created.
+
+
+## Follow-up verification — dependency map and timestamp mismatches (2026-11-25)
+
+A source-level dependency/order map for all 17 recovered historical migrations was added at [`production_migration_dependency_order_map_2026-11-25.md`](production_migration_dependency_order_map_2026-11-25.md). It records prerequisite objects, downstream consumers, data/HTTP/Cron/privilege side effects, and the minimum dependency edges. It is a review artifact only, not a replay manifest.
+
+### Direct byte comparison of all 20 timestamp-mismatched local files
+
+The 20 local SQL files mapped by normalized migration name were compared against their corresponding Production ledger `statements` bodies using byte lengths, MD5 values, and targeted line-level inspection of the non-exact cases:
+
+- **16 of 20** are byte-for-byte identical to the Production ledger despite a different filename timestamp.
+- **3 of 20** differ only by a single leading or trailing newline:
+  - `20261113162154` ↔ `20261113162202_record_conditional_reservation_consumption.sql`;
+  - `20261113162233` ↔ `20261113162244_index_conditional_execution_order_reference.sql`;
+  - `20261113173506` ↔ `20261113190000_admin_on_demand_crypto_asset_refresh.sql`.
+- **1 of 20** has a substantive SQL-body divergence:
+  - Production ledger version `20261115134357` vs local `20261115134500_add_kifpool_to_scheduled_exchange_asset_sync.sql`.
+  - The local file is 230 bytes longer and includes additional change-detection predicates that avoid updating unchanged observation match/status rows. The Production ledger body does not include those predicates. This is a behavioral divergence, not a filename-only mismatch. Keep both source versions distinct; do not rename the local file as if it were the historical Production body.
+
+This narrows the timestamp mismatch problem substantially, but it does not authorize bulk renaming. The two local-only KuCoin/Gate.io refresh migrations remain unrecorded in the ledger and retain the previously identified risk of replacing the current 515-ID-capped market-price function with older definitions.
+
+### Current live project and CI snapshot
+
+- Production project remains `ACTIVE_HEALTHY`, PostgreSQL 17.11; its migration ledger currently contains 55 applied rows through `20261121050216`. All database inspection for this follow-up was SELECT-only.
+- PR #61 head `3474f628eb5b7e7515fe9c559908235f09fa9a05`: UI visual review, exact-decimal tests, and isolated Android APK workflow runs completed successfully.
+- PR #62 head `66dad350ad3f02a7c3c885c4bd2e45e9f1f0e53b`: unit/type-check and PostgreSQL 17 targeted RPC smoke passed; the remote database integration job was skipped.
+- PR #63 head before this documentation follow-up `907bf1d5b7a0689dccb5db98c55c040bbe7787b0`: the observed run `45661119749` passed the exact-decimal job (including isolated PostgreSQL arithmetic/schema and trading lifecycle/race checks). It did not run the full security audit role matrix. CI for the new documentation commit must be checked separately before reporting its status.
+
+### Safety and next step
+
+No Migration was renamed, copied into `supabase/migrations/`, replayed, pushed, or applied. No migration ledger row, function, grant, RLS policy, queue, Cron schedule, Edge Function, deployment, wallet, order, trade, reservation, or financial record was changed. No merge or cost-creating resource was made.
+
+Next: turn the dependency map into a disposable PostgreSQL 17 replay plan with external HTTP, queue snapshot, privileged identity seed, Cron scheduling/alteration, and all live data/financial writes explicitly excluded or replaced by synthetic assertions. Keep all Production operations gated by explicit owner approval.
