@@ -106,6 +106,14 @@ jobs:
           test -n "$pg_container"
           docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/fixtures/rpc-security-postgres17-bootstrap.sql
 
+      - name: Prepare synthetic exchange-discovery dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/fixtures/rpc-security-exchange-discovery-dependencies.sql
+
       - name: Load exact 46-signature ACL fixture (41 inert metadata stubs + 5 real bodies)
         shell: bash
         run: |
@@ -113,6 +121,17 @@ jobs:
           pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
           test -n "$pg_container"
           docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/fixtures/rpc-security-postgres17-catalog-stubs.sql
+
+      - name: Install exact exchange-discovery migration body and model observed service-role ACL
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 -c "DROP FUNCTION public.get_exchange_discovered_market_assets();"
+          docker cp supabase/migrations/20261116200009_auto_list_unmatched_iran_exchange_assets.sql "$pg_container:/tmp/get_exchange_discovered_market_assets.sql"
+          docker exec "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 -f /tmp/get_exchange_discovered_market_assets.sql
+          docker exec "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 -c "GRANT EXECUTE ON FUNCTION public.get_exchange_discovered_market_assets() TO service_role;"
 
       - name: Assert representative function SECURITY DEFINER, search_path, and ACLs
         shell: bash
@@ -165,6 +184,14 @@ jobs:
           docker cp tests/rpc-security-exchange-discovery-standalone.sql "$pg_container:/tmp/rpc-security-exchange-discovery-standalone.sql"
           docker exec "$pg_container" psql -U postgres -d digiarz_discovery_standalone -v ON_ERROR_STOP=1 -f /tmp/rpc-security-exchange-discovery-standalone.sql
 
+      - name: Test source-backed exchange discovery RPC behavior and rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security-exchange-discovery.integration.sql
+
       - name: Confirm test fixture contains only the synthetic admin identity
         shell: bash
         run: |
@@ -173,4 +200,4 @@ jobs:
           test -n "$pg_container"
           docker exec "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 -c "SELECT count(*) = 1 AS only_one_synthetic_admin FROM private.admin_users;"
           docker exec "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 -c "SELECT count(*) = 0 AS no_persistent_synthetic_claims FROM private.admin_asset_refresh_limits;"
-          docker exec "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 -c "SELECT (SELECT count(*) FROM public.crypto_assets) = 0 AND (SELECT count(*) FROM public.market_prices) = 0 AND (SELECT count(*) FROM public.admin_market_listings) = 0 AS no_persistent_synthetic_market_rows;"
+          docker exec "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 -c "SELECT (SELECT count(*) FROM public.crypto_assets) = 0 AND (SELECT count(*) FROM public.market_prices) = 0 AND (SELECT count(*) FROM public.admin_market_listings) = 0 AND (SELECT count(*) FROM public.exchange_asset_observations) = 0 AND (SELECT count(*) FROM public.demo_trading_pairs) = 0 AS no_persistent_synthetic_market_rows;"
