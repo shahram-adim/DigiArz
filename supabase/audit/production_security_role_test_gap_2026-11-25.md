@@ -120,3 +120,23 @@ This narrows the timestamp mismatch problem substantially, but it does not autho
 No Migration was renamed, copied into `supabase/migrations/`, replayed, pushed, or applied. No migration ledger row, function, grant, RLS policy, queue, Cron schedule, Edge Function, deployment, wallet, order, trade, reservation, or financial record was changed. No merge or cost-creating resource was made.
 
 Next: turn the dependency map into a disposable PostgreSQL 17 replay plan with external HTTP, queue snapshot, privileged identity seed, Cron scheduling/alteration, and all live data/financial writes explicitly excluded or replaced by synthetic assertions. Keep all Production operations gated by explicit owner approval.
+
+
+## Disposable PostgreSQL 17 migration-replay plan — 2026-11-25
+
+A review-only replay-validation plan has been added in PR #62:
+https://github.com/shahram-adim/DigiArz/blob/feature/persian-asset-name-candidates-2026/supabase/drafts/2026-11-25_postgres17-migration-replay-validation-plan.md
+
+The plan classifies all 17 byte-exact recovered historical SQL bodies by their schema/function/data/privilege/HTTP/Cron/queue effects and lays out a dependency-ordered, ephemeral PostgreSQL 17 validation approach. It explicitly excludes the privileged identity seed, real wallet/data writes, HTTP request execution, pg_net queue snapshots, pg_cron schedule creation/alteration, and both local-only KuCoin/Gate.io migrations. It also requires synthetic two-user RLS isolation tests and separates ACL denial from function-body authorization.
+
+### Existing harness boundary confirmed
+
+The current PR #62 workflow uses a postgres:17 service container and no Production database URL or secrets. Its latest verified run 45617838082 passed:
+- unit tests and isolated Edge Function type-check;
+- the targeted PostgreSQL 17 RPC smoke suite, including all 46 exact SECURITY DEFINER signatures and current API-role ACL metadata;
+- 13 source-backed/reviewed function bodies plus 33 inert metadata-only stubs in the shared 46-signature fixture;
+- targeted role, worker-claim, listing, exchange-discovery, admin search/add/enable, trigger, fee-rate and owner-scoped reservation tests.
+
+The remote rpc-security-integration job was skipped as configured. The harness remains a targeted smoke suite, not full Supabase parity or a migration replay.
+
+The new replay plan is documentation only. No workflow or test code was changed, no CI gate was enabled, no SQL was executed, and no Production/Recovery-Test object, privilege, data, queue, Cron schedule, or financial record was changed. The plan's next bounded unit is a static statement-classification manifest; execution remains blocked until the acceptance gates are reviewed.
