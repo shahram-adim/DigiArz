@@ -216,3 +216,25 @@ No such runtime tests were run because the existing Recovery-Test project is not
 - Decide whether the global 30-second market-price refresh cooldown should remain global or become per-user/per-client; no change before explicit approval.
 - Correct NULL liquidity-type validation only after a separately reviewed draft and owner approval.
 - Build a disposable environment with matching grants, schema USAGE, Auth trigger, Cron identities, and fixtures before enabling the skipped RPC integration CI job.
+
+
+## 10. Fee RPC NULL-validation fix — isolated draft and regression test
+
+Created two review-only artifacts on the feature branch:
+
+- `supabase/drafts/2026-11-25_fix_demo_trading_fee_rate_null_validation.sql`
+  - Preserves the exact function signature, numeric return type, STABLE volatility, SECURITY DEFINER, and empty search_path.
+  - Adds explicit `p_liquidity_type IS NULL` rejection before the maker/taker branch.
+  - Does not alter grants, ownership, ACL defaults, or caller authorization.
+  - This is deliberately stored under `drafts/`, not as a migration.
+
+- `tests/demo-trading-fee-rate-validation.sql`
+  - On a disposable test database with at least one enabled fee row, checks that maker/taker values match the configured table values.
+  - Checks that NULL and unsupported liquidity types raise exactly `Invalid liquidity type`.
+  - Checks that an unknown quote asset raises the existing configuration error.
+  - Performs no persistent table writes or schema/ACL changes.
+  - Not executed against Production or the non-parity Recovery-Test project.
+
+The test is a manual isolated-database regression script; it has not yet been wired into CI. It must not be enabled against Production. The proposed SQL has not been applied anywhere.
+
+Remaining verification: run this script against a disposable database with the exact function/table contract, then decide whether to convert the approved SQL into a timestamped migration. Owner approval is required before any Production migration or database change.
