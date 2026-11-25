@@ -49,14 +49,19 @@ AS $fn$
   SELECT NULLIF(current_setting('request.jwt.claim.sub', true), '')::uuid;
 $fn$;
 
--- Explicit shim boundary: the test isolates the captured user_id predicates.
+-- Body copied from the captured Production definition (MD5 d932cd1d0da21bb96bdc0a381f7dcbc3).
+-- auth.uid() remains a test shim backed by request.jwt.claim.sub; no real JWT is verified.
 CREATE FUNCTION public.current_account_is_active()
 RETURNS boolean
 LANGUAGE sql
-STABLE
-SET search_path=''
+STABLE SECURITY DEFINER
+SET search_path TO ''
 AS $fn$
-  SELECT true;
+  SELECT coalesce((
+    SELECT p.is_active
+    FROM public.profiles p
+    WHERE p.id = auth.uid()
+  ), false);
 $fn$;
 
 CREATE TABLE public.profiles (
@@ -320,6 +325,43 @@ BEGIN
   SELECT count(*) INTO n FROM public.conditional_orders; IF n<>1 OR EXISTS(SELECT 1 FROM public.conditional_orders WHERE user_id<>'22222222-2222-4222-8222-222222222222') THEN RAISE EXCEPTION 'user B conditional order isolation failed'; END IF;
 END
 $user_b$;
+RESET ROLE;
+
+-- Exercise the captured Production helper body with an inactive synthetic account.
+-- Policies that call the helper must hide rows; policies without it are recorded separately.
+UPDATE public.profiles
+SET is_active = false, deactivated_at = now()
+WHERE id = '22222222-2222-4222-8222-222222222222';
+
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',true);
+DO $inactive_account$
+DECLARE n integer;
+BEGIN
+  IF public.current_account_is_active() IS DISTINCT FROM false THEN
+    RAISE EXCEPTION 'captured active-account helper did not reject inactive user B';
+  END IF;
+  IF (SELECT count(*) FROM public.wallets) <> 0
+     OR (SELECT count(*) FROM public.asset_balances) <> 0
+     OR (SELECT count(*) FROM public.orders) <> 0
+     OR (SELECT count(*) FROM public.trades) <> 0
+     OR (SELECT count(*) FROM public.transactions) <> 0 THEN
+    RAISE EXCEPTION 'active-account RLS predicate exposed rows to inactive user B';
+  END IF;
+  SELECT count(*) INTO n FROM public.profiles;
+  IF n <> 1 THEN
+    RAISE EXCEPTION 'profile self-read policy behavior changed for inactive user B';
+  END IF;
+  SELECT count(*) INTO n FROM public.order_reservations;
+  IF n <> 1 THEN
+    RAISE EXCEPTION 'order_reservations policy no longer matches captured owner-only predicate';
+  END IF;
+  SELECT count(*) INTO n FROM public.conditional_orders;
+  IF n <> 1 THEN
+    RAISE EXCEPTION 'conditional_orders policy no longer matches captured owner-only predicate';
+  END IF;
+END
+$inactive_account$;
 RESET ROLE;
 
 -- No authenticated subject: all owner-scoped rows must be hidden.
