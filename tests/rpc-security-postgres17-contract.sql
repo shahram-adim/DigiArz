@@ -159,6 +159,20 @@ BEGIN
      OR has_table_privilege('service_role','private.admin_users','SELECT') THEN
     RAISE EXCEPTION 'private.admin_users must not be directly readable by API roles';
   END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname='public' AND tablename='crypto_assets'
+      AND policyname='crypto_assets_public_read' AND cmd='SELECT'
+      AND roles @> ARRAY['anon','authenticated']::name[] AND qual='true'
+  ) THEN
+    RAISE EXCEPTION 'crypto_assets_public_read policy does not match Production';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname='private' AND tablename='admin_users'
+  ) THEN
+    RAISE EXCEPTION 'private.admin_users unexpectedly has an RLS policy';
+  END IF;
   RAISE NOTICE 'PASS: admin_search_market_assets live return shape, owner, volatility, path, ACL and dependency RLS';
 END
 $admin_search_contract$;
