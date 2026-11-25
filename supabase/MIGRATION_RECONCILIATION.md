@@ -196,3 +196,37 @@ This report is an inventory and safety analysis only. It changes no database obj
 - بخش «وضعیت CI و PR» در snapshot قبلی پیش از اجرای نهایی CI نوشته شده بود و دیگر وضعیت جاری را نشان نمی‌دهد. برای commit فعلی PR #62 یعنی `ea8b541af8fa8037627c16ba3258506698370cfa`، GitHub Actions run **45563453868** (run #67) با نتیجهٔ **success** تکمیل شده است. Job `unit-tests` و هر دو مرحلهٔ «Test Persian asset-name candidate extraction» و «Type-check the isolated exchange-sync Edge Function» موفق بوده‌اند.
 - PR #62 همچنان open، Draft و ادغام‌نشده است. موفقیت CI مجوز merge، deploy، اجرای SQL یا تغییر Production محسوب نمی‌شود.
 - این اصلاح صرفاً مستندسازی در شاخهٔ آزمایشی است؛ هیچ Migration، جدول، تابع، grant، RLS، cron، صف یا دادهٔ Production تغییر نکرده است.
+
+
+## شواهد تکمیلی زنده برای Migrationهای Bit24، پایش و محدودیت Worker — ۲۵ نوامبر ۲۰۲۶
+
+این بررسی فقط SELECT از کاتالوگ PostgreSQL، تعریف توابع و جدول `cron.job` بود.
+
+### زمان‌بندی Bit24 و جدول درخواست
+- Cron job 15 با نام `digiarz-bit24-request` فعال است؛ schedule برابر `*/30 * * * *` و command برابر `select public.request_bit24_exchange_sync();` است.
+- Cron job 16 با نام `digiarz-bit24-process` فعال است؛ schedule برابر `16,46 * * * *` و command برابر `select public.process_bit24_exchange_sync();` است.
+- جدول `public.bit24_exchange_sync_requests` وجود دارد، مالک آن postgres است و RLS آن فعال است (FORCE RLS خاموش).
+- توابع `request_bit24_exchange_sync()` و `process_bit24_exchange_sync()` هر دو SECURITY DEFINER، مالک postgres و دارای search_path خالی هستند.
+- این شواهد، وجود مسیر عملیاتی Bit24 و زمان‌بندی آن را تأیید می‌کند؛ اما متن SQL اصلی Migration `schedule_bit24_exchange_asset_sync` هنوز بازیابی نشده و تطبیق کامل محتوایی با Migration ثبت‌شده انجام نشده است.
+
+### تابع پایش مدیریتی
+- تابع `public.admin_exchange_asset_sync_report()` وجود دارد؛ بدون آرگومان، خروجی JSONB، مالک postgres، SECURITY DEFINER و search_path خالی.
+- بدنهٔ زنده قبل از ساخت گزارش، `private.is_current_user_super_admin()` را بررسی می‌کند و در غیر این صورت خطای 42501 می‌دهد.
+- گزارش summary، وضعیت منابع و حداکثر ۱۰۰ مورد نیازمند بررسی تطبیق را از جدول‌های observations و sync requests می‌سازد.
+- ACL زنده: postgres، authenticated و service_role مجاز؛ anon فاقد EXECUTE است.
+- Commit تاریخی `987ef541a797e3078c5ca6f41d1f46bba2a3e723` فقط تغییر `index.html` برای UI پایش را نشان می‌دهد؛ فایل SQL Migration در همان Commit وجود ندارد.
+- بنابراین وجود UI و تابع پایش و رفتار فعلی آن تأیید شده، ولی SQL اصلی Migration `admin_exchange_asset_sync_monitoring` هنوز بازیابی نشده است.
+
+### محدودیت اجرای Worker
+- ACL توابع `request_iran_exchange_asset_sync()`, `process_iran_exchange_asset_sync()`, `request_bit24_exchange_sync()` و `process_bit24_exchange_sync()`: postgres و service_role مجازند؛ anon و authenticated مجوز مستقیم ندارند.
+- چهار Cron مرتبط (jobs 13 تا 16) در زمان snapshot فعال بودند؛ زمان‌بندی‌های زنده:
+  - job 13: `*/10 * * * *`
+  - job 14: `1,31 * * * *`
+  - job 15: `*/30 * * * *`
+  - job 16: `16,46 * * * *`
+- این privilege matrix با هدف محدودکردن اجرای مستقیم Worker سازگار است، اما مالکیت/نقش اجراکنندهٔ Cron و متن SQL اصلی Migration `restrict_exchange_sync_worker_execution` باید جداگانه از منبع تاریخی تأیید شود؛ صرف ACL تابع برای بازسازی کامل Migration کافی نیست.
+
+### نتیجهٔ این بررسی
+- شواهد زنده برای سه Migration بالا قوی‌تر شد، اما هیچ‌یک از SQLهای اصلی آن‌ها از این مرحله بازیابی نشد.
+- هیچ Cron، تابع، grant، RLS، جدول، صف، داده، Migration یا تنظیم Production تغییر نکرد.
+- این شواهد را نباید به‌عنوان مجوز db push، تغییر ACL یا بازنویسی migration ledger تفسیر کرد.
