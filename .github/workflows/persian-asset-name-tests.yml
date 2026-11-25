@@ -15,6 +15,7 @@ on:
       - "tests/rpc-security-claim-admin-refresh.integration.sql"
       - "tests/rpc-security-market-listings.integration.sql"
       - "tests/rpc-security-market-listing-trigger.integration.sql"
+      - "tests/rpc-security-auto-list-trigger.integration.sql"
       - "tests/fixtures/rpc-security-postgres17-bootstrap.sql"
       - "tests/fixtures/rpc-security-postgres17-catalog-stubs.sql"
       - "tests/rpc-security-postgres17-contract.sql"
@@ -115,7 +116,7 @@ jobs:
           test -n "$pg_container"
           docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/fixtures/rpc-security-exchange-discovery-dependencies.sql
 
-      - name: Load exact 46-signature ACL fixture (40 inert metadata stubs + 6 real/source-backed bodies)
+      - name: Load exact 46-signature ACL fixture (39 inert metadata stubs + 7 real/source-backed bodies)
         shell: bash
         run: |
           set -euo pipefail
@@ -211,6 +212,14 @@ jobs:
           pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
           test -n "$pg_container"
           docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security-market-listing-trigger.integration.sql
+
+      - name: Test exact Production auto-list trigger with synthetic observations
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security-auto-list-trigger.integration.sql
 
       - name: Confirm test fixture contains only the synthetic admin identity
         shell: bash
