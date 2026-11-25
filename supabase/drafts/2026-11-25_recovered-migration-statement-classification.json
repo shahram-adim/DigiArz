@@ -60,7 +60,7 @@
           "ordinal": 6,
           "sha256": "5c67c9969117fff56f0889d9bc3e2c4b175b406e6d74541ae7d48c2c40c50bd8",
           "classification": "acl_assertion_only_no_persistent_replay",
-          "target": "unresolved-review",
+          "target": "public.demo_trading_fees",
           "preview": "REVOKE ALL ON public.demo_trading_fees FROM PUBLIC, anon, authenticated;"
         },
         {
@@ -116,7 +116,7 @@
           "ordinal": 14,
           "sha256": "47d5ab9eb95988d14ee6c11a596e43a383443fbbd5115eb4cfa7449de6ed39ee",
           "classification": "schema_or_function_candidate_dependency_gated",
-          "target": "unresolved-review",
+          "target": "public.coin_reviews",
           "preview": "CREATE INDEX IF NOT EXISTS coin_reviews_symbol_created_idx ON public.coin_reviews(symbol, created_at DESC);"
         },
         {
@@ -137,7 +137,7 @@
           "ordinal": 17,
           "sha256": "5a9ad8fd26f68bc76590d506415773e938d660477557fc6608cf0b32e39d6463",
           "classification": "schema_or_function_candidate_dependency_gated",
-          "target": "unresolved-review",
+          "target": "public.coin_reviews",
           "preview": "CREATE POLICY \"Public can read coin reviews\" ON public.coin_reviews FOR SELECT TO anon, authenticated USING (true);"
         },
         {
@@ -151,7 +151,7 @@
           "ordinal": 19,
           "sha256": "c297972e9a1e73df4cbc52f7df9b2bc65b337e22045821f479e035441bb8bc87",
           "classification": "schema_or_function_candidate_dependency_gated",
-          "target": "unresolved-review",
+          "target": "public.coin_reviews",
           "preview": "CREATE POLICY \"Users can create own coin reviews\" ON public.coin_reviews FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id AND public.curre"
         },
         {
@@ -179,7 +179,7 @@
           "ordinal": 23,
           "sha256": "130814eff2cb842ee6f19e9661a9190d7d722c463ed23025af57b45d78613862",
           "classification": "schema_or_function_candidate_dependency_gated",
-          "target": "unresolved-review",
+          "target": "public.coin_reviews",
           "preview": "CREATE POLICY \"Users can delete own coin reviews\" ON public.coin_reviews FOR DELETE TO authenticated USING (auth.uid() = user_id);"
         },
         {
@@ -207,35 +207,35 @@
           "ordinal": 27,
           "sha256": "8208c9608916e408c33fb4719594a941f52a091b343cce22232d10ce2c0ff84f",
           "classification": "schema_or_function_candidate_dependency_gated",
-          "target": "unresolved-review",
+          "target": "public.coin_review_reports",
           "preview": "CREATE POLICY \"Users can report coin reviews\" ON public.coin_review_reports FOR INSERT TO authenticated WITH CHECK (auth.uid() = reporter_user_id AND "
         },
         {
           "ordinal": 28,
           "sha256": "3cc4b32b46f861547a4501e849aeca2ca60e588bfbf8eb270ba72e672e74b909",
           "classification": "acl_assertion_only_no_persistent_replay",
-          "target": "unresolved-review",
+          "target": "public.coin_review_reports",
           "preview": "REVOKE ALL ON public.coin_review_reports FROM PUBLIC, anon;"
         },
         {
           "ordinal": 29,
           "sha256": "d0efbe0d48a36619662de6640c118df69bee29ed751492460582db5e15e77904",
           "classification": "acl_assertion_only_no_persistent_replay",
-          "target": "unresolved-review",
+          "target": "public.coin_reviews",
           "preview": "GRANT SELECT, INSERT, UPDATE, DELETE ON public.coin_reviews TO authenticated;"
         },
         {
           "ordinal": 30,
           "sha256": "ba9fa4395d5f34a1f80e8b56d6ff84fd124e30ac884285c4e9cf850063bc9de1",
           "classification": "acl_assertion_only_no_persistent_replay",
-          "target": "unresolved-review",
+          "target": "public.coin_reviews",
           "preview": "GRANT SELECT ON public.coin_reviews TO anon;"
         },
         {
           "ordinal": 31,
           "sha256": "8192372fa0bddcb171bc45c635edb5616fe3616983fbe5b401719d237794a438",
           "classification": "acl_assertion_only_no_persistent_replay",
-          "target": "unresolved-review",
+          "target": "public.coin_review_reports",
           "preview": "GRANT INSERT ON public.coin_review_reports TO authenticated;"
         }
       ]
@@ -259,14 +259,14 @@
           "ordinal": 2,
           "sha256": "a17822df0a5ae7cf77f75fa06703c79a235e31a600df2e230e26643ffa4c3f99",
           "classification": "schema_or_function_candidate_dependency_gated",
-          "target": "unresolved-review",
+          "target": "private",
           "preview": "create schema if not exists private;"
         },
         {
           "ordinal": 3,
           "sha256": "12da4d43af58d61e358dbcea97cded2a9722c9f745069a7977b746cc643023f9",
           "classification": "acl_assertion_only_no_persistent_replay",
-          "target": "unresolved-review",
+          "target": "private",
           "preview": "revoke all on schema private from public, anon, authenticated;"
         },
         {
@@ -287,7 +287,7 @@
           "ordinal": 6,
           "sha256": "d6e3ad6354312ef6325cb43fd64b43a67c4b4e741ebac27744048b09f7508617",
           "classification": "acl_assertion_only_no_persistent_replay",
-          "target": "unresolved-review",
+          "target": "private.admin_users",
           "preview": "revoke all on table private.admin_users from public, anon, authenticated;"
         },
         {
@@ -353,7 +353,7 @@
           "ordinal": 4,
           "sha256": "e8dc0f9ec449330d26795932dd3dc847982fa03b3a30e3e66ebf08c8edba4a17",
           "classification": "acl_assertion_only_no_persistent_replay",
-          "target": "unresolved-review",
+          "target": "private.admin_wallet_adjustments",
           "preview": "revoke all on table private.admin_wallet_adjustments from public, anon, authenticated;"
         },
         {
@@ -516,7 +516,7 @@
           "ordinal": 2,
           "sha256": "d59d4b2aaebf18fafa18dbb0c7ecb506ef4728e723be4fc81f9da5894557f328",
           "classification": "acl_assertion_only_no_persistent_replay",
-          "target": "unresolved-review",
+          "target": "private",
           "preview": "grant usage on schema private to authenticated;"
         },
         {
@@ -673,14 +673,14 @@
           "ordinal": 2,
           "sha256": "91fbc6e4518f90e75fc5f1ca2cdfd2f72494f2fec51f6979ce0d585cce1d81d6",
           "classification": "schema_or_function_candidate_dependency_gated",
-          "target": "unresolved-review",
+          "target": "public.exchange_asset_observations",
           "preview": "create index if not exists exchange_asset_observations_symbol_idx on public.exchange_asset_observations (upper(base_symbol));"
         },
         {
           "ordinal": 3,
           "sha256": "8ca831f50472b62409bfa7323d90fd21ea91d7e5284a045ac35b0fbf5934fc2a",
           "classification": "schema_or_function_candidate_dependency_gated",
-          "target": "unresolved-review",
+          "target": "public.exchange_asset_observations",
           "preview": "create index if not exists exchange_asset_observations_match_idx on public.exchange_asset_observations (match_status, last_seen_at desc);"
         },
         {
@@ -694,14 +694,14 @@
           "ordinal": 5,
           "sha256": "fe66b58b720661e4ab680d30a5e79b5852780faba0ea7f90fd29119f96b5fd9d",
           "classification": "acl_assertion_only_no_persistent_replay",
-          "target": "unresolved-review",
+          "target": "public.exchange_asset_observations",
           "preview": "revoke all on public.exchange_asset_observations from anon, authenticated;"
         },
         {
           "ordinal": 6,
           "sha256": "f2cc7aee603c87f28162717a9b5064f03e5f7aba603c2be38c11fa35a2fc13fd",
           "classification": "acl_assertion_only_no_persistent_replay",
-          "target": "unresolved-review",
+          "target": "public.exchange_asset_observations",
           "preview": "grant all on public.exchange_asset_observations to service_role;"
         },
         {
@@ -739,14 +739,14 @@
           "ordinal": 3,
           "sha256": "94a1337bafbad0e1936b99a138773b4550cf130d6608b3b1327c8bfe4e6315b5",
           "classification": "acl_assertion_only_no_persistent_replay",
-          "target": "unresolved-review",
+          "target": "public.exchange_asset_sync_requests",
           "preview": "revoke all on public.exchange_asset_sync_requests from anon, authenticated;"
         },
         {
           "ordinal": 4,
           "sha256": "95f155ed8f795b4d4a741c81d43c41d459edb22d25d00c3770065ba3682d440a",
           "classification": "acl_assertion_only_no_persistent_replay",
-          "target": "unresolved-review",
+          "target": "public.exchange_asset_sync_requests",
           "preview": "grant all on public.exchange_asset_sync_requests to service_role;"
         },
         {
@@ -781,14 +781,14 @@
           "ordinal": 9,
           "sha256": "0a35fd3fd9266e9e9a80c2966ee0730937a6a29c0e557e69f557d201649eef37",
           "classification": "excluded_cron_side_effect",
-          "target": "unresolved-review",
+          "target": "pg_cron job",
           "preview": "select cron.schedule('digiarz-iran-exchange-request','*/30 * * * *','select public.request_iran_exchange_asset_sync();');"
         },
         {
           "ordinal": 10,
           "sha256": "d9f68526659fd66e82a9ca922a4e5a8d3914a827bf94a43bb323bbf0d1450294",
           "classification": "excluded_cron_side_effect",
-          "target": "unresolved-review",
+          "target": "pg_cron job",
           "preview": "select cron.schedule('digiarz-iran-exchange-process','*/2 * * * *','select public.process_iran_exchange_asset_sync();');"
         }
       ]
@@ -888,14 +888,14 @@
           "ordinal": 3,
           "sha256": "f24b81da26b8cde3513c201d9cc5e10724d72c4a0e3940a3f8e7397c71388f64",
           "classification": "acl_assertion_only_no_persistent_replay",
-          "target": "unresolved-review",
+          "target": "public.bit24_exchange_sync_requests",
           "preview": "revoke all on public.bit24_exchange_sync_requests from anon,authenticated;"
         },
         {
           "ordinal": 4,
           "sha256": "afd3bf80f1ff3ce7773e104ccc9b76c5b7e731705c176cea4d3b50b7b601f50e",
           "classification": "acl_assertion_only_no_persistent_replay",
-          "target": "unresolved-review",
+          "target": "public.bit24_exchange_sync_requests",
           "preview": "grant all on public.bit24_exchange_sync_requests to service_role;"
         },
         {
@@ -930,14 +930,14 @@
           "ordinal": 9,
           "sha256": "ad1424d096065bd83f5ed65166407146df0c0212bf185d431cd37742f74e00c7",
           "classification": "excluded_cron_side_effect",
-          "target": "unresolved-review",
+          "target": "pg_cron job",
           "preview": "select cron.schedule('digiarz-bit24-request','*/30 * * * *','select public.request_bit24_exchange_sync();');"
         },
         {
           "ordinal": 10,
           "sha256": "a001e5531d1b32d8e13d3b15e00f43744c812f052c0609be64984869c35f40ee",
           "classification": "excluded_cron_side_effect",
-          "target": "unresolved-review",
+          "target": "pg_cron job",
           "preview": "select cron.schedule('digiarz-bit24-process','*/2 * * * *','select public.process_bit24_exchange_sync();');"
         }
       ]
@@ -1058,7 +1058,7 @@
           "ordinal": 3,
           "sha256": "30259e9e9d94ac8eb45da3ac26da7e45097a73e4a1551bd0576e0a05edcc1189",
           "classification": "excluded_cron_side_effect",
-          "target": "unresolved-review",
+          "target": "pg_cron job",
           "preview": "SELECT cron.schedule( 'digiarz-auto-activate-verified-exchange-pairs', '* * * * *', 'SELECT private.auto_activate_verified_exchange_pairs();' );"
         }
       ]
@@ -1075,7 +1075,7 @@
           "ordinal": 1,
           "sha256": "6108c68f0644b8b87e8d78f4853d493fa5cedd678c5c3b2917efce940d17c552",
           "classification": "schema_or_function_candidate_dependency_gated",
-          "target": "unresolved-review",
+          "target": "public.crypto_assets",
           "preview": "CREATE INDEX IF NOT EXISTS crypto_assets_upper_symbol_active_idx ON public.crypto_assets (upper(symbol)) WHERE is_active IS TRUE;"
         },
         {
@@ -1123,14 +1123,14 @@
           "ordinal": 1,
           "sha256": "8d94de301bfb5fc3cb4bf2055321e5285c10b5e3e4d27375212db12f650f2e4e",
           "classification": "excluded_cron_side_effect",
-          "target": "unresolved-review",
+          "target": "pg_cron job",
           "preview": "select cron.alter_job(14, schedule := '1,31 * * * *');"
         },
         {
           "ordinal": 2,
           "sha256": "20d9696cb53573cc68fbd5d955012b22a03574fe7db4476904b570e38108ac7c",
           "classification": "excluded_cron_side_effect",
-          "target": "unresolved-review",
+          "target": "pg_cron job",
           "preview": "select cron.alter_job(16, schedule := '16,46 * * * *');"
         }
       ]
@@ -1175,6 +1175,9 @@
     "unclassified_unknown": 0,
     "excluded_cron": 7,
     "excluded_external_http_or_queue": 7,
-    "transaction_wrappers": 8
-  }
+    "transaction_wrappers": 8,
+    "target_locators_resolved": 132,
+    "unresolved_targets": 4
+  },
+  "target_extraction_note": "Targets are best-effort object locators extracted from statement previews; full-body/manual review remains mandatory. A resolved target is not a dependency proof."
 }
