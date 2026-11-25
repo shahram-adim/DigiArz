@@ -1,7 +1,7 @@
 -- TEST-ONLY metadata fixture for tests/rpc-security-catalog.sql.
 -- Reproduces the 46 exact Production signatures and current API-role ACL
 -- booleans from the reviewed 2026-11-25 catalog snapshot.
--- Except for the six real function bodies installed by the bootstrap file,
+-- Except for the five real function bodies installed by the bootstrap file,
 -- all remaining functions below are inert NO-OP stubs (RETURNS void). They MUST NOT be
 -- used to claim function-body behavior or full Production schema parity.
 -- This file runs only inside the disposable PostgreSQL 17 service container.
@@ -323,6 +323,22 @@ $stub$;
 REVOKE ALL ON FUNCTION public.get_demo_trading_fee_rate(p_quote_asset text, p_liquidity_type text) FROM PUBLIC, anon, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.get_demo_trading_fee_rate(p_quote_asset text, p_liquidity_type text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_demo_trading_fee_rate(p_quote_asset text, p_liquidity_type text) TO service_role;
+
+CREATE OR REPLACE FUNCTION public.get_exchange_discovered_market_assets()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $stub$
+BEGIN
+  RETURN;
+END;
+$stub$;
+
+REVOKE ALL ON FUNCTION public.get_exchange_discovered_market_assets() FROM PUBLIC, anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.get_exchange_discovered_market_assets() TO anon;
+GRANT EXECUTE ON FUNCTION public.get_exchange_discovered_market_assets() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_exchange_discovered_market_assets() TO service_role;
 
 CREATE OR REPLACE FUNCTION public.get_my_order_reservations(p_order_ids uuid[])
 RETURNS void
