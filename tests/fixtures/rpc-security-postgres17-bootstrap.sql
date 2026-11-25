@@ -278,13 +278,18 @@ CREATE TABLE public.demo_trading_fees (
   taker_fee_rate numeric(10,8) NOT NULL CHECK (taker_fee_rate >= 0 AND taker_fee_rate <= 0.05),
   is_enabled boolean NOT NULL DEFAULT true,
   updated_at timestamptz NOT NULL DEFAULT now(),
-  CHECK (quote_asset ~ '^[A-Z0-9]{2,12}
+  CHECK (quote_asset = upper(quote_asset) AND length(quote_asset) BETWEEN 2 AND 12)
+);
+ALTER TABLE public.demo_trading_fees ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.demo_trading_fees FROM PUBLIC, anon, authenticated, service_role;
+GRANT ALL ON public.demo_trading_fees TO service_role;
+
+CREATE TABLE public.market_prices (
   symbol text PRIMARY KEY,
   price numeric,
   updated_at timestamptz,
   source text
 );
-
 
 ALTER TABLE public.admin_market_listings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.crypto_assets ENABLE ROW LEVEL SECURITY;
