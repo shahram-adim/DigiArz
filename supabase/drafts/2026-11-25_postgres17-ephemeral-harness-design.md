@@ -97,10 +97,15 @@ This remains a narrow source-faithful function test, not a full Production-parit
 The read-only `public.get_admin_market_listings()` body from `20261113181000_show_live_prices_for_curated_assets.sql` is now installed in the disposable PostgreSQL 17 fixture as the fifth real function body. The fixture therefore contains 5 source-backed/reviewed bodies and 41 metadata-only stubs across the 46-signature contract. CI run #313 (run ID `45603853118`) passed: unit/type checks and every PostgreSQL 17 step, including the new role/price-freshness test and post-rollback empty-table checks. The remote `rpc-security-integration` job remained skipped. No Production/Recovery-Test operation, ACL/default ACL change, migration, deploy or merge occurred.
 
 
-## Source mapping only — exchange discovery RPC — 2026-11-25
 
-The source for `public.get_exchange_discovered_market_assets()` was recovered from `20261116200009_auto_list_unmatched_iran_exchange_assets.sql` (blob `901f6e3004a1fd51995ea159d840ce5b5b39dbeb`). Its return shape, five read-only dependencies, empty search_path, STABLE/SECURITY DEFINER attributes, filters and absence of DML/HTTP/financial side effects were statically mapped in the RPC parity manifest.
+## Superseding checkpoint — source-backed exchange discovery RPC — 2026-11-25
 
-An attempted promotion into the shared disposable fixture caused repeated PostgreSQL 17 harness parser failures. The attempted body, test and workflow changes were reverted. The stable fixture remains at **5 real bodies + 41 metadata-only stubs**. No successful behavior-test evidence is claimed for this candidate. A standalone minimal PostgreSQL 17 reproduction must isolate the parser issue before any retry.
+The exact body of `public.get_exchange_discovered_market_assets()` from migration `20261116200009_auto_list_unmatched_iran_exchange_assets.sql` (blob `901f6e3004a1fd51995ea159d840ce5b5b39dbeb`) has now been installed in the shared disposable PostgreSQL 17 fixture. The function was first tested independently by executing the original migration file directly, then promoted by dropping only its matching metadata stub and executing that same file in the shared harness.
 
-The source migration grants anon/authenticated but the current catalog snapshot also records service_role EXECUTE=true. That effective ACL origin is unresolved; no Production ACL or default privilege was changed. All prior safety boundaries remain in force.
+- Fixture coverage is now **6 real bodies + 40 metadata-only stubs** across 46 signatures.
+- Synthetic dependencies: `exchange_asset_observations`, `admin_market_listings`, `crypto_assets`, `demo_trading_pairs`, `market_prices`; RLS enabled on all five in the fixture. Direct anon SELECT remains absent on protected dependencies.
+- Tests cover anon/authenticated/service_role function calls, aggregation across two exchanges, ambiguous status, fresh/stale prices, active/status/48-hour filters, stock/tokenized exclusions, curated listing and enabled-pair exclusions, direct table denial, exact result contract and rollback.
+- Source migration itself grants anon/authenticated but not service_role. The shared fixture applies a function-specific test-only grant to service_role after migration execution to reproduce the reviewed current catalog ACL bit. The discrepancy remains unresolved; no Production ACL/default privilege changed.
+- CI run #386 (`45607713609`) passed PostgreSQL 17 and unit tests; remote RPC integration remains skipped. The PostgreSQL job log confirms `CREATE FUNCTION`, contract assertions, all three role tests and `ROLLBACK`.
+- The earlier parser failure's root cause remains unknown. The exact migration now works both standalone and in the shared harness through file execution; do not infer the prior failure cause.
+- Production RLS/grants and exact per-signature owner/ACL evidence still require direct catalog-source verification. No Production or Recovery-Test database was changed.
