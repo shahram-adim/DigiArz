@@ -1491,7 +1491,7 @@
 
 - [x] CI اجرای اصلاح‌شدهٔ commit `d99167600ec869af9ada7868f7c98745a6cbae7a` در run `45639205441` با موفقیت کامل شد؛ job `exact-decimal` success.
 - [x] crosswalk وضعیت فعلی ۴ گروه Migration مفقود با manifest توابع، relation inventory، RLS/trigger bindings و cron metadata ثبت‌شده تکمیل شد: ۱۲ routine fingerprint مستقیم، metadata روابط و triggerهای منطبق؛ موارد فاقد انتساب مستقیم صریحاً علامت‌گذاری شدند.
-- [x] برای هر گروه تصریح شد که fingerprint جاری، منشأ تاریخی Migration را ثابت نمی‌کند؛ cron command text/fingerprint در داده‌های crosswalk موجود نیست.
+- [x] در نسخهٔ اولیهٔ crosswalk، cron command fingerprint موجود نبود؛ در پیوست تکمیلی، چهار command MD5 و routine هدف هر job با استخراج نام تابع اضافه شد. این داده‌ها منشأ تاریخی Migration را ثابت نمی‌کنند.
 - [x] تست CI برای وجود crosswalk، ۱۲ fingerprint و ممانعت از ادعای provenance تاریخی اضافه شد.
 - [ ] CI commit جدید `16bf19eae0ad115432cadfbc8ddf9b58d65e8d5c` و commit status بعدی باید بررسی شود؛ هنوز نتیجه‌ای برای این تغییرات اعلام نشده است.
 - [!] هیچ SQL تاریخی بازسازی/اجرا نشده؛ هیچ Production schema/data/ACL/RLS/function/trigger/cron/queue تغییر نکرده است.
@@ -1499,7 +1499,7 @@
 - [x] در Production فقط metadata جدول `cron.job` برای jobهای مرتبط 11/13/14/18 خوانده شد؛ command text و queue payloadها خوانده نشدند. چهار command MD5 و length به پرونده‌ها افزوده شد.
 - [x] تمام ۶ trigger binding موجود در snapshot SECURITY DEFINER با relation، function و MD5 fingerprint ثبت شد.
 - [x] تست تکمیلی برای ۴ cron fingerprint، شش trigger binding و عدم توقف/تغییر jobها افزوده شد؛ commit تست `ca932241e46d097cf6b99322f32d61bffa6e5110`.
-- [!] CI run `45639843226` مربوط به crosswalk اولیه در آخرین poll هنوز in_progress بود؛ تست‌های افزوده‌شدهٔ cron/trigger هنوز نتیجهٔ CI تأییدشده ندارند.
+- [x] وضعیت اولیهٔ run `45639843226` در poll نخست in_progress بود؛ بعداً completed/success شد، اما قبل از افزودن cron/trigger fingerprints اجرا شده بود. CI نهایی برای نسخهٔ کامل‌تر در run `45640964392` موفق شد.
 - [!] هر چهار cron job در وضعیت مشاهده‌شده active=true بودند؛ این فقط snapshot زمان ممیزی است و هیچ jobی اجرا/توقف/کند/زمان‌بندی مجدد نشد.
 
 - [x] CI run `45639843226` برای commit `16bf19eae0ad115432cadfbc8ddf9b58d65e8d5c` اکنون completed/success شد؛ تمام ۲۲ مرحلهٔ substantive شامل PostgreSQL 17 و lifecycle/race tests موفق بودند.
@@ -1514,7 +1514,7 @@
 - [x] انتساب فعلی دقیق: job 11 → `public.recover_stale_crypto_assets_sync()`; job 13 → `public.request_iran_exchange_asset_sync()`; job 14 → `public.process_iran_exchange_asset_sync()`; job 18 → `private.auto_activate_verified_exchange_pairs()`.
 - [x] تست برای چهار ردیف cron-to-routine به‌همراه ۴ cron command fingerprint، ۶ trigger fingerprint و ۱۲ routine fingerprint گروهی اضافه شد؛ commit تست نهایی فعلی `f4dc0bafcf6ba4439784feb91abc1e0564a3ac1b`.
 - [x] شمارش محتوای branch با اجرای regex مستقل: ۱۷ Migration heading یکتا، ۱۲ routine MD5 گروهی، ۴ cron command MD5، ۶ trigger MD5 و ۴ انتساب cron-to-routine؛ همه با انتظار تطبیق دارند.
-- [ ] CI برای commit `f4dc0bafcf6ba4439784feb91abc1e0564a3ac1b` هنوز نتیجهٔ قابل مشاهده ندارد؛ نتیجهٔ CI قدیمی `45639843226` فقط commit قبلی را پوشش می‌دهد.
+- [x] تست‌های commit `f4dc0bafcf6ba4439784feb91abc1e0564a3ac1b` و اصلاح group 4 در commit بعدی، در CI نهایی run `45640964392` روی commit `5e9defc9c5b049259c8a6cd695684a559d2eecae` پوشش داده شدند.
 
 - [x] CI نهایی crosswalk در run `45640964392` (run #2019) روی commit `5e9defc9c5b049259c8a6cd695684a559d2eecae` با نتیجهٔ `success` تکمیل شد؛ job `exact-decimal` بدون failure و با موفقیت تمام مراحل Node/browser و PostgreSQL 17 arithmetic, widening, lifecycle و two-session race را گذراند.
 - [x] این CI شامل تست‌های جدید پرونده‌های ۱۷ Migration، ۱۲ routine fingerprint، ۴ cron command fingerprint، ۶ trigger fingerprint، ۴ cron-to-routine attribution و برابری fingerprint چهار routine زنده با manifest است.
