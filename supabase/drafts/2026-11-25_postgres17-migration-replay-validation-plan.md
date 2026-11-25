@@ -178,3 +178,14 @@ supabase/drafts/2026-11-25_recovered-migration-statement-classification.json
 This is a static inventory only. It does not prove every unit is safe to execute, and the best-effort target extraction is not a dependency proof. The 3 dynamic trading-function rewrites are still blocked; Cron/HTTP/queue/identity/financial effects remain excluded or synthetic-only. No SQL statement was executed, no database was changed, and no workflow was modified.
 
 Next bounded step: independently review every statement classification and target against its full SQL body, especially all 136 statement ordinals and any dynamic SQL. Then add explicit object dependency edges and only afterwards design the isolated test-unit list. Replay remains NOT RUN / BLOCKED.
+
+
+### Target-locator refinement
+
+The statement manifest was refined after reviewing the unresolved target previews:
+- 136/136 statement units now have a best-effort object target locator.
+- 0 target locators remain unresolved.
+- 0 statements remain in the unclassified-unknown category.
+- The three dynamic trading-function rewrites remain manual-review blockers, despite their exact function targets now being identified.
+
+Target locators are navigation aids only. They do not prove dependency order, ownership, exact runtime effect, or replay safety. The complete SQL body still requires reviewer inspection before any test-unit selection.
