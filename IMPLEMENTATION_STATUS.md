@@ -1410,3 +1410,19 @@
 - [ ] ۱۷ Migration source مفقود و timestamp/content drift هنوز پیش از هر replay نیازمند inventory تازه و منبع معتبرند. هیچ Migration replay نشد.
 - [ ] تصمیم مالک درباره default EXECUTE برای service_role باز است؛ هیچ تغییر پیش‌فرضی انجام نشد.
 - [x] هیچ Production/Recovery-Test DB، داده مالی، سفارش، معامله، رزرو، کیف پول، balance، Auth، Cron، Edge Function یا Migration ledger تغییر نکرد؛ Merge، Deploy، db push، پروژه/زیرساخت جدید و هزینه‌ای ایجاد نشد.
+
+
+## Checkpoint 2026-11-25 — successful isolated PostgreSQL 17 source-migration test
+
+- [x] PR #62 و وضعیت واقعی branch قبل از این مرحله بررسی شد: PR باز، Draft و ادغام‌نشده؛ base=`redesign/ui-clean-rebuild-2026`.
+- [x] تست مستقل `tests/rpc-security-exchange-discovery-standalone.sql` اضافه شد. این تست در دیتابیس disposable جداگانه اجرا می‌شود و Migration اصلی را مستقیماً با `psql \\ir /tmp/get_exchange_discovered_market_assets.sql` بارگذاری می‌کند؛ بدنه تابع دستی کپی یا بازنویسی نمی‌شود.
+- [x] CI کپی دقیق فایل Migration `20261116200009_auto_list_unmatched_iran_exchange_assets.sql` به کانتینر PostgreSQL 17 و اجرای تست در دیتابیس تازه `digiarz_discovery_standalone` را انجام می‌دهد.
+- [x] تست منبع اصلی موفق شد: `CREATE FUNCTION`, تست anon، تست authenticated، تجمیع دو صرافی و وضعیت ambiguous، قیمت تازه 65000، حذف قیمت کهنه، فیلتر 48 ساعته و stock/matched/curated/enabled-pair، نبود SELECT مستقیم anon، مجوزهای anon/authenticated، نبود EXECUTE برای PUBLIC و نبود مجوز service_role در خود Migration؛ در پایان `ROLLBACK` موفق.
+- [x] CI run #372 (`45607071619`) روی commit `19d5d8e4d6375c6d660a06cf84bbd0bb57eee630` موفق شد؛ `postgres17-rpc-smoke` و `unit-tests` سبز، `rpc-security-integration` عمداً skipped.
+- [!] ریشهٔ دقیق parser failure قبلی در تلاش shared fixture هنوز قطعی نشده است. تست مستقل ثابت می‌کند Migration اصلی به‌تنهایی در PostgreSQL 17 parse و اجرا می‌شود؛ علت failure قبلی را به‌طور قطعی به انتقال یا fixture نسبت نمی‌دهیم.
+- [ ] تابع هنوز در shared 46-signature fixture به body واقعی ارتقا نیافته؛ آن fixture همچنان ۵ بدنه واقعی + ۴۱ stub metadata-only دارد. گام بعدی: افزودن dependency tables مصنوعی به bootstrap، حذف صرفاً stub هم‌امضا، اجرای Migration اصلی از فایل در همان کانتینر، و سپس grant تستی مختص service_role برای بازنمایی ACL snapshot؛ سپس contract و integration tests نقش‌ها/rollback.
+- [!] اختلاف ACL همچنان unresolved: Migration اصلی فقط anon/authenticated را grant می‌کند، اما catalog snapshot Production برای service_role نیز EXECUTE=true ثبت کرده است. این تست standalone مجوز source-level را دقیقاً بازتاب می‌دهد و نشان می‌دهد service_role از خود Migration مجوز نمی‌گیرد. هیچ default privilege یا ACL در Production تغییر نکرد.
+- [ ] owner دقیق per-signature، ACL/default ACL منبع‌دار و RLS/grants کامل جداول Production هنوز برای parity کامل لازم‌اند.
+- [ ] ۱۷ Migration source مفقود و timestamp/content drift پیش از هر replay نیازمند reconciliation تازه‌اند؛ هیچ Migration replay نشده است.
+- [ ] تصمیم مالک درباره default EXECUTE برای service_role همچنان باز است.
+- [x] هیچ Production/Recovery-Test DB، داده مالی، سفارش، معامله، رزرو، کیف پول، balance، Auth، Cron، Edge Function یا Migration ledger تغییر نکرد؛ هیچ Merge، Deploy، db push، پروژه/زیرساخت جدید یا هزینه‌ای ایجاد نشد.
