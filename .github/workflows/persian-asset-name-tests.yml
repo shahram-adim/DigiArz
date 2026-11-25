@@ -20,6 +20,7 @@ on:
       - "tests/rpc-security-order-reservations.integration.sql"
       - "tests/rpc-security-admin-search.integration.sql"
       - "tests/rpc-security-admin-add-listing.integration.sql"
+      - "tests/rpc-security-admin-enable-pair.integration.sql"
       - "tests/fixtures/rpc-security-postgres17-bootstrap.sql"
       - "tests/fixtures/rpc-security-postgres17-catalog-stubs.sql"
       - "tests/rpc-security-postgres17-contract.sql"
@@ -120,7 +121,7 @@ jobs:
           test -n "$pg_container"
           docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/fixtures/rpc-security-exchange-discovery-dependencies.sql
 
-      - name: Load exact 46-signature ACL fixture (35 inert metadata stubs + 11 real/source-backed bodies; before exchange-discovery migration replacement)
+      - name: Load exact 46-signature ACL fixture (34 inert metadata stubs + 12 real/source-backed bodies; before exchange-discovery migration replacement)
         shell: bash
         run: |
           set -euo pipefail
@@ -208,6 +209,14 @@ jobs:
           docker cp supabase/migrations/20261113172000_harden_admin_market_listing_access.sql "$pg_container:/tmp/harden_admin_market_listing_access.sql"
           docker cp tests/rpc-security-admin-market-search-standalone.sql "$pg_container:/tmp/rpc-security-admin-market-search-standalone.sql"
           docker exec "$pg_container" psql -U postgres -d digiarz_admin_search_standalone -v ON_ERROR_STOP=1 -f /tmp/rpc-security-admin-market-search-standalone.sql
+
+      - name: Test exact Production admin-enable-pair body, eligibility, audit, and rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security-admin-enable-pair.integration.sql
 
       - name: Test exact Production admin-add-listing body, ticker guard, and rollback
         shell: bash
