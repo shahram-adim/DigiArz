@@ -76,3 +76,17 @@ The first PostgreSQL 17 smoke execution completed successfully on the initial ha
 - Expanded 46-signature ACL run: `45598493186`; `postgres17-rpc-smoke` and `unit-tests` passed, and the existing remote-database integration job remained skipped.
 
 This confirms the fixture and the single-RPC behavior test execute on PostgreSQL 17. It does not upgrade the result to full Production parity; all limitations in the scope section above remain in force.
+
+
+## Source-faithful body expansion — 2026-11-25
+
+The fixture now includes a fourth real Production function body: `public.claim_admin_asset_refresh(text, uuid)`, recovered from authoritative historical source `20261113190000_admin_on_demand_crypto_asset_refresh.sql`.
+
+- The fixture creates only the synthetic `private.admin_asset_refresh_limits` table with RLS enabled.
+- The exact return type (`boolean`), SECURITY DEFINER flag, empty search_path, and function-specific service_role-only API ACL are asserted.
+- A dedicated transaction-scoped test exercises a successful synthetic super-admin claim, a non-admin denial (`42501`), invalid input (`22023`), and the 30-second duplicate-claim cooldown (`55000`).
+- The function is no longer replaced by an inert stub. The fixture now has four real function bodies and 42 inert metadata-only stubs.
+- CI run `45600501368` passed all PostgreSQL 17 smoke steps and unit/type-check steps. The remote RPC integration job remained skipped.
+- The test transaction rolls back; a post-check confirms the synthetic claim table is empty.
+
+This remains a narrow source-faithful function test, not a full Production-parity Supabase clone. The deployed Edge Function itself is not invoked, and the other 42 stub bodies remain untested.
