@@ -1341,4 +1341,4 @@
 - [ ] تصمیم مالک درباره default EXECUTE برای service_role هنوز باز است؛ هیچ GRANT/REVOKE یا ALTER DEFAULT PRIVILEGES برای تغییر سیاست پیش‌فرض انجام نشود.
 - [x] هیچ Production/Recovery-Test database، ACL، Auth، Cron، Edge Function، داده کاربر یا داده مالی تغییر نکرد؛ هیچ Migration، db push، Deploy، Merge، پروژه/زیرساخت Supabase یا هزینه جدیدی ایجاد نشد.
 
-**آخرین commit کد/تست این گام:** `39baf5677924ab2066429cc0ae77a550592cfc2d`؛ CI run #275 موفق است.
+**آخرین commit کد/تست این گام:** `5a17d3744fc9a2982045008f84693f6df4eac384`؛ CI run #277 پس از post-check rollback موفق است. آخرین commit مستندات ممیزی در این ادامه: `bce49bd4912265019cec7329d2f968d4a9f05493`.
