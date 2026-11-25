@@ -459,3 +459,40 @@ Commit: `7ef1932c49744b88408f3b80118eb3e574ed9c8a` (branch `feature/persian-asse
 - پاسخ‌های زنده: TTL شش‌ساعتهٔ پیش‌فرض، worker فعال، بدون Cron cleanup اختصاصی؛ snapshot فعلی با TTL سازگار است.
 - صف زنده: در snapshot فعلی خالی.
 - Snapshotهای Recovery: ماندگار و خارج از TTL pg_net؛ نیازمند تصمیم مستقل مالک دربارهٔ retention/آرشیو/حذف هستند. در این مرحله هیچ حذف یا تغییر retention انجام نمی‌شود.
+
+
+## بازیابی کامل منابع ۱۷ Migration فاقد فایل canonical هم‌نام — ۲۵ نوامبر ۲۰۲۶
+
+### نتیجهٔ مهم
+هر ۱۷ رکوردی که در reconciliation قبلی در ledger Production وجود داشتند اما فایل canonical هم‌نام آن‌ها در شاخهٔ بررسی‌شده پیدا نشده بود، اکنون مستقیماً از ستون `statements` در `supabase_migrations.schema_migrations` بازیابی شدند. برای هر رکورد یک فایل SQL مستقل در `supabase/drafts/` ساخته شد؛ هر فایل header هشدار دارد و منبع تاریخیِ قبلاً اجراشده را «غیرقابل اجرا» معرفی می‌کند.
+
+### کنترل صحت فایل‌ها
+پس از ایجاد فایل‌ها، محتوای انتهایی هر فایل با statement متناظر در ledger Production مقایسه شد. نتیجه: **۱۷ از ۱۷ فایل، متن SQL منبع را دقیقاً حفظ کرده‌اند** (بدون تغییر محتوا؛ فقط header هشدار به ابتدای فایل اضافه شده است). این تطبیق، صحت بازیابی متن را تأیید می‌کند؛ هنوز تطبیق کامل هر Migration با وضعیت جاری schema، ترتیب وابستگی‌ها، و drift شاخه انجام نشده است.
+
+### فهرست فایل‌های بازیابی‌شده
+- `20261113153808` — `approved_wallet_defaults_fees_and_coin_reviews`: `supabase/drafts/recovered_20261113153808_approved_wallet_defaults_fees_and_coin_reviews.sql`
+- `20261113154323` — `assign_confirmed_super_admin`: `supabase/drafts/recovered_20261113154323_assign_confirmed_super_admin.sql`
+- `20261113154736` — `secure_admin_wallet_management`: `supabase/drafts/recovered_20261113154736_secure_admin_wallet_management.sql`
+- `20261113154750` — `add_admin_role_probe`: `supabase/drafts/recovered_20261113154750_add_admin_role_probe.sql`
+- `20261113154844` — `use_toman_units_in_admin_credit_ui`: `supabase/drafts/recovered_20261113154844_use_toman_units_in_admin_credit_ui.sql`
+- `20261113154926` — `move_admin_privilege_logic_to_private_schema`: `supabase/drafts/recovered_20261113154926_move_admin_privilege_logic_to_private_schema.sql`
+- `20261115101709` — `create_exchange_asset_observations`: `supabase/drafts/recovered_20261115101709_create_exchange_asset_observations.sql`
+- `20261115102729` — `schedule_iran_exchange_asset_sync`: `supabase/drafts/recovered_20261115102729_schedule_iran_exchange_asset_sync.sql`
+- `20261115102927` — `fix_exchange_sync_response_json_cast`: `supabase/drafts/recovered_20261115102927_fix_exchange_sync_response_json_cast.sql`
+- `20261115103227` — `auto_list_verified_exchange_assets`: `supabase/drafts/recovered_20261115103227_auto_list_verified_exchange_assets.sql`
+- `20261115103507` — `schedule_bit24_exchange_asset_sync`: `supabase/drafts/recovered_20261115103507_schedule_bit24_exchange_asset_sync.sql`
+- `20261115105721` — `admin_exchange_asset_sync_monitoring`: `supabase/drafts/recovered_20261115105721_admin_exchange_asset_sync_monitoring.sql`
+- `20261115105956` — `restrict_exchange_sync_worker_execution`: `supabase/drafts/recovered_20261115105956_restrict_exchange_sync_worker_execution.sql`
+- `20261116201639` — `auto_activate_verified_exchange_pairs`: `supabase/drafts/recovered_20261116201639_auto_activate_verified_exchange_pairs.sql`
+- `20261121045434` — `digiarz_backpressure_and_exchange_sync_bloat_guards`: `supabase/drafts/recovered_20261121045434_digiarz_backpressure_and_exchange_sync_bloat_guards.sql`
+- `20261121045531` — `snapshot_pg_net_unlogged_queue_before_recovery`: `supabase/drafts/recovered_20261121045531_snapshot_pg_net_unlogged_queue_before_recovery.sql`
+- `20261121050216` — `temporarily_throttle_exchange_asset_processors`: `supabase/drafts/recovered_20261121050216_temporarily_throttle_exchange_asset_processors.sql`
+
+### وضعیت reconciliation پس از بازیابی
+- شمار Migrationهای دارای رکورد ledger ولی فاقد فایل canonical هم‌نام که قبلاً ۱۷ بود، از نظر «منبع SQL ناشناخته» اکنون **صفر** است.
+- از نظر «فایل canonical در مسیر migrations شاخه» این موارد هنوز فاقد فایل هستند؛ عمداً فقط در `supabase/drafts/` ذخیره شده‌اند تا هیچ db push یا migration runner آن‌ها را اجرا نکند.
+- ۲۰ مورد اختلاف timestamp/نام‌گذاری دیگر که قبلاً شناسایی شده بودند، هنوز نیازمند تطبیق نام/محتوا هستند و نباید با این ۱۷ مورد یکی شمرده شوند.
+- دو فایل محلی `20261116203000_add_kucoin_to_scheduled_market_price_refresh.sql` و `20261116203100_add_gateio_to_scheduled_market_price_refresh.sql` همچنان در ledger به‌عنوان Migration مستقل ثبت نشده‌اند و طبق بررسی قبلی به‌دلیل بازنویسی قدیمی `refresh_market_prices()` نباید بدون اصلاح و تطبیق اعمال شوند.
+
+### کنترل ایمنی
+منبع هر ۱۷ Migration فقط با SELECT از ledger Production خوانده شد. همهٔ فایل‌ها فقط در شاخهٔ آزمایشی و پوشهٔ `supabase/drafts/` ایجاد شدند. هیچ فایل به `supabase/migrations/` اضافه نشد؛ هیچ Migration یا SQL بازیابی‌شده اجرا نشد؛ هیچ تغییر DDL/DML، Cron، Worker، Merge یا Production انجام نشد.
