@@ -1495,3 +1495,9 @@
 - [x] تست CI برای وجود crosswalk، ۱۲ fingerprint و ممانعت از ادعای provenance تاریخی اضافه شد.
 - [ ] CI commit جدید `16bf19eae0ad115432cadfbc8ddf9b58d65e8d5c` و commit status بعدی باید بررسی شود؛ هنوز نتیجه‌ای برای این تغییرات اعلام نشده است.
 - [!] هیچ SQL تاریخی بازسازی/اجرا نشده؛ هیچ Production schema/data/ACL/RLS/function/trigger/cron/queue تغییر نکرده است.
+
+- [x] در Production فقط metadata جدول `cron.job` برای jobهای مرتبط 11/13/14/18 خوانده شد؛ command text و queue payloadها خوانده نشدند. چهار command MD5 و length به پرونده‌ها افزوده شد.
+- [x] تمام ۶ trigger binding موجود در snapshot SECURITY DEFINER با relation، function و MD5 fingerprint ثبت شد.
+- [x] تست تکمیلی برای ۴ cron fingerprint، شش trigger binding و عدم توقف/تغییر jobها افزوده شد؛ commit تست `ca932241e46d097cf6b99322f32d61bffa6e5110`.
+- [!] CI run `45639843226` مربوط به crosswalk اولیه در آخرین poll هنوز in_progress بود؛ تست‌های افزوده‌شدهٔ cron/trigger هنوز نتیجهٔ CI تأییدشده ندارند.
+- [!] هر چهار cron job در وضعیت مشاهده‌شده active=true بودند؛ این فقط snapshot زمان ممیزی است و هیچ jobی اجرا/توقف/کند/زمان‌بندی مجدد نشد.
