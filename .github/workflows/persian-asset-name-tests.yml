@@ -13,6 +13,7 @@ on:
       - "tests/sync-safety.test.mjs"
       - "tests/rpc-security.integration.sql"
       - "tests/fixtures/rpc-security-postgres17-bootstrap.sql"
+      - "tests/fixtures/rpc-security-postgres17-catalog-stubs.sql"
       - "tests/rpc-security-postgres17-contract.sql"
       - "tests/rpc-security-catalog.sql"
       - "tests/exchange-asset-observations-catalog.sql"
@@ -103,13 +104,29 @@ jobs:
           test -n "$pg_container"
           docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/fixtures/rpc-security-postgres17-bootstrap.sql
 
-      - name: Assert exact fixture signature, SECURITY DEFINER, search_path, and ACLs
+      - name: Load exact 46-signature ACL metadata fixture (43 inert stubs)
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/fixtures/rpc-security-postgres17-catalog-stubs.sql
+
+      - name: Assert representative function SECURITY DEFINER, search_path, and ACLs
         shell: bash
         run: |
           set -euo pipefail
           pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
           test -n "$pg_container"
           docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security-postgres17-contract.sql
+
+      - name: Verify all 46 exact SECURITY DEFINER signatures and current API-role ACLs
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security-catalog.sql
 
       - name: Test anon, ordinary authenticated, and synthetic super-admin behavior
         shell: bash
