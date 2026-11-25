@@ -1390,3 +1390,34 @@
 3. Review the Production-versus-candidate child-row lock difference before proposing any migration.
 4. Keep `supabase db push`, function deployment, grant/policy changes, and all Production financial writes blocked pending explicit approval.
 5. After the Stop-Limit gate, return to the Toman market page/provider work and the four approved Iranian sources; do not report stale prices as live.
+
+
+## Daily execution report — 2026-11-25 — Production RPC security manifest and anonymous access review
+
+### Work completed (read-only Production inspection)
+- Captured all 46 live `SECURITY DEFINER` functions from Supabase Production using PostgreSQL catalogs: complete `pg_get_functiondef`, identity arguments, result type, owner, volatility, `search_path`, raw ACL and MD5 fingerprint.
+- Captured 34 public/private base relations, their RLS flags and role privileges, 21 policies, and six live trigger bindings to SECURITY DEFINER functions.
+- Captured anonymous effective function/table/view privilege metadata and the definitions of the two anon-granted public views.
+- Added `tests/production-rpc-manifest.test.js` to verify manifest completeness, the anon RPC allowlist, trigger-to-function references, RLS/view grant constraints and explicit super-admin guards for all ten `admin_*` RPCs.
+- Created draft PR #63: https://github.com/shahram-adim/DigiArz/pull/63 . It remains open, draft and unmerged.
+
+### Findings
+- Exactly two of the 46 captured SECURITY DEFINER functions are executable by `anon`: `public.get_admin_market_listings()` and `public.get_exchange_discovered_market_assets()`. Their current return fields and SQL bodies expose market/exchange-discovery metadata, not user identity, wallet, balance, order, trade, reservation or transaction records.
+- All ten `admin_*` functions in the snapshot contain an explicit `private.is_super_admin()` or `private.is_current_user_super_admin()` guard. Their captured ACLs do not grant `anon`.
+- `anon` has excess DML/TRUNCATE grants on `coin_reviews`; the captured RLS policy set gives anon SELECT only, while write policies are authenticated-only.
+- `anon` has SELECT on `conditional_orders`, but the captured SELECT policy is authenticated-only.
+- `anon` has broad grants on `market_prices_with_toman` and `market_toman_performance`; both are `security_invoker=true` views. Underlying anon grants currently restrict the former to base-table SELECT and provide no base-table access for the latter's Toman sources.
+- These are least-privilege hardening opportunities, not confirmed anonymous write/read exploits. No anonymous API request was executed; conclusions are based on the captured ACL, RLS and view metadata.
+
+### CI status
+- Workflow Run #45633511235 on commit `b67d2754ffcd234a629a131bb048a928bba201cf` passed all 25 workflow steps, including all 73 Node tests present at that commit and the PostgreSQL 17 regression/lifecycle/race suite.
+- A subsequent admin-guard test addition exposed an invalid regular-expression escape in the new test; that failure was diagnosed from the Actions log and corrected in commit `3830c0df2e659db1b4abeb68c45da10dd83eeb24`.
+- The Actions run for corrected commit `3830c0df2e659db1b4abeb68c45da10dd83eeb24` was still in progress at report time; its final result must be checked before marking the new test verified.
+
+### Safety and next steps
+- No Production grants, RLS policies, functions, views, migrations, cron jobs, Edge Functions or financial rows were changed. No user/financial row data was read.
+1. Verify the latest CI run on the corrected PR head; fix only test defects found by evidence.
+2. Reconstruct table/function dependencies for the 46 bodies using reviewed SQL and authoritative migration sources; empty `pg_depend` entries are not evidence of no PL/pgSQL table references.
+3. Review the four excess-grant findings against actual application call sites before proposing least-privilege changes; do not apply GRANT/REVOKE or RLS changes without owner approval.
+4. Continue recovering authoritative migration sources and building the isolated PostgreSQL 17 ACL/RLS/function parity harness.
+5. Keep merge, Production migrations, grants, policies, function/view changes and financial writes blocked pending explicit approval.
