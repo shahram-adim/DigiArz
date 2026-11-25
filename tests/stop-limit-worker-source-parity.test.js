@@ -10,7 +10,8 @@ const read = (relativePath) => fs.readFileSync(path.join(__dirname, '..', relati
 function extractFullWorker(source, label) {
   const match = source.match(/CREATE OR REPLACE FUNCTION\s+public\.process_stop_limit_orders\s*\(\s*\)\s*RETURNS\s+jsonb[\s\S]*?AS\s+\$function\$[\s\S]*?\$function\$/i);
   assert.ok(match, label + ': process_stop_limit_orders() definition not found');
-  return match[0];
+  // pg_get_functiondef() includes one trailing newline; the executable SQL snapshot adds a semicolon after the delimiter.
+  return match[0] + '\n';
 }
 
 function extractWorkerBody(source, label) {
