@@ -705,3 +705,30 @@ Advisor امنیتی Production در 2026-11-25 این موارد را گزار�
 ### وضعیت ایمنی
 - هیچ تنظیم Auth، ACL، default privilege، جدول، policy، تابع، trigger یا Cron در Production تغییر نکرد.
 - هیچ Migration اجرایی ساخته یا اعمال نشده؛ فایل پیشنهادی فقط در drafts و کامنتی است.
+
+
+## ممیزی مسیر RPC از Frontend تا توابع Production — ۲۵ نوامبر ۲۰۲۶
+
+این بخش با بررسی فقط‌خواندنی کد رابط کاربری در شاخه `redesign/ui-clean-rebuild-2026` و کاتالوگ توابع Production تهیه شده است. هیچ RPC یا Edge Function اجرا نشد.
+
+### مسیرهای احرازشده در Frontend
+- `index.html` در ابتدای نشست، پس از دریافت پروفایل، `is_current_user_super_admin()` را فراخوانی می‌کند؛ تب مدیریت فقط وقتی نمایش داده می‌شود که پاسخ دقیقاً `true` باشد. این کنترل صرفاً UX است و جای کنترل سمت سرور را نمی‌گیرد.
+- عملیات مدیریتی بازار از RPCهای `admin_search_market_assets`, `admin_review_market_listings`, `admin_add_market_listing`, `admin_remove_market_listing`, `admin_enable_market_pair`, `admin_disable_market_pair` عبور می‌کند. بدنهٔ توابع حساس بررسی‌شده `auth.uid()` و `private.is_super_admin()` را کنترل می‌کند.
+- پنل همگام‌سازی مدیریتی از `admin_exchange_asset_sync_report()` و `admin_request_exchange_asset_sync()` استفاده می‌کند. هر دو تابع در Production کنترل `private.is_current_user_super_admin()` دارند؛ تابع درخواست سپس Workerهای محدودشده را فراخوانی می‌کند.
+- پنل کاربران از wrapperهای عمومی `admin_list_users()` و `admin_adjust_wallet(...)` استفاده می‌کند. این wrapperها SECURITY INVOKER هستند و به helperهای خصوصی SECURITY DEFINER می‌رسند؛ helperها وجود `auth.uid()` و نقش super_admin را بررسی می‌کنند.
+- معاملات و سفارش‌های کاربر از RPCهای `execute_demo_trade`, `place_limit_order`, `place_stop_limit_order`, `place_conditional_exit_order` و توابع لغو استفاده می‌کنند. همهٔ امضاهای بررسی‌شده فقط برای authenticated قابل اجرا هستند و بدنه‌ها هویت کاربر را از `auth.uid()` می‌گیرند.
+- `request_market_price_refresh()` برای authenticated قابل اجراست؛ بدنه نشست معتبر، حساب فعال و فاصلهٔ حداقل ۳۰ ثانیه بین درخواست‌ها را بررسی می‌کند. این RPC یک درخواست به‌روزرسانی ثبت می‌کند و endpoint عمومی/ناشناس نیست.
+
+### ماتریس ACL و کنترل سمت سرور
+- توابع حساس فهرست‌شده در Frontend برای anon قابل اجرا نیستند؛ استثنا فقط دو RPC دادهٔ عمومی بازار است: `get_admin_market_listings()` و `get_exchange_discovered_market_assets()`. هر دو فقط metadata بازار را برمی‌گردانند و در migrationهای موجود، PUBLIC صریحاً revoke و anon/authenticated به‌صورت مشخص مجاز شده‌اند.
+- توابع Worker شامل `request_iran_exchange_asset_sync()` و `request_bit24_exchange_sync()` برای service_role قابل اجرا هستند و برای anon/authenticated مجوز ندارند.
+- توابع خصوصی `private.admin_list_users()` و `private.admin_adjust_wallet(...)` برای authenticated قابل اجرا هستند، اما guard داخلی super-admin دارند؛ schema خصوصی به‌عنوان مسیر مستقیم Frontend استفاده نشده است. wrapperهای public نقش واسط SECURITY INVOKER را دارند.
+- در نمونهٔ توابع مدیریتی بررسی‌شده، `search_path` خالی است. بدنهٔ `admin_disable_market_pair` به‌صورت دستی مرور شد؛ عبارت جست‌وجوی اولیه برای dynamic SQL به‌دلیل وجود واژهٔ «execute» در توضیحات/متن، false positive بود و دستور اجرای SQL پویا در بدنهٔ تابع مشاهده نشد.
+- فهرست Edge Functionهای Production شامل `sync-iran-exchange-assets` نسخهٔ ۷ با `verify_jwt=true` است. نسخهٔ مستقر همان نسخهٔ قدیمی است و استخراج‌کنندهٔ جدید نام فارسی در آن فعال نیست. سورس شاخهٔ PR به‌تنهایی به معنی deploy شدن نیست.
+- در سورس Frontend بررسی‌شده هیچ فراخوانی مستقیم به schema خصوصی یا استفاده از `service_role` مشاهده نشد. هیچ کلید محرمانه‌ای از طریق این بررسی به کاربر یا گزارش منتقل نشده است.
+
+### ارزیابی و محدودیت شواهد
+- در مسیرهای RPC مدیریتی مشاهده‌شده، کنترل UI با guard سمت سرور همراه است؛ اتکا به مخفی‌کردن تب مدیریت به‌تنهایی کافی نیست، اما guardهای دیتابیس لایهٔ اصلی کنترل‌اند.
+- service_role یک نقش مورداعتماد backend است و در کد مرورگر نباید استفاده شود. این بررسی، نبود رشتهٔ service_role در فایل اصلی Frontend را نشان می‌دهد، نه ممیزی جامع تمام artifactهای build و متغیرهای deploy.
+- این مرحله static/catalog audit است؛ هیچ آزمون منفی با JWT کاربر عادی یا anon اجرا نشده، هیچ endpointای فراخوانی نشده و هیچ تغییر مجوزی انجام نشده است.
+- نتیجه: در مسیرهای مشخص‌شده، موردی از RPC مدیریتی بدون guard سمت سرور پیدا نشد. گام بعدی مناسب، افزودن تست‌های CI مبتنی بر کاتالوگ و تست‌های منفی در پروژهٔ آزمایشی ایزوله است؛ Production همچنان read-only باقی می‌ماند.
