@@ -661,3 +661,47 @@ Commit: `7ef1932c49744b88408f3b80118eb3e574ed9c8a` (branch `feature/persian-asse
 - هیچ ALTER DEFAULT PRIVILEGES, REVOKE, GRANT, CREATE OR REPLACE FUNCTION, Migration یا اجرای تابع انجام نشد.
 - هیچ تغییر Production، Cron، worker، داده یا هزینه‌ای انجام نشد.
 - این بخش صرفاً به فایل Markdown گزارش در branch آزمایشی افزوده شد.
+
+
+## تکمیل ممیزی SECURITY DEFINER، هشدارهای Supabase Advisors و دسترسی جدول‌ها — ۲۵ نوامبر ۲۰۲۶
+
+### بررسی dynamic SQL و مسیرهای اجرای پویا
+- متن هر ۳۷ تابع SECURITY DEFINER عمومی خوانده و برای دستورهای dynamic EXECUTE و format() بررسی شد.
+- هیچ دستور dynamic SQL واقعی در این ۳۷ تابع پیدا نشد. تنها تطبیق واژه execute در admin_disable_market_pair مربوط به توضیح کامنت دربارهٔ اجرای trigger بود، نه دستور PL/pgSQL.
+- این نتیجه فقط دربارهٔ متن تعریف فعلی این ۳۷ تابع است؛ تغییرات بعدی باید در CI دوباره کنترل شوند.
+
+### توابع بدون auth.uid یا guard مدیریتی که برای نقش‌های API قابل اجرا هستند
+سه مورد در بررسی متنی باقی ماندند:
+1. get_admin_market_listings(): برای anon و authenticated مجاز است؛ خروجی فقط اطلاعات بازار و فهرست curated است. این endpoint عمومی/خواندنی به نظر می‌رسد، اما نام admin در ابتدای آن ممکن است مصرف‌کننده را دربارهٔ سطح دسترسی گمراه کند.
+2. get_exchange_discovered_market_assets(): برای anon و authenticated مجاز است؛ خروجی فقط نمای تجمیعی مشاهدات بازار تازه است. هیچ payload خام، شناسهٔ درخواست یا دادهٔ کاربر در projection فعلی دیده نشد.
+3. get_demo_trading_fee_rate(p_quote_asset,p_liquidity_type): برای authenticated مجاز است و نرخ کارمزد پیکربندی‌شده را می‌خواند؛ تابع هیچ تغییر داده‌ای انجام نمی‌دهد و ورودی liquidity type را به maker/taker محدود می‌کند. anon مجوز آن را ندارد.
+این سه مورد در این مرحله به‌عنوان endpointهای خواندنی/دادهٔ عمومی یا تنظیمات قابل نمایش طبقه‌بندی شدند، نه اثبات نقص مجوز. برای دو endpoint نخست باید تصمیم public بودن و نام‌گذاری آن‌ها در allowlist مستند شود.
+
+### توابع private و trigger
+- توابع private.admin_adjust_wallet و private.admin_list_users دارای auth.uid() و super-admin guard هستند؛ EXECUTE فقط postgres و authenticated است و PUBLIC/anon/service_role در ACL مؤثرشان دیده نشد.
+- private.is_super_admin و private.is_current_user_super_admin در schema خصوصی قرار دارند و مسیر اجرای آن‌ها محدود است.
+- توابع private مربوط به trigger و scheduler از جمله auto_list_verified_exchange_asset، enforce_unique_admin_market_listing_symbol، guard_active_account_writes و auto_activate_verified_exchange_pairs فقط postgres را در ACL مؤثر دارند؛ نبود auth.uid در توابع trigger/scheduler به‌خودی‌خود نقص نیست، چون از مسیرهای داخلی دیتابیس فراخوانی می‌شوند.
+- توابع عمومی worker که عملیات sync/پردازش انجام می‌دهند، در ACL بررسی‌شده برای anon/authenticated قابل اجرا نیستند و دسترسی اجرایی آن‌ها به service_role/postgres محدود است.
+
+### Supabase Security Advisors — snapshot خواندنی
+Advisor امنیتی Production در 2026-11-25 این موارد را گزارش کرد:
+- ۲ هشدار anon SECURITY DEFINER: get_admin_market_listings و get_exchange_discovered_market_assets. این دو endpoint عمداً خروجی بازار را منتشر می‌کنند؛ هشدار واقعی ابزار است، اما public بودن باید در allowlist و تست خروجی تثبیت شود.
+- ۲۳ هشدار authenticated SECURITY DEFINER. این عدد شامل RPCهای موردنیاز کاربران، endpointهای مدیریتی دارای super-admin guard و توابع read-only است؛ بنابراین شمارش هشدار به‌تنهایی معادل ۲۳ آسیب‌پذیری نیست.
+- ۱۵ مورد RLS enabled without policy. بررسی مستقیم مجوز جدول‌ها نشان داد anon و authenticated روی هیچ‌یک از این ۱۵ جدول SELECT/INSERT/UPDATE مستقیم ندارند. برای ۱۰ جدول private نیز هیچ‌یک از این دو نقش مجوز مستقیم نداشتند. پنج جدول public هم RLS فعال و بدون policy دارند و مجوز مستقیم anon/authenticated برای آن‌ها مشاهده نشد؛ service_role مجوز SELECT دارد. دسترسی از طریق SECURITY DEFINERهای محدود، جداگانه بررسی شده است.
+- یک هشدار Auth: محافظت در برابر گذرواژه‌های افشاشده غیرفعال است. این یک تنظیم امنیتی حساس است و بدون تأیید صریح مالک تغییر داده نمی‌شود.
+لینک‌های راهنمای Advisor:
+  - https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable
+  - https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable
+  - https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy
+  - https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection
+
+### پیشنهاد default ACL به‌صورت فایل غیرقابل‌اجرا
+- فایل supabase/drafts/2026-11-25_proposed_restrict_default_public_function_exec.sql اضافه شد.
+- این فایل کاملاً comment-only است و هیچ دستور فعال SQL ندارد.
+- پیشنهاد آن فقط برای توابع جدید schema عمومی است: حذف EXECUTE پیش‌فرض anon و authenticated برای سازندگان postgres و supabase_admin، حفظ service_role و سپس اعطای EXECUTE صریح به allowlist.
+- ALTER DEFAULT PRIVILEGES توابع موجود را تغییر نمی‌دهد؛ بنابراین مجوزهای RPC فعلی نیازمند بررسی و allowlist مستقل هستند.
+- قبل از هر اجرای احتمالی باید توانایی نقش اجراکننده برای تغییر default privileges متعلق به supabase_admin، اثر روی توابع لازم اپلیکیشن و تست در پروژهٔ آزمایشی بررسی شود.
+
+### وضعیت ایمنی
+- هیچ تنظیم Auth، ACL، default privilege، جدول، policy، تابع، trigger یا Cron در Production تغییر نکرد.
+- هیچ Migration اجرایی ساخته یا اعمال نشده؛ فایل پیشنهادی فقط در drafts و کامنتی است.
