@@ -2,7 +2,9 @@
 -- Reproduces the 46 exact Production signatures and current API-role ACL
 -- booleans from the reviewed 2026-11-25 catalog snapshot.
 -- Five real bodies are installed by the bootstrap; this file adds two exact
--- migration-backed trigger bodies and one ledger-recovered read-only RPC. The remaining 38 functions are inert NO-OP stubs
+-- migration-backed trigger bodies and two ledger/source-backed read-only RPCs.
+-- The remaining 37 functions are inert NO-OP stubs (the exchange-discovery stub
+-- is replaced by its applied migration in the following workflow step).
 -- (RETURNS void). They MUST NOT be
 -- used to claim function-body behavior or full Production schema parity.
 -- This file runs only inside the disposable PostgreSQL 17 service container.
@@ -419,20 +421,43 @@ GRANT EXECUTE ON FUNCTION public.get_exchange_discovered_market_assets() TO anon
 GRANT EXECUTE ON FUNCTION public.get_exchange_discovered_market_assets() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_exchange_discovered_market_assets() TO service_role;
 
+-- Exact source migration 20261114143035; current Production definition matches.
 CREATE OR REPLACE FUNCTION public.get_my_order_reservations(p_order_ids uuid[])
-RETURNS void
-LANGUAGE plpgsql
+RETURNS TABLE (
+  order_id uuid,
+  asset text,
+  reserved_amount numeric,
+  consumed_amount numeric,
+  released_amount numeric,
+  status text
+)
+LANGUAGE sql
+STABLE
 SECURITY DEFINER
 SET search_path = ''
-AS $stub$
-BEGIN
-  RETURN;
-END;
-$stub$;
+AS $function$
+  SELECT
+    r.order_id,
+    r.asset,
+    r.reserved_amount,
+    r.consumed_amount,
+    r.released_amount,
+    r.status
+  FROM public.order_reservations AS r
+  WHERE (SELECT auth.uid()) IS NOT NULL
+    AND r.user_id = (SELECT auth.uid())
+    AND p_order_ids IS NOT NULL
+    AND cardinality(p_order_ids) BETWEEN 1 AND 100
+    AND r.order_id = ANY(p_order_ids);
+$function$;
 
-REVOKE ALL ON FUNCTION public.get_my_order_reservations(p_order_ids uuid[]) FROM PUBLIC, anon, authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.get_my_order_reservations(p_order_ids uuid[]) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.get_my_order_reservations(p_order_ids uuid[]) TO service_role;
+REVOKE ALL ON FUNCTION public.get_my_order_reservations(uuid[])
+  FROM PUBLIC, anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.get_my_order_reservations(uuid[]) TO authenticated;
+-- Test-only grant models the observed postgres/public default-ACL service_role bit.
+GRANT EXECUTE ON FUNCTION public.get_my_order_reservations(uuid[]) TO service_role;
+COMMENT ON FUNCTION public.get_my_order_reservations(uuid[])
+IS 'Read-only, authenticated owner-scoped reservation lookup for at most 100 supplied order IDs. Returns only reservation display fields.';
 
 CREATE OR REPLACE FUNCTION public.new_user_setup()
 RETURNS void
