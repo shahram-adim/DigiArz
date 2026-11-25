@@ -73,3 +73,13 @@ The repository already contains review-only candidate artifacts under `supabase/
 - No orders, trades, wallets, balances, reservations, RLS, grants, triggers, functions, migrations, Cron jobs, or schedules were changed.
 - No merge, deployment, db push, migration, paid resource, or project branch was created.
 - The candidate files remain review-only; any Production change requires separate explicit owner approval.
+
+
+## CI follow-up — 2026-11-25
+
+- The full exact-decimal workflow was enabled for pull requests targeting `redesign/ui-clean-rebuild-2026`, because PR #62 targets that UI candidate branch rather than `main`.
+- Run [45670566646](https://github.com/shahram-adim/DigiArz/actions/runs/45670566646) passed on commit `99780b6a2a72ee84d44bbbe319e743c440e659d1`. It completed the widened-schema candidate integration, cancellation lifecycle, and two-session race checks for Limit, Stop-Limit and TP/SL.
+- Important scope distinction: that passing suite executes the review-only exact-decimal candidate with widened synthetic column types. It does not execute the exact live Production Limit worker against the current 8-place schema.
+- To close that baseline gap, the exact read-only Production `process_limit_orders()` definition (fingerprint `00ab429596fb99392666632967cde9c0`) was copied into a disposable PostgreSQL 17 regression fixture with synthetic data and Production-like 8-place column typmods. The new test is `supabase/tests/live_limit_worker_8scale_baseline.pg17.sql`; it asserts the observed four-pass buy/sell quantity and balance drift plus reservation-vs-wallet rounding divergence.
+- The baseline test was added to the exact-decimal CI workflow. Its first run is pending at the time of this report update. A passing result will establish isolated reproduction of the live-body arithmetic; it still will not imply that any live Production order has drifted.
+- No Production RPC was invoked. The live function was read with `pg_get_functiondef` only. No Production mutation, migration, merge, deployment, or Cron change occurred.
