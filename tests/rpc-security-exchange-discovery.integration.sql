@@ -8,8 +8,8 @@ INSERT INTO public.crypto_assets(coingecko_id,symbol,name,is_active) VALUES
   ('ci-discovery-enabled','PAIR','Synthetic Enabled Pair',true);
 INSERT INTO public.admin_market_listings(coingecko_id,added_by)
 VALUES ('ci-discovery-curated',NULL);
-INSERT INTO public.demo_trading_pairs(base_coingecko_id,is_enabled)
-VALUES ('ci-discovery-enabled',true);
+INSERT INTO public.demo_trading_pairs(pair_symbol,base_coingecko_id,is_enabled)
+VALUES ('PAIRUSDT','ci-discovery-enabled',true);
 INSERT INTO public.market_prices(symbol,price,updated_at,source) VALUES
   ('BTCUSDT',65000,pg_catalog.now()-interval '30 seconds','CoinGecko'),
   ('STLUSDT',12,pg_catalog.now()-interval '5 minutes','CoinGecko');
@@ -48,10 +48,13 @@ BEGIN
   FROM public.get_exchange_discovered_market_assets() WHERE symbol='STL';
   IF stale IS NOT NULL THEN RAISE EXCEPTION 'stale price must be NULL, got %',stale; END IF;
   IF has_table_privilege(current_user,'public.exchange_asset_observations','SELECT')
-     OR has_table_privilege(current_user,'public.crypto_assets','SELECT')
-     OR has_table_privilege(current_user,'public.demo_trading_pairs','SELECT')
-     OR has_table_privilege(current_user,'public.market_prices','SELECT') THEN
+     OR has_table_privilege(current_user,'public.admin_market_listings','SELECT') THEN
     RAISE EXCEPTION 'anon unexpectedly has direct SELECT on protected dependency tables';
+  END IF;
+  IF NOT has_table_privilege(current_user,'public.crypto_assets','SELECT')
+     OR NOT has_table_privilege(current_user,'public.demo_trading_pairs','SELECT')
+     OR NOT has_table_privilege(current_user,'public.market_prices','SELECT') THEN
+    RAISE EXCEPTION 'anon is missing an observed Production public-read table grant';
   END IF;
 END
 $anon$;
