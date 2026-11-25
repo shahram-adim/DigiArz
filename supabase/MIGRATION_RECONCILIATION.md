@@ -429,3 +429,13 @@ Commit: `7ef1932c49744b88408f3b80118eb3e574ed9c8a` (branch `feature/persian-asse
 
 ### ایمنی
 تمام دستورات Supabase این مرحله SELECT روی ledger و کاتالوگ/تعریف توابع بودند. هیچ Migration، DDL، DML، Cron یا Worker اجرا/تغییر نشد. هیچ داده‌ای حذف یا بازنویسی نشد و هزینه‌ای ایجاد نشد.
+
+
+### کنترل ایندکس و نگهداری فایل‌های منبع تاریخی به‌صورت SQL قابل بازبینی
+- کاتالوگ `pg_indexes` در Production، ایندکس `public.crypto_assets_upper_symbol_active_idx` را روی `public.crypto_assets` با تعریف دقیق `USING btree (upper(symbol)) WHERE (is_active IS TRUE)` نشان داد؛ با دستور CREATE INDEX در Migration اصلی مطابقت دارد.
+- برای سه Migration بازیابی‌شده، فایل‌های SQL مستقل در پوشهٔ `supabase/drafts/` شاخهٔ آزمایشی ایجاد شدند؛ هر فایل header هشدار دارد که منبع تاریخیِ قبلاً اجراشده است و Migration اجرایی نیست:
+  - `recovered_20261121045434_digiarz_backpressure_and_exchange_sync_bloat_guards.sql` — commit `31677f3f41fcbb2bc2cab0189b75a4a569f2df4d`
+  - `recovered_20261121045531_snapshot_pg_net_unlogged_queue_before_recovery.sql` — commit `210e24e516c7c4a30e6482c6a0edce6f19956f3f`
+  - `recovered_20261121050216_temporarily_throttle_exchange_asset_processors.sql` — commit `7d8402a602b5553fad9534aa89b5b4450a774a5c`
+- این فایل‌ها عمداً زیر `supabase/drafts/` هستند و در مسیر `supabase/migrations/` قرار نگرفته‌اند؛ هیچ‌کدام اجرا نشده‌اند.
+- همراه با فایل تجمیعی `2026-11-25_recovered-production-migration-sources.md`، اکنون متن کامل هر سه منبع هم به‌صورت سند و هم SQL جداگانه در شاخهٔ آزمایشی قابل بازبینی است.
