@@ -1504,3 +1504,8 @@
 
 - [x] CI run `45639843226` برای commit `16bf19eae0ad115432cadfbc8ddf9b58d65e8d5c` اکنون completed/success شد؛ تمام ۲۲ مرحلهٔ substantive شامل PostgreSQL 17 و lifecycle/race tests موفق بودند.
 - [!] این run قبل از افزودن cron command MD5ها و تست تکمیلی شش trigger/چهار cron اجرا شده است؛ بنابراین هنوز CI commit نهایی `2185566256384654c1eea64665d074044c3b60fd` را پوشش نداده است.
+
+- [x] اصلاح تکمیلی crosswalk: بررسی مستقیم متن سند نشان داد شمارندهٔ تست باید ۱۲ fingerprint روتین، ۶ fingerprint trigger و ۴ fingerprint فرمان cron را جداگانه بشمارد؛ regex تست بر اساس ردیف‌های جدول تصحیح شد.
+- [x] اعتبارسنجی محلی/متنی مستقل روی محتوای commit branch: ۱۷ heading یکتا، ۱۲ routine MD5، ۶ trigger MD5، ۴ cron command MD5؛ همه شمارش‌ها دقیقاً مطابق snapshot هستند.
+- [x] CI run `45639843226` برای commit `16bf19eae0ad115432cadfbc8ddf9b58d65e8d5c` موفق است، اما قبل از تغییرات cron/trigger اجرا شده؛ آن را تأیید CI نسخهٔ نهایی تلقی نکن.
+- [ ] CI برای تست اصلاح‌شده در commit `d3bcd974e47254b091cfe27c528c1df104426a13` هنوز در فهرست runها ظاهر نشده است؛ باید پیش از ادعای سبز بودن این تست بررسی شود.
