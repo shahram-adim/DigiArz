@@ -86,3 +86,33 @@ BEGIN
   RAISE NOTICE 'PASS: claim_admin_asset_refresh exact return type, SECURITY DEFINER, search_path and function-specific service_role ACL';
 END
 $claim_contract$;
+
+
+DO $market_listings_contract$
+DECLARE
+  fn oid;
+  result_type text;
+BEGIN
+  SELECT p.oid INTO fn
+  FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+  WHERE n.nspname='public' AND p.proname='get_admin_market_listings'
+    AND pg_get_function_identity_arguments(p.oid)='';
+  IF fn IS NULL THEN RAISE EXCEPTION 'get_admin_market_listings() missing'; END IF;
+  SELECT pg_get_function_result(fn) INTO result_type;
+  IF result_type <> 'TABLE(coingecko_id text, symbol text, name text, image_url text, market_cap_rank integer, current_price_usd numeric, price_toman numeric, price_change_percentage_24h numeric, total_volume_usd numeric, last_updated timestamp with time zone, added_at timestamp with time zone)' THEN
+    RAISE EXCEPTION 'Unexpected get_admin_market_listings return shape: %', result_type;
+  END IF;
+  IF NOT (SELECT prosecdef AND provolatile='s' FROM pg_proc WHERE oid=fn) THEN
+    RAISE EXCEPTION 'get_admin_market_listings must be STABLE SECURITY DEFINER';
+  END IF;
+  IF NOT COALESCE((SELECT proconfig @> ARRAY['search_path=""'] FROM pg_proc WHERE oid=fn),false) THEN
+    RAISE EXCEPTION 'get_admin_market_listings must have empty search_path';
+  END IF;
+  IF has_function_privilege('anon',fn,'EXECUTE') IS NOT TRUE
+     OR has_function_privilege('authenticated',fn,'EXECUTE') IS NOT TRUE
+     OR has_function_privilege('service_role',fn,'EXECUTE') IS NOT TRUE THEN
+    RAISE EXCEPTION 'get_admin_market_listings current API-role ACL mismatch';
+  END IF;
+  RAISE NOTICE 'PASS: get_admin_market_listings exact TABLE return shape, STABLE, SECURITY DEFINER, empty search_path and current effective API ACL';
+END
+$market_listings_contract$;
