@@ -166,3 +166,45 @@ The static manifest was refined after inspecting the four previously unresolved 
 - Three dynamic rewrites still require manual review: execute_demo_trade, place_limit_order and process_limit_orders.
 
 A resolved target is only a locator, not proof of dependencies or permission to replay. The complete source bodies still require reviewer inspection. The manifest remains non-executable and the replay remains blocked.
+
+
+## Two-user RLS runtime matrix — 2026-11-25
+
+A new test-only PostgreSQL 17 script is now wired into PR #63:
+
+- Test: `tests/production-user-rls-two-user.pg17.sql`.
+- Workflow step: `Run Production-snapshot two-user RLS isolation matrix`.
+- Successful CI run: [45692611554](https://github.com/shahram-adim/DigiArz/actions/runs/45692611554), commit `bfc099c15421b9c32024267293dce3498a56d94f`.
+- PR #63 remains Draft/open/unmerged; latest verified head at this checkpoint is the commit above.
+
+### Covered synthetic relations
+
+The fixture exercises captured 2026-11-25 Production RLS/grant metadata for:
+`profiles`, `wallets`, `asset_balances`, `orders`, `trades`, `transactions`, `order_reservations`, and `conditional_orders`.
+
+Two fixed synthetic Auth UUIDs and two rows per relation verify:
+- user A sees only A's row;
+- user B sees only B's row;
+- a missing `auth.uid()` subject sees no user-owned rows;
+- `anon` cannot read protected financial relations; the captured anon SELECT grant on `conditional_orders` is still blocked by the absence of an anon RLS policy;
+- `service_role` sees both synthetic rows under the captured BYPASSRLS/table-grant behavior;
+- `postgres` sees both rows in the disposable service container;
+- authenticated direct financial DML grants remain absent in the fixture.
+
+### Important exact-grant nuance
+
+Production's captured `order_reservations` relation has an owner-read RLS policy, but the captured table ACL does **not** grant SELECT to `authenticated`. The test asserts that direct SELECT is unavailable, then adds SELECT only inside the same disposable test transaction to exercise the row-ownership predicate. The transaction rolls back, so this does not represent or propose a Production grant.
+
+### Evidence boundary
+
+The test creates only synthetic schema/rows in the job-local `postgres:17` container. It is a targeted RLS-policy and table-ACL behavior test, not a complete Supabase/Production schema clone:
+- `auth.uid()` is a test shim reading a transaction-local synthetic subject, not JWT verification.
+- `public.current_account_is_active()` is a test shim returning TRUE. The captured user-ID ownership predicates are tested, but the live helper body and inactive-account behavior are not.
+- Trigger bodies, non-SELECT writes, Auth triggers, RPC function bodies, extension/platform state and full migration replay are outside this test.
+- The `order_reservations` policy is exercised only after the transaction-scoped test grant described above.
+
+### CI outcome and correction history
+
+The first workflow attempt (run `45692411798`) failed before SQL execution because the shell continuation in the new workflow step contained an extra backslash; the existing 89 Node tests had passed. The workflow line was corrected, then run `45692611554` completed successfully. Its 22 substantive workflow stages all passed, including the new RLS step and the existing exact-decimal, Market/Limit, Stop-Limit, TP-SL and two-session race tests.
+
+No Production, Recovery-Test or other persistent Supabase project was queried or changed by this test. No Migration, `db push`, grant, policy, function, trigger, Cron schedule, deployment, merge, or financial row was changed.
