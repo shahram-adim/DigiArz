@@ -8,13 +8,13 @@ const path = require('node:path');
 const read = (relativePath) => fs.readFileSync(path.join(__dirname, '..', relativePath), 'utf8');
 
 function extractFullWorker(source, label) {
-  const match = source.match(/CREATE OR REPLACE FUNCTION\s+public\.process_stop_limit_orders\s*\(\s*\)\s*RETURNS\s+jsonb[\s\S]*?AS\s+\$function\$[\s\S]*?\$function\$;/i);
+  const match = source.match(/CREATE OR REPLACE FUNCTION\s+public\.process_stop_limit_orders\s*\(\s*\)\s*RETURNS\s+jsonb[\s\S]*?AS\s+\$function\$[\s\S]*?\$function\$/i);
   assert.ok(match, label + ': process_stop_limit_orders() definition not found');
   return match[0];
 }
 
 function extractWorkerBody(source, label) {
-  const match = source.match(/CREATE OR REPLACE FUNCTION\s+public\.process_stop_limit_orders\s*\(\s*\)\s*RETURNS\s+jsonb[\s\S]*?AS\s+\$function\$([\s\S]*?)\$function\$;/i);
+  const match = source.match(/CREATE OR REPLACE FUNCTION\s+public\.process_stop_limit_orders\s*\(\s*\)\s*RETURNS\s+jsonb[\s\S]*?AS\s+\$function\$([\s\S]*?)\$function\$/i);
   assert.ok(match, label + ': process_stop_limit_orders() body not found');
   return match[1].replace(/--[^\n]*/g, '').replace(/\s+/g, ' ').trim();
 }
