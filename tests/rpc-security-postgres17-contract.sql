@@ -118,6 +118,52 @@ END
 $market_listings_contract$;
 
 
+DO $admin_search_contract$
+DECLARE
+  fn oid;
+  result_type text;
+BEGIN
+  fn := 'public.admin_search_market_assets(text,integer)'::regprocedure;
+  SELECT pg_get_function_result(fn) INTO result_type;
+  IF result_type <> 'TABLE(coingecko_id text, symbol text, name text, image_url text, market_cap_rank integer, current_price_usd numeric, last_updated timestamp with time zone)' THEN
+    RAISE EXCEPTION 'Unexpected admin_search_market_assets return shape: %', result_type;
+  END IF;
+  IF NOT (SELECT prosecdef AND provolatile='s' AND proowner='postgres'::regrole FROM pg_proc WHERE oid=fn) THEN
+    RAISE EXCEPTION 'admin_search_market_assets owner/volatility/SECURITY DEFINER mismatch';
+  END IF;
+  IF NOT COALESCE((SELECT proconfig @> ARRAY['search_path=""'] FROM pg_proc WHERE oid=fn),false) THEN
+    RAISE EXCEPTION 'admin_search_market_assets must have empty search_path';
+  END IF;
+  IF has_function_privilege('anon',fn,'EXECUTE')
+     OR NOT has_function_privilege('authenticated',fn,'EXECUTE')
+     OR NOT has_function_privilege('service_role',fn,'EXECUTE') THEN
+    RAISE EXCEPTION 'admin_search_market_assets effective API ACL mismatch';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM aclexplode(COALESCE((SELECT proacl FROM pg_proc WHERE oid=fn),
+                                    acldefault('f',(SELECT proowner FROM pg_proc WHERE oid=fn)))) a
+    WHERE a.grantee=0 AND a.privilege_type='EXECUTE'
+  ) THEN
+    RAISE EXCEPTION 'PUBLIC must not execute admin_search_market_assets';
+  END IF;
+  IF NOT (SELECT relrowsecurity AND NOT relforcerowsecurity
+          FROM pg_class WHERE oid='public.crypto_assets'::regclass) THEN
+    RAISE EXCEPTION 'crypto_assets RLS flags mismatch';
+  END IF;
+  IF NOT (SELECT relrowsecurity AND NOT relforcerowsecurity
+          FROM pg_class WHERE oid='private.admin_users'::regclass) THEN
+    RAISE EXCEPTION 'private.admin_users RLS flags mismatch';
+  END IF;
+  IF has_table_privilege('anon','private.admin_users','SELECT')
+     OR has_table_privilege('authenticated','private.admin_users','SELECT')
+     OR has_table_privilege('service_role','private.admin_users','SELECT') THEN
+    RAISE EXCEPTION 'private.admin_users must not be directly readable by API roles';
+  END IF;
+  RAISE NOTICE 'PASS: admin_search_market_assets live return shape, owner, volatility, path, ACL and dependency RLS';
+END
+$admin_search_contract$;
+
+
 DO $exchange_discovery_shared_contract$
 DECLARE
   fn oid;
