@@ -341,3 +341,11 @@ This report is an inventory and safety analysis only. It changes no database obj
 - در role_table_grants فقط postgres برای این دو جدول مجوز داشت؛ grant مستقیمی برای anon، authenticated یا service_role در خروجی مشاهده نشد.
 - این وضعیت با جدول‌های پشتیبان موقت و محدود به مالک سازگار است، اما از روی آن نمی‌توان سیاست دقیق Migration تاریخی یا intent سازنده را اثبات کرد.
 - PR #62 در بازبینی تازه همچنان open، Draft و merged=false است؛ GitHub در زمان این بررسی mergeable=true گزارش کرد. بنابراین مقدار mergeable=false که در گزارش قبلی ثبت شده بود، یک snapshot قدیمی/متغیر بود و با وضعیت تازه جایگزین شد. Commit مستنداتی d0770af2a48b81536a2ceddb446a2dab1aa5594d workflow run مستقلی ندارد؛ تغییر Markdown است و نباید CI-tested معرفی شود. هیچ تلاش merge انجام نشد.
+
+
+### دوام فیزیکی Snapshotها و نبود سازوکار خودکارِ ثبت‌شده — ۲۵ نوامبر ۲۰۲۶
+- کاتالوگ PostgreSQL هر دو جدول Snapshot را با relpersistence='p' گزارش می‌کند؛ یعنی هر دو جدول permanent هستند، نه TEMP و نه UNLOGGED.
+- ستون captured_at در هر دو جدول nullable است و default ندارد. ستون‌های دیگر نیز nullable و بدون default ثبت شده‌اند.
+- هیچ تابعی با نام حاوی snapshot در schemaهای public/private/net پیدا نشد. جست‌وجوی قبلی نیز تابع اپلیکیشنی مشخصی برای purge/retention پاسخ‌ها پیدا نکرده بود. این شواهد وجود هر نوع cleanup بیرونی یا اجرای SQL با نام متفاوت را رد نمی‌کند.
+- آمار pg_stat_user_tables برای این دو جدول هنوز صفر/NULL است و قابل استفاده برای نتیجه‌گیری دربارهٔ تعداد ردیف یا vacuum نیست؛ تعداد واقعی ردیف‌ها از COUNT مستقیم در بررسی قبلی گرفته شده است.
+- نکتهٔ مهم: permanent بودن جدول‌ها به‌معنای ماندگاری تا زمان حذف صریح است؛ در شواهد فعلی TTL، partitioning یا cleanup خودکار برای این دو Snapshot دیده نشد. بنابراین نباید آن‌ها را «موقت» توصیف کرد. همچنین اندازهٔ ۴۰ MiB Snapshot پاسخ شامل دادهٔ ذخیره‌شده است و به‌خودی‌خود bloat محسوب نمی‌شود.
