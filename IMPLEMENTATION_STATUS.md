@@ -1372,3 +1372,6 @@
 - [ ] ادامه: استخراج منبع معتبر و dependency/RLS برای توابع بعدی؛ اولویت با read-only market metadata، نه توابع مالی/worker.
 - [ ] default EXECUTE برای service_role همچنان تصمیم باز مالک است؛ هیچ تغییر پیش‌فرض یا grant/revoke در Production انجام نشود.
 - [x] هیچ داده مالی، سفارش، معامله، رزرو، کیف پول، balance، Migration ledger، Cron، Auth، Edge Function یا schedule تغییر نکرد؛ هیچ Merge/Deploy/db push یا هزینه‌ای ایجاد نشد.
+
+
+**آخرین وضعیت شاخه پس از ثبت مستندات:** PR #62 HEAD برابر `7f3fb3f06ebea612401aad56a6e0e78a391182a3`؛ PR باز، Draft، ادغام‌نشده. آخرین commit کد/تست مربوط به harness برابر `8e993a3904db07b5a9862073e85f4c461792f155` است که CI run #313 موفق را اجرا کرد؛ commitهای پس از آن فقط ثبت شواهد/مستندات بودند و برای آن‌ها اجرای CI جدید در پاسخ API مشاهده نشد.
