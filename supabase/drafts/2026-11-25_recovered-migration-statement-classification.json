@@ -130,7 +130,7 @@
           "ordinal": 16,
           "sha256": "2af7ebe3b1d20cf48c2c0452e0886e24d2b9d67d44d59b78ce20fdc75f4cea03",
           "classification": "schema_or_function_candidate_dependency_gated",
-          "target": "unresolved-review",
+          "target": "public.coin_reviews",
           "preview": "DROP POLICY IF EXISTS \"Public can read coin reviews\" ON public.coin_reviews;"
         },
         {
@@ -144,7 +144,7 @@
           "ordinal": 18,
           "sha256": "1ec177f6a916a28a74346c0f512ad3d71818ad5a85a23ac4d733ea2a712fff8e",
           "classification": "schema_or_function_candidate_dependency_gated",
-          "target": "unresolved-review",
+          "target": "public.coin_reviews",
           "preview": "DROP POLICY IF EXISTS \"Users can create own coin reviews\" ON public.coin_reviews;"
         },
         {
@@ -172,7 +172,7 @@
           "ordinal": 22,
           "sha256": "de31677417e947d6955a44479be65c25c0eec6c6a703d298e648607b5b92d702",
           "classification": "schema_or_function_candidate_dependency_gated",
-          "target": "unresolved-review",
+          "target": "public.coin_reviews",
           "preview": "DROP POLICY IF EXISTS \"Users can delete own coin reviews\" ON public.coin_reviews;"
         },
         {
@@ -200,7 +200,7 @@
           "ordinal": 26,
           "sha256": "9946ac13581dc69a1b39565588b27070d3eb7c1a33ad8ac3514a977e49156bee",
           "classification": "schema_or_function_candidate_dependency_gated",
-          "target": "unresolved-review",
+          "target": "public.coin_review_reports",
           "preview": "DROP POLICY IF EXISTS \"Users can report coin reviews\" ON public.coin_review_reports;"
         },
         {
@@ -1176,8 +1176,8 @@
     "excluded_cron": 7,
     "excluded_external_http_or_queue": 7,
     "transaction_wrappers": 8,
-    "target_locators_resolved": 132,
-    "unresolved_targets": 4
+    "target_locators_resolved": 136,
+    "unresolved_targets": 0
   },
   "target_extraction_note": "Targets are best-effort object locators extracted from statement previews; full-body/manual review remains mandatory. A resolved target is not a dependency proof."
 }
