@@ -273,3 +273,22 @@ test("aggregates Bitpin as an independent Iranian source", () => {
   assert.equal(rows[0].status, "consensus_candidate");
   assert.equal(rows[0].source_count, 2);
 });
+
+
+test("approved Persian-name projection requires exact asset identity and explicit admin approval", async () => {
+  const { getApprovedPersianAssetName } = await import("../src/persian-asset-names.mjs");
+  const approval = {
+    coingecko_id: "bitcoin",
+    name_fa: "بیت‌کوین",
+    status: "approved",
+    approved_by: "admin-user-id",
+    approved_at: "2026-11-25T10:00:00.000Z"
+  };
+  assert.equal(getApprovedPersianAssetName("bitcoin", approval), "بیت‌کوین");
+  assert.equal(getApprovedPersianAssetName("ethereum", approval), null);
+  assert.equal(getApprovedPersianAssetName("bitcoin", { ...approval, status: "consensus_candidate" }), null);
+  assert.equal(getApprovedPersianAssetName("bitcoin", { ...approval, approved_by: null }), null);
+  assert.equal(getApprovedPersianAssetName("bitcoin", { ...approval, approved_at: "invalid" }), null);
+  assert.equal(getApprovedPersianAssetName("bitcoin", { ...approval, name_fa: "Bitcoin" }), null);
+  assert.equal(getApprovedPersianAssetName("bitcoin", null), null);
+});
