@@ -22,11 +22,13 @@
 --    ALTER DEFAULT PRIVILEGES FOR ROLE postgres
 --      REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
 --
--- B. Remove schema-specific direct EXECUTE defaults for API client roles
---    on future public functions created by postgres. Preserve service_role:
+-- B. Remove any schema-specific additive EXECUTE defaults for PUBLIC and
+--    direct EXECUTE defaults for API client roles on future public functions.
+--    This schema-level PUBLIC revoke cannot replace step A; it only removes
+--    an additive schema-specific grant. Preserve service_role temporarily:
 --
 --    ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
---      REVOKE EXECUTE ON FUNCTIONS FROM anon, authenticated;
+--      REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC, anon, authenticated;
 --
 -- C. Explicitly grant EXECUTE on each new function only to the roles that
 --    need it. This must be done per exact signature, not by blanket grants.
