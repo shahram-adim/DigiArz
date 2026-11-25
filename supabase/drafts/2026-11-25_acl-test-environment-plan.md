@@ -145,3 +145,23 @@ The current `tests/rpc-security.integration.sql` is a transaction-scoped test of
 - No Production query beyond the already documented read-only catalog audits was run for this plan.
 - No CI gate, secret, variable, or deployment was changed.
 - No PR merge or infrastructure spend occurred.
+
+
+## 9. Follow-up review of current CI artifacts (2026-11-25)
+
+The latest Push and Pull Request runs on the plan commit `ec10ff0cc556701bdb0d0baa8e0d20e9d9d40a52` both completed:
+- `unit-tests`: success (candidate extraction tests and isolated Edge Function type-check).
+- `rpc-security-integration`: skipped in both runs, as intended by the current opt-in gate.
+- These results do not validate database ACL behavior or Production parity.
+
+Additional static review findings:
+
+1. `tests/default-function-acl-hardening.sql` currently encodes the policy that `service_role` keeps public-schema default EXECUTE. The proposal file encodes the opposite policy. This is a genuine contract mismatch. Neither artifact should be changed until the owner/reviewer explicitly selects the intended default policy.
+2. `tests/rpc-security-catalog.sql` compares most role allowlists by schema + function name, not by exact identity-argument signature. It separately fails if any SECURITY DEFINER function name has multiple overloads, which reduces ambiguity but does not fully assert the exact argument signature. A future reviewed revision should use explicit (schema, name, identity_arguments) tuples and compare those against catalog results.
+3. The catalog test's service_role allowlist reflects the current Production baseline (including the 13 service_role-only candidates and the 23 functions also executable by authenticated). It is not a proposed post-hardening ACL state and must not be reused as a post-change expected matrix without an explicit decision.
+4. `tests/rpc-security.integration.sql` temporarily grants public-schema USAGE and EXECUTE to anon/authenticated inside a transaction, then tests the function body's super-admin guard and rolls back. It is useful as a function-body authorization test, but it does not prove the real catalog ACL contract; temporary grants deliberately bypass that part of the test. Its fixture also requires exactly one synthetic super-admin row.
+5. Both current workflow runs confirm the integration job remains skipped; do not enable it until a disposable parity environment and the policy contract are approved.
+
+Recommended next review unit: prepare a separate, non-executable exact-signature ACL matrix (current Production state versus proposed target state), with each function's owner, SECURITY DEFINER flag, search_path, current effective API roles, observed caller, and proposed required roles. Mark `claim_admin_asset_refresh(text,uuid)` as unresolved. Do not generate executable GRANT/REVOKE statements until every row has a verified caller and the owner approves the target policy.
+
+This section is evidence/review documentation only. No SQL test was run, no CI workflow or gate was changed, and no database object or privilege was modified.
