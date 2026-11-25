@@ -272,6 +272,110 @@ CREATE TABLE public.crypto_assets (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
+CREATE TABLE public.demo_trading_fees (
+  quote_asset text PRIMARY KEY,
+  maker_fee_rate numeric(10,8) NOT NULL CHECK (maker_fee_rate >= 0 AND maker_fee_rate <= 0.05),
+  taker_fee_rate numeric(10,8) NOT NULL CHECK (taker_fee_rate >= 0 AND taker_fee_rate <= 0.05),
+  is_enabled boolean NOT NULL DEFAULT true,
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  CHECK (quote_asset ~ '^[A-Z0-9]{2,12}
+  symbol text PRIMARY KEY,
+  price numeric,
+  updated_at timestamptz,
+  source text
+);
+
+
+ALTER TABLE public.admin_market_listings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.crypto_assets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.market_prices ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS admin_market_listings_public_read ON public.admin_market_listings;
+CREATE POLICY admin_market_listings_public_read
+  ON public.admin_market_listings
+  FOR SELECT TO anon, authenticated
+  USING (true);
+
+DROP POLICY IF EXISTS crypto_assets_public_read ON public.crypto_assets;
+CREATE POLICY crypto_assets_public_read
+  ON public.crypto_assets
+  FOR SELECT TO anon, authenticated
+  USING (true);
+
+DROP POLICY IF EXISTS "Authenticated users can view market prices" ON public.market_prices;
+CREATE POLICY "Authenticated users can view market prices"
+  ON public.market_prices
+  FOR SELECT TO authenticated
+  USING (true);
+
+DROP POLICY IF EXISTS market_prices_anon_public_read ON public.market_prices;
+CREATE POLICY market_prices_anon_public_read
+  ON public.market_prices
+  FOR SELECT TO anon
+  USING (true);
+
+REVOKE ALL ON public.admin_market_listings, public.crypto_assets, public.market_prices
+  FROM PUBLIC, anon, authenticated, service_role;
+GRANT SELECT ON public.crypto_assets, public.market_prices TO anon, authenticated;
+GRANT ALL ON public.admin_market_listings, public.crypto_assets, public.market_prices TO service_role;
+
+-- Exact read-only function body from the final reviewed migration source.
+CREATE OR REPLACE FUNCTION public.get_admin_market_listings()
+RETURNS TABLE (
+  coingecko_id text,
+  symbol text,
+  name text,
+  image_url text,
+  market_cap_rank integer,
+  current_price_usd numeric,
+  price_toman numeric,
+  price_change_percentage_24h numeric,
+  total_volume_usd numeric,
+  last_updated timestamptz,
+  added_at timestamptz
+)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $function$
+  SELECT
+    ca.coingecko_id,
+    ca.symbol,
+    ca.name,
+    ca.image_url,
+    ca.market_cap_rank,
+    CASE
+      WHEN mp.updated_at >= pg_catalog.now() - interval '2 minutes'
+       AND mp.source = 'CoinGecko'
+       AND mp.price > 0
+      THEN mp.price
+      ELSE NULL
+    END AS current_price_usd,
+    ca.price_toman,
+    ca.price_change_percentage_24h,
+    ca.total_volume_usd,
+    mp.updated_at AS last_updated,
+    l.created_at AS added_at
+  FROM public.admin_market_listings AS l
+  JOIN public.crypto_assets AS ca ON ca.coingecko_id = l.coingecko_id
+  LEFT JOIN public.market_prices AS mp
+    ON mp.symbol = pg_catalog.upper(ca.symbol) || 'USDT'
+  WHERE ca.is_active IS TRUE
+  ORDER BY l.created_at DESC, ca.market_cap_rank ASC NULLS LAST;
+$function$;
+
+-- Match the reviewed current effective ACL in the disposable fixture.
+-- The service_role grant here models the observed function ACL only; it does
+-- not set or alter any default privileges.
+REVOKE ALL ON FUNCTION public.get_admin_market_listings() FROM PUBLIC, anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.get_admin_market_listings() TO anon, authenticated, service_role;
+)
+);
+ALTER TABLE public.demo_trading_fees ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.demo_trading_fees FROM PUBLIC, anon, authenticated, service_role;
+GRANT ALL ON public.demo_trading_fees TO service_role;
+
 CREATE TABLE public.market_prices (
   symbol text PRIMARY KEY,
   price numeric,
