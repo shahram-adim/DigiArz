@@ -156,6 +156,7 @@ Deno.serve(async (req: Request) => {
         : await fetch(ex.url, {
             headers: { accept: "application/json", "user-agent": "DigiArz-market-catalog/1.0" },
             signal: AbortSignal.timeout(12000),
+            ...(ex.id === "bitpin" ? { redirect: "error" as RequestRedirect } : {}),
           });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       let payload = await response.json();
@@ -163,7 +164,8 @@ Deno.serve(async (req: Request) => {
         payload = await collectBitpinMarketPages({
           firstPayload: payload,
           catalogUrl: ex.url,
-          fetchPage: (url: string) => fetch(url, {
+          fetchPage: (url: string, init?: RequestInit) => fetch(url, {
+            ...init,
             headers: { accept: "application/json", "user-agent": "DigiArz-market-catalog/1.0" },
             signal: AbortSignal.timeout(12000),
           }),
