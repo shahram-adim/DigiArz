@@ -1488,3 +1488,10 @@
 - [!] CI run `45638928773` روی commit قبلی شکست خورد: تست جدید پرونده‌ها به‌علت escape دوگانه در regex، صفر عنوان Migration را match کرد (انتظار ۱۷). ۸۱ تست از ۸۲ تست موفق بودند؛ مراحل PostgreSQL بعدی به‌دلیل توقف زودهنگام اجرا نشدند.
 - [x] علت مشخص شد و regex در commit `d99167600ec869af9ada7868f7c98745a6cbae7a` اصلاح شد تا ۱۴ رقم ابتدای headingها را match کند.
 - [ ] CI commit اصلاحی هنوز در فهرست اجراها ظاهر نشده؛ نتیجهٔ آن تأیید نشده است.
+
+- [x] CI اجرای اصلاح‌شدهٔ commit `d99167600ec869af9ada7868f7c98745a6cbae7a` در run `45639205441` با موفقیت کامل شد؛ job `exact-decimal` success.
+- [x] crosswalk وضعیت فعلی ۴ گروه Migration مفقود با manifest توابع، relation inventory، RLS/trigger bindings و cron metadata ثبت‌شده تکمیل شد: ۱۲ routine fingerprint مستقیم، metadata روابط و triggerهای منطبق؛ موارد فاقد انتساب مستقیم صریحاً علامت‌گذاری شدند.
+- [x] برای هر گروه تصریح شد که fingerprint جاری، منشأ تاریخی Migration را ثابت نمی‌کند؛ cron command text/fingerprint در داده‌های crosswalk موجود نیست.
+- [x] تست CI برای وجود crosswalk، ۱۲ fingerprint و ممانعت از ادعای provenance تاریخی اضافه شد.
+- [ ] CI commit جدید `16bf19eae0ad115432cadfbc8ddf9b58d65e8d5c` و commit status بعدی باید بررسی شود؛ هنوز نتیجه‌ای برای این تغییرات اعلام نشده است.
+- [!] هیچ SQL تاریخی بازسازی/اجرا نشده؛ هیچ Production schema/data/ACL/RLS/function/trigger/cron/queue تغییر نکرده است.
