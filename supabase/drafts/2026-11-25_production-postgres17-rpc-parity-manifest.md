@@ -194,4 +194,9 @@ GitHub Actions run #313 (`45603853118`) completed successfully on the updated PR
 
 ### Next safe step
 
-Build a minimal standalone disposable PostgreSQL 17 script for this single SQL function and establish why the function body is being split/rejected before adding it back to the shared harness. Keep the existing stable five-body fixture untouched until that standalone script and role/rollback tests pass.
+Promote this function into the shared disposable 46-signature fixture using the proven source-file execution path, not a copied SQL body:
+1. Add only the five minimal synthetic dependency tables/columns to the shared bootstrap, with RLS enabled and no direct anon table SELECT.
+2. After loading the catalog stubs, drop only the matching `get_exchange_discovered_market_assets()` stub and execute the exact migration file from the PostgreSQL 17 container.
+3. Apply a function-specific test-only EXECUTE grant to `service_role` only after the migration, solely to reproduce the observed current catalog snapshot; keep the source-level ACL test showing that the migration itself does not grant it.
+4. Add exact return-shape/SECURITY DEFINER/search_path/owner/ACL contract assertions and role/rollback behavior tests. Preserve the shared fixture's 5-real-body baseline until the new path passes.
+5. The cause of the earlier shared-fixture parser failure remains unknown; do not attribute it to source or transfer without evidence.
