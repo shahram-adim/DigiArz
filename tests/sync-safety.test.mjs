@@ -23,8 +23,9 @@ test("collects all Bitpin pages from the exact catalog endpoint", async () => {
       results: [{ code: "BTC_IRT" }],
       next: "?page=2",
     },
-    fetchPage: async (url) => {
+    fetchPage: async (url, options) => {
       requested.push(url);
+      assert.deepEqual(options, { redirect: "error" });
       return {
         ok: true,
         json: async () => ({
@@ -113,5 +114,38 @@ test("rejects a first-page payload without a results array", async () => {
       fetchPage: async () => ({ ok: true, json: async () => ({ results: [] }) }),
     }),
     /no results array/,
+  );
+});
+
+
+test("rejects a pagination response that reports a followed redirect", async () => {
+  await assert.rejects(
+    collectBitpinMarketPages({
+      catalogUrl: "https://api.bitpin.ir/api/v1/mkt/markets/",
+      firstPayload: { results: [], next: "?page=2" },
+      fetchPage: async () => ({
+        ok: true,
+        redirected: true,
+        url: "https://evil.example/redirected",
+        json: async () => ({ results: [] }),
+      }),
+    }),
+    /unexpected redirect/,
+  );
+});
+
+test("rejects a response URL that escaped the exact Bitpin catalog endpoint", async () => {
+  await assert.rejects(
+    collectBitpinMarketPages({
+      catalogUrl: "https://api.bitpin.ir/api/v1/mkt/markets/",
+      firstPayload: { results: [], next: "?page=2" },
+      fetchPage: async () => ({
+        ok: true,
+        redirected: false,
+        url: "https://api.bitpin.ir/api/v1/private/export/",
+        json: async () => ({ results: [] }),
+      }),
+    }),
+    /unexpected URL/,
   );
 });
