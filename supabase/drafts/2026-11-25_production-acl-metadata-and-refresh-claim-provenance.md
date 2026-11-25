@@ -65,7 +65,7 @@ A GitHub repository code search for `claim_admin_asset_refresh` and `admin_asset
 
 ## 5. Next evidence required
 
-1. Trace the admin on-demand asset-refresh caller and verify whether the 30-second claim operation is actually invoked.
+1. Preserve the confirmed caller/grant pair. If runtime-usage evidence is needed, inspect a later authorized log window; do not infer non-use from the prior empty 24-hour window.
 2. Complete exact caller mapping for the 23 browser/session-facing signatures and preserve function-body review separately from ACL state.
 3. Obtain the owner's explicit decisions on default `service_role` EXECUTE, anonymous market-metadata disclosure, and the intended refresh-claim design.
 4. Only after an approved disposable parity environment and target policy exist, prepare role-positive/negative runtime tests. Do not enable the skipped CI integration job before those gates pass.
