@@ -1440,3 +1440,13 @@
 - [x] Added `supabase/audit/production_migration_source_reconciliation_2026-11-25.json` and CI assertions so timestamp drift is not misreported as a missing source.
 - [!] No missing migration was reconstructed from live catalog state, no SQL was applied, and no db push was run.
 - Next: seek original source artifacts from authoritative backup/CI/developer artifacts; if unavailable, prepare per-migration evidence packages from live definitions, ACL/RLS, triggers and dependency metadata, clearly labeled as reconstructions and requiring manual approval. Keep db push and Production changes blocked.
+
+
+### Missing-migration live-evidence map — 2026-11-25
+- [x] Grouped all 17 missing sources into four evidence domains: admin/wallet/roles (6), Iranian exchange observation and workers (7), verified pair activation (1), and backpressure/pg_net queue snapshot/throttling (3).
+- [x] Read-only catalog inspection captured current schema metadata for `wallets`, `coin_reviews`, `demo_trading_fees`, `profiles`, `private.admin_users`, `private.admin_wallet_adjustments`, `exchange_asset_observations`, exchange request queues and pg_net backup-table definitions.
+- [x] Captured current relevant routine signatures/fingerprints and cron job IDs/schedules/active flags. No table rows or queue payloads were read.
+- [x] Added `supabase/audit/production_missing_migration_recovery_map_2026-11-25.json` and a CI completeness guard.
+- [!] The live `wallets` schema currently declares defaults `balance_usdt=200` and `balance_irr=1000000000`; reconcile this with the separately approved product defaults before any future onboarding/default changes. No data/default was changed.
+- [!] Live function bodies and cron metadata represent current state, not the exact historical SQL/order or dropped intermediate states. The recovery map is evidence-only and must not be used as an executable migration.
+- Next: obtain original SQL from a trusted backup/developer artifact; otherwise prepare review-only per-object reconstruction dossiers with explicit provenance and unknowns. Keep `db push`, migrations, grants, RLS changes, cron changes and all Production writes blocked.
