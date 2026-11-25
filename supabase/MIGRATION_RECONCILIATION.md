@@ -155,3 +155,33 @@ This report is an inventory and safety analysis only. It changes no database obj
 - هیچ Edge Function مستقر، تابع SQL، Cron، جدول، مجوز، داده یا Migration در Production یا پروژهٔ آزمایشی تغییر نکرد.
 - سورس Worker آزمایشی با نسخهٔ مستقر Production متفاوت است. پیش از فعال‌سازی candidate extraction باید مسیر زمان‌بندی‌شدهٔ SQL و مسیر Edge Function به‌صورت یکپارچه طراحی و تست شوند؛ از اجرای دستی Worker روی Production برای آزمایش خودداری شود.
 - بازیابی SQL سه Migration کنترل فشار/صف در ۲۱ نوامبر و ۱۴ Migration قدیمی‌تر همچنان باز است. هیچ محتوایی از روی نام Migration حدس زده نشده است.
+
+
+## ممیزی تکمیلی ۲۵ نوامبر ۲۰۲۶ — شواهد زنده برای Migrationهای مفقود
+
+این بخش فقط از متادیتا و تعریف اشیای زندهٔ PostgreSQL خوانده شده است؛ متن SQL اصلی Migrationهای مفقود از روی وضعیت فعلی بازسازی یا جعل نشده است.
+
+### شواهد برای ۶ Migration مدیریتی/کیف پول
+- `approved_wallet_defaults_fees_and_coin_reviews`: جدول‌های `public.demo_trading_fees`، `public.coin_reviews` و `public.coin_review_reports` وجود دارند و RLS روی هر سه فعال است. تابع `public.get_demo_trading_fee_rate(text,text)` نیز فعال است. Policyهای خواندن عمومی و ایجاد/ویرایش/حذف نظر با محدودیت مالکیت و وضعیت حساب مشاهده شدند.
+- `assign_confirmed_super_admin` و `add_admin_role_probe`: جدول `private.admin_users` موجود است و توابع `private.is_super_admin()` و `private.is_current_user_super_admin()` به آن متکی‌اند. در این بررسی هیچ شناسهٔ کاربری یا مقدار شخصی role استخراج یا در گزارش ثبت نشد.
+- `secure_admin_wallet_management`: جدول `private.admin_wallet_adjustments` موجود است. تابع `private.admin_adjust_wallet(...)` با مالک postgres، SECURITY DEFINER و search_path خالی اجرا می‌شود؛ هویت مدیر را از auth.uid() می‌گیرد، نقش super_admin را بررسی می‌کند، بدهی USDT رزروشده در سفارش‌های باز را لحاظ می‌کند و adjustment را audit می‌کند. wrapper عمومی `public.admin_adjust_wallet(...)` SECURITY DEFINER نیست.
+- `use_toman_units_in_admin_credit_ui`: تابع مدیریتی زنده برای ارز `TOMAN`، تبدیل به واحد ذخیره‌سازی IRR با ضریب ۱۰ و ثبت transaction با currency برابر IRR را نشان می‌دهد. این فقط رفتار فعلی تابع را اثبات می‌کند، نه جزئیات UI تاریخی Migration.
+- `move_admin_privilege_logic_to_private_schema`: توابع `private.is_super_admin()` و `private.is_current_user_super_admin()` در schema خصوصی قرار دارند؛ تابع public هم‌نام فقط wrapper بدون SECURITY DEFINER است. این با هدف انتقال منطق حساس به private سازگار است.
+
+### شواهد برای Migrationهای exchange sync
+- جدول‌های `public.exchange_asset_observations` و `public.exchange_asset_sync_requests` موجودند و RLS دارند.
+- توابع `public.request_iran_exchange_asset_sync()` و `public.process_iran_exchange_asset_sync()` هر دو SECURITY DEFINER، مالک postgres و دارای search_path خالی‌اند.
+- `process_iran_exchange_asset_sync()` پاسخ صف را به observations تبدیل می‌کند، نام و نماد را از payload منابع استخراج می‌کند، upsert و match انجام می‌دهد و درخواست‌ها را processed علامت می‌زند.
+- تابع Trigger `private.auto_list_verified_exchange_asset()` وجود دارد و در صورت matched + active + CoinGecko ID، فهرست بازار را با قیود اعتبار قیمت/دارایی به‌روزرسانی می‌کند.
+- Cronهای ۱۳ و ۱۴ مسیر SQL بالا را اجرا می‌کنند. Edge Function جداگانهٔ `sync-iran-exchange-assets` نسخهٔ ۷ فعال است؛ کد آن با مسیر SQL زمان‌بندی‌شده یکسان نیست.
+- برای Migrationهای `schedule_bit24_exchange_asset_sync` و `admin_exchange_asset_sync_monitoring` در این نوبت هنوز تمام جزئیات منبع تاریخی و اشیای UI/monitoring به‌طور مستقل بازیابی نشده است؛ صرف وجود جدول و cron برای اثبات کامل بدنهٔ آن‌ها کافی نیست.
+- `restrict_exchange_sync_worker_execution`: تعریف زندهٔ تابع SQL با SECURITY DEFINER و search_path خالی مشاهده شد؛ اما برای اثبات دقیق policyهای اجرا و مجوزهای نقش‌ها باید privilege matrix و cron ownership جداگانه استخراج شود.
+
+### وضعیت CI و PR
+- Commit گزارش ممیزی قبلی `2274ef2ce1d9742efe3f6936fd59bf0d2b984532` دارای دو check با نام `unit-tests` است که هر دو با conclusion برابر `success` تکمیل شدند.
+- PR #62 همچنان open، Draft و merged=false است. این CI موفق فقط به همان commit مربوط است؛ پس از تغییر تازهٔ همین گزارش، CI جدید هنوز باید اجرا و بررسی شود.
+
+### نتیجهٔ این مرحله
+- شواهد زنده برای وجود و رفتار بخشی از اشیای مربوط به ۱۴ Migration مفقود به دست آمد، اما SQL اصلی هیچ‌یک از ۱۴ Migration به‌عنوان منبع معتبر بازیابی نشد.
+- این شواهد برای طراحی یک baseline بازسازی‌شده مفیدند، ولی برای بازنویسی migration history یا ساخت Migrationهای جایگزین کافی نیستند.
+- هیچ تغییری در Production، جدول‌ها، توابع، grants، RLS، Cronها، داده‌های مالی یا migration ledger انجام نشد.
