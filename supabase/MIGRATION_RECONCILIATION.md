@@ -439,3 +439,23 @@ Commit: `7ef1932c49744b88408f3b80118eb3e574ed9c8a` (branch `feature/persian-asse
   - `recovered_20261121050216_temporarily_throttle_exchange_asset_processors.sql` — commit `7d8402a602b5553fad9534aa89b5b4450a774a5c`
 - این فایل‌ها عمداً زیر `supabase/drafts/` هستند و در مسیر `supabase/migrations/` قرار نگرفته‌اند؛ هیچ‌کدام اجرا نشده‌اند.
 - همراه با فایل تجمیعی `2026-11-25_recovered-production-migration-sources.md`، اکنون متن کامل هر سه منبع هم به‌صورت سند و هم SQL جداگانه در شاخهٔ آزمایشی قابل بازبینی است.
+
+
+## ممیزی سیاست نگهداری pg_net و تفکیک آن از Snapshotهای دائمی — ۲۵ نوامبر ۲۰۲۶
+
+### تنظیمات واقعی و worker
+- `pg_net.ttl = 6 hours` و source آن `default` است؛ `pg_net.batch_size=200` نیز default است.
+- worker نسخهٔ `pg_net 0.20.4` در `pg_stat_activity` حاضر و active دیده شد.
+- در لحظهٔ بررسی، `net._http_response` شامل 1,246 ردیف بود؛ قدیمی‌ترین پاسخ 2026-11-25 01:14:00 UTC و جدیدترین 07:13:00 UTC. تعداد پاسخ‌های قدیمی‌تر از ۶ ساعت، ۲۴ ساعت و ۷ روز همگی صفر بود. اندازهٔ relation برابر 128 MB بود.
+- صف زندهٔ `net.http_request_queue` در همان snapshot صفر ردیف داشت.
+- در Cron هیچ jobی با ارجاع به `net._http_response`، `net.http_request_queue` یا دو جدول Snapshot پیدا نشد؛ در schema `net` نیز تابع app-level با نام/تعریف cleanup و trigger غیرسیستمی یافت نشد.
+
+### تفسیر صحیح با اتکا به مستندات رسمی Supabase/pg_net
+- TTL پاسخ‌های زنده توسط تنظیم داخلی `pg_net.ttl` مدیریت می‌شود؛ worker هنگام پردازش درخواست‌ها پاسخ‌های منقضی را پاک می‌کند. بنابراین برای این سازوکار Cron اختصاصی لازم نیست. مستندات رسمی می‌گویند TTL پیش‌فرض ۶ ساعت است و پاک‌سازی هنگام پردازش worker انجام می‌شود: https://supabase.com/docs/guides/database/extensions/pg_net و https://supabase.com/kb/troubleshooting/database-roles-can-read-request-headers-queued-by-pg_net
+- این رفتار فقط برای جدول پاسخ متعلق به خود extension است؛ به دو جدول کپی‌شدهٔ `private.digiarz_pg_net_queue_backup_20261121` و `private.digiarz_pg_net_response_backup_20261121` تعمیم ندارد.
+- Snapshotها permanent هستند و در جدول‌های مستقل ذخیره شده‌اند؛ TTL شش‌ساعتهٔ pg_net آن‌ها را پاک نمی‌کند. در بررسی فعلی هیچ retention یا cleanup خودکار برای Snapshotها پیدا نشد. بنابراین وجود 128 MB در جدول زنده با TTL/worker توضیح‌پذیر است، اما حجم Snapshot پاسخ حدود 41.7 MB یک کپی مستقل و ماندگار است؛ هیچ‌یک به‌تنهایی اثبات bloat نیست.
+
+### نتیجهٔ ممیزی retention
+- پاسخ‌های زنده: TTL شش‌ساعتهٔ پیش‌فرض، worker فعال، بدون Cron cleanup اختصاصی؛ snapshot فعلی با TTL سازگار است.
+- صف زنده: در snapshot فعلی خالی.
+- Snapshotهای Recovery: ماندگار و خارج از TTL pg_net؛ نیازمند تصمیم مستقل مالک دربارهٔ retention/آرشیو/حذف هستند. در این مرحله هیچ حذف یا تغییر retention انجام نمی‌شود.
