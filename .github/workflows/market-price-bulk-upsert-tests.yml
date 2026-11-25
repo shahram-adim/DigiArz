@@ -1,0 +1,35 @@
+name: Market price bulk-upsert contract
+
+on:
+  push:
+    branches: [perf/market-price-bulk-upsert-draft]
+  pull_request:
+    branches: [main]
+
+jobs:
+  postgres-17-contract:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: digiarz_market_price_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d digiarz_market_price_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run isolated bulk-upsert contract fixture
+        env:
+          PGPASSWORD: postgres
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          psql -h localhost -U postgres -d digiarz_market_price_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/market_price_bulk_upsert_contract.sql
