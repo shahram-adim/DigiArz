@@ -375,19 +375,6 @@ $function$;
 -- not set or alter any default privileges.
 REVOKE ALL ON FUNCTION public.get_admin_market_listings() FROM PUBLIC, anon, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.get_admin_market_listings() TO anon, authenticated, service_role;
-)
-);
-ALTER TABLE public.demo_trading_fees ENABLE ROW LEVEL SECURITY;
-REVOKE ALL ON public.demo_trading_fees FROM PUBLIC, anon, authenticated, service_role;
-GRANT ALL ON public.demo_trading_fees TO service_role;
-
-CREATE TABLE public.market_prices (
-  symbol text PRIMARY KEY,
-  price numeric,
-  updated_at timestamptz,
-  source text
-);
-
 
 ALTER TABLE public.admin_market_listings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.crypto_assets ENABLE ROW LEVEL SECURITY;
