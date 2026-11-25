@@ -772,3 +772,42 @@ Advisor امنیتی Production در 2026-11-25 این موارد را گزار�
 - این شکست به‌عنوان کشف drift محیط تست ثبت می‌شود، نه شکست امنیتی Production.
 - هیچ اصلاح ACL یا schema در محیط تست انجام نشد. اجرای قرارداد فقط catalog read بود و تغییری ایجاد نکرد.
 - نتیجهٔ اجرایی: job یکپارچه‌سازی CI باید تا آماده‌شدن یک clone آزمایشی با ACL و schema grants همسان Production خاموش بماند؛ روشن‌کردن آن روی پروژهٔ فعلی به شکست قابل‌انتظار منجر می‌شود.
+
+
+## به‌روزرسانی ممیزی PR #62 و هم‌ترازی جدول مشاهدات — ۲۵ نوامبر ۲۰۲۶
+
+این الحاقیه بر اساس آخرین snapshot GitHub و پرس‌وجوهای صرفاً خواندنی از Production و پروژهٔ تست تهیه شد.
+
+### وضعیت GitHub و CI در آخرین Commit
+- آخرین head بررسی‌شده: `15df27f659a9f3a5586f38712a01ca34b4e667e4`.
+- PR #62 همچنان Open و Draft و ادغام‌نشده است؛ تعداد فایل‌های تغییرکرده ۲۹.
+- compare زنده: شاخهٔ head تعداد ۸۹ commit جلوتر و صفر commit عقب‌تر از base است؛ merge-base برابر base است.
+- مقدار mergeable در هر دو پاسخ تازهٔ GitHub برابر true بود. این فقط snapshot فعلی است و علت اختلاف mergeable در snapshotهای قدیمی‌تر را به‌صورت تاریخی اثبات نمی‌کند.
+- گزارش قبلی در همین سند عدد ۸۳ commit جلوتر را ثبت کرده بود؛ آن عدد برای snapshot فعلی منسوخ است و مقدار تازه ۸۹ است.
+- اجرای CI شمارهٔ ۱۵۶ روی همین head با نتیجهٔ کلی success تمام شد. job مربوط به unit-tests موفق بود: تست‌های Node و type-check تابع Edge Function هر دو موفق شدند.
+- job با نام rpc-security-integration در همین اجرا skipped بود؛ بنابراین CI هنوز تست RPC را روی دیتابیس اجرا نکرده و نباید موفقیت اجرای تست امنیتی RPC گزارش شود. فعال‌سازی آن همچنان منوط به همسان‌سازی محیط تست و تنظیم امن متغیر/secret است.
+
+### مقایسهٔ زندهٔ public.exchange_asset_observations
+- هر دو محیط دقیقاً ۱۳ ستون با نوع، nullability و default یکسان، و ۵ constraint متناظر دارند.
+- RLS در هر دو فعال و FORCE RLS خاموش است؛ هیچ policy مستقیمی روی این جدول در هیچ‌یک از دو محیط ثبت نشده است.
+- در هر دو محیط anon و authenticated هیچ مجوز مستقیم SELECT/INSERT/UPDATE/DELETE روی جدول ندارند.
+- Production مالک جدول را postgres دارد و service_role مجوزهای کامل جدول را دارد. در پروژهٔ تست، service_role مجوز مستقیم جدول ندارد؛ پس این جدول از نظر مجوز backend نیز clone همسان Production نیست.
+- Trigger با نام `trg_auto_list_verified_exchange_asset` در هر دو محیط موجود و فعال است؛ تعریف trigger در دو محیط یکسان است و پس از INSERT یا UPDATE ستون‌های match_status، coingecko_id یا is_active اجرا می‌شود.
+- تعداد و ساختار کلی indexها در هر دو محیط چهار مورد است، اما یک index متفاوت است:
+  - Production: `exchange_asset_observations_match_idx (match_status, last_seen_at DESC)`.
+  - Test: `exchange_asset_observations_match_status_active_idx` به‌صورت partial روی وضعیت‌های pending/ambiguous/unmatched و is_active=true.
+  - بنابراین test از نظر index plan و عملکرد query، همسان Production نیست.
+- در Production، sequence هویتی `public.exchange_asset_observations_id_seq` به anon و authenticated نیز مجوزهای SELECT، UPDATE و USAGE دارد؛ در پروژهٔ تست sequence فقط برای postgres مجاز است. این مجوزها به معنای دسترسی مستقیم به جدول نیستند، اما برای اصل حداقل‌سازی دسترسی یک مورد بازبینی جداگانه‌اند.
+- Default ACL مربوط به sequenceهای schema public در Production برای نقش‌های postgres و supabase_admin به anon، authenticated و service_role مجوزهای sequence می‌دهد؛ در پروژهٔ تست رکورد default ACL متناظر برای public وجود ندارد. این اختلاف با تفاوت ACL توابع جدید هم‌راستا است و صرفاً با GRANT روی جدول حل نمی‌شود.
+
+### ارزیابی و اقدام بعدی
+- پروژهٔ تست موجود برای آزمون برابری مجوزها، رفتار sequence و planهای وابسته به index، جایگزین قابل‌اعتماد Production نیست.
+- فایل تاریخی `recovered_20261115101709_create_exchange_asset_observations.sql` منبع بازیابی‌شدهٔ Migration است و همچنان فقط مرجع بازبینی در drafts باقی می‌ماند؛ اجرا یا replay نمی‌شود.
+- پیش از هر Migration احتمالی باید تصمیم مستقل دربارهٔ مجوز sequence برای anon/authenticated، ACL پیش‌فرض sequence و index متفاوت test ثبت شود. هیچ‌یک از این موارد در این مرحله اصلاح نشد.
+- گام امن بعدی: تهیهٔ قرارداد parity برای schema usage، table ACL، sequence ACL/default ACL، function ACL/default ACL، trigger و index؛ سپس اجرای آن روی یک دیتابیس دورریختنی/ایزوله که از snapshot معتبر Production ساخته شده باشد. پروژهٔ تست فعلی تا رفع drift نباید به‌عنوان clone Production معرفی شود.
+- هرگونه تغییر پایدار در Production یا پروژهٔ تست، اجرای Migration، db push، تغییر Cron/Worker، Merge، ایجاد هزینه یا ارتقای زیرساخت همچنان متوقف و نیازمند تأیید صریح مالک است.
+
+### قفل ایمنی این الحاقیه
+- تمام پرس‌وجوهای دیتابیس فقط خواندنی و مبتنی بر کاتالوگ PostgreSQL بودند.
+- هیچ جدول، index، policy، ACL، default privilege، sequence، trigger، تابع، داده، Cron یا Worker تغییر نکرد.
+- هیچ Migration اجرا نشد و PR #62 ادغام نشد.
