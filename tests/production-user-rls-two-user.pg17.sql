@@ -49,6 +49,14 @@ AS $fn$
   SELECT NULLIF(current_setting('request.jwt.claim.sub', true), '')::uuid;
 $fn$;
 
+CREATE TABLE public.profiles (
+  id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email text,
+  created_at timestamptz DEFAULT now(),
+  is_active boolean NOT NULL DEFAULT true,
+  deactivated_at timestamptz
+);
+
 -- Body copied from the captured Production definition (MD5 d932cd1d0da21bb96bdc0a381f7dcbc3).
 -- auth.uid() remains a test shim backed by request.jwt.claim.sub; no real JWT is verified.
 CREATE FUNCTION public.current_account_is_active()
@@ -64,13 +72,6 @@ AS $fn$
   ), false);
 $fn$;
 
-CREATE TABLE public.profiles (
-  id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  email text,
-  created_at timestamptz DEFAULT now(),
-  is_active boolean NOT NULL DEFAULT true,
-  deactivated_at timestamptz
-);
 CREATE TABLE public.wallets (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
