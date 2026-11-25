@@ -1,7 +1,7 @@
 -- TEST-ONLY metadata fixture for tests/rpc-security-catalog.sql.
 -- Reproduces the 46 exact Production signatures and current API-role ACL
 -- booleans from the reviewed 2026-11-25 catalog snapshot.
--- Except for the four real function bodies installed by the bootstrap file,
+-- Except for the five real function bodies installed by the bootstrap file,
 -- all remaining functions below are inert NO-OP stubs (RETURNS void). They MUST NOT be
 -- used to claim function-body behavior or full Production schema parity.
 -- This file runs only inside the disposable PostgreSQL 17 service container.
