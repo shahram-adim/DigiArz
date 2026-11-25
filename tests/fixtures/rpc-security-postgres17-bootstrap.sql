@@ -189,8 +189,9 @@ REVOKE ALL ON SCHEMA private FROM PUBLIC, anon, authenticated, service_role;
 REVOKE ALL ON TABLE private.admin_users FROM PUBLIC, anon, authenticated, service_role;
 
 
--- Exact Production function body recovered from migration
--- 20261113190000_admin_on_demand_crypto_asset_refresh.sql.
+-- Exact Production function body recovered from applied ledger version
+-- 20261113173506 (admin_on_demand_crypto_asset_refresh). The similarly named
+-- repository file 20261113190000 has a timestamp mismatch and is not provenance.
 -- The only row/data dependency is a synthetic private table in this fixture.
 CREATE TABLE private.admin_asset_refresh_limits (
   coingecko_id text PRIMARY KEY,
