@@ -332,3 +332,45 @@ test('Production RPC role ACL matrix covers all 46 signatures and preserves the 
   );
   assert.ok(matrix.limitations.some(x => /does not execute functions/.test(x)));
 });
+
+
+test('Production role matrix exactly reconciles every captured function ACL and definition fingerprint', () => {
+  const matrix = JSON.parse(fs.readFileSync('supabase/audit/production_rpc_role_matrix_2026-11-25.json', 'utf8'));
+  const liveManifest = JSON.parse(fs.readFileSync('supabase/audit/production_security_definer_manifest_2026-11-25.json', 'utf8'));
+  assert.equal(matrix.function_count, 46);
+  assert.equal(liveManifest.functions.length, 46);
+
+  const parseAcl = raw => {
+    assert.match(raw, /^\\{.*\\}$/);
+    const entries = raw.slice(1, -1).split(',').filter(Boolean);
+    const privileges = new Map();
+    for (const entry of entries) {
+      const separator = entry.indexOf('=');
+      assert.notEqual(separator, -1, 'malformed ACL entry: ' + entry);
+      const grantee = entry.slice(0, separator) || 'PUBLIC';
+      const privilegeText = entry.slice(separator + 1).split('/')[0];
+      privileges.set(grantee, privilegeText.includes('X'));
+    }
+    return privileges;
+  };
+
+  const byIdentity = new Map(liveManifest.functions.map(fn => [
+    fn.schema_name + '.' + fn.function_name + '(' + fn.identity_arguments + ')', fn
+  ]));
+  assert.equal(byIdentity.size, 46, 'manifest identities must be unique');
+
+  for (const row of matrix.functions) {
+    const source = byIdentity.get(row.identity);
+    assert.ok(source, 'role matrix identity missing from Production manifest: ' + row.identity);
+    assert.equal(row.owner, source.owner, row.identity + ' owner drift');
+    assert.equal(row.acl_snapshot, source.raw_acl, row.identity + ' raw ACL drift');
+    assert.equal(row.definition_md5, source.definition_md5, row.identity + ' definition fingerprint drift');
+
+    const acl = parseAcl(source.raw_acl);
+    for (const role of ['anon', 'authenticated', 'service_role']) {
+      assert.equal(row.expected_execute[role], acl.get(role) === true, row.identity + ' ' + role + ' direct ACL mismatch');
+    }
+    assert.equal(row.public_execute, acl.get('PUBLIC') === true, row.identity + ' PUBLIC ACL mismatch');
+    assert.equal(row.expected_execute.postgres, true, row.identity + ' postgres owner execution expectation');
+  }
+});
