@@ -284,6 +284,25 @@ ALTER TABLE public.demo_trading_fees ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON public.demo_trading_fees FROM PUBLIC, anon, authenticated, service_role;
 GRANT ALL ON public.demo_trading_fees TO service_role;
 
+CREATE TABLE public.order_reservations (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id uuid NOT NULL,
+  user_id uuid NOT NULL,
+  asset text NOT NULL,
+  reserved_amount numeric NOT NULL,
+  consumed_amount numeric NOT NULL DEFAULT 0,
+  released_amount numeric NOT NULL DEFAULT 0,
+  status text NOT NULL DEFAULT 'reserved',
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+ALTER TABLE public.order_reservations ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can view own order reservations"
+  ON public.order_reservations FOR SELECT TO authenticated
+  USING (auth.uid() = user_id);
+REVOKE ALL ON public.order_reservations FROM PUBLIC, anon, authenticated, service_role;
+GRANT ALL ON public.order_reservations TO service_role;
+
 CREATE TABLE public.market_prices (
   symbol text PRIMARY KEY,
   price numeric,
