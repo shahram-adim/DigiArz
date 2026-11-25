@@ -8,6 +8,7 @@ const inventory = JSON.parse(fs.readFileSync('supabase/audit/production_rpc_rela
 const review = JSON.parse(fs.readFileSync('supabase/audit/production_anon_access_review_2026-11-25.json', 'utf8'));
 const dependencies = JSON.parse(fs.readFileSync('supabase/audit/production_rpc_relation_dependencies_2026-11-25.json', 'utf8'));
 const migrationReconciliation = JSON.parse(fs.readFileSync('supabase/audit/production_migration_source_reconciliation_2026-11-25.json', 'utf8'));
+const migrationRecoveryMap = JSON.parse(fs.readFileSync('supabase/audit/production_missing_migration_recovery_map_2026-11-25.json', 'utf8'));
 
 test('Production SECURITY DEFINER snapshot is complete and internally consistent', () => {
   assert.equal(manifest.source.project_ref, 'gfoaubfilhttnwjykaox');
@@ -136,4 +137,18 @@ test('Production migration ledger reconciliation distinguishes missing sources f
   assert.equal(migrationReconciliation.matched.filter(x => !x.timestamp_match).length, 20);
   assert.equal(migrationReconciliation.local_files_without_ledger_name.length, 2);
   assert.equal(migrationReconciliation.safety.includes('Do not run db push'), true);
+});
+
+test('Missing Production migration sources have explicit evidence maps and remain non-executable', () => {
+  const mapped = migrationRecoveryMap.groups.flatMap(group => group.migrations);
+  assert.equal(mapped.length, 17);
+  assert.equal(new Set(mapped).size, 17);
+  assert.equal(migrationRecoveryMap.groups.length, 4);
+  assert.ok(migrationRecoveryMap.global_gaps.some(x => x.includes('must not be synthesized')));
+  assert.ok(migrationRecoveryMap.global_gaps.some(x => x.includes('No Production migration')));
+  for (const group of migrationRecoveryMap.groups) {
+    assert.ok(group.area.length > 0);
+    assert.ok(group.evidence_files.length > 0);
+    assert.ok(group.gaps.length > 0);
+  }
 });
