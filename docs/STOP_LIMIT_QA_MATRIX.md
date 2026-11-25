@@ -432,3 +432,13 @@ See \`docs/superpowers/reports/2026-11-15-exact-decimal-implementation-checkpoin
 2. Build the full disposable PostgreSQL 17 schema/ACL harness from authoritative Production DDL and grants. The new snapshot test covers one Production worker branch only; it is not a full schema/ACL parity environment.
 3. Re-run valid Stop-Limit trigger → child Limit placement, partial/full fill, cancellation, reservation consumption/release, idempotency, and two-session races against recovered Production-source entrypoints. Current full lifecycle CI still exercises the reviewed draft candidate.
 4. Keep Production untouched. No worker/RPC was invoked, no cron was changed, and no financial rows, migrations, grants, policies, or functions were written.
+
+
+## Production Limit RPC source snapshots — 2026-11-26
+
+- Captured the live `public.place_limit_order(text,text,numeric,numeric)` and `public.cancel_limit_order(uuid)` definitions with read-only `pg_get_functiondef`; no business-table rows were read.
+- Live fingerprints: `place_limit_order=3eab167c47bf8ff2e1705b9f243380ec`; `cancel_limit_order=69360684173b6aabebc5ff4e4de2eed9`.
+- Both functions are owned by `postgres`, are `SECURITY DEFINER`, use an empty `search_path`, and are executable by `authenticated` and `service_role`, not `anon`.
+- Added test-only snapshots under `supabase/tests/` and Node source-contract tests for identity derivation, account/pair validation, balance row locks, active-reservation arithmetic, order/reservation creation, owner-scoped cancellation, and exact remaining-reservation release.
+- The exact-decimal workflow discovers the new Node test through `node --test tests/*.test.js`; a new run is expected from the push, but its result must be checked separately.
+- This narrows the missing Stop-Limit source gap for two called entrypoints. It does **not** replace the missing base table DDL or create a complete Production schema/ACL parity harness. No production function, grant, migration, worker, cron, or financial row was changed.
