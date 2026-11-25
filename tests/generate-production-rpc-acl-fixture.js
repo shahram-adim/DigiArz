@@ -50,7 +50,7 @@ for (const row of matrix.functions) {
   const {schema, name, types, signature} = quoteIdentity(row);
   const args = types.map((type, i) => 'p' + (i + 1) + ' ' + type).join(', ');
   statements.push(
-    'CREATE FUNCTION ' + schema + '.' + name + '(' + args + ') RETURNS void LANGUAGE SQL SECURITY DEFINER SET search_path = \'\' AS \'SELECT\';'
+    'CREATE FUNCTION ' + schema + '.' + name + '(' + args + ') RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path = \'\' AS \'BEGIN RETURN; END;\';'
   );
   statements.push('REVOKE ALL ON FUNCTION ' + signature + ' FROM PUBLIC, anon, authenticated, service_role;');
   if (row.public_execute) statements.push('GRANT EXECUTE ON FUNCTION ' + signature + ' TO PUBLIC;');
