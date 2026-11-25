@@ -118,6 +118,66 @@ END
 $market_listings_contract$;
 
 
+DO $admin_enable_pair_contract$
+DECLARE
+  fn oid := 'public.admin_enable_market_pair(text)'::regprocedure;
+  audit_seq regclass := pg_get_serial_sequence('private.market_pair_admin_audit','id')::regclass;
+BEGIN
+  IF pg_get_function_result(fn) <> 'jsonb' THEN
+    RAISE EXCEPTION 'admin_enable_market_pair return type mismatch';
+  END IF;
+  IF NOT (SELECT prosecdef AND provolatile='v' AND proowner='postgres'::regrole FROM pg_proc WHERE oid=fn) THEN
+    RAISE EXCEPTION 'admin_enable_market_pair owner/volatility/SECURITY DEFINER mismatch';
+  END IF;
+  IF NOT COALESCE((SELECT proconfig @> ARRAY['search_path=""'] FROM pg_proc WHERE oid=fn),false) THEN
+    RAISE EXCEPTION 'admin_enable_market_pair must have empty search_path';
+  END IF;
+  IF has_function_privilege('anon',fn,'EXECUTE')
+     OR NOT has_function_privilege('authenticated',fn,'EXECUTE')
+     OR NOT has_function_privilege('service_role',fn,'EXECUTE') THEN
+    RAISE EXCEPTION 'admin_enable_market_pair effective ACL mismatch';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM aclexplode(COALESCE((SELECT proacl FROM pg_proc WHERE oid=fn),
+                                    acldefault('f',(SELECT proowner FROM pg_proc WHERE oid=fn)))) a
+    WHERE a.grantee=0 AND a.privilege_type='EXECUTE'
+  ) THEN
+    RAISE EXCEPTION 'PUBLIC must not execute admin_enable_market_pair';
+  END IF;
+  IF NOT (SELECT relrowsecurity AND NOT relforcerowsecurity
+          FROM pg_class WHERE oid='private.market_pair_admin_audit'::regclass) THEN
+    RAISE EXCEPTION 'market_pair_admin_audit RLS flags mismatch';
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='private' AND tablename='market_pair_admin_audit') THEN
+    RAISE EXCEPTION 'market_pair_admin_audit must not expose API policies';
+  END IF;
+  IF has_table_privilege('anon','private.market_pair_admin_audit','SELECT')
+     OR has_table_privilege('authenticated','private.market_pair_admin_audit','SELECT')
+     OR has_table_privilege('service_role','private.market_pair_admin_audit','SELECT')
+     OR has_sequence_privilege('anon',audit_seq,'USAGE')
+     OR has_sequence_privilege('authenticated',audit_seq,'USAGE')
+     OR has_sequence_privilege('service_role',audit_seq,'USAGE') THEN
+    RAISE EXCEPTION 'market_pair_admin_audit or identity sequence is exposed to API roles';
+  END IF;
+  IF NOT (SELECT relrowsecurity AND NOT relforcerowsecurity
+          FROM pg_class WHERE oid='public.demo_trading_pairs'::regclass) THEN
+    RAISE EXCEPTION 'demo_trading_pairs RLS flags mismatch';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public'
+                 AND tablename='demo_trading_pairs'
+                 AND policyname='demo_trading_pairs_public_read'
+                 AND cmd='SELECT' AND roles @> ARRAY['anon','authenticated']::name[]
+                 AND qual='true') THEN
+    RAISE EXCEPTION 'demo_trading_pairs public-read policy mismatch';
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_trigger WHERE tgrelid='public.demo_trading_pairs'::regclass AND NOT tgisinternal) THEN
+    RAISE EXCEPTION 'Unexpected trigger on demo_trading_pairs';
+  END IF;
+  RAISE NOTICE 'PASS: admin_enable_market_pair metadata, audit RLS/ACL, and pair-table policy';
+END
+$admin_enable_pair_contract$;
+
+
 DO $admin_add_listing_contract$
 DECLARE
   fn oid := 'public.admin_add_market_listing(text)'::regprocedure;
