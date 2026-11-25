@@ -181,7 +181,7 @@ GitHub Actions run #313 (`45603853118`) completed successfully on the updated PR
 
 ## 2B. Additional source-backed body: `public.get_exchange_discovered_market_assets()`
 
-- Authoritative function source: `supabase/migrations/20261116200009_auto_list_unmatched_iran_exchange_assets.sql` (Git blob at review time: `[source blob to verify]`).
+- Authoritative function source: `supabase/migrations/20261116200009_auto_list_unmatched_iran_exchange_assets.sql` (Git blob at review time: ``901f6e3004a1fd51995ea159d840ce5b5b39dbeb``).
 - Exact identity: `public.get_exchange_discovered_market_assets()`; language SQL; `STABLE SECURITY DEFINER`; `search_path=''`.
 - Return shape: `TABLE(symbol text, name text, current_price_usd numeric, last_updated timestamptz, exchange_sources text, exchange_count integer, observed_at timestamptz, match_status text)`.
 - Read-only dependency graph: `exchange_asset_observations` → grouped recent active observations; exclusion joins to `admin_market_listings` + `crypto_assets`, and `demo_trading_pairs` + `crypto_assets`; optional fresh price join to `market_prices`. No INSERT/UPDATE/DELETE, HTTP, cron, financial ledger, wallet, order, trade, reservation, or balance side effect exists in this function body.
