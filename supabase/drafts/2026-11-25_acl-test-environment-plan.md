@@ -91,13 +91,15 @@ Do not infer a function's authorization from its name. Include positive and nega
 - Separately test that the service key cannot invoke an RPC unless that exact RPC grant is intentionally part of the approved contract.
 - Confirm that a service key's RLS bypass does not get conflated with function EXECUTE privileges or table grants.
 
-### E. Unresolved refresh-claim function
+### E. Confirmed refresh-claim function caller
 
-Before deciding the fate of `public.claim_admin_asset_refresh(text,uuid)`:
-- search all active repository code, deployment configuration that is accessible without revealing secrets, function logs/metadata where authorized, and known external/manual worker documentation;
-- determine whether rate limiting is intended to be enforced by this RPC;
-- if an Edge Function currently bypasses this RPC and performs direct table operations, record the design gap and propose a separately reviewed correction;
-- do not revoke or grant this function based only on absence of a repository callsite.
+The previous unresolved-caller wording is superseded by the live trace in `2026-11-25_refresh-claim-live-caller-trace.md`:
+- Production Edge Function `admin-refresh-crypto-asset` v2 is ACTIVE with `verify_jwt=true`;
+- it validates the Bearer token through `auth.getUser(token)`, verifies super-admin access through the user-scoped RPC, derives the UUID from the verified Auth response, and calls `public.claim_admin_asset_refresh(text,uuid)` through a server-side service-role client;
+- the exact explicit `service_role EXECUTE` grant is required by this deployed caller and must be preserved unless the caller is intentionally redesigned and separately reviewed;
+- the available 24-hour log window showed no invocation, which does not negate the deployed source/caller path.
+
+The disposable PostgreSQL 17 harness now tests the real Migration body, boolean return type, super-admin lookup, invalid-input rejection, and 30-second cooldown using synthetic rows only. This per-function grant is separate from the still-undecided default-function EXECUTE policy.
 
 ## 5. Existing test-contract discrepancy — must be resolved before enabling CI
 
