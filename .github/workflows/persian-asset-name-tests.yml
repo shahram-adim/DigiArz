@@ -11,6 +11,7 @@ on:
       - "src/sync-safety.mjs"
       - "tests/persian-asset-names.test.mjs"
       - "tests/sync-safety.test.mjs"
+      - "tests/rpc-security.integration.sql"
       - "supabase/functions/sync-iran-exchange-assets/index.ts"
       - ".github/workflows/persian-asset-name-tests.yml"
 
@@ -32,3 +33,26 @@ jobs:
           deno-version: v2.x
       - name: Type-check the isolated exchange-sync Edge Function
         run: deno check --no-lock --node-modules-dir=auto supabase/functions/sync-iran-exchange-assets/index.ts
+
+  rpc-security-integration:
+    # Enable only after the repository secret points to the dedicated test project.
+    if: ${{ vars.DIGIARZ_ENABLE_RPC_SECURITY_TESTS == 'true' }}
+    runs-on: ubuntu-24.04
+    env:
+      DIGIARZ_TEST_DB_URL: ${{ secrets.DIGIARZ_TEST_DB_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Refuse any database other than the dedicated DigiArz test project
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${DIGIARZ_TEST_DB_URL}" ]]; then
+            echo "DIGIARZ_TEST_DB_URL secret is required when RPC integration tests are enabled."
+            exit 1
+          fi
+          if [[ "${DIGIARZ_TEST_DB_URL}" != *"zrriqwyolcjhbappocuw"* ]]; then
+            echo "Refusing to connect: the configured database URL is not the dedicated test project."
+            exit 1
+          fi
+      - name: Run transaction-scoped RPC authorization tests
+        run: psql "${DIGIARZ_TEST_DB_URL}" -v ON_ERROR_STOP=1 -f tests/rpc-security.integration.sql
