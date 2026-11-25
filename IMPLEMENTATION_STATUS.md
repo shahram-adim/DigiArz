@@ -1443,3 +1443,17 @@
 - [ ] ۱۷ Migration مفقود و timestamp/content drift هنوز نیازمند reconciliation تازه‌اند؛ هیچ replay انجام نشده است.
 - [ ] owner/ACL/default ACL و RLS/grants دقیق Production برای هر تابع و جدول وابسته همچنان نیازمند مستندات مستقیم catalog هستند. تصمیم مالک درباره default EXECUTE برای service_role باز است.
 - [x] هیچ Production/Recovery-Test DB، داده مالی، سفارش، معامله، رزرو، کیف پول، balance، Auth، Cron، Edge Function یا Migration ledger تغییر نکرد؛ Merge، Deploy، db push، پروژه/زیرساخت جدید و هزینه‌ای ایجاد نشد.
+
+
+## Checkpoint 2026-11-25 — admin market search RPC source mapping and standalone test
+
+- [x] تابع بعدی `public.admin_search_market_assets(text, integer)` از Migration معتبر `20261113172000_harden_admin_market_listing_access.sql` بازیابی شد؛ blob SHA=`31adf046df44f04976d926280c062228db38c30e`.
+- [x] source review: PL/pgSQL, STABLE, SECURITY DEFINER, `search_path=''`, خروجی TABLE هفت‌ستونی؛ فقط `crypto_assets` و helperهای `auth.uid()` و `private.is_super_admin()` را می‌خواند؛ هیچ DML/HTTP/Cron یا اثر مالی ندارد.
+- [x] فیلترها و منطق: فقط super-admin واردشده؛ حداقل دو حرف؛ دارایی فعال با قیمت USD مثبت و تازه‌تر از ۲۴ ساعت؛ جست‌وجوی symbol/name/CoinGecko ID؛ محدودیت خروجی clamp شده بین ۱ تا ۵۰.
+- [x] تست مستقل `tests/rpc-security-admin-market-search-standalone.sql` اضافه شد و Migration اصلی مستقیماً از فایل اجرا شد. تست anon execute denial، authenticated ordinary denial، super-admin synthetic success، freshness/active/positive-price filters، حداقل طول query، limit clamp، نبود direct SELECT روی admin_market_listings و عدم grant به service_role در خود Migration را بررسی کرد؛ داده‌های مصنوعی rollback شدند.
+- [x] CI run #399 (`45608422378`) و #400 (`45608433695`) روی commit `77ad7035419e3bef7bb0b2de19659541673c71cf` موفق شدند؛ PostgreSQL 17 و unit tests سبز، remote RPC integration عمداً skipped.
+- [!] این تابع هنوز در shared 46-signature fixture به body واقعی ارتقا نیافته است. Migration 20261113172000 علاوه بر admin_search، تابع `get_admin_market_listings()` را با projection قدیمی مبتنی بر `crypto_assets.current_price_usd/last_updated` جایگزین می‌کند و دسترسی مستقیم جدول admin_market_listings را revoke می‌کند. Migration بعدی `20261113181000_show_live_prices_for_curated_assets.sql` projection فعلی مبتنی بر `market_prices` را دوباره نصب می‌کند. قبل از promotion باید هر دو منبع به ترتیب اجرا شوند و ستون‌های synthetic لازم افزوده شوند؛ سپس ACL service_role فقط با grant تستی مختص تابع برای بازنمایی snapshot مدل شود.
+- [!] ACL source discrepancy: Migration به authenticated مجوز می‌دهد و anon/PUBLIC را منع می‌کند، اما snapshot فعلی service_role=true دارد؛ منشأ آن unresolved است. هیچ Production ACL یا default privilege تغییر نکرد.
+- [ ] گام بعدی: طراحی promotion ایمن در shared fixture با اجرای دو Migration به ترتیب، تست بازگشت `get_admin_market_listings()` به بدنهٔ فعلی، آزمون دسترسی admin_search و تأیید عدم دسترسی مستقیم به جدول؛ فقط synthetic market metadata و rollback.
+- [ ] ۱۷ Migration مفقود و timestamp/content drift همچنان پیش از هر replay نیازمند reconciliation تازه‌اند؛ هیچ replay انجام نشده است.
+- [x] هیچ Production/Recovery-Test DB، داده مالی، سفارش، معامله، رزرو، کیف پول، balance، Auth، Cron، Edge Function یا Migration ledger تغییر نکرد؛ Merge، Deploy، db push، پروژه/زیرساخت جدید و هزینه‌ای ایجاد نشد.
