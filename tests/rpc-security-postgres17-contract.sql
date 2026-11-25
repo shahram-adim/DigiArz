@@ -116,3 +116,55 @@ BEGIN
   RAISE NOTICE 'PASS: get_admin_market_listings exact TABLE return shape, STABLE, SECURITY DEFINER, empty search_path and current effective API ACL';
 END
 $market_listings_contract$;
+
+
+DO $exchange_discovery_shared_contract$
+DECLARE
+  fn oid;
+  result_type text;
+BEGIN
+  SELECT p.oid INTO fn
+  FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+  WHERE n.nspname='public' AND p.proname='get_exchange_discovered_market_assets'
+    AND pg_get_function_identity_arguments(p.oid)='';
+  IF fn IS NULL THEN RAISE EXCEPTION 'get_exchange_discovered_market_assets() missing'; END IF;
+  SELECT pg_get_function_result(fn) INTO result_type;
+  IF result_type <> 'TABLE(symbol text, name text, current_price_usd numeric, last_updated timestamp with time zone, exchange_sources text, exchange_count integer, observed_at timestamp with time zone, match_status text)' THEN
+    RAISE EXCEPTION 'Unexpected exchange discovery return shape: %',result_type;
+  END IF;
+  IF NOT (SELECT prosecdef AND provolatile='s' FROM pg_proc WHERE oid=fn) THEN
+    RAISE EXCEPTION 'Exchange discovery must be STABLE SECURITY DEFINER';
+  END IF;
+  IF NOT COALESCE((SELECT proconfig @> ARRAY['search_path=""'] FROM pg_proc WHERE oid=fn),false) THEN
+    RAISE EXCEPTION 'Exchange discovery must have empty search_path';
+  END IF;
+  IF (SELECT rolname FROM pg_roles WHERE oid=(SELECT proowner FROM pg_proc WHERE oid=fn)) <> 'postgres' THEN
+    RAISE EXCEPTION 'Expected postgres owner in disposable fixture';
+  END IF;
+  IF NOT has_function_privilege('anon',fn,'EXECUTE')
+     OR NOT has_function_privilege('authenticated',fn,'EXECUTE')
+     OR NOT has_function_privilege('service_role',fn,'EXECUTE') THEN
+    RAISE EXCEPTION 'Shared fixture API-role ACL does not match reviewed current catalog snapshot';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM aclexplode(COALESCE((SELECT proacl FROM pg_proc WHERE oid=fn),
+                                     acldefault('f',(SELECT proowner FROM pg_proc WHERE oid=fn)))) a
+    WHERE a.grantee=0 AND a.privilege_type='EXECUTE'
+  ) THEN
+    RAISE EXCEPTION 'PUBLIC must not have EXECUTE on exchange discovery';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM unnest(ARRAY[
+      'public.exchange_asset_observations'::regclass,
+      'public.admin_market_listings'::regclass,
+      'public.crypto_assets'::regclass,
+      'public.demo_trading_pairs'::regclass,
+      'public.market_prices'::regclass
+    ]) AS t(relid)
+    WHERE NOT (SELECT relrowsecurity FROM pg_class WHERE oid=t.relid)
+  ) THEN
+    RAISE EXCEPTION 'All exchange discovery dependencies must have RLS enabled in the disposable fixture';
+  END IF;
+  RAISE NOTICE 'PASS: exact exchange discovery return shape, volatility, definer, path, owner, ACL and dependency RLS';
+END
+$exchange_discovery_shared_contract$;
