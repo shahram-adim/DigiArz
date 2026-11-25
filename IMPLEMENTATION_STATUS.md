@@ -1333,6 +1333,7 @@
 - [x] قرارداد دقیق claim نوع خروجی boolean، SECURITY DEFINER، search_path خالی و ACL مختص تابع را بررسی می‌کند: فقط service_role از میان API roles مجاز است؛ anon و authenticated مجاز نیستند.
 - [x] آزمون مثبت service_role برای super-admin مصنوعی موفق؛ آزمون منفی شناسه غیرمدیر با SQLSTATE `42501`، ورودی نامعتبر با `22023` و claim تکراری در بازه ۳۰ثانیه با `55000` موفق.
 - [x] تمام گام‌های `postgres17-rpc-smoke` و `unit-tests` در CI run `45600501368` (run #275) موفق؛ remote `rpc-security-integration` عمداً skipped ماند. لینک: https://github.com/shahram-adim/DigiArz/actions/runs/45600501368
+- [x] اجرای تأییدی پس از افزودن post-check صریح rollback در CI run `45600722397` (run #277) نیز موفق شد؛ jobهای `postgres17-rpc-smoke` و `unit-tests` سبز و remote `rpc-security-integration` همچنان skipped بود. لینک: https://github.com/shahram-adim/DigiArz/actions/runs/45600722397
 - [x] آزمون در تراکنش Rollback می‌شود؛ workflow خالی بودن جدول claim را پس از Rollback نیز بررسی می‌کند.
 - [!] این آزمون بدنه و dependency محدود همین تابع را پوشش می‌دهد؛ caller واقعی Edge Function از نظر source/ACL تأیید شده، اما خود Edge Function در harness اجرا نمی‌شود. این نتیجه full Production/Supabase parity نیست.
 - [ ] ۴۲ تابع stub دیگر باید فقط پس از بازیابی منبع معتبر و dependency map به بدنه واقعی تبدیل شوند؛ return type و owner هر ۴۶ تابع نیز باید در manifest جداگانه تطبیق داده شود.
