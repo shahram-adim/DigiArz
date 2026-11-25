@@ -83,7 +83,7 @@ A fresh Production catalog audit was performed using SELECT-only queries against
 
 The 36 signatures, grouped by their additional effective callers, are:
 
-**Also executable by authenticated (22):**
+**Also executable by authenticated (23):**
 - `public.admin_add_market_listing(text)`
 - `public.admin_disable_market_pair(text,text)`
 - `public.admin_enable_market_pair(text)`
