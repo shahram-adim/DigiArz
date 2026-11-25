@@ -184,7 +184,7 @@ ROLLBACK;
 DO $rollback_assert$
 BEGIN
   IF EXISTS (SELECT 1 FROM public.demo_trading_pairs WHERE base_coingecko_id LIKE 'ci-enable-%')
-     OR EXISTS (SELECT 1 FROM public.market_pair_admin_audit WHERE coingecko_id LIKE 'ci-enable-%') THEN
+     OR EXISTS (SELECT 1 FROM private.market_pair_admin_audit WHERE coingecko_id LIKE 'ci-enable-%') THEN
     RAISE EXCEPTION 'Synthetic pair or audit rows survived rollback';
   END IF;
 END
