@@ -811,3 +811,53 @@ Advisor امنیتی Production در 2026-11-25 این موارد را گزار�
 - تمام پرس‌وجوهای دیتابیس فقط خواندنی و مبتنی بر کاتالوگ PostgreSQL بودند.
 - هیچ جدول، index، policy، ACL، default privilege، sequence، trigger، تابع، داده، Cron یا Worker تغییر نکرد.
 - هیچ Migration اجرا نشد و PR #62 ادغام نشد.
+
+
+## گزارش تکمیلی ممیزی و اعتبارسنجی تست‌های کاتالوگ — ۲۵ نوامبر ۲۰۲۶
+
+این بخش، snapshotهای قدیمی‌تر همین گزارش را برای وضعیت فعلی جایگزین می‌کند.
+
+### وضعیت شاخه و PR
+- آخرین commit کد/تست پیش از این گزارش: `2e30ba2daa76022c633cb0d46c1b340413685658`.
+- PR #62 در آخرین بررسی باز، Draft و ادغام‌نشده است؛ mergeable=true.
+- مقایسهٔ head با base در آخرین snapshot پیش از این گزارش: ۹۱ commit جلوتر و صفر عقب‌تر.
+- فایل جدید `tests/exchange-asset-observations-catalog.sql` به قرارداد تست افزوده شد و workflow طوری به‌روزرسانی شد که پس از تست RPC، قرارداد کاتالوگ جدول مشاهدات را نیز روی همان دیتابیس تست اجرا کند.
+- تعداد فایل‌های PR با اضافه‌شدن تست جدید باید در snapshot بعدی GitHub دوباره تأیید شود؛ اعداد ۲۹ فایل و commitهای قبلی دیگر مبنای وضعیت نهایی نیستند.
+
+### اصلاح اشکال‌های کشف‌شده در تست RPC
+اجرای read-only قرارداد کاتالوگ روی Production دو ایراد SQL در فایل تست را آشکار کرد:
+1. شمارش overloadها از aggregate تو در تو استفاده می‌کرد و خطای PostgreSQL 42803 می‌داد؛ با subquery گروه‌بندی‌شده اصلاح شد.
+2. CTEهای allowlist ستون‌های `nspname/proname` برمی‌گرداندند، در حالی که query بیرونی `schema_name/function_name` می‌خواند؛ aliasها اصلاح شدند.
+
+پس از اصلاح، اجرای `tests/rpc-security-catalog.sql` روی Production با موفقیت تمام شد. این اجرا فقط catalog SELECT داشت و هیچ تابع برنامه‌ای، RPC، داده یا ACL را تغییر نداد.
+
+### قرارداد مستقل جدول مشاهدات
+فایل جدید `tests/exchange-asset-observations-catalog.sql` اضافه شد. این تست به‌صورت read-only موارد زیر را با baseline ثبت‌شدهٔ Production تطبیق می‌دهد:
+- ۱۳ ستون، نوع داده، nullability، default و identity.
+- ۵ constraint و تعریف دقیق آن‌ها.
+- چهار index، تعریف و وضعیت معتبر/آماده.
+- فعال بودن RLS، خاموش بودن FORCE RLS و نبود policy.
+- ACL مستقیم جدول و سطح دسترسی anon/authenticated/service_role.
+- ACL sequence هویتی.
+- تعریف و وضعیت Trigger خودکار فهرست‌کردن دارایی تأییدشده.
+
+در اجرای آزمایشی این قرارداد روی Production ابتدا دو خطای تست (نمایش boolean به شکل t/f و cast وضعیت trigger) اصلاح شد. پس از اصلاح، اجرای نهایی روی Production موفق شد.
+
+اجرای همین قرارداد روی پروژهٔ تست عمداً با خطای کنترل‌شدهٔ index drift متوقف شد؛ Production دارای `exchange_asset_observations_match_idx (match_status, last_seen_at DESC)` است، ولی پروژهٔ تست index متفاوت و partial به نام `exchange_asset_observations_match_status_active_idx` دارد. ممیزی قبلی همچنین نشان داده بود service_role در پروژهٔ تست مجوز مستقیم جدول ندارد و ACL sequence آن با Production یکسان نیست. بنابراین شکست، اختلاف محیط را ثابت می‌کند و نشانهٔ خرابی Production نیست.
+
+### نکتهٔ امنیتی مهم دربارهٔ Default ACL
+در Production، Default ACL مربوط به توابع schema عمومی برای grantorهای `postgres` و `supabase_admin` شامل EXECUTE برای نقش‌های anon، authenticated و service_role است. Default ACL مربوط به sequenceهای عمومی نیز SELECT/UPDATE/USAGE را برای همین نقش‌ها دارد. این مجوزها به‌صورت پیش‌فرض روی اشیای جدید اثر می‌گذارند؛ بنابراین هر تابع جدید public باید با سیاست مجوزدهی صریح و بررسی‌شده ساخته شود. فایل پیشنهادی محدودسازی Default EXECUTE همچنان فقط draft است و اجرا نشده است.
+پروژهٔ تست فعلی رکوردهای Default ACL متناظر در schema public را ندارد؛ این اختلاف باید در مرحلهٔ parity به‌صورت مستقل پوشش داده شود.
+
+### وضعیت اجرای CI و قفل انتشار
+- تست‌های کاتالوگ روی Production به‌صورت مستقیم و فقط خواندنی اعتبارسنجی شدند؛ این به معنی اجرای موفق Job یکپارچه‌سازی CI نیست.
+- Job یکپارچه‌سازی RPC در workflow همچنان با متغیر `DIGIARZ_ENABLE_RPC_SECURITY_TESTS` محافظت می‌شود و تا آماده‌شدن دیتابیس تست همسان، skipped باقی می‌ماند.
+- هیچ secret یا repository variable تغییر نکرد.
+- هیچ Migration، db push، GRANT/REVOKE پایدار، تغییر schema، trigger، index، sequence، داده، Auth، Cron یا Worker انجام نشد.
+- هیچ Merge، هزینه یا ارتقای زیرساخت انجام نشد.
+
+### گام بعدی
+1. اجرای CI روی آخرین commit پس از اصلاح تست‌ها و ثبت نتیجهٔ هر job.
+2. تکمیل parity قرارداد Default ACL و ACLهای role/service_role بدون تغییر دادن محیط‌ها.
+3. تهیهٔ طرح clone دورریختنی و fixture احراز هویت آزمایشی برای آزمون end-to-end؛ تا آن زمان پروژهٔ تست موجود برای اجرای job RPC قابل اعتماد نیست.
+4. بازبینی مستقل draft محدودسازی Default EXECUTE، به‌ویژه اثر آن بر توابع public فعلی و مسیرهای worker، پیش از هر پیشنهاد اجرا.
