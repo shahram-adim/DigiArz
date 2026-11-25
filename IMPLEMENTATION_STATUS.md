@@ -1375,3 +1375,22 @@
 
 
 **آخرین وضعیت شاخه پس از ثبت مستندات:** PR #62 HEAD برابر `7f3fb3f06ebea612401aad56a6e0e78a391182a3`؛ PR باز، Draft، ادغام‌نشده. آخرین commit کد/تست مربوط به harness برابر `8e993a3904db07b5a9862073e85f4c461792f155` است که CI run #313 موفق را اجرا کرد؛ commitهای پس از آن فقط ثبت شواهد/مستندات بودند و برای آن‌ها اجرای CI جدید در پاسخ API مشاهده نشد.
+
+
+## Checkpoint 2026-11-25 — sixth source-backed PostgreSQL 17 RPC body
+
+- [x] PR #62 قبل از تغییر بررسی شد: باز، Draft و ادغام‌نشده؛ branch برابر `feature/persian-asset-name-candidates-2026` و HEAD اولیه `1a229da48f0343b66a9867529136b9a2d57ef15` بود. CI روی همین HEAD در runهای #322 (`45604280334`) و #323 (`45604288608`) موفق بود.
+- [x] منبع معتبر `public.get_exchange_discovered_market_assets()` در Migration `20261116200009_auto_list_unmatched_iran_exchange_assets.sql` بازیابی شد؛ blob SHA برابر `901f6e3004a1fd51995ea159d840ce5b5b39dbeb`.
+- [x] بدنه SQL read-only و نوع خروجی دقیق ۸ ستونی، `STABLE`, `SECURITY DEFINER`, `search_path=''` در fixture دورریختنی PostgreSQL 17 نصب شد؛ وابستگی‌ها: `exchange_asset_observations`, `admin_market_listings`, `crypto_assets`, `demo_trading_pairs`, `market_prices`.
+- [x] RLS روی پنج جدول synthetic فعال شد؛ هیچ grant مستقیم SELECT برای anon روی جداول وابسته داده نشد. تست‌ها فقط داده‌های مصنوعی metadata بازار را درج می‌کنند و تراکنش را ROLLBACK می‌کنند.
+- [x] تست‌های جدید برای anon/authenticated/service_role، تجمیع چند صرافی، حفظ وضعیت ambiguous، پنجره ۴۸ساعته، حذف stock/tokenized، حذف دارایی فهرست‌شده و جفت فعال، قیمت تازه/کهنه، عدم دسترسی مستقیم anon و rollback نوشته شدند.
+- [x] contract assertion نوع خروجی، SQL/STABLE/SECURITY DEFINER، مسیر خالی، owner fixture، ACL مؤثر نقش‌ها، نبود EXECUTE برای PUBLIC و فعال بودن RLS در وابستگی‌های synthetic را کنترل می‌کند.
+- [x] Harness اکنون ۶ بدنه واقعی و ۴۰ stub صرفاً metadata دارد؛ fixture `RETURNS void` برای ۴۰ مورد همچنان منبع نوع خروجی Production نیست.
+- [!] اختلاف ACL برای پیگیری ثبت شد: Migration صریحاً anon/authenticated را grant می‌کند، اما ACL snapshot فعلی برای service_role نیز EXECUTE=true ثبت کرده است. منشأ این بیت service_role در منبع فعلی روشن نیست؛ ممکن است از grant/default ACL جداگانه ناشی شده باشد، اما بدون شواهد قطعی هیچ نتیجه‌ای نمی‌گیریم. fixture فقط برای بازنمایی snapshot، grant تستی مختص تابع دارد. هیچ default privilege یا ACL در Production تغییر نکرد.
+- [ ] CI برای commitهای جدید کد/تست باید بررسی شود؛ remote RPC integration عمداً مستقل و skipped باقی می‌ماند.
+- [ ] owner دقیق per-signature، ACL/default ACL منبع‌دار، و RLS/grants کامل پنج جدول Production هنوز برای parity کامل لازم‌اند.
+- [ ] ۱۷ Migration مفقود و timestamp/content drift همچنان قبل از هر replay نیازمند reconciliation تازه‌اند؛ هیچ Migration replay نشده است.
+- [ ] تصمیم مالک درباره default EXECUTE برای service_role همچنان باز است؛ هیچ `GRANT`, `REVOKE` یا `ALTER DEFAULT PRIVILEGES` روی Production انجام نشد.
+- [x] هیچ Production/Recovery-Test DB، داده مالی، سفارش، معامله، رزرو، کیف پول، موجودی، Auth، Cron، Edge Function یا Migration ledger تغییر نکرد؛ هیچ Merge، Deploy، db push، زیرساخت جدید یا هزینه‌ای ایجاد نشد.
+
+**CI قبل از این گام:** run #323 / `45604288608` روی HEAD اولیه موفق بود. **CI جدید این گام:** در انتظار نتیجه پس از push تغییرات fixture/test.
