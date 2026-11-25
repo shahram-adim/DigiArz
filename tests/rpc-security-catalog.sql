@@ -3,7 +3,7 @@
 -- Expected values are the read-only Production snapshot dated 2026-11-25.
 -- Run only on a dedicated test database with matching role/schema grants.
 -- The ephemeral PostgreSQL 17 smoke fixture seeds all 46 signatures/ACLs;
--- 42 are inert metadata-only stubs and are never invoked. Four reviewed
+-- 41 are inert metadata-only stubs and are never invoked. Five reviewed
 -- SECURITY DEFINER bodies are real; only the read-only report RPC is exercised.
 -- This is a CURRENT-STATE regression contract, not a proposed hardening target.
 
