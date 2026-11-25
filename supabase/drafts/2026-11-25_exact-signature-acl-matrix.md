@@ -29,7 +29,7 @@ Effective API role summary:
 | `public.admin_add_market_listing(text)` | authenticated, service_role | Browser `.rpc()` inventory | User-session RPC; inspect body authorization before any ACL change |
 | `public.admin_disable_market_pair(text,text)` | authenticated, service_role | Browser `.rpc()` inventory | User-session RPC; inspect body authorization before any ACL change |
 | `public.admin_enable_market_pair(text)` | authenticated, service_role | Browser `.rpc()` inventory | User-session RPC; inspect body authorization before any ACL change |
-| `public.admin_exchange_asset_sync_report()` | anon, authenticated, service_role | Browser `.rpc()` inventory; integration test exercises function-body guard | Anon and ordinary-user denial must be tested at function-body level; catalog grant is currently present |
+| `public.admin_exchange_asset_sync_report()` | authenticated, service_role | Browser `.rpc()` inventory; integration test exercises function-body guard | Anon and ordinary-user denial must be tested at function-body level; catalog grant is currently present |
 | `public.admin_remove_market_listing(text)` | authenticated, service_role | Browser `.rpc()` inventory | User-session RPC; inspect body authorization before any ACL change |
 | `public.admin_request_exchange_asset_sync()` | authenticated, service_role | Browser `.rpc()` inventory; body calls two request functions as postgres-owned SECURITY DEFINER | User-session RPC; nested child calls do not establish a service_role client caller |
 | `public.admin_review_market_listings()` | authenticated, service_role | Browser `.rpc()` inventory | User-session RPC; inspect body authorization before any ACL change |
@@ -238,3 +238,21 @@ Created two review-only artifacts on the feature branch:
 The test is a manual isolated-database regression script; it has not yet been wired into CI. It must not be enabled against Production. The proposed SQL has not been applied anywhere.
 
 Remaining verification: run this script against a disposable database with the exact function/table contract, then decide whether to convert the approved SQL into a timestamped migration. Owner approval is required before any Production migration or database change.
+
+
+## 11. Exact-signature catalog regression contract — refreshed Production snapshot
+
+The test `tests/rpc-security-catalog.sql` was revised to compare the complete tuple:
+
+`(schema_name, function_name, pg_get_function_identity_arguments, anon_execute, authenticated_execute, service_role_execute)`
+
+- The expected inventory contains all 46 SECURITY DEFINER signatures observed in the fresh read-only Production catalog query: 9 in `private` and 37 in `public`.
+- The tuple comparison uses bidirectional `EXCEPT`, so it detects missing signatures, unexpected signatures, new overloads, and effective role-EXECUTE drift. Function-name-only matching is no longer used for the inventory or role contract.
+- The test separately retains constrained `search_path`, effective PUBLIC EXECUTE prohibition, and schema USAGE assertions.
+- The exact current snapshot confirms 36 of the 46 signatures are executable by `service_role`; `public.refresh_market_prices()` is intentionally recorded as not executable by anon, authenticated, or service_role.
+- Current anon EXECUTE is present only on `public.get_admin_market_listings()` and `public.get_exchange_discovered_market_assets()`. A prior row in Section 2 incorrectly listed `public.admin_exchange_asset_sync_report()` as anon-executable; the fresh catalog query shows anon=false, and this matrix row has been corrected.
+- This is a regression test for the observed CURRENT state, not a proposed target ACL policy. It does not resolve or alter the separate default-function-ACL policy conflict.
+
+The catalog query was SELECT-only. The revised SQL test has been committed to the PR branch but has NOT been executed against Production or the non-parity Recovery-Test project. CI integration remains intentionally skipped until a valid disposable parity environment exists.
+
+No GRANT/REVOKE, function change, default ACL change, migration, db push, Cron/trigger change, Edge Function deployment, or Production write was performed.
