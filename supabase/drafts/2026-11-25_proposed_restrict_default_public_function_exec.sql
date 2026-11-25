@@ -1,41 +1,67 @@
 -- DIGIARZ — REVIEW DRAFT ONLY / NOT EXECUTABLE
--- This file is intentionally comments-only. It changes no database state.
--- Do NOT remove the comment prefixes or run this file as a migration.
+-- Comments-only proposal. No SQL statement is active.
+-- Do NOT remove comment prefixes or run this file as a migration.
 --
--- Purpose:
--- The current production default ACL for functions created by postgres and
--- supabase_admin in schema public grants EXECUTE to anon, authenticated,
--- and service_role. The proposal below removes only the first two defaults.
+-- SECURITY FINDINGS (verified against Supabase documentation):
+-- 1) PostgreSQL grants EXECUTE on new functions to PUBLIC by global default.
+--    Revoking EXECUTE from anon/authenticated only IN SCHEMA public does not
+--    remove that inherited PUBLIC grant.
+-- 2) The Supabase-managed supabase_admin default ACL in public is not
+--    user-editable through ALTER DEFAULT PRIVILEGES; Supabase documents that
+--    attempts can fail with SQLSTATE 42501. Do not include such a statement
+--    in a production migration.
+-- 3) Supabase default ACLs for postgres-created public functions may also
+--    directly grant anon, authenticated and service_role.
 --
--- Proposed statements for a separately reviewed migration, subject to:
--- (1) explicit owner approval,
--- (2) confirming the migration execution role can alter defaults for both
---     function creators (especially supabase_admin),
--- (3) inventorying functions that must remain callable by anon/authenticated,
--- (4) adding explicit GRANT EXECUTE allowlists for those public/user RPCs,
--- (5) verifying the resulting ACLs in a disposable test project first.
+-- PROPOSED HARDENING SCOPE — postgres-created functions only:
 --
--- Proposed SQL (kept commented intentionally):
+-- A. Remove the global PUBLIC EXECUTE default for functions created by
+--    postgres. This is global (not schema-scoped), because PostgreSQL's
+--    PUBLIC default is global:
 --
--- ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
---   REVOKE EXECUTE ON FUNCTIONS FROM anon, authenticated;
+--    ALTER DEFAULT PRIVILEGES FOR ROLE postgres
+--      REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
 --
--- ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public
---   REVOKE EXECUTE ON FUNCTIONS FROM anon, authenticated;
+-- B. Remove schema-specific direct EXECUTE defaults for API client roles
+--    on future public functions created by postgres. Preserve service_role:
 --
--- service_role is intentionally preserved.
--- Existing functions are NOT changed by ALTER DEFAULT PRIVILEGES.
--- Existing explicit grants must be reviewed separately; this proposal does
--- not REVOKE privileges from any existing function.
+--    ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
+--      REVOKE EXECUTE ON FUNCTIONS FROM anon, authenticated;
 --
--- Expected follow-up:
---   * Explicit grants for approved public read endpoints:
---       get_admin_market_listings()
---       get_exchange_discovered_market_assets()
---   * Explicit grants for authenticated user RPCs that are part of the app:
---       inventory from the reviewed allowlist, not a blanket schema grant.
---   * Keep worker functions restricted to service_role/postgres.
---   * Catalog test must fail if a newly added SECURITY DEFINER function
---     inherits anon/authenticated EXECUTE without an approved allowlist entry.
+-- C. Explicitly grant EXECUTE on each new function only to the roles that
+--    need it. This must be done per exact signature, not by blanket grants.
+--    The reviewed allowlists in tests/rpc-security-catalog.sql are a starting
+--    point, but every function's purpose, caller and overload signature must
+--    be checked before producing executable SQL.
 --
--- No SQL in this file is active. No migration has been created or applied.
+-- D. Migration ownership must be verified. These defaults apply to objects
+--    created by postgres, not objects created by another owner. CI must fail
+--    or require review if a migration creates SECURITY DEFINER functions
+--    under an unexpected owner.
+--
+-- SUPABASE-MANAGED supabase_admin EXCEPTION:
+-- - Do not attempt ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin.
+-- - Do not claim this proposal hardens objects created by supabase_admin.
+-- - Any supabase_admin-created public function remains a separate platform
+--   exposure exception and must be inventoried and reviewed.
+-- - If Supabase changes this restriction in future, verify the current
+--   documentation and project permissions before proposing a separate step.
+--
+-- EXISTING FUNCTIONS:
+-- ALTER DEFAULT PRIVILEGES affects future objects only. Existing function
+-- ACLs are unchanged. Any change to existing RPC ACLs requires a separate
+-- exact-signature inventory, regression tests and explicit owner approval.
+--
+-- REQUIRED PRE-IMPLEMENTATION CHECKS:
+-- 1) Confirm the actual migration execution role is postgres.
+-- 2) Enumerate all function signatures and owners in public/private.
+-- 3) Map each function to its required callers (anon, authenticated,
+--    service_role, postgres/worker) and inspect SECURITY DEFINER bodies.
+-- 4) Add exact EXECUTE grants for approved functions only.
+-- 5) Test new function creation and inherited ACLs in a disposable clone.
+-- 6) Run RPC negative tests (anon, ordinary authenticated) and positive
+--    tests (approved authenticated, service_role, admin) using test identities.
+-- 7) Run Supabase security advisors and inspect PostgREST/worker call paths.
+--
+-- This file remains documentation-only. No migration has been created or
+-- applied, and no database privileges have been changed.
