@@ -1342,3 +1342,19 @@
 - [x] هیچ Production/Recovery-Test database، ACL، Auth، Cron، Edge Function، داده کاربر یا داده مالی تغییر نکرد؛ هیچ Migration، db push، Deploy، Merge، پروژه/زیرساخت Supabase یا هزینه جدیدی ایجاد نشد.
 
 **آخرین commit کد/تست این گام:** `5a17d3744fc9a2982045008f84693f6df4eac384`؛ CI run #277 پس از post-check rollback موفق است. آخرین commit مستندات ممیزی در این ادامه: `bce49bd4912265019cec7329d2f968d4a9f05493`.
+
+
+## Checkpoint 2026-11-25 — 46-function Production/PG17 parity register
+
+- [x] وضعیت واقعی PR #62 و شاخه دوباره بررسی شد: PR باز، Draft، ادغام‌نشده؛ HEAD هنگام ثبت این checkpoint `18a262d2161b50fd8afd984e622bfd90c64ad018` بود.
+- [x] فایل `supabase/drafts/2026-11-25_production-postgres17-rpc-parity-manifest.md` ساخته شد و ۴۶ امضای دقیق را از قرارداد کاتالوگ موجود ثبت می‌کند؛ برای هر امضا ACL مؤثر anon/authenticated/service_role، وضعیت body fixture، وضعیت مالک، search_path، return type، dependency و RLS به‌صورت تفکیک‌شده ثبت شده است.
+- [x] manifest به‌صراحت ثبت می‌کند که ۴۲ مقدار `RETURNS void` فقط stubهای تستی‌اند و هیچ اعتباری به‌عنوان نوع خروجی Production ندارند.
+- [x] چهار بدنهٔ واقعی fixture و نوع خروجی منبع‌دار آن‌ها ثبت شد: دو helper با `boolean`، گزارش مدیران با `jsonb` و `claim_admin_asset_refresh` با `boolean`.
+- [!] manifest فعلاً **ثبت پایهٔ ۴۶ تابع است، نه parity کامل**: نوع خروجی/مالک دقیق/تعریف/وابستگی/جدول/RLS برای ۴۲ تابع باقی‌مانده هنوز از منبع معتبر به‌صورت per-signature استخراج نشده؛ owner برای ۳۶ تابع service_role در snapshot قبلی `postgres` ثبت شده، اما owner ده مورد دیگر و مقدار دقیق per-function search_path باید مستند شود.
+- [x] اختلاف شمار migrationها روشن شد: inventory مورخ 2026-11-17 شامل ۱۴ منبع مفقود بود؛ سه Migration اعمال‌شدهٔ 2026-11-21 به آن اضافه شده‌اند، بنابراین checkpoint مورخ 2026-11-22/25 تعداد پیگیری‌شده را ۱۷ می‌داند. ۲۰ timestamp mismatch گزارش قدیمی باید با ledger تازه دوباره سنجیده شود. manifest فهرست هر ۱۷ نسخه را ثبت می‌کند.
+- [!] هیچ stub جدیدی در این گام با بدنهٔ واقعی جایگزین نشد؛ انتخاب تابع بعدی باید پس از تأیید منبع و dependency map انجام شود. هیچ تابع مالی/worker روی Production یا با دادهٔ مالی اجرا نشده است.
+- [ ] گام بعد: استخراج per-signature catalog facts و source definitions، سپس dependency/RLS map؛ اولویت با توابع read-only و کم‌خطر دارای migration معتبر است. برای هر تابع پیچیدهٔ مالی/worker ابتدا fixture کامل synthetic و side-effect review لازم است.
+- [ ] default EXECUTE برای service_role همچنان تصمیم باز مالک است؛ هیچ GRANT/REVOKE/ALTER DEFAULT PRIVILEGES انجام نشود.
+- [x] هیچ Production/Recovery-Test DB، migration ledger، Auth، Cron، Edge Function، دادهٔ مالی، یا schedule تغییر نکرد؛ هیچ merge/deploy/db push یا هزینهٔ جدید ایجاد نشد.
+
+**Commitهای مستندات این گام:** manifest پایه `e75c69ad3f4a8ca0d0477124780ec40ced6e70f3`؛ reconciliation منابع مفقود `18a262d2161b50fd8afd984e622bfd90c64ad018`.
