@@ -1394,3 +1394,19 @@
 - [x] هیچ Production/Recovery-Test DB، داده مالی، سفارش، معامله، رزرو، کیف پول، موجودی، Auth، Cron، Edge Function یا Migration ledger تغییر نکرد؛ هیچ Merge، Deploy، db push، زیرساخت جدید یا هزینه‌ای ایجاد نشد.
 
 **CI قبل از این گام:** run #323 / `45604288608` روی HEAD اولیه موفق بود. **CI جدید این گام:** در انتظار نتیجه پس از push تغییرات fixture/test.
+
+
+## Checkpoint 2026-11-25 — exchange discovery RPC source mapping and safe rollback
+
+- [x] PR #62 دوباره بررسی شد: open، Draft، unmerged؛ base=`redesign/ui-clean-rebuild-2026`؛ HEAD هنگام ثبت این یادداشت `f25096b78fb5b50fc6a79e82cf272fad47885c46`.
+- [x] Migration منبع تابع `public.get_exchange_discovered_market_assets()` بازیابی شد: `20261116200009_auto_list_unmatched_iran_exchange_assets.sql`، blob SHA `901f6e3004a1fd51995ea159d840ce5b5b39dbeb`.
+- [x] نوع خروجی ۸ ستونی، SQL/STABLE/SECURITY DEFINER، `search_path=''`، پنج وابستگی read-only و فیلترهای تابع به‌صورت static review در manifest ثبت شدند. هیچ DML، HTTP، Cron یا اثر مالی در بدنهٔ تابع مشاهده نشد.
+- [!] تلاش برای افزودن بدنه و تست رفتاری به harness PostgreSQL 17 به خطاهای parser در اجرای ایزوله منجر شد. علت ریشه‌ای هنوز به‌طور قطعی مشخص نشده؛ بنابراین body، test و workflow changes این تلاش revert شدند. هیچ ادعای موفقیت behavioral test برای این تابع نداریم.
+- [x] وضعیت پایدار قبلی بازیابی شد: fixture همچنان ۵ بدنه واقعی + ۴۱ stub metadata-only دارد؛ تابع discovery در fixture همچنان stub است و فقط source-mapped candidate.
+- [x] پس از بازگردانی، CI run #359 (`45606099116`) و run #360 (`45606110974`) موفق شدند؛ `postgres17-rpc-smoke` و `unit-tests` سبز، remote `rpc-security-integration` عمداً skipped. Run #361 (`45606154307`) روی commit مستندات نیز success شد.
+- [!] ACL discrepancy ثبت شد: source migration فقط anon/authenticated را grant می‌کند، در حالی که catalog snapshot برای service_role نیز EXECUTE=true ثبت کرده است. منشأ آن unresolved است؛ هیچ default ACL، GRANT یا REVOKE روی Production تغییر نکرد.
+- [ ] گام بعدی امن: بازتولید parser failure در یک اسکریپت مستقل و حداقلی PostgreSQL 17، بدون دست‌زدن به shared harness؛ فقط پس از موفقیت standalone و role/rollback tests، تصمیم دربارهٔ افزودن دوبارهٔ بدنه گرفته شود.
+- [ ] برای parity کامل هنوز owner/ACL/proconfig دقیق per-signature و RLS/grants تمام پنج جدول Production باید از catalog evidence مستقیم تکمیل شوند.
+- [ ] ۱۷ Migration source مفقود و timestamp/content drift هنوز پیش از هر replay نیازمند inventory تازه و منبع معتبرند. هیچ Migration replay نشد.
+- [ ] تصمیم مالک درباره default EXECUTE برای service_role باز است؛ هیچ تغییر پیش‌فرضی انجام نشد.
+- [x] هیچ Production/Recovery-Test DB، داده مالی، سفارش، معامله، رزرو، کیف پول، balance، Auth، Cron، Edge Function یا Migration ledger تغییر نکرد؛ Merge، Deploy، db push، پروژه/زیرساخت جدید و هزینه‌ای ایجاد نشد.
