@@ -55,13 +55,18 @@ BEGIN
     RAISE EXCEPTION 'Unreviewed SECURITY DEFINER function(s): %', unexpected_functions;
   END IF;
 
-  SELECT string_agg(format('%I.%I has %s overloads', n.nspname, p.proname, count(*)), ', ')
+  SELECT string_agg(format('%I.%I has %s overloads',
+                                overloads.nspname, overloads.proname,
+                                overloads.overload_count), ', ')
     INTO overloaded_functions
-  FROM pg_proc p
-  JOIN pg_namespace n ON n.oid = p.pronamespace
-  WHERE n.nspname IN ('public','private') AND p.prosecdef
-  GROUP BY n.nspname, p.proname
-  HAVING count(*) > 1;
+  FROM (
+    SELECT n.nspname, p.proname, count(*) AS overload_count
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname IN ('public','private') AND p.prosecdef
+    GROUP BY n.nspname, p.proname
+    HAVING count(*) > 1
+  ) AS overloads;
 
   IF overloaded_functions IS NOT NULL THEN
     RAISE EXCEPTION 'SECURITY DEFINER overloads require explicit signature review: %', overloaded_functions;
