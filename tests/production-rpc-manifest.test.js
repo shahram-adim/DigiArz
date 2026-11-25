@@ -7,6 +7,7 @@ const manifest = JSON.parse(fs.readFileSync('supabase/audit/production_security_
 const inventory = JSON.parse(fs.readFileSync('supabase/audit/production_rpc_relation_rls_inventory_2026-11-25.json', 'utf8'));
 const review = JSON.parse(fs.readFileSync('supabase/audit/production_anon_access_review_2026-11-25.json', 'utf8'));
 const dependencies = JSON.parse(fs.readFileSync('supabase/audit/production_rpc_relation_dependencies_2026-11-25.json', 'utf8'));
+const migrationReconciliation = JSON.parse(fs.readFileSync('supabase/audit/production_migration_source_reconciliation_2026-11-25.json', 'utf8'));
 
 test('Production SECURITY DEFINER snapshot is complete and internally consistent', () => {
   assert.equal(manifest.source.project_ref, 'gfoaubfilhttnwjykaox');
@@ -117,4 +118,22 @@ test('Production RPC body relation scan resolves to live schema metadata', () =>
       assert.ok(functions.has(caller), 'unknown function reference: ' + caller);
     }
   }
+});
+
+test('Production migration ledger reconciliation distinguishes missing sources from timestamp drift', () => {
+  assert.deepEqual(migrationReconciliation.counts, {
+    production_ledger: 55,
+    local_sql_files: 40,
+    matched_by_normalized_name: 38,
+    missing_source_files: 17,
+    matched_timestamp_mismatches: 20,
+    exact_timestamp_matches: 18,
+    local_files_without_ledger_name: 2
+  });
+  assert.equal(migrationReconciliation.missing_sources.length, 17);
+  assert.equal(migrationReconciliation.matched.length, 38);
+  assert.equal(migrationReconciliation.matched.filter(x => x.timestamp_match).length, 18);
+  assert.equal(migrationReconciliation.matched.filter(x => !x.timestamp_match).length, 20);
+  assert.equal(migrationReconciliation.local_files_without_ledger_name.length, 2);
+  assert.equal(migrationReconciliation.safety.includes('Do not run db push'), true);
 });
