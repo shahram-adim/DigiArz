@@ -1323,3 +1323,21 @@
 - [x] هیچ Production/Recovery-Test DDL، ACL، داده، Auth، Cron، Edge Function یا رکورد مالی تغییر نکرد؛ هیچ Merge یا Deploy انجام نشد و هیچ زیرساخت Supabase هزینه‌دار ساخته نشد.
 
 **آخرین commit کد/تست این checkpoint:** `50fa0c57c5ce673c0fd12c825849eafa7d8b66bc`؛ commitهای بعدی تا `82e66240369bc22f4de664b9d6d340adab509dd4` فقط مستندات/ثبت وضعیت را به‌روزرسانی کردند.
+
+
+## Checkpoint 2026-11-25 — source-faithful admin refresh claim RPC
+
+- [x] منبع معتبر تابع `public.claim_admin_asset_refresh(text, uuid)` از Migration `20261113190000_admin_on_demand_crypto_asset_refresh.sql` بازیابی و با caller مستقر تطبیق شد.
+- [x] اختلاف fixture اصلاح شد: تابع اکنون با بدنه واقعی و `RETURNS boolean` نصب می‌شود؛ جدول وابسته `private.admin_asset_refresh_limits` فقط با داده مصنوعی و RLS فعال در PostgreSQL 17 دورریختنی ساخته می‌شود.
+- [x] این تابع از مجموعه stubها خارج شد؛ اکنون ۴ تابع بدنه واقعی دارند و ۴۲ تابع فقط stub بی‌اثر metadata هستند.
+- [x] قرارداد دقیق claim نوع خروجی boolean، SECURITY DEFINER، search_path خالی و ACL مختص تابع را بررسی می‌کند: فقط service_role از میان API roles مجاز است؛ anon و authenticated مجاز نیستند.
+- [x] آزمون مثبت service_role برای super-admin مصنوعی موفق؛ آزمون منفی شناسه غیرمدیر با SQLSTATE `42501`، ورودی نامعتبر با `22023` و claim تکراری در بازه ۳۰ثانیه با `55000` موفق.
+- [x] تمام گام‌های `postgres17-rpc-smoke` و `unit-tests` در CI run `45600501368` (run #275) موفق؛ remote `rpc-security-integration` عمداً skipped ماند. لینک: https://github.com/shahram-adim/DigiArz/actions/runs/45600501368
+- [x] آزمون در تراکنش Rollback می‌شود؛ workflow خالی بودن جدول claim را پس از Rollback نیز بررسی می‌کند.
+- [!] این آزمون بدنه و dependency محدود همین تابع را پوشش می‌دهد؛ caller واقعی Edge Function از نظر source/ACL تأیید شده، اما خود Edge Function در harness اجرا نمی‌شود. این نتیجه full Production/Supabase parity نیست.
+- [ ] ۴۲ تابع stub دیگر باید فقط پس از بازیابی منبع معتبر و dependency map به بدنه واقعی تبدیل شوند؛ return type و owner هر ۴۶ تابع نیز باید در manifest جداگانه تطبیق داده شود.
+- [ ] ۱۷ منبع Migration مفقود و اختلاف timestamp/content همچنان مانع replay کامل هستند.
+- [ ] تصمیم مالک درباره default EXECUTE برای service_role هنوز باز است؛ هیچ GRANT/REVOKE یا ALTER DEFAULT PRIVILEGES برای تغییر سیاست پیش‌فرض انجام نشود.
+- [x] هیچ Production/Recovery-Test database، ACL، Auth، Cron، Edge Function، داده کاربر یا داده مالی تغییر نکرد؛ هیچ Migration، db push، Deploy، Merge، پروژه/زیرساخت Supabase یا هزینه جدیدی ایجاد نشد.
+
+**آخرین commit کد/تست این گام:** `39baf5677924ab2066429cc0ae77a550592cfc2d`؛ CI run #275 موفق است.
