@@ -12,7 +12,8 @@
 --     admin_market_listings only when an observation becomes matched+active.
 --     This approval table is deliberately NOT wired to that trigger.
 --   * The historical create_exchange_asset_observations migration is recorded
---     in Supabase's ledger but its SQL file is absent from the inspected branch.
+--     in Supabase's ledger but its SQL file is absent from the inspected branch
+--     and no Git commit history for that exact path was found.
 --
 -- Compatibility contract with src/persian-asset-names.mjs:
 --   { coingecko_id, status: "approved", approved_by, approved_at, name_fa }
@@ -20,9 +21,9 @@
 --
 -- Security design:
 --   * No direct anon/authenticated table access.
---   * Authenticated caller can invoke only the admin RPC.
---   * RPC checks private.is_current_user_super_admin() and derives approved_by
---     from auth.uid(); caller cannot nominate another approver.
+--   * Authenticated caller can invoke only admin read/write RPCs.
+--   * RPCs check private.is_current_user_super_admin(); write RPC derives
+--     approved_by from auth.uid(); caller cannot nominate another approver.
 --   * service_role remains trusted backend-only access, not an end-user route.
 
 BEGIN;
@@ -63,8 +64,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE
   ON TABLE public.crypto_asset_persian_name_approvals
   TO service_role;
 
--- Do not expose a generic write path. The only application-role write path
--- checks the existing private super-admin predicate inside SECURITY DEFINER.
+-- Do not expose a generic write path. The application uses the guarded RPCs.
 CREATE OR REPLACE FUNCTION public.admin_approve_persian_asset_name(
   p_coingecko_id text,
   p_name_fa text,
@@ -119,20 +119,68 @@ BEGIN
 END;
 $function$;
 
+-- The admin UI needs a read path too. Direct SELECT remains revoked; this
+-- paginated RPC exposes approved rows only after the same super-admin check.
+CREATE OR REPLACE FUNCTION public.admin_list_persian_asset_name_approvals(
+  p_limit integer DEFAULT 200,
+  p_offset integer DEFAULT 0
+)
+RETURNS TABLE (
+  coingecko_id text,
+  name_fa text,
+  approved_by uuid,
+  approved_at timestamptz,
+  source_snapshot jsonb,
+  approval_note text,
+  updated_at timestamptz
+)
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $function$
+BEGIN
+  IF auth.uid() IS NULL OR NOT coalesce(private.is_current_user_super_admin(), false) THEN
+    RAISE EXCEPTION 'Super administrator access required'
+      USING ERRCODE = '42501';
+  END IF;
+
+  IF p_limit IS NULL OR p_limit NOT BETWEEN 1 AND 500
+     OR p_offset IS NULL OR p_offset < 0 THEN
+    RAISE EXCEPTION 'Invalid pagination arguments'
+      USING ERRCODE = '22023';
+  END IF;
+
+  RETURN QUERY
+  SELECT a.coingecko_id, a.name_fa, a.approved_by, a.approved_at,
+         a.source_snapshot, a.approval_note, a.updated_at
+  FROM public.crypto_asset_persian_name_approvals AS a
+  ORDER BY a.updated_at DESC, a.coingecko_id
+  LIMIT p_limit OFFSET p_offset;
+END;
+$function$;
+
 REVOKE ALL ON FUNCTION public.admin_approve_persian_asset_name(text, text, jsonb, text)
   FROM PUBLIC, anon, service_role;
 GRANT EXECUTE ON FUNCTION public.admin_approve_persian_asset_name(text, text, jsonb, text)
   TO authenticated;
 
+REVOKE ALL ON FUNCTION public.admin_list_persian_asset_name_approvals(integer, integer)
+  FROM PUBLIC, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.admin_list_persian_asset_name_approvals(integer, integer)
+  TO authenticated;
+
 -- Review checklist before this draft can become an executable migration:
--- [ ] Verify the function owner is a trusted migration owner (normally postgres).
+-- [ ] Verify both function owners are trusted migration owners (normally postgres).
 -- [ ] Confirm authenticated has USAGE on public and private, and EXECUTE on the
 --     existing private.is_current_user_super_admin() predicate.
 -- [ ] Add regression tests: anon denied; non-admin authenticated denied;
---     admin succeeds; approved_by always equals auth.uid(); invalid names/snapshots
---     rejected; duplicate approvals update only through the guarded RPC.
--- [ ] Review whether source_snapshot should be schema-validated and size-limited.
--- [ ] Ensure the UI reads this approved table, not consensus candidates.
+--     admin can list and approve; approved_by always equals auth.uid(); invalid
+--     names/snapshots/pagination rejected; duplicate approvals update only through
+--     the guarded RPCs; direct table SELECT/INSERT/UPDATE/DELETE denied.
+-- [ ] Decide and enforce a source_snapshot schema and maximum serialized size.
+-- [ ] Ensure the UI reads this approved table through the admin list RPC, never
+--     from consensus candidates or direct table access.
 -- [ ] Reconcile the missing historical create_exchange_asset_observations SQL
 --     source and migration-ledger drift before any db push.
 -- [ ] Verify on a disposable PostgreSQL/Supabase test project.
