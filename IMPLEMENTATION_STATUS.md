@@ -1515,3 +1515,8 @@
 - [x] تست برای چهار ردیف cron-to-routine به‌همراه ۴ cron command fingerprint، ۶ trigger fingerprint و ۱۲ routine fingerprint گروهی اضافه شد؛ commit تست نهایی فعلی `f4dc0bafcf6ba4439784feb91abc1e0564a3ac1b`.
 - [x] شمارش محتوای branch با اجرای regex مستقل: ۱۷ Migration heading یکتا، ۱۲ routine MD5 گروهی، ۴ cron command MD5، ۶ trigger MD5 و ۴ انتساب cron-to-routine؛ همه با انتظار تطبیق دارند.
 - [ ] CI برای commit `f4dc0bafcf6ba4439784feb91abc1e0564a3ac1b` هنوز نتیجهٔ قابل مشاهده ندارد؛ نتیجهٔ CI قدیمی `45639843226` فقط commit قبلی را پوشش می‌دهد.
+
+- [x] CI نهایی crosswalk در run `45640964392` (run #2019) روی commit `5e9defc9c5b049259c8a6cd695684a559d2eecae` با نتیجهٔ `success` تکمیل شد؛ job `exact-decimal` بدون failure و با موفقیت تمام مراحل Node/browser و PostgreSQL 17 arithmetic, widening, lifecycle و two-session race را گذراند.
+- [x] این CI شامل تست‌های جدید پرونده‌های ۱۷ Migration، ۱۲ routine fingerprint، ۴ cron command fingerprint، ۶ trigger fingerprint، ۴ cron-to-routine attribution و برابری fingerprint چهار routine زنده با manifest است.
+- [!] این تأیید فقط برای CI روی محیط disposable است؛ هیچ Production migration، grant/policy/function/trigger، deployment، cron change یا financial write را مجاز یا تأیید نمی‌کند.
+- [x] PR #63 آخرین بار open/Draft/unmerged تأیید شد؛ head `5e9defc9c5b049259c8a6cd695684a559d2eecae`، base `main`، branch جلوتر از main به تعداد ۵۱ commit و ۰ عقب‌تر.
