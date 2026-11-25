@@ -2,7 +2,7 @@
 -- Reproduces the 46 exact Production signatures and current API-role ACL
 -- booleans from the reviewed 2026-11-25 catalog snapshot.
 -- Five real bodies are installed by the bootstrap; this file adds two exact
--- migration-backed trigger bodies. The remaining 39 functions are inert NO-OP stubs
+-- migration-backed trigger bodies and one ledger-recovered read-only RPC. The remaining 38 functions are inert NO-OP stubs
 -- (RETURNS void). They MUST NOT be
 -- used to claim function-body behavior or full Production schema parity.
 -- This file runs only inside the disposable PostgreSQL 17 service container.
@@ -365,20 +365,43 @@ REVOKE ALL ON FUNCTION public.execute_demo_trade(p_symbol text, p_side text, p_a
 GRANT EXECUTE ON FUNCTION public.execute_demo_trade(p_symbol text, p_side text, p_amount numeric, p_price numeric) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.execute_demo_trade(p_symbol text, p_side text, p_amount numeric, p_price numeric) TO service_role;
 
+-- Exact current Production body recovered from applied migration 20261113153808.
+-- The full migration file is absent from this branch; the function source was
+-- read from supabase_migrations.schema_migrations and matched to pg_get_functiondef.
 CREATE OR REPLACE FUNCTION public.get_demo_trading_fee_rate(p_quote_asset text, p_liquidity_type text)
-RETURNS void
+RETURNS numeric
 LANGUAGE plpgsql
+STABLE
 SECURITY DEFINER
 SET search_path = ''
-AS $stub$
+AS $function$
+DECLARE
+    v_rate numeric;
 BEGIN
-  RETURN;
-END;
-$stub$;
+    IF p_liquidity_type NOT IN ('maker', 'taker') THEN
+        RAISE EXCEPTION 'Invalid liquidity type';
+    END IF;
 
-REVOKE ALL ON FUNCTION public.get_demo_trading_fee_rate(p_quote_asset text, p_liquidity_type text) FROM PUBLIC, anon, authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.get_demo_trading_fee_rate(p_quote_asset text, p_liquidity_type text) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.get_demo_trading_fee_rate(p_quote_asset text, p_liquidity_type text) TO service_role;
+    SELECT CASE WHEN p_liquidity_type = 'maker'
+                THEN f.maker_fee_rate ELSE f.taker_fee_rate END
+      INTO v_rate
+      FROM public.demo_trading_fees AS f
+     WHERE f.quote_asset = upper(btrim(p_quote_asset))
+       AND f.is_enabled IS TRUE;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Trading fee is not configured for quote asset %', p_quote_asset;
+    END IF;
+
+    RETURN v_rate;
+END;
+$function$;
+
+REVOKE ALL ON FUNCTION public.get_demo_trading_fee_rate(text,text)
+  FROM PUBLIC, anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.get_demo_trading_fee_rate(text,text) TO authenticated;
+-- Test-only grant models the currently observed Production service_role EXECUTE bit.
+GRANT EXECUTE ON FUNCTION public.get_demo_trading_fee_rate(text,text) TO service_role;
 
 CREATE OR REPLACE FUNCTION public.get_exchange_discovered_market_assets()
 RETURNS void
