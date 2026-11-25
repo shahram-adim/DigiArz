@@ -154,6 +154,17 @@ jobs:
           test -n "$pg_container"
           docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security-market-listings.integration.sql
 
+      - name: Reproduce exchange discovery directly from its migration in a fresh database
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec "$pg_container" createdb -U postgres digiarz_discovery_standalone
+          docker cp supabase/migrations/20261116200009_auto_list_unmatched_iran_exchange_assets.sql "$pg_container:/tmp/get_exchange_discovered_market_assets.sql"
+          docker cp tests/rpc-security-exchange-discovery-standalone.sql "$pg_container:/tmp/rpc-security-exchange-discovery-standalone.sql"
+          docker exec "$pg_container" psql -U postgres -d digiarz_discovery_standalone -v ON_ERROR_STOP=1 -f /tmp/rpc-security-exchange-discovery-standalone.sql
+
       - name: Confirm test fixture contains only the synthetic admin identity
         shell: bash
         run: |
