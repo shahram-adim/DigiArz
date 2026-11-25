@@ -66,6 +66,63 @@
 | `public.request_iran_exchange_asset_sync()` | anon=false, authenticated=false, service_role=true | postgres (verified for service_role subset) | constrained (exact value per signature not yet captured) | stub only | not inspected from valid source | not mapped | not reviewed | NO-OP stub; RETURNS void is fixture-only and not Production evidence |
 | `public.request_market_price_refresh()` | anon=false, authenticated=true, service_role=true | postgres (verified for service_role subset) | constrained (exact value per signature not yet captured) | stub only | not inspected from valid source | not mapped | not reviewed | NO-OP stub; RETURNS void is fixture-only and not Production evidence |
 
+## 2A. Direct Production catalog metadata snapshot — 2026-11-25
+
+Read-only query of `pg_proc`, `pg_namespace`, `pg_roles`, and `pg_language` on Production. This table records the live return type, owner, language, volatility, function-level search_path, stored ACL, and effective API-role EXECUTE privileges. It does not execute any application function.
+
+| Exact signature | Return type | Owner | Language / volatility | Function search_path | Stored ACL | anon / authenticated / service_role EXECUTE |
+|---|---|---|---|---|---|---|
+| `private.admin_adjust_wallet(p_user_id uuid, p_currency text, p_direction text, p_amount numeric, p_reason text)` | `jsonb` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,authenticated=X/postgres}` | `false/true/false` |
+| `private.admin_list_users()` | `TABLE(user_id uuid, email text, is_active boolean, created_at timestamp with time zone, balance_usdt numeric, balance_irr numeric)` | `postgres` | `plpgsql / stable` | `search_path=""` | `{postgres=X/postgres,authenticated=X/postgres}` | `false/true/false` |
+| `private.auto_activate_verified_exchange_pairs()` | `jsonb` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres}` | `false/false/false` |
+| `private.auto_list_verified_exchange_asset()` | `trigger` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres}` | `false/false/false` |
+| `private.enforce_unique_admin_market_listing_symbol()` | `trigger` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres}` | `false/false/false` |
+| `private.guard_active_account_writes()` | `trigger` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres}` | `false/false/false` |
+| `private.is_current_user_super_admin()` | `boolean` | `postgres` | `sql / stable` | `search_path=""` | `{postgres=X/postgres,authenticated=X/postgres}` | `false/true/false` |
+| `private.is_super_admin()` | `boolean` | `postgres` | `sql / stable` | `search_path=""` | `{postgres=X/postgres}` | `false/false/false` |
+| `private.request_market_price_overflow()` | `integer` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres}` | `false/false/false` |
+| `public.admin_add_market_listing(p_coingecko_id text)` | `jsonb` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}` | `false/true/true` |
+| `public.admin_disable_market_pair(p_coingecko_id text, p_reason text)` | `jsonb` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}` | `false/true/true` |
+| `public.admin_enable_market_pair(p_coingecko_id text)` | `jsonb` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}` | `false/true/true` |
+| `public.admin_exchange_asset_sync_report()` | `jsonb` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}` | `false/true/true` |
+| `public.admin_remove_market_listing(p_coingecko_id text)` | `jsonb` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}` | `false/true/true` |
+| `public.admin_request_exchange_asset_sync()` | `jsonb` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}` | `false/true/true` |
+| `public.admin_review_market_listings()` | `TABLE(coingecko_id text, symbol text, name text, pair_symbol text, current_price_usd numeric, total_volume_usd numeric, market_cap_rank integer, metadata_updated_at timestamp with time zone, market_price numeric, price_source text, price_updated_at timestamp with time zone, price_age_seconds numeric, is_enabled boolean, is_eligible boolean, eligibility_reason text)` | `postgres` | `sql / stable` | `search_path=""` | `{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}` | `false/true/true` |
+| `public.admin_search_market_assets(p_search text, p_limit integer)` | `TABLE(coingecko_id text, symbol text, name text, image_url text, market_cap_rank integer, current_price_usd numeric, last_updated timestamp with time zone)` | `postgres` | `plpgsql / stable` | `search_path=""` | `{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}` | `false/true/true` |
+| `public.cancel_conditional_exit_order(p_order_id uuid)` | `jsonb` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}` | `false/true/true` |
+| `public.cancel_limit_order(p_order_id uuid)` | `jsonb` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}` | `false/true/true` |
+| `public.cancel_stop_limit_order(p_order_id uuid)` | `jsonb` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}` | `false/true/true` |
+| `public.claim_admin_asset_refresh(p_coingecko_id text, p_admin_user_id uuid)` | `boolean` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,service_role=X/postgres}` | `false/false/true` |
+| `public.current_account_is_active()` | `boolean` | `postgres` | `sql / stable` | `search_path=""` | `{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}` | `false/true/true` |
+| `public.deactivate_my_account()` | `jsonb` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}` | `false/true/true` |
+| `public.execute_demo_trade(p_symbol text, p_side text, p_amount numeric, p_price numeric)` | `jsonb` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}` | `false/true/true` |
+| `public.get_admin_market_listings()` | `TABLE(coingecko_id text, symbol text, name text, image_url text, market_cap_rank integer, current_price_usd numeric, price_toman numeric, price_change_percentage_24h numeric, total_volume_usd numeric, last_updated timestamp with time zone, added_at timestamp with time zone)` | `postgres` | `sql / stable` | `search_path=""` | `{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}` | `true/true/true` |
+| `public.get_demo_trading_fee_rate(p_quote_asset text, p_liquidity_type text)` | `numeric` | `postgres` | `plpgsql / stable` | `search_path=""` | `{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}` | `false/true/true` |
+| `public.get_exchange_discovered_market_assets()` | `TABLE(symbol text, name text, current_price_usd numeric, last_updated timestamp with time zone, exchange_sources text, exchange_count integer, observed_at timestamp with time zone, match_status text)` | `postgres` | `sql / stable` | `search_path=""` | `{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}` | `true/true/true` |
+| `public.get_my_order_reservations(p_order_ids uuid[])` | `TABLE(order_id uuid, asset text, reserved_amount numeric, consumed_amount numeric, released_amount numeric, status text)` | `postgres` | `sql / stable` | `search_path=""` | `{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}` | `false/true/true` |
+| `public.new_user_setup()` | `trigger` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,service_role=X/postgres}` | `false/false/true` |
+| `public.place_conditional_exit_order(p_symbol text, p_order_kind text, p_amount numeric, p_trigger_price numeric)` | `jsonb` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}` | `false/true/true` |
+| `public.place_limit_order(p_symbol text, p_side text, p_amount numeric, p_limit_price numeric)` | `jsonb` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}` | `false/true/true` |
+| `public.place_stop_limit_order(p_symbol text, p_side text, p_amount numeric, p_stop_price numeric, p_limit_price numeric)` | `jsonb` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}` | `false/true/true` |
+| `public.process_bit24_exchange_sync()` | `jsonb` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,service_role=X/postgres}` | `false/false/true` |
+| `public.process_conditional_orders()` | `jsonb` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,service_role=X/postgres}` | `false/false/true` |
+| `public.process_iran_exchange_asset_sync()` | `jsonb` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,service_role=X/postgres}` | `false/false/true` |
+| `public.process_limit_orders()` | `jsonb` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,service_role=X/postgres}` | `false/false/true` |
+| `public.process_stop_limit_orders()` | `jsonb` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,service_role=X/postgres}` | `false/false/true` |
+| `public.reactivate_my_account()` | `jsonb` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}` | `false/true/true` |
+| `public.recover_stale_crypto_assets_sync()` | `void` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,service_role=X/postgres}` | `false/false/true` |
+| `public.refresh_crypto_assets()` | `void` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,service_role=X/postgres}` | `false/false/true` |
+| `public.refresh_crypto_assets_toman()` | `void` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,service_role=X/postgres}` | `false/false/true` |
+| `public.refresh_market_fx_rate()` | `void` | `postgres` | `plpgsql / volatile` | `search_path=pg_catalog` | `{postgres=X/postgres,service_role=X/postgres}` | `false/false/true` |
+| `public.refresh_market_prices()` | `void` | `postgres` | `plpgsql / volatile` | `search_path=pg_catalog` | `{postgres=X/postgres}` | `false/false/false` |
+| `public.request_bit24_exchange_sync()` | `integer` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,service_role=X/postgres}` | `false/false/true` |
+| `public.request_iran_exchange_asset_sync()` | `integer` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,service_role=X/postgres}` | `false/false/true` |
+| `public.request_market_price_refresh()` | `jsonb` | `postgres` | `plpgsql / volatile` | `search_path=""` | `{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}` | `false/true/true` |
+
+All 46 rows returned `SECURITY DEFINER = true`; all 46 are owned by `postgres`; every recorded function-level search_path is either empty (`search_path=""`) or `pg_catalog`. The exact per-function values are shown above. This metadata snapshot supersedes the earlier incomplete owner/search_path notes in the initial register.
+
+**Still open:** exact body/source provenance, relation/function dependencies, table and sequence grants, RLS policies, trigger bindings, and safe positive/negative runtime coverage must be completed per function. Catalog metadata alone does not prove PL/pgSQL relation dependencies or runtime behavior.
+
 ## 2. Real-body provenance and limits
 
 | Function | Source provenance | Fixture dependency model | Current test scope | Remaining gap |
