@@ -13,6 +13,9 @@ DECLARE
   unexpected_authenticated text;
   missing_anon text;
   missing_authenticated text;
+  schema_usage_drift text;
+  unexpected_service_role text;
+  missing_service_role text;
 BEGIN
   SELECT string_agg(format('%I.%I(%s)', n.nspname, p.proname,
                            pg_get_function_identity_arguments(p.oid)), ', ')
@@ -158,6 +161,89 @@ BEGIN
       COALESCE(unexpected_authenticated,''), COALESCE(missing_authenticated,'');
   END IF;
 
-  RAISE NOTICE 'PASS: SECURITY DEFINER inventory, empty search_path, PUBLIC revoke, anon and authenticated allowlists match reviewed baseline';
+  -- Exact schema USAGE contract is part of effective API reachability.
+  WITH expected(schema_name, role_name, can_use) AS (
+    VALUES
+      ('public','anon',true),
+      ('public','authenticated',true),
+      ('public','service_role',true),
+      ('private','anon',false),
+      ('private','authenticated',true),
+      ('private','service_role',false)
+  )
+  SELECT string_agg(
+           schema_name || '/' || role_name || ': expected=' || can_use ||
+           ', actual=' || has_schema_privilege(role_name, schema_name, 'USAGE'),
+           '; ' ORDER BY schema_name, role_name
+         )
+    INTO schema_usage_drift
+  FROM expected
+  WHERE has_schema_privilege(role_name, schema_name, 'USAGE') IS DISTINCT FROM can_use;
+
+  IF schema_usage_drift IS NOT NULL THEN
+    RAISE EXCEPTION 'Schema USAGE contract drift: %', schema_usage_drift;
+  END IF;
+
+  -- service_role is a trusted backend identity, but its function ACL must
+  -- still be explicit and reviewed; it is not interchangeable with PUBLIC.
+  WITH expected(schema_name, function_name) AS (
+    VALUES
+      ('public','admin_add_market_listing'),
+      ('public','admin_disable_market_pair'),
+      ('public','admin_enable_market_pair'),
+      ('public','admin_exchange_asset_sync_report'),
+      ('public','admin_remove_market_listing'),
+      ('public','admin_request_exchange_asset_sync'),
+      ('public','admin_review_market_listings'),
+      ('public','admin_search_market_assets'),
+      ('public','cancel_conditional_exit_order'),
+      ('public','cancel_limit_order'),
+      ('public','cancel_stop_limit_order'),
+      ('public','claim_admin_asset_refresh'),
+      ('public','current_account_is_active'),
+      ('public','deactivate_my_account'),
+      ('public','execute_demo_trade'),
+      ('public','get_admin_market_listings'),
+      ('public','get_demo_trading_fee_rate'),
+      ('public','get_exchange_discovered_market_assets'),
+      ('public','get_my_order_reservations'),
+      ('public','new_user_setup'),
+      ('public','place_conditional_exit_order'),
+      ('public','place_limit_order'),
+      ('public','place_stop_limit_order'),
+      ('public','process_bit24_exchange_sync'),
+      ('public','process_conditional_orders'),
+      ('public','process_iran_exchange_asset_sync'),
+      ('public','process_limit_orders'),
+      ('public','process_stop_limit_orders'),
+      ('public','reactivate_my_account'),
+      ('public','recover_stale_crypto_assets_sync'),
+      ('public','refresh_crypto_assets'),
+      ('public','refresh_crypto_assets_toman'),
+      ('public','refresh_market_fx_rate'),
+      ('public','request_bit24_exchange_sync'),
+      ('public','request_iran_exchange_asset_sync'),
+      ('public','request_market_price_refresh')
+  ),
+  actual AS (
+    SELECT n.nspname, p.proname
+    FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname IN ('public','private')
+      AND p.prosecdef
+      AND has_function_privilege('service_role', p.oid, 'EXECUTE')
+  )
+  SELECT
+    (SELECT string_agg(schema_name || '.' || function_name, ', ')
+       FROM (SELECT * FROM actual EXCEPT SELECT * FROM expected) x),
+    (SELECT string_agg(schema_name || '.' || function_name, ', ')
+       FROM (SELECT * FROM expected EXCEPT SELECT * FROM actual) x)
+  INTO unexpected_service_role, missing_service_role;
+
+  IF unexpected_service_role IS NOT NULL OR missing_service_role IS NOT NULL THEN
+    RAISE EXCEPTION 'service_role SECURITY DEFINER allowlist drift; unexpected=[%], missing=[%]',
+      COALESCE(unexpected_service_role,''), COALESCE(missing_service_role,'');
+  END IF;
+
+  RAISE NOTICE 'PASS: SECURITY DEFINER inventory, search_path, PUBLIC revoke, schema USAGE, and anon/authenticated/service_role allowlists match reviewed baseline';
 END
 $catalog_test$;
