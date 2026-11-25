@@ -142,13 +142,13 @@ END
 $service$;
 RESET ROLE;
 
+ROLLBACK;
+
 DO $rollback_assert$
 BEGIN
   IF EXISTS (SELECT 1 FROM public.admin_market_listings
              WHERE coingecko_id LIKE 'ci-add-%') THEN
-    RAISE EXCEPTION 'Synthetic admin listings survived the test transaction';
+    RAISE EXCEPTION 'Synthetic admin listings survived transaction rollback';
   END IF;
 END
 $rollback_assert$;
-
-ROLLBACK;
