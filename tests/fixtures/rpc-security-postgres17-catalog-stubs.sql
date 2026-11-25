@@ -2,8 +2,8 @@
 -- Reproduces the 46 exact Production signatures and current API-role ACL
 -- booleans from the reviewed 2026-11-25 catalog snapshot.
 -- Five real bodies are installed by the bootstrap; this file adds two exact
--- migration-backed trigger bodies, three read-only RPCs, and one admin write RPC.
--- The remaining 35 functions are inert NO-OP stubs (the exchange-discovery stub
+-- migration-backed trigger bodies and three ledger/source-backed read-only RPCs.
+-- The remaining 36 functions are inert NO-OP stubs (the exchange-discovery stub
 -- is replaced by its applied migration in the following workflow step).
 -- (RETURNS void). They MUST NOT be
 -- used to claim function-body behavior or full Production schema parity.
@@ -137,16 +137,6 @@ $function$;
 REVOKE ALL ON FUNCTION private.enforce_unique_admin_market_listing_symbol()
   FROM PUBLIC, anon, authenticated, service_role;
 
--- Bind the exact Production trigger in the disposable fixture so catalog
--- assertions and admin-add tests exercise the same BEFORE INSERT/UPDATE path.
-DROP TRIGGER IF EXISTS admin_market_listing_unique_ticker
-  ON public.admin_market_listings;
-CREATE TRIGGER admin_market_listing_unique_ticker
-BEFORE INSERT OR UPDATE OF coingecko_id
-ON public.admin_market_listings
-FOR EACH ROW
-EXECUTE FUNCTION private.enforce_unique_admin_market_listing_symbol();
-
 CREATE OR REPLACE FUNCTION private.guard_active_account_writes()
 RETURNS void
 LANGUAGE plpgsql
@@ -178,8 +168,6 @@ $stub$;
 
 REVOKE ALL ON FUNCTION private.request_market_price_overflow() FROM PUBLIC, anon, authenticated, service_role;
 
--- Exact current Production body; live pg_get_functiondef matches the
--- applied migration ledger version 20261113175312 and repository migration.
 CREATE OR REPLACE FUNCTION public.admin_add_market_listing(p_coingecko_id text)
 RETURNS jsonb
 LANGUAGE plpgsql
@@ -211,9 +199,7 @@ BEGIN
     RAISE EXCEPTION 'Asset not found, inactive, or market data is stale';
   END IF;
 
-  IF v_asset.symbol IS NULL OR v_asset.symbol !~ '^[A-Za-z0-9]{2,15}$'
-
-CREATE OR REPLACE FUNCTION public.admin_disable_market_pair(p_coingecko_id text, p_reason text)
+  IF v_asset.symbol IS NULL OR v_asset.symbol !~ '^[A-Za-z0-9]{2,15}CREATE OR REPLACE FUNCTION public.admin_disable_market_pair(p_coingecko_id text, p_reason text)
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -801,9 +787,8 @@ GRANT EXECUTE ON FUNCTION public.request_market_price_refresh() TO service_role;
     RAISE EXCEPTION 'Trading-pair symbol conflicts with another asset';
   END IF;
 
-  -- An existing pair for this same CoinGecko asset is valid and must not
-  -- prevent adding the asset to the admin-curated list. Pair creation or
-  -- reactivation remains the responsibility of admin_enable_market_pair().
+  -- Existing matching pair is valid; do not create a duplicate and do not
+  -- block curated-list insertion. A conflicting asset symbol is still rejected.
   INSERT INTO public.admin_market_listings(coingecko_id, added_by)
   VALUES (v_asset.coingecko_id, v_admin)
   ON CONFLICT (coingecko_id) DO NOTHING;
@@ -830,7 +815,6 @@ REVOKE ALL ON FUNCTION public.admin_add_market_listing(text)
   FROM PUBLIC, anon, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.admin_add_market_listing(text)
   TO authenticated, service_role;
-
 CREATE OR REPLACE FUNCTION public.admin_disable_market_pair(p_coingecko_id text, p_reason text)
 RETURNS void
 LANGUAGE plpgsql
@@ -1403,3 +1387,13 @@ REVOKE ALL ON FUNCTION public.request_market_price_refresh() FROM PUBLIC, anon, 
 GRANT EXECUTE ON FUNCTION public.request_market_price_refresh() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.request_market_price_refresh() TO service_role;
 
+
+
+-- Exact Production trigger binding for the curated-list ticker guard.
+DROP TRIGGER IF EXISTS admin_market_listing_unique_ticker
+  ON public.admin_market_listings;
+CREATE TRIGGER admin_market_listing_unique_ticker
+BEFORE INSERT OR UPDATE OF coingecko_id
+ON public.admin_market_listings
+FOR EACH ROW
+EXECUTE FUNCTION private.enforce_unique_admin_market_listing_symbol();
