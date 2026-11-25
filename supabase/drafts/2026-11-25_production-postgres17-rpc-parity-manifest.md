@@ -9,8 +9,8 @@
 ## Interpretation rules
 
 1. The 46 signatures and the three API-role EXECUTE booleans below are copied from the reviewed current-state catalog contract. They are not proposed target permissions.
-2. The 38 functions still represented by NO-OP stubs in `rpc-security-postgres17-catalog-stubs.sql` are metadata-only. Their fixture `RETURNS void` declarations MUST NOT be treated as Production return types or function definitions.
-3. Eight functions have real/source-backed bodies in the current disposable fixture: `private.is_super_admin()`, `private.is_current_user_super_admin()`, `private.auto_list_verified_exchange_asset()`, `private.enforce_unique_admin_market_listing_symbol()`, `public.get_demo_trading_fee_rate(text,text)`, `public.admin_exchange_asset_sync_report()`, `public.claim_admin_asset_refresh(text,uuid)`, and `public.get_exchange_discovered_market_assets()`. Their source provenance differs; see below.
+2. The raw `rpc-security-postgres17-catalog-stubs.sql` contains 38 metadata-only stub declarations. The next workflow step replaces `public.get_exchange_discovered_market_assets()` with its exact applied migration body, leaving 37 metadata-only functions in the final PostgreSQL 17 smoke fixture. Fixture `RETURNS void` declarations MUST NOT be treated as Production return types or function definitions.
+3. Nine functions have real/source-backed bodies in the final disposable fixture: `private.is_super_admin()`, `private.is_current_user_super_admin()`, `private.auto_list_verified_exchange_asset()`, `private.enforce_unique_admin_market_listing_symbol()`, `public.get_demo_trading_fee_rate(text,text)`, `public.admin_exchange_asset_sync_report()`, `public.claim_admin_asset_refresh(text,uuid)`, `public.get_admin_market_listings()`, and `public.get_exchange_discovered_market_assets()`. Their source provenance differs; see below.
 4. The direct Production catalog snapshot in §2A now records owner and exact search_path for all 46 signatures: every function is owned by `postgres`; each path is either empty (`search_path=""`) or `pg_catalog`.
 5. Table dependencies, column dependencies, referenced functions, RLS policies, and table privileges are not inferred from names or stub code. They remain open until exact Production definitions and catalog dependency evidence are captured.
 6. No fixture is considered full Supabase parity: this is PostgreSQL 17 with synthetic roles and minimal tables; Auth/JWT, pg_net, pg_cron, extension behavior, RLS policies and grants are not comprehensively reproduced.
@@ -177,7 +177,7 @@ A stub may be replaced only when all are true:
 6. Tests cover caller role, function-level authorization, error paths, side effects and rollback.
 7. CI passes on PostgreSQL 17, and the manifest is updated with evidence links/commit hashes.
 
-**Current disposition (2026-11-25):** two stubs were replaced with exact current Production trigger bodies after matching `pg_get_functiondef` against its applied migration source. Its dependencies, RLS flags/policies, table ACLs, and trigger binding were inspected read-only. The new PostgreSQL 17 test uses synthetic market rows inside a transaction and rolls back. Thirty-nine inert stubs remain; each must pass the same source, signature, dependency, RLS, and side-effect gates before replacement.
+**Current disposition (2026-11-25):** three stubs were replaced with two exact Production trigger bodies and one ledger-recovered read-only RPC. Their definitions, return types, dependencies, RLS, table ACLs, trigger binding and role permissions were checked. The PostgreSQL 17 tests use synthetic rows in transactions and roll back. The exchange-discovery migration step also replaces its metadata stub, so the final harness has 9 real/source-backed bodies and 37 metadata-only stubs. Each remaining stub must pass the same source, signature, dependency, RLS and side-effect gates before replacement.
 
 ## 6. Migration source recovery — unresolved
 
