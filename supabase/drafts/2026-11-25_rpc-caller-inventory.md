@@ -222,3 +222,13 @@ A catalog-only comparison was run against the separate `DigiArz-Recovery-Test` p
 - Therefore this project cannot presently reproduce Production's function grants, scheduled execution identity, or Auth-trigger execution path. Do not treat it as a disposable clone for ACL rollout tests without first designing and explicitly approving a separate test-environment preparation plan.
 
 This Test-project check was SELECT-only. No extensions, functions, grants, triggers, cron jobs, or test fixtures were installed or changed.
+
+## 12. Superseding runtime evidence — 2026-11-25
+
+The earlier unresolved-caller conclusion for `public.claim_admin_asset_refresh(text,uuid)` is superseded by the live caller trace in `2026-11-25_refresh-claim-live-caller-trace.md`.
+
+Production Edge Function `admin-refresh-crypto-asset` is ACTIVE at version 2 with `verify_jwt=true`. Its deployed source validates the Bearer token through `auth.getUser(token)`, verifies super-admin access through the user-scoped admin RPC, obtains the subject ID from the verified Auth response, and calls `claim_admin_asset_refresh(p_coingecko_id,p_admin_user_id)` through a server-side service-role client. The live function ACL explicitly grants EXECUTE to service_role. This exact grant is required by the currently deployed caller path and must not be revoked unless the runtime is deliberately redesigned and re-reviewed.
+
+The available 24-hour Edge Function log window contained no request path for `admin-refresh-crypto-asset`; this means no invocation was evidenced in that window, not that the deployed caller does not exist. No Production ACL or function was changed.
+
+This finding narrows the caller uncertainty for this one signature only. It does not prove that any other service_role-only RPC is used, and it does not justify blanket service_role EXECUTE on future functions.
