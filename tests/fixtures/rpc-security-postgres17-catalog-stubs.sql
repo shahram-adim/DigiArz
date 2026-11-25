@@ -1,8 +1,9 @@
 -- TEST-ONLY metadata fixture for tests/rpc-security-catalog.sql.
 -- Reproduces the 46 exact Production signatures and current API-role ACL
 -- booleans from the reviewed 2026-11-25 catalog snapshot.
--- Except for the five real function bodies installed by the bootstrap file,
--- all remaining functions below are inert NO-OP stubs (RETURNS void). They MUST NOT be
+-- Five real bodies are installed by the bootstrap; this file adds one exact
+-- migration-backed trigger body. The remaining 40 functions are inert NO-OP stubs
+-- (RETURNS void). They MUST NOT be
 -- used to claim function-body behavior or full Production schema parity.
 -- This file runs only inside the disposable PostgreSQL 17 service container.
 
@@ -66,18 +67,50 @@ $stub$;
 
 REVOKE ALL ON FUNCTION private.auto_list_verified_exchange_asset() FROM PUBLIC, anon, authenticated, service_role;
 
+-- Exact current Production body, independently matched against
+-- migration 20261113184000_prevent_curated_ticker_collisions.sql.
 CREATE OR REPLACE FUNCTION private.enforce_unique_admin_market_listing_symbol()
-RETURNS void
+RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = ''
-AS $stub$
+AS $function$
+DECLARE
+  v_symbol text;
 BEGIN
-  RETURN;
-END;
-$stub$;
+  SELECT ca.symbol INTO v_symbol
+  FROM public.crypto_assets ca
+  WHERE ca.coingecko_id = NEW.coingecko_id;
 
-REVOKE ALL ON FUNCTION private.enforce_unique_admin_market_listing_symbol() FROM PUBLIC, anon, authenticated, service_role;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Curated asset does not exist';
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM public.admin_market_listings l
+    JOIN public.crypto_assets other ON other.coingecko_id = l.coingecko_id
+    WHERE l.coingecko_id <> NEW.coingecko_id
+      AND pg_catalog.upper(other.symbol) = pg_catalog.upper(v_symbol)
+  ) THEN
+    RAISE EXCEPTION 'Another curated asset already uses this ticker';
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM public.demo_trading_pairs dp
+    WHERE dp.pair_symbol = pg_catalog.upper(v_symbol) || 'USDT'
+      AND dp.base_coingecko_id <> NEW.coingecko_id
+  ) THEN
+    RAISE EXCEPTION 'Ticker conflicts with an existing demo trading pair';
+  END IF;
+
+  RETURN NEW;
+END;
+$function$;
+
+REVOKE ALL ON FUNCTION private.enforce_unique_admin_market_listing_symbol()
+  FROM PUBLIC, anon, authenticated, service_role;
 
 CREATE OR REPLACE FUNCTION private.guard_active_account_writes()
 RETURNS void
