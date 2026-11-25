@@ -8,6 +8,11 @@ CREATE TABLE auth.users (
 INSERT INTO auth.users(id)
 VALUES ('22222222-2222-4222-8222-222222222222');
 
+-- Shared synthetic FK target used by existing ticker-conflict integration fixtures.
+INSERT INTO public.crypto_assets
+  (coingecko_id,symbol,name,market_cap_rank,current_price_usd,total_volume_usd,last_updated,is_active)
+VALUES ('different-fixture-asset','DIFF','Fixture Pair Owner',1,1,1000000,now(),true);
+
 CREATE TABLE public.demo_trading_pairs (
   pair_symbol text PRIMARY KEY,
   base_coingecko_id text NOT NULL UNIQUE REFERENCES public.crypto_assets(coingecko_id),
