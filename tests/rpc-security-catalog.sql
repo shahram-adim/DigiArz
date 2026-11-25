@@ -111,7 +111,7 @@ BEGIN
            ('public','get_exchange_discovered_market_assets')
   ),
   actual AS (
-    SELECT n.nspname, p.proname
+    SELECT n.nspname AS schema_name, p.proname AS function_name
     FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
     WHERE n.nspname IN ('public','private')
       AND p.prosecdef
@@ -148,7 +148,7 @@ BEGIN
       ('public','request_market_price_refresh')
   ),
   actual AS (
-    SELECT n.nspname, p.proname
+    SELECT n.nspname AS schema_name, p.proname AS function_name
     FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
     WHERE n.nspname IN ('public','private')
       AND p.prosecdef
@@ -231,7 +231,7 @@ BEGIN
       ('public','request_market_price_refresh')
   ),
   actual AS (
-    SELECT n.nspname, p.proname
+    SELECT n.nspname AS schema_name, p.proname AS function_name
     FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
     WHERE n.nspname IN ('public','private')
       AND p.prosecdef
