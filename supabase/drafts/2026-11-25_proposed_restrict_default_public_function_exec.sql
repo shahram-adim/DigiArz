@@ -22,13 +22,20 @@
 --    ALTER DEFAULT PRIVILEGES FOR ROLE postgres
 --      REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
 --
--- B. Remove any schema-specific additive EXECUTE defaults for PUBLIC and
---    direct EXECUTE defaults for API client roles on future public functions.
---    This schema-level PUBLIC revoke cannot replace step A; it only removes
---    an additive schema-specific grant. Preserve service_role temporarily:
+-- B. Remove schema-specific additive EXECUTE defaults for PUBLIC and direct
+--    EXECUTE defaults for API roles (anon, authenticated, service_role) on
+--    future public functions. This schema-level PUBLIC revoke cannot replace
+--    step A; it only removes an additive schema-specific grant.
+--
+--    The caller trace found no current Edge Function invoking a service-role
+--    RPC: Edge Functions use the service key for direct PostgREST table
+--    operations; cron jobs run as postgres; the Auth setup path is a trigger.
+--    Therefore service_role should not receive blanket EXECUTE on every new
+--    public function. If a future worker genuinely needs an RPC, grant that
+--    exact signature explicitly after review.
 --
 --    ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
---      REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC, anon, authenticated;
+--      REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC, anon, authenticated, service_role;
 --
 -- C. Explicitly grant EXECUTE on each new function only to the roles that
 --    need it. This must be done per exact signature, not by blanket grants.
@@ -59,7 +66,9 @@
 -- 2) Enumerate all function signatures and owners in public/private.
 -- 3) Map each function to its required callers (anon, authenticated,
 --    service_role, postgres/worker) and inspect SECURITY DEFINER bodies.
--- 4) Add exact EXECUTE grants for approved functions only.
+-- 4) Add exact EXECUTE grants for approved functions only; do not assume
+--    service_role needs blanket access merely because Edge Functions use its
+--    key for table-level PostgREST operations.
 -- 5) Test new function creation and inherited ACLs in a disposable clone.
 -- 6) Run RPC negative tests (anon, ordinary authenticated) and positive
 --    tests (approved authenticated, service_role, admin) using test identities.
