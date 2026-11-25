@@ -251,3 +251,91 @@ $function$;
 
 REVOKE ALL ON FUNCTION public.claim_admin_asset_refresh(text, uuid) FROM PUBLIC, anon, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.claim_admin_asset_refresh(text, uuid) TO service_role;
+
+
+-- Synthetic, non-financial dependencies for the read-only curated-market RPC.
+-- These are minimal test tables, not a full Production schema reconstruction.
+CREATE TABLE public.crypto_assets (
+  coingecko_id text PRIMARY KEY,
+  symbol text NOT NULL,
+  name text NOT NULL,
+  image_url text,
+  market_cap_rank integer,
+  price_toman numeric,
+  price_change_percentage_24h numeric,
+  total_volume_usd numeric,
+  is_active boolean NOT NULL DEFAULT true
+);
+
+CREATE TABLE public.market_prices (
+  symbol text PRIMARY KEY,
+  price numeric,
+  updated_at timestamptz,
+  source text
+);
+
+ALTER TABLE public.admin_market_listings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.crypto_assets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.market_prices ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS admin_market_listings_public_read ON public.admin_market_listings;
+CREATE POLICY admin_market_listings_public_read
+  ON public.admin_market_listings
+  FOR SELECT TO anon, authenticated
+  USING (true);
+
+REVOKE ALL ON public.admin_market_listings, public.crypto_assets, public.market_prices
+  FROM PUBLIC, anon, authenticated, service_role;
+GRANT SELECT ON public.admin_market_listings TO anon, authenticated;
+
+-- Exact read-only function body from the final reviewed migration source.
+CREATE OR REPLACE FUNCTION public.get_admin_market_listings()
+RETURNS TABLE (
+  coingecko_id text,
+  symbol text,
+  name text,
+  image_url text,
+  market_cap_rank integer,
+  current_price_usd numeric,
+  price_toman numeric,
+  price_change_percentage_24h numeric,
+  total_volume_usd numeric,
+  last_updated timestamptz,
+  added_at timestamptz
+)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $function$
+  SELECT
+    ca.coingecko_id,
+    ca.symbol,
+    ca.name,
+    ca.image_url,
+    ca.market_cap_rank,
+    CASE
+      WHEN mp.updated_at >= pg_catalog.now() - interval '2 minutes'
+       AND mp.source = 'CoinGecko'
+       AND mp.price > 0
+      THEN mp.price
+      ELSE NULL
+    END AS current_price_usd,
+    ca.price_toman,
+    ca.price_change_percentage_24h,
+    ca.total_volume_usd,
+    mp.updated_at AS last_updated,
+    l.created_at AS added_at
+  FROM public.admin_market_listings AS l
+  JOIN public.crypto_assets AS ca ON ca.coingecko_id = l.coingecko_id
+  LEFT JOIN public.market_prices AS mp
+    ON mp.symbol = pg_catalog.upper(ca.symbol) || 'USDT'
+  WHERE ca.is_active IS TRUE
+  ORDER BY l.created_at DESC, ca.market_cap_rank ASC NULLS LAST;
+$function$;
+
+-- Match the reviewed current effective ACL in the disposable fixture.
+-- The service_role grant here models the observed function ACL only; it does
+-- not set or alter any default privileges.
+REVOKE ALL ON FUNCTION public.get_admin_market_listings() FROM PUBLIC, anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.get_admin_market_listings() TO anon, authenticated, service_role;
