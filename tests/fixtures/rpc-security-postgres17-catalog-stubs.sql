@@ -2,8 +2,8 @@
 -- Reproduces the 46 exact Production signatures and current API-role ACL
 -- booleans from the reviewed 2026-11-25 catalog snapshot.
 -- Five real bodies are installed by the bootstrap; this file adds two exact
--- migration-backed trigger bodies and two ledger/source-backed read-only RPCs.
--- The remaining 37 functions are inert NO-OP stubs (the exchange-discovery stub
+-- migration-backed trigger bodies and three ledger/source-backed read-only RPCs.
+-- The remaining 36 functions are inert NO-OP stubs (the exchange-discovery stub
 -- is replaced by its applied migration in the following workflow step).
 -- (RETURNS void). They MUST NOT be
 -- used to claim function-body behavior or full Production schema parity.
@@ -262,20 +262,60 @@ REVOKE ALL ON FUNCTION public.admin_review_market_listings() FROM PUBLIC, anon, 
 GRANT EXECUTE ON FUNCTION public.admin_review_market_listings() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_review_market_listings() TO service_role;
 
-CREATE OR REPLACE FUNCTION public.admin_search_market_assets(p_search text, p_limit integer)
-RETURNS void
+-- Exact current Production definition recovered from applied migration ledger
+-- version 20261113173506 (name: admin_on_demand_crypto_asset_refresh) and
+-- matched byte-for-byte in behavior to live pg_get_functiondef on 2026-11-25.
+-- The repo's similarly named 20261113190000 file has a timestamp mismatch;
+-- the applied ledger statements, not that filename, are the provenance.
+CREATE OR REPLACE FUNCTION public.admin_search_market_assets(
+  p_search text,
+  p_limit integer DEFAULT 20
+)
+RETURNS TABLE (
+  coingecko_id text,
+  symbol text,
+  name text,
+  image_url text,
+  market_cap_rank integer,
+  current_price_usd numeric,
+  last_updated timestamptz
+)
 LANGUAGE plpgsql
+STABLE
 SECURITY DEFINER
 SET search_path = ''
-AS $stub$
+AS $function$
+DECLARE
+  v_search text := pg_catalog.btrim(COALESCE(p_search, ''));
 BEGIN
-  RETURN;
-END;
-$stub$;
+  IF auth.uid() IS NULL OR NOT private.is_super_admin() THEN
+    RAISE EXCEPTION 'Super administrator access required' USING errcode = '42501';
+  END IF;
+  IF pg_catalog.length(v_search) < 2 THEN
+    RAISE EXCEPTION 'Search query must contain at least two characters';
+  END IF;
 
-REVOKE ALL ON FUNCTION public.admin_search_market_assets(p_search text, p_limit integer) FROM PUBLIC, anon, authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.admin_search_market_assets(p_search text, p_limit integer) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.admin_search_market_assets(p_search text, p_limit integer) TO service_role;
+  RETURN QUERY
+  SELECT ca.coingecko_id, ca.symbol, ca.name, ca.image_url,
+         ca.market_cap_rank, ca.current_price_usd, ca.last_updated
+  FROM public.crypto_assets AS ca
+  WHERE ca.is_active IS TRUE
+    AND (
+      ca.symbol ILIKE '%' || v_search || '%'
+      OR ca.name ILIKE '%' || v_search || '%'
+      OR ca.coingecko_id ILIKE '%' || v_search || '%'
+    )
+  ORDER BY ca.market_cap_rank ASC NULLS LAST
+  LIMIT LEAST(GREATEST(COALESCE(p_limit, 20), 1), 50);
+END;
+$function$;
+
+-- Reproduce the effective Production ACL, including service_role inherited
+-- from postgres' public-schema function default privileges. Test-only fixture grant.
+REVOKE ALL ON FUNCTION public.admin_search_market_assets(text, integer)
+  FROM PUBLIC, anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.admin_search_market_assets(text, integer)
+  TO authenticated, service_role;
 
 CREATE OR REPLACE FUNCTION public.cancel_conditional_exit_order(p_order_id uuid)
 RETURNS void
