@@ -6,7 +6,7 @@
 
 ## What this harness does
 
-The workflow `.github/workflows/rpc-security-postgres17-smoke.yml` starts a disposable `postgres:17` service container inside the GitHub Actions job. It creates synthetic API roles and one synthetic super-admin identity, installs a test-only `auth.uid()` shim, and exercises the current Production body of the read-only `public.admin_exchange_asset_sync_report()` function against empty synthetic reporting tables.
+The existing GitHub Actions workflow starts a disposable `postgres:17` service container inside the job. It creates synthetic API roles and one synthetic super-admin identity, installs a test-only `auth.uid()` shim, seeds the current-state ACL metadata for all 46 exact SECURITY DEFINER signatures (43 inert stubs plus three reviewed real bodies), and exercises the current Production body of the read-only `public.admin_exchange_asset_sync_report()` function against empty synthetic reporting tables.
 
 The test checks two separate security layers:
 
@@ -27,9 +27,9 @@ This separation matters: an ACL denial and a function-body authorization denial 
 
 ## Explicit scope limitation — not Production parity
 
-This is a **PostgreSQL 17 behavior smoke harness**, not a complete Supabase or Production-parity clone. It does not reproduce:
+This is a **PostgreSQL 17 ACL/function-behavior smoke harness**, not a complete Supabase or Production-parity clone. It reproduces the 46-signature current-state ACL metadata contract, but it does not reproduce:
 
-- the full 46-signature SECURITY DEFINER catalog;
+- the remaining 43 SECURITY DEFINER function bodies and their dependencies;
 - every Production table, RLS policy, schema privilege, owner, or default ACL;
 - Supabase-managed roles and platform schemas beyond the minimal test shims;
 - the real Supabase Auth implementation or `auth.users` trigger;
@@ -61,16 +61,18 @@ These files are reviewable test code only. They do not modify Production or any 
 
 ## First CI execution result — 2026-11-25
 
-The first PostgreSQL 17 smoke execution completed successfully on the harness code commit:
+The first PostgreSQL 17 smoke execution completed successfully on the initial harness. A second expanded run then passed the 46-signature ACL metadata contract as well:
 
 - PostgreSQL server: **17.12**.
 - Fixture bootstrap: success.
 - Exact-signature / SECURITY DEFINER / empty-search_path / ACL contract: success.
+- All **46 exact SECURITY DEFINER signatures** and their current anon/authenticated/service_role EXECUTE booleans, constrained search_path, no direct PUBLIC EXECUTE, and schema-USAGE contract: success. The 43 placeholder bodies are inert metadata-only stubs and were never invoked.
 - Anonymous caller: rejected by the function-body guard with SQLSTATE `42501`.
 - Ordinary authenticated caller: rejected by the function-body guard with SQLSTATE `42501`.
 - Synthetic super-admin caller: accepted and returned the JSON report.
 - Transaction rollback: completed.
 - Post-check: exactly one synthetic super-admin row remained in the disposable database.
-- GitHub Actions run IDs: `45597893116` and `45597904032`; both `postgres17-rpc-smoke` jobs and both `unit-tests` jobs passed. The existing remote-database integration job remained skipped.
+- Initial GitHub Actions run IDs: `45597893116` and `45597904032`; both `postgres17-rpc-smoke` jobs and both `unit-tests` jobs passed.
+- Expanded 46-signature ACL run: `45598493186`; `postgres17-rpc-smoke` and `unit-tests` passed, and the existing remote-database integration job remained skipped.
 
 This confirms the fixture and the single-RPC behavior test execute on PostgreSQL 17. It does not upgrade the result to full Production parity; all limitations in the scope section above remain in force.
