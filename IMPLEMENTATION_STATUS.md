@@ -1528,3 +1528,14 @@
 - [x] دو شاخهٔ اضافی `perf/crypto-assets-noop-upserts` و `perf/market-price-bulk-upsert-draft` برای هر ۱۷ نام canonical migration بررسی شدند؛ هیچ‌یک از ۳۴ مسیر SQL در این دو شاخه وجود نداشت.
 - [!] این بررسی اضافه، نبود SQL را فقط در همین دو درخت شاخه‌ای ثابت می‌کند؛ منبع authoritative تازه‌ای پیدا نشد. تعداد منابع SQL اصلی بازیابی‌شده همچنان صفر و تعداد پرونده‌های مفقود ۱۷ است.
 - [!] PR #63 همچنان Draft و ادغام‌نشده است؛ هیچ Migration، db push، deploy، Production write، grant، policy یا تغییر cron انجام نشد.
+
+
+## وضعیت تکمیلی — 2026-11-25، پس از اجرای آزمون دوکاربره RLS
+
+- [x] ۱۷ منبع Migration که در snapshot اولیهٔ ممیزی PR #63 مفقود ثبت شده بودند، بعداً در شاخهٔ مستقل PR #62 از ستون `supabase_migrations.schema_migrations.statements` بازیابی شدند؛ هر ۱۷ بدنه پس از حذف سربرگ provenance با متن Production byte-for-byte تطبیق داده شده‌اند. فایل‌ها فقط در `supabase/drafts/` و برای بازبینی نگه‌داری می‌شوند، نه در مسیر اجرایی Migration.
+- [x] طرح Replay در PR #62 تأیید می‌کند Replay هنوز اجرا نشده و فقط باید در PostgreSQL 17 موقت CI با حذف/جایگزینی HTTP، pg_net، pg_cron، seed هویت ممتاز و هرگونه دادهٔ واقعی/مالی انجام شود.
+- [!] گزارش‌های `production_migration_authority_search_2026-11-25.json` و `production_missing_migration_recovery_map_2026-11-25.json` در PR #63 snapshot تاریخی پیش از بازیابی نهایی هستند؛ عبارت «۱۷ منبع پیدا نشد» وضعیت پس از بازیابی PR #62 را منعکس نمی‌کند.
+- [!] اختلاف مستقل Kifpool همچنان باید حفظ شود: فایل محلی `20261115134500_add_kifpool_to_scheduled_exchange_asset_sync.sql` از نظر رفتار با بدنهٔ ledger نسخهٔ `20261115134357` متفاوت است و نباید به‌عنوان همان منبع تاریخی جا زده شود. سه اختلاف دیگر فقط newline هستند؛ ۱۶ مورد از ۲۰ اختلاف timestamp، byte-exact هستند.
+- [x] تست RLS دوکاربره برای ۸ رابطهٔ کاربرمحور به workflow PostgreSQL 17 افزوده شد؛ CI run `45692611554` روی commit کد `bfc099c15421b9c32024267293dce3498a56d94f` با موفقیت کامل شد. تمام ۲۲ مرحلهٔ substantive از جمله RLS، Market/Limit، Stop-Limit، TP-SL و آزمون‌های race موفق شدند.
+- [!] تست RLS از Auth shim و helper فعال‌بودن حسابِ مصنوعی استفاده می‌کند؛ رفتار JWT واقعی و بدنهٔ live تابع `current_account_is_active()` هنوز در این تست اثبات نشده است.
+- [!] PR #63 همچنان Draft/open/unmerged است؛ آخرین مقایسهٔ شاخه با `main`: ۷۱ commit جلوتر و صفر عقب‌تر. هیچ Production change، Migration، db push، Merge، Deploy، Cron change، grant یا RLS policy change انجام نشده است.
