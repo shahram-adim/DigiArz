@@ -341,7 +341,7 @@ test('Production role matrix exactly reconciles every captured function ACL and 
   assert.equal(liveManifest.functions.length, 46);
 
   const parseAcl = raw => {
-    assert.match(raw, /^\\{.*\\}$/);
+    assert.ok(raw.startsWith('{') && raw.endsWith('}'), 'malformed ACL array: ' + raw);
     const entries = raw.slice(1, -1).split(',').filter(Boolean);
     const privileges = new Map();
     for (const entry of entries) {
