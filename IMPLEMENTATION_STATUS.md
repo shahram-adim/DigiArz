@@ -1421,3 +1421,12 @@
 3. Review the four excess-grant findings against actual application call sites before proposing least-privilege changes; do not apply GRANT/REVOKE or RLS changes without owner approval.
 4. Continue recovering authoritative migration sources and building the isolated PostgreSQL 17 ACL/RLS/function parity harness.
 5. Keep merge, Production migrations, grants, policies, function/view changes and financial writes blocked pending explicit approval.
+
+
+### Relation dependency inventory — 2026-11-25
+- [x] Static-scanned all 46 live Production function bodies for schema-qualified relation references.
+- [x] Resolved all 27 unique candidates against the live Production catalog; no unresolved candidates remained.
+- [x] Captured 175 live columns plus relation owner, RLS/forced-RLS flags, effective anon/authenticated/service_role table privileges, constraints, indexes, policies and user triggers.
+- [x] Added `supabase/audit/production_rpc_relation_dependencies_2026-11-25.json` and extended `tests/production-rpc-manifest.test.js` to validate its counts and references.
+- [!] Static scanning does not prove full dependency coverage for dynamic SQL, unqualified identifiers, trigger-only dependencies or indirect calls.
+- CI Run #45634861182 on dependency-inventory commit `d99a4397e945719e99ce628f5537153dc83f683d` passed the Node/browser test step and the first eight disposable PostgreSQL steps at the time this status note was added; remaining PostgreSQL lifecycle steps were still running.
