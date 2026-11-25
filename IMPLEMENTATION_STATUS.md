@@ -1390,3 +1390,169 @@
 3. Review the Production-versus-candidate child-row lock difference before proposing any migration.
 4. Keep `supabase db push`, function deployment, grant/policy changes, and all Production financial writes blocked pending explicit approval.
 5. After the Stop-Limit gate, return to the Toman market page/provider work and the four approved Iranian sources; do not report stale prices as live.
+
+
+## Daily execution report — 2026-11-25 — Production RPC security manifest and anonymous access review
+
+### Work completed (read-only Production inspection)
+- Captured all 46 live `SECURITY DEFINER` functions from Supabase Production using PostgreSQL catalogs: complete `pg_get_functiondef`, identity arguments, result type, owner, volatility, `search_path`, raw ACL and MD5 fingerprint.
+- Captured 34 public/private base relations, their RLS flags and role privileges, 21 policies, and six live trigger bindings to SECURITY DEFINER functions.
+- Captured anonymous effective function/table/view privilege metadata and the definitions of the two anon-granted public views.
+- Added `tests/production-rpc-manifest.test.js` to verify manifest completeness, the anon RPC allowlist, trigger-to-function references, RLS/view grant constraints and explicit super-admin guards for all ten `admin_*` RPCs.
+- Created draft PR #63: https://github.com/shahram-adim/DigiArz/pull/63 . It remains open, draft and unmerged.
+
+### Findings
+- Exactly two of the 46 captured SECURITY DEFINER functions are executable by `anon`: `public.get_admin_market_listings()` and `public.get_exchange_discovered_market_assets()`. Their current return fields and SQL bodies expose market/exchange-discovery metadata, not user identity, wallet, balance, order, trade, reservation or transaction records.
+- All ten `admin_*` functions in the snapshot contain an explicit `private.is_super_admin()` or `private.is_current_user_super_admin()` guard. Their captured ACLs do not grant `anon`.
+- `anon` has excess DML/TRUNCATE grants on `coin_reviews`; the captured RLS policy set gives anon SELECT only, while write policies are authenticated-only.
+- `anon` has SELECT on `conditional_orders`, but the captured SELECT policy is authenticated-only.
+- `anon` has broad grants on `market_prices_with_toman` and `market_toman_performance`; both are `security_invoker=true` views. Underlying anon grants currently restrict the former to base-table SELECT and provide no base-table access for the latter's Toman sources.
+- These are least-privilege hardening opportunities, not confirmed anonymous write/read exploits. No anonymous API request was executed; conclusions are based on the captured ACL, RLS and view metadata.
+
+### CI status
+- Workflow Run #45633511235 on commit `b67d2754ffcd234a629a131bb048a928bba201cf` passed all 25 workflow steps, including all 73 Node tests present at that commit and the PostgreSQL 17 regression/lifecycle/race suite.
+- A subsequent admin-guard test addition exposed an invalid regular-expression escape in the new test; that failure was diagnosed from the Actions log and corrected in commit `3830c0df2e659db1b4abeb68c45da10dd83eeb24`.
+- The Actions run for corrected commit `3830c0df2e659db1b4abeb68c45da10dd83eeb24` was still in progress at report time; its final result must be checked before marking the new test verified.
+
+### Safety and next steps
+- No Production grants, RLS policies, functions, views, migrations, cron jobs, Edge Functions or financial rows were changed. No user/financial row data was read.
+1. Verify the latest CI run on the corrected PR head; fix only test defects found by evidence.
+2. Reconstruct table/function dependencies for the 46 bodies using reviewed SQL and authoritative migration sources; empty `pg_depend` entries are not evidence of no PL/pgSQL table references.
+3. Review the four excess-grant findings against actual application call sites before proposing least-privilege changes; do not apply GRANT/REVOKE or RLS changes without owner approval.
+4. Continue recovering authoritative migration sources and building the isolated PostgreSQL 17 ACL/RLS/function parity harness.
+5. Keep merge, Production migrations, grants, policies, function/view changes and financial writes blocked pending explicit approval.
+
+
+### Relation dependency inventory — 2026-11-25
+- [x] Static-scanned all 46 live Production function bodies for schema-qualified relation references.
+- [x] Resolved all 27 unique candidates against the live Production catalog; no unresolved candidates remained.
+- [x] Captured 175 live columns plus relation owner, RLS/forced-RLS flags, effective anon/authenticated/service_role table privileges, constraints, indexes, policies and user triggers.
+- [x] Added `supabase/audit/production_rpc_relation_dependencies_2026-11-25.json` and extended `tests/production-rpc-manifest.test.js` to validate its counts and references.
+- [!] Static scanning does not prove full dependency coverage for dynamic SQL, unqualified identifiers, trigger-only dependencies or indirect calls.
+- CI Run #45634861182 on test commit `311d2e0f9f5ad57aa29090a3165c6ed5d17dfa21` completed with `success`; all 26 workflow steps passed, including the Node/browser suite and disposable PostgreSQL arithmetic, widening, lifecycle and two-session race tests.
+
+
+### Production migration-source recovery — reconciliation completed 2026-11-25
+- [x] Re-read the live Supabase migration ledger and GitHub `main` recursive tree; exact count: 55 Production ledger entries and 40 local SQL files.
+- [x] Matched migration identities by normalized migration name rather than timestamp alone: 38 names match, of which 18 timestamps match and 20 have timestamp drift.
+- [x] Confirmed 17 ledger entries have no matching SQL source file in `main`; two local SQL files have no matching ledger name.
+- [x] Searched 12 relevant existing branches for the missing migration source files; none of the 17 files was present in those branch trees.
+- [x] Added `supabase/audit/production_migration_source_reconciliation_2026-11-25.json` and CI assertions so timestamp drift is not misreported as a missing source.
+- [!] No missing migration was reconstructed from live catalog state, no SQL was applied, and no db push was run.
+- Next: seek original source artifacts from authoritative backup/CI/developer artifacts; if unavailable, prepare per-migration evidence packages from live definitions, ACL/RLS, triggers and dependency metadata, clearly labeled as reconstructions and requiring manual approval. Keep db push and Production changes blocked.
+
+
+### Missing-migration live-evidence map — 2026-11-25
+- [x] Grouped all 17 missing sources into four evidence domains: admin/wallet/roles (6), Iranian exchange observation and workers (7), verified pair activation (1), and backpressure/pg_net queue snapshot/throttling (3).
+- [x] Read-only catalog inspection captured current schema metadata for `wallets`, `coin_reviews`, `demo_trading_fees`, `profiles`, `private.admin_users`, `private.admin_wallet_adjustments`, `exchange_asset_observations`, exchange request queues and pg_net backup-table definitions.
+- [x] Captured current relevant routine signatures/fingerprints and cron job IDs/schedules/active flags. No table rows or queue payloads were read.
+- [x] Added `supabase/audit/production_missing_migration_recovery_map_2026-11-25.json` and a CI completeness guard.
+- [!] The live `wallets` schema currently declares defaults `balance_usdt=200` and `balance_irr=1000000000`; reconcile this with the separately approved product defaults before any future onboarding/default changes. No data/default was changed.
+- [!] Live function bodies and cron metadata represent current state, not the exact historical SQL/order or dropped intermediate states. The recovery map is evidence-only and must not be used as an executable migration.
+- Next: obtain original SQL from a trusted backup/developer artifact; otherwise prepare review-only per-object reconstruction dossiers with explicit provenance and unknowns. Keep `db push`, migrations, grants, RLS changes, cron changes and all Production writes blocked.
+
+
+### Authoritative-source search expansion — 2026-11-25
+- [x] Re-read the historical `supabase/MIGRATION_RECONCILIATION.md`: it documented 14 missing sources on 2026-11-17; the current ledger's 17 are those 14 plus three later entries from 2026-11-21.
+- [x] Inspected GitHub migration-directory commit history (44 returned commits), 20 unique topic-branch trees, relevant PR changed-file lists, and code-search results for representative missing migration names and worker functions.
+- [x] Confirmed PR #7's three migration files, PR #39's Bit24 deduplication migration, and PR #40's observation-bloat migration are distinct from the 17 missing sources.
+- [x] Checked downloadable artifacts for two prior relevant CI runs; both returned zero artifacts.
+- [x] Added `supabase/audit/production_migration_authority_search_2026-11-25.json` and a CI assertion for the evidence and bounded-search limitations.
+- [!] No authoritative SQL source was recovered by these checks. This is not proof that external backups, developer clones, unexamined refs or other deployment artifacts do not contain a copy.
+- Next: obtain owner-controlled backup/export or original deployment/SQL-editor transcript; alternatively inspect the developer workstation's original clone, reflogs and dangling Git objects. Do not reconstruct executable SQL from current Production catalog state alone.
+
+
+- [x] Scope correction: the authority-search artifact and test list exactly 28 PR changed-file inventories actually queried; PRs not queried are not claimed as searched.
+
+
+### Final PR-head CI verification — 2026-11-25
+- [x] Re-fetched PR #63 metadata and confirmed the exact branch HEAD was `46ffca599929b7596e004171ee776915ce867c67`; PR remains open, Draft, unmerged, base `main`.
+- [x] GitHub Actions run `45637284651` (run #1996) for that exact HEAD completed with `success`; its `exact-decimal` job completed successfully.
+- [x] All 22 substantive workflow steps passed, including Node/browser integration, PostgreSQL 17 arithmetic and widening rehearsals, Market/Limit/Stop-Limit/TP-SL lifecycle tests, and two-session race tests.
+- [!] This confirms only the CI suite on disposable test infrastructure. It does not validate or authorize any Production migration, grant/policy/function change, deployment, cron change, or financial write.
+- [ ] Continue recovery of the 17 authoritative missing migration SQL sources from owner-controlled backups, original SQL Editor/deployment transcripts, or the original developer clone/reflogs. Until then, keep migration replay and `supabase db push` blocked.
+
+
+### پرونده‌های شواهد مستقل برای ۱۷ Migration مفقود — 2026-11-25
+- [x] ایجاد `supabase/audit/production_missing_migration_dossiers_2026-11-25.md` شامل ۱۷ پرونده مستقل در چهار حوزه: کیف پول/مدیران (۶)، sync صرافی‌های ایرانی (۷)، فعال‌سازی pair (۱)، backpressure/pg_net (۳).
+- [x] هر پرونده شامل اثرات/اشیای زندهٔ مشاهده‌شده، شواهد موجود، موارد نامعلوم، مدرک اصلی لازم و نتیجهٔ ایمنی است.
+- [x] دروازهٔ پذیرش منبع اصلی و ممنوعیت اجرای SQL حدسی، queue replay، cron changes و تغییرات Production به‌صورت صریح ثبت شد.
+- [!] این مستندات بازسازی SQL اصلی نیستند؛ در این گام هیچ SQL اجرایی ساخته یا Migration بازیابی نشده است.
+- [x] تعداد پرونده‌ها ۱۷/۱۷؛ منبع اصلی بازیابی‌شده ۰؛ SQL اجرایی ساخته‌شده ۰.
+- [ ] گام بعد: بررسی فقط‌خواندنی provenance برای هر routine/trigger/job مرتبط در manifestها و افزودن ارجاع دقیق به شناسه/فینگرپرینت هر شیء؛ سپس CI completeness guard برای پرونده‌ها.
+- [!] PR #63 همچنان Draft و ادغام‌نشده بماند؛ `supabase db push` و هر تغییر Production ممنوع تا بازیابی منبع معتبر و تأیید مالک.
+
+- [x] تست CI `tests/production-rpc-manifest.test.js` توسعه یافت تا وجود دقیق ۱۷ پرونده، یکتایی versionها، برچسب غیرقابل اجرا بودن، صفر بودن SQL بازیابی/ساخته‌شده و دروازهٔ پذیرش منبع را کنترل کند.
+- [!] تست جدید روی commit `ac6e265f78803efdbce6fff47e6a6690b1a2469f` ثبت شده؛ نتیجهٔ CI این commit هنوز تأیید نشده و نباید سبز فرض شود.
+
+- [!] CI run `45638928773` روی commit قبلی شکست خورد: تست جدید پرونده‌ها به‌علت escape دوگانه در regex، صفر عنوان Migration را match کرد (انتظار ۱۷). ۸۱ تست از ۸۲ تست موفق بودند؛ مراحل PostgreSQL بعدی به‌دلیل توقف زودهنگام اجرا نشدند.
+- [x] علت مشخص شد و regex در commit `d99167600ec869af9ada7868f7c98745a6cbae7a` اصلاح شد تا ۱۴ رقم ابتدای headingها را match کند.
+- [ ] CI commit اصلاحی هنوز در فهرست اجراها ظاهر نشده؛ نتیجهٔ آن تأیید نشده است.
+
+- [x] CI اجرای اصلاح‌شدهٔ commit `d99167600ec869af9ada7868f7c98745a6cbae7a` در run `45639205441` با موفقیت کامل شد؛ job `exact-decimal` success.
+- [x] crosswalk وضعیت فعلی ۴ گروه Migration مفقود با manifest توابع، relation inventory، RLS/trigger bindings و cron metadata ثبت‌شده تکمیل شد: ۱۲ routine fingerprint مستقیم، metadata روابط و triggerهای منطبق؛ موارد فاقد انتساب مستقیم صریحاً علامت‌گذاری شدند.
+- [x] در نسخهٔ اولیهٔ crosswalk، cron command fingerprint موجود نبود؛ در پیوست تکمیلی، چهار command MD5 و routine هدف هر job با استخراج نام تابع اضافه شد. این داده‌ها منشأ تاریخی Migration را ثابت نمی‌کنند.
+- [x] تست CI برای وجود crosswalk، ۱۲ fingerprint و ممانعت از ادعای provenance تاریخی اضافه شد.
+- [ ] CI commit جدید `16bf19eae0ad115432cadfbc8ddf9b58d65e8d5c` و commit status بعدی باید بررسی شود؛ هنوز نتیجه‌ای برای این تغییرات اعلام نشده است.
+- [!] هیچ SQL تاریخی بازسازی/اجرا نشده؛ هیچ Production schema/data/ACL/RLS/function/trigger/cron/queue تغییر نکرده است.
+
+- [x] در Production فقط metadata جدول `cron.job` برای jobهای مرتبط 11/13/14/18 خوانده شد؛ command text و queue payloadها خوانده نشدند. چهار command MD5 و length به پرونده‌ها افزوده شد.
+- [x] تمام ۶ trigger binding موجود در snapshot SECURITY DEFINER با relation، function و MD5 fingerprint ثبت شد.
+- [x] تست تکمیلی برای ۴ cron fingerprint، شش trigger binding و عدم توقف/تغییر jobها افزوده شد؛ commit تست `ca932241e46d097cf6b99322f32d61bffa6e5110`.
+- [x] وضعیت اولیهٔ run `45639843226` در poll نخست in_progress بود؛ بعداً completed/success شد، اما قبل از افزودن cron/trigger fingerprints اجرا شده بود. CI نهایی برای نسخهٔ کامل‌تر در run `45640964392` موفق شد.
+- [!] هر چهار cron job در وضعیت مشاهده‌شده active=true بودند؛ این فقط snapshot زمان ممیزی است و هیچ jobی اجرا/توقف/کند/زمان‌بندی مجدد نشد.
+
+- [x] CI run `45639843226` برای commit `16bf19eae0ad115432cadfbc8ddf9b58d65e8d5c` اکنون completed/success شد؛ تمام ۲۲ مرحلهٔ substantive شامل PostgreSQL 17 و lifecycle/race tests موفق بودند.
+- [!] این run قبل از افزودن cron command MD5ها و تست تکمیلی شش trigger/چهار cron اجرا شده است؛ بنابراین هنوز CI commit نهایی `2185566256384654c1eea64665d074044c3b60fd` را پوشش نداده است.
+
+- [x] اصلاح تکمیلی crosswalk: بررسی مستقیم متن سند نشان داد شمارندهٔ تست باید ۱۲ fingerprint روتین، ۶ fingerprint trigger و ۴ fingerprint فرمان cron را جداگانه بشمارد؛ regex تست بر اساس ردیف‌های جدول تصحیح شد.
+- [x] اعتبارسنجی محلی/متنی مستقل روی محتوای commit branch: ۱۷ heading یکتا، ۱۲ routine MD5، ۶ trigger MD5، ۴ cron command MD5؛ همه شمارش‌ها دقیقاً مطابق snapshot هستند.
+- [x] CI run `45639843226` برای commit `16bf19eae0ad115432cadfbc8ddf9b58d65e8d5c` موفق است، اما قبل از تغییرات cron/trigger اجرا شده؛ آن را تأیید CI نسخهٔ نهایی تلقی نکن.
+- [ ] CI برای تست اصلاح‌شده در commit `d3bcd974e47254b091cfe27c528c1df104426a13` هنوز در فهرست runها ظاهر نشده است؛ باید پیش از ادعای سبز بودن این تست بررسی شود.
+
+- [x] برای cronهای 11/13/14/18 با query فقط‌خواندنی، فقط نام routine فراخوانی‌شده از متن command استخراج شد؛ متن کامل command ذخیره/نمایش نشد. اکنون هر چهار job به routine زنده و definition MD5 آن متصل‌اند.
+- [x] انتساب فعلی دقیق: job 11 → `public.recover_stale_crypto_assets_sync()`; job 13 → `public.request_iran_exchange_asset_sync()`; job 14 → `public.process_iran_exchange_asset_sync()`; job 18 → `private.auto_activate_verified_exchange_pairs()`.
+- [x] تست برای چهار ردیف cron-to-routine به‌همراه ۴ cron command fingerprint، ۶ trigger fingerprint و ۱۲ routine fingerprint گروهی اضافه شد؛ commit تست نهایی فعلی `f4dc0bafcf6ba4439784feb91abc1e0564a3ac1b`.
+- [x] شمارش محتوای branch با اجرای regex مستقل: ۱۷ Migration heading یکتا، ۱۲ routine MD5 گروهی، ۴ cron command MD5، ۶ trigger MD5 و ۴ انتساب cron-to-routine؛ همه با انتظار تطبیق دارند.
+- [x] تست‌های commit `f4dc0bafcf6ba4439784feb91abc1e0564a3ac1b` و اصلاح group 4 در commit بعدی، در CI نهایی run `45640964392` روی commit `5e9defc9c5b049259c8a6cd695684a559d2eecae` پوشش داده شدند.
+
+- [x] CI نهایی crosswalk در run `45640964392` (run #2019) روی commit `5e9defc9c5b049259c8a6cd695684a559d2eecae` با نتیجهٔ `success` تکمیل شد؛ job `exact-decimal` بدون failure و با موفقیت تمام مراحل Node/browser و PostgreSQL 17 arithmetic, widening, lifecycle و two-session race را گذراند.
+- [x] این CI شامل تست‌های جدید پرونده‌های ۱۷ Migration، ۱۲ routine fingerprint، ۴ cron command fingerprint، ۶ trigger fingerprint، ۴ cron-to-routine attribution و برابری fingerprint چهار routine زنده با manifest است.
+- [!] این تأیید فقط برای CI روی محیط disposable است؛ هیچ Production migration، grant/policy/function/trigger، deployment، cron change یا financial write را مجاز یا تأیید نمی‌کند.
+- [x] PR #63 در بررسی مجدد همچنان open/Draft/unmerged است؛ commit عملکردی CI سبز `5e9defc9c5b049259c8a6cd695684a559d2eecae` است؛ commit مستنداتی بعدی `611d277714a15929ff275a8830dd1a30324027a1` فقط وضعیت/گزارش را اصلاح کرد. مقایسهٔ شاخه با `main` پیش از ثبت این یادداشت: ۵۳ commit جلوتر و صفر عقب‌تر.
+
+
+## پیگیری بازیابی Migrationهای مفقود — 2026-11-25
+- [x] CI run #2000 (`45638928773`) روی commit تستی `ac6e265f78803efdbce6fff47e6a6690b1a2469f` شکست خورد؛ علت دقیق، Regex تست شمارش پرونده‌ها بود (`\\d` به‌جای `\d`) که ۰ heading به‌جای ۱۷ پیدا می‌کرد. هیچ تست PostgreSQL پس از شکست Node اجرا نشد.
+- [x] نسخهٔ بعدی تست، الگوی صحیح را دارد؛ CI نهایی run #2019 (`45640964392`) روی commit `5e9defc9c5b049259c8a6cd695684a559d2eecae` با job `exact-decimal` و همهٔ ۲۲ مرحلهٔ substantive موفق شد. run #2000 به‌عنوان موفقیت محسوب نمی‌شود.
+- [x] دو شاخهٔ اضافی `perf/crypto-assets-noop-upserts` و `perf/market-price-bulk-upsert-draft` برای هر ۱۷ نام canonical migration بررسی شدند؛ هیچ‌یک از ۳۴ مسیر SQL در این دو شاخه وجود نداشت.
+- [!] این بررسی اضافه، نبود SQL را فقط در همین دو درخت شاخه‌ای ثابت می‌کند؛ منبع authoritative تازه‌ای پیدا نشد. تعداد منابع SQL اصلی بازیابی‌شده همچنان صفر و تعداد پرونده‌های مفقود ۱۷ است.
+- [!] PR #63 همچنان Draft و ادغام‌نشده است؛ هیچ Migration، db push، deploy، Production write، grant، policy یا تغییر cron انجام نشد.
+
+
+## وضعیت تکمیلی — 2026-11-25، پس از اجرای آزمون دوکاربره RLS
+
+- [x] ۱۷ منبع Migration که در snapshot اولیهٔ ممیزی PR #63 مفقود ثبت شده بودند، بعداً در شاخهٔ مستقل PR #62 از ستون `supabase_migrations.schema_migrations.statements` بازیابی شدند؛ هر ۱۷ بدنه پس از حذف سربرگ provenance با متن Production byte-for-byte تطبیق داده شده‌اند. فایل‌ها فقط در `supabase/drafts/` و برای بازبینی نگه‌داری می‌شوند، نه در مسیر اجرایی Migration.
+- [x] طرح Replay در PR #62 تأیید می‌کند Replay هنوز اجرا نشده و فقط باید در PostgreSQL 17 موقت CI با حذف/جایگزینی HTTP، pg_net، pg_cron، seed هویت ممتاز و هرگونه دادهٔ واقعی/مالی انجام شود.
+- [!] گزارش‌های `production_migration_authority_search_2026-11-25.json` و `production_missing_migration_recovery_map_2026-11-25.json` در PR #63 snapshot تاریخی پیش از بازیابی نهایی هستند؛ عبارت «۱۷ منبع پیدا نشد» وضعیت پس از بازیابی PR #62 را منعکس نمی‌کند.
+- [!] اختلاف مستقل Kifpool همچنان باید حفظ شود: فایل محلی `20261115134500_add_kifpool_to_scheduled_exchange_asset_sync.sql` از نظر رفتار با بدنهٔ ledger نسخهٔ `20261115134357` متفاوت است و نباید به‌عنوان همان منبع تاریخی جا زده شود. سه اختلاف دیگر فقط newline هستند؛ ۱۶ مورد از ۲۰ اختلاف timestamp، byte-exact هستند.
+- [x] تست RLS دوکاربره برای ۸ رابطهٔ کاربرمحور به workflow PostgreSQL 17 افزوده شد؛ CI run `45692611554` روی commit کد `bfc099c15421b9c32024267293dce3498a56d94f` با موفقیت کامل شد. تمام ۲۲ مرحلهٔ substantive از جمله RLS، Market/Limit، Stop-Limit، TP-SL و آزمون‌های race موفق شدند.
+- [!] تست RLS از Auth shim و helper فعال‌بودن حسابِ مصنوعی استفاده می‌کند؛ رفتار JWT واقعی و بدنهٔ live تابع `current_account_is_active()` هنوز در این تست اثبات نشده است.
+- [!] PR #63 همچنان Draft/open/unmerged است؛ آخرین مقایسهٔ شاخه با `main`: ۷۱ commit جلوتر و صفر عقب‌تر. هیچ Production change، Migration، db push، Merge، Deploy، Cron change، grant یا RLS policy change انجام نشده است.
+
+
+### تکمیل آزمون ACL توابع RPC — 2026-11-25
+- [x] تست Node جدید، هر ۴۶ امضای ماتریس نقش‌ها را با manifest توابع Production از نظر هویت، مالک، ACL خام و fingerprint بدنه تطبیق می‌دهد؛ مجوزهای مستقیم anon، authenticated، service_role و PUBLIC جداگانه parse و مقایسه می‌شوند.
+- [x] بررسی مستقل همین نشست روی ۴۶/۴۶ تابع بدون اختلاف بود: anon=2، authenticated=26، service_role=36 و PUBLIC=0 در snapshot مورخ 2026-11-25.
+- [x] generator و مرحلهٔ CI برای ساخت fixture موقت PostgreSQL 17 اضافه شد؛ fixture از امضاها و ACLهای snapshot، توابع no-op مصنوعی می‌سازد و has_function_privilege را برای هر ۴۶ تابع و چهار role بررسی می‌کند.
+- [!] این fixture فقط semantics و ارزیابی مجوز PostgreSQL را روی ACL بازسازی‌شده آزمایش می‌کند؛ اجرای بدنهٔ ۴۶ تابع زنده، guardهای داخل بدنه، JWT واقعی Supabase، RLS، default privileges و رفتار Production را اثبات نمی‌کند.
+- [ ] اجرای CI روی commit نهایی این تغییرات هنوز مشاهده/تأیید نشده است؛ بنابراین آزمون ACL جدید را سبز یا تکمیل‌شده اعلام نکنید.
+- [!] هیچ Production grant/revoke، تغییر تابع، policy، migration، db push، deploy یا Merge انجام نشده است.
+
+
+### آزمون حساب غیرفعال در RLS — 2026-11-25
+- [x] بدنهٔ واقعی ثبت‌شدهٔ `public.current_account_is_active()` از manifest Production با fingerprint `d932cd1d0da21bb96bdc0a381f7dcbc3` وارد fixture شد؛ تابع مقدار `profiles.is_active` را برای `auth.uid()` می‌خواند و در نبود profile مقدار false می‌دهد.
+- [x] سناریوی synthetic user B پس از آزمون جداسازی عادی، غیرفعال می‌شود؛ آزمون انتظار دارد policyهایی که helper را فراخوانی می‌کنند (wallets، asset_balances، orders، trades، transactions) ردیف ندهند.
+- [!] دو policy ثبت‌شده در snapshot، `order_reservations` و `conditional_orders`، فقط مالکیت user_id را کنترل می‌کنند و helper فعال‌بودن حساب را فراخوانی نمی‌کنند؛ fixture این رفتار را آشکار و مستند می‌کند، نه اینکه آن را خودسرانه اصلاح کند. profile self-read نیز همچنان یک ردیف را نشان می‌دهد.
+- [!] `auth.uid()` همچنان shim مبتنی بر claim محلی است؛ JWT verification واقعی Supabase، triggerها و مسیرهای write در این تست اثبات نشده‌اند.
+- [ ] CI برای نسخهٔ جدید fixture هنوز اجرا/تأیید نشده است؛ هیچ نتیجهٔ موفقی برای این تغییر اعلام نمی‌شود.

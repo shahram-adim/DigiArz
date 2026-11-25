@@ -1,0 +1,619 @@
+{
+  "schema_version": 1,
+  "captured_on": "2026-11-25",
+  "source": "Production pg_proc.proacl snapshot; derived from production_security_definer_manifest_2026-11-25.json",
+  "purpose": "Explicit expected EXECUTE ACL inventory for designing runtime role tests; not runtime test evidence and not an approved target-policy change.",
+  "roles": [
+    "anon",
+    "authenticated",
+    "service_role",
+    "postgres"
+  ],
+  "function_count": 46,
+  "functions": [
+    {
+      "identity": "private.admin_adjust_wallet(p_user_id uuid, p_currency text, p_direction text, p_amount numeric, p_reason text)",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": true,
+        "service_role": false,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,authenticated=X/postgres}",
+      "definition_md5": "85c4d10adc62c3159e9d82acea1ca71f"
+    },
+    {
+      "identity": "private.admin_list_users()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": true,
+        "service_role": false,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,authenticated=X/postgres}",
+      "definition_md5": "8545473ad46d598dc6fd8a13e96e8630"
+    },
+    {
+      "identity": "private.auto_activate_verified_exchange_pairs()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": false,
+        "service_role": false,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres}",
+      "definition_md5": "fd177baeee1a5bdd927458413f69bfb6"
+    },
+    {
+      "identity": "private.auto_list_verified_exchange_asset()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": false,
+        "service_role": false,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres}",
+      "definition_md5": "49880c0892cad6081acb6ce071090a5d"
+    },
+    {
+      "identity": "private.enforce_unique_admin_market_listing_symbol()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": false,
+        "service_role": false,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres}",
+      "definition_md5": "6e9a7e9f7d8cd5f0ac20f3216ee5f0b3"
+    },
+    {
+      "identity": "private.guard_active_account_writes()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": false,
+        "service_role": false,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres}",
+      "definition_md5": "29b8e23c1de8eb4762a8cf1a9c9343ce"
+    },
+    {
+      "identity": "private.is_current_user_super_admin()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": true,
+        "service_role": false,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,authenticated=X/postgres}",
+      "definition_md5": "83d42c9299632d2a6c66fe39d6d01936"
+    },
+    {
+      "identity": "private.is_super_admin()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": false,
+        "service_role": false,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres}",
+      "definition_md5": "324c3a171280546dc16429d7ccf4aa86"
+    },
+    {
+      "identity": "private.request_market_price_overflow()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": false,
+        "service_role": false,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres}",
+      "definition_md5": "e6ed136175b0d340c9a86e51f7917a76"
+    },
+    {
+      "identity": "public.admin_add_market_listing(p_coingecko_id text)",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": true,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "definition_md5": "8b3d0c18e54b08f01c27bc24491e3448"
+    },
+    {
+      "identity": "public.admin_disable_market_pair(p_coingecko_id text, p_reason text)",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": true,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "definition_md5": "07ff2862b133f6dbeb3c0cf5d33c5878"
+    },
+    {
+      "identity": "public.admin_enable_market_pair(p_coingecko_id text)",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": true,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "definition_md5": "848f7c1ebe114c558c1ce73e76dd13bd"
+    },
+    {
+      "identity": "public.admin_exchange_asset_sync_report()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": true,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "definition_md5": "fb633c495a9dec841d57c30a4a06972b"
+    },
+    {
+      "identity": "public.admin_remove_market_listing(p_coingecko_id text)",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": true,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "definition_md5": "7ad74680560a6e1e9b1865078464cd4b"
+    },
+    {
+      "identity": "public.admin_request_exchange_asset_sync()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": true,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "definition_md5": "5fd277d145c28193cc5110f9acdb358a"
+    },
+    {
+      "identity": "public.admin_review_market_listings()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": true,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "definition_md5": "93e96328ff9b8d8f3739b57ce49eb397"
+    },
+    {
+      "identity": "public.admin_search_market_assets(p_search text, p_limit integer)",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": true,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "definition_md5": "f5dfc59bd5c47065692601c46590cffc"
+    },
+    {
+      "identity": "public.cancel_conditional_exit_order(p_order_id uuid)",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": true,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "definition_md5": "efa4c8a200d299f76b0d2cbe2d0b49e9"
+    },
+    {
+      "identity": "public.cancel_limit_order(p_order_id uuid)",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": true,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "definition_md5": "69360684173b6aabebc5ff4e4de2eed9"
+    },
+    {
+      "identity": "public.cancel_stop_limit_order(p_order_id uuid)",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": true,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "definition_md5": "82cedc2c442b0c826a8684044aed5f8d"
+    },
+    {
+      "identity": "public.claim_admin_asset_refresh(p_coingecko_id text, p_admin_user_id uuid)",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": false,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_md5": "dbb4c04187f07c695ac9f8e3532b1c47"
+    },
+    {
+      "identity": "public.current_account_is_active()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": true,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "definition_md5": "d932cd1d0da21bb96bdc0a381f7dcbc3"
+    },
+    {
+      "identity": "public.deactivate_my_account()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": true,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "definition_md5": "2081e024a2b815aa2c6ebf6470fa2bce"
+    },
+    {
+      "identity": "public.execute_demo_trade(p_symbol text, p_side text, p_amount numeric, p_price numeric)",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": true,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "definition_md5": "4289e358b0c7293fc33f86c2511486d7"
+    },
+    {
+      "identity": "public.get_admin_market_listings()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": true,
+        "authenticated": true,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "definition_md5": "3b9243af942acf73ad72ab17faafda41"
+    },
+    {
+      "identity": "public.get_demo_trading_fee_rate(p_quote_asset text, p_liquidity_type text)",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": true,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "definition_md5": "546d80d7105228ed97da26c5ed0c7b7f"
+    },
+    {
+      "identity": "public.get_exchange_discovered_market_assets()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": true,
+        "authenticated": true,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "definition_md5": "87f9f56829abb50b2ff1fb878684e89c"
+    },
+    {
+      "identity": "public.get_my_order_reservations(p_order_ids uuid[])",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": true,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "definition_md5": "97189e59fbf37bb5f85b215dadd13dfd"
+    },
+    {
+      "identity": "public.new_user_setup()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": false,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_md5": "9ad150e007399b8feeca58399d8187d7"
+    },
+    {
+      "identity": "public.place_conditional_exit_order(p_symbol text, p_order_kind text, p_amount numeric, p_trigger_price numeric)",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": true,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "definition_md5": "e4de4667d89e6663f04d92d47ac4d5cf"
+    },
+    {
+      "identity": "public.place_limit_order(p_symbol text, p_side text, p_amount numeric, p_limit_price numeric)",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": true,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "definition_md5": "3eab167c47bf8ff2e1705b9f243380ec"
+    },
+    {
+      "identity": "public.place_stop_limit_order(p_symbol text, p_side text, p_amount numeric, p_stop_price numeric, p_limit_price numeric)",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": true,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "definition_md5": "d6f4ff7478b83fbabbab519c7c711bcd"
+    },
+    {
+      "identity": "public.process_bit24_exchange_sync()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": false,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_md5": "9f3e6d7e20586ea79b7c021eebc6ab62"
+    },
+    {
+      "identity": "public.process_conditional_orders()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": false,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_md5": "5cfbf0e2e73474ae64e42643b3feb28a"
+    },
+    {
+      "identity": "public.process_iran_exchange_asset_sync()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": false,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_md5": "889c3728e54154a799e55ed8b9bc2edb"
+    },
+    {
+      "identity": "public.process_limit_orders()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": false,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_md5": "00ab429596fb99392666632967cde9c0"
+    },
+    {
+      "identity": "public.process_stop_limit_orders()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": false,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_md5": "66357ab4a2247019f22a8b6ab6eac6fe"
+    },
+    {
+      "identity": "public.reactivate_my_account()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": true,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "definition_md5": "18a13c04c8dd42c4c262d1c37e47784d"
+    },
+    {
+      "identity": "public.recover_stale_crypto_assets_sync()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": false,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_md5": "9ab6efcdb72cce454244f81aecc1da86"
+    },
+    {
+      "identity": "public.refresh_crypto_assets_toman()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": false,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_md5": "bc9daf5e57307e82fd5188798624b116"
+    },
+    {
+      "identity": "public.refresh_crypto_assets()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": false,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_md5": "f14765ffd1166380f58e391b34163259"
+    },
+    {
+      "identity": "public.refresh_market_fx_rate()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": false,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_md5": "db263e967dff46ed38afea56bd7cb26a"
+    },
+    {
+      "identity": "public.refresh_market_prices()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": false,
+        "service_role": false,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres}",
+      "definition_md5": "3788666d57957a66bf59031f54ceff03"
+    },
+    {
+      "identity": "public.request_bit24_exchange_sync()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": false,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_md5": "629da0df67c74eeb41948f368b584043"
+    },
+    {
+      "identity": "public.request_iran_exchange_asset_sync()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": false,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,service_role=X/postgres}",
+      "definition_md5": "22e4150dd0ae30a2e3abf81887c52897"
+    },
+    {
+      "identity": "public.request_market_price_refresh()",
+      "owner": "postgres",
+      "expected_execute": {
+        "anon": false,
+        "authenticated": true,
+        "service_role": true,
+        "postgres": true
+      },
+      "public_execute": false,
+      "acl_snapshot": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "definition_md5": "140cb90d5a73059155d04fac4b309f4e"
+    }
+  ],
+  "limitations": [
+    "This records catalog ACL state only; it does not execute functions under these roles.",
+    "Function-body authorization guards, RLS, ownership, default privileges, Supabase JWT verification, and service-role bypass behavior require separate runtime tests.",
+    "The snapshot is historical and must be refreshed before any security release decision.",
+    "No GRANT, REVOKE, default-privilege change, or Production mutation is authorized."
+  ]
+}

@@ -1,0 +1,129 @@
+{
+  "captured_on": "2026-11-25",
+  "purpose": "Record where authoritative SQL source recovery was attempted and what the evidence does and does not establish.",
+  "migration_reconciliation_document": {
+    "path": "supabase/MIGRATION_RECONCILIATION.md",
+    "historical_snapshot": "2026-11-17 02:14 Asia/Tehran",
+    "then_missing_sources": 14,
+    "current_missing_sources": 17,
+    "historical_14_listed": true,
+    "later_additions": [
+      {
+        "version": "20261121045434",
+        "name": "digiarz_backpressure_and_exchange_sync_bloat_guards"
+      },
+      {
+        "version": "20261121045531",
+        "name": "snapshot_pg_net_unlogged_queue_before_recovery"
+      },
+      {
+        "version": "20261121050216",
+        "name": "temporarily_throttle_exchange_asset_processors_20261121"
+      }
+    ],
+    "note": "The current 17-source count is consistent with the historical 14 plus the three later Production ledger entries."
+  },
+  "git_history": {
+    "endpoint": "GET /repos/shahram-adim/DigiArz/commits?path=supabase/migrations&per_page=100",
+    "returned_commits": 44,
+    "earliest_returned": "2026-11-13T16:16:58Z",
+    "latest_returned": "2026-11-16T20:54:54Z",
+    "finding": "The returned path history contains no source-file commit for the 17 missing canonical migration paths. This does not rule out external backups, deleted files outside the fetched page, or artifacts not retained in GitHub."
+  },
+  "branch_search": {
+    "unique_topic_branches_examined": 20,
+    "findings": "No exact matching missing migration filenames were found in the examined topic branch trees.",
+    "limitation": "This is a bounded search of the listed branches, not a proof that no copy exists in any GitHub ref or external source."
+  },
+  "pull_request_search": {
+    "inspected_pr_changed_files": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      32,
+      33,
+      39,
+      40
+    ],
+    "notable": [
+      {
+        "pr": 7,
+        "files": [
+          "20261116195749_fix_iran_exchange_sync_gzip_responses.sql",
+          "20261116195814_deduplicate_iran_exchange_sync_rows.sql",
+          "20261116200009_auto_list_unmatched_iran_exchange_assets.sql"
+        ],
+        "finding": "These are later migration sources, not any of the 17 missing canonical sources."
+      },
+      {
+        "pr": 39,
+        "files": [
+          "20261121061500_fix_bit24_duplicate_market_rows.sql"
+        ],
+        "finding": "Different migration; not one of the 17 missing sources."
+      },
+      {
+        "pr": 40,
+        "files": [
+          "20261121062000_reduce_exchange_observation_update_bloat.sql"
+        ],
+        "finding": "Different migration; not one of the 17 missing sources."
+      }
+    ],
+    "inspected_pr_count": 28
+  },
+  "code_search": {
+    "terms": [
+      "create_exchange_asset_observations",
+      "schedule_iran_exchange_asset_sync",
+      "process_iran_exchange_asset_sync",
+      "digiarz_backpressure_and_exchange_sync_bloat_guards",
+      "snapshot_pg_net_unlogged_queue_before_recovery",
+      "temporarily_throttle_exchange_asset_processors_20261121",
+      "secure_admin_wallet_management",
+      "approved_wallet_defaults_fees_and_coin_reviews"
+    ],
+    "finding": "Search results surfaced migration names and current/historical documentation, plus later functions that replace/update the worker. No original SQL source for any missing migration was surfaced."
+  },
+  "actions_artifacts": {
+    "runs_checked": [
+      {
+        "run_id": 45602256035,
+        "artifact_count": 0
+      },
+      {
+        "run_id": 45503827911,
+        "artifact_count": 0
+      }
+    ],
+    "limitation": "These two CI runs have no retained downloadable workflow artifacts; this does not establish that no other run or external artifact exists."
+  },
+  "next_authoritative_sources_to_check": [
+    "Supabase project backup/export artifacts or provider support-provided migration archive",
+    "Developer workstation/repository clone reflogs and dangling Git objects",
+    "Original SQL editor/deployment transcript or secure CI/deploy logs",
+    "Owner-controlled encrypted backups"
+  ],
+  "safety": "No source was reconstructed or applied. No Production data, schema, grants, functions, cron jobs or migration history were changed. Do not infer executable migration SQL from this report."
+}

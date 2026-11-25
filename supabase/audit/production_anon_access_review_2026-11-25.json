@@ -1,0 +1,236 @@
+{
+  "captured_on": "2026-11-25",
+  "source": {
+    "provider": "Supabase",
+    "project_ref": "gfoaubfilhttnwjykaox",
+    "postgres_version": "17.11.0.018",
+    "method": "read-only pg_catalog, information_schema and pg_policies inspection"
+  },
+  "anon_executable_security_definer_functions": [
+    {
+      "name": "public.get_admin_market_listings",
+      "arguments": "",
+      "returns": [
+        "coingecko_id",
+        "symbol",
+        "name",
+        "image_url",
+        "market_cap_rank",
+        "current_price_usd",
+        "price_toman",
+        "price_change_percentage_24h",
+        "total_volume_usd",
+        "last_updated",
+        "added_at"
+      ],
+      "tables_read": [
+        "public.admin_market_listings",
+        "public.crypto_assets",
+        "public.market_prices"
+      ],
+      "assessment": "Market listing and price metadata only. No account, identity, wallet, order, trade, reservation, balance or transaction columns are returned.",
+      "public_access_intent": {
+        "confirmed_by_migrations": true,
+        "migrations": [
+          "20261113171000_add_admin_curated_market_assets.sql",
+          "20261113172000_harden_admin_market_listing_access.sql",
+          "20261113181000_show_live_prices_for_curated_assets.sql"
+        ],
+        "evidence": "The migration source explicitly revokes PUBLIC and grants EXECUTE to anon, authenticated. The hardening migration documents a safe public listing projection."
+      }
+    },
+    {
+      "name": "public.get_exchange_discovered_market_assets",
+      "arguments": "",
+      "returns": [
+        "symbol",
+        "name",
+        "current_price_usd",
+        "last_updated",
+        "exchange_sources",
+        "exchange_count",
+        "observed_at",
+        "match_status"
+      ],
+      "tables_read": [
+        "public.exchange_asset_observations",
+        "public.admin_market_listings",
+        "public.crypto_assets",
+        "public.demo_trading_pairs",
+        "public.market_prices"
+      ],
+      "assessment": "Exchange discovery metadata only, limited to active recent pending/ambiguous/unmatched observations. It does not return source_payload, source_url, coingecko_id or user data.",
+      "public_access_intent": {
+        "confirmed_by_migrations": true,
+        "migrations": [
+          "20261116200009_auto_list_unmatched_iran_exchange_assets.sql"
+        ],
+        "evidence": "The migration source explicitly revokes PUBLIC and grants EXECUTE to anon, authenticated for exchange-discovery market metadata."
+      }
+    }
+  ],
+  "anon_base_table_grants": [
+    {
+      "table": "public.coin_reviews",
+      "privileges": [
+        "DELETE",
+        "INSERT",
+        "REFERENCES",
+        "SELECT",
+        "TRIGGER",
+        "TRUNCATE",
+        "UPDATE"
+      ],
+      "rls_enabled": true,
+      "anon_policies": [
+        "SELECT"
+      ],
+      "assessment": "Excess table grants exist, but current RLS policies provide anon only SELECT. Insert/update/delete have no anon policy and are denied by RLS under the captured policy set."
+    },
+    {
+      "table": "public.conditional_orders",
+      "privileges": [
+        "SELECT"
+      ],
+      "rls_enabled": true,
+      "anon_policies": [],
+      "assessment": "SELECT grant exists, but the only captured SELECT policy is for authenticated. No anon row access is granted by the captured policy set."
+    },
+    {
+      "table": "public.crypto_assets",
+      "privileges": [
+        "SELECT"
+      ],
+      "rls_enabled": true,
+      "anon_policies": [
+        "SELECT"
+      ],
+      "assessment": "Public market metadata read."
+    },
+    {
+      "table": "public.demo_trading_pairs",
+      "privileges": [
+        "SELECT"
+      ],
+      "rls_enabled": true,
+      "anon_policies": [
+        "SELECT"
+      ],
+      "assessment": "Public demo-market metadata read."
+    },
+    {
+      "table": "public.market_fx_rates",
+      "privileges": [
+        "SELECT"
+      ],
+      "rls_enabled": true,
+      "anon_policies": [
+        "SELECT"
+      ],
+      "assessment": "Public FX metadata read."
+    },
+    {
+      "table": "public.market_prices",
+      "privileges": [
+        "SELECT"
+      ],
+      "rls_enabled": true,
+      "anon_policies": [
+        "SELECT"
+      ],
+      "assessment": "Public market-price metadata read."
+    },
+    {
+      "table": "public.market_toman_prices",
+      "privileges": [],
+      "rls_enabled": true,
+      "anon_policies": [],
+      "assessment": "No anon base-table privilege; authenticated-only policy."
+    },
+    {
+      "table": "public.market_toman_price_history",
+      "privileges": [],
+      "rls_enabled": true,
+      "anon_policies": [],
+      "assessment": "No anon base-table privilege; authenticated-only policy."
+    }
+  ],
+  "anon_view_grants": [
+    {
+      "view": "public.market_prices_with_toman",
+      "privileges": [
+        "DELETE",
+        "INSERT",
+        "REFERENCES",
+        "SELECT",
+        "TRIGGER",
+        "TRUNCATE",
+        "UPDATE"
+      ],
+      "security_invoker": true,
+      "underlying_anon_privileges": {
+        "public.market_prices": [
+          "SELECT"
+        ],
+        "public.market_fx_rates": [
+          "SELECT"
+        ]
+      },
+      "assessment": "Excess grants on the view. security_invoker=true means underlying privileges still apply; base tables grant anon SELECT only, so the view grants do not provide base-table write privileges."
+    },
+    {
+      "view": "public.market_toman_performance",
+      "privileges": [
+        "DELETE",
+        "INSERT",
+        "REFERENCES",
+        "SELECT",
+        "TRIGGER",
+        "TRUNCATE",
+        "UPDATE"
+      ],
+      "security_invoker": true,
+      "underlying_anon_privileges": {
+        "public.market_toman_prices": [],
+        "public.market_toman_price_history": []
+      },
+      "assessment": "Excess grants on the view. security_invoker=true and no anon base-table privileges mean the view does not provide anon access to its underlying Toman tables."
+    }
+  ],
+  "findings": [
+    {
+      "id": "ANON-RPC-01",
+      "severity": "informational",
+      "summary": "Two SECURITY DEFINER RPCs are executable by anon by explicit design: the source migrations revoke PUBLIC and explicitly grant anon EXECUTE. Their current outputs are market/exchange-discovery metadata, not user/account/financial records."
+    },
+    {
+      "id": "ANON-GRANT-01",
+      "severity": "hardening",
+      "summary": "anon has broad DML/TRUNCATE grants on coin_reviews, but RLS policies captured for anon permit SELECT only. Revoke unnecessary grants after impact review and approval."
+    },
+    {
+      "id": "ANON-GRANT-02",
+      "severity": "hardening",
+      "summary": "anon has SELECT on conditional_orders without an anon SELECT policy. The captured policy set therefore blocks anon row visibility; remove unnecessary grant after impact review and approval."
+    },
+    {
+      "id": "ANON-VIEW-01",
+      "severity": "hardening",
+      "summary": "anon has broad privileges on two security-invoker views. Underlying grants currently constrain effective access; reduce view grants to required SELECT only after dependency and client-usage review."
+    }
+  ],
+  "safety": {
+    "production_mutations": "none",
+    "grants_changed": false,
+    "policies_changed": false,
+    "functions_changed": false,
+    "migrations_run": false,
+    "user_or_financial_rows_read": false
+  },
+  "limitations": [
+    "This is a timestamped read-only snapshot, not a live guarantee after capture time.",
+    "has_table_privilege and role_table_grants report privileges, not proof that every operation succeeds; RLS, view updatability, security_invoker and underlying privileges also apply.",
+    "No anonymous API request was executed. Effective row visibility is inferred from the captured grants and pg_policies catalog.",
+    "No revoke, grant, policy, function or view change is proposed for execution without explicit owner approval."
+  ]
+}
