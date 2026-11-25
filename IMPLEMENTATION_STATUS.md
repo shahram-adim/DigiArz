@@ -1509,3 +1509,9 @@
 - [x] اعتبارسنجی محلی/متنی مستقل روی محتوای commit branch: ۱۷ heading یکتا، ۱۲ routine MD5، ۶ trigger MD5، ۴ cron command MD5؛ همه شمارش‌ها دقیقاً مطابق snapshot هستند.
 - [x] CI run `45639843226` برای commit `16bf19eae0ad115432cadfbc8ddf9b58d65e8d5c` موفق است، اما قبل از تغییرات cron/trigger اجرا شده؛ آن را تأیید CI نسخهٔ نهایی تلقی نکن.
 - [ ] CI برای تست اصلاح‌شده در commit `d3bcd974e47254b091cfe27c528c1df104426a13` هنوز در فهرست runها ظاهر نشده است؛ باید پیش از ادعای سبز بودن این تست بررسی شود.
+
+- [x] برای cronهای 11/13/14/18 با query فقط‌خواندنی، فقط نام routine فراخوانی‌شده از متن command استخراج شد؛ متن کامل command ذخیره/نمایش نشد. اکنون هر چهار job به routine زنده و definition MD5 آن متصل‌اند.
+- [x] انتساب فعلی دقیق: job 11 → `public.recover_stale_crypto_assets_sync()`; job 13 → `public.request_iran_exchange_asset_sync()`; job 14 → `public.process_iran_exchange_asset_sync()`; job 18 → `private.auto_activate_verified_exchange_pairs()`.
+- [x] تست برای چهار ردیف cron-to-routine به‌همراه ۴ cron command fingerprint، ۶ trigger fingerprint و ۱۲ routine fingerprint گروهی اضافه شد؛ commit تست نهایی فعلی `f4dc0bafcf6ba4439784feb91abc1e0564a3ac1b`.
+- [x] شمارش محتوای branch با اجرای regex مستقل: ۱۷ Migration heading یکتا، ۱۲ routine MD5 گروهی، ۴ cron command MD5، ۶ trigger MD5 و ۴ انتساب cron-to-routine؛ همه با انتظار تطبیق دارند.
+- [ ] CI برای commit `f4dc0bafcf6ba4439784feb91abc1e0564a3ac1b` هنوز نتیجهٔ قابل مشاهده ندارد؛ نتیجهٔ CI قدیمی `45639843226` فقط commit قبلی را پوشش می‌دهد.
