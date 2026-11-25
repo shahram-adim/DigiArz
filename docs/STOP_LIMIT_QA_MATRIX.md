@@ -403,3 +403,32 @@ See \`docs/superpowers/reports/2026-11-15-exact-decimal-implementation-checkpoin
 1. Build a disposable PostgreSQL 17 harness from the captured Production DDL, constraints, indexes, triggers, function bodies, grants, and RLS contract; compare it to the migration/draft candidate before running lifecycle tests.
 2. Re-run the full Stop-Limit parent → child Limit lifecycle in that source-faithful harness, including partial/full fills, cancellation, reservation consumption/release, idempotency, and concurrent worker/cancel races.
 3. Keep Production untouched. No order, trade, reservation, wallet, balance, transaction, cron job, RPC, migration, grant, or policy was changed or used as a test.
+
+
+## Captured Production Stop-Limit worker regression — 2026-11-25
+
+### Fresh Production evidence (read-only)
+- [x] Re-read Supabase project `gfoaubfilhttnwjykaox`: `ACTIVE_HEALTHY`, PostgreSQL `17.11.0.018`, migration ledger 55 entries, latest `20261121050216`; Development Branch listing remains empty.
+- [x] Captured `pg_get_functiondef('public.process_stop_limit_orders()')` from Production. The catalog fingerprint observed in the same read-only review is `66357ab4a2247019f22a8b6ab6eac6fe`. The live function is `SECURITY DEFINER`, owned by `postgres`, with empty `search_path`.
+- [x] Current live ACLs: placement/cancellation RPCs (`place_stop_limit_order`, `cancel_stop_limit_order`, `place_limit_order`, `cancel_limit_order`) are executable by `authenticated` and `service_role`, not `anon`; `process_stop_limit_orders` is executable by `service_role` only.
+- [x] Live cron rows remain active and unchanged: job 8 `digiarz-limit-orders` and job 12 `digiarz-stop-limit-orders`, both `* * * * *`.
+- [x] Aggregate-only counts: `orders=0`, `trades=0`, `order_reservations=0`, `conditional_orders=0`. No user rows were inspected.
+
+### Source-parity finding
+- [!] The live worker's parent/child synchronization query uses `FOR UPDATE OF c,parent SKIP LOCKED` (the child row is read but not included in that lock clause).
+- [!] The current draft worker and CI fixture both use `FOR UPDATE OF c,parent,child SKIP LOCKED`. Their normalized function bodies are identical (6,689 characters), but this lock-scope difference means the passing candidate race tests are not proof of the exact Production worker's child-row locking behavior.
+- [x] The applied base migration `20261113181827` contains the Production parent-only lock clause. Applied retry patch `20261115143827` adds bounded invalid-reservation handling (10 attempts, manual-review reason, fail-closed rejection) without changing that lock clause.
+- [!] This is a concurrency-semantic difference to review, not an automatic defect finding. No Production function was changed.
+
+### New isolated regression added
+- [x] Added `supabase/tests/stop_limit_production_worker_snapshot.sql`, captured from the read-only Production function definition; it is a test fixture, not a migration.
+- [x] Added `supabase/tests/stop_limit_production_worker_sentinel.sql`; the sentinel raises if the invalid-reservation path unexpectedly calls the child Limit RPC.
+- [x] Added `supabase/tests/stop_limit_production_worker_retry_exhaustion.sql`: ten separate autocommit worker calls against a deliberately invalid disposable reservation, asserting parent/conditional rejection, attempt count 10, manual-review reason, no child order, and unchanged reservation arithmetic.
+- [x] Added `tests/stop-limit-worker-source-parity.test.js` to pin the captured function fingerprint, verify draft/fixture equality, and make the Production-versus-candidate lock difference explicit.
+- [x] Added a dedicated PostgreSQL 17 disposable CI step. Exact-decimal workflow Run #1974 (`45602256035`) completed with `success` on commit `e9339bdc662a35612b54b78dda5d7168dbcdf4b8`; the Node/browser suite, all existing PostgreSQL lifecycle/race checks, and the new captured-Production invalid-reservation regression passed.
+
+### Remaining gates
+1. Recover the missing canonical source for `place_limit_order` and the missing base DDL; do not recreate them from assumptions. The current inventory remains 55 applied migrations versus 40 local SQL files, with 17 applied SQL sources absent and 20 timestamp-mismatched local filenames.
+2. Build the full disposable PostgreSQL 17 schema/ACL harness from authoritative Production DDL and grants. The new snapshot test covers one Production worker branch only; it is not a full schema/ACL parity environment.
+3. Re-run valid Stop-Limit trigger → child Limit placement, partial/full fill, cancellation, reservation consumption/release, idempotency, and two-session races against recovered Production-source entrypoints. Current full lifecycle CI still exercises the reviewed draft candidate.
+4. Keep Production untouched. No worker/RPC was invoked, no cron was changed, and no financial rows, migrations, grants, policies, or functions were written.
