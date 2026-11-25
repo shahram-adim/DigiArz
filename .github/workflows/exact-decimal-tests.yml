@@ -239,6 +239,16 @@ jobs:
             -f supabase/tests/exact_decimal_stop_limit_worker.sql \
             -f supabase/drafts/2026-11-15_exact_decimal_process_limit_orders.sql \
             -f supabase/tests/exact_decimal_stop_limit_integration.sql
+      - name: Run captured Production Stop-Limit worker invalid-reservation retry regression
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_stop_limit_prod_snapshot_test;"
+          psql -h localhost -U postgres -d digiarz_stop_limit_prod_snapshot_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_stop_limit_setup.sql \
+            -f supabase/tests/stop_limit_production_worker_sentinel.sql \
+            -f supabase/tests/stop_limit_production_worker_snapshot.sql \
+            -f supabase/tests/stop_limit_production_worker_retry_exhaustion.sql
       - name: Compile and run isolated TP-SL conditional exit lifecycle integration
         env:
           PGPASSWORD: postgres
