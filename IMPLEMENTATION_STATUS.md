@@ -1349,3 +1349,44 @@
 - [x] Re-read the newly committed test and tightened its source guard to match the SQL/HTTP verb token `DELETE` directly, avoiding an over-escaped whitespace pattern.
 - [x] Test file re-fetched after commit and exact content verified.
 - [x] Final GitHub Actions Run #1964 (`45503827911`) completed with `success` on `0baf402`; the tightened `DELETE` regression guard passed in the Node/browser step and all remaining PostgreSQL lifecycle steps passed.
+
+
+## Daily execution report — 2026-11-25 — Stop-Limit Production-source QA
+
+### Verified starting state
+- Re-read GitHub `main`, `IMPLEMENTATION_STATUS.md`, `docs/STOP_LIMIT_QA_MATRIX.md`, workflow, migrations, tests, and UI structure. Starting `main` HEAD was `ebaa65e69c0c981f9af08180ec789abcf84330f1`; no prior chat note was treated as current state.
+- The exact-decimal CI Run #1964 (`45503827911`) was independently rechecked as successful on `0baf402`.
+- UI static inventory: `index.html` is 492,996 bytes with 244 unique IDs, 9 navigation routes (`dashboard`, `markets`, `toman`, `trade`, `orders`, `assets`, `history`, `settings`, `admin`), RTL direction, and viewport metadata. `src/` contains `daily-ads.js`, `decimal.js`, `market-holdings.js`, and `pwa-install.js`. No UI file was changed in this Stop-Limit-focused run.
+- Supabase `gfoaubfilhttnwjykaox` remains `ACTIVE_HEALTHY`, PostgreSQL `17.11.0.018`; ledger 55, local migration files 40, no Development Branch. Reconciliation still reports 17 applied SQL sources missing locally, 20 timestamp mismatches, and two local-only older market-price function replacements; `db push` remains unsafe.
+- Live jobs 8 (`digiarz-limit-orders`) and 12 (`digiarz-stop-limit-orders`) remain active every minute. No worker was manually invoked.
+- Aggregate-only Production counts: orders 0, trades 0, reservations 0, conditional orders 0. No financial row was read.
+- Current Stop-Limit ACL snapshot: placement/cancel RPCs are executable by `authenticated` and `service_role`, not `anon`; `process_stop_limit_orders` is executable by `service_role` only. Active-account INSERT triggers remain on `orders` and `trades`.
+
+### Work completed
+- Captured the live `process_stop_limit_orders()` definition as a test-only SQL snapshot. The read-only catalog fingerprint recorded in Production is `66357ab4a2247019f22a8b6ab6eac6fe`; the snapshot is not a migration and was never applied to Production.
+- Added a fail-fast `place_limit_order` sentinel and a disposable PostgreSQL regression for the Production worker's invalid-reservation branch. Ten separate autocommit calls must reject the parent and conditional order after attempt 10, retain the manual-review reason, create no child order, and leave invalid reservation arithmetic untouched.
+- Added a Node source-parity test that verifies the captured worker contract, equality of the draft worker and current CI fixture, and explicitly distinguishes their child-row lock scope from Production.
+- Added a dedicated PostgreSQL 17 disposable CI step and updated `docs/STOP_LIMIT_QA_MATRIX.md` with the live evidence and remaining gates.
+
+### Important source-parity finding
+- Production's synchronization query locks `conditional_orders` and the parent `orders` row (`FOR UPDATE OF c,parent SKIP LOCKED`); it reads but does not include the child row in that lock list.
+- The draft and CI fixture use `FOR UPDATE OF c,parent,child SKIP LOCKED`. Their normalized bodies match each other, but not this Production lock scope. This is a concurrency-semantic difference requiring review; it is not being labeled a defect or deployed automatically.
+- The new Production snapshot regression covers the fail-closed invalid-reservation branch only. Full valid trigger → child Limit execution still uses the draft candidate because the authoritative `place_limit_order` source and complete base DDL are not yet locally recoverable.
+
+### CI result and commit trail
+- Exact-decimal workflow Run #1974 (`45602256035`) completed with `success` on `e9339bdc662a35612b54b78dda5d7168dbcdf4b8`. Node/browser tests, existing PostgreSQL 17 arithmetic/lifecycle/race steps, and the new captured-Production invalid-reservation regression all passed.
+- Initial runs #1970–#1973 exposed test-harness regex/SQL-terminator/fingerprint-extraction issues; these were corrected before Run #1974. Do not treat those failed attempts as successful evidence.
+- Main commits for this work include `dd55b71` (Production worker snapshot), `7907411` (retry-exhaustion regression SQL), `1a3285e` (source-parity test), `42b769a` (fail-fast sentinel), `772985c` (workflow step), `22e84a7` / `f43f4f4` / `47ff5f1` / `e9339bd` (test corrections), and `b11b752` (QA matrix update).
+
+### Other current blocker — Toman market
+- Production Edge Function `refresh-toman-market-prices` is still deployed at version 3. Its live source still contains a DELETE cleanup path and uses Nobitex, Wallex, and Bitpin; Bit24 and Kifpool are not connected in this function.
+- `market_toman_prices` and history each contain 373 rows, but the newest current-price `fetched_at` is 2026-11-17 and none are fresh within five minutes. In the last 24-hour log window, the function had 37 POST 502 responses and 37 OPTIONS 200 preflights.
+- The safer no-prune/upsert source on GitHub is not deployed. No deployment or refresh was attempted because Production deployment requires explicit approval.
+
+### Safety and next steps
+- No Production order, trade, reservation, wallet, balance, transaction, migration, grant, RLS policy, function, cron job, or Edge Function was changed. Only aggregate counts and catalog metadata were read; all new financial-path tests ran in disposable GitHub Actions PostgreSQL 17.
+1. Recover the authoritative missing `place_limit_order` and base-schema SQL from a trusted deployment artifact/backup; do not reconstruct from names or draft files.
+2. Build a complete disposable PostgreSQL 17 schema/ACL parity harness, then test the exact Production worker's valid trigger, child Limit placement, partial/full fills, cancellation, idempotency, and two-session races.
+3. Review the Production-versus-candidate child-row lock difference before proposing any migration.
+4. Keep `supabase db push`, function deployment, grant/policy changes, and all Production financial writes blocked pending explicit approval.
+5. After the Stop-Limit gate, return to the Toman market page/provider work and the four approved Iranian sources; do not report stale prices as live.
