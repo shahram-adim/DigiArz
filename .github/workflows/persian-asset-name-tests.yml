@@ -17,6 +17,7 @@ on:
       - "tests/rpc-security-market-listing-trigger.integration.sql"
       - "tests/rpc-security-auto-list-trigger.integration.sql"
       - "tests/rpc-security-demo-fee-rate.integration.sql"
+      - "tests/demo-trading-fee-rate-null-regression.pg17.sql"
       - "tests/rpc-security-order-reservations.integration.sql"
       - "tests/rpc-security-admin-search.integration.sql"
       - "tests/rpc-security-admin-add-listing.integration.sql"
@@ -257,6 +258,14 @@ jobs:
           pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
           test -n "$pg_container"
           docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security-demo-fee-rate.integration.sql
+
+      - name: Reproduce and verify NULL liquidity-type fee-rate fix in disposable PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/demo-trading-fee-rate-null-regression.pg17.sql
 
       - name: Test source-backed owner-scoped reservation lookup with synthetic rows
         shell: bash
