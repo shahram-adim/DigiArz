@@ -170,3 +170,116 @@
 تعداد SQL اصلی بازیابی‌شده در این گام: صفر.
 تعداد SQL اجرایی ساخته‌شده: صفر.
 وضعیت: آمادهٔ بررسی شواهد جدید؛ تا دریافت منبع معتبر، بازسازی اجرایی و replay مسدود است.
+
+
+## پیوست ممیزی: تطبیق اشیای زنده و fingerprintها — 2026-11-25
+
+**روش:** تطبیق نام‌های ثبت‌شده در recovery map با snapshot زندهٔ ۴۶ تابع SECURITY DEFINER، شش trigger binding و inventory روابط. این crosswalk فقط «ارتباط مشاهده‌شده در وضعیت فعلی» را ثبت می‌کند؛ اثبات نمی‌کند کدام Migration تاریخی شیء را ایجاد یا تغییر داده است. هیچ SQL تاریخی از روی این تطبیق بازسازی نشده است.
+
+**محدودیت انتساب:** شناسهٔ Migration به‌تنهایی provenance یک routine یا trigger نیست. اگر ارتباط مستقیم در snapshot وجود ندارد، صریحاً «no direct live attribution» ثبت شده است. برای cron فقط job id/name/schedule/active موجود در recovery map ثبت می‌شود؛ command text یا fingerprint آن در این مجموعه‌فایل‌ها موجود نیست.
+
+### گروه 1: wallet defaults, fee configuration, coin reviews, super-admin authorization and admin wallet operations
+
+**Migration IDs:** `20261113153808`, `20261113154323`, `20261113154736`, `20261113154750`, `20261113154844`, `20261113154926`
+
+**روابط زندهٔ مرتبط (نام/متادیتا):**
+- `public.wallets`: owner `postgres`، RLS `true`، forced RLS `false`، columns=5، indexes=2، constraints=4، policies=1، triggers=0.
+- `public.coin_reviews`: در relation dependency inventory مستقیم موجود نیست.
+- `public.demo_trading_fees`: owner `postgres`، RLS `true`، forced RLS `false`، columns=5، indexes=1، constraints=4، policies=0، triggers=0.
+- `public.profiles`: owner `postgres`، RLS `true`، forced RLS `false`، columns=5، indexes=1، constraints=2، policies=1، triggers=0.
+- `private.admin_users`: owner `postgres`، RLS `true`، forced RLS `false`، columns=4، indexes=1، constraints=4، policies=0، triggers=0.
+- `private.admin_wallet_adjustments`: owner `postgres`، RLS `true`، forced RLS `false`، columns=10، indexes=1، constraints=7، policies=0، triggers=0.
+
+**روتین‌های زنده و fingerprint:**
+- `private.admin_adjust_wallet(p_user_id uuid, p_currency text, p_direction text, p_amount numeric, p_reason text)` — return `jsonb`; owner `postgres`; `search_path=""`; MD5 `85c4d10adc62c3159e9d82acea1ca71f`.
+- `private.admin_list_users()` — return `TABLE(user_id uuid, email text, is_active boolean, created_at timestamp with time zone, balance_usdt numeric, balance_irr numeric)`; owner `postgres`; `search_path=""`; MD5 `8545473ad46d598dc6fd8a13e96e8630`.
+- `private.is_current_user_super_admin()` — return `boolean`; owner `postgres`; `search_path=""`; MD5 `83d42c9299632d2a6c66fe39d6d01936`.
+- `private.is_super_admin()` — return `boolean`; owner `postgres`; `search_path=""`; MD5 `324c3a171280546dc16429d7ccf4aa86`.
+
+**Trigger bindings زنده:**
+- هیچ trigger binding مستقیم از توابع فهرست‌شدهٔ این گروه در snapshot ثبت نشده است؛ این به‌معنای نبودن triggerهای دیگر در Production نیست.
+
+**Cron metadata ثبت‌شده:**
+- در recovery map برای این گروه cron مشخصی ثبت نشده است.
+
+**نتیجهٔ provenance:** اشیای بالا candidateهای تطبیق فعلی‌اند، نه اثبات منشأ تاریخی. برای تعیین اینکه هر Migration دقیقاً چه چیزی ایجاد/تغییر داده، همچنان SQL اصلی یا transcript معتبر قبل/بعد لازم است.
+
+### گروه 2: Iranian exchange asset observations, request queues, workers, Bit24 and admin monitoring
+
+**Migration IDs:** `20261115101709`, `20261115102729`, `20261115102927`, `20261115103227`, `20261115103507`, `20261115105721`, `20261115105956`
+
+**روابط زندهٔ مرتبط (نام/متادیتا):**
+- `public.exchange_asset_observations`: owner `postgres`، RLS `true`، forced RLS `false`، columns=13، indexes=4، constraints=5، policies=0، triggers=1.
+- `public.exchange_asset_sync_requests`: owner `postgres`، RLS `true`، forced RLS `false`، columns=6، indexes=1، constraints=2، policies=0، triggers=0.
+- `public.bit24_exchange_sync_requests`: owner `postgres`، RLS `true`، forced RLS `false`، columns=5، indexes=1، constraints=1، policies=0، triggers=0.
+- `public.admin_market_listings`: owner `postgres`، RLS `true`، forced RLS `false`، columns=3، indexes=2، constraints=3، policies=1، triggers=1.
+
+**روتین‌های زنده و fingerprint:**
+- `public.request_iran_exchange_asset_sync()` — return `integer`; owner `postgres`; `search_path=""`; MD5 `22e4150dd0ae30a2e3abf81887c52897`.
+- `public.process_iran_exchange_asset_sync()` — return `jsonb`; owner `postgres`; `search_path=""`; MD5 `889c3728e54154a799e55ed8b9bc2edb`.
+- `public.request_bit24_exchange_sync()` — return `integer`; owner `postgres`; `search_path=""`; MD5 `629da0df67c74eeb41948f368b584043`.
+- `public.process_bit24_exchange_sync()` — return `jsonb`; owner `postgres`; `search_path=""`; MD5 `9f3e6d7e20586ea79b7c021eebc6ab62`.
+- `public.admin_exchange_asset_sync_report()` — return `jsonb`; owner `postgres`; `search_path=""`; MD5 `fb633c495a9dec841d57c30a4a06972b`.
+- `public.admin_request_exchange_asset_sync()` — return `jsonb`; owner `postgres`; `search_path=""`; MD5 `5fd277d145c28193cc5110f9acdb358a`.
+- `private.auto_list_verified_exchange_asset()` — return `trigger`; owner `postgres`; `search_path=""`; MD5 `49880c0892cad6081acb6ce071090a5d`.
+
+**Trigger bindings زنده:**
+- `trg_auto_list_verified_exchange_asset` روی `public.exchange_asset_observations`: `CREATE TRIGGER trg_auto_list_verified_exchange_asset AFTER INSERT OR UPDATE OF match_status, coingecko_id, is_active ON public.exchange_asset_observations FOR EACH ROW EXECUTE FUNCTION private.auto_list_verified_exchange_asset()`
+
+**Cron metadata ثبت‌شده:**
+- jobid `13`, name `digiarz-iran-exchange-request`, schedule `*/10 * * * *`, active `true`. command text/fingerprint در این crosswalk موجود نیست.
+- jobid `14`, name `digiarz-iran-exchange-process`, schedule `1,31 * * * *`, active `true`. command text/fingerprint در این crosswalk موجود نیست.
+
+**نتیجهٔ provenance:** اشیای بالا candidateهای تطبیق فعلی‌اند، نه اثبات منشأ تاریخی. برای تعیین اینکه هر Migration دقیقاً چه چیزی ایجاد/تغییر داده، همچنان SQL اصلی یا transcript معتبر قبل/بعد لازم است.
+
+### گروه 3: automatic activation of verified exchange pairs
+
+**Migration IDs:** `20261116201639`
+
+**روابط زندهٔ مرتبط (نام/متادیتا):**
+- `public.crypto_assets`: owner `postgres`، RLS `true`، forced RLS `false`، columns=14، indexes=6، constraints=1، policies=1، triggers=0.
+- `public.admin_market_listings`: owner `postgres`، RLS `true`، forced RLS `false`، columns=3، indexes=2، constraints=3، policies=1، triggers=1.
+- `public.market_prices`: owner `postgres`، RLS `true`، forced RLS `false`، columns=4، indexes=1، constraints=2، policies=2، triggers=0.
+- `public.exchange_asset_observations`: owner `postgres`، RLS `true`، forced RLS `false`، columns=13، indexes=4، constraints=5، policies=0، triggers=1.
+- `public.demo_trading_pairs`: owner `postgres`، RLS `true`، forced RLS `false`، columns=6، indexes=2، constraints=5، policies=1، triggers=0.
+
+**روتین‌های زنده و fingerprint:**
+- `private.auto_activate_verified_exchange_pairs()` — return `jsonb`; owner `postgres`; `search_path=""`; MD5 `fd177baeee1a5bdd927458413f69bfb6`.
+
+**Trigger bindings زنده:**
+- هیچ trigger binding مستقیم از توابع فهرست‌شدهٔ این گروه در snapshot ثبت نشده است؛ این به‌معنای نبودن triggerهای دیگر در Production نیست.
+
+**Cron metadata ثبت‌شده:**
+- jobid `18`, name `digiarz-auto-activate-verified-exchange-pairs`, schedule `9-59/10 * * * *`, active `true`. command text/fingerprint در این crosswalk موجود نیست.
+
+**نتیجهٔ provenance:** اشیای بالا candidateهای تطبیق فعلی‌اند، نه اثبات منشأ تاریخی. برای تعیین اینکه هر Migration دقیقاً چه چیزی ایجاد/تغییر داده، همچنان SQL اصلی یا transcript معتبر قبل/بعد لازم است.
+
+### گروه 4: request backpressure, pg_net queue/response backup and temporary worker throttling
+
+**Migration IDs:** `20261121045434`, `20261121045531`, `20261121050216`
+
+**روابط زندهٔ مرتبط (نام/متادیتا):**
+- `private.digiarz_pg_net_queue_backup_20261121`: در relation dependency inventory مستقیم موجود نیست.
+- `private.digiarz_pg_net_response_backup_20261121`: در relation dependency inventory مستقیم موجود نیست.
+- `public.exchange_asset_sync_requests`: owner `postgres`، RLS `true`، forced RLS `false`، columns=6، indexes=1، constraints=2، policies=0، triggers=0.
+- `public.bit24_exchange_sync_requests`: owner `postgres`، RLS `true`، forced RLS `false`، columns=5، indexes=1، constraints=1، policies=0، triggers=0.
+
+**روتین‌های زنده و fingerprint:**
+- در recovery map برای این گروه routine مستقیمی نام‌گذاری نشده؛ انتساب مستقیم routine: **not established**.
+
+**Trigger bindings زنده:**
+- هیچ trigger binding مستقیم از توابع فهرست‌شدهٔ این گروه در snapshot ثبت نشده است؛ این به‌معنای نبودن triggerهای دیگر در Production نیست.
+
+**Cron metadata ثبت‌شده:**
+- jobid `11`, name `digiarz-crypto-assets-stale-request-recovery`, schedule `3-59/5 * * * *`, active `true`. command text/fingerprint در این crosswalk موجود نیست.
+- jobid `13`, name `digiarz-iran-exchange-request`, schedule `*/10 * * * *`, active `true`. command text/fingerprint در این crosswalk موجود نیست.
+- jobid `14`, name `digiarz-iran-exchange-process`, schedule `1,31 * * * *`, active `true`. command text/fingerprint در این crosswalk موجود نیست.
+
+**نتیجهٔ provenance:** اشیای بالا candidateهای تطبیق فعلی‌اند، نه اثبات منشأ تاریخی. برای تعیین اینکه هر Migration دقیقاً چه چیزی ایجاد/تغییر داده، همچنان SQL اصلی یا transcript معتبر قبل/بعد لازم است.
+
+### کنترل‌های ایمنی
+- شمار توابع در snapshot: 46; روابط schema-qualified resolved در dependency scan: 27/27; unresolved candidates: 0.
+- Trigger bindings ثبت‌شده: 6.
+- هیچ row از wallets، users، transactions، pg_net queues یا backup tables خوانده نشده است.
+- هیچ grant/revoke، policy، function، trigger، cron، queue، دادهٔ مالی یا schema در Production تغییر نکرده است.
+- این پیوست صرفاً سند ممیزی است و executable نیست.
