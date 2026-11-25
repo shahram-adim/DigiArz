@@ -1,8 +1,8 @@
 -- TEST-ONLY metadata fixture for tests/rpc-security-catalog.sql.
 -- Reproduces the 46 exact Production signatures and current API-role ACL
 -- booleans from the reviewed 2026-11-25 catalog snapshot.
--- Five real bodies are installed by the bootstrap; this file adds one exact
--- migration-backed trigger body. The remaining 40 functions are inert NO-OP stubs
+-- Five real bodies are installed by the bootstrap; this file adds two exact
+-- migration-backed trigger bodies. The remaining 39 functions are inert NO-OP stubs
 -- (RETURNS void). They MUST NOT be
 -- used to claim function-body behavior or full Production schema parity.
 -- This file runs only inside the disposable PostgreSQL 17 service container.
@@ -54,18 +54,41 @@ $stub$;
 
 REVOKE ALL ON FUNCTION private.auto_activate_verified_exchange_pairs() FROM PUBLIC, anon, authenticated, service_role;
 
+-- Exact current Production body from applied migration 20261115134855.
+-- The repository migration filename 20261115134600 is a timestamp mismatch;
+-- this fixture body was checked against the applied statements and pg_get_functiondef.
 CREATE OR REPLACE FUNCTION private.auto_list_verified_exchange_asset()
-RETURNS void
+RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = ''
-AS $stub$
-BEGIN
-  RETURN;
-END;
-$stub$;
+AS $function$
+begin
+ if new.match_status='matched'
+    and new.is_active is true
+    and new.coingecko_id is not null
+    and (
+      tg_op='INSERT'
+      or old.match_status is distinct from new.match_status
+      or old.coingecko_id is distinct from new.coingecko_id
+      or old.is_active is distinct from new.is_active
+    )
+ then
+  insert into public.admin_market_listings(coingecko_id,added_by)
+  select ca.coingecko_id,null::uuid from public.crypto_assets ca
+  where ca.coingecko_id=new.coingecko_id and ca.is_active is true
+    and ca.current_price_usd>0 and ca.last_updated>=now()-interval '24 hours'
+    and (select count(*) from public.crypto_assets c2 where c2.is_active is true and upper(c2.symbol)=upper(ca.symbol))=1
+    and not exists(select 1 from public.admin_market_listings l join public.crypto_assets c2 using(coingecko_id) where upper(c2.symbol)=upper(ca.symbol) and l.coingecko_id<>ca.coingecko_id)
+    and not exists(select 1 from public.demo_trading_pairs dp where dp.pair_symbol=upper(ca.symbol)||'USDT' and dp.base_coingecko_id<>ca.coingecko_id)
+  on conflict(coingecko_id) do nothing;
+ end if;
+ return new;
+end;
+$function$;
 
-REVOKE ALL ON FUNCTION private.auto_list_verified_exchange_asset() FROM PUBLIC, anon, authenticated, service_role;
+REVOKE ALL ON FUNCTION private.auto_list_verified_exchange_asset()
+  FROM PUBLIC, anon, authenticated, service_role;
 
 -- Exact current Production body, independently matched against
 -- migration 20261113184000_prevent_curated_ticker_collisions.sql.
