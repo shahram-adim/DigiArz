@@ -1460,3 +1460,6 @@
 - [x] Added `supabase/audit/production_migration_authority_search_2026-11-25.json` and a CI assertion for the evidence and bounded-search limitations.
 - [!] No authoritative SQL source was recovered by these checks. This is not proof that external backups, developer clones, unexamined refs or other deployment artifacts do not contain a copy.
 - Next: obtain owner-controlled backup/export or original deployment/SQL-editor transcript; alternatively inspect the developer workstation's original clone, reflogs and dangling Git objects. Do not reconstruct executable SQL from current Production catalog state alone.
+
+
+- [x] Scope correction: the authority-search artifact and test list exactly 28 PR changed-file inventories actually queried; PRs not queried are not claimed as searched.
