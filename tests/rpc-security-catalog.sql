@@ -58,7 +58,10 @@ BEGIN
   JOIN pg_namespace n ON n.oid = p.pronamespace
   WHERE n.nspname IN ('public','private')
     AND p.prosecdef
-    AND NOT (COALESCE(p.proconfig, ARRAY[]::text[]) @> ARRAY['search_path=""']);
+    AND NOT (
+      COALESCE(p.proconfig, ARRAY[]::text[]) @> ARRAY['search_path=""']
+      OR COALESCE(p.proconfig, ARRAY[]::text[]) @> ARRAY['search_path=pg_catalog']
+    );
 
   IF unsafe_search_paths IS NOT NULL THEN
     RAISE EXCEPTION 'SECURITY DEFINER function(s) missing empty search_path: %', unsafe_search_paths;
