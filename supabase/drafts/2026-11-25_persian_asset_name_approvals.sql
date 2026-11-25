@@ -1,22 +1,29 @@
--- DigiArz: proposed Persian asset-name approval storage
+-- DigiArz: proposed Persian asset-name approval storage and admin RPC
 -- STATUS: REVIEW-ONLY DRAFT. This file is intentionally under supabase/drafts/,
 -- not supabase/migrations/. It is NOT picked up by Supabase migration push.
 -- DO NOT execute on Production or any connected database without explicit approval.
 --
--- Rationale:
---   * exchange_asset_observations already stores raw source payloads and remains
---     service_role-only; no direct anon/authenticated table grants or RLS policies.
---   * Candidate extraction currently embeds a candidate envelope in source_payload.
---     A live read-only count found 0/4,970 observations with that envelope, so this
---     table must not be populated until an explicitly authorized future sync.
---   * Consensus is not approval. Only a separately reviewed administrator action
---     may insert/update an approved name.
+-- Live audit facts (read-only, 2026-11-25):
+--   * public.exchange_asset_observations has 13 columns, 5 constraints,
+--     4 indexes, one trigger, RLS enabled, no policies.
+--   * anon/authenticated have no table privileges; service_role has DML.
+--   * 4,970 observations exist; 0 contain the new candidate envelope.
+--   * Existing trigger private.auto_list_verified_exchange_asset() inserts into
+--     admin_market_listings only when an observation becomes matched+active.
+--     This approval table is deliberately NOT wired to that trigger.
+--   * The historical create_exchange_asset_observations migration is recorded
+--     in Supabase's ledger but its SQL file is absent from the inspected branch.
 --
 -- Compatibility contract with src/persian-asset-names.mjs:
 --   { coingecko_id, status: "approved", approved_by, approved_at, name_fa }
---
--- Proposed object: public.crypto_asset_persian_name_approvals
 -- One current approved Persian display name per exact CoinGecko asset identity.
+--
+-- Security design:
+--   * No direct anon/authenticated table access.
+--   * Authenticated caller can invoke only the admin RPC.
+--   * RPC checks private.is_current_user_super_admin() and derives approved_by
+--     from auth.uid(); caller cannot nominate another approver.
+--   * service_role remains trusted backend-only access, not an end-user route.
 
 BEGIN;
 
@@ -26,7 +33,8 @@ CREATE TABLE public.crypto_asset_persian_name_approvals (
     ON UPDATE CASCADE
     ON DELETE RESTRICT,
   name_fa text NOT NULL
-    CHECK (char_length(btrim(name_fa)) BETWEEN 1 AND 80),
+    CHECK (char_length(btrim(name_fa)) BETWEEN 1 AND 80)
+    CHECK (name_fa ~ '[ء-ی]'),
   status text NOT NULL DEFAULT 'approved'
     CHECK (status = 'approved'),
   approved_by uuid NOT NULL
@@ -43,12 +51,10 @@ CREATE TABLE public.crypto_asset_persian_name_approvals (
 COMMENT ON TABLE public.crypto_asset_persian_name_approvals IS
   'Explicitly approved Persian display names; consensus candidates are never approvals.';
 COMMENT ON COLUMN public.crypto_asset_persian_name_approvals.source_snapshot IS
-  'Immutable-at-approval evidence snapshot with source exchange, source key, spelling and source URL.';
+  'Approval-time evidence snapshot: source exchange, source key, spelling and source URL.';
 COMMENT ON COLUMN public.crypto_asset_persian_name_approvals.approved_by IS
-  'Auth user UUID of the administrator who explicitly approved this display name.';
+  'Auth user UUID derived from auth.uid() by the administrator-only RPC.';
 
--- Match the existing observation-table access model: RLS on, no policies,
--- no direct application-role table grants; only the trusted service role gets DML.
 ALTER TABLE public.crypto_asset_persian_name_approvals ENABLE ROW LEVEL SECURITY;
 
 REVOKE ALL ON TABLE public.crypto_asset_persian_name_approvals FROM PUBLIC;
@@ -57,16 +63,78 @@ GRANT SELECT, INSERT, UPDATE, DELETE
   ON TABLE public.crypto_asset_persian_name_approvals
   TO service_role;
 
-COMMIT;
+-- Do not expose a generic write path. The only application-role write path
+-- checks the existing private super-admin predicate inside SECURITY DEFINER.
+CREATE OR REPLACE FUNCTION public.admin_approve_persian_asset_name(
+  p_coingecko_id text,
+  p_name_fa text,
+  p_source_snapshot jsonb DEFAULT '[]'::jsonb,
+  p_approval_note text DEFAULT NULL
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $function$
+DECLARE
+  v_actor uuid := auth.uid();
+BEGIN
+  IF v_actor IS NULL OR NOT coalesce(private.is_current_user_super_admin(), false) THEN
+    RAISE EXCEPTION 'Super administrator access required'
+      USING ERRCODE = '42501';
+  END IF;
+
+  IF nullif(btrim(p_coingecko_id), '') IS NULL THEN
+    RAISE EXCEPTION 'CoinGecko ID is required' USING ERRCODE = '22023';
+  END IF;
+
+  IF p_name_fa IS NULL
+     OR char_length(btrim(p_name_fa)) NOT BETWEEN 1 AND 80
+     OR p_name_fa !~ '[ء-ی]' THEN
+    RAISE EXCEPTION 'A valid Persian display name is required'
+      USING ERRCODE = '22023';
+  END IF;
+
+  IF p_source_snapshot IS NULL OR jsonb_typeof(p_source_snapshot) <> 'array' THEN
+    RAISE EXCEPTION 'Source snapshot must be a JSON array'
+      USING ERRCODE = '22023';
+  END IF;
+
+  INSERT INTO public.crypto_asset_persian_name_approvals (
+    coingecko_id, name_fa, status, approved_by, approved_at,
+    source_snapshot, approval_note, updated_at
+  )
+  VALUES (
+    btrim(p_coingecko_id), btrim(p_name_fa), 'approved', v_actor, now(),
+    p_source_snapshot, nullif(btrim(p_approval_note), ''), now()
+  )
+  ON CONFLICT (coingecko_id) DO UPDATE
+  SET name_fa = EXCLUDED.name_fa,
+      status = 'approved',
+      approved_by = EXCLUDED.approved_by,
+      approved_at = EXCLUDED.approved_at,
+      source_snapshot = EXCLUDED.source_snapshot,
+      approval_note = EXCLUDED.approval_note,
+      updated_at = now();
+END;
+$function$;
+
+REVOKE ALL ON FUNCTION public.admin_approve_persian_asset_name(text, text, jsonb, text)
+  FROM PUBLIC, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.admin_approve_persian_asset_name(text, text, jsonb, text)
+  TO authenticated;
 
 -- Review checklist before this draft can become an executable migration:
--- [ ] Confirm an approved-name write endpoint verifies private.is_super_admin()
---     from the authenticated caller; never trust caller-supplied approved_by.
--- [ ] Ensure that endpoint snapshots only source-attributed evidence and never
---     converts consensus_candidate/single_source/review_required into approval.
--- [ ] Add regression tests for anon/authenticated denial and service-role access.
--- [ ] Verify the target PostgreSQL version and schema state in a disposable DB.
+-- [ ] Verify the function owner is a trusted migration owner (normally postgres).
+-- [ ] Confirm authenticated has USAGE on public and private, and EXECUTE on the
+--     existing private.is_current_user_super_admin() predicate.
+-- [ ] Add regression tests: anon denied; non-admin authenticated denied;
+--     admin succeeds; approved_by always equals auth.uid(); invalid names/snapshots
+--     rejected; duplicate approvals update only through the guarded RPC.
+-- [ ] Review whether source_snapshot should be schema-validated and size-limited.
+-- [ ] Ensure the UI reads this approved table, not consensus candidates.
 -- [ ] Reconcile the missing historical create_exchange_asset_observations SQL
---     source and the Supabase migration-ledger drift before any db push.
+--     source and migration-ledger drift before any db push.
+-- [ ] Verify on a disposable PostgreSQL/Supabase test project.
 -- [ ] Obtain explicit owner approval before converting this draft into a migration
 --     or applying it to any database.
