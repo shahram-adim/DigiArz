@@ -1471,3 +1471,13 @@
 - [x] All 22 substantive workflow steps passed, including Node/browser integration, PostgreSQL 17 arithmetic and widening rehearsals, Market/Limit/Stop-Limit/TP-SL lifecycle tests, and two-session race tests.
 - [!] This confirms only the CI suite on disposable test infrastructure. It does not validate or authorize any Production migration, grant/policy/function change, deployment, cron change, or financial write.
 - [ ] Continue recovery of the 17 authoritative missing migration SQL sources from owner-controlled backups, original SQL Editor/deployment transcripts, or the original developer clone/reflogs. Until then, keep migration replay and `supabase db push` blocked.
+
+
+### پرونده‌های شواهد مستقل برای ۱۷ Migration مفقود — 2026-11-25
+- [x] ایجاد `supabase/audit/production_missing_migration_dossiers_2026-11-25.md` شامل ۱۷ پرونده مستقل در چهار حوزه: کیف پول/مدیران (۶)، sync صرافی‌های ایرانی (۷)، فعال‌سازی pair (۱)، backpressure/pg_net (۳).
+- [x] هر پرونده شامل اثرات/اشیای زندهٔ مشاهده‌شده، شواهد موجود، موارد نامعلوم، مدرک اصلی لازم و نتیجهٔ ایمنی است.
+- [x] دروازهٔ پذیرش منبع اصلی و ممنوعیت اجرای SQL حدسی، queue replay، cron changes و تغییرات Production به‌صورت صریح ثبت شد.
+- [!] این مستندات بازسازی SQL اصلی نیستند؛ در این گام هیچ SQL اجرایی ساخته یا Migration بازیابی نشده است.
+- [x] تعداد پرونده‌ها ۱۷/۱۷؛ منبع اصلی بازیابی‌شده ۰؛ SQL اجرایی ساخته‌شده ۰.
+- [ ] گام بعد: بررسی فقط‌خواندنی provenance برای هر routine/trigger/job مرتبط در manifestها و افزودن ارجاع دقیق به شناسه/فینگرپرینت هر شیء؛ سپس CI completeness guard برای پرونده‌ها.
+- [!] PR #63 همچنان Draft و ادغام‌نشده بماند؛ `supabase db push` و هر تغییر Production ممنوع تا بازیابی منبع معتبر و تأیید مالک.
