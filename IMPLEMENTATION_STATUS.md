@@ -1485,3 +1485,14 @@
 - [x] Supabase دوباره فقط‌خواندنی بررسی شد: `ACTIVE_HEALTHY`، PostgreSQL `17.11.0.018`؛ migration ledger تعداد 55 رکورد دارد و هیچ migration جدیدی در این مرحله اعمال نشده است.
 - [x] نتیجهٔ نهایی این checkpoint: ۴۶ امضای دقیق + metadata زندهٔ کامل؛ ۷ بدنهٔ واقعی/source-backed در harness؛ ۳۹ stub metadata-only باقی‌مانده.
 - [ ] ادامهٔ بعدی: بررسی تابع بعدی فقط پس از تطبیق مستقیم Production definition با migration اعمال‌شده؛ timestamp mismatch فایل auto-list همچنان در reconciliation باقی است.
+
+
+### Follow-on checkpoint — fee-rate RPC, default ACL evidence, and CI result (2026-11-25)
+
+- [x] `public.get_demo_trading_fee_rate(text,text)` was promoted from metadata stub to the exact current Production body. Live `pg_get_functiondef` matches the function statement recovered from applied migration ledger version `20261113153808`; the full migration file is absent from this branch. The isolated test verifies maker/taker rates, normalization, invalid liquidity, disabled/missing quote assets, anon denial, authenticated/service_role access, and no direct anon/authenticated fee-table SELECT.
+- [x] Read-only `pg_default_acl` inspection resolved the previously unexplained service_role EXECUTE bit: for functions created by `postgres` in `public`, default ACL is `{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}`. This also grants anon/authenticated by default unless explicitly revoked. The fee migration revokes PUBLIC/anon/authenticated but omits service_role, so the live service_role bit is inherited. No default ACL or function ACL was changed; owner approval is still required for any policy change.
+- [x] CI run #441 / ID `45610442154` on code/test commit `dedea8590707791fcb3d88250f6900b2282becd1` completed successfully: unit-tests and postgres17-rpc-smoke success, including all three new source-backed tests (ticker guard, auto-list trigger, fee-rate RPC). `rpc-security-integration` remains skipped by the isolated-environment gate.
+- [x] Final smoke-fixture count after the workflow replaces the exchange-discovery stub: 9 real/source-backed bodies and 37 metadata-only stubs (the raw catalog-stubs file initially declares 38 stubs before the migration replacement step).
+- [x] PR #62 remains Open, Draft, unmerged; base `redesign/ui-clean-rebuild-2026`; latest HEAD at this status update is `043df8ceb8874be55dc2cae1221151eda1baa8c1` (documentation-only after the successful CI code/test commit).
+- [ ] Next: continue the 37 remaining stubs one at a time, starting with a low-risk function whose live definition and applied migration source can both be proven; map every dependency, table/sequence ACL, RLS policy, and caller before promotion.
+- [x] No Production DDL/DML, ACL/default ACL, migration ledger, cron, auth, edge function, deploy, db push, merge, cost, or infrastructure change was performed.
