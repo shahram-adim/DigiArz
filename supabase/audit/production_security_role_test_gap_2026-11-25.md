@@ -56,12 +56,20 @@
 
 ## Migration replay hazards
 
-The recovered SQL must be reviewed individually before any isolated replay plan is considered:
+Static source review of the recovered bodies identified several distinct classes of side effects. These are reasons to preserve the SQL as historical evidence, not reasons to execute it again:
 
-- `20261121050216` changes Cron schedules for jobs 14 and 16. Do not execute it or alter any Production Cron schedule.
-- `20261121045531` creates persistent snapshots of `net.http_request_queue` and `net._http_response`; it must not be replayed against Production or treated as a harmless schema-only migration.
-- `20261121045434` replaces several live function definitions and changes request/back-pressure behavior; it requires dependency-aware isolated validation.
-- No recovered migration may be blindly replayed as a batch. Do not restore, replay, drain, delete, throttle, or reschedule any Production queue or worker.
+- **Privilege/data seed:** `20261113154323` inserts or updates the `private.admin_users` super-admin row under a profile-count condition. Replaying it could reassign privileged access; never replay this identity/role assignment.
+- **Wallet/fee seed and function replacement:** `20261113153808` inserts profile/wallet defaults and fee rows, creates review/report tables and policies, and dynamically replaces trading function definitions. Replaying it could touch account defaults or alter financial execution logic.
+- **Wallet-management function definitions:** `20261113154736`, `20261113154844`, and `20261113154926` install or revise functions that, when invoked, can update wallet balances, insert transaction/audit rows, and change admin privilege checks. The function bodies must be reviewed independently; do not invoke them as part of source recovery.
+- **External API and Cron setup:** `20261115102729` and `20261115103507` define request workers that call `net.http_get`, write request/observation rows, and create Cron schedules. Replaying them could enqueue real external requests and create duplicate/changed jobs.
+- **Curated-market backfill and trigger:** `20261115103227` inserts rows into `admin_market_listings`, drops/recreates an observation trigger, and runs a backfill. It can change the visible curated market catalogue.
+- **Demo-pair seed and Cron:** `20261116201639` inserts demo trading pairs and creates a Cron job.
+- **Dynamic worker rewrites:** `20261121045434` dynamically replaces several live market-price, FX, crypto-asset, Iranian-exchange, and Bit24 function definitions. Its embedded request cleanup/back-pressure logic requires dependency-aware isolated validation.
+- **Queue/response snapshots:** `20261121045531` creates persistent copies of `net.http_request_queue` and `net._http_response`; it is not a harmless schema-only migration and may duplicate transient operational payloads.
+- **Cron schedule mutation:** `20261121050216` calls `cron.alter_job` for jobs 14 and 16. Do not execute it or alter any Production Cron schedule.
+- The remaining recovered files also contain function/trigger, schema, RLS, and ACL definitions; they must be checked in historical order and against the current live catalog before any isolated rehearsal.
+
+No recovered migration may be blindly replayed as a batch. Do not restore, replay, drain, delete, throttle, or reschedule any Production queue or worker. In particular, no order-engine Cron job may be paused, slowed, or rescheduled.
 
 ## Required next steps
 
