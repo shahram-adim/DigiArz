@@ -209,3 +209,16 @@ No database function body in `public/private` references `public.claim_admin_ass
 This is a caller-evidence finding, not yet an authorization to revoke. Before any ACL change, still verify the intended runtime model for the Auth trigger, check for out-of-repository/manual service clients, and run disposable-clone tests with exact function signatures. The user-facing refresh Edge Function currently performs direct table operations rather than invoking `claim_admin_asset_refresh`; if rate limiting is intended to be enforced through that RPC, this is a separate functional design gap that must be addressed explicitly, not silently by granting or revoking permissions.
 
 No changes were made to Production, SQL schema, ACLs, functions, cron jobs, triggers, Edge Function deployment, secrets, variables, or service configuration.
+
+
+## 9. Recovery Test project suitability check (read-only, 2026-11-25)
+
+A catalog-only comparison was run against the separate `DigiArz-Recovery-Test` project (`zrriqwyolcjhbappocuw`). This project is **not currently a faithful disposable clone for validating the Production ACL/cron/trigger proposal**:
+
+- All 13 service-role-only candidate functions exist there, but their `proacl` is NULL (default ACL). Effective privilege checks show `anon`, `authenticated`, and `service_role` can execute all 13, unlike Production's explicit per-function ACLs.
+- The Test project has no `pg_default_acl` rows for public/global function defaults in the inspected catalog.
+- The Test project has no `cron.job` relation (pg_cron catalog unavailable in this project state).
+- No matching `auth.users` trigger for `new_user_setup()` was found.
+- Therefore this project cannot presently reproduce Production's function grants, scheduled execution identity, or Auth-trigger execution path. Do not treat it as a disposable clone for ACL rollout tests without first designing and explicitly approving a separate test-environment preparation plan.
+
+This Test-project check was SELECT-only. No extensions, functions, grants, triggers, cron jobs, or test fixtures were installed or changed.
