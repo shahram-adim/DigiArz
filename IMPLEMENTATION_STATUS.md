@@ -1539,3 +1539,12 @@
 - [x] تست RLS دوکاربره برای ۸ رابطهٔ کاربرمحور به workflow PostgreSQL 17 افزوده شد؛ CI run `45692611554` روی commit کد `bfc099c15421b9c32024267293dce3498a56d94f` با موفقیت کامل شد. تمام ۲۲ مرحلهٔ substantive از جمله RLS، Market/Limit، Stop-Limit، TP-SL و آزمون‌های race موفق شدند.
 - [!] تست RLS از Auth shim و helper فعال‌بودن حسابِ مصنوعی استفاده می‌کند؛ رفتار JWT واقعی و بدنهٔ live تابع `current_account_is_active()` هنوز در این تست اثبات نشده است.
 - [!] PR #63 همچنان Draft/open/unmerged است؛ آخرین مقایسهٔ شاخه با `main`: ۷۱ commit جلوتر و صفر عقب‌تر. هیچ Production change، Migration، db push، Merge، Deploy، Cron change، grant یا RLS policy change انجام نشده است.
+
+
+### تکمیل آزمون ACL توابع RPC — 2026-11-25
+- [x] تست Node جدید، هر ۴۶ امضای ماتریس نقش‌ها را با manifest توابع Production از نظر هویت، مالک، ACL خام و fingerprint بدنه تطبیق می‌دهد؛ مجوزهای مستقیم anon، authenticated، service_role و PUBLIC جداگانه parse و مقایسه می‌شوند.
+- [x] بررسی مستقل همین نشست روی ۴۶/۴۶ تابع بدون اختلاف بود: anon=2، authenticated=26، service_role=36 و PUBLIC=0 در snapshot مورخ 2026-11-25.
+- [x] generator و مرحلهٔ CI برای ساخت fixture موقت PostgreSQL 17 اضافه شد؛ fixture از امضاها و ACLهای snapshot، توابع no-op مصنوعی می‌سازد و has_function_privilege را برای هر ۴۶ تابع و چهار role بررسی می‌کند.
+- [!] این fixture فقط semantics و ارزیابی مجوز PostgreSQL را روی ACL بازسازی‌شده آزمایش می‌کند؛ اجرای بدنهٔ ۴۶ تابع زنده، guardهای داخل بدنه، JWT واقعی Supabase، RLS، default privileges و رفتار Production را اثبات نمی‌کند.
+- [ ] اجرای CI روی commit نهایی این تغییرات هنوز مشاهده/تأیید نشده است؛ بنابراین آزمون ACL جدید را سبز یا تکمیل‌شده اعلام نکنید.
+- [!] هیچ Production grant/revoke، تغییر تابع، policy، migration، db push، deploy یا Merge انجام نشده است.
