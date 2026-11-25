@@ -1,7 +1,7 @@
 -- TEST-ONLY: exact live Production admin_search_market_assets body.
 -- Synthetic market metadata only; no financial/order/user data is touched.
 -- All inserted rows are rolled back.
-\\set ON_ERROR_STOP on
+\set ON_ERROR_STOP on
 BEGIN;
 
 INSERT INTO public.crypto_assets
