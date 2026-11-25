@@ -192,3 +192,29 @@ This section is evidence/review documentation only. No SQL test was run, no CI w
 6. Only after the policy conflict and parity preconditions are resolved, prepare positive/negative per-signature authorization tests and inert Auth/Cron tests. Enable the CI integration job only after a separate explicit approval.
 
 The test environment is NOT ready. The only completed work in this follow-up is read-only inspection plus repository documentation; no environment provisioning or database test execution occurred.
+
+## 11. Disposable PostgreSQL 17 smoke harness — first execution result (2026-11-25)
+
+The plan above remains the authority for full Production-parity testing. The following limited smoke phase is now implemented and has passed:
+
+- A per-job `postgres:17` service container runs in GitHub Actions; observed server version was PostgreSQL **17.12**.
+- Synthetic `anon`, `authenticated`, and `service_role` roles were created. One fixed synthetic super-admin identity was inserted into the ephemeral container only.
+- The test-only `auth.uid()` shim reads the transaction-local synthetic subject; it is not a JWT verifier and is not production code.
+- The exact read-only Production body of `public.admin_exchange_asset_sync_report()` was exercised against empty synthetic reporting tables.
+- The separate fixture contract passed: exact zero-argument signature, SECURITY DEFINER, empty search_path, anon EXECUTE denied, authenticated/service_role EXECUTE present, and no direct PUBLIC EXECUTE.
+- Function-body tests passed: anon and ordinary authenticated both received SQLSTATE `42501`; the synthetic super-admin received the expected JSON report. The transaction rolled back and the post-check confirmed exactly one synthetic admin fixture.
+- Both GitHub Actions runs associated with head `2ccd668038adddf7cdee0944f02089dacad34f5d` completed the `postgres17-rpc-smoke` and `unit-tests` jobs successfully. The pre-existing remote `rpc-security-integration` job remained skipped.
+
+### What this result does not prove
+
+This is a PostgreSQL 17 behavior smoke test for one read-only admin RPC, **not** a Production-parity pass. It does not test all 46 SECURITY DEFINER signatures, the future-function default ACL contract, all RLS/table grants, the real Supabase Auth trigger, `pg_cron`, or the remaining function dependency graphs. It does not resolve the owner decision about the future `service_role` EXECUTE defaults.
+
+The Recovery-Test project remains unsuitable and untouched. The missing-migration/source reconciliation remains a blocker to full schema replay. No persistent Supabase database, GitHub secret, CI variable, Production object, ACL, trigger, Cron job, or financial record was changed.
+
+### Corrected refresh-claim caller evidence
+
+The earlier statements in this plan that described `claim_admin_asset_refresh(text,uuid)` as having no known Edge Function caller are superseded by the live runtime trace recorded in `2026-11-25_refresh-claim-live-caller-trace.md`: the active Production `admin-refresh-crypto-asset` Edge Function (version 2) calls this exact RPC using its server-side service-role client after validating the user JWT and super-admin status. Preserve its exact service_role EXECUTE grant unless the caller is intentionally redesigned and reviewed. This does not justify blanket service_role EXECUTE defaults for unrelated functions. The available 24-hour log window did not show a request to that Edge Function, so source-level caller existence is confirmed but a request during that window is not.
+
+### Next action
+
+Extend the ephemeral fixture one reviewed exact-signature function at a time, then produce a complete Production-vs-fixture parity manifest. Keep default ACL policy unresolved and the remote-database integration gate disabled until full parity and separate owner approval.
