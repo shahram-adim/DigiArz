@@ -398,3 +398,34 @@ Commit: `7ef1932c49744b88408f3b80118eb3e574ed9c8a` (branch `feature/persian-asse
 - Job 17 (market-price overflow) فعال و روی `5-59/10` باقی است.
 - نتیجهٔ روشن: تغییر زمان‌بندی Migration شمارهٔ 20261121050216 محدود به processorهای کشف دارایی است؛ موتور سفارش‌های limit همچنان هر دقیقه فعال است. هیچ jobی تغییر داده نشد.
 - در آخرین دریافت GitHub، PR #62 همچنان open، Draft و merged=false است و mergeable=false گزارش شد. این فیلد در دریافت‌های متوالی ناپایدار بوده است؛ به‌عنوان وضعیت قطعی conflict تفسیر نشود. هیچ Merge یا update-branch انجام نشده است.
+
+
+## تطبیق قطعات Migration Backpressure با تعریف زندهٔ توابع Production — ۲۵ نوامبر ۲۰۲۶
+
+### روش
+- متن اصلی statement از ledger Production برای Migration `20261121045434` با SELECT خوانده شد.
+- از هر بخش `v_def := pg_get_functiondef(...)`، قطعات مقصد `v_new := $new$...$new$` استخراج شدند.
+- این قطعات با تعریف زندهٔ همان تابع از `pg_get_functiondef` مقایسه شدند؛ فقط whitespace برای مقایسه نرمال شد، محتوای SQL/کامنت‌ها تغییر داده نشد.
+
+### نتیجه
+هر ۱۴ قطعه در تابع مقصد فعلی Production به‌صورت کامل پیدا شد:
+
+| تابع | قطعات | نتیجه |
+|---|---:|---|
+| `public.refresh_market_prices()` | ۱/۱ | تطبیق کامل |
+| `private.request_market_price_overflow()` | ۱/۱ | تطبیق کامل |
+| `public.refresh_market_fx_rate()` | ۲/۲ | تطبیق کامل |
+| `public.request_iran_exchange_asset_sync()` | ۱/۱ | تطبیق کامل |
+| `public.request_bit24_exchange_sync()` | ۱/۱ | تطبیق کامل |
+| `public.recover_stale_crypto_assets_sync()` | ۲/۲ | تطبیق کامل |
+| `public.process_iran_exchange_asset_sync()` | ۳/۳ | تطبیق کامل |
+| `public.process_bit24_exchange_sync()` | ۳/۳ | تطبیق کامل |
+| **جمع** | **۱۴/۱۴** | **همهٔ قطعات حاضرند** |
+
+این تطبیق ثابت می‌کند قطعات مقصدی که Migration قصد درج/جایگزینی آن‌ها را داشته، در تعریف فعلی توابع وجود دارند. این کار به‌تنهایی سلامت اجرایی همهٔ مسیرها، صحت داده‌ها یا ایمنی replay را اثبات نمی‌کند و مجوز اجرای دوباره نیست. Migration شامل CREATE INDEX نیز جداگانه از نظر وجود/تعریف index باید با catalog بررسی شود؛ این بررسی در گام بعد انجام می‌شود.
+
+### PR #62
+آخرین fetch در همین مرحله: PR باز، Draft و merged=false؛ فیلد mergeable در آن لحظه true بود. این فیلد قبلاً نوسان داشته و فقط snapshot لحظه‌ای است؛ mergeability را به‌عنوان مجوز ادغام یا تضمین عدم conflict تلقی نکنید. هیچ merge یا update-branch انجام نشد.
+
+### ایمنی
+تمام دستورات Supabase این مرحله SELECT روی ledger و کاتالوگ/تعریف توابع بودند. هیچ Migration، DDL، DML، Cron یا Worker اجرا/تغییر نشد. هیچ داده‌ای حذف یا بازنویسی نشد و هزینه‌ای ایجاد نشد.
