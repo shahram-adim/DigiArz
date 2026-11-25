@@ -331,3 +331,17 @@ Metadata اتصال ثبت‌شده برای هر چهار job: database=`postgr
 - گروه Migrationهای 2026-11-21: job 11 مستقیماً `public.recover_stale_crypto_assets_sync()` را فراخوانی می‌کند. این routine در snapshot manifest موجود است؛ fingerprint بالا از همان manifest گرفته شده است.
 
 این crosswalk اجرای فعلی job را به routine وصل می‌کند؛ برای اثبات اینکه کدام یک از Migrationهای گروه، آن routine یا cron job را ایجاد/تغییر داده، همچنان SQL اصلی یا transcript تاریخی معتبر لازم است. هیچ job یا routine اجرا یا تغییر داده نشد.
+
+
+### تأیید دوبارهٔ fingerprint چهار routine در Production
+
+برای اطمینان از اینکه اتصال cron-to-routine صرفاً متکی به snapshot قبلی نیست، fingerprint تعریف زندهٔ هر چهار routine با `pg_get_functiondef` دوباره محاسبه شد. هر چهار مقدار با manifest تاریخ 2026-11-25 یکسان است.
+
+| Routine | Result type | Live definition MD5 | Owner | search_path |
+|---|---|---|---|---|
+| `public.recover_stale_crypto_assets_sync()` | `void` | `9ab6efcdb72cce454244f81aecc1da86` | `postgres` | `""` |
+| `public.request_iran_exchange_asset_sync()` | `integer` | `22e4150dd0ae30a2e3abf81887c52897` | `postgres` | `""` |
+| `public.process_iran_exchange_asset_sync()` | `jsonb` | `889c3728e54154a799e55ed8b9bc2edb` | `postgres` | `""` |
+| `private.auto_activate_verified_exchange_pairs()` | `jsonb` | `fd177baeee1a5bdd927458413f69bfb6` | `postgres` | `""` |
+
+**نتیجه:** تطبیق fingerprint فعلی Production با manifest برای این چهار routine برابر است (۴/۴). این فقط یکسان‌بودن تعریف فعلی را تأیید می‌کند و هیچ ادعایی دربارهٔ نسخهٔ اولیه یا محتوای تاریخی Migrationها ندارد.
