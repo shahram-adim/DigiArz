@@ -162,7 +162,7 @@ BEGIN
     RAISE EXCEPTION 'exchange_asset_observations sequence ACL drift; actual=%', actual_sequence_acl;
   END IF;
 
-  SELECT array_agg(t.tgname || '|' || t.tgenabled || '|' || pg_get_triggerdef(t.oid,true)
+  SELECT array_agg(t.tgname || '|' || t.tgenabled::text || '|' || pg_get_triggerdef(t.oid,true)
                    ORDER BY t.tgname)
     INTO actual_triggers
   FROM pg_trigger t
