@@ -763,3 +763,12 @@ Advisor امنیتی Production در 2026-11-25 این موارد را گزار�
 
 ### محدودیت انتشار
 تمام بررسی‌های Production فقط SELECT روی catalog بوده‌اند. هیچ تابع Production اجرا نشده است. هیچ Merge، migration، db push، grant پایدار، Auth change، Cron/Worker change، یا هزینه‌ای انجام نشده است.
+
+
+### نتیجهٔ اجرای قرارداد کاتالوگ روی محیط تست
+فایل `tests/rpc-security-catalog.sql` عمداً روی پروژهٔ تست فعلی اجرا شد تا اختلاف محیط آشکار شود؛ تست با خطای کنترل‌شده fail شد:
+- محیط تست برای تعداد زیادی از توابع SECURITY DEFINER مجوز EXECUTE به PUBLIC دارد؛ این دقیقاً با baseline Production که صفر تابع دارای PUBLIC EXECUTE دارد، مغایر است.
+- با وجود EXECUTE، نقش‌های anon/authenticated در baseline تست USAGE روی schema عمومی ندارند؛ بنابراین ACL و schema privileges این پروژه با Production هم‌تراز نیستند.
+- این شکست به‌عنوان کشف drift محیط تست ثبت می‌شود، نه شکست امنیتی Production.
+- هیچ اصلاح ACL یا schema در محیط تست انجام نشد. اجرای قرارداد فقط catalog read بود و تغییری ایجاد نکرد.
+- نتیجهٔ اجرایی: job یکپارچه‌سازی CI باید تا آماده‌شدن یک clone آزمایشی با ACL و schema grants همسان Production خاموش بماند؛ روشن‌کردن آن روی پروژهٔ فعلی به شکست قابل‌انتظار منجر می‌شود.
