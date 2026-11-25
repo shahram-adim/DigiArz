@@ -262,3 +262,38 @@ This report is an inventory and safety analysis only. It changes no database obj
 - وجود صف خالی و ۷ درخواست pending بدون تأخیر بیش از ۳۰ دقیقه، رفتار فعلی را توصیف می‌کند؛ این داده‌ها محتوای Migrationهای `digiarz_backpressure_and_exchange_sync_bloat_guards` و `temporarily_throttle_exchange_asset_processors_20261121` را بازسازی نمی‌کنند.
 - **هیچ پاک‌سازی، VACUUM، DELETE، snapshot، بازیابی، تغییر Cron، اجرای دستی Worker یا تغییر در pg_net انجام نشد.** برای بازیابی SQL اصلی همچنان باید deployment artifact یا backup معتبر پیدا شود.
 
+
+
+## بررسی مسیر Backup و امکان بازیابی Migration Source — ۲۵ نوامبر ۲۰۲۶
+
+در درخت شاخهٔ `main` دو سند و یک Workflow مرتبط با پشتیبان‌گیری پیدا شد:
+- `docs/DATABASE_BACKUP_RECOVERY.md`
+- `docs/MIGRATION_SOURCE_INVENTORY.md`
+- `.github/workflows/manual-database-backup.yml`
+
+### دامنهٔ Backup موجود
+- Workflow با PostgreSQL 17 از schemaهای `public` و `private` آرشیو custom-format رمزگذاری‌شده می‌سازد.
+- دادهٔ سه صف موقت خصوصی `private.crypto_assets_sync_requests`، `private.market_fx_sync_requests` و `private.market_price_sync_requests` عمداً از dump حذف می‌شود؛ ساختار جدول‌ها در آرشیو می‌ماند.
+- مستند رسمی مخزن صریحاً می‌گوید آرشیو شامل `supabase_migrations.schema_migrations`، Auth users، Storage، Vault secrets، Edge Functions یا تنظیمات پروژه نیست.
+- در نتیجه این Backup می‌تواند برای بازسازی بخشی از وضعیت schema و توابع فعلی کمک کند، اما **منبع SQL Migrationهای تاریخی یا Migration ledger را در خود ندارد** و به‌تنهایی شکاف ۱۷ Migration را حل نمی‌کند.
+- رمز Backup در GitHub Secret نگهداری می‌شود؛ هیچ Secret یا credential خوانده یا استخراج نشد.
+
+### بررسی artifactهای Drill شناخته‌شده
+- مستند بازیابی به Backup run شمارهٔ `43848835281` و Restore drill شمارهٔ `44298621534` اشاره می‌کند.
+- فهرست artifactهای قابل‌دسترسی برای هر دو run در زمان این بررسی خالی برگشت. با توجه به retention هفت‌روزهٔ Workflow، این artifactها اکنون از طریق این endpoint قابل بازیابی نیستند؛ این نتیجه به معنی حذف نسخه‌های مستقل یا خارج از GitHub نیست.
+- Restore drill موفق ۱۸ نوامبر صرفاً بازگردانی schemaهای public/private به پروژهٔ ایزوله را ثابت می‌کند و نه بازیابی Migration source یا تاریخچهٔ Migration را.
+
+### تصمیم ایمنی
+- Workflow پشتیبان‌گیری دستی اجرا نشد؛ اجرای آن مستلزم export داده‌های Production و استفاده از Secretهای مخزن است و برای این ممیزی لازم نبود.
+- پروژهٔ Recovery-Test پاک‌سازی یا بازنویسی نشد.
+- هیچ Secret، artifact رمزگشایی‌شده، backup، Migration ledger یا دادهٔ Production تغییر نکرد.
+
+### نتیجه و مسیر بازیابی معتبر
+- مسیر Backup فعلی برای schema recovery مفید است، ولی منبع Migrationهای مفقود نیست.
+- مسیر بعدی باید artifactهای مستقلِ deployment/release یا نسخه‌های محفوظ خارج از retention هفت‌روزه را هدف بگیرد. هر فایل بازیابی‌شده باید با commit provenance، hash، نام Migration و مقایسهٔ محتوایی با وضعیت زنده اعتبارسنجی شود.
+- تا یافتن منبع معتبر، ۱۷ Migration همچنان «فاقد فایل canonical بازیابی‌شده» هستند؛ از این عبارت نباید نتیجه گرفت که همهٔ نسخه‌ها قطعاً نابود شده‌اند.
+
+### اصلاح وضعیت CI برای Commit مستندات قبلی
+- GitHub Actions بعد از Commit `8f7a3ec558bfbd79f0504acd1539663c37eec12f` دو run مرتبط ثبت کرده است: run #72 با event از نوع push و run #73 با event از نوع pull_request؛ هر دو conclusion برابر `success` هستند.
+- این نتیجه، وضعیت قبلی گزارش که «برای این Commit اجرای CI ثبت نشده» را اصلاح می‌کند. موفقیت این Workflow فقط همان تست‌های تعریف‌شده در `DigiArz Persian asset-name candidate tests` را نشان می‌دهد؛ جایگزین CI کامل برنامه، تست PostgreSQL Migration یا تست Production نیست.
+- PR #62 همچنان Draft و ادغام‌نشده است؛ این موفقیت‌ها مجوز merge، deploy یا اجرای SQL نیستند.
