@@ -496,3 +496,10 @@ Commit: `7ef1932c49744b88408f3b80118eb3e574ed9c8a` (branch `feature/persian-asse
 
 ### کنترل ایمنی
 منبع هر ۱۷ Migration فقط با SELECT از ledger Production خوانده شد. همهٔ فایل‌ها فقط در شاخهٔ آزمایشی و پوشهٔ `supabase/drafts/` ایجاد شدند. هیچ فایل به `supabase/migrations/` اضافه نشد؛ هیچ Migration یا SQL بازیابی‌شده اجرا نشد؛ هیچ تغییر DDL/DML، Cron، Worker، Merge یا Production انجام نشد.
+
+
+### کنترل نهایی دامنهٔ PR پس از بازیابی ۱۷ منبع — ۲۵ نوامبر ۲۰۲۶
+- PR #62 شامل ۲۶ فایل تغییر‌یافته است؛ ۱۸ فایل SQL در `supabase/drafts/` قرار دارند (۱۷ منبع تاریخی بازیابی‌شده + یک draft طراحی جدول تأیید نام فارسی).
+- هیچ‌یک از فایل‌های PR زیر `supabase/migrations/` نیستند؛ بررسی فهرست کامل فایل‌های PR این موضوع را تأیید کرد.
+- PR همچنان open، Draft و merged=false است. در آخرین fetch فیلد mergeable=false گزارش شد؛ چون این فیلد در همین جلسه true/false نوسان داشته، آن را فقط snapshot لحظه‌ای می‌دانیم، نه حکم قطعی conflict.
+- هیچ workflow run جدیدی برای آخرین commit مستنداتی گزارش نشد؛ مستندات و بازیابی منبع را CI-tested معرفی نکنید.
