@@ -564,3 +564,54 @@ Commit: `7ef1932c49744b88408f3b80118eb3e574ed9c8a` (branch `feature/persian-asse
 - هیچ تابع، Trigger، policy، grant، Cron، Edge Function یا Migration اجرا یا اصلاح نشد.
 - این ۱۱ فایل همچنان در supabase/drafts/ و صرفاً مرجع تاریخی هستند؛ هیچ‌کدام به supabase/migrations/ منتقل یا replay نمی‌شوند.
 - هیچ merge، update-branch، تغییر Production یا هزینه‌ای انجام نشد.
+
+
+## تکمیل تطبیق چهار Migration باقیمانده و راستی‌آزمایی نسخه‌های تکامل‌یافته — ۲۵ نوامبر ۲۰۲۶
+
+این تکمیل، سه Migration بازیابی‌شدهٔ باقیمانده و نسخه‌های بعدی مربوط به role probe، واحد تومان و Worker بیت۲۴ را با Production مقایسه می‌کند؛ همچنین snapshot و دو Migration نهایی backpressure/throttle را دوباره به شواهد catalog متصل می‌کند.
+
+| نسخه | Migration | دستهٔ اثر فعلی | نتیجه |
+|---|---|---|---|
+| 20261113154750 | add_admin_role_probe | ۲ — superseded | تابع عمومی role probe وجود دارد، اما نسخهٔ زنده SECURITY INVOKER و wrapper تابع private است؛ نه SECURITY DEFINER تعریف‌شده در این Migration. این تغییر با انتقال بعدی منطق به private سازگار است. |
+| 20261113154844 | use_toman_units_in_admin_credit_ui | ۲ — اثر موجود و تکامل‌یافته | constraint ارز audit اکنون USDT/TOMAN است و منطق TOMAN با ضریب ۱۰ به IRR ذخیره‌شده تبدیل می‌کند؛ ولی تابع حساس در private و SECURITY DEFINER قرار دارد و تابع public فقط wrapper SECURITY INVOKER است. |
+| 20261115103507 | schedule_bit24_exchange_asset_sync | ۲ — اثر موجود با backpressure و cadence اصلاح‌شده | جدول درخواست‌ها، RLS، دو تابع Worker و دو Cron فعال موجودند؛ تابع درخواست اکنون درخواست‌های معلق را حفظ می‌کند و از enqueue تکراری جلوگیری می‌کند. |
+| 20261121045434 | digiarz_backpressure_and_exchange_sync_bloat_guards | ۱ — قطعات تابعی بررسی‌شده منطبق | index و ۱۴ قطعهٔ جایگزینی بررسی‌شده با تعریف زنده تطبیق داده شده‌اند؛ این صرفاً تطبیق قطعات تعریف تابع است، نه اثبات سلامت کامل رفتار runtime. |
+| 20261121045531 | snapshot_pg_net_unlogged_queue_before_recovery | ۱ — اثر ساختاری منطبق | هر دو جدول snapshot در private وجود دارند و permanent ordinary table هستند؛ snapshotها TTL خودکار pg_net ندارند. |
+| 20261121050216 | temporarily_throttle_exchange_asset_processors | ۱ — scheduleهای هدف منطبق | job 14 برابر 1,31 * * * * و job 16 برابر 16,46 * * * * فعال‌اند؛ job 8 موتور سفارش در این Migration تغییر نکرده و فعال باقی مانده است. |
+
+### جزئیات تکمیلی
+
+#### role probe و انتقال privilege
+- Migration مربوط به role probe در زمان خود تابع public.is_current_user_super_admin() را SECURITY DEFINER با search_path خالی ایجاد می‌کرد و EXECUTE را برای authenticated مجاز می‌ساخت.
+- نسخهٔ زندهٔ public همین نام، SECURITY INVOKER است و صرفاً private.is_current_user_super_admin() را فراخوانی می‌کند. تابع private مقصد SECURITY DEFINER، search_path خالی و ACL کنترل‌شده دارد.
+- بنابراین Migration role probe نباید به‌صورت مستقل replay شود؛ نسخهٔ فعلی از تغییرات بعدی private-schema تبعیت می‌کند.
+
+#### واحد تومان و تعدیل کیف پول
+- Migration واحد تومان constraint را به USDT/TOMAN تغییر داده و مقدار TOMAN را هنگام ثبت transaction به IRR ×۱۰ تبدیل می‌کند. این منطق در private.admin_adjust_wallet زنده است.
+- نسخهٔ public.admin_adjust_wallet در Production SECURITY INVOKER است و به تابع private واگذار می‌کند؛ تابع private SECURITY DEFINER است، auth.uid و super-admin را بررسی می‌کند، مبلغ USDT رزروشده در order_reservations را از برداشت قابل‌دسترس کم می‌کند، سپس wallet، transactions و audit را در یک منطق واحد به‌روزرسانی می‌کند.
+- ACL تابع private شامل postgres و authenticated است؛ wrapper public شامل postgres، authenticated و service_role است. این تفاوت ACL باید در ممیزی جامع endpointها لحاظ شود؛ از صرف وجود SECURITY INVOKER نمی‌توان دسترسی غیرمجاز به عملیات privileged را نتیجه گرفت، چون تابع private کنترل super-admin دارد.
+- هیچ تعدیل آزمایشی برای اثبات runtime انجام نشد؛ اجرای آزمایشی تابع می‌توانست موجودی یا ledger را تغییر دهد و خارج از محدودهٔ read-only بود.
+
+#### Worker بیت۲۴
+- جدول public.bit24_exchange_sync_requests موجود، RLS فعال و permanent است.
+- request_bit24_exchange_sync() و process_bit24_exchange_sync() هر دو SECURITY DEFINER، search_path خالی و ACL محدود به postgres و service_role دارند؛ authenticated و anon EXECUTE ندارند.
+- تابع درخواست زنده پاک‌سازی صف معلق را فقط وقتی انجام می‌دهد که request id نه در pg_net queue و نه در response باشد؛ اگر درخواست پردازش‌نشده باقی مانده باشد، درخواست تازه enqueue نمی‌کند.
+- تابع پردازش زنده از no-op update guards برای observationها استفاده می‌کند تا ردیف‌های بدون تغییر بی‌دلیل بازنویسی نشوند.
+- Cronهای زنده و فعال: job 15 با */30 * * * * و job 16 با 16,46 * * * *. schedule دوم با */2 در Migration اولیه متفاوت است و با Migration throttle بازیابی‌شده تطابق دارد.
+
+#### Snapshot و backpressure
+- دو snapshot table زنده private.digiarz_pg_net_queue_backup_20261121 و private.digiarz_pg_net_response_backup_20261121 با relkind='r' و relpersistence='p' مشاهده شدند؛ یعنی permanent ordinary tables هستند، نه TEMP یا UNLOGGED.
+- snapshotهای ساخته‌شده با CTAS حاوی دادهٔ کپی‌شده در زمان capture هستند و cleanup خودکار TTL شش‌ساعتهٔ pg_net شامل آن‌ها نمی‌شود.
+- Migration backpressure ایندکس crypto_assets_upper_symbol_active_idx را با تعریف مورد انتظار دارد و ۱۴ قطعهٔ جایگزینی استخراج‌شده از آن با تعریف زندهٔ توابع متناظر تطبیق داده شده‌اند.
+- این مقایسه صحت تطبیق متن قطعات را نشان می‌دهد؛ آزمون عملی enqueue، پاسخ HTTP، retry، queue drain یا عملکرد runtime انجام نشده است.
+
+### اصلاح و شفاف‌سازی طبقه‌بندی کلی
+- در بخش قبلی، Migrationهای اولیهٔ fee/wallet، جدول observation و محدودسازی اجرای Worker به‌عنوان اثرهای اصلی منطبق ثبت شده بودند. این طبقه‌بندی دربارهٔ اثرهای مورد انتظار آن نسخه‌هاست؛ نسخه‌های بعدی، به‌ویژه role probe و تومان، در این بخش به‌صراحت superseded/evolved ثبت شده‌اند.
+- scheduleهای زندهٔ Bit24 و پردازش ایران با Migrationهای اولیه متفاوت‌اند، اما با Migrationهای throttling بازیابی‌شده سازگارند.
+- شمارش ۱۷ فایل بازیابی‌شده کامل است؛ با این حال برای چند نسخهٔ تاریخی که بعداً superseded شده‌اند، انتساب هر تغییر به یک Migration خاص بدون اجرای timeline کامل همهٔ ledger statements ممکن نیست.
+
+### قفل ایمنی تکمیلی
+- فقط catalog و تعاریف تابع و scheduleها خوانده شدند. هیچ تابعی فراخوانی نشد؛ هیچ درخواست HTTP، تغییر صف، تغییر موجودی، ledger write، grant، policy، Cron یا Migration اجرا نشد.
+- job 8 موتور سفارش و همهٔ Cronهای دیگر دست‌نخورده‌اند.
+- هیچ snapshot یا backup حذف یا restore نشد.
+- همهٔ فایل‌های recovered همچنان در supabase/drafts/ هستند و هیچ فایل اجرایی به supabase/migrations/ اضافه نشده است.
