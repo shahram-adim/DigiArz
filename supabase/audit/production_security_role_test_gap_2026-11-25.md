@@ -1,56 +1,79 @@
 # Production security role-test gap — 2026-11-25
 
-## Evidence checked
+## Scope and branch separation
 
-- PR #63 remains an open Draft; this note is review-only and does not request merge.
-- Reviewed the workflow run associated with the current audit branch HEAD `c21ac67990ee8ad468b4260ad7b3b160d6b22c90`: run `45643794201` (#2023), conclusion `success`.
-- The workflow executed `node --test tests/*.test.js`: 88 tests passed, 0 failed, 0 skipped.
-- The 88 Node tests include static assertions for the 46-function SECURITY DEFINER manifest, the two-function anon allowlist, admin guard text, RLS/grant snapshots, view security-invoker metadata, 27 relation references, and the 17 missing-migration evidence dossiers.
-- The same workflow ran PostgreSQL 17 disposable-database arithmetic, schema-widening, trading lifecycle, and two-session race checks.
-- In the inspected run/job step summaries and log output, no dedicated runtime role-matrix test was found that executes the audited Production RPCs and table/view operations under `anon`, ordinary `authenticated`, super-admin `authenticated`, and `service_role` identities. This is a coverage gap in the evidence reviewed, not proof that an access-control vulnerability exists.
+- PR #63 is the Production security audit branch based on `main`; it remains an open Draft and unmerged.
+- PR #62 is a separate open Draft on `feature/persian-asset-name-candidates-2026`, based on `redesign/ui-clean-rebuild-2026` (PR #61 candidate), not on `main`.
+- Evidence from PR #62 is recorded here as cross-branch evidence only. It has not been merged, cherry-picked, or applied to PR #63 or Production.
+- No Merge, `db push`, Production SQL, grant/revoke, policy, function, view, data, Cron, queue, Edge Function, deployment, wallet, order, or financial-row mutation is authorized by this note.
 
-## Required next test layer
+## Evidence checked on 2026-11-25
 
-Add a separate, explicitly isolated PostgreSQL 17/Supabase-compatible role harness. It must never connect to the Production project.
+### PR #63 audit branch
 
-1. **ACL / EXECUTE matrix**
-   - Verify `anon` can execute only the two intentionally public market-metadata SECURITY DEFINER RPCs.
-   - Verify ordinary `authenticated` cannot execute admin-only RPCs or worker-only RPCs.
-   - Verify a normal authenticated user cannot pass super-admin checks by changing client-supplied metadata.
-   - Verify service-role-only worker RPCs reject anon and ordinary authenticated callers.
-   - Verify the expected service-role worker calls remain permitted in the disposable fixture.
+- The earlier workflow run on head `c21ac67990ee8ad468b4260ad7b3b160d6b22c90` was successful: run `45643794201` (#2023).
+- It executed `node --test tests/*.test.js`: 88 passed, 0 failed, 0 skipped.
+- That suite contains static assertions for the 46-function SECURITY DEFINER manifest, the two-function anon allowlist, admin guard text, RLS/grant snapshots, security-invoker view metadata, 27 relation references, and the original migration-source reconciliation.
+- The docs-only follow-up commit `ac5036591502701aa682a8e6786b9386a97c82fc` also completed its workflow successfully (run `45659490513`). Its PostgreSQL 17 arithmetic, schema-widening, trading-lifecycle and two-session race checks passed. This run did not contain a dedicated security role matrix.
 
-2. **RLS isolation**
-   - Seed two synthetic users and synthetic rows only.
-   - Under ordinary authenticated user A, verify own-row visibility and denied reads/writes against user B's wallet, balances, orders, trades, reservations, conditional orders, and transactions.
-   - Verify anon sees only explicitly public market metadata; no private account or financial rows.
-   - Verify user-owned review/report policies enforce ownership and active-account requirements where applicable.
+### PR #62 source-recovery evidence
 
-3. **SECURITY DEFINER execution**
-   - Invoke representative guarded admin RPCs with no JWT subject, ordinary user A, and the designated synthetic super-admin.
-   - Assert fail-closed behavior for the first two and the intended permission boundary for the synthetic super-admin.
-   - Check fixed function owner, `search_path`, ACL, and function identity in the test database against the captured manifest.
-   - Test the two public market RPCs for output-column allowlisting; assert no user identity, wallet, balance, order, trade, reservation, or transaction fields are returned.
+- PR #62 contains 17 separate files under `supabase/drafts/recovered_*.sql`; all 17 paths were fetched and their contents were confirmed present.
+- Its recovery report states that the files were reproduced from the Production `supabase_migrations.schema_migrations.statements` column on 2026-11-25. This is a materially stronger source than reconstructing SQL from the current live schema.
+- The recovered versions are review-only drafts, not canonical files in `supabase/migrations/`. Their presence does not authorize replay or deployment.
+- The 17 recovered migration versions are:
+  - `20261113153808`, `20261113154323`, `20261113154736`, `20261113154750`, `20261113154844`, `20261113154926`;
+  - `20261115101709`, `20261115102729`, `20261115102927`, `20261115103227`, `20261115103507`, `20261115105721`, `20261115105956`;
+  - `20261116201639`;
+  - `20261121045434`, `20261121045531`, `20261121050216`.
+- The old reconciliation finding should now be read precisely: 17 canonical migration source paths were missing from the repository migration directory; source text has since been recovered into review-only draft files on PR #62. Canonical-path reconciliation, dependency/order review, and isolated replay validation remain incomplete.
+- The 20 timestamp/content mismatches in the broader local-vs-Production migration reconciliation remain a separate issue; recovery of these 17 sources does not resolve them automatically.
 
-4. **Least-privilege hardening candidates**
-   - Confirm effective denial for anon writes to `coin_reviews` despite excess table grants.
-   - Confirm anon cannot read `conditional_orders` under the captured policies.
-   - Confirm the two `security_invoker` views cannot bypass underlying table grants.
-   - Keep any proposed GRANT/REVOKE change separate from the test harness and require owner approval before any Production change.
+### PR #62 PostgreSQL 17 security smoke run
 
-## Harness acceptance gates
+- PR #62 head at the time of inspection: `66dad350ad3f02a7c3c885c4bd2e45e9f1f0e53b`.
+- Workflow run `45617838082` completed successfully. The `postgres17-rpc-smoke` job passed all 27 steps; the unit/type-check job passed; the remote-database `rpc-security-integration` job was skipped as configured.
+- The ephemeral PostgreSQL server was PostgreSQL 17. The workflow used a job-local `postgres:17` service and synthetic roles/identities, not the Production URL, Supabase credentials, or user data.
+- The smoke fixture checked the exact 46 SECURITY DEFINER signatures and current API-role EXECUTE booleans, constrained search_path, absence of direct PUBLIC EXECUTE, and schema-USAGE contract.
+- The workflow step loads 34 inert metadata stubs plus 12 real/source-backed bodies, then replaces the exchange-discovery stub with its applied migration body. The final fixture therefore has 33 inert stubs and 13 real/source-backed bodies. The inert stubs are metadata-only and must never be counted as tested Production implementations.
+- Runtime checks passed for selected paths:
+  - `anon`, ordinary `authenticated`, and one designated synthetic super-admin against the read-only admin sync report function (including function-body denials/allowance);
+  - `service_role` on the synthetic admin asset-refresh claim path and its cooldown/error cases;
+  - public market-listing reads under anon/authenticated/service_role;
+  - selected admin-search, admin add/enable listing, exchange-discovery, trigger, fee-rate, and owner-scoped reservation paths.
+- These are real PostgreSQL 17 fixture executions, but they are a **targeted smoke harness**, not a full Supabase or Production-parity test.
 
-- Bootstrap from reviewed, authoritative SQL sources; do not infer or synthesize missing historical migrations.
-- Record every fixture-only stub and prove it cannot weaken the permission boundary being tested.
-- Assert the database target is disposable before executing any setup or cleanup.
-- Use synthetic identities and rows only; no Production credentials, user records, wallet rows, or financial rows.
-- Fail closed if the database URL points to the known Production project/ref or if environment identity cannot be established.
-- Preserve all existing order-engine cron jobs; do not pause, throttle, reschedule, or replay queues.
-- CI must show the role matrix test names and explicit pass/fail counts, separate from the existing arithmetic/lifecycle/race suite.
+## Remaining security coverage gaps
+
+1. **Function-body parity:** 33 of the 46 exact SECURITY DEFINER signatures remain inert metadata stubs in the PostgreSQL 17 fixture. Their Production bodies and dependencies have not been executed there.
+2. **RLS parity:** the fixture does not reproduce every Production relation, policy, grant, owner, default ACL, Auth trigger, or extension. In particular, a complete two-user isolation matrix for wallets, balances, orders, trades, reservations, conditional orders, transactions, and coin reviews remains outstanding.
+3. **Role matrix completeness:** runtime role tests cover selected functions only. They do not prove the positive/negative caller matrix for every signature or every worker RPC.
+4. **Auth fidelity:** the fixture's `auth.uid()` shim reads a transaction-local synthetic subject. It is not Supabase JWT verification and does not test the real Auth platform.
+5. **Service-role policy:** the conflict between the current/default ACL test and the proposed default-function EXECUTE hardening remains unresolved. Current-state ACL observations must not be mistaken for an approved target policy.
+6. **Remote test gate:** the workflow's remote `rpc-security-integration` job remains skipped. Do not enable it until its destination, parity, secrets, and owner approval are explicitly verified.
+
+## Migration replay hazards
+
+The recovered SQL must be reviewed individually before any isolated replay plan is considered:
+
+- `20261121050216` changes Cron schedules for jobs 14 and 16. Do not execute it or alter any Production Cron schedule.
+- `20261121045531` creates persistent snapshots of `net.http_request_queue` and `net._http_response`; it must not be replayed against Production or treated as a harmless schema-only migration.
+- `20261121045434` replaces several live function definitions and changes request/back-pressure behavior; it requires dependency-aware isolated validation.
+- No recovered migration may be blindly replayed as a batch. Do not restore, replay, drain, delete, throttle, or reschedule any Production queue or worker.
+
+## Required next steps
+
+1. Reconcile each of the 17 recovered draft files against its exact Production ledger version and retain per-file provenance/checksums; preserve the original historical text.
+2. Reconcile the 20 timestamp/content mismatches without rewriting history or inferring migration provenance from current object state.
+3. Build a disposable PostgreSQL 17 schema-replay harness from reviewed authoritative sources. Exclude Production data, secrets, live queue contents, and Cron side effects; fail closed if the target is not the disposable CI database.
+4. Expand source-backed runtime coverage function-by-function, removing a stub only when the exact body and required dependencies are available.
+5. Add two-synthetic-user RLS isolation tests and explicit role-positive/negative tests for the still-uncovered relations and RPCs.
+6. Keep the remote-database job disabled and all proposed ACL hardening separate until the test destination, parity, and target policy have been approved.
 
 ## Current safety state
 
-- This note is documentation only.
-- No Production SQL, migration, grant, policy, function, view, data, cron, queue, Edge Function, deployment, or financial row was changed.
-- No migration source was reconstructed; the 17 missing canonical SQL sources remain unrecovered.
-- PR #63 remains Draft and unmerged. No `db push` or Merge is authorized by this work.
+- PR #63 remains open, Draft, and unmerged.
+- PR #62 remains a separate open Draft; its recovered SQL and PG17 harness have not been integrated into PR #63 or `main`.
+- The PostgreSQL 17 smoke run used only an ephemeral CI container; the remote-database job was skipped.
+- No Production migration, SQL, grant, revoke, RLS policy, function, view, data, Cron schedule, queue, Edge Function, deployment, or financial row was changed.
+- No cost-creating project or database branch was created.
