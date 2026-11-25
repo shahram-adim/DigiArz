@@ -1519,4 +1519,12 @@
 - [x] CI نهایی crosswalk در run `45640964392` (run #2019) روی commit `5e9defc9c5b049259c8a6cd695684a559d2eecae` با نتیجهٔ `success` تکمیل شد؛ job `exact-decimal` بدون failure و با موفقیت تمام مراحل Node/browser و PostgreSQL 17 arithmetic, widening, lifecycle و two-session race را گذراند.
 - [x] این CI شامل تست‌های جدید پرونده‌های ۱۷ Migration، ۱۲ routine fingerprint، ۴ cron command fingerprint، ۶ trigger fingerprint، ۴ cron-to-routine attribution و برابری fingerprint چهار routine زنده با manifest است.
 - [!] این تأیید فقط برای CI روی محیط disposable است؛ هیچ Production migration، grant/policy/function/trigger، deployment، cron change یا financial write را مجاز یا تأیید نمی‌کند.
-- [x] PR #63 آخرین بار open/Draft/unmerged تأیید شد؛ head `5e9defc9c5b049259c8a6cd695684a559d2eecae`، base `main`، branch جلوتر از main به تعداد ۵۱ commit و ۰ عقب‌تر.
+- [x] PR #63 در بررسی مجدد همچنان open/Draft/unmerged است؛ commit عملکردی CI سبز `5e9defc9c5b049259c8a6cd695684a559d2eecae` است؛ commit مستنداتی بعدی `611d277714a15929ff275a8830dd1a30324027a1` فقط وضعیت/گزارش را اصلاح کرد. مقایسهٔ شاخه با `main` پیش از ثبت این یادداشت: ۵۳ commit جلوتر و صفر عقب‌تر.
+
+
+## پیگیری بازیابی Migrationهای مفقود — 2026-11-25
+- [x] CI run #2000 (`45638928773`) روی commit تستی `ac6e265f78803efdbce6fff47e6a6690b1a2469f` شکست خورد؛ علت دقیق، Regex تست شمارش پرونده‌ها بود (`\\d` به‌جای `\d`) که ۰ heading به‌جای ۱۷ پیدا می‌کرد. هیچ تست PostgreSQL پس از شکست Node اجرا نشد.
+- [x] نسخهٔ بعدی تست، الگوی صحیح را دارد؛ CI نهایی run #2019 (`45640964392`) روی commit `5e9defc9c5b049259c8a6cd695684a559d2eecae` با job `exact-decimal` و همهٔ ۲۲ مرحلهٔ substantive موفق شد. run #2000 به‌عنوان موفقیت محسوب نمی‌شود.
+- [x] دو شاخهٔ اضافی `perf/crypto-assets-noop-upserts` و `perf/market-price-bulk-upsert-draft` برای هر ۱۷ نام canonical migration بررسی شدند؛ هیچ‌یک از ۳۴ مسیر SQL در این دو شاخه وجود نداشت.
+- [!] این بررسی اضافه، نبود SQL را فقط در همین دو درخت شاخه‌ای ثابت می‌کند؛ منبع authoritative تازه‌ای پیدا نشد. تعداد منابع SQL اصلی بازیابی‌شده همچنان صفر و تعداد پرونده‌های مفقود ۱۷ است.
+- [!] PR #63 همچنان Draft و ادغام‌نشده است؛ هیچ Migration، db push، deploy، Production write، grant، policy یا تغییر cron انجام نشد.
