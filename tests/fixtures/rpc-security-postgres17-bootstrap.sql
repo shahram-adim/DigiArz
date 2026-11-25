@@ -185,3 +185,69 @@ GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.admin_exchange_asset_sync_report() TO authenticated, service_role;
 REVOKE ALL ON SCHEMA private FROM PUBLIC, anon, authenticated, service_role;
 REVOKE ALL ON TABLE private.admin_users FROM PUBLIC, anon, authenticated, service_role;
+
+
+-- Exact Production function body recovered from migration
+-- 20261113190000_admin_on_demand_crypto_asset_refresh.sql.
+-- The only row/data dependency is a synthetic private table in this fixture.
+CREATE TABLE private.admin_asset_refresh_limits (
+  coingecko_id text PRIMARY KEY,
+  last_requested_at timestamptz NOT NULL,
+  requested_by uuid NOT NULL
+);
+ALTER TABLE private.admin_asset_refresh_limits ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE private.admin_asset_refresh_limits FROM PUBLIC, anon, authenticated, service_role;
+
+CREATE OR REPLACE FUNCTION public.claim_admin_asset_refresh(
+  p_coingecko_id text,
+  p_admin_user_id uuid
+)
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $function$
+DECLARE
+  v_claimed boolean := false;
+BEGIN
+  IF p_admin_user_id IS NULL
+     OR p_coingecko_id IS NULL
+     OR pg_catalog.length(pg_catalog.btrim(p_coingecko_id)) NOT BETWEEN 1 AND 128 THEN
+    RAISE EXCEPTION 'Invalid refresh request' USING errcode = '22023';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM private.admin_users a
+    WHERE a.user_id = p_admin_user_id
+      AND a.role = 'super_admin'
+  ) THEN
+    RAISE EXCEPTION 'Super administrator access required' USING errcode = '42501';
+  END IF;
+
+  PERFORM pg_catalog.pg_advisory_xact_lock(
+    742021,
+    pg_catalog.hashtext(pg_catalog.btrim(p_coingecko_id))
+  );
+
+  INSERT INTO private.admin_asset_refresh_limits(
+    coingecko_id, last_requested_at, requested_by
+  )
+  VALUES (pg_catalog.btrim(p_coingecko_id), pg_catalog.now(), p_admin_user_id)
+  ON CONFLICT (coingecko_id) DO UPDATE
+    SET last_requested_at = EXCLUDED.last_requested_at,
+        requested_by = EXCLUDED.requested_by
+    WHERE private.admin_asset_refresh_limits.last_requested_at
+          <= pg_catalog.now() - interval '30 seconds'
+  RETURNING true INTO v_claimed;
+
+  IF NOT COALESCE(v_claimed, false) THEN
+    RAISE EXCEPTION 'This asset was refreshed recently; wait 30 seconds'
+      USING errcode = '55000';
+  END IF;
+
+  RETURN true;
+END;
+$function$;
+
+REVOKE ALL ON FUNCTION public.claim_admin_asset_refresh(text, uuid) FROM PUBLIC, anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.claim_admin_asset_refresh(text, uuid) TO service_role;
