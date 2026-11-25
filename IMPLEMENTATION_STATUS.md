@@ -1358,3 +1358,17 @@
 - [x] هیچ Production/Recovery-Test DB، migration ledger، Auth، Cron، Edge Function، دادهٔ مالی، یا schedule تغییر نکرد؛ هیچ merge/deploy/db push یا هزینهٔ جدید ایجاد نشد.
 
 **Commitهای مستندات این گام:** manifest پایه `e75c69ad3f4a8ca0d0477124780ec40ced6e70f3`؛ reconciliation منابع مفقود `18a262d2161b50fd8afd984e622bfd90c64ad018`.
+
+
+## Checkpoint 2026-11-25 — fifth source-backed RPC body and CI #313
+
+- [x] `public.get_admin_market_listings()` با بدنهٔ Migration معتبر `20261113181000_show_live_prices_for_curated_assets.sql` جایگزین stub شد.
+- [x] وابستگی‌های synthetic و غیرمالی `admin_market_listings`, `crypto_assets`, `market_prices` برای fixture تعریف شدند؛ RLS فعال شد؛ policy خواندن عمومی فهرست curated و عدم دسترسی مستقیم anon به جداول پایه در تست کنترل شد.
+- [x] نوع خروجی دقیق TABLE با ۱۱ ستون، `STABLE`, `SECURITY DEFINER`, `search_path=''` و ACL مؤثر فعلی در contract assertion کنترل می‌شود.
+- [x] آزمون anon، authenticated و service_role؛ فیلتر دارایی غیرفعال؛ نمایش قیمت مثبت CoinGecko تازه؛ پنهان‌سازی قیمت کهنه؛ و rollback تمام داده‌های مصنوعی موفق شدند.
+- [x] CI run #313 / ID `45603853118` موفق شد: `unit-tests` و `postgres17-rpc-smoke` سبز؛ remote `rpc-security-integration` عمداً skipped. لینک: https://github.com/shahram-adim/DigiArz/actions/runs/45603853118
+- [x] fixture اکنون ۵ بدنهٔ واقعی و ۴۱ stub صرفاً metadata دارد؛ ۴۱ نوع خروجی واقعی هنوز از stub `void` قابل استنتاج نیست.
+- [!] RLS/grants کامل Production برای جداول `crypto_assets` و `market_prices` هنوز در این fixture اثبات نشده؛ این مدل حداقلی و synthetic است. بنابراین فقط بدنه و منطق این RPC در محدودهٔ مشخص تست شده، نه full schema parity.
+- [ ] ادامه: استخراج منبع معتبر و dependency/RLS برای توابع بعدی؛ اولویت با read-only market metadata، نه توابع مالی/worker.
+- [ ] default EXECUTE برای service_role همچنان تصمیم باز مالک است؛ هیچ تغییر پیش‌فرض یا grant/revoke در Production انجام نشود.
+- [x] هیچ داده مالی، سفارش، معامله، رزرو، کیف پول، balance، Migration ledger، Cron، Auth، Edge Function یا schedule تغییر نکرد؛ هیچ Merge/Deploy/db push یا هزینه‌ای ایجاد نشد.
