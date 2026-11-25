@@ -182,3 +182,20 @@ test('All 17 missing migrations have review-only dossiers and executable replay 
   assert.match(dossier, /هیچ Migration یا SQL بازسازی‌شده اجرا نشود/);
   assert.match(dossier, /هیچ scheduleی از روی حدس تغییر یا بازگردانی نشود/);
 });
+
+
+test('missing-migration dossiers cross-reference only captured live fingerprints and object bindings', () => {
+  const dossier = fs.readFileSync('supabase/audit/production_missing_migration_dossiers_2026-11-25.md', 'utf8');
+  assert.match(dossier, /تطبیق اشیای زنده و fingerprintها/);
+  assert.match(dossier, /ارتباط مشاهده‌شده در وضعیت فعلی/);
+  assert.match(dossier, /اثبات نمی‌کند کدام Migration تاریخی/);
+  assert.match(dossier, /no direct live attribution/);
+  assert.match(dossier, /command text\/fingerprint در این crosswalk موجود نیست/);
+  const fingerprints = [...dossier.matchAll(/MD5 `[a-f0-9]{32}`/g)];
+  assert.equal(fingerprints.length, 12);
+  assert.match(dossier, /20261113153808/);
+  assert.match(dossier, /20261115105956/);
+  assert.match(dossier, /20261116201639/);
+  assert.match(dossier, /20261121050216/);
+  assert.match(dossier, /هیچ grant\/revoke، policy، function، trigger، cron، queue/);
+});
