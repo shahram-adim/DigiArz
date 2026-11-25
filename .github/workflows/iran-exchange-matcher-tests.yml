@@ -1,0 +1,46 @@
+name: Iran exchange matcher fixture tests
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'supabase/tests/iran_exchange_matcher_*.sql'
+      - 'supabase/tests/iran_exchange_response_queue_fixture.sql'
+      - '.github/workflows/iran-exchange-matcher-tests.yml'
+      - 'docs/IRAN_EXCHANGE_MATCHER_INCREMENTAL_DESIGN_2026-11-17.md'
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/tests/iran_exchange_matcher_*.sql'
+      - 'supabase/tests/iran_exchange_response_queue_fixture.sql'
+      - '.github/workflows/iran-exchange-matcher-tests.yml'
+
+jobs:
+  matcher-fixture:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: digiarz_matcher_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d digiarz_matcher_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run isolated matcher fixture
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_matcher_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/iran_exchange_matcher_fixture_setup.sql \
+            -f supabase/tests/iran_exchange_matcher_fixture_integration.sql \
+            -f supabase/tests/iran_exchange_matcher_plan_fixture.sql \
+            -f supabase/tests/iran_exchange_response_queue_fixture.sql \
+            -f supabase/tests/iran_exchange_matcher_catalog_queue_concurrency.sql
