@@ -314,11 +314,17 @@ test('Production RPC role ACL matrix covers all 46 signatures and preserves the 
     assert.equal(fn.owner, 'postgres', fn.identity);
     assert.match(fn.definition_md5, /^[a-f0-9]{32}$/i, fn.identity);
     assert.equal(fn.expected_execute.postgres, true, fn.identity);
-    assert.equal(fn.expected_execute.anon, fn.public_execute ? fn.expected_execute.anon : fn.expected_execute.anon);
-    assert.equal(fn.expected_execute.anon, /(?:^|,)anon=X\\//.test(fn.acl_snapshot), fn.identity + ' anon ACL mismatch');
-    assert.equal(fn.expected_execute.authenticated, /(?:^|,)authenticated=X\\//.test(fn.acl_snapshot), fn.identity + ' authenticated ACL mismatch');
-    assert.equal(fn.expected_execute.service_role, /(?:^|,)service_role=X\\//.test(fn.acl_snapshot), fn.identity + ' service_role ACL mismatch');
-    assert.equal(fn.public_execute, /(?:^|\\{)X\\//.test(fn.acl_snapshot), fn.identity + ' PUBLIC ACL mismatch');
+    const entries = fn.acl_snapshot.replace(/^\\{|\\}$/g, '').split(',').filter(Boolean);
+    const acl = Object.fromEntries(entries.map(entry => {
+      const index = entry.indexOf('=');
+      const grantee = entry.slice(0, index) || 'PUBLIC';
+      const privileges = entry.slice(index + 1).split('/')[0];
+      return [grantee, privileges.includes('X')];
+    }));
+    for (const role of ['anon', 'authenticated', 'service_role']) {
+      assert.equal(fn.expected_execute[role], !!acl[role], fn.identity + ' ' + role + ' ACL mismatch');
+    }
+    assert.equal(fn.public_execute, !!acl.PUBLIC, fn.identity + ' PUBLIC ACL mismatch');
   }
   assert.deepEqual(
     matrix.functions.filter(fn => fn.expected_execute.anon).map(fn => fn.identity).sort(),
