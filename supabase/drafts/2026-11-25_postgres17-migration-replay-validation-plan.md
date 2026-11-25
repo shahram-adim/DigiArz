@@ -159,3 +159,22 @@ Until all gates pass, report the replay as NOT RUN / BLOCKED, not passed.
 ## 8. Next bounded implementation unit
 
 After review, implement only a static statement-classification manifest for the 17 exact source bodies. The manifest should list statement ordinal, statement digest, object targets, classification, dependencies, and whether the statement is excluded from replay. It must not contain runnable SQL copies and must not invoke a database. Only after that manifest passes review should a disposable replay test be considered.
+
+
+## 9. Static statement-classification manifest — first pass completed (2026-11-25)
+
+A non-executable JSON manifest is now stored at:
+supabase/drafts/2026-11-25_recovered-migration-statement-classification.json
+
+- All 17 recovered source bodies were re-fetched from the reviewed PR #62 branch.
+- The lexical splitter produced 136 statement units while respecting SQL single/double quotes, line/block comments and PostgreSQL dollar-quoted bodies.
+- Each file has a source blob SHA, exact body SHA-256 and UTF-8 byte length. Each statement has an ordinal, SHA-256 digest, classification, best-effort target and short preview. No runnable SQL body is copied into the manifest.
+- The SHA-256 implementation was checked against the standard "abc" and empty-string test vectors.
+- Classification is fail-closed: unknown statements block replay. The first pass was refined to zero unclassified-unknown statements.
+- Three dynamic pg_get_functiondef/replace/EXECUTE blocks in 20261113153808 remain explicit manual-review blockers because they rewrite execute_demo_trade, place_limit_order and process_limit_orders.
+- Eight BEGIN/COMMIT transaction-wrapper statements are marked for removal/re-authoring at the fixture layer, not standalone replay.
+- Cron, external HTTP/pg_net queue, privileged identity seed, financial DML, generic synthetic DML, ACL assertion-only, and schema/function candidate units have separate classifications.
+
+This is a static inventory only. It does not prove every unit is safe to execute, and the best-effort target extraction is not a dependency proof. The 3 dynamic trading-function rewrites are still blocked; Cron/HTTP/queue/identity/financial effects remain excluded or synthetic-only. No SQL statement was executed, no database was changed, and no workflow was modified.
+
+Next bounded step: independently review every statement classification and target against its full SQL body, especially all 136 statement ordinals and any dynamic SQL. Then add explicit object dependency edges and only afterwards design the isolated test-unit list. Replay remains NOT RUN / BLOCKED.
