@@ -166,3 +166,19 @@ test('Migration source recovery report records bounded search evidence and limit
   assert.ok(migrationAuthoritySearch.next_authoritative_sources_to_check.length >= 3);
   assert.ok(migrationAuthoritySearch.safety.includes('No source was reconstructed or applied'));
 });
+
+
+test('All 17 missing migrations have review-only dossiers and executable replay stays blocked', () => {
+  const dossierPath = 'supabase/audit/production_missing_migration_dossiers_2026-11-25.md';
+  assert.equal(fs.existsSync(dossierPath), true);
+  const dossier = fs.readFileSync(dossierPath, 'utf8');
+  const ids = [...dossier.matchAll(/^#### (\\d{14}) — /gm)].map(match => match[1]);
+  assert.equal(ids.length, 17);
+  assert.equal(new Set(ids).size, 17);
+  assert.match(dossier, /وضعیت: فقط مستندات بازبینی؛ غیرقابل اجرا/);
+  assert.match(dossier, /تعداد SQL اصلی بازیابی‌شده در این گام: صفر/);
+  assert.match(dossier, /تعداد SQL اجرایی ساخته‌شده: صفر/);
+  assert.match(dossier, /هر پرونده فقط وقتی می‌تواند از «مفقود» به «بازیابی‌شده» تغییر کند/);
+  assert.match(dossier, /هیچ Migration یا SQL بازسازی‌شده اجرا نشود/);
+  assert.match(dossier, /هیچ scheduleی از روی حدس تغییر یا بازگردانی نشود/);
+});
