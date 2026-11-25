@@ -1457,3 +1457,22 @@
 - [ ] گام بعدی: طراحی promotion ایمن در shared fixture با اجرای دو Migration به ترتیب، تست بازگشت `get_admin_market_listings()` به بدنهٔ فعلی، آزمون دسترسی admin_search و تأیید عدم دسترسی مستقیم به جدول؛ فقط synthetic market metadata و rollback.
 - [ ] ۱۷ Migration مفقود و timestamp/content drift همچنان پیش از هر replay نیازمند reconciliation تازه‌اند؛ هیچ replay انجام نشده است.
 - [x] هیچ Production/Recovery-Test DB، داده مالی، سفارش، معامله، رزرو، کیف پول، balance، Auth، Cron، Edge Function یا Migration ledger تغییر نکرد؛ Merge، Deploy، db push، پروژه/زیرساخت جدید و هزینه‌ای ایجاد نشد.
+
+
+## Checkpoint 2026-11-25 15:20–15:26 — 46-function Production catalog and trigger-body promotion
+
+- [x] وضعیت واقعی Supabase فقط‌خواندنی بررسی شد: پروژه `gfoaubfilhttnwjykaox` برابر `ACTIVE_HEALTHY`، PostgreSQL `17.11`، region `us-west-2`.
+- [x] وضعیت واقعی PR #62 بررسی شد: Open، Draft، merged=false؛ head branch برابر `feature/persian-asset-name-candidates-2026` و base برابر `redesign/ui-clean-rebuild-2026`. تمام تغییرات این checkpoint فقط روی شاخهٔ PR انجام شده‌اند.
+- [x] کاتالوگ زندهٔ Production برای هر ۴۶ تابع SECURITY DEFINER با SELECT از `pg_proc` ثبت شد: exact identity arguments، return type، owner، language، volatility، `proconfig/search_path`، stored ACL و EXECUTE مؤثر anon/authenticated/service_role. هر ۴۶ تابع owner=`postgres` دارند و search_path آن‌ها `""` یا `pg_catalog` است. این داده‌ها در `supabase/drafts/2026-11-25_production-postgres17-rpc-parity-manifest.md` اضافه شدند.
+- [x] تابع `private.enforce_unique_admin_market_listing_symbol()` با بدنهٔ دقیق Production جایگزین stub شد؛ `pg_get_functiondef` با Migration `20261113184000` تطبیق دارد. وابستگی‌ها، trigger binding، RLS و table ACLها فقط‌خواندنی بررسی شدند.
+- [x] تست PostgreSQL 17 برای ticker guard اضافه شد: insert معتبر، duplicate symbol، pair collision، missing asset، update و rollback. CI run #? روی commit `e4e2dbfc2dbbf73abc46704317065e613a34d129` موفق شد: unit-tests و postgres17-rpc-smoke سبز؛ remote rpc-security-integration عمداً skipped.
+- [x] تابع `private.auto_list_verified_exchange_asset()` نیز با بدنهٔ زندهٔ Production و منبع اعمال‌شدهٔ Migration `20261115134855` جایگزین stub شد. منبع از `supabase_migrations.schema_migrations.statements` بازیابی و با `pg_get_functiondef` تطبیق داده شد.
+- [!] فایل مخزن `20261115134600_avoid_relisting_unchanged_exchange_asset_matches.sql` با timestamp اعمال‌شدهٔ Production یعنی `20261115134855` اختلاف دارد؛ این فایل به‌عنوان منبع Migration اعمال‌شده تلقی نشد، rename/replay هم انجام نشد. این mismatch باید در reconciliation جداگانه باقی بماند.
+- [x] fixture برای ستون‌های `current_price_usd/last_updated`، RLS و grants جداول synthetic بازار تکمیل شد. assertionهای قدیمی که به‌اشتباه SELECT مستقیم anon روی `crypto_assets/market_prices` را منع می‌کردند، با ACL واقعی Production هم‌تراز شدند.
+- [x] تست جدید `tests/rpc-security-auto-list-trigger.integration.sql` با ردیف‌های کاملاً synthetic اضافه شد: asset تازه و یکتا پذیرفته می‌شود؛ asset کهنه، نماد تکراری و تداخل جفت رد می‌شوند؛ انتقال pending به matched نیز trigger را اجرا می‌کند؛ تمام DDL/DML داخل transaction و در پایان rollback می‌شود.
+- [x] Harness اکنون ۷ بدنهٔ واقعی/source-backed و ۳۹ stub صرفاً metadata دارد. مقدار `RETURNS void` در ۳۹ stub همچنان fixture-only است و نباید به‌عنوان نوع خروجی Production استفاده شود.
+- [ ] CI آخرین تغییرات auto-list روی HEAD `6cc1bae87c4f6575888e13b315ea16aa318d6fef` در حال اجراست؛ تا دریافت نتیجهٔ کامل، موفقیت این تست جدید اعلام نمی‌شود.
+- [!] remote `rpc-security-integration` همچنان به دلیل gate محیط ایزوله skipped است. تست‌های نقش anon/authenticated/synthetic-super-admin در PostgreSQL 17 smoke اجرا می‌شوند، اما این معادل Production-parity end-to-end نیست.
+- [ ] گام بعد: نتیجهٔ CI آخرین HEAD را ثبت کن؛ سپس برای هر یک از ۳۹ stub باقی‌مانده، تعریف زنده، source provenance، dependency، table/sequence grants، RLS و caller را جداگانه بررسی کن و فقط تابعی را جایگزین کن که source و تست synthetic امن دارد.
+- [ ] سیاست Default ACL برای service_role هنوز تصمیم مالک می‌خواهد؛ هیچ GRANT/REVOKE/ALTER DEFAULT PRIVILEGES اجرا نشود.
+- [x] هیچ Production/Recovery-Test DB، schema، data، ACL، Auth، Cron، Edge Function، Migration ledger، secret یا schedule تغییر نکرد؛ هیچ Migration/db push، Deploy، Merge، هزینه یا ارتقای زیرساخت انجام نشد.
