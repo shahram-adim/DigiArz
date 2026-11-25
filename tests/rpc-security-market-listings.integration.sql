@@ -21,40 +21,51 @@ VALUES
   ('BTCUSDT',65000,pg_catalog.now()-interval '30 seconds','CoinGecko'),
   ('STLUSDT',12,pg_catalog.now()-interval '5 minutes','CoinGecko');
 
-DO $market_listings_test$
+SET LOCAL ROLE anon;
+DO $anon_market_test$
 DECLARE
   v_count integer;
   v_fresh numeric;
   v_stale numeric;
 BEGIN
-  -- Public metadata RPC is intentionally callable by anon.
-  SET LOCAL ROLE anon;
   SELECT count(*) INTO v_count FROM public.get_admin_market_listings();
   IF v_count <> 2 THEN RAISE EXCEPTION 'anon expected two active synthetic listings, got %',v_count; END IF;
   SELECT current_price_usd INTO v_fresh FROM public.get_admin_market_listings() WHERE coingecko_id='ci-market-fresh';
   SELECT current_price_usd INTO v_stale FROM public.get_admin_market_listings() WHERE coingecko_id='ci-market-stale';
   IF v_fresh IS DISTINCT FROM 65000 THEN RAISE EXCEPTION 'fresh CoinGecko price should be visible, got %',v_fresh; END IF;
   IF v_stale IS NOT NULL THEN RAISE EXCEPTION 'stale price must be redacted, got %',v_stale; END IF;
-  RESET ROLE;
+END
+$anon_market_test$;
+RESET ROLE;
 
-  -- authenticated and service_role have the same observed function access.
-  SET LOCAL ROLE authenticated;
+SET LOCAL ROLE authenticated;
+DO $authenticated_market_test$
+DECLARE v_count integer;
+BEGIN
   SELECT count(*) INTO v_count FROM public.get_admin_market_listings();
   IF v_count <> 2 THEN RAISE EXCEPTION 'authenticated expected two synthetic listings, got %',v_count; END IF;
-  RESET ROLE;
+END
+$authenticated_market_test$;
+RESET ROLE;
 
-  SET LOCAL ROLE service_role;
+SET LOCAL ROLE service_role;
+DO $service_market_test$
+DECLARE v_count integer;
+BEGIN
   SELECT count(*) INTO v_count FROM public.get_admin_market_listings();
   IF v_count <> 2 THEN RAISE EXCEPTION 'service_role expected two synthetic listings, got %',v_count; END IF;
-  RESET ROLE;
+END
+$service_market_test$;
+RESET ROLE;
 
-  -- No direct table SELECT is granted to anon on the underlying market tables.
+DO $market_table_acl_test$
+BEGIN
   IF has_table_privilege('anon','public.crypto_assets','SELECT')
      OR has_table_privilege('anon','public.market_prices','SELECT') THEN
     RAISE EXCEPTION 'anon unexpectedly has direct SELECT on underlying tables';
   END IF;
   RAISE NOTICE 'PASS: public market RPC exposes only active listings and redacts stale USD prices; base tables remain non-readable directly';
 END
-$market_listings_test$;
+$market_table_acl_test$;
 
 ROLLBACK;
