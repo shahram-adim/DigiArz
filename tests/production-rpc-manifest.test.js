@@ -156,7 +156,7 @@ test('Missing Production migration sources have explicit evidence maps and remai
 
 test('Migration source recovery report records bounded search evidence and limitations', () => {
   assert.equal(migrationAuthoritySearch.migration_reconciliation_document.then_missing_sources, 14);
-  assert.equal(migrationAuthoritySearch.current_missing_sources, undefined);
+  assert.equal(migrationAuthoritySearch.migration_reconciliation_document.current_missing_sources, 17);
   assert.equal(migrationAuthoritySearch.migration_reconciliation_document.later_additions.length, 3);
   assert.equal(migrationAuthoritySearch.git_history.returned_commits, 44);
   assert.equal(migrationAuthoritySearch.branch_search.unique_topic_branches_examined, 20);
