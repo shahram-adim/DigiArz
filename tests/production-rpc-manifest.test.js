@@ -37,6 +37,10 @@ test('Production snapshot has an explicit allowlist for anonymous SECURITY DEFIN
   ]);
   assert.deepEqual(review.anon_executable_security_definer_functions.map(fn => fn.name).sort(), actual);
   for (const fn of review.anon_executable_security_definer_functions) {
+    assert.equal(fn.public_access_intent.confirmed_by_migrations, true);
+    assert.ok(fn.public_access_intent.migrations.length > 0);
+  }
+  for (const fn of review.anon_executable_security_definer_functions) {
     assert.doesNotMatch(fn.returns.join(' ').toLowerCase(), /user_id|email|wallet|balance|order|trade|transaction|reservation/);
     assert.doesNotMatch(fn.tables_read.join(' ').toLowerCase(), /profiles|wallets|asset_balances|orders|trades|transactions|order_reservations/);
   }
