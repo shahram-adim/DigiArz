@@ -19,7 +19,9 @@
 ### PR #62 source-recovery evidence
 
 - PR #62 contains 17 separate files under `supabase/drafts/recovered_*.sql`; all 17 paths were fetched and their contents were confirmed present.
-- Its recovery report states that the files were reproduced from the Production `supabase_migrations.schema_migrations.statements` column on 2026-11-25. This is a materially stronger source than reconstructing SQL from the current live schema.
+- Its recovery report states that the files were reproduced from the Production `supabase_migrations.schema_migrations.statements` column on 2026-11-25.
+- This provenance was independently re-verified with SELECT-only queries against the ACTIVE_HEALTHY Production project (PostgreSQL 17.11). The catalog shows `statements` is `text[]`; for each of the 17 versions, the query compared `md5(array_to_string(statements, E'\\n'))` with `md5(recovered_file_body)`, after removing only the nine-line review/provenance header. **All 17 of 17 matched exactly**, with identical byte lengths and identical MD5 values. Each ledger row contained one statement element.
+- This establishes byte-exact recovery of the recorded historical SQL text. It does not establish that replaying any statement is safe or appropriate.
 - The recovered versions are review-only drafts, not canonical files in `supabase/migrations/`. Their presence does not authorize replay or deployment.
 - The 17 recovered migration versions are:
   - `20261113153808`, `20261113154323`, `20261113154736`, `20261113154750`, `20261113154844`, `20261113154926`;
