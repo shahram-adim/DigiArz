@@ -9,6 +9,7 @@ const review = JSON.parse(fs.readFileSync('supabase/audit/production_anon_access
 const dependencies = JSON.parse(fs.readFileSync('supabase/audit/production_rpc_relation_dependencies_2026-11-25.json', 'utf8'));
 const migrationReconciliation = JSON.parse(fs.readFileSync('supabase/audit/production_migration_source_reconciliation_2026-11-25.json', 'utf8'));
 const migrationRecoveryMap = JSON.parse(fs.readFileSync('supabase/audit/production_missing_migration_recovery_map_2026-11-25.json', 'utf8'));
+const migrationAuthoritySearch = JSON.parse(fs.readFileSync('supabase/audit/production_migration_authority_search_2026-11-25.json', 'utf8'));
 
 test('Production SECURITY DEFINER snapshot is complete and internally consistent', () => {
   assert.equal(manifest.source.project_ref, 'gfoaubfilhttnwjykaox');
@@ -151,4 +152,16 @@ test('Missing Production migration sources have explicit evidence maps and remai
     assert.ok(group.evidence_files.length > 0);
     assert.ok(group.gaps.length > 0);
   }
+});
+
+test('Migration source recovery report records bounded search evidence and limitations', () => {
+  assert.equal(migrationAuthoritySearch.migration_reconciliation_document.then_missing_sources, 14);
+  assert.equal(migrationAuthoritySearch.current_missing_sources, undefined);
+  assert.equal(migrationAuthoritySearch.migration_reconciliation_document.later_additions.length, 3);
+  assert.equal(migrationAuthoritySearch.git_history.returned_commits, 44);
+  assert.equal(migrationAuthoritySearch.branch_search.unique_topic_branches_examined, 20);
+  assert.equal(migrationAuthoritySearch.actions_artifacts.runs_checked.length, 2);
+  assert.ok(migrationAuthoritySearch.actions_artifacts.runs_checked.every(x => x.artifact_count === 0));
+  assert.ok(migrationAuthoritySearch.next_authoritative_sources_to_check.length >= 3);
+  assert.ok(migrationAuthoritySearch.safety.includes('No source was reconstructed or applied'));
 });
