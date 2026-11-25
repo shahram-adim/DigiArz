@@ -1315,10 +1315,11 @@
 - [x] ماتریس کاتالوگ تمام ۴۶ امضای دقیق SECURITY DEFINER در PostgreSQL 17 موفق: ACL مؤثر anon/authenticated/service_role، search_path محدود، نبود EXECUTE مستقیم PUBLIC و شش مقدار schema USAGE مطابق snapshot فعلی Production. ۴۳ تابع صرفاً stub بی‌اثر برای آزمون metadata هستند و اجرا نشده‌اند.
 - [x] آزمون بدنه تابع موفق: anon و authenticated عادی با SQLSTATE 42501 رد شدند؛ super-admin مصنوعی گزارش JSON دریافت کرد؛ تراکنش ROLLBACK شد و post-check وجود فقط یک هویت مصنوعی را تأیید کرد.
 - [x] هر دو اجرای CI روی commit `2ccd668038adddf7cdee0944f02089dacad34f5d`، jobهای `postgres17-rpc-smoke` و `unit-tests` را با موفقیت گذراندند. job قدیمی `rpc-security-integration` همچنان skipped باقی ماند.
+- [x] اجرای توسعه‌یافتهٔ CI شماره `45598493186` روی commit `50fa0c57c5ce673c0fd12c825849eafa7d8b66bc` موفق شد: تمام ۴۶ امضای دقیق و ACLهای فعلی، تست بدنه برای سه هویت، و unit-tests موفق بودند؛ remote `rpc-security-integration` همچنان skipped ماند.
 - [!] این موفقیت شامل آزمون metadata/ACL هر ۴۶ امضا و آزمون رفتاری بدنهٔ فقط یک RPC در PostgreSQL 17 است؛ نه اثبات parity کامل Supabase/Production. default ACLها، تمام RLS و table grants، Auth trigger، pg_cron و بدنه/dependencyهای ۴۳ تابع stubشده هنوز در scope کامل بررسی نشده‌اند.
 - [x] شواهد قبلی دربارهٔ نبود caller برای `claim_admin_asset_refresh(text,uuid)` اصلاح شد: Edge Function فعال `admin-refresh-crypto-asset` نسخه ۲ این RPC را با service_role فراخوانی می‌کند. مجوز دقیق آن باید حفظ شود، مگر اینکه caller عمداً بازطراحی و بازبینی شود. لاگ ۲۴ ساعت اخیر invocation ثبت نکرد؛ این موضوع caller مستقر را نفی نمی‌کند.
 - [ ] گام بعد: توسعهٔ fixture برای توابع بعدی بر اساس امضای دقیق، تعریف زنده و dependencyهای synthetic؛ ساخت manifest کامل Production-to-test؛ بازیابی ۱۷ منبع Migration مفقود و حل اختلاف timestamp/content پیش از replay کامل.
 - [ ] اختلاف سیاست default EXECUTE برای service_role همچنان نیازمند تصمیم صریح مالک است. تا آن زمان هیچ GRANT/REVOKE یا ALTER DEFAULT PRIVILEGES اجرا نشود.
 - [x] هیچ Production/Recovery-Test DDL، ACL، داده، Auth، Cron، Edge Function یا رکورد مالی تغییر نکرد؛ هیچ Merge یا Deploy انجام نشد و هیچ زیرساخت Supabase هزینه‌دار ساخته نشد.
 
-**آخرین commit این checkpoint:** `2ccd668038adddf7cdee0944f02089dacad34f5d`؛ تغییرات مستندسازی نتیجه آزمون در commitهای بعدی همین شاخه ثبت شده‌اند.
+**آخرین commit کد/تست این checkpoint:** `50fa0c57c5ce673c0fd12c825849eafa7d8b66bc`؛ commitهای بعدی تا `82e66240369bc22f4de664b9d6d340adab509dd4` فقط مستندات/ثبت وضعیت را به‌روزرسانی کردند.
