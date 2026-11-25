@@ -1,0 +1,354 @@
+{
+  "captured_on": "2026-11-25",
+  "production_project_ref": "gfoaubfilhttnwjykaox",
+  "source": "Supabase migration ledger via read-only list_migrations; GitHub main recursive tree",
+  "counts": {
+    "production_ledger": 55,
+    "local_sql_files": 40,
+    "matched_by_normalized_name": 38,
+    "missing_source_files": 17,
+    "matched_timestamp_mismatches": 20,
+    "exact_timestamp_matches": 18,
+    "local_files_without_ledger_name": 2
+  },
+  "matched": [
+    {
+      "ledger_version": "20261113161641",
+      "ledger_name": "enforce_active_accounts_in_demo_trade_and_limit_engine",
+      "local_file": "20261113161641_enforce_active_accounts_in_demo_trade_and_limit_engine.sql",
+      "timestamp_match": true
+    },
+    {
+      "ledger_version": "20261113162051",
+      "ledger_name": "add_demo_take_profit_stop_loss_engine",
+      "local_file": "20261113162051_add_demo_take_profit_stop_loss_engine.sql",
+      "timestamp_match": true
+    },
+    {
+      "ledger_version": "20261113162130",
+      "ledger_name": "lock_market_price_during_conditional_execution",
+      "local_file": "20261113162130_lock_market_price_during_conditional_execution.sql",
+      "timestamp_match": true
+    },
+    {
+      "ledger_version": "20261113162154",
+      "ledger_name": "record_conditional_reservation_consumption",
+      "local_file": "20261113162202_record_conditional_reservation_consumption.sql",
+      "timestamp_match": false
+    },
+    {
+      "ledger_version": "20261113162233",
+      "ledger_name": "index_conditional_execution_order_reference",
+      "local_file": "20261113162244_index_conditional_execution_order_reference.sql",
+      "timestamp_match": false
+    },
+    {
+      "ledger_version": "20261113163743",
+      "ledger_name": "20261113170000_recover_stalled_crypto_asset_sync",
+      "local_file": "20261113170000_recover_stalled_crypto_asset_sync.sql",
+      "timestamp_match": false
+    },
+    {
+      "ledger_version": "20261113163947",
+      "ledger_name": "20261113171000_add_admin_curated_market_assets",
+      "local_file": "20261113171000_add_admin_curated_market_assets.sql",
+      "timestamp_match": false
+    },
+    {
+      "ledger_version": "20261113164521",
+      "ledger_name": "20261113172000_harden_admin_market_listing_access",
+      "local_file": "20261113172000_harden_admin_market_listing_access.sql",
+      "timestamp_match": false
+    },
+    {
+      "ledger_version": "20261113165725",
+      "ledger_name": "20261113180000_add_admin_pair_activation_engine",
+      "local_file": "20261113180000_add_admin_pair_activation_engine.sql",
+      "timestamp_match": false
+    },
+    {
+      "ledger_version": "20261113165747",
+      "ledger_name": "20261113180500_fix_market_price_decimal_parser",
+      "local_file": "20261113180500_fix_market_price_decimal_parser.sql",
+      "timestamp_match": false
+    },
+    {
+      "ledger_version": "20261113165806",
+      "ledger_name": "20261113181000_show_live_prices_for_curated_assets",
+      "local_file": "20261113181000_show_live_prices_for_curated_assets.sql",
+      "timestamp_match": false
+    },
+    {
+      "ledger_version": "20261113170056",
+      "ledger_name": "20261113182000_rate_limit_manual_market_refresh",
+      "local_file": "20261113182000_rate_limit_manual_market_refresh.sql",
+      "timestamp_match": false
+    },
+    {
+      "ledger_version": "20261113170216",
+      "ledger_name": "20261113183000_index_market_pair_admin_audit",
+      "local_file": "20261113183000_index_market_pair_admin_audit.sql",
+      "timestamp_match": false
+    },
+    {
+      "ledger_version": "20261113170328",
+      "ledger_name": "20261113184000_prevent_curated_ticker_collisions",
+      "local_file": "20261113184000_prevent_curated_ticker_collisions.sql",
+      "timestamp_match": false
+    },
+    {
+      "ledger_version": "20261113173506",
+      "ledger_name": "admin_on_demand_crypto_asset_refresh",
+      "local_file": "20261113190000_admin_on_demand_crypto_asset_refresh.sql",
+      "timestamp_match": false
+    },
+    {
+      "ledger_version": "20261113175312",
+      "ledger_name": "allow_existing_pair_in_admin_asset_listing",
+      "local_file": "20261113175312_allow_existing_pair_in_admin_asset_listing.sql",
+      "timestamp_match": true
+    },
+    {
+      "ledger_version": "20261113181827",
+      "ledger_name": "add_stop_limit_order_engine",
+      "local_file": "20261113181827_add_stop_limit_order_engine.sql",
+      "timestamp_match": true
+    },
+    {
+      "ledger_version": "20261114143035",
+      "ledger_name": "get_my_order_reservations_rpc",
+      "local_file": "20261114143035_get_my_order_reservations_rpc.sql",
+      "timestamp_match": true
+    },
+    {
+      "ledger_version": "20261115125926",
+      "ledger_name": "expand_market_price_precision_for_micro_assets",
+      "local_file": "20261115125926_expand_market_price_precision_for_micro_assets.sql",
+      "timestamp_match": true
+    },
+    {
+      "ledger_version": "20261115130430",
+      "ledger_name": "fetch_coin_gecko_market_price_overflow_ids",
+      "local_file": "20261115130430_fetch_coin_gecko_market_price_overflow_ids.sql",
+      "timestamp_match": true
+    },
+    {
+      "ledger_version": "20261115134357",
+      "ledger_name": "add_kifpool_to_scheduled_exchange_asset_sync",
+      "local_file": "20261115134500_add_kifpool_to_scheduled_exchange_asset_sync.sql",
+      "timestamp_match": false
+    },
+    {
+      "ledger_version": "20261115134855",
+      "ledger_name": "avoid_relisting_unchanged_exchange_asset_matches",
+      "local_file": "20261115134600_avoid_relisting_unchanged_exchange_asset_matches.sql",
+      "timestamp_match": false
+    },
+    {
+      "ledger_version": "20261115135818",
+      "ledger_name": "prefer_kifpool_coingecko_id_with_exact_asset_name",
+      "local_file": "20261115135818_prefer_kifpool_coingecko_id_with_exact_asset_name.sql",
+      "timestamp_match": true
+    },
+    {
+      "ledger_version": "20261115140035",
+      "ledger_name": "preserve_kifpool_exact_id_matches_in_unmatched_fallback",
+      "local_file": "20261115140035_preserve_kifpool_exact_id_matches_in_unmatched_fallback.sql",
+      "timestamp_match": true
+    },
+    {
+      "ledger_version": "20261115142131",
+      "ledger_name": "allow_verified_kifpool_legacy_name_aliases",
+      "local_file": "20261115142131_allow_verified_kifpool_legacy_name_aliases.sql",
+      "timestamp_match": true
+    },
+    {
+      "ledger_version": "20261115142357",
+      "ledger_name": "allow_verified_kifpool_kishu_short_name_alias",
+      "local_file": "20261115142357_allow_verified_kifpool_kishu_short_name_alias.sql",
+      "timestamp_match": true
+    },
+    {
+      "ledger_version": "20261115142521",
+      "ledger_name": "allow_verified_kifpool_cfg_jup_exact_id_aliases",
+      "local_file": "20261115143000_allow_verified_kifpool_cfg_jup_exact_id_aliases.sql",
+      "timestamp_match": false
+    },
+    {
+      "ledger_version": "20261115142620",
+      "ledger_name": "prioritize_exact_name_matches_for_kifpool_assets",
+      "local_file": "20261115143200_prioritize_exact_name_matches_for_kifpool_assets.sql",
+      "timestamp_match": false
+    },
+    {
+      "ledger_version": "20261115143015",
+      "ledger_name": "allow_verified_kifpool_rebrand_aliases",
+      "local_file": "20261115145000_allow_verified_kifpool_rebrand_aliases.sql",
+      "timestamp_match": false
+    },
+    {
+      "ledger_version": "20261115143050",
+      "ledger_name": "allow_verified_kifpool_additional_name_aliases",
+      "local_file": "20261115145500_allow_verified_kifpool_additional_name_aliases.sql",
+      "timestamp_match": false
+    },
+    {
+      "ledger_version": "20261115143223",
+      "ledger_name": "allow_verified_kifpool_exact_id_name_aliases_batch",
+      "local_file": "20261115150000_allow_verified_kifpool_exact_id_name_aliases_batch.sql",
+      "timestamp_match": false
+    },
+    {
+      "ledger_version": "20261115143450",
+      "ledger_name": "allow_verified_kifpool_legacy_coin_id_transition",
+      "local_file": "20261115143450_allow_verified_kifpool_legacy_coin_id_transition.sql",
+      "timestamp_match": true
+    },
+    {
+      "ledger_version": "20261115143827",
+      "ledger_name": "bound_stop_limit_invalid_reservation_retries",
+      "local_file": "20261115143827_bound_stop_limit_invalid_reservation_retries.sql",
+      "timestamp_match": true
+    },
+    {
+      "ledger_version": "20261116195749",
+      "ledger_name": "fix_iran_exchange_sync_gzip_responses",
+      "local_file": "20261116195749_fix_iran_exchange_sync_gzip_responses.sql",
+      "timestamp_match": true
+    },
+    {
+      "ledger_version": "20261116195814",
+      "ledger_name": "deduplicate_iran_exchange_sync_rows",
+      "local_file": "20261116195814_deduplicate_iran_exchange_sync_rows.sql",
+      "timestamp_match": true
+    },
+    {
+      "ledger_version": "20261116200009",
+      "ledger_name": "auto_list_unmatched_iran_exchange_assets",
+      "local_file": "20261116200009_auto_list_unmatched_iran_exchange_assets.sql",
+      "timestamp_match": true
+    },
+    {
+      "ledger_version": "20261116203709",
+      "ledger_name": "limit_primary_coingecko_batch_to_515_ids",
+      "local_file": "20261116203709_limit_primary_coingecko_batch_to_515_ids.sql",
+      "timestamp_match": true
+    },
+    {
+      "ledger_version": "20261116205451",
+      "ledger_name": "stagger_market_price_overflow_and_refresh_exchange_discovery",
+      "local_file": "20261117130000_stagger_market_price_overflow_and_refresh_exchange_discovery.sql",
+      "timestamp_match": false
+    }
+  ],
+  "missing_sources": [
+    {
+      "version": "20261113153808",
+      "name": "approved_wallet_defaults_fees_and_coin_reviews",
+      "expected_filename": "20261113153808_approved_wallet_defaults_fees_and_coin_reviews.sql"
+    },
+    {
+      "version": "20261113154323",
+      "name": "assign_confirmed_super_admin",
+      "expected_filename": "20261113154323_assign_confirmed_super_admin.sql"
+    },
+    {
+      "version": "20261113154736",
+      "name": "secure_admin_wallet_management",
+      "expected_filename": "20261113154736_secure_admin_wallet_management.sql"
+    },
+    {
+      "version": "20261113154750",
+      "name": "add_admin_role_probe",
+      "expected_filename": "20261113154750_add_admin_role_probe.sql"
+    },
+    {
+      "version": "20261113154844",
+      "name": "use_toman_units_in_admin_credit_ui",
+      "expected_filename": "20261113154844_use_toman_units_in_admin_credit_ui.sql"
+    },
+    {
+      "version": "20261113154926",
+      "name": "move_admin_privilege_logic_to_private_schema",
+      "expected_filename": "20261113154926_move_admin_privilege_logic_to_private_schema.sql"
+    },
+    {
+      "version": "20261115101709",
+      "name": "create_exchange_asset_observations",
+      "expected_filename": "20261115101709_create_exchange_asset_observations.sql"
+    },
+    {
+      "version": "20261115102729",
+      "name": "schedule_iran_exchange_asset_sync",
+      "expected_filename": "20261115102729_schedule_iran_exchange_asset_sync.sql"
+    },
+    {
+      "version": "20261115102927",
+      "name": "fix_exchange_sync_response_json_cast",
+      "expected_filename": "20261115102927_fix_exchange_sync_response_json_cast.sql"
+    },
+    {
+      "version": "20261115103227",
+      "name": "auto_list_verified_exchange_assets",
+      "expected_filename": "20261115103227_auto_list_verified_exchange_assets.sql"
+    },
+    {
+      "version": "20261115103507",
+      "name": "schedule_bit24_exchange_asset_sync",
+      "expected_filename": "20261115103507_schedule_bit24_exchange_asset_sync.sql"
+    },
+    {
+      "version": "20261115105721",
+      "name": "admin_exchange_asset_sync_monitoring",
+      "expected_filename": "20261115105721_admin_exchange_asset_sync_monitoring.sql"
+    },
+    {
+      "version": "20261115105956",
+      "name": "restrict_exchange_sync_worker_execution",
+      "expected_filename": "20261115105956_restrict_exchange_sync_worker_execution.sql"
+    },
+    {
+      "version": "20261116201639",
+      "name": "auto_activate_verified_exchange_pairs",
+      "expected_filename": "20261116201639_auto_activate_verified_exchange_pairs.sql"
+    },
+    {
+      "version": "20261121045434",
+      "name": "digiarz_backpressure_and_exchange_sync_bloat_guards",
+      "expected_filename": "20261121045434_digiarz_backpressure_and_exchange_sync_bloat_guards.sql"
+    },
+    {
+      "version": "20261121045531",
+      "name": "snapshot_pg_net_unlogged_queue_before_recovery",
+      "expected_filename": "20261121045531_snapshot_pg_net_unlogged_queue_before_recovery.sql"
+    },
+    {
+      "version": "20261121050216",
+      "name": "temporarily_throttle_exchange_asset_processors_20261121",
+      "expected_filename": "20261121050216_temporarily_throttle_exchange_asset_processors_20261121.sql"
+    }
+  ],
+  "local_files_without_ledger_name": [
+    "20261116203000_add_kucoin_to_scheduled_market_price_refresh.sql",
+    "20261116203100_add_gateio_to_scheduled_market_price_refresh.sql"
+  ],
+  "branch_recovery_search": {
+    "branches_examined": 12,
+    "matching_missing_migration_files_found": 0,
+    "branches": [
+      "diagnostics/auth-cron-connection-pressure",
+      "feat/admin-daily-image-ad",
+      "feat/demo-derivatives-trading",
+      "feature/auto-list-iran-exchange-assets",
+      "fix/bit24-deduplicate-sync-2026-11-21",
+      "fix/exchange-observation-hot-updates-2026-11-21",
+      "fix/iran-exchange-sync-response-race",
+      "perf/iran-exchange-matcher-design",
+      "perf/iran-exchange-sync-noop-updates",
+      "security/tp-sl-bounded-reservation-retry-2026-11-20",
+      "test/account-deactivation-order-race",
+      "work/exact-decimal-preflight"
+    ]
+  },
+  "safety": "Inventory only. No migration SQL was reconstructed, applied, pushed, or executed. Do not run db push while the ledger/source mismatch remains."
+}
