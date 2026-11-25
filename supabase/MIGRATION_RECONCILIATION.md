@@ -333,3 +333,11 @@ This report is an inventory and safety analysis only. It changes no database obj
 - اکنون وجود واقعی دو Snapshot و دامنه زمانی/حجمی آن‌ها تأیید شده است؛ بااین‌حال SQL اصلی Migration، منطق انتخاب ردیف‌ها، روش capture، هرگونه restore و cleanup همچنان از منبع canonical بازیابی نشده‌اند.
 - قبل از هر طراحی بازیابی باید DDL/constraints/indexes/ACLهای دو جدول Snapshot، زمان و مالکیت ساخت آن‌ها، و محتوای Migration از deployment artifact معتبر بازیابی شود.
 - هیچ Snapshot جدیدی گرفته نشد؛ هیچ ردیفی از صف یا پاسخ حذف/بازیابی نشد؛ هیچ VACUUM، Cron، Worker، Migration، grant یا تنظیم Production تغییر نکرد.
+
+
+### کنترل دسترسی و ساختار فیزیکی جدول‌های Snapshot — ۲۵ نوامبر ۲۰۲۶
+- هر دو جدول Snapshot مالک postgres هستند؛ RLS و FORCE RLS روی آن‌ها خاموش است.
+- در خروجی pg_indexes هیچ indexی برای این دو جدول ثبت نشد و در pg_constraint نیز هیچ constraintی پیدا نشد.
+- در role_table_grants فقط postgres برای این دو جدول مجوز داشت؛ grant مستقیمی برای anon، authenticated یا service_role در خروجی مشاهده نشد.
+- این وضعیت با جدول‌های پشتیبان موقت و محدود به مالک سازگار است، اما از روی آن نمی‌توان سیاست دقیق Migration تاریخی یا intent سازنده را اثبات کرد.
+- PR #62 پس از ثبت گزارش در Commit 950134307754df7c26ace8a6a3ba78b3a033b35a همچنان open و Draft و merged=false است. برای این Commit جدید، workflow run ثبت نشده است؛ تغییر صرفاً Markdown بوده و نباید آن را CI-tested معرفی کرد. GitHub در snapshot فعلی mergeable=false برگرداند؛ علت آن بدون بررسی conflict details قطعی نیست و هیچ تلاش merge انجام نشد.
