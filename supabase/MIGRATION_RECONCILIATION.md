@@ -615,3 +615,49 @@ Commit: `7ef1932c49744b88408f3b80118eb3e574ed9c8a` (branch `feature/persian-asse
 - job 8 موتور سفارش و همهٔ Cronهای دیگر دست‌نخورده‌اند.
 - هیچ snapshot یا backup حذف یا restore نشد.
 - همهٔ فایل‌های recovered همچنان در supabase/drafts/ هستند و هیچ فایل اجرایی به supabase/migrations/ اضافه نشده است.
+
+
+## ممیزی جامع توابع SECURITY DEFINER عمومی، ACL و default privileges — ۲۵ نوامبر ۲۰۲۶
+
+این بررسی فقط metadata و متن توابع را خوانده است؛ هیچ تابعی فراخوانی نشده است.
+
+### نتیجهٔ شمارشی
+- تعداد توابع SECURITY DEFINER در schema عمومی: ۳۷.
+- تابعی با EXECUTE مستقیم برای role PUBLIC مشاهده نشد.
+- هیچ‌یک از این ۳۷ تابع search_path باز و نامحدود ندارند: ۳۵ تابع با search_path خالی و دو تابع refresh_market_prices() و refresh_market_fx_rate() با search_path=pg_catalog تنظیم شده‌اند.
+- ۲۳ تابع برای authenticated قابل اجرا هستند؛ این موضوع به‌تنهایی آسیب‌پذیری نیست و باید همراه با guard داخل بدنه ارزیابی شود.
+- دو تابع برای anon قابل اجرا هستند؛ هر دو در ادامه از نظر ماهیت داده بررسی شده‌اند.
+
+### توابع SECURITY DEFINER قابل دسترسی برای anon
+1. get_admin_market_listings() داده‌های فهرست عمومی بازار را می‌خواند: شناسهٔ CoinGecko، نماد، نام، تصویر، رتبه، قیمت، درصد تغییر، حجم و زمان به‌روزرسانی. تعریف فعلی از admin_market_listings به‌عنوان فهرست curated بازار استفاده می‌کند؛ هیچ دادهٔ wallet، هویت مدیر یا ledger در خروجی آن دیده نشد.
+2. get_exchange_discovered_market_assets() دادهٔ مشاهدات عمومی بازار را برای نمادهای تازه کشف‌شده برمی‌گرداند: نام، منابع صرافی، تعداد منابع، زمان مشاهده و وضعیت تطبیق. بدنه، مشاهده‌های فعال و تازه را فیلتر می‌کند و نمادهایی را که در فهرست curated یا جفت معاملاتی فعال هستند کنار می‌گذارد. این endpoint دادهٔ عملیاتی sync را تا حدی به anon آشکار می‌کند؛ در بررسی فعلی هیچ URL خصوصی، توکن، request id، payload خام یا شناسهٔ کاربر در projection خروجی مشاهده نشد.
+- این دو مورد را «دسترسی عمومی عمدی به دادهٔ بازار» طبقه‌بندی می‌کنیم، نه اثبات آسیب‌پذیری. با این حال نام get_admin_market_listings گمراه‌کننده است و بهتر است در بازبینی API مشخص شود این endpoint عمداً public است.
+
+### بررسی توابع مدیریتی
+- توابع admin_add_market_listing, admin_remove_market_listing, admin_enable_market_pair, admin_disable_market_pair, admin_search_market_assets در بدنه هم auth.uid() را بررسی می‌کنند و هم private.is_super_admin() را فراخوانی می‌کنند.
+- admin_exchange_asset_sync_report() و admin_request_exchange_asset_sync() از private.is_current_user_super_admin() استفاده می‌کنند. نبودن فراخوانی مستقیم auth.uid() در این دو تابع به‌تنهایی نقص نیست، چون guard خصوصی هویت جاری را ارزیابی می‌کند.
+- تابع عمومی admin_adjust_wallet() wrapper از نوع SECURITY INVOKER است؛ منطق تغییر موجودی در تابع private و SECURITY DEFINER انجام می‌شود و آن تابع کنترل super-admin را اعمال می‌کند.
+- claim_admin_asset_refresh() فقط به service_role مجوز دارد و user-supplied p_admin_user_id را با جدول private.admin_users تطبیق می‌دهد؛ authenticated و anon مجوز اجرای مستقیم ندارند.
+- توابع معاملاتی/سفارشی که برای authenticated مجازند، از auth.uid() و مالکیت order/user یا اعتبارسنجی حساب فعال استفاده می‌کنند؛ این توابع در این گزارش به‌عنوان عملیات کاربر طبقه‌بندی شده‌اند، نه عملیات مدیریتی.
+
+### مورد مهم: default privileges برای توابع آینده
+- default ACL توابع در schema عمومی برای سازنده با نقش postgres، EXECUTE را به anon, authenticated و service_role اعطا می‌کند.
+- default ACL توابع عمومی برای سازنده با نقش supabase_admin نیز همین دسترسی‌ها را دارد.
+- این مورد به معنای وجود EXECUTE برای PUBLIC روی ۳۷ تابع فعلی نیست؛ بررسی ACL مؤثر توابع موجود، صفر تابع با PUBLIC EXECUTE نشان داد.
+- با این حال، هر تابع جدیدی که با این ownerها ساخته شود ممکن است به‌صورت پیش‌فرض برای anon/authenticated قابل اجرا شود، مگر آنکه Migration سازنده در همان تراکنش ACL را محدود کند یا default privileges اصلاح شده باشد. این یک ریسک حاکمیتی/پیکربندی برای توسعه‌های آینده است و باید پیش از افزودن توابع privileged جدید حل و در CI کنترل شود.
+- default privileges فعلی تغییر داده نشد؛ اصلاح آن نیازمند Migration مجزا، بررسی اثر روی توابعی که باید public باشند و تأیید مالک است.
+
+### دو تابع با search_path غیرخالی
+- refresh_market_prices() و refresh_market_fx_rate() دارای SET search_path=pg_catalog هستند، نه search_path پیش‌فرض کاربر. این تنظیم به‌صورت صریح به pg_catalog محدود شده و از shadowing اشیای schemaهای دیگر جلوگیری می‌کند. در تعریف‌های بررسی‌شده، اشیای برنامه با نام schema-qualified فراخوانی می‌شوند.
+- بنابراین این دو مورد در این مرحله به‌عنوان نقص search_path طبقه‌بندی نشدند؛ با این حال در بازبینی تغییرات آینده باید همین تنظیم محدود حفظ شود.
+
+### ارزیابی ریسک و اقدام پیشنهادی (بدون اجرا)
+1. اولویت بالا — default privileges: طراحی یک Migration صرفاً پیشنهادی برای محدودکردن EXECUTE پیش‌فرض توابع تازه در schema عمومی برای anon/authenticated؛ سپس فهرست allowlist توابع عمومی و کنترل خودکار در CI. هیچ تغییر ACL اکنون انجام نشده است.
+2. اولویت متوسط — allowlist endpointهای anon: مستندسازی دو تابع بازار فوق به‌عنوان API عمومی و افزودن تستی که ثابت کند خروجی آن‌ها شامل دادهٔ حساس یا payload خام sync نمی‌شود.
+3. اولویت متوسط — کنترل CI: تست catalog برای هر SECURITY DEFINER جدید: search_path محدود، نبود PUBLIC EXECUTE، ACL صریح و guard هویتی/مالکیت متناسب با نوع endpoint.
+4. تکمیل لازم: بازبینی تمام ۳۷ بدنه در برابر dynamic SQL، EXECUTE, استفاده از نام‌های بدون schema، فراخوانی توابع زنجیره‌ای و مرز اعتماد به service_role. شمارش و اسکن این مرحله جایگزین بازبینی دستی تک‌تک شاخه‌های اجرایی نیست.
+
+### قفل ایمنی
+- هیچ ALTER DEFAULT PRIVILEGES, REVOKE, GRANT, CREATE OR REPLACE FUNCTION, Migration یا اجرای تابع انجام نشد.
+- هیچ تغییر Production، Cron، worker، داده یا هزینه‌ای انجام نشد.
+- این بخش صرفاً به فایل Markdown گزارش در branch آزمایشی افزوده شد.
