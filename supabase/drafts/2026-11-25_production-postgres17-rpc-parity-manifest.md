@@ -172,3 +172,8 @@ These four types are source-backed for the reviewed fixture bodies only. The rem
 `public.get_admin_market_listings()` has now been promoted from metadata stub to the fifth real fixture body using the final reviewed migration source. The fixture includes synthetic, non-financial market metadata only; its read dependencies are `admin_market_listings`, `crypto_assets`, and `market_prices`. The function's exact TABLE return shape, STABLE flag, SECURITY DEFINER, empty search_path, and current effective API ACL are asserted. Role tests verify anon/authenticated/service_role access, active-listing filtering, fresh CoinGecko price visibility, stale-price redaction, and absence of direct anon SELECT on the underlying asset/price tables. All synthetic rows are transaction-scoped and rollback-checked.
 
 Current fixture body count: **5 real bodies + 41 metadata-only stubs = 46 signatures**. Exact Production RLS/grants for all dependency tables remain only partially established; the fixture's table policies are explicitly a minimal model, not full RLS parity.
+
+
+### CI evidence for the fifth body
+
+GitHub Actions run #313 (`45603853118`) completed successfully on the updated PR branch. Both `unit-tests` and `postgres17-rpc-smoke` concluded success; the remote `rpc-security-integration` job remained intentionally skipped. The PostgreSQL 17 job completed the exact 46-signature ACL contract, the previous report/claim tests, the new `get_admin_market_listings()` role and price-freshness tests, and post-rollback checks confirming no synthetic market rows remain.
