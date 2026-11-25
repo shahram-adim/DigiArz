@@ -39,6 +39,13 @@ jobs:
           psql -h localhost -U postgres -d digiarz_test -v ON_ERROR_STOP=1 \
             -f supabase/tests/exact_decimal_arithmetic.sql \
             -f supabase/tests/toman_market_upsert_idempotency.sql
+      - name: Reproduce exact live Production Limit worker against 8-scale synthetic schema
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_live_worker_8scale_test;"
+          psql -h localhost -U postgres -d digiarz_live_worker_8scale_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/live_limit_worker_8scale_baseline.pg17.sql
       - name: Rehearse exact-decimal schema widening in disposable PostgreSQL
         env:
           PGPASSWORD: postgres
