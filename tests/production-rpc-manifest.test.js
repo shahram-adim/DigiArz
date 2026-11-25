@@ -232,3 +232,10 @@ test('live cron-invoked routine fingerprints match the captured Production manif
   }
   assert.match(dossier, /تطبیق fingerprint فعلی Production با manifest برای این چهار routine برابر است \(۴\/۴\)/);
 });
+
+
+test('group four cron attribution supersedes the earlier map omission without claiming migration provenance', () => {
+  const dossier = fs.readFileSync('supabase/audit/production_missing_migration_dossiers_2026-11-25.md', 'utf8');
+  assert.match(dossier, /job 11 تابع `public\.recover_stale_crypto_assets_sync\(\)` را فراخوانی می‌کند/);
+  assert.match(dossier, /این انتساب، اجرای فعلی job را ثابت می‌کند نه اینکه کدام Migration آن را ایجاد\/تغییر داده باشد/);
+});
