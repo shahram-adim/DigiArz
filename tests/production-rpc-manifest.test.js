@@ -172,7 +172,7 @@ test('All 17 missing migrations have review-only dossiers and executable replay 
   const dossierPath = 'supabase/audit/production_missing_migration_dossiers_2026-11-25.md';
   assert.equal(fs.existsSync(dossierPath), true);
   const dossier = fs.readFileSync(dossierPath, 'utf8');
-  const ids = [...dossier.matchAll(/^#### (\\d{14}) — /gm)].map(match => match[1]);
+  const ids = [...dossier.matchAll(/^#### (\d{14}) — /gm)].map(match => match[1]);
   assert.equal(ids.length, 17);
   assert.equal(new Set(ids).size, 17);
   assert.match(dossier, /وضعیت: فقط مستندات بازبینی؛ غیرقابل اجرا/);
