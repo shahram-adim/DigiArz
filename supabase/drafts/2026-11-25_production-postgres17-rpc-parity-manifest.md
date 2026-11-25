@@ -9,8 +9,8 @@
 ## Interpretation rules
 
 1. The 46 signatures and the three API-role EXECUTE booleans below are copied from the reviewed current-state catalog contract. They are not proposed target permissions.
-2. The 42 functions represented by NO-OP stubs in `rpc-security-postgres17-catalog-stubs.sql` are metadata-only. Their fixture `RETURNS void` declarations MUST NOT be treated as Production return types or function definitions.
-3. Four functions have real bodies in the current disposable fixture: `private.is_super_admin()`, `private.is_current_user_super_admin()`, `public.admin_exchange_asset_sync_report()`, and `public.claim_admin_asset_refresh(text,uuid)`. Their source provenance differs; see below.
+2. The 41 functions represented by NO-OP stubs in `rpc-security-postgres17-catalog-stubs.sql` are metadata-only. Their fixture `RETURNS void` declarations MUST NOT be treated as Production return types or function definitions.
+3. Five functions have real bodies in the current disposable fixture: `private.is_super_admin()`, `private.is_current_user_super_admin()`, `public.admin_exchange_asset_sync_report()`, and `public.claim_admin_asset_refresh(text,uuid)`. Their source provenance differs; see below.
 4. For the 36 signatures with effective `service_role` EXECUTE, the prior read-only Production audit reports owner `postgres` and constrained `search_path` (either empty or `pg_catalog`). The exact per-function search_path values are not in the current manifest evidence and are not guessed. For the other 10, owner and per-function path need direct evidence.
 5. Table dependencies, column dependencies, referenced functions, RLS policies, and table privileges are not inferred from names or stub code. They remain open until exact Production definitions and catalog dependency evidence are captured.
 6. No fixture is considered full Supabase parity: this is PostgreSQL 17 with synthetic roles and minimal tables; Auth/JWT, pg_net, pg_cron, extension behavior, RLS policies and grants are not comprehensively reproduced.
@@ -140,7 +140,7 @@ Owner decision remains OPEN. Do not run `GRANT`, `REVOKE`, `ALTER DEFAULT PRIVIL
 
 ## 8. Latest checkpoint
 
-- Baseline CI for the 46-signature metadata contract passed previously; four real bodies now exist in the disposable fixture, with 42 metadata-only stubs.
+- Baseline CI for the 46-signature metadata contract passed previously; five real bodies now exist in the disposable fixture, with 41 metadata-only stubs.
 - CI #277 passed after the claim rollback post-check: https://github.com/shahram-adim/DigiArz/actions/runs/45600722397
 - This manifest is an evidence tracker, not proof that all fields are complete or that Production parity is achieved.
 
@@ -165,3 +165,10 @@ These four types are source-backed for the reviewed fixture bodies only. The rem
 - The disposable fixture now defines only the required synthetic columns for `crypto_assets` and `market_prices`, enables RLS on its three synthetic dependencies, and grants no direct base-table SELECT to anon. The curated listing table has the source migration's public-read policy. This is a narrow fixture, not proof of exact RLS parity for all three Production tables.
 - Tests exercise anon, authenticated and service_role reads; inactive listings are omitted; fresh CoinGecko USD price is visible; stale price is redacted; direct anon table SELECT remains unavailable. All inserted rows are synthetic non-financial market metadata and the transaction rolls back.
 - The current effective service_role EXECUTE bit is reproduced explicitly in this disposable fixture to match the read-only catalog snapshot. No default privileges are altered.
+
+
+## Fixture coverage update — source-faithful curated-market read RPC
+
+`public.get_admin_market_listings()` has now been promoted from metadata stub to the fifth real fixture body using the final reviewed migration source. The fixture includes synthetic, non-financial market metadata only; its read dependencies are `admin_market_listings`, `crypto_assets`, and `market_prices`. The function's exact TABLE return shape, STABLE flag, SECURITY DEFINER, empty search_path, and current effective API ACL are asserted. Role tests verify anon/authenticated/service_role access, active-listing filtering, fresh CoinGecko price visibility, stale-price redaction, and absence of direct anon SELECT on the underlying asset/price tables. All synthetic rows are transaction-scoped and rollback-checked.
+
+Current fixture body count: **5 real bodies + 41 metadata-only stubs = 46 signatures**. Exact Production RLS/grants for all dependency tables remain only partially established; the fixture's table policies are explicitly a minimal model, not full RLS parity.
