@@ -159,3 +159,60 @@ The following helper definitions were read from Production:
 - No grant/revoke recommendation is finalized by this body review. Preserve all current grants until exact policy approval and disposable-clone testing.
 
 This review was performed using SELECT-only catalog/function-definition reads. No RPC function was invoked and no data, ACL, function, trigger, Cron job, migration, CI secret, or deployment was changed.
+
+
+## 8. Public read RPCs — fresh definition-level review
+
+The three public/read/configuration definitions were re-read directly from Production catalogs using SELECT-only queries. All are `STABLE SECURITY DEFINER` with `search_path=""`. No RPC was invoked and no output rows were queried.
+
+### 8.1 `public.get_admin_market_listings()`
+
+- Exact result contract: 11 columns — CoinGecko ID, symbol, name, image URL, market-cap rank, current USD price, Toman price, 24h percentage, USD volume, market-price timestamp, and listing timestamp.
+- Reads curated listings joined to active `crypto_assets`, with a left join to `market_prices`.
+- USD price is returned only when the price row is from CoinGecko, positive, and updated within two minutes; otherwise the USD price is NULL.
+- No user, wallet, order, reservation, email, or account identifiers are referenced in the function body.
+- Public exposure is consistent with a public market catalogue, notwithstanding the legacy `admin_` name.
+- Review caveat: Toman price, 24h percentage, volume and rank are selected directly from `crypto_assets`; their own freshness is not checked in this function. Consumers should not treat the `last_updated` value (which comes from the USD market-price join) as a freshness guarantee for those other fields.
+
+### 8.2 `public.get_exchange_discovered_market_assets()`
+
+- Exact result contract: 8 columns — symbol, observed name, recent USD price, price timestamp, exchange-source names, distinct source count, observation timestamp, and match status.
+- Only active observations seen within 48 hours, with normalized-looking base symbols and statuses `pending`, `ambiguous`, or `unmatched`, are considered.
+- It excludes likely tokenized-stock labels and symbols already represented in curated listings or enabled demo pairs.
+- Output is grouped by symbol; source names are aggregated, and the most recently observed non-empty name is selected.
+- USD price is included only if positive and updated within two minutes.
+- No user, wallet, order, reservation, email, or account identifiers are referenced.
+- Public exposure reveals exchange names, asset symbols/names, match-state labels and observation recency. This is market-operations metadata, not personal data, but the product owner should explicitly accept that public disclosure.
+- Semantics note: a group with only `pending` rows is emitted as `unmatched` because the CASE expression only distinguishes whether any row is `ambiguous`; otherwise it returns `unmatched`.
+- Review caveat: the function has no explicit row limit. The 48-hour and eligibility predicates bound the input window, but output cardinality can still grow with distinct symbols.
+
+### 8.3 `public.get_demo_trading_fee_rate(text,text)`
+
+- Exact signature: `(p_quote_asset text, p_liquidity_type text)`; returns a single numeric rate.
+- Current EXECUTE roles: authenticated and service_role; anon is not granted execution.
+- Reads enabled maker/taker fee values by normalized quote asset. It returns no user or account data.
+- The body validates `p_liquidity_type NOT IN ('maker','taker')`, but SQL three-valued logic means a NULL liquidity type does not satisfy that IF condition. In the current CASE expression, every value other than the exact string `maker` selects the taker rate, so NULL is implicitly treated as taker.
+- This is not an observed privilege escalation or data disclosure, but it is an input-validation/contract defect candidate. Recommended future correction: explicitly reject NULL and any non-maker/non-taker value, with regression tests for NULL, invalid strings, both valid liquidity types, and unknown/disabled quote assets. Do not change Production as part of this audit.
+
+### 8.4 Public endpoint regression-test requirements
+
+Before treating these public endpoints as stable contracts, a disposable Production-parity database should test:
+1. Anon can execute only the two explicitly public market-metadata functions; anon cannot execute the fee function or any other SECURITY DEFINER endpoint.
+2. Authenticated can read the same public market metadata and fee configuration, but neither endpoint returns user-specific or wallet/order/reservation data.
+3. The market-listing USD price becomes NULL when stale, non-positive, or from a non-CoinGecko source; fresh valid values are returned.
+4. Exchange observations older than 48 hours, inactive rows, unsupported statuses, tokenized-stock labels, and already-listed/enabled symbols are excluded.
+5. Ambiguous groups remain marked ambiguous; pending-only groups currently map to unmatched (assert current behavior or change only after product decision).
+6. Fee function accepts maker/taker, rejects NULL and invalid values after an approved correction, and rejects missing/disabled quote-asset configurations.
+7. Public result schemas remain exactly 11, 8, and 1 columns respectively; prevent future additions of personal or account-level fields.
+
+No such runtime tests were run because the existing Recovery-Test project is not a valid Production ACL/Cron/Auth-trigger parity environment.
+
+## 9. Consolidated remaining decisions
+
+- Owner policy decision: whether default function EXECUTE should be removed for `service_role` as well as PUBLIC/anon/authenticated, given no reviewed Edge Function currently uses service-role RPC.
+- Resolve the conflict between `tests/default-function-acl-hardening.sql` and the proposed default-ACL SQL draft.
+- Determine external/manual caller intent for `claim_admin_asset_refresh(text,uuid)`; do not revoke while unresolved.
+- Decide whether public disclosure of exchange source names and observation states is acceptable.
+- Decide whether the global 30-second market-price refresh cooldown should remain global or become per-user/per-client; no change before explicit approval.
+- Correct NULL liquidity-type validation only after a separately reviewed draft and owner approval.
+- Build a disposable environment with matching grants, schema USAGE, Auth trigger, Cron identities, and fixtures before enabling the skipped RPC integration CI job.
