@@ -349,3 +349,7 @@ This report is an inventory and safety analysis only. It changes no database obj
 - هیچ تابعی با نام حاوی snapshot در schemaهای public/private/net پیدا نشد. جست‌وجوی قبلی نیز تابع اپلیکیشنی مشخصی برای purge/retention پاسخ‌ها پیدا نکرده بود. این شواهد وجود هر نوع cleanup بیرونی یا اجرای SQL با نام متفاوت را رد نمی‌کند.
 - آمار pg_stat_user_tables برای این دو جدول هنوز صفر/NULL است و قابل استفاده برای نتیجه‌گیری دربارهٔ تعداد ردیف یا vacuum نیست؛ تعداد واقعی ردیف‌ها از COUNT مستقیم در بررسی قبلی گرفته شده است.
 - نکتهٔ مهم: permanent بودن جدول‌ها به‌معنای ماندگاری تا زمان حذف صریح است؛ در شواهد فعلی TTL، partitioning یا cleanup خودکار برای این دو Snapshot دیده نشد. بنابراین نباید آن‌ها را «موقت» توصیف کرد. همچنین اندازهٔ ۴۰ MiB Snapshot پاسخ شامل دادهٔ ذخیره‌شده است و به‌خودی‌خود bloat محسوب نمی‌شود.
+
+
+### یادداشت پایداری وضعیت mergeability — ۲۵ نوامبر ۲۰۲۶
+در چند دریافت متوالی از GitHub، فیلد mergeable برای PR #62 به‌ترتیب false، سپس true و مجدداً false گزارش شد، درحالی‌که state=open، draft=true و merged=false ثابت ماند. بنابراین mergeability در این بازه ناپایدار/در حال محاسبه بوده و نباید مقدار لحظه‌ای را به‌عنوان رفع قطعی conflict تفسیر کرد. PR ادغام نشده و هیچ اقدام merge یا update-branch انجام نشده است. Commit فعلی گزارش cb5c7ef02fb8d5af9064a8f3bb632b2ecc036452 است؛ برای این commit workflow run ثبت نشده است.
