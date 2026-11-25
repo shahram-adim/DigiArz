@@ -297,3 +297,39 @@ This report is an inventory and safety analysis only. It changes no database obj
 - GitHub Actions بعد از Commit `8f7a3ec558bfbd79f0504acd1539663c37eec12f` دو run مرتبط ثبت کرده است: run #72 با event از نوع push و run #73 با event از نوع pull_request؛ هر دو conclusion برابر `success` هستند.
 - این نتیجه، وضعیت قبلی گزارش که «برای این Commit اجرای CI ثبت نشده» را اصلاح می‌کند. موفقیت این Workflow فقط همان تست‌های تعریف‌شده در `DigiArz Persian asset-name candidate tests` را نشان می‌دهد؛ جایگزین CI کامل برنامه، تست PostgreSQL Migration یا تست Production نیست.
 - PR #62 همچنان Draft و ادغام‌نشده است؛ این موفقیت‌ها مجوز merge، deploy یا اجرای SQL نیستند.
+
+
+## بررسی مستقیم Snapshotهای pg_net در Production — ۲۵ نوامبر ۲۰۲۶
+
+این بررسی فقط SELECT روی کاتالوگ PostgreSQL و دو جدول Snapshot موجود انجام شد. هیچ محتوای درخواست HTTP، URL خصوصی، header یا body در گزارش کپی نشده است.
+
+### نسخه افزونه و ساختار
+- افزونه pg_net در schema برابر extensions و نسخه 0.20.4 نصب است.
+- جدول زنده net._http_response ستون‌های id، status_code، content_type، headers، content، timed_out، error_msg و created دارد.
+- جدول زنده net.http_request_queue ستون‌های id، method، url، headers، body و timeout_milliseconds دارد.
+- جدول Snapshot صف شامل captured_at و ستون‌های صف اصلی است؛ Snapshot پاسخ نیز captured_at و ستون‌های پاسخ اصلی را حفظ کرده است.
+
+### آمار Snapshot صف
+- private.digiarz_pg_net_queue_backup_20261121: تعداد ۴٬۶۴۰ ردیف.
+- بازه capture: ۲۱ نوامبر ۲۰۲۶، از ۰۴:۵۵:۳۱ تا ۰۵:۰۵:۲۱ UTC.
+- روش‌ها: ۴٬۵۳۳ درخواست GET و ۱۰۷ درخواست POST.
+- بازه شناسه‌ها: ۲۹٬۱۳۶ تا ۳۳٬۷۷۹.
+- حجم کل جدول Snapshot حدود ۷٬۰۴۰ KiB است.
+
+### آمار Snapshot پاسخ
+- private.digiarz_pg_net_response_backup_20261121: تعداد ۵۴۱ ردیف.
+- بازه زمان ایجاد پاسخ‌ها: ۱۹ نوامبر ۲۰۲۶، از ۱۶:۵۷:۲۲ تا ۲۲:۵۷:۰۰ UTC.
+- ۴۵۹ پاسخ HTTP 2xx، یک پاسخ 4xx، صفر پاسخ 5xx، ۷۸ ردیف با timed_out=true و ۸۱ ردیف دارای error_msg ثبت شده‌اند.
+- میانگین طول content حدود ۲۹۶٬۶۱۰ نویسه و بیشینه ۷۳۸٬۱۷۵ نویسه است؛ ۸۱ ردیف content تهی دارند.
+- حجم کل جدول Snapshot پاسخ حدود ۴۰ MiB است.
+
+### تفسیر زمانی و محدودیت تطبیق
+- Snapshot صف در ۲۱ نوامبر گرفته شده، درحالی‌که پاسخ‌های Snapshotشده در ۱۹ نوامبر ایجاد شده‌اند. بنابراین این دو جدول Snapshot هم‌زمان نیستند.
+- تطبیق مستقیم شناسه id بین دو جدول Snapshot در این بررسی صفر ردیف مشترک نشان داد. به‌دلیل اختلاف زمانی capture و ماهیت دو Snapshot، این نتیجه به‌تنهایی نشانه خرابی یا از دست‌رفتن پاسخ نیست و نباید برای نتیجه‌گیری درباره ارتباط request/response استفاده شود.
+- پاسخ‌های ذخیره‌شده Snapshot به‌طور متوسط حجیم‌اند؛ این با یافته قبلی غالب بودن TOAST در حجم جدول زنده net._http_response سازگار است، اما رابطه مستقیم هر پاسخ Snapshot با رشد فعلی TOAST هنوز اثبات نشده است.
+- جست‌وجوی GitHub برای نام دقیق دو جدول Snapshot، نام Migration snapshot_pg_net_unlogged_queue_before_recovery و timestamp آن، commit منبعی برنگرداند. این فقط نتیجه جست‌وجوی فعلی است و نبود نسخه در تمام artifactها یا مخازن را اثبات نمی‌کند.
+
+### نتیجه و اقدام بعدی
+- اکنون وجود واقعی دو Snapshot و دامنه زمانی/حجمی آن‌ها تأیید شده است؛ بااین‌حال SQL اصلی Migration، منطق انتخاب ردیف‌ها، روش capture، هرگونه restore و cleanup همچنان از منبع canonical بازیابی نشده‌اند.
+- قبل از هر طراحی بازیابی باید DDL/constraints/indexes/ACLهای دو جدول Snapshot، زمان و مالکیت ساخت آن‌ها، و محتوای Migration از deployment artifact معتبر بازیابی شود.
+- هیچ Snapshot جدیدی گرفته نشد؛ هیچ ردیفی از صف یا پاسخ حذف/بازیابی نشد؛ هیچ VACUUM، Cron، Worker، Migration، grant یا تنظیم Production تغییر نکرد.
