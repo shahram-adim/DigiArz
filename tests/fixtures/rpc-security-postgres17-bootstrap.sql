@@ -284,6 +284,8 @@ CREATE TABLE public.demo_trading_pairs (
 ALTER TABLE public.admin_market_listings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.crypto_assets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.market_prices ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.demo_trading_pairs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.exchange_asset_observations ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS admin_market_listings_public_read ON public.admin_market_listings;
 CREATE POLICY admin_market_listings_public_read
@@ -291,7 +293,8 @@ CREATE POLICY admin_market_listings_public_read
   FOR SELECT TO anon, authenticated
   USING (true);
 
-REVOKE ALL ON public.admin_market_listings, public.crypto_assets, public.market_prices
+REVOKE ALL ON public.admin_market_listings, public.crypto_assets, public.market_prices,
+  public.demo_trading_pairs, public.exchange_asset_observations
   FROM PUBLIC, anon, authenticated, service_role;
 GRANT SELECT ON public.admin_market_listings TO anon, authenticated;
 
