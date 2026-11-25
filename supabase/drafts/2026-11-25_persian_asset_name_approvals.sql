@@ -11,9 +11,10 @@
 --   * Existing trigger private.auto_list_verified_exchange_asset() inserts into
 --     admin_market_listings only when an observation becomes matched+active.
 --     This approval table is deliberately NOT wired to that trigger.
---   * The historical create_exchange_asset_observations migration is recorded
---     in Supabase's ledger but its SQL file is absent from the inspected branch
---     and no Git commit history for that exact path was found.
+--   * Production migration ledger has 55 entries; the inspected base branch has
+--     40 SQL migration files. 17 ledger entries have no matching file name after
+--     timestamp normalization, including the observation-table migration and
+--     several exchange-sync/security migrations. Exact reconciliation is required.
 --
 -- Compatibility contract with src/persian-asset-names.mjs:
 --   { coingecko_id, status: "approved", approved_by, approved_at, name_fa }
@@ -43,8 +44,10 @@ CREATE TABLE public.crypto_asset_persian_name_approvals (
     ON DELETE RESTRICT,
   approved_at timestamptz NOT NULL DEFAULT now(),
   source_snapshot jsonb NOT NULL DEFAULT '[]'::jsonb
-    CHECK (jsonb_typeof(source_snapshot) = 'array'),
-  approval_note text,
+    CHECK (jsonb_typeof(source_snapshot) = 'array')
+    CHECK (pg_column_size(source_snapshot) <= 32768),
+  approval_note text
+    CHECK (approval_note IS NULL OR char_length(approval_note) <= 500),
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
@@ -95,8 +98,14 @@ BEGIN
       USING ERRCODE = '22023';
   END IF;
 
-  IF p_source_snapshot IS NULL OR jsonb_typeof(p_source_snapshot) <> 'array' THEN
-    RAISE EXCEPTION 'Source snapshot must be a JSON array'
+  IF p_source_snapshot IS NULL OR jsonb_typeof(p_source_snapshot) <> 'array'
+     OR pg_column_size(p_source_snapshot) > 32768 THEN
+    RAISE EXCEPTION 'Source snapshot must be an array no larger than 32 KiB'
+      USING ERRCODE = '22023';
+  END IF;
+
+  IF p_approval_note IS NOT NULL AND char_length(btrim(p_approval_note)) > 500 THEN
+    RAISE EXCEPTION 'Approval note must not exceed 500 characters'
       USING ERRCODE = '22023';
   END IF;
 
@@ -178,7 +187,7 @@ GRANT EXECUTE ON FUNCTION public.admin_list_persian_asset_name_approvals(integer
 --     admin can list and approve; approved_by always equals auth.uid(); invalid
 --     names/snapshots/pagination rejected; duplicate approvals update only through
 --     the guarded RPCs; direct table SELECT/INSERT/UPDATE/DELETE denied.
--- [ ] Decide and enforce a source_snapshot schema and maximum serialized size.
+-- [ ] Define the allowed source_snapshot object keys and validate each array item.
 -- [ ] Ensure the UI reads this approved table through the admin list RPC, never
 --     from consensus candidates or direct table access.
 -- [ ] Reconcile the missing historical create_exchange_asset_observations SQL
