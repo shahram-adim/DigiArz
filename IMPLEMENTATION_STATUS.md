@@ -1548,3 +1548,11 @@
 - [!] این fixture فقط semantics و ارزیابی مجوز PostgreSQL را روی ACL بازسازی‌شده آزمایش می‌کند؛ اجرای بدنهٔ ۴۶ تابع زنده، guardهای داخل بدنه، JWT واقعی Supabase، RLS، default privileges و رفتار Production را اثبات نمی‌کند.
 - [ ] اجرای CI روی commit نهایی این تغییرات هنوز مشاهده/تأیید نشده است؛ بنابراین آزمون ACL جدید را سبز یا تکمیل‌شده اعلام نکنید.
 - [!] هیچ Production grant/revoke، تغییر تابع، policy، migration، db push، deploy یا Merge انجام نشده است.
+
+
+### آزمون حساب غیرفعال در RLS — 2026-11-25
+- [x] بدنهٔ واقعی ثبت‌شدهٔ `public.current_account_is_active()` از manifest Production با fingerprint `d932cd1d0da21bb96bdc0a381f7dcbc3` وارد fixture شد؛ تابع مقدار `profiles.is_active` را برای `auth.uid()` می‌خواند و در نبود profile مقدار false می‌دهد.
+- [x] سناریوی synthetic user B پس از آزمون جداسازی عادی، غیرفعال می‌شود؛ آزمون انتظار دارد policyهایی که helper را فراخوانی می‌کنند (wallets، asset_balances، orders، trades، transactions) ردیف ندهند.
+- [!] دو policy ثبت‌شده در snapshot، `order_reservations` و `conditional_orders`، فقط مالکیت user_id را کنترل می‌کنند و helper فعال‌بودن حساب را فراخوانی نمی‌کنند؛ fixture این رفتار را آشکار و مستند می‌کند، نه اینکه آن را خودسرانه اصلاح کند. profile self-read نیز همچنان یک ردیف را نشان می‌دهد.
+- [!] `auth.uid()` همچنان shim مبتنی بر claim محلی است؛ JWT verification واقعی Supabase، triggerها و مسیرهای write در این تست اثبات نشده‌اند.
+- [ ] CI برای نسخهٔ جدید fixture هنوز اجرا/تأیید نشده است؛ هیچ نتیجهٔ موفقی برای این تغییر اعلام نمی‌شود.
