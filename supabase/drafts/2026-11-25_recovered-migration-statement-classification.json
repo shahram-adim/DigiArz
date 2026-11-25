@@ -24,7 +24,7 @@
         {
           "ordinal": 1,
           "sha256": "492384dbc8e0e502c2519effc733157d3b024789571cadd56f8f4ad085d36ae2",
-          "classification": "manual_review_unknown_fail_closed",
+          "classification": "schema_or_function_candidate_dependency_gated",
           "target": "public.wallets",
           "preview": "-- DigiArz: approved demo wallet defaults, configurable fees, and instant coin reviews. ALTER TABLE public.wallets ALTER COLUMN balance_usdt SET DEFAU"
         },
@@ -87,22 +87,22 @@
         {
           "ordinal": 10,
           "sha256": "298d3e9678ceafddc0c41b9a188faa1a5cec7ea89035f3d8bf7404f55a9da89b",
-          "classification": "manual_review_unknown_fail_closed",
-          "target": "unresolved-review",
+          "classification": "manual_review_dynamic_function_rewrite_blocked",
+          "target": "public.execute_demo_trade(text,text,numeric,numeric)",
           "preview": "-- Market orders are taker orders. DO $migration$ DECLARE v_def text; BEGIN v_def := pg_get_functiondef('public.execute_demo_trade(text,text,numeric,n"
         },
         {
           "ordinal": 11,
           "sha256": "0eb76aadb1a342eaef3b14698bb085dedf8fc90e54ca8c342146df9a20039483",
-          "classification": "manual_review_unknown_fail_closed",
-          "target": "unresolved-review",
+          "classification": "manual_review_dynamic_function_rewrite_blocked",
+          "target": "public.place_limit_order(text,text,numeric,numeric)",
           "preview": "-- Limit orders reserve maker fees; their fills are processed as maker liquidity. DO $migration$ DECLARE v_def text; BEGIN v_def := pg_get_functiondef"
         },
         {
           "ordinal": 12,
           "sha256": "6a8073ea8c66228e9927e8587f2ec092bd6150c74d3f834df528d73958fa6a3d",
-          "classification": "manual_review_unknown_fail_closed",
-          "target": "unresolved-review",
+          "classification": "manual_review_dynamic_function_rewrite_blocked",
+          "target": "public.process_limit_orders()",
           "preview": "-- Limit-order matching applies the maker fee consistently to fills and remaining reservations. DO $migration$ DECLARE v_def text; BEGIN v_def := pg_g"
         },
         {
@@ -251,8 +251,8 @@
         {
           "ordinal": 1,
           "sha256": "edd65695b320db381bb184e32a5dfcc16b4d4c822f560f090224bb840c63958b",
-          "classification": "manual_review_unknown_fail_closed",
-          "target": "unresolved-review",
+          "classification": "transaction_wrapper_strip_before_fixture",
+          "target": "transaction boundary",
           "preview": "begin;"
         },
         {
@@ -314,8 +314,8 @@
         {
           "ordinal": 10,
           "sha256": "364647c86405c505850634a548a540e7738f7690d7e5f7d744edf0ba1dbbc575",
-          "classification": "manual_review_unknown_fail_closed",
-          "target": "unresolved-review",
+          "classification": "transaction_wrapper_strip_before_fixture",
+          "target": "transaction boundary",
           "preview": "commit;"
         }
       ]
@@ -331,8 +331,8 @@
         {
           "ordinal": 1,
           "sha256": "edd65695b320db381bb184e32a5dfcc16b4d4c822f560f090224bb840c63958b",
-          "classification": "manual_review_unknown_fail_closed",
-          "target": "unresolved-review",
+          "classification": "transaction_wrapper_strip_before_fixture",
+          "target": "transaction boundary",
           "preview": "begin;"
         },
         {
@@ -401,8 +401,8 @@
         {
           "ordinal": 11,
           "sha256": "364647c86405c505850634a548a540e7738f7690d7e5f7d744edf0ba1dbbc575",
-          "classification": "manual_review_unknown_fail_closed",
-          "target": "unresolved-review",
+          "classification": "transaction_wrapper_strip_before_fixture",
+          "target": "transaction boundary",
           "preview": "commit;"
         }
       ]
@@ -449,8 +449,8 @@
         {
           "ordinal": 1,
           "sha256": "edd65695b320db381bb184e32a5dfcc16b4d4c822f560f090224bb840c63958b",
-          "classification": "manual_review_unknown_fail_closed",
-          "target": "unresolved-review",
+          "classification": "transaction_wrapper_strip_before_fixture",
+          "target": "transaction boundary",
           "preview": "begin;"
         },
         {
@@ -491,8 +491,8 @@
         {
           "ordinal": 7,
           "sha256": "364647c86405c505850634a548a540e7738f7690d7e5f7d744edf0ba1dbbc575",
-          "classification": "manual_review_unknown_fail_closed",
-          "target": "unresolved-review",
+          "classification": "transaction_wrapper_strip_before_fixture",
+          "target": "transaction boundary",
           "preview": "commit;"
         }
       ]
@@ -508,8 +508,8 @@
         {
           "ordinal": 1,
           "sha256": "edd65695b320db381bb184e32a5dfcc16b4d4c822f560f090224bb840c63958b",
-          "classification": "manual_review_unknown_fail_closed",
-          "target": "unresolved-review",
+          "classification": "transaction_wrapper_strip_before_fixture",
+          "target": "transaction boundary",
           "preview": "begin;"
         },
         {
@@ -648,8 +648,8 @@
         {
           "ordinal": 21,
           "sha256": "364647c86405c505850634a548a540e7738f7690d7e5f7d744edf0ba1dbbc575",
-          "classification": "manual_review_unknown_fail_closed",
-          "target": "unresolved-review",
+          "classification": "transaction_wrapper_strip_before_fixture",
+          "target": "transaction boundary",
           "preview": "commit;"
         }
       ]
@@ -707,8 +707,8 @@
         {
           "ordinal": 7,
           "sha256": "bcc49db8fa0d341a619c7696d8c4c798d11354003db376bf2caec6aead8ab131",
-          "classification": "manual_review_unknown_fail_closed",
-          "target": "unresolved-review",
+          "classification": "schema_metadata_comment_candidate",
+          "target": "public.exchange_asset_observations",
           "preview": "comment on table public.exchange_asset_observations is 'Read-only exchange listing evidence. Never enables demo trading pairs; unmatched/ambiguous ass"
         }
       ]
@@ -1135,5 +1135,46 @@
         }
       ]
     }
-  ]
+  ],
+  "classification_notes": {
+    "transaction_wrapper_strip_before_fixture": "BEGIN/COMMIT wrappers are not replayed as standalone statements; any candidate unit must be re-authored into an explicit test transaction.",
+    "manual_review_dynamic_function_rewrite_blocked": "DO blocks that inspect and rewrite existing trading function bodies are blocked until exact before/after definitions, preconditions and rollback behavior are independently reviewed. They are not executed by this manifest.",
+    "schema_or_function_candidate_dependency_gated": "Candidate only; exact dependencies, owner, grants, RLS and synthetic prerequisites still require review before any disposable fixture use.",
+    "schema_metadata_comment_candidate": "COMMENT metadata only; may be asserted in a fixture after object existence is established.",
+    "acl_assertion_only_no_persistent_replay": "Record expected effective privileges in a fixture contract; do not apply GRANT/REVOKE to any persistent database.",
+    "excluded_external_http_or_queue": "No pg_net HTTP invocation, queue read/write, queue snapshot or payload replay is allowed.",
+    "excluded_cron_side_effect": "No pg_cron schedule creation, alteration, execution or removal is allowed.",
+    "excluded_privileged_identity_seed": "Never replay a privileged identity assignment; use only a deterministic synthetic identity.",
+    "synthetic_financial_data_only": "Only synthetic fixtures and rollback-scoped tests are allowed; no persistent balance/order/trade/reservation/transaction changes.",
+    "synthetic_data_only_rollback": "Synthetic-only fixture DML, transaction-scoped and rolled back.",
+    "manual_review_unknown_fail_closed": "Unknown statements block replay until individually classified."
+  },
+  "manual_review_blockers": [
+    {
+      "version": "20261113153808",
+      "ordinal": 10,
+      "target": "public.execute_demo_trade(text,text,numeric,numeric)",
+      "reason": "Dynamic pg_get_functiondef/replace/EXECUTE rewrite of a trading function."
+    },
+    {
+      "version": "20261113153808",
+      "ordinal": 11,
+      "target": "public.place_limit_order(text,text,numeric,numeric)",
+      "reason": "Dynamic pg_get_functiondef/replace/EXECUTE rewrite of a financial order-placement function."
+    },
+    {
+      "version": "20261113153808",
+      "ordinal": 12,
+      "target": "public.process_limit_orders()",
+      "reason": "Dynamic pg_get_functiondef/replace/EXECUTE rewrite of the live limit-order worker."
+    }
+  ],
+  "summary": {
+    "total_statements": 136,
+    "manual_review_blockers": 3,
+    "unclassified_unknown": 0,
+    "excluded_cron": 7,
+    "excluded_external_http_or_queue": 7,
+    "transaction_wrappers": 8
+  }
 }
