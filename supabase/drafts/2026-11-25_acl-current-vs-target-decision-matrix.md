@@ -57,7 +57,7 @@ Two repository artifacts currently encode different future expectations for func
 
 | Exact signature | Current observed grant | Inspected caller evidence | Candidate disposition (not target approval) |
 |---|---|---|---|
-| `public.claim_admin_asset_refresh(text,uuid)` | service_role | No caller found in browser, reviewed Edge Functions, DB function bodies, Cron jobs, or application triggers | **UNRESOLVED** — external/manual caller and intended rate-limit design unknown; retain pending evidence |
+| `public.claim_admin_asset_refresh(text,uuid)` | service_role | Active Production Edge Function `admin-refresh-crypto-asset` v2 verifies the user JWT and super-admin status, then invokes this RPC through a server-side service-role client | **CONFIRMED FUNCTION-SPECIFIC CALLER** — preserve the explicit grant; this does not decide default EXECUTE policy for other/future functions |
 | `public.new_user_setup()` | service_role | `auth.users.on_auth_user_created` trigger; trigger path runs as postgres-owned SECURITY DEFINER | Observed path does not need service_role EXECUTE; external callers not fully ruled out |
 | `public.process_bit24_exchange_sync()` | service_role | Active Cron, username postgres, scheduled minutes 16 and 46 | Observed path does not need service_role EXECUTE; preserve worker |
 | `public.process_conditional_orders()` | service_role | Active Cron, username postgres, every minute | Observed path does not need service_role EXECUTE; preserve worker |
@@ -112,3 +112,10 @@ A response to these policy questions does not itself authorize Production execut
 ## 7. Explicit non-actions
 
 No Production SQL, function invocation, GRANT, REVOKE, ALTER DEFAULT PRIVILEGES, DDL, migration, db push, data change, Cron/trigger change, Edge Function deployment, secret change, CI gate enablement, Supabase provisioning, paid upgrade, or PR merge was performed in preparing this document.
+
+
+## Superseding evidence — claim RPC caller and isolated behavior test
+
+The caller for `public.claim_admin_asset_refresh(text,uuid)` is no longer unresolved. The active deployed Edge Function `admin-refresh-crypto-asset` v2 is the confirmed caller and requires this exact explicit service_role EXECUTE grant. Its source validates the Bearer token, verifies super-admin status through the user-scoped RPC, and derives the UUID from the verified Auth response before calling the claim RPC.
+
+A source-faithful PostgreSQL 17 fixture now tests the real Migration body, exact boolean return type, non-admin denial, invalid input, and 30-second cooldown. CI run `45600501368` passed. This per-function finding does not settle the owner decision about future/default service_role EXECUTE privileges.
