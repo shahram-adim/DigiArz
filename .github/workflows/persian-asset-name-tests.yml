@@ -79,8 +79,6 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 20
-    env:
-      PG_CONTAINER: ${{ job.services.postgres.id }}
     steps:
       - uses: actions/checkout@v4
 
@@ -88,33 +86,43 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          version="$(docker exec "$PG_CONTAINER" psql -U postgres -d digiarz_security_test -Atc 'SHOW server_version_num')"
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          version="$(docker exec "$pg_container" psql -U postgres -d digiarz_security_test -Atc 'SHOW server_version_num')"
           if [[ "$version" != 17* ]]; then
             echo "Expected PostgreSQL 17, got server_version_num=$version"
             exit 1
           fi
-          docker exec "$PG_CONTAINER" psql -U postgres -d digiarz_security_test -c 'SELECT version();'
+          docker exec "$pg_container" psql -U postgres -d digiarz_security_test -c 'SELECT version();'
 
       - name: Bootstrap synthetic roles, schemas, and read-only RPC fixture
         shell: bash
         run: |
           set -euo pipefail
-          docker exec -i "$PG_CONTAINER" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/fixtures/rpc-security-postgres17-bootstrap.sql
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/fixtures/rpc-security-postgres17-bootstrap.sql
 
       - name: Assert exact fixture signature, SECURITY DEFINER, search_path, and ACLs
         shell: bash
         run: |
           set -euo pipefail
-          docker exec -i "$PG_CONTAINER" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security-postgres17-contract.sql
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security-postgres17-contract.sql
 
       - name: Test anon, ordinary authenticated, and synthetic super-admin behavior
         shell: bash
         run: |
           set -euo pipefail
-          docker exec -i "$PG_CONTAINER" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security.integration.sql
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security.integration.sql
 
       - name: Confirm test fixture contains only the synthetic admin identity
         shell: bash
         run: |
           set -euo pipefail
-          docker exec "$PG_CONTAINER" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 -c "SELECT count(*) = 1 AS only_one_synthetic_admin FROM private.admin_users;"
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 -c "SELECT count(*) = 1 AS only_one_synthetic_admin FROM private.admin_users;"
