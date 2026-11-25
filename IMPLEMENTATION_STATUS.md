@@ -1305,3 +1305,19 @@
 - هیچ سفارش، معامله، reservation، wallet، balance، transaction یا سابقهٔ مالی Production ایجاد یا تغییر نکرد.
 - هیچ worker یا RPC مالی روی کاربر واقعی اجرا نشد.
 - هیچ migration، deploy، cron، grant، policy، Auth setting یا انتشار APK انجام نشد.
+
+## Checkpoint 2026-11-25 — disposable PostgreSQL 17 RPC security smoke
+
+- [x] پیش از ادامه، وضعیت واقعی PR #62 و شاخه `feature/persian-asset-name-candidates-2026` بررسی شد؛ PR همچنان Draft، باز و ادغام‌نشده است.
+- [x] یک harness موقت PostgreSQL 17 در GitHub Actions اضافه شد؛ نسخهٔ واقعی runner برابر PostgreSQL 17.12 بود. هیچ Supabase project/branch جدیدی ایجاد نشد و Recovery-Test استفاده نشد.
+- [x] fixture فقط نقش‌های مصنوعی `anon`، `authenticated`، `service_role`، یک super-admin ساختگی و جداول خالی لازم برای RPC گزارش مدیران را ایجاد می‌کند. shim مربوط به `auth.uid()` فقط برای تست است و JWT واقعی را اعتبارسنجی نمی‌کند.
+- [x] تست ACL تابع `public.admin_exchange_asset_sync_report()` موفق: امضای دقیق بدون آرگومان، SECURITY DEFINER، search_path خالی، عدم EXECUTE برای anon، وجود EXECUTE برای authenticated و service_role، و نبود EXECUTE مستقیم برای PUBLIC.
+- [x] آزمون بدنه تابع موفق: anon و authenticated عادی با SQLSTATE 42501 رد شدند؛ super-admin مصنوعی گزارش JSON دریافت کرد؛ تراکنش ROLLBACK شد و post-check وجود فقط یک هویت مصنوعی را تأیید کرد.
+- [x] هر دو اجرای CI روی commit `2ccd668038adddf7cdee0944f02089dacad34f5d`، jobهای `postgres17-rpc-smoke` و `unit-tests` را با موفقیت گذراندند. job قدیمی `rpc-security-integration` همچنان skipped باقی ماند.
+- [!] این موفقیت فقط آزمون رفتاری یک RPC در PostgreSQL 17 است؛ نه اثبات parity کامل Supabase/Production. ۴۶ امضای SECURITY DEFINER، default ACLها، تمام RLS و table grants، Auth trigger، pg_cron و ۴۵ تابع دیگر هنوز در scope کامل بررسی نشده‌اند.
+- [x] شواهد قبلی دربارهٔ نبود caller برای `claim_admin_asset_refresh(text,uuid)` اصلاح شد: Edge Function فعال `admin-refresh-crypto-asset` نسخه ۲ این RPC را با service_role فراخوانی می‌کند. مجوز دقیق آن باید حفظ شود، مگر اینکه caller عمداً بازطراحی و بازبینی شود. لاگ ۲۴ ساعت اخیر invocation ثبت نکرد؛ این موضوع caller مستقر را نفی نمی‌کند.
+- [ ] گام بعد: توسعهٔ fixture برای توابع بعدی بر اساس امضای دقیق، تعریف زنده و dependencyهای synthetic؛ ساخت manifest کامل Production-to-test؛ بازیابی ۱۷ منبع Migration مفقود و حل اختلاف timestamp/content پیش از replay کامل.
+- [ ] اختلاف سیاست default EXECUTE برای service_role همچنان نیازمند تصمیم صریح مالک است. تا آن زمان هیچ GRANT/REVOKE یا ALTER DEFAULT PRIVILEGES اجرا نشود.
+- [x] هیچ Production/Recovery-Test DDL، ACL، داده، Auth، Cron، Edge Function یا رکورد مالی تغییر نکرد؛ هیچ Merge یا Deploy انجام نشد و هیچ زیرساخت Supabase هزینه‌دار ساخته نشد.
+
+**آخرین commit این checkpoint:** `2ccd668038adddf7cdee0944f02089dacad34f5d`؛ تغییرات مستندسازی نتیجه آزمون در commitهای بعدی همین شاخه ثبت شده‌اند.
