@@ -353,3 +353,39 @@ This report is an inventory and safety analysis only. It changes no database obj
 
 ### یادداشت پایداری وضعیت mergeability — ۲۵ نوامبر ۲۰۲۶
 در چند دریافت متوالی از GitHub، فیلد mergeable برای PR #62 به‌ترتیب false، سپس true و مجدداً false گزارش شد، درحالی‌که state=open، draft=true و merged=false ثابت ماند. بنابراین mergeability در این بازه ناپایدار/در حال محاسبه بوده و نباید مقدار لحظه‌ای را به‌عنوان رفع قطعی conflict تفسیر کرد. PR ادغام نشده و هیچ اقدام merge یا update-branch انجام نشده است. Commit فعلی گزارش cb5c7ef02fb8d5af9064a8f3bb632b2ecc036452 است؛ برای این commit workflow run ثبت نشده است.
+
+
+## بازیابی منبع اصلی سه Migration مورخ ۲۱ نوامبر از ledger زنده Production — ۲۵ نوامبر ۲۰۲۶
+
+### روش و اعتبار منبع
+با SELECT فقط‌خواندنی از ستون `statements` جدول `supabase_migrations.schema_migrations`، متن SQL هر سه رکورد زیر بازیابی شد. این منبع از جست‌وجوی نام فایل یا استنتاج از وضعیت فعلی قوی‌تر است و متن ثبت‌شدهٔ Migration زمان اجرا را حفظ می‌کند. منبع کامل در فایل بازبینی‌پذیر زیر ذخیره شده است:
+
+`supabase/drafts/2026-11-25_recovered-production-migration-sources.md`
+
+Commit: `7ef1932c49744b88408f3b80118eb3e574ed9c8a` (branch `feature/persian-asset-name-candidates-2026`). این فایل در پوشه drafts است و جزو مسیر migrations نیست.
+
+### 1) 20261121045434 — digiarz_backpressure_and_exchange_sync_bloat_guards
+- ایجاد index جزئی `crypto_assets_upper_symbol_active_idx` روی `upper(symbol)` برای دارایی‌های فعال.
+- بازنویسی محافظه‌کارانهٔ `public.refresh_market_prices()`: درخواست‌های بیش از ۳۰ دقیقه فقط وقتی حذف می‌شوند که شناسه در هیچ‌یک از صف یا پاسخ pg_net نباشد؛ تا وقتی درخواست‌های قبلی در صف یا جدول پیگیری باقی‌اند، batch جدید ارسال نمی‌شود.
+- `private.request_market_price_overflow()` تا خالی‌شدن batch قبلی صبر می‌کند.
+- `public.refresh_market_fx_rate()` برای درخواست‌های معوق و تکراری محافظت اضافه می‌کند.
+- توابع درخواست و پردازش کشف دارایی‌های ایران و Bit24 از enqueue تکراری جلوگیری می‌کنند و ردیف‌های observation بدون تغییر را بی‌جهت بازنویسی نمی‌کنند.
+- `public.recover_stale_crypto_assets_sync()` هنگام retry/delete وجود درخواست در صف pg_net را نیز بررسی می‌کند.
+- این Migration شامل دستور مستقیم پاک‌کردن `net._http_response` یا `net.http_request_queue` نیست. DELETEهای آن روی صف‌های پیگیری داخلی و فقط پس از نبود شناسه در هر دو جدول pg_net انجام می‌شوند.
+
+### 2) 20261121045531 — snapshot_pg_net_unlogged_queue_before_recovery
+- دقیقاً دو جدول permanent با CTAS ایجاد می‌کند و تمام ردیف‌های موجود صف و پاسخ را همراه `captured_at` کپی می‌کند.
+- هیچ DELETE، TRUNCATE، تغییر Cron یا restore در متن آن وجود ندارد.
+- بنابراین نام Migration شامل unlogged است، اما جدول‌های خروجی با CREATE TABLE معمولی ساخته شده‌اند و permanent هستند؛ مشاهدهٔ relpersistence='p' این موضوع را تأیید می‌کند.
+
+### 3) 20261121050216 — temporarily_throttle_exchange_asset_processors_20261121
+متن اصلی فقط دو دستور است:
+- `cron.alter_job(14, schedule := '1,31 * * * *')`
+- `cron.alter_job(16, schedule := '16,46 * * * *')`
+این تغییر فقط دو processor کشف دارایی ایران و Bit24 را زمان‌بندی مجدد می‌کند؛ در این Migration تغییری به job موتور سفارش‌های معاملاتی داده نشده است. schedule فعلی این دو job در snapshot زنده نیز با همین مقادیر گزارش شده بود.
+
+### اصلاح شمارش reconciliation
+این سه Migration همچنان در درخت SQL محلی شاخه‌ها فاقد فایل canonical هم‌نام‌اند، اما اکنون متن اصلی هر سه از ledger Production بازیابی و در draft artifact ذخیره شده است. بنابراین آن‌ها دیگر «منبع SQL ناشناخته» محسوب نمی‌شوند؛ وضعیت درست «منبع اصلی بازیابی شده، فایل migrations محلی هنوز بازسازی/تطبیق نشده» است. این تفاوت مهم است و شمار ۱۷ مورد فاقد فایل محلی را نباید با ۱۷ مورد فاقد منبع SQL یکی دانست.
+
+### کنترل ایمنی
+فقط SELECT از ledger اجرا شد و فایل Markdown/SQL متنی در پوشه drafts شاخهٔ آزمایشی ایجاد شد. هیچ Migration اجرا یا ledger ویرایش نشد؛ هیچ Cron، Worker، جدول، داده یا تابع Production تغییر نکرد؛ هیچ Merge یا هزینه‌ای ایجاد نشد.
