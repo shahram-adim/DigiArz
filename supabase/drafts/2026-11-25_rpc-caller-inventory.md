@@ -167,3 +167,45 @@ The live `cron.job` catalog is the current schedule evidence. Recovered drafts a
 ### ACL decision status
 
 The catalog evidence establishes that cron and Auth trigger execution currently run as postgres, not service_role. It does **not** yet establish that all 13 service-role-only grants are unused: the remaining Edge Function/backend caller search is still required, particularly for `claim_admin_asset_refresh`. Do not apply the default-ACL proposal or any per-function revoke until that search and disposable-clone integration tests are complete. The Production catalog audit was read-only; no schema, ACL, data, cron, worker, secret, or configuration changes were made.
+
+
+## 8. Edge Function and backend caller trace (read-only, 2026-11-25)
+
+All four deployed Edge Function source files present in the reviewed branch tree were inspected:
+- `app-assets`: public asset proxy; no Supabase RPC or service-role database call.
+- `refresh-toman-market-prices`: validates the caller's user session through `/auth/v1/user`; uses `SUPABASE_SERVICE_ROLE_KEY` only for direct PostgREST table operations on `market_toman_prices` and `market_toman_price_history` (read/upsert/cleanup/history). It does not call any of the 13 service-role-only functions.
+- `sync-iran-exchange-assets`: checks super-admin status by calling `is_current_user_super_admin` with the caller's anon key + user Authorization header; then uses service key for direct upsert into `exchange_asset_observations`. It does not call any of the 13 service-role-only functions.
+- `refresh-toman-market-prices/persistence.mjs`: request builder/deduplication helpers; no RPC.
+- The fourth Edge Function's helper files and the shared source modules contain no server-side RPC invocation.
+
+The active browser entrypoint `index.html` has the 24 direct RPC call sites already catalogued in section 1. Those are user/session-facing calls, not service-role RPC callers. Archived HTML copies were not treated as deployed runtime entrypoints.
+
+### Refined database call graph
+
+A read-only scan of `pg_proc.prosrc` found one nested database call relationship among the service-role-only candidates:
+- `public.admin_request_exchange_asset_sync()` calls both `public.request_iran_exchange_asset_sync()` and `public.request_bit24_exchange_sync()`.
+- The parent function is SECURITY DEFINER and postgres-owned. Its nested calls therefore execute in the postgres effective-role context; the service_role grant on the two child functions is not required for this database call path.
+
+No database function body in `public/private` references `public.claim_admin_asset_refresh(text,uuid)`. The complete live `cron.job` inventory contains 14 jobs, all active and all running as `postgres`; no job invokes `claim_admin_asset_refresh`. The live application-trigger inventory contains six enabled triggers; only `auth.users.on_auth_user_created` invokes one of the 13 service-role-only functions (`new_user_setup()`). The other five triggers call private-schema guard/auto-list functions and are unrelated to these grants.
+
+### Caller disposition of the 13 service-role-only functions
+
+| Function | Observed live caller | Does observed path require service_role EXECUTE? |
+|---|---|---|
+| `claim_admin_asset_refresh(text,uuid)` | No caller found in active Edge Function source, browser entrypoint, database function bodies, cron jobs, or application triggers | No observed caller; grant is currently unexplained |
+| `new_user_setup()` | `auth.users.on_auth_user_created` trigger | Trigger is postgres-owned; service_role grant is not evidenced as needed |
+| `process_bit24_exchange_sync()` | Cron job 16, postgres | No |
+| `process_conditional_orders()` | Cron job 9, postgres | No |
+| `process_iran_exchange_asset_sync()` | Cron job 14, postgres | No |
+| `process_limit_orders()` | Cron job 8, postgres | No |
+| `process_stop_limit_orders()` | Cron job 12, postgres | No |
+| `recover_stale_crypto_assets_sync()` | Cron job 11, postgres | No |
+| `refresh_crypto_assets()` | Cron job 4, postgres | No |
+| `refresh_crypto_assets_toman()` | Cron job 5, postgres | No |
+| `refresh_market_fx_rate()` | Cron job 2, postgres | No |
+| `request_bit24_exchange_sync()` | Cron job 15, postgres; also nested under postgres-owned `admin_request_exchange_asset_sync()` | No |
+| `request_iran_exchange_asset_sync()` | Cron job 13, postgres; also nested under postgres-owned `admin_request_exchange_asset_sync()` | No |
+
+This is a caller-evidence finding, not yet an authorization to revoke. Before any ACL change, still verify the intended runtime model for the Auth trigger, check for out-of-repository/manual service clients, and run disposable-clone tests with exact function signatures. The user-facing refresh Edge Function currently performs direct table operations rather than invoking `claim_admin_asset_refresh`; if rate limiting is intended to be enforced through that RPC, this is a separate functional design gap that must be addressed explicitly, not silently by granting or revoking permissions.
+
+No changes were made to Production, SQL schema, ACLs, functions, cron jobs, triggers, Edge Function deployment, secrets, variables, or service configuration.
