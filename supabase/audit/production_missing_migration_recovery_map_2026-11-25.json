@@ -1,0 +1,169 @@
+{
+  "captured_on": "2026-11-25",
+  "source_recovery_status": "Original SQL for all 17 missing ledger entries was not found in main or the 12 searched topic branches. This file maps only observed live Production effects and identifies evidence still needed; it is not a reconstruction of the missing migrations.",
+  "groups": [
+    {
+      "migrations": [
+        "20261113153808_approved_wallet_defaults_fees_and_coin_reviews",
+        "20261113154323_assign_confirmed_super_admin",
+        "20261113154736_secure_admin_wallet_management",
+        "20261113154750_add_admin_role_probe",
+        "20261113154844_use_toman_units_in_admin_credit_ui",
+        "20261113154926_move_admin_privilege_logic_to_private_schema"
+      ],
+      "area": "wallet defaults, fee configuration, coin reviews, super-admin authorization and admin wallet operations",
+      "observed_relations": [
+        "public.wallets",
+        "public.coin_reviews",
+        "public.demo_trading_fees",
+        "public.profiles",
+        "private.admin_users",
+        "private.admin_wallet_adjustments"
+      ],
+      "observed_routines": [
+        "private.admin_adjust_wallet(uuid,text,text,numeric,text)",
+        "private.admin_list_users()",
+        "private.is_current_user_super_admin()",
+        "private.is_super_admin()"
+      ],
+      "evidence_files": [
+        "supabase/audit/production_security_definer_manifest_2026-11-25.json",
+        "supabase/audit/production_rpc_relation_dependencies_2026-11-25.json"
+      ],
+      "gaps": [
+        "Original data statements and exact seed/default values from the six migrations are unavailable.",
+        "The live wallets table currently declares defaults balance_usdt=200 and balance_irr=1000000000; reconcile this schema default against the separately approved product default before any future onboarding/default change.",
+        "The live catalog snapshot does not establish historical ordering or intermediate privilege states."
+      ]
+    },
+    {
+      "migrations": [
+        "20261115101709_create_exchange_asset_observations",
+        "20261115102729_schedule_iran_exchange_asset_sync",
+        "20261115102927_fix_exchange_sync_response_json_cast",
+        "20261115103227_auto_list_verified_exchange_assets",
+        "20261115103507_schedule_bit24_exchange_asset_sync",
+        "20261115105721_admin_exchange_asset_sync_monitoring",
+        "20261115105956_restrict_exchange_sync_worker_execution"
+      ],
+      "area": "Iranian exchange asset observations, request queues, workers, Bit24 and admin monitoring",
+      "observed_relations": [
+        "public.exchange_asset_observations",
+        "public.exchange_asset_sync_requests",
+        "public.bit24_exchange_sync_requests",
+        "public.admin_market_listings"
+      ],
+      "observed_routines": [
+        "public.request_iran_exchange_asset_sync()",
+        "public.process_iran_exchange_asset_sync()",
+        "public.request_bit24_exchange_sync()",
+        "public.process_bit24_exchange_sync()",
+        "public.admin_exchange_asset_sync_report()",
+        "public.admin_request_exchange_asset_sync()",
+        "private.auto_list_verified_exchange_asset()"
+      ],
+      "observed_cron_jobs": [
+        {
+          "jobid": 13,
+          "jobname": "digiarz-iran-exchange-request",
+          "schedule": "*/10 * * * *",
+          "active": true
+        },
+        {
+          "jobid": 14,
+          "jobname": "digiarz-iran-exchange-process",
+          "schedule": "1,31 * * * *",
+          "active": true
+        }
+      ],
+      "evidence_files": [
+        "supabase/audit/production_security_definer_manifest_2026-11-25.json",
+        "supabase/audit/production_rpc_relation_dependencies_2026-11-25.json"
+      ],
+      "gaps": [
+        "The original CREATE TABLE statements, indexes, policies and intermediate function revisions are not recovered from source control.",
+        "The live process function body is a current-state definition and may include later modifications from subsequent migrations.",
+        "The complete cron command text is not copied into this map; only job identity, schedule, active flag and a command fingerprint were inspected."
+      ]
+    },
+    {
+      "migrations": [
+        "20261116201639_auto_activate_verified_exchange_pairs"
+      ],
+      "area": "automatic activation of verified exchange pairs",
+      "observed_relations": [
+        "public.crypto_assets",
+        "public.admin_market_listings",
+        "public.market_prices",
+        "public.exchange_asset_observations",
+        "public.demo_trading_pairs"
+      ],
+      "observed_routines": [
+        "private.auto_activate_verified_exchange_pairs()"
+      ],
+      "observed_cron_jobs": [
+        {
+          "jobid": 18,
+          "jobname": "digiarz-auto-activate-verified-exchange-pairs",
+          "schedule": "9-59/10 * * * *",
+          "active": true
+        }
+      ],
+      "evidence_files": [
+        "supabase/audit/production_security_definer_manifest_2026-11-25.json",
+        "supabase/audit/production_rpc_relation_dependencies_2026-11-25.json"
+      ],
+      "gaps": [
+        "Need original migration SQL and prior trigger/function versions to distinguish what this migration introduced from later changes."
+      ]
+    },
+    {
+      "migrations": [
+        "20261121045434_digiarz_backpressure_and_exchange_sync_bloat_guards",
+        "20261121045531_snapshot_pg_net_unlogged_queue_before_recovery",
+        "20261121050216_temporarily_throttle_exchange_asset_processors_20261121"
+      ],
+      "area": "request backpressure, pg_net queue/response backup and temporary worker throttling",
+      "observed_relations": [
+        "private.digiarz_pg_net_queue_backup_20261121",
+        "private.digiarz_pg_net_response_backup_20261121",
+        "public.exchange_asset_sync_requests",
+        "public.bit24_exchange_sync_requests"
+      ],
+      "observed_cron_jobs": [
+        {
+          "jobid": 11,
+          "jobname": "digiarz-crypto-assets-stale-request-recovery",
+          "schedule": "3-59/5 * * * *",
+          "active": true
+        },
+        {
+          "jobid": 13,
+          "jobname": "digiarz-iran-exchange-request",
+          "schedule": "*/10 * * * *",
+          "active": true
+        },
+        {
+          "jobid": 14,
+          "jobname": "digiarz-iran-exchange-process",
+          "schedule": "1,31 * * * *",
+          "active": true
+        }
+      ],
+      "evidence_files": [
+        "supabase/audit/production_rpc_relation_dependencies_2026-11-25.json"
+      ],
+      "gaps": [
+        "Backup table schemas are observed; no backup rows or pg_net queue/response payloads were read.",
+        "The original queue-copy/restore sequence and exact throttling changes cannot be inferred from current schema and cron metadata alone.",
+        "Do not execute any recovery, replay, queue drain, cron reschedule or cleanup operation as part of source reconstruction."
+      ]
+    }
+  ],
+  "global_gaps": [
+    "Current function definitions do not prove the exact historical SQL or order of migration operations.",
+    "Current catalogs cannot recover dropped intermediate objects or data backfills.",
+    "The missing migrations must not be synthesized as executable migrations from this map.",
+    "No Production migration, grant, policy, function, cron job or row was modified."
+  ]
+}
