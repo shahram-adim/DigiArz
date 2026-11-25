@@ -74,6 +74,13 @@
 | `private.is_current_user_super_admin()` | Reviewed body copied into bootstrap; calls `auth.uid()` and `private.is_super_admin()` | Same synthetic Auth/admin objects | Used by admin report guard | Confirm exact Production definition and direct/indirect dependency graph |
 | `public.admin_exchange_asset_sync_report()` | Production definition captured via `pg_get_functiondef` on 2026-11-25 | Empty synthetic reporting tables: observations, listings, sync request tables | anon and ordinary authenticated denied; synthetic super-admin can read JSON report | Full source dependency, table ACL/RLS, schema/function dependency parity not yet demonstrated |
 | `private.enforce_unique_admin_market_listing_symbol()` | Current Production `pg_get_functiondef` captured 2026-11-25 and text-matched to migration `20261113184000_prevent_curated_ticker_collisions.sql` | Synthetic `crypto_assets`, `admin_market_listings`, and `demo_trading_pairs` tables; no external calls | Positive insert/update plus duplicate-symbol, pair-collision, and missing-asset rejection tests | Production trigger binding: `admin_market_listing_unique_ticker`, BEFORE INSERT OR UPDATE OF `coingecko_id`; no API-role EXECUTE |
+
+
+For `private.enforce_unique_admin_market_listing_symbol()` the read-only dependency audit recorded:
+- `crypto_assets`: RLS enabled, FORCE RLS off; `crypto_assets_public_read` policy for anon/authenticated; anon/authenticated SELECT and service_role ALL.
+- `admin_market_listings`: RLS enabled, FORCE RLS off; `admin_market_listings_public_read` policy for anon/authenticated; service_role ALL, with no direct anon/authenticated table grant.
+- `demo_trading_pairs`: RLS enabled, FORCE RLS off; `demo_trading_pairs_public_read` policy for anon/authenticated; anon/authenticated SELECT and service_role ALL.
+- Trigger `admin_market_listing_unique_ticker` is attached BEFORE INSERT OR UPDATE OF `coingecko_id` on `public.admin_market_listings`.
 | `public.claim_admin_asset_refresh(text,uuid)` | Migration `20261113190000_admin_on_demand_crypto_asset_refresh.sql` | Synthetic `private.admin_asset_refresh_limits` + synthetic admin identity | positive service_role call, non-admin 42501, invalid input 22023, cooldown 55000; rollback checked | Edge Function not executed in harness; validate migration/source hash and exact live definition before claiming full parity |
 
 ## 3. Known caller classifications
