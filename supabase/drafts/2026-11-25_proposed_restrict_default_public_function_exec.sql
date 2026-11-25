@@ -27,12 +27,18 @@
 --    future public functions. This schema-level PUBLIC revoke cannot replace
 --    step A; it only removes an additive schema-specific grant.
 --
---    The caller trace found no current Edge Function invoking a service-role
---    RPC: Edge Functions use the service key for direct PostgREST table
---    operations; cron jobs run as postgres; the Auth setup path is a trigger.
---    Therefore service_role should not receive blanket EXECUTE on every new
---    public function. If a future worker genuinely needs an RPC, grant that
---    exact signature explicitly after review.
+--    The live caller trace found one current Edge Function invoking a
+--    service-role RPC: `admin-refresh-crypto-asset` calls the exact
+--    `public.claim_admin_asset_refresh(text, uuid)` signature using its
+--    server-side service-role client. That function already has an explicit
+--    function-level EXECUTE grant to service_role in its migration/ACL; it
+--    does not depend on a blanket default grant. Other reviewed Edge Function
+--    paths use service-role PostgREST table operations, while cron jobs run
+--    as postgres and Auth setup is trigger-driven.
+--    This evidence does not justify blanket EXECUTE for service_role on every
+--    newly created public function. Preserve the explicit grant for
+--    `claim_admin_asset_refresh`; grant any other required RPC by exact
+--    signature only after caller and body review.
 --
 --    ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
 --      REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC, anon, authenticated, service_role;
