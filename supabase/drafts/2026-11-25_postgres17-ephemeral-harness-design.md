@@ -90,3 +90,8 @@ The fixture now includes a fourth real Production function body: `public.claim_a
 - The test transaction rolls back; a post-check confirms the synthetic claim table is empty.
 
 This remains a narrow source-faithful function test, not a full Production-parity Supabase clone. The deployed Edge Function itself is not invoked, and the other 42 stub bodies remain untested.
+
+
+## Superseding fixture coverage checkpoint — 2026-11-25
+
+The read-only `public.get_admin_market_listings()` body from `20261113181000_show_live_prices_for_curated_assets.sql` is now installed in the disposable PostgreSQL 17 fixture as the fifth real function body. The fixture therefore contains 5 source-backed/reviewed bodies and 41 metadata-only stubs across the 46-signature contract. CI run #313 (run ID `45603853118`) passed: unit/type checks and every PostgreSQL 17 step, including the new role/price-freshness test and post-rollback empty-table checks. The remote `rpc-security-integration` job remained skipped. No Production/Recovery-Test operation, ACL/default ACL change, migration, deploy or merge occurred.
