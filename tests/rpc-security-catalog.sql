@@ -2,6 +2,9 @@
 -- Read-only: catalog inspection only; raises on drift. No DDL or privilege changes.
 -- Expected values are the read-only Production snapshot dated 2026-11-25.
 -- Run only on a dedicated test database with matching role/schema grants.
+-- The ephemeral PostgreSQL 17 smoke fixture seeds all 46 signatures/ACLs;
+-- 43 are inert metadata-only stubs and are never invoked. Three reviewed
+-- SECURITY DEFINER bodies are real; only the read-only report RPC is exercised.
 -- This is a CURRENT-STATE regression contract, not a proposed hardening target.
 
 DO $catalog_test$
