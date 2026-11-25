@@ -732,3 +732,34 @@ Advisor امنیتی Production در 2026-11-25 این موارد را گزار�
 - service_role یک نقش مورداعتماد backend است و در کد مرورگر نباید استفاده شود. این بررسی، نبود رشتهٔ service_role در فایل اصلی Frontend را نشان می‌دهد، نه ممیزی جامع تمام artifactهای build و متغیرهای deploy.
 - این مرحله static/catalog audit است؛ هیچ آزمون منفی با JWT کاربر عادی یا anon اجرا نشده، هیچ endpointای فراخوانی نشده و هیچ تغییر مجوزی انجام نشده است.
 - نتیجه: در مسیرهای مشخص‌شده، موردی از RPC مدیریتی بدون guard سمت سرور پیدا نشد. گام بعدی مناسب، افزودن تست‌های CI مبتنی بر کاتالوگ و تست‌های منفی در پروژهٔ آزمایشی ایزوله است؛ Production همچنان read-only باقی می‌ماند.
+
+
+## طراحی CI و آزمون منفی RPC — ۲۵ نوامبر ۲۰۲۶
+
+### قرارداد کاتالوگ Production
+ممیزی تازهٔ کاتالوگ Production تعداد ۴۶ تابع SECURITY DEFINER را در schemaهای public/private نشان داد:
+- ۴۴ تابع با search_path خالی و ۲ تابع فقط با `search_path=pg_catalog` تنظیم شده‌اند؛ هر دو الگو در این قرارداد مجازند.
+- هیچ‌یک از ۴۶ تابع EXECUTE برای نقش PUBLIC ندارند.
+- فقط دو تابع دادهٔ بازار برای anon قابل اجرا هستند: `public.get_admin_market_listings()` و `public.get_exchange_discovered_market_assets()`.
+- ۲۶ تابع SECURITY DEFINER برای authenticated قابل اجرا هستند؛ allowlist دقیق نام آن‌ها در `tests/rpc-security-catalog.sql` ثبت شده است.
+- نقش service_role جداگانه بررسی می‌شود و نباید با PUBLIC یا anon اشتباه گرفته شود.
+
+### فایل‌های تست جدید
+- `tests/rpc-security-catalog.sql`: قرارداد read-only برای inventory توابع SECURITY DEFINER، search_path امن، نبود EXECUTE برای PUBLIC و allowlist نقش‌های anon/authenticated. هر تابع جدید یا تغییر مجوز خارج از allowlist، تست را fail می‌کند تا بازبینی صریح انجام شود.
+- `tests/rpc-security.integration.sql`: آزمون نقش‌محور روی RPC گزارش مدیریتی فقط‌خواندنی. GRANTهای حداقلی در همان تراکنش موقت‌اند و در انتها ROLLBACK می‌شوند. هیچ کیف پول، سفارش، صف، Cron، Migration یا دادهٔ دائمی تغییر نمی‌کند.
+- `.github/workflows/persian-asset-name-tests.yml`: job یکپارچه‌سازی RPC به‌صورت gated اضافه شد. فقط وقتی متغیر مخزن `DIGIARZ_ENABLE_RPC_SECURITY_TESTS=true` فعال شود اجرا می‌شود؛ اتصال باید با secret `DIGIARZ_TEST_DB_URL` و شناسهٔ پروژهٔ تست `zrriqwyolcjhbappocuw` منطبق باشد. ابتدا catalog contract و سپس role tests اجرا می‌شوند.
+
+### اجرای واقعی آزمون روی پروژهٔ تست فعلی
+فایل `tests/rpc-security.integration.sql` در پروژهٔ تست اجرا شد:
+- anon: فراخوانی RPC با SQLSTATE 42501 رد شد.
+- authenticated عادی با شناسهٔ آزمایشی: با SQLSTATE 42501 رد شد.
+- super-admin ثبت‌شده در `private.admin_users`: همان RPC گزارش فقط‌خواندنی را با خروجی JSON object اجرا کرد.
+- پس از ROLLBACK، مجوز موقت USAGE روی schema public باقی نماند.
+
+محدودیت مهم محیط تست: `auth.users` خالی است، یک رکورد super-admin در `private.admin_users` وجود دارد، و نقش‌های anon/authenticated در baseline مجوز USAGE روی schemaهای public/private ندارند. همچنین ACLهای EXECUTE توابع SECURITY DEFINER در این پروژه با Production یکسان نیستند. آزمون نقش‌ها بنابراین با claim آزمایشی و دسترسی موقت تراکنشی، guard داخل تابع را سنجید؛ آزمون end-to-end با حساب واقعی Auth انجام نشده است. به همین دلیل job یکپارچه‌سازی CI تا همسان‌سازی ACL/schema در محیط تست، به‌صورت gated باقی می‌ماند و catalog contract فعلاً روی این پروژه نباید به‌عنوان تست سبز گزارش شود.
+
+### وضعیت Mergeable
+در بررسی فعلی PR #62، `mergeable=true` است. مقایسهٔ branchها نشان می‌دهد head تعداد ۸۳ commit جلوتر و صفر commit عقب‌تر از base است و merge-base دقیقاً برابر base است. بنابراین در snapshot فعلی واگرایی یا conflict ثبت نشده است. مقدار `false` در بررسی قبلی احتمالاً وضعیت محاسبهٔ موقت GitHub بوده؛ علت تاریخی قطعی از API فعلی قابل اثبات نیست.
+
+### محدودیت انتشار
+تمام بررسی‌های Production فقط SELECT روی catalog بوده‌اند. هیچ تابع Production اجرا نشده است. هیچ Merge، migration، db push، grant پایدار، Auth change، Cron/Worker change، یا هزینه‌ای انجام نشده است.
