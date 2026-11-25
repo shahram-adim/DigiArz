@@ -137,6 +137,16 @@ $function$;
 REVOKE ALL ON FUNCTION private.enforce_unique_admin_market_listing_symbol()
   FROM PUBLIC, anon, authenticated, service_role;
 
+-- Bind the exact Production trigger in the disposable fixture so catalog
+-- assertions and admin-add tests exercise the same BEFORE INSERT/UPDATE path.
+DROP TRIGGER IF EXISTS admin_market_listing_unique_ticker
+  ON public.admin_market_listings;
+CREATE TRIGGER admin_market_listing_unique_ticker
+BEFORE INSERT OR UPDATE OF coingecko_id
+ON public.admin_market_listings
+FOR EACH ROW
+EXECUTE FUNCTION private.enforce_unique_admin_market_listing_symbol();
+
 CREATE OR REPLACE FUNCTION private.guard_active_account_writes()
 RETURNS void
 LANGUAGE plpgsql
