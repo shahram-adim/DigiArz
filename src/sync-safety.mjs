@@ -8,7 +8,8 @@ export function isSuperAdminRpcAuthorized(httpOk, responseBody) {
 
 /**
  * Collect every page from Bitpin's market catalog.
- * Pagination is constrained to the exact catalog origin and pathname.
+ * Pagination and the resulting response are constrained to the exact catalog origin/path.
+ * Redirects are disabled by the caller and explicitly rejected if a fetch adapter follows one.
  */
 export async function collectBitpinMarketPages({
   firstPayload,
@@ -27,6 +28,13 @@ export async function collectBitpinMarketPages({
   }
 
   const catalog = new URL(catalogUrl);
+  const assertCatalogUrl = (value) => {
+    const url = new URL(value, catalog);
+    if (url.origin !== catalog.origin || url.pathname !== catalog.pathname) {
+      throw new Error("Bitpin pagination returned an unexpected URL");
+    }
+    return url;
+  };
   const rows = [...firstPayload.results];
   let nextPage = typeof firstPayload.next === "string" && firstPayload.next.length
     ? firstPayload.next
@@ -34,12 +42,14 @@ export async function collectBitpinMarketPages({
   let pageCount = 1;
 
   while (nextPage && pageCount < maxPages) {
-    const nextUrl = new URL(nextPage, catalog);
-    if (nextUrl.origin !== catalog.origin || nextUrl.pathname !== catalog.pathname) {
-      throw new Error("Bitpin pagination returned an unexpected URL");
+    const nextUrl = assertCatalogUrl(nextPage);
+    const response = await fetchPage(nextUrl.toString(), { redirect: "error" });
+    if (response?.redirected === true) {
+      throw new Error("Bitpin pagination followed an unexpected redirect");
     }
-
-    const response = await fetchPage(nextUrl.toString());
+    if (typeof response?.url === "string" && response.url) {
+      assertCatalogUrl(response.url);
+    }
     if (!response?.ok) {
       throw new Error(`Bitpin page ${pageCount + 1} HTTP ${response?.status ?? "unknown"}`);
     }
