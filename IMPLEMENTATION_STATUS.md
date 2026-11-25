@@ -1476,3 +1476,12 @@
 - [ ] گام بعد: نتیجهٔ CI آخرین HEAD را ثبت کن؛ سپس برای هر یک از ۳۹ stub باقی‌مانده، تعریف زنده، source provenance، dependency، table/sequence grants، RLS و caller را جداگانه بررسی کن و فقط تابعی را جایگزین کن که source و تست synthetic امن دارد.
 - [ ] سیاست Default ACL برای service_role هنوز تصمیم مالک می‌خواهد؛ هیچ GRANT/REVOKE/ALTER DEFAULT PRIVILEGES اجرا نشود.
 - [x] هیچ Production/Recovery-Test DB، schema، data، ACL، Auth، Cron، Edge Function، Migration ledger، secret یا schedule تغییر نکرد؛ هیچ Migration/db push، Deploy، Merge، هزینه یا ارتقای زیرساخت انجام نشد.
+
+
+### CI completion update — 2026-11-25 15:26
+
+- [x] CI PR run #425 / ID `45609779655` روی code/test HEAD `6cc1bae87c4f6575888e13b315ea16aa318d6fef` موفق شد: `unit-tests` و `postgres17-rpc-smoke` هر دو success؛ تست `private.auto_list_verified_exchange_asset()` نیز success؛ remote `rpc-security-integration` به‌علت gate محیط ایزوله skipped باقی ماند.
+- [x] PR #62 همچنان open، Draft، unmerged و base آن `redesign/ui-clean-rebuild-2026` است. HEAD فعلی پس از commit مستندات وضعیت `4fe00ef6fd76269497afb2ee8cdf1c016d2973a4` است؛ این commit فقط وضعیت را ثبت می‌کند و فایل‌های اجرایی/test تغییر نکرده‌اند.
+- [x] Supabase دوباره فقط‌خواندنی بررسی شد: `ACTIVE_HEALTHY`، PostgreSQL `17.11.0.018`؛ migration ledger تعداد 55 رکورد دارد و هیچ migration جدیدی در این مرحله اعمال نشده است.
+- [x] نتیجهٔ نهایی این checkpoint: ۴۶ امضای دقیق + metadata زندهٔ کامل؛ ۷ بدنهٔ واقعی/source-backed در harness؛ ۳۹ stub metadata-only باقی‌مانده.
+- [ ] ادامهٔ بعدی: بررسی تابع بعدی فقط پس از تطبیق مستقیم Production definition با migration اعمال‌شده؛ timestamp mismatch فایل auto-list همچنان در reconciliation باقی است.
