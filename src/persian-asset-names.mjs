@@ -47,6 +47,12 @@ export function extractPersianNameCandidate(exchange, payload) {
       ["faBaseAsset", payload.faBaseAsset],
       ["faName", isStandaloneWallexFallback(payload.faName) ? payload.faName : null],
     ],
+    ramzinex: [
+      ["base_currency_symbol.fa", getPath(payload, "base_currency_symbol.fa")],
+      ["name.fa", getPath(payload, "name.fa")],
+    ],
+    okex: [["nameFa", payload.nameFa]],
+    tetherland: [["fa_name", payload.fa_name]],
   };
   const candidates = sources[String(exchange || "").toLowerCase()] || [];
   for (const [sourceKey, raw] of candidates) {
@@ -129,7 +135,7 @@ export function aggregatePersianNameCandidates(observations) {
     if (!coingeckoId) continue;
 
     const sourceExchange = String(observation.exchange || "").toLowerCase().trim();
-    if (!["bit24", "kifpool", "abantether", "wallex", "bitpin"].includes(sourceExchange)) continue;
+    if (!["bit24", "kifpool", "abantether", "wallex", "bitpin", "ramzinex", "okex", "tetherland"].includes(sourceExchange)) continue;
 
     const payload = observation.source_payload && typeof observation.source_payload === "object"
       ? observation.source_payload : {};
