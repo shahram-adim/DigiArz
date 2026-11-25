@@ -239,3 +239,65 @@ test('group four cron attribution supersedes the earlier map omission without cl
   assert.match(dossier, /job 11 تابع `public\.recover_stale_crypto_assets_sync\(\)` را فراخوانی می‌کند/);
   assert.match(dossier, /این انتساب، اجرای فعلی job را ثابت می‌کند نه اینکه کدام Migration آن را ایجاد\/تغییر داده باشد/);
 });
+
+
+test('anonymous base-table access is limited to intended public market metadata reads', () => {
+  const byTable = new Map(review.anon_base_table_grants.map(item => [item.table, item]));
+  const expectedPublicMetadata = [
+    'public.crypto_assets',
+    'public.demo_trading_pairs',
+    'public.market_fx_rates',
+    'public.market_prices'
+  ];
+  for (const table of expectedPublicMetadata) {
+    const entry = byTable.get(table);
+    assert.ok(entry, 'missing public market metadata grant: ' + table);
+    assert.deepEqual(entry.privileges, ['SELECT'], 'unexpected anon privilege: ' + table);
+    assert.deepEqual(entry.anon_policies, ['SELECT'], 'unexpected anon policy: ' + table);
+  }
+
+  for (const table of ['public.market_toman_prices', 'public.market_toman_price_history']) {
+    const entry = byTable.get(table);
+    assert.ok(entry, 'missing Toman table access snapshot: ' + table);
+    assert.deepEqual(entry.privileges, [], 'unexpected anon base-table grant: ' + table);
+    assert.deepEqual(entry.anon_policies, [], 'unexpected anon row policy: ' + table);
+  }
+
+  assert.deepEqual(
+    [...byTable.keys()].sort(),
+    [
+      'public.coin_reviews',
+      'public.conditional_orders',
+      'public.crypto_assets',
+      'public.demo_trading_pairs',
+      'public.market_fx_rates',
+      'public.market_prices',
+      'public.market_toman_price_history',
+      'public.market_toman_prices'
+    ]
+  );
+});
+
+test('security-invoker market views cannot exceed captured underlying anon base-table access', () => {
+  const views = new Map(review.anon_view_grants.map(item => [item.view, item]));
+  const marketView = views.get('public.market_prices_with_toman');
+  assert.ok(marketView);
+  assert.equal(marketView.security_invoker, true);
+  assert.deepEqual(marketView.underlying_anon_privileges, {
+    'public.market_prices': ['SELECT'],
+    'public.market_fx_rates': ['SELECT']
+  });
+
+  const tomanView = views.get('public.market_toman_performance');
+  assert.ok(tomanView);
+  assert.equal(tomanView.security_invoker, true);
+  assert.deepEqual(tomanView.underlying_anon_privileges, {
+    'public.market_toman_prices': [],
+    'public.market_toman_price_history': []
+  });
+
+  assert.deepEqual([...views.keys()].sort(), [
+    'public.market_prices_with_toman',
+    'public.market_toman_performance'
+  ]);
+});
