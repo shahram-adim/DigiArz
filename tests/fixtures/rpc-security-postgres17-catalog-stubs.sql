@@ -309,22 +309,6 @@ REVOKE ALL ON FUNCTION public.execute_demo_trade(p_symbol text, p_side text, p_a
 GRANT EXECUTE ON FUNCTION public.execute_demo_trade(p_symbol text, p_side text, p_amount numeric, p_price numeric) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.execute_demo_trade(p_symbol text, p_side text, p_amount numeric, p_price numeric) TO service_role;
 
-CREATE OR REPLACE FUNCTION public.get_admin_market_listings()
-RETURNS void
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = ''
-AS $stub$
-BEGIN
-  RETURN;
-END;
-$stub$;
-
-REVOKE ALL ON FUNCTION public.get_admin_market_listings() FROM PUBLIC, anon, authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.get_admin_market_listings() TO anon;
-GRANT EXECUTE ON FUNCTION public.get_admin_market_listings() TO authenticated;
-GRANT EXECUTE ON FUNCTION public.get_admin_market_listings() TO service_role;
-
 CREATE OR REPLACE FUNCTION public.get_demo_trading_fee_rate(p_quote_asset text, p_liquidity_type text)
 RETURNS void
 LANGUAGE plpgsql
