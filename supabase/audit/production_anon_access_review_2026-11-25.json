@@ -28,7 +28,16 @@
         "public.crypto_assets",
         "public.market_prices"
       ],
-      "assessment": "Market listing and price metadata only. No account, identity, wallet, order, trade, reservation, balance or transaction columns are returned."
+      "assessment": "Market listing and price metadata only. No account, identity, wallet, order, trade, reservation, balance or transaction columns are returned.",
+      "public_access_intent": {
+        "confirmed_by_migrations": true,
+        "migrations": [
+          "20261113171000_add_admin_curated_market_assets.sql",
+          "20261113172000_harden_admin_market_listing_access.sql",
+          "20261113181000_show_live_prices_for_curated_assets.sql"
+        ],
+        "evidence": "The migration source explicitly revokes PUBLIC and grants EXECUTE to anon, authenticated. The hardening migration documents a safe public listing projection."
+      }
     },
     {
       "name": "public.get_exchange_discovered_market_assets",
@@ -50,7 +59,14 @@
         "public.demo_trading_pairs",
         "public.market_prices"
       ],
-      "assessment": "Exchange discovery metadata only, limited to active recent pending/ambiguous/unmatched observations. It does not return source_payload, source_url, coingecko_id or user data."
+      "assessment": "Exchange discovery metadata only, limited to active recent pending/ambiguous/unmatched observations. It does not return source_payload, source_url, coingecko_id or user data.",
+      "public_access_intent": {
+        "confirmed_by_migrations": true,
+        "migrations": [
+          "20261116200009_auto_list_unmatched_iran_exchange_assets.sql"
+        ],
+        "evidence": "The migration source explicitly revokes PUBLIC and grants EXECUTE to anon, authenticated for exchange-discovery market metadata."
+      }
     }
   ],
   "anon_base_table_grants": [
@@ -185,7 +201,7 @@
     {
       "id": "ANON-RPC-01",
       "severity": "informational",
-      "summary": "Two SECURITY DEFINER RPCs are executable by anon; their current return schemas and bodies are limited to market/exchange-discovery metadata."
+      "summary": "Two SECURITY DEFINER RPCs are executable by anon by explicit design: the source migrations revoke PUBLIC and explicitly grant anon EXECUTE. Their current outputs are market/exchange-discovery metadata, not user/account/financial records."
     },
     {
       "id": "ANON-GRANT-01",
