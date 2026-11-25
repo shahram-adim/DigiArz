@@ -80,7 +80,6 @@ SELECT set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222'
 DO $super_admin$
 DECLARE
   result jsonb;
-  audit_count integer;
 BEGIN
   result := public.admin_enable_market_pair('ci-enable-good');
   IF result->>'success' <> 'true'
@@ -93,11 +92,6 @@ BEGIN
                  WHERE pair_symbol='ENABUSDT' AND is_enabled IS TRUE) THEN
     RAISE EXCEPTION 'Eligible pair was not enabled';
   END IF;
-  SELECT count(*) INTO audit_count FROM private.market_pair_admin_audit
-  WHERE pair_symbol='ENABUSDT' AND action='enabled'
-    AND admin_user_id='22222222-2222-4222-8222-222222222222';
-  IF audit_count <> 1 THEN RAISE EXCEPTION 'Expected one audit row; got %',audit_count; END IF;
-
   -- Existing same-asset pair is re-enabled idempotently.
   result := public.admin_enable_market_pair('ci-enable-existing');
   IF result->>'status' <> 'enabled'
@@ -173,6 +167,16 @@ BEGIN
 END
 $service$;
 RESET ROLE;
+
+DO $audit_assert$
+BEGIN
+  IF (SELECT count(*) FROM private.market_pair_admin_audit
+      WHERE pair_symbol='ENABUSDT' AND action='enabled'
+        AND admin_user_id='22222222-2222-4222-8222-222222222222') <> 1 THEN
+    RAISE EXCEPTION 'Expected one admin audit row for enabled pair';
+  END IF;
+END
+$audit_assert$;
 
 ROLLBACK;
 
