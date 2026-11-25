@@ -10,19 +10,19 @@ DECLARE
   sequence_oid oid;
   actual_columns text[];
   expected_columns text[] := ARRAY[
-    '1|id|bigint|true|<NULL>|a',
-    '2|exchange|text|true|<NULL>|',
-    '3|market_symbol|text|true|<NULL>|',
-    '4|base_symbol|text|false|<NULL>|',
-    '5|quote_symbol|text|false|<NULL>|',
-    '6|asset_name|text|false|<NULL>|',
-    '7|coingecko_id|text|false|<NULL>|',
-    '8|match_status|text|true|''pending''::text|',
-    '9|source_url|text|true|<NULL>|',
-    '10|source_payload|jsonb|false|<NULL>|',
-    '11|is_active|boolean|true|true|',
-    '12|first_seen_at|timestamp with time zone|true|now()|',
-    '13|last_seen_at|timestamp with time zone|true|now()|'
+    '1|id|bigint|t|<NULL>|a',
+    '2|exchange|text|t|<NULL>|',
+    '3|market_symbol|text|t|<NULL>|',
+    '4|base_symbol|text|f|<NULL>|',
+    '5|quote_symbol|text|f|<NULL>|',
+    '6|asset_name|text|f|<NULL>|',
+    '7|coingecko_id|text|f|<NULL>|',
+    '8|match_status|text|t|''pending''::text|',
+    '9|source_url|text|t|<NULL>|',
+    '10|source_payload|jsonb|f|<NULL>|',
+    '11|is_active|boolean|t|true|',
+    '12|first_seen_at|timestamp with time zone|t|now()|',
+    '13|last_seen_at|timestamp with time zone|t|now()|'
   ];
   actual_constraints text[];
   expected_constraints text[] := ARRAY[
