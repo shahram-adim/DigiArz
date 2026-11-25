@@ -1429,4 +1429,4 @@
 - [x] Captured 175 live columns plus relation owner, RLS/forced-RLS flags, effective anon/authenticated/service_role table privileges, constraints, indexes, policies and user triggers.
 - [x] Added `supabase/audit/production_rpc_relation_dependencies_2026-11-25.json` and extended `tests/production-rpc-manifest.test.js` to validate its counts and references.
 - [!] Static scanning does not prove full dependency coverage for dynamic SQL, unqualified identifiers, trigger-only dependencies or indirect calls.
-- CI Run #45634861182 on dependency-inventory commit `d99a4397e945719e99ce628f5537153dc83f683d` passed the Node/browser test step and the first eight disposable PostgreSQL steps at the time this status note was added; remaining PostgreSQL lifecycle steps were still running.
+- CI Run #45634861182 on test commit `311d2e0f9f5ad57aa29090a3165c6ed5d17dfa21` completed with `success`; all 26 workflow steps passed, including the Node/browser suite and disposable PostgreSQL arithmetic, widening, lifecycle and two-session race tests.
