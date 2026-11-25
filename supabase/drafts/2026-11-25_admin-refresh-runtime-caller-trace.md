@@ -43,3 +43,9 @@ Do not revoke `service_role` EXECUTE and do not remove or bypass the cooldown ta
 2. Confirm whether that runtime calls `claim_admin_asset_refresh(text, uuid)` and where the service-role client is used.
 3. If logs are available, inspect metadata/counts and timestamps only; do not reveal tokens, keys, or personal data.
 4. Keep the RPC security integration CI job skipped until the approved policy and a genuine disposable Production-parity environment exist.
+
+## 5. Superseding live runtime confirmation — 2026-11-25
+
+The earlier status **UNRESOLVED** is superseded for the deployed Production path. The active `admin-refresh-crypto-asset` Edge Function, version 2, has `verify_jwt=true` and calls `public.claim_admin_asset_refresh(text,uuid)` using a server-side service-role client. Before the call it validates the Bearer token with `auth.getUser(token)`, checks super-admin authorization with the user-scoped admin RPC, and derives the user UUID from the verified Auth response. The function's live ACL explicitly grants EXECUTE to service_role.
+
+Therefore the caller is confirmed at the deployed-source level; the earlier absence from indexed source search was an incomplete search result. Preserve this exact grant unless the deployed caller is intentionally replaced and separately reviewed. The available 24-hour Edge Function log window showed no request path for this function, so an actual invocation in that window is not evidenced. No Production object or privilege was changed.
