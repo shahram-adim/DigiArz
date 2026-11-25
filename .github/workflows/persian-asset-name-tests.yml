@@ -118,7 +118,7 @@ jobs:
           test -n "$pg_container"
           docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/fixtures/rpc-security-exchange-discovery-dependencies.sql
 
-      - name: Load exact 46-signature ACL fixture (39 inert metadata stubs + 7 real/source-backed bodies)
+      - name: Load exact 46-signature ACL fixture (37 inert metadata stubs + 9 real/source-backed bodies; before exchange-discovery migration replacement)
         shell: bash
         run: |
           set -euo pipefail
