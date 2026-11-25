@@ -503,3 +503,64 @@ Commit: `7ef1932c49744b88408f3b80118eb3e574ed9c8a` (branch `feature/persian-asse
 - هیچ‌یک از فایل‌های PR زیر `supabase/migrations/` نیستند؛ بررسی فهرست کامل فایل‌های PR این موضوع را تأیید کرد.
 - PR همچنان open، Draft و merged=false است. در آخرین fetch فیلد mergeable=false گزارش شد؛ چون این فیلد در همین جلسه true/false نوسان داشته، آن را فقط snapshot لحظه‌ای می‌دانیم، نه حکم قطعی conflict.
 - هیچ workflow run جدیدی برای آخرین commit مستنداتی گزارش نشد؛ مستندات و بازیابی منبع را CI-tested معرفی نکنید.
+
+
+## ممیزی اثر زندهٔ ۱۱ Migration مدیریتی، کیف پول و همگام‌سازی — ۲۵ نوامبر ۲۰۲۶
+
+این بخش با مقایسهٔ SQL بازیابی‌شده از ledger با catalogهای Production تهیه شده است. تمام پرس‌وجوهای پایگاه داده در این مرحله فقط SELECT و خواندن metadata بوده‌اند. دسته‌بندی‌ها دربارهٔ اثر فعلی هستند، نه مجوز اجرای مجدد Migration.
+
+### خلاصهٔ دسته‌بندی
+
+| نسخه | Migration | دسته | نتیجهٔ تطبیق |
+|---|---|---|---|
+| 20261113153808 | approved_wallet_defaults_fees_and_coin_reviews | ۱ — اثر اصلی موجود و منطبق | defaults کیف پول، جداول fee/reviews/reports، محدودیت‌ها و سیاست‌های اصلی مشاهده شد؛ سه تابع معامله نیز از نرخ fee قابل‌تنظیم استفاده می‌کنند. |
+| 20261113154323 | assign_confirmed_super_admin | ۲ — اثر موجود با محدودیت اثبات | schema/table/check/FK و تابع بررسی super-admin موجود است؛ یک رکورد super_admin به حساب فعال متصل است و granted_by همان حساب است. UUID و شرایط تاریخی لحظهٔ انتساب عمداً افشا یا از وضعیت فعلی استنتاج نشده‌اند. |
+| 20261113154736 | secure_admin_wallet_management | ۲ — اثر موجود اما تکامل‌یافته | جدول audit و منطق کنترل دسترسی/رزرو/ثبت transaction موجود است؛ منطق فعلی در private قرار دارد و currency در audit برابر USDT/TOMAN است، نه USDT/IRR نسخهٔ اولیه. |
+| 20261113154926 | move_admin_privilege_logic_to_private_schema | ۲ — اثر موجود با تفاوت ACL تکمیلی | توابع privileged در private با SECURITY DEFINER و search_path خالی قرار دارند؛ wrapperهای public از نوع SECURITY INVOKER هستند. ACL زنده شامل service_role نیز هست و از grantهای صریح تاریخی گسترده‌تر است. |
+| 20261115101709 | create_exchange_asset_observations | ۱ — ساختار اصلی منطبق | جدول، identity، ستون‌ها، FK، unique constraint، دو index، RLS و دسترسی service_role با منبع سازگارند؛ Triggerهای بعدی جداگانه ثبت شده‌اند. |
+| 20261115102729 | schedule_iran_exchange_asset_sync | ۲ — اثر موجود با تغییرات بعدی | جدول درخواست‌ها و توابع worker موجودند؛ فهرست منابع و منطق backpressure توسعه یافته و cadence زنده با دو schedule اولیه متفاوت است. |
+| 20261115102927 | fix_exchange_sync_response_json_cast | ۲ — نسخهٔ اولیه superseded شده | پردازش پاسخ JSON وجود دارد، اما تابع زنده از private.try_parse_jsonb و رد پاسخ‌های غیرقابل‌تجزیه استفاده می‌کند، نه cast مستقیم r.content::jsonb در متن بازیابی‌شده. |
+| 20261115103227 | auto_list_verified_exchange_assets | ۲ — اثر موجود با guard تکمیلی | تابع private و Trigger مربوط به آن وجود دارند؛ تابع زنده علاوه بر شروط اولیه، فقط INSERT یا تغییر واقعی وضعیت تطبیق/شناسه/فعال‌بودن را پردازش می‌کند. اثر تاریخی backfill به‌تنهایی از catalog فعلی قابل انتساب قطعی نیست. |
+| 20261115105721 | admin_exchange_asset_sync_monitoring | ۲ — اثر موجود با ACL تکمیلی | هر دو تابع گزارش و درخواست sync وجود دارند و بررسی super-admin دارند؛ SECURITY DEFINER و search_path خالی‌اند. ACL زنده service_role را نیز مجاز می‌کند. |
+| 20261115105956 | restrict_exchange_sync_worker_execution | ۱ — اثر امنیتی منطبق | برای چهار تابع request/process مربوط به worker، EXECUTE فقط برای postgres و service_role مشاهده شد؛ authenticated و anon مجوز ندارند. |
+| 20261116201639 | auto_activate_verified_exchange_pairs | ۲ — منطق موجود، cadence متفاوت | تابع private با SECURITY DEFINER، search_path خالی و ACL محدود وجود دارد؛ Cron فعال است اما schedule زنده 9-59/10 است، نه هر دقیقهٔ تعریف‌شده در منبع تاریخی. |
+
+### شواهد جزئی و نکات مهم
+
+#### کیف پول، fee و بازخورد دارایی
+- مقدار پیش‌فرض زندهٔ wallets.balance_usdt برابر ۲۰۰ و balance_irr برابر ۱٬۰۰۰٬۰۰۰٬۰۰۰ است؛ تابع new_user_setup() نیز همین مقادیر را هنگام ساخت حساب درج می‌کند. این با متن Migration بازیابی‌شده منطبق است، اما با تصمیم محصولی متأخرتر ۵۰ میلیون تومان (۵۰۰ میلیون IRR) یکسان نیست. این اختلاف صرفاً ثبت شد و هیچ default یا موجودی تغییر نکرد.
+- نرخ‌های فعال زنده: USDT maker=0.001 و taker=0.0013؛ IRR maker/taker=0.0025. هر سه تابع execute_demo_trade, place_limit_order, process_limit_orders از get_demo_trading_fee_rate استفاده می‌کنند؛ مقدار ثابت 0.001 در مسیرهای بررسی‌شده باقی نمانده است.
+- coin_reviews و coin_review_reports دارای RLS و محدودیت‌های اصلی مالکیت/اعتبارسنجی هستند. خواندن review برای anon/authenticated مجاز است؛ گزارش‌کردن فقط برای authenticated و با reporter_user_id برابر auth.uid و حساب فعال است. سیاست حذف review همان شرط مالکیت را دارد و شرط فعال‌بودن حساب را اضافه نمی‌کند؛ این دقیقاً با SQL بازیابی‌شده سازگار است.
+- جدول fee دارای RLS است و دسترسی مستقیم عمومی/کاربری مشاهده نشد؛ نرخ‌ها از تابع کنترل‌شده خوانده می‌شوند.
+
+#### مدیریت و امنیت
+- private.admin_users و private.admin_wallet_adjustments هر دو RLS فعال دارند و هیچ policy کاربری برای دسترسی مستقیم به آن‌ها مشاهده نشد.
+- private.admin_adjust_wallet با SECURITY DEFINER، مالک postgres و search_path خالی اجرا می‌شود؛ تابع هویت caller را با auth.uid می‌گیرد، super-admin را بررسی می‌کند، USDT رزروشده در سفارش‌های باز را از مبلغ قابل برداشت کم می‌کند، تغییر را در wallet و transactions ثبت می‌کند و audit جداگانه می‌نویسد.
+- wrapper عمومی public.admin_adjust_wallet از نوع SECURITY INVOKER است؛ این نکته مهم است و نباید با نسخهٔ اولیهٔ SECURITY DEFINER اشتباه گرفته شود.
+- توابع private.admin_list_users و private.is_current_user_super_admin نیز SECURITY DEFINER و search_path خالی دارند و ACL آن‌ها برای authenticated محدود شده است؛ wrapperهای public متناظر SECURITY INVOKER هستند.
+- تابع گزارش و تابع درخواست sync مدیریتی در public از نوع SECURITY DEFINER هستند، اما در بدنه بررسی super-admin دارند. این‌ها endpointهای حساس‌اند و در هر تغییر آتی باید بررسی بدنه و ACL با هم انجام شود.
+- Migration اولیهٔ secure_admin_wallet_management تابع عمومی با ارز USDT/IRR تعریف کرده بود؛ نسخهٔ بعدی آن را به private منتقل و واحد TOMAN را با تبدیل ×۱۰ به IRR ذخیره‌شده اضافه کرده است. وضعیت فعلی با نسخهٔ تکامل‌یافته سازگار است، نه با متن اولیه به‌تنهایی.
+
+#### جدول مشاهدات و Worker
+- exchange_asset_observations.id به‌صورت GENERATED ALWAYS AS IDENTITY است؛ unique(exchange,market_symbol)، FK به crypto_assets، checkهای exchange و match_status و indexهای upper(base_symbol) و (match_status,last_seen_at DESC) وجود دارند.
+- RLS فعال است و مجوزهای جدول برای anon/authenticated مشاهده نشد؛ service_role دسترسی عملیاتی دارد.
+- Trigger زندهٔ trg_auto_list_verified_exchange_asset روی INSERT و UPDATE ستون‌های match_status/coingecko_id/is_active نصب است و تابع private را اجرا می‌کند.
+- جدول exchange_asset_sync_requests و تابع پردازش زنده از منبع اولیه تکامل یافته‌اند؛ تابع زنده از private.try_parse_jsonb استفاده می‌کند و برای پاسخ malformed آن را از پردازش کنار می‌گذارد.
+- زمان‌بندی زندهٔ مشاهده‌شده:
+  - job 13، digiarz-iran-exchange-request: */10 * * * *
+  - job 14، digiarz-iran-exchange-process: 1,31 * * * *
+  - job 18، digiarz-auto-activate-verified-exchange-pairs: 9-59/10 * * * *
+- دو cadence نخست با */30 و */2 در Migration اولیه فرق دارند؛ cadence سوم نیز با * * * * * متن تاریخی فرق دارد. این اختلاف‌ها نشان‌دهندهٔ تکامل بعدی هستند، اما منشأ دقیق هر تغییر فقط با مقایسهٔ همهٔ Migrationهای بعدی و deployment history قابل اثبات است.
+- مجوز اجرای چهار تابع اصلی Worker برای postgres و service_role است؛ برای authenticated و anon هیچ EXECUTE مشاهده نشد. Cronهای فعال دست‌نخورده باقی ماندند.
+
+### مواردی که هنوز اثبات نشده‌اند
+1. اینکه رکورد super-admin در زمان اجرای Migration دقیقاً از همان شرط count(profiles)=1 و همان UUID ثابت تاریخی عبور کرده باشد؛ بررسی فعلی فقط تعداد یک مدیر، فعال‌بودن حساب مرتبط و self-grant را بدون افشای شناسه تأیید می‌کند.
+2. اینکه همهٔ ردیف‌های اولیهٔ backfill در admin_market_listings مشخصاً توسط Migration 20261115103227 ایجاد شده باشند؛ وضعیت فعلی تابع و Trigger قابل اثبات است، نه منشأ تک‌تک ردیف‌ها.
+3. منشأ deploymentی تغییر scheduleها و همهٔ ACLهای تکمیلی service_role؛ برای انتساب قطعی باید deployment/audit history کامل‌تر بررسی شود.
+4. تطبیق کامل رفتار همهٔ مسیرهای Worker در برابر تمام Migrationهای بعدی خارج از ۱۱ فایل این ممیزی هنوز باز است.
+
+### قفل ایمنی
+- این ممیزی فقط catalog/metadata و SELECT بوده است؛ هیچ ردیف کاربر، شناسهٔ شخصی، wallet balance، transaction، order یا reservation تغییر نکرد.
+- هیچ تابع، Trigger، policy، grant، Cron، Edge Function یا Migration اجرا یا اصلاح نشد.
+- این ۱۱ فایل همچنان در supabase/drafts/ و صرفاً مرجع تاریخی هستند؛ هیچ‌کدام به supabase/migrations/ منتقل یا replay نمی‌شوند.
+- هیچ merge، update-branch، تغییر Production یا هزینه‌ای انجام نشد.
