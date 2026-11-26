@@ -911,3 +911,19 @@ test('logo tile removal also covers top-volume assets, trade previews and fallba
     'box-shadow:none!important','object-fit:contain!important'])
     assert.ok(finalCss.includes(token),'global logo reset includes '+token);
 });
+
+
+test('visual review seeds deterministic market and wallet fixtures without contacting Supabase',()=>{
+  const harness=fs.readFileSync('tests/ui-visual-screenshots.cjs','utf8');
+  assert.match(harness,/Deterministic visual-only market\/account fixtures/);
+  assert.match(harness,/marketRows = samples\.map/);
+  assert.match(harness,/marketTickerMap = new Map/);
+  assert.match(harness,/currentFxIsValid = true/);
+  assert.match(harness,/currentWalletUsdt = 200/);
+  assert.match(harness,/renderMarkets\(\)/);
+  assert.match(harness,/renderDashboardSummary\(\)/);
+  assert.match(harness,/renderTopAssets\(\)/);
+  assert.match(harness,/renderAssets\(\)/);
+  assert.match(harness,/supabase\\.co/);
+  assert.match(harness,/these rows are synthetic and are never written/);
+});
