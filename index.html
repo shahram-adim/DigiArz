@@ -2063,6 +2063,7 @@ body.light-theme #tab-markets .market-board-v34 .coin .price-toman{color:#805a0a
     ذخیره امن ایمیل و رمز برای ورود بعدی با اثر انگشت
    </label>
    <button id="biometricLoginBtn" class="secondary hidden" type="button" style="width:100%;min-height:52px">ورود با اثر انگشت</button>
+   <button id="clearBiometricCredentialsBtn" class="secondary hidden" type="button" style="width:100%;background:transparent;color:#f6b9c0;border:1px solid rgba(246,70,93,.35)">حذف اطلاعات ورود ذخیره‌شده از این گوشی</button>
   </div>
   <div class="auth-actions"><button id="loginBtn">ورود به حساب</button><button id="signupBtn" class="secondary">ساخت حساب جدید</button></div>
   <button id="forgotBtn" class="secondary" style="width:100%;margin-top:9px">بازیابی رمز عبور</button>
@@ -3635,8 +3636,16 @@ function bindTabs(){$('exchangeSyncRefreshBtn')?.addEventListener('click',loadEx
 async function setupBiometricControls(){
  const panel=$('biometricOptions'),button=$('biometricLoginBtn'),vault=window.Capacitor?.Plugins?.BiometricCredential;
  if(!panel||!button||!vault)return;
- try{const state=await vault.isAvailable();if(!state?.available)return;panel.classList.remove('hidden');if(state.hasCredentials)button.classList.remove('hidden');button.addEventListener('click',loginWithBiometrics)}
+ try{const state=await vault.isAvailable();if(!state?.available)return;panel.classList.remove('hidden');if(state.hasCredentials){button.classList.remove('hidden');$('clearBiometricCredentialsBtn')?.classList.remove('hidden')}button.addEventListener('click',loginWithBiometrics);$('clearBiometricCredentialsBtn')?.addEventListener('click',clearBiometricCredentials)}
  catch(error){console.warn('DigiArz biometric availability check failed:',error)}
+}
+async function clearBiometricCredentials(){
+ const vault=window.Capacitor?.Plugins?.BiometricCredential;
+ if(!vault)return;
+ const button=$('clearBiometricCredentialsBtn');if(button)button.disabled=true;
+ try{await vault.clearCredentials();$('biometricLoginBtn')?.classList.add('hidden');button?.classList.add('hidden');showMessage(authMsg,'اطلاعات ورود ذخیره‌شده از این گوشی پاک شد.','ok')}
+ catch(error){showMessage(authMsg,'حذف اطلاعات ذخیره‌شده ناموفق بود: '+(error?.message||String(error)),'err')}
+ finally{if(button)button.disabled=false}
 }
 async function loginWithBiometrics(){
  const button=$('biometricLoginBtn'),vault=window.Capacitor?.Plugins?.BiometricCredential;
@@ -4113,6 +4122,7 @@ body.luxury-theme #authView .auth-phone-device{border-color:rgba(232,218,183,.8)
 </style>
 
 
+<style id="digiarz-biometric-controls">#authView .auth-form #saveCredentialsForBiometric{width:18px!important;min-width:18px!important;height:18px!important;min-height:18px!important;flex:0 0 18px!important;padding:0!important;margin:0!important;accent-color:#f0b90b}#authView .auth-form #biometricOptions label{cursor:pointer}#authView .auth-form #biometricOptions button{border-radius:14px}</style>
 <link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=3">
 </body>
 </html>
