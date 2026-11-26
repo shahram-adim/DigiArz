@@ -2108,3 +2108,13 @@
 - [ ] تست syntax و UI workflow برای commit اصلاح‌شده باید در GitHub Actions تأیید شود؛ نتیجه اجرا هنوز در این مرحله در دسترس نیست.
 - [!] مقایسه تازه: شاخه اکنون 166 commit جلو و 2 عقب، همچنان diverged است؛ merge-base هنوز `9855d6ea6cd188a5621c4e2c28c55e4cfb4d2587` و PR #64 همچنان Draft است. توضیحات PR درباره «ساخته‌شده از main فعلی 9855d6e با صفر commit عقب» نادرست/قدیمی است؛ main فعلی `6916b940...` است.
 - ایمنی: اصلاح فقط روی شاخه candidate؛ هیچ merge، deploy، release، Pages، Supabase، migration یا Production data change انجام نشد.
+
+
+## نقطه توقف و ادامه — «شهرام ۱۲۰» — ۲۶ نوامبر ۲۰۲۶
+- آخرین اصلاح ثبت‌شده: commit `f6c2e05e562679ee66ac07d54e24fc8c9932c8fa`؛ تابع `setupBiometricControls` به async تغییر کرد تا `await vault.isAvailable()` خطای نحوی ایجاد نکند.
+- آخرین ثبت وضعیت: commit `ad5506adaa65003d394d622394c4274e993f9bb2`.
+- شاخه کاری: `redesign/ui-mainline-clean-2026-11-26`؛ آخرین مقایسه گزارش‌شده با main: 167 commit جلو، 2 عقب، diverged؛ merge-base برابر `9855d6ea6cd188a5621c4e2c28c55e4cfb4d2587`؛ main برابر `6916b940f63877f0f2589ad1652791b85e01d823`.
+- PR #64 باز و Draft است؛ توضیحات PR درباره پایه فعلی main قدیمی و نادرست است و باید بعداً اصلاح شود.
+- CI برای کامیت اصلاح بیومتریک هنوز نتیجه تأییدشده ندارد؛ تست روی دستگاه Android واقعی نیز انجام نشده است.
+- ادامه از این نقطه: ابتدا وضعیت Actions/CI کامیت `f6c2e05` و تست‌های syntax/UI را بررسی کن؛ سپس ممیزی امنیتی افزونه BiometricCredential (لغو/تلاش ناموفق، تغییر enrollment، حذف کلید، ثبت plugin در MainActivity و Gradle) را کامل کن.
+- هیچ Merge، Rebase، انتشار، Pages deploy، Supabase/Production، migration، یا تغییر wallet/order/trade انجام نشده است؛ این محدودیت‌ها همچنان پابرجا هستند.
