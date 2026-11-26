@@ -1743,3 +1743,11 @@
 - [!] تست‌های Node، Playwright، screenshots و APK پس از این دو commit هنوز اجرا/موفقیت‌شان از GitHub قابل تأیید نیست. package.json فقط build:web و prepare:android را تعریف می‌کند؛ APK نیازمند اجرای واقعی زنجیرهٔ Capacitor/Gradle در محیط Android است.
 - [ ] گام بعد: یافتن راه معتبر اجرای push workflow و دریافت artifact بدون افزودن workflow به Main؛ سپس اجرای Node regression، Playwright و APK روی HEAD تازه و بازبینی screenshotها. اگر GitHub Actions برای push شاخه اجرا نمی‌شود، برای فعال‌سازی مسیر base باید از مالک اجازهٔ اقدام مشخص در تنظیمات/شاخهٔ Main گرفته شود؛ تا آن زمان هیچ merge یا تغییر Main انجام نشود.
 - ایمنی: فقط harness تست، تست رگرسیون و مستندات در شاخهٔ Draft تغییر کردند؛ Main، Pages، Supabase، Production، migration، کیف پول، سفارش و معامله دست‌نخورده‌اند.
+
+
+## تأیید نهایی اصلاح harness — ۲۶ نوامبر ۲۰۲۶
+- [x] assertion تست رگرسیون بازبینی شد؛ به‌جای regex مبهم، اکنون دقیقاً وجود عبارت تنظیم color-scheme صحیح را در فایل harness بررسی می‌کند.
+- [x] commit اصلاح assertion: 3573d0331af1ab23eba9df113a2d613e3b510e29.
+- [!] compare بلافاصله پیش از این اصلاح: ۹۱ commit جلو و ۲ commit عقب؛ با این commit تست و checkpoint مستندات جدید، شمارش جلوتر از Main افزایش می‌یابد. این اختلاف فقط تغییرات شاخهٔ candidate را نشان می‌دهد و هیچ merge/rebase صورت نگرفته است.
+- [!] combined status و wrapper اجراهای PR برای commit مستندات قبلی خالی بودند؛ هیچ نتیجهٔ CI برای کد جدید قابل تأیید نیست. تست محلی نیز در این محیط اجرا نشده است.
+- [ ] گام بعد: بررسی اجرای واقعی Actions و گرفتن screenshots/APK از آخرین HEAD؛ در صورت نبود مسیر قابل دسترسی، باید اجرای workflow از GitHub UI یا فعال‌سازی کنترل‌شدهٔ Actions توسط مالک انجام شود. هیچ تغییر Main/Production بدون تأیید انجام نمی‌شود.
