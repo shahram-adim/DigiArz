@@ -1691,3 +1691,13 @@
 - [!] اجرای Node و CI برای head جدید هنوز باید از نتیجهٔ واقعی Actions تأیید شود؛ وجود commit یا trigger به معنی موفقیت CI نیست.
 - [ ] گام بعد: بررسی diff نهایی و runهای CI روی آخرین head؛ سپس تحلیل دقیق هر اختلاف با main و رفع هر تعارض احتمالی، بدون ادغام PR.
 - [ ] هیچ Production، Migration، grant، policy، cron، Edge Function، Auth یا دادهٔ مالی تغییر نکرده است.
+
+ 
+### نتیجهٔ مستقل Fingerprint و بازبینی همگام‌سازی — ۲۰۲۶-۱۱-۲۶
+
+- [x] متن کامل ۴۶ تعریف تابع از manifest دریافت و MD5 هر بدنه به‌صورت مستقل با پیاده‌سازی مستقل MD5 در محیط V8 دوباره محاسبه شد؛ ۴۶/۴۶ برابر، صفر اختلاف. self-test الگوریتم برای ورودی `abc` نیز با مقدار استاندارد MD5 منطبق بود.
+- [x] سه فایل جدید backportشده از نظر Git blob SHA با نسخهٔ main برابرند: source-contract test `2cadc6bc7773a15a458b648557c4d15efc249bd2`، snapshot ثبت `9e9d619196bc9ce4104d6208aed7cbe853465d18`، snapshot لغو `18c363097173939429756f56fe9773e554937f39`.
+- [!] این بررسی مستقل fingerprint، اجرای `node --test` یا اجرای کل CI نیست. برای head فعلی `aa68a5690420fa772a2afbc1b0c25fba41f50965`، ابزار وضعیت و فهرست runهای PR هیچ نتیجهٔ CI نمایش ندادند.
+- [!] Git graph همچنان ۱۴۳ جلو / ۷ عقب و diverged است؛ محتوای پنج فایل main-side بررسی و در شاخه backport شد، اما تاریخچه هنوز rebase/merge نشده است.
+- [ ] گام بعد: فراهم‌کردن اجرای واقعی Node/Actions روی head فعلی، سپس بررسی دقیق علت divergence و انتخاب روش امن همگام‌سازی با تأیید مالک.
+- [ ] Production و داده‌های مالی دست‌نخورده باقی ماندند؛ هیچ Migration، grant، policy، cron، Auth، function یا deploy انجام نشد.
