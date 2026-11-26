@@ -4613,3 +4613,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{ou
   display:block!important;width:100%!important;height:100%!important;
   object-fit:contain!important;
 }
+
+
+/* The app-wide sticky brand bar already owns the dashboard identity; suppress the duplicate in-panel masthead. */
+#tab-dashboard>.da-v2-topline{display:none!important}
