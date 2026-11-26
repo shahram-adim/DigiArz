@@ -152,13 +152,25 @@ const server = http.createServer((req, res) => {
           await seedVisualFixtures(page);
           const filename=[viewport.name,theme,tab].join('-')+'.png';
           await page.screenshot({path:path.join(output,filename),fullPage:viewport.name==='desktop',animations:'disabled'});
+          if (viewport.name==='mobile' && tab==='dashboard') {
+            const marketPreview=page.locator('#dashboardMarketPreview');
+            await marketPreview.scrollIntoViewIfNeeded();
+            await page.waitForTimeout(100);
+            await page.screenshot({path:path.join(output,['mobile',theme,'dashboard-marketrows'].join('-')+'.png'),fullPage:false,animations:'disabled'});
+          }
+          if (viewport.name==='mobile' && tab==='markets') {
+            const marketRows=page.locator('#marketList');
+            await marketRows.scrollIntoViewIfNeeded();
+            await page.waitForTimeout(100);
+            await page.screenshot({path:path.join(output,['mobile',theme,'markets-assetrows'].join('-')+'.png'),fullPage:false,animations:'disabled'});
+          }
         }
       }
       await context.close();
     }
     const files=fs.readdirSync(output).filter(name=>name.endsWith('.png'));
-    if (files.length!==60) throw new Error('Expected 60 screenshots, got '+files.length);
-    fs.writeFileSync(path.join(output,'README.txt'),'DigiArz UI visual review screenshots\n60 captures: 2 viewports x 3 themes x 10 app sections.\nSupabase API requests were blocked; no production data was changed.\nMarket, dashboard, asset and top-volume rows are synthetic DOM-only fixtures.\n');
+    if (files.length!==66) throw new Error('Expected 66 screenshots, got '+files.length);
+    fs.writeFileSync(path.join(output,'README.txt'),'DigiArz UI visual review screenshots\n66 captures: 2 viewports x 3 themes x 10 app sections, plus mobile dashboard/market row close-ups.\nSupabase API requests were blocked; no production data was changed.\nMarket, dashboard, asset and top-volume rows are synthetic DOM-only fixtures. Mobile row close-ups scroll to the actual rendered asset lists.\n');
     console.log('Created '+files.length+' screenshots in '+output);
   } finally {
     await browser.close();
