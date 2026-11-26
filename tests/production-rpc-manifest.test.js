@@ -41,7 +41,8 @@ test('Production SECURITY DEFINER definition MD5 fingerprints are recomputed fro
     assert.equal(actual, fn.definition_md5, 'definition MD5 does not match captured body: ' + identity);
   }
 });
-\ntest('Production snapshot has an explicit allowlist for anonymous SECURITY DEFINER execution', () => {
+
+test('Production snapshot has an explicit allowlist for anonymous SECURITY DEFINER execution', () => {
   const actual = manifest.functions
     .filter(fn => /(?:^|,)anon=X\//.test(fn.raw_acl))
     .map(fn => fn.schema_name + '.' + fn.function_name)
