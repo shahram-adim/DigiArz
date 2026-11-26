@@ -526,3 +526,25 @@ test('Stop-Limit worker race fixture embeds the captured Production body and tes
   assert.match(race, /parent did not converge to child filled state/);
   assert.match(race, /conditional did not converge to child filled state/);
 });
+
+
+test('Limit and Stop-Limit worker-to-worker race fixture uses captured Production worker bodies', () => {
+  const fixture = fs.readFileSync('tests/inactive-account-rpc-race.pg17.sql', 'utf8');
+  for (const name of ['process_limit_orders', 'process_stop_limit_orders']) {
+    const worker = manifest.functions.find(fn => fn.schema_name === 'public' && fn.function_name === name);
+    const start = fixture.lastIndexOf('CREATE OR REPLACE FUNCTION public.' + name + '()');
+    assert.notEqual(start, -1, 'worker missing from disposable fixture: ' + name);
+    assert.ok(fixture.slice(start).trim().startsWith(worker.definition.trim()),
+      'fixture must use exact captured Production body: ' + name);
+  }
+
+  const race = fs.readFileSync('tests/limit-stop-worker-race.pg17.sh', 'utf8');
+  assert.match(race, /PGAPPNAME=digiarz_limit_worker/);
+  assert.match(race, /wait_for_lock_wait digiarz_limit_worker/);
+  assert.match(race, /process_stop_limit_orders\(\)->>'synced'/);
+  assert.match(race, /process_limit_orders\(\)/);
+  assert.match(race, /one-cycle stale parent snapshot/);
+  assert.match(race, /parent quantities did not converge/);
+  assert.match(race, /public\.trades/);
+  assert.match(race, /public\.transactions/);
+});
