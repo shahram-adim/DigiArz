@@ -2671,8 +2671,8 @@ function applyTheme(theme){
   el.classList.toggle('active',active);el.setAttribute('aria-pressed',active?'true':'false');
  });
  const meta=document.querySelector('meta[name="theme-color"]');
- if(meta)meta.content=light?'#ffffff':luxury?'#edf2ff':'#090b10';
- const palette=light?{bg:'#ffffff',text:'#152b40',grid:'#eaf2f8',line:'#d8e7f2'}:luxury?{bg:'#edf2ff',text:'#202b55',grid:'#dbe4ff',line:'#b9c7ef'}:{bg:'#090b10',text:'#f7f4eb',grid:'#272b34',line:'#5b4b2a'};
+ if(meta)meta.content=light?'#ffffff':luxury?'#e5eaff':'#090b10';
+ const palette=light?{bg:'#ffffff',text:'#152b40',grid:'#eaf2f8',line:'#d8e7f2'}:luxury?{bg:'#e5eaff',text:'#202b55',grid:'#cbd5ff',line:'#aebdf5'}:{bg:'#090b10',text:'#f7f4eb',grid:'#272b34',line:'#5b4b2a'};
  const options={layout:{background:{color:palette.bg},textColor:palette.text},grid:{vertLines:{color:palette.grid},horzLines:{color:palette.grid}},rightPriceScale:{borderColor:palette.line},timeScale:{borderColor:palette.line}};
  if(chart)chart.applyOptions(options);
  if(volumeChart)volumeChart.applyOptions(options);
