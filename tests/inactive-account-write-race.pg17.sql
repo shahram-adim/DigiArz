@@ -1,0 +1,1 @@
+-- PostgreSQL 17 isolated inactive-account write race fixture.
