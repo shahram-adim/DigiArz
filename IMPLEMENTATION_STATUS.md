@@ -2219,3 +2219,16 @@
 - [!] APK یک debug candidate است؛ نصب روی گوشی فیزیکی، ورود واقعی، biometric enrollment و حذف credential هنوز آزمایش نشده‌اند.
 - لینک‌ها: APK `https://github.com/shahram-adim/DigiArz/actions/runs/45875527103`؛ UI `https://github.com/shahram-adim/DigiArz/actions/runs/45875527160`؛ visual retest `https://github.com/shahram-adim/DigiArz/actions/runs/45875541965`.
 - هیچ merge/rebase/deploy، انتشار یا تغییر Supabase/Production انجام نشده است.
+
+
+## پاک‌سازی اعتبارنامهٔ بیومتریک پس از تغییر رمز — ۲۶ نوامبر ۲۰۲۶
+- [x] ممیزی جریان بازیابی رمز نشان داد پس از `auth.updateUser({password})`، اعتبارنامهٔ رمزنگاری‌شدهٔ قدیمی در Android Keystore باقی می‌ماند و تلاش ورود بیومتریک بعدی با رمز منقضی‌شده شکست می‌خورد.
+- [x] پس از تغییر موفق رمز، برنامه اکنون `clearCredentials()` را اجرا و دکمه‌های ورود/حذف بیومتریک را پنهان می‌کند؛ اگر پاک‌سازی ناموفق شود، هشدار داده می‌شود و کنترل حذف دستی باقی می‌ماند.
+- [x] اگر Supabase هنگام ورود بیومتریک خطای `invalid_credentials` برگرداند، vault قدیمی پاک می‌شود و کاربر به ورود دستی با رمز جدید هدایت می‌شود؛ خطاهای شبکه یا 504 باعث حذف خودکار vault نمی‌شوند.
+- [x] تست‌های منبعی برای هر دو مسیر اضافه شد؛ مرحلهٔ source-level regression در UI workflow جدید موفق گزارش شده است.
+- Commitهای تغییر: `f1ad70839d1fd8e3f7e98b5903440367fb269f8a` و تست `ee40da2e60719851685d034100189b6284a90ac0`.
+- [ ] APK جدید run `45876178982` هنوز در مرحلهٔ Build installable debug APK بود؛ artifact تازه تا پایان verify/upload تأیید نشده است.
+- [ ] UI visual review run `45876179024` تست‌های منبعی را پشت سر گذاشته و در مرحلهٔ نصب Chromium بود؛ capture/upload هنوز نهایی نشده است.
+- [!] تغییر رمز و ورود بیومتریک هنوز روی گوشی واقعی و حساب واقعی آزمایش نشده‌اند؛ هیچ رمز یا دادهٔ کاربری واقعی دستکاری نشده است.
+- وضعیت PR #64: باز و Draft، mergeable=false، merged=false؛ شاخه 204 commit جلو و 2 عقب از main است. دو commit عقب‌مانده مربوط به QA و snapshot فقط‌خواندنی Stop-Limit هستند و دست‌نخورده باقی مانده‌اند.
+- هیچ merge، rebase، deploy، انتشار، migration یا تغییر Supabase/Production انجام نشد.
