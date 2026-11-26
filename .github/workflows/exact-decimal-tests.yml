@@ -300,3 +300,9 @@ jobs:
           PGPASSWORD: postgres
         run: |
           PGDATABASE=digiarz_inactive_account_rpc_race_test bash tests/stop-limit-child-sync-race.pg17.sh
+
+      - name: Reproduce actual Limit worker versus Stop-Limit child synchronization race
+        env:
+          PGPASSWORD: postgres
+        run: |
+          PGDATABASE=digiarz_inactive_account_rpc_race_test bash tests/limit-stop-worker-race.pg17.sh
