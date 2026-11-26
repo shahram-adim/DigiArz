@@ -1021,3 +1021,22 @@ test('bright indigo dashboard overrides inherited dark account and market surfac
     'color:#202b55!important;'
   ]) assert.ok(final.includes(token),'bright dashboard override includes '+token);
 });
+
+
+test('mobile dashboard asset rows preserve readable identity and dual-currency prices',()=>{
+  const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
+  const final=css.slice(css.lastIndexOf('Mobile composition pass 3'));
+  assert.ok(final.includes('grid-template-columns:25px minmax(112px,1.35fr) minmax(48px,.58fr) minmax(86px,.95fr)!important;'));
+  assert.ok(final.includes('white-space:normal!important;overflow:visible!important;text-overflow:clip!important;'));
+  assert.ok(final.includes('#dashboardMarketPreview .da-market-sparkline{display:none!important}'));
+  assert.ok(final.includes('#dashboardMarketPreview .da-market-toman'));
+});
+
+test('mobile market hero and category navigation use compact spacing',()=>{
+  const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
+  const final=css.slice(css.lastIndexOf('Mobile composition pass 3'));
+  for(const token of ['#tab-markets .market-hero-v34','min-height:0!important;padding:12px 13px!important',
+    '#tab-markets .market-categories{gap:5px!important;margin:8px 0!important;overflow-x:auto!important;flex-wrap:nowrap!important}',
+    '#tab-markets .market-board-v34{margin-top:8px!important}'])
+    assert.ok(final.includes(token),'mobile market layout includes '+token);
+});
