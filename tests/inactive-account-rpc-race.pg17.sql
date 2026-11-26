@@ -1377,3 +1377,349 @@ BEGIN
 END;
 $function$
 ;
+
+-- Exact market execution and conditional worker bodies from Production snapshot.
+CREATE OR REPLACE FUNCTION public.execute_demo_trade(p_symbol text, p_side text, p_amount numeric, p_price numeric)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+DECLARE
+    v_uid uuid;
+    v_symbol text;
+    v_base text;
+    v_side text;
+    v_price numeric;
+    v_balance numeric;
+    v_asset_balance numeric;
+    v_reserved numeric := 0;
+    v_available numeric := 0;
+    v_gross numeric;
+    v_total numeric;
+    v_fee numeric;
+    v_fee_rate numeric;
+    v_order_id uuid;
+BEGIN
+    v_uid := auth.uid();
+
+    IF v_uid IS NULL THEN
+        RAISE EXCEPTION 'Authentication required';
+    END IF;
+
+    IF NOT public.current_account_is_active() THEN
+        RAISE EXCEPTION 'Account is inactive';
+    END IF;
+
+    v_symbol := upper(trim(p_symbol));
+    v_side := lower(trim(p_side));
+
+    IF v_symbol IS NULL
+       OR v_symbol !~ '^[A-Z0-9]{2,15}USDT$' THEN
+        RAISE EXCEPTION 'Unsupported trading pair';
+    END IF;
+
+    v_base := left(v_symbol, length(v_symbol) - 4);
+
+    IF v_side IS NULL OR v_side NOT IN ('buy', 'sell')
+       OR v_base = 'USDT' THEN
+        RAISE EXCEPTION 'Invalid trade parameters';
+    END IF;
+
+    IF p_amount IS NULL OR p_amount <= 0 OR p_amount > 1000000 THEN
+        RAISE EXCEPTION 'Invalid amount';
+    END IF;
+
+    PERFORM 1
+    FROM public.demo_trading_pairs AS dp
+    WHERE dp.pair_symbol = v_symbol
+      AND dp.quote_asset = 'USDT'
+      AND dp.is_enabled IS TRUE
+    FOR SHARE;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Trading pair is not enabled';
+    END IF;
+
+    SELECT mp.price
+    INTO v_price
+    FROM public.market_prices AS mp
+    WHERE mp.symbol = v_symbol
+      AND mp.updated_at >= now() - interval '1 minute'
+    FOR SHARE;
+
+    IF NOT FOUND OR v_price IS NULL OR v_price <= 0 THEN
+        RAISE EXCEPTION 'Market price unavailable or outdated';
+    END IF;
+
+    v_fee_rate := public.get_demo_trading_fee_rate('USDT', 'taker');
+    v_gross := round(p_amount * v_price, 8);
+    v_fee := round(v_gross * v_fee_rate, 8);
+
+    INSERT INTO public.wallets (user_id)
+    VALUES (v_uid)
+    ON CONFLICT (user_id) DO NOTHING;
+
+    SELECT balance_usdt
+    INTO v_balance
+    FROM public.wallets
+    WHERE user_id = v_uid
+    FOR UPDATE;
+
+    IF v_balance IS NULL THEN
+        v_balance := 0;
+    END IF;
+
+    IF v_side = 'buy' THEN
+        SELECT COALESCE(
+            SUM(r.reserved_amount - r.released_amount - r.consumed_amount),
+            0
+        )
+        INTO v_reserved
+        FROM public.order_reservations AS r
+        WHERE r.user_id = v_uid
+          AND r.asset = 'USDT'
+          AND r.status = 'reserved';
+
+        v_available := v_balance - v_reserved;
+        v_total := v_gross + v_fee;
+
+        IF v_available < v_total THEN
+            RAISE EXCEPTION 'Insufficient available USDT balance';
+        END IF;
+
+        UPDATE public.wallets
+        SET balance_usdt = balance_usdt - v_total
+        WHERE user_id = v_uid;
+
+        INSERT INTO public.asset_balances (
+            user_id, asset, balance, updated_at
+        )
+        VALUES (v_uid, v_base, p_amount, now())
+        ON CONFLICT (user_id, asset)
+        DO UPDATE SET
+            balance = public.asset_balances.balance + EXCLUDED.balance,
+            updated_at = now();
+    ELSE
+        INSERT INTO public.asset_balances (user_id, asset, balance)
+        VALUES (v_uid, v_base, 0)
+        ON CONFLICT (user_id, asset) DO NOTHING;
+
+        SELECT balance
+        INTO v_asset_balance
+        FROM public.asset_balances
+        WHERE user_id = v_uid
+          AND asset = v_base
+        FOR UPDATE;
+
+        SELECT COALESCE(
+            SUM(r.reserved_amount - r.released_amount - r.consumed_amount),
+            0
+        )
+        INTO v_reserved
+        FROM public.order_reservations AS r
+        WHERE r.user_id = v_uid
+          AND r.asset = v_base
+          AND r.status = 'reserved';
+
+        v_available := COALESCE(v_asset_balance, 0) - v_reserved;
+
+        IF v_available < p_amount THEN
+            RAISE EXCEPTION 'Insufficient available asset balance';
+        END IF;
+
+        v_total := v_gross - v_fee;
+
+        UPDATE public.asset_balances
+        SET balance = balance - p_amount,
+            updated_at = now()
+        WHERE user_id = v_uid
+          AND asset = v_base;
+
+        UPDATE public.wallets
+        SET balance_usdt = balance_usdt + v_total
+        WHERE user_id = v_uid;
+    END IF;
+
+    INSERT INTO public.orders (
+        user_id, symbol, side, order_type, amount, price, status,
+        filled_amount, remaining_amount
+    )
+    VALUES (
+        v_uid, v_symbol, v_side, 'market', p_amount, v_price, 'filled',
+        p_amount, 0
+    )
+    RETURNING id INTO v_order_id;
+
+    INSERT INTO public.trades (
+        order_id, user_id, symbol, side, amount, price
+    )
+    VALUES (
+        v_order_id, v_uid, v_symbol, v_side, p_amount, v_price
+    );
+
+    INSERT INTO public.transactions (
+        user_id, currency, amount, transaction_type, description
+    )
+    VALUES (
+        v_uid, 'USDT', v_total, v_side,
+        'DigiArz demo trade: ' || v_symbol
+    );
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'order_id', v_order_id,
+        'symbol', v_symbol,
+        'side', v_side,
+        'amount', p_amount,
+        'price', v_price,
+        'fee', v_fee,
+        'total', v_total,
+        'currency', 'USDT'
+    );
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.process_conditional_orders()
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+DECLARE
+  v_cond record;
+  v_res public.order_reservations%ROWTYPE;
+  v_market_price numeric;
+  v_result jsonb;
+  v_execution_order_id uuid;
+  v_processed integer:=0;
+  v_triggered integer:=0;
+  v_rejected integer:=0;
+  v_skipped integer:=0;
+  v_rows integer;
+BEGIN
+  IF NOT pg_catalog.pg_try_advisory_xact_lock(739201127) THEN
+    RETURN jsonb_build_object('success',true,'message','Another conditional cycle is running','processed',0);
+  END IF;
+
+  FOR v_cond IN
+    SELECT c.id,c.order_id,c.user_id,c.symbol,c.order_kind,c.trigger_price,c.amount,
+           o.filled_amount,o.remaining_amount
+    FROM public.conditional_orders c
+    JOIN public.orders o ON o.id=c.order_id AND o.user_id=c.user_id
+    JOIN public.profiles p ON p.id=c.user_id AND p.is_active IS TRUE
+    WHERE c.status='pending' AND o.status='pending' AND o.order_type='conditional'
+    ORDER BY c.created_at
+    FOR UPDATE OF c,o SKIP LOCKED
+  LOOP
+    IF v_cond.symbol IS NULL OR v_cond.symbol !~ '^[A-Z0-9]{2,15}USDT$'
+       OR v_cond.amount IS NULL OR v_cond.amount<=0
+       OR v_cond.trigger_price IS NULL OR v_cond.trigger_price<=0 THEN
+      v_skipped:=v_skipped+1; CONTINUE;
+    END IF;
+
+    SELECT mp.price INTO v_market_price
+    FROM public.market_prices mp
+    WHERE mp.symbol=v_cond.symbol
+      AND mp.updated_at>=now()-interval '1 minute'
+    FOR SHARE;
+    IF NOT FOUND OR v_market_price IS NULL OR v_market_price<=0 THEN
+      v_skipped:=v_skipped+1; CONTINUE;
+    END IF;
+
+    IF (v_cond.order_kind='take_profit' AND v_market_price<v_cond.trigger_price)
+       OR (v_cond.order_kind='stop_loss' AND v_market_price>v_cond.trigger_price) THEN
+      v_skipped:=v_skipped+1; CONTINUE;
+    END IF;
+
+    SELECT * INTO v_res
+    FROM public.order_reservations r
+    WHERE r.order_id=v_cond.order_id AND r.user_id=v_cond.user_id
+    FOR UPDATE;
+    IF NOT FOUND OR v_res.status<>'reserved'
+       OR v_res.asset<>left(v_cond.symbol,length(v_cond.symbol)-4)
+       OR v_res.reserved_amount<v_cond.amount
+       OR v_res.consumed_amount<0
+       OR v_res.consumed_amount+v_res.released_amount>v_res.reserved_amount THEN
+      UPDATE public.conditional_orders
+      SET attempt_count=attempt_count+1,last_error='Reservation validation failed',updated_at=now()
+      WHERE id=v_cond.id;
+      v_skipped:=v_skipped+1; CONTINUE;
+    END IF;
+
+    BEGIN
+      -- Release this order's own reservation inside the same transaction before
+      -- calling the market engine; if execution fails, this subtransaction rolls back.
+      UPDATE public.order_reservations
+      SET released_amount=reserved_amount-consumed_amount,
+          status='released',updated_at=now()
+      WHERE id=v_res.id AND status='reserved';
+
+      PERFORM pg_catalog.set_config('request.jwt.claim.sub',v_cond.user_id::text,true);
+      PERFORM pg_catalog.set_config('request.jwt.claims',
+        pg_catalog.jsonb_build_object('sub',v_cond.user_id::text,'role','authenticated')::text,true);
+
+      v_result:=public.execute_demo_trade(v_cond.symbol,'sell',v_cond.amount,v_market_price);
+      IF COALESCE((v_result->>'success')::boolean,false) IS NOT TRUE THEN
+        RAISE EXCEPTION 'Market engine did not confirm conditional execution';
+      END IF;
+      v_execution_order_id:=(v_result->>'order_id')::uuid;
+
+      UPDATE public.order_reservations
+      SET consumed_amount=reserved_amount,released_amount=0,status='consumed',updated_at=now()
+      WHERE id=v_res.id AND status='released'
+        AND consumed_amount=0 AND released_amount=reserved_amount;
+      GET DIAGNOSTICS v_rows=ROW_COUNT;
+      IF v_rows<>1 THEN RAISE EXCEPTION 'Conditional reservation consumption update failed'; END IF;
+
+      UPDATE public.orders
+      SET status='filled',filled_amount=amount,remaining_amount=0
+      WHERE id=v_cond.order_id AND user_id=v_cond.user_id AND status='pending';
+      GET DIAGNOSTICS v_rows=ROW_COUNT;
+      IF v_rows<>1 THEN RAISE EXCEPTION 'Conditional parent order update failed'; END IF;
+
+      UPDATE public.conditional_orders
+      SET status='filled',execution_order_id=v_execution_order_id,
+          executed_price=(v_result->>'price')::numeric,
+          triggered_at=now(),executed_at=now(),last_error=NULL,updated_at=now()
+      WHERE id=v_cond.id AND status='pending';
+      GET DIAGNOSTICS v_rows=ROW_COUNT;
+      IF v_rows<>1 THEN RAISE EXCEPTION 'Conditional order completion update failed'; END IF;
+
+      PERFORM pg_catalog.set_config('request.jwt.claim.sub','',true);
+      PERFORM pg_catalog.set_config('request.jwt.claims','',true);
+      v_processed:=v_processed+1;
+      v_triggered:=v_triggered+1;
+    EXCEPTION WHEN OTHERS THEN
+      PERFORM pg_catalog.set_config('request.jwt.claim.sub','',true);
+      PERFORM pg_catalog.set_config('request.jwt.claims','',true);
+      -- The failed execution block rolled back the reservation release.
+      UPDATE public.conditional_orders
+      SET attempt_count=attempt_count+1,last_error=left(SQLERRM,500),updated_at=now()
+      WHERE id=v_cond.id;
+      SELECT * INTO v_res FROM public.order_reservations WHERE order_id=v_cond.order_id AND user_id=v_cond.user_id FOR UPDATE;
+      IF FOUND AND (SELECT attempt_count FROM public.conditional_orders WHERE id=v_cond.id)>=10
+         AND v_res.status='reserved'
+         AND v_res.consumed_amount>=0
+         AND v_res.consumed_amount+v_res.released_amount<=v_res.reserved_amount THEN
+        UPDATE public.order_reservations
+        SET released_amount=reserved_amount-consumed_amount,status='released',updated_at=now()
+        WHERE id=v_res.id;
+        UPDATE public.orders SET status='rejected',remaining_amount=amount-filled_amount
+        WHERE id=v_cond.order_id AND user_id=v_cond.user_id AND status='pending';
+        UPDATE public.conditional_orders
+        SET status='rejected',updated_at=now()
+        WHERE id=v_cond.id AND status='pending';
+        v_rejected:=v_rejected+1;
+      ELSE
+        v_skipped:=v_skipped+1;
+      END IF;
+    END;
+  END LOOP;
+
+  RETURN jsonb_build_object('success',true,'processed',v_processed,
+    'triggered',v_triggered,'rejected',v_rejected,'skipped',v_skipped);
+END;
+$function$
+;
