@@ -2065,9 +2065,9 @@ body.light-theme #tab-markets .market-board-v34 .coin .price-toman{color:#805a0a
   <div id="biometricOptions" class="hidden" style="display:grid;gap:10px;margin:10px 0">
    <label for="saveCredentialsForBiometric" style="display:flex;align-items:center;gap:9px;color:#d8e2f2;font-size:12px;line-height:1.8">
     <input id="saveCredentialsForBiometric" type="checkbox" style="width:18px;min-height:18px;accent-color:#f0b90b">
-    ذخیره امن ایمیل و رمز برای ورود بعدی با اثر انگشت
+    ذخیره امن ایمیل و رمز برای ورود با اثر انگشت یا تشخیص چهرهٔ امن دستگاه
    </label>
-   <button id="biometricLoginBtn" class="secondary hidden" type="button" style="width:100%;min-height:52px">ورود با اثر انگشت</button>
+   <button id="biometricLoginBtn" class="secondary hidden" type="button" style="width:100%;min-height:52px">ورود با بیومتریک امن دستگاه</button>
    <button id="clearBiometricCredentialsBtn" class="secondary hidden" type="button" style="width:100%;background:transparent;color:#f6b9c0;border:1px solid rgba(246,70,93,.35)">حذف اطلاعات ورود ذخیره‌شده از این گوشی</button>
   </div>
   <div class="auth-actions"><button id="loginBtn">ورود به حساب</button><button id="signupBtn" class="secondary">ساخت حساب جدید</button></div>
@@ -2274,7 +2274,7 @@ function readExactInput(id,label){const raw=$(id).value;try{const parsed=DigiDec
 function safeText(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function initClient(){if(!window.supabase?.createClient)throw new Error('کتابخانه اتصال بارگذاری نشد؛ اینترنت را بررسی کنید.');supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})}
 async function signup(){const btn=$('signupBtn');btn.disabled=true;hideMessage(authMsg);try{const email=$('email').value.trim().toLowerCase(),password=$('password').value;if(!email||!email.includes('@'))throw new Error('آدرس ایمیل معتبر وارد کنید.');if(password.length<6)throw new Error('رمز عبور باید حداقل ۶ کاراکتر باشد.');const {data,error}=await supabaseClient.auth.signUp({email,password,emailRedirectTo:location.href});if(error)throw error;if(data.session){showMessage(authMsg,'ثبت‌نام موفق بود.','ok');await showApp(data.session)}else showMessage(authMsg,'ثبت‌نام انجام شد. لینک تأیید را از ایمیل باز کنید و سپس وارد شوید.','ok')}catch(e){showMessage(authMsg,'ثبت‌نام انجام نشد: '+(e.message||String(e)),'err')}finally{btn.disabled=false}}
-async function login(){const btn=$('loginBtn');btn.disabled=true;showMessage(authMsg,'در حال بررسی اطلاعات ورود…','warn');try{if(!supabaseClient)throw new Error('اتصال سامانه آماده نیست؛ صفحه را تازه‌سازی کنید.');const email=$('email').value.trim().toLowerCase(),password=$('password').value;if(!email||!password)throw new Error('ایمیل و رمز عبور را وارد کنید.');const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});if(error)throw error;if(!data.session)throw new Error('ورود انجام نشد؛ نشست معتبر از سرور دریافت نشد.');if($('saveCredentialsForBiometric')?.checked){try{const vault=window.Capacitor?.Plugins?.BiometricCredential;if(!vault)throw new Error('قفل امن اثر انگشت در این نسخه در دسترس نیست.');await vault.saveCredentials({email,password});$('saveCredentialsForBiometric').checked=false;$('biometricLoginBtn')?.classList.remove('hidden');$('clearBiometricCredentialsBtn')?.classList.remove('hidden');showMessage(authMsg,'اطلاعات ورود با اثر انگشت روی همین گوشی به‌صورت رمزنگاری‌شده ذخیره شد.','ok')}catch(vaultError){showMessage(authMsg,'ورود موفق بود؛ ذخیره امن برای اثر انگشت انجام نشد: '+(vaultError?.message||String(vaultError)),'warn')}}else showMessage(authMsg,'ورود تأیید شد؛ در حال بارگذاری حساب…','ok');await showApp(data.session)}catch(e){console.error('DigiArz login failed:',e);showMessage(authMsg,'ورود انجام نشد: '+(e?.message||String(e)||'خطای نامشخص'),'err')}finally{btn.disabled=false}}
+async function login(){const btn=$('loginBtn');btn.disabled=true;showMessage(authMsg,'در حال بررسی اطلاعات ورود…','warn');try{if(!supabaseClient)throw new Error('اتصال سامانه آماده نیست؛ صفحه را تازه‌سازی کنید.');const email=$('email').value.trim().toLowerCase(),password=$('password').value;if(!email||!password)throw new Error('ایمیل و رمز عبور را وارد کنید.');const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});if(error)throw error;if(!data.session)throw new Error('ورود انجام نشد؛ نشست معتبر از سرور دریافت نشد.');if($('saveCredentialsForBiometric')?.checked){try{const vault=window.Capacitor?.Plugins?.BiometricCredential;if(!vault)throw new Error('قفل بیومتریک امن دستگاه در این نسخه در دسترس نیست.');await vault.saveCredentials({email,password});$('saveCredentialsForBiometric').checked=false;$('biometricLoginBtn')?.classList.remove('hidden');$('clearBiometricCredentialsBtn')?.classList.remove('hidden');showMessage(authMsg,'اطلاعات ورود برای بیومتریک امن دستگاه روی همین گوشی به‌صورت رمزنگاری‌شده ذخیره شد.','ok')}catch(vaultError){showMessage(authMsg,'ورود موفق بود؛ ذخیره امن برای اثر انگشت انجام نشد: '+(vaultError?.message||String(vaultError)),'warn')}}else showMessage(authMsg,'ورود تأیید شد؛ در حال بارگذاری حساب…','ok');await showApp(data.session)}catch(e){console.error('DigiArz login failed:',e);showMessage(authMsg,'ورود انجام نشد: '+(e?.message||String(e)||'خطای نامشخص'),'err')}finally{btn.disabled=false}}
 async function forgotPassword(){hideMessage(authMsg);try{const email=$('email').value.trim().toLowerCase();if(!email||!email.includes('@'))throw new Error('ابتدا ایمیل خود را وارد کنید.');const redirectTo=location.origin+location.pathname;const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo});if(error)throw error;showMessage(authMsg,'اگر این ایمیل در DigiArz ثبت شده باشد، لینک بازیابی برای آن ارسال می‌شود. صندوق ورودی و پوشه هرزنامه را بررسی کنید.','ok')}catch(e){showMessage(authMsg,'ارسال لینک بازیابی ناموفق بود: '+(e.message||String(e)),'err')}}
 function showRecoveryForm(){
  document.body.classList.add('auth-page-active');document.body.classList.remove('dashboard-page-active');
@@ -3701,7 +3701,7 @@ async function clearBiometricCredentials(){
 async function loginWithBiometrics(){
  const button=$('biometricLoginBtn'),vault=window.Capacitor?.Plugins?.BiometricCredential;
  if(!vault||!supabaseClient)return;
- button.disabled=true;showMessage(authMsg,'برای ورود، اثر انگشت خود را تأیید کنید…','warn');
+ button.disabled=true;showMessage(authMsg,'برای ورود، بیومتریک امن دستگاه را تأیید کنید…','warn');
  try{const credentials=await vault.getCredentials();if(!credentials?.email||!credentials?.password)throw new Error('اطلاعات ورود ذخیره‌شده پیدا نشد.');const {data,error}=await supabaseClient.auth.signInWithPassword({email:credentials.email,password:credentials.password});if(error)throw error;if(!data.session)throw new Error('نشست معتبر از سرور دریافت نشد.');showMessage(authMsg,'ورود بیومتریک تأیید شد.','ok');await showApp(data.session)}
  catch(error){
   const staleCredential=error?.code==='invalid_credentials'||/invalid login credentials|invalid_credentials/i.test(error?.message||String(error));
@@ -3710,12 +3710,12 @@ async function loginWithBiometrics(){
     await vault.clearCredentials();
     button.classList.add('hidden');
     $('clearBiometricCredentialsBtn')?.classList.add('hidden');
-    showMessage(authMsg,'رمز ذخیره‌شده دیگر معتبر نیست و از این گوشی پاک شد؛ با رمز جدید وارد شوید و در صورت تمایل اثر انگشت را دوباره فعال کنید.','warn');
+    showMessage(authMsg,'رمز ذخیره‌شده دیگر معتبر نیست و از این گوشی پاک شد؛ با رمز جدید وارد شوید و در صورت تمایل بیومتریک امن دستگاه را دوباره فعال کنید.','warn');
    }catch(clearError){
     $('clearBiometricCredentialsBtn')?.classList.remove('hidden');
     showMessage(authMsg,'رمز ذخیره‌شده معتبر نیست؛ با رمز جدید وارد شوید و اطلاعات بیومتریک قبلی را پاک کنید.','warn');
    }
-  }else showMessage(authMsg,'ورود با اثر انگشت انجام نشد: '+(error?.message||String(error)),'err');
+  }else showMessage(authMsg,'ورود با بیومتریک امن دستگاه انجام نشد: '+(error?.message||String(error)),'err');
  }
  finally{button.disabled=false}
 }
