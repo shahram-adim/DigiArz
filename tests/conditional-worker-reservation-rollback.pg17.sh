@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
-export PGPASSWORD="\${PGPASSWORD:-postgres}"
-DB_HOST="\${PGHOST:-localhost}"
-DB_USER="\${PGUSER:-postgres}"
-DB_NAME="\${PGDATABASE:-digiarz_inactive_account_rpc_race_test}"
+export PGPASSWORD="${PGPASSWORD:-postgres}"
+DB_HOST="${PGHOST:-localhost}"
+DB_USER="${PGUSER:-postgres}"
+DB_NAME="${PGDATABASE:-digiarz_inactive_account_rpc_race_test}"
 PSQL=(psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -v ON_ERROR_STOP=1 -X -q)
 USER_ID='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
 PARENT_ID='aaaaaaaa-aaaa-4aaa-8aaa-000000000001'
@@ -11,7 +11,7 @@ COND_ID='aaaaaaaa-aaaa-4aaa-8aaa-000000000002'
 
 # Inject a deterministic failure after execute_demo_trade has reached its
 # guarded trades INSERT. The trigger is test-only and scoped to this user.
-"\${PSQL[@]}" <<SQL
+"${PSQL[@]}" <<SQL
 CREATE OR REPLACE FUNCTION private.fail_test_conditional_trade_insert()
 RETURNS trigger LANGUAGE plpgsql SET search_path TO ''
 AS \$function\$
@@ -50,11 +50,11 @@ INSERT INTO public.order_reservations(
 VALUES ('$PARENT_ID','$USER_ID','BTC',0.1,0,0,'reserved');
 SQL
 
-"\${PSQL[@]}" -c "SELECT public.process_conditional_orders();" >/tmp/digiarz-conditional-rollback.log 2>&1
+"${PSQL[@]}" -c "SELECT public.process_conditional_orders();" >/tmp/digiarz-conditional-rollback.log 2>&1
 
 # The failing subtransaction must restore the reservation, wallet, asset
 # balance, parent order and all execution writes; only attempt diagnostics persist.
-"\${PSQL[@]}" -c "DO \\$\\$ BEGIN
+"${PSQL[@]}" -c "DO \$\$ BEGIN
   IF (SELECT status FROM public.order_reservations WHERE order_id='$PARENT_ID') IS DISTINCT FROM 'reserved'
      OR (SELECT released_amount FROM public.order_reservations WHERE order_id='$PARENT_ID') IS DISTINCT FROM 0
      OR (SELECT consumed_amount FROM public.order_reservations WHERE order_id='$PARENT_ID') IS DISTINCT FROM 0 THEN
@@ -79,8 +79,8 @@ SQL
      OR (SELECT count(*) FROM public.transactions WHERE user_id='$USER_ID') <> 0 THEN
     RAISE EXCEPTION 'market execution rows survived failed subtransaction';
   END IF;
-END \\$\\$;"
+END \$\$;"
 
 # Remove only the test-only failure trigger so subsequent test users can trade.
-"\${PSQL[@]}" -c "DROP TRIGGER zz_test_fail_conditional_trade_insert ON public.trades;"
+"${PSQL[@]}" -c "DROP TRIGGER zz_test_fail_conditional_trade_insert ON public.trades;"
 echo "PASS: conditional worker exception rolls back reservation release and all partial market-engine writes while preserving retry diagnostics."
