@@ -1002,6 +1002,17 @@ test('market row grid uses five matching columns and named areas at desktop and 
   assert.ok(final.includes('grid-template-columns:22px minmax(0,1fr) 34px 48px 76px!important;'));
 });
 
+
+test('market asset rows remain frameless across all themes while retaining a subtle hover state',()=>{
+  const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
+  const final=css.slice(css.lastIndexOf('Market asset rows: preserve spacing and hover feedback without card frames.'));
+  assert.ok(final.includes('#appView #tab-markets #marketList>.coin:not(.tether-pinned)'));
+  assert.ok(final.includes('border:0!important;'));
+  assert.ok(final.includes('outline:0!important;'));
+  assert.ok(final.includes('box-shadow:none!important;'));
+  assert.ok(final.includes('background:transparent!important;'));
+});
+
 test('third luxury theme is a bright ice-blue indigo glass palette, distinct from the black-gold dark theme',()=>{
   const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
   const final=css.slice(css.lastIndexOf('DigiArz layout correction + luminous indigo glass theme'));
