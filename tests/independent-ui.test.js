@@ -24,17 +24,22 @@ test('authentication, dashboard, market, wallet, orders and history hooks are pr
   assert.match(html, /\['light','dark','luxury'\]\.includes\(theme\)/);
 });
 
-test('three themes use distinct black-gold, translucent light and indigo-glass palettes', () => {
+test('three themes resolve to distinct black-gold, white-glass and bright indigo-glass palettes', () => {
   assert.match(css, /body\.dark-theme\{[\s\S]*?--da-accent:#f0b90b/);
   assert.match(css, /body\.light-theme\{[\s\S]*?--da-surface:rgba\(255,255,255,\.68\)/);
-  assert.match(css, /body\.luxury-theme\{[\s\S]*?--da-bg:#111027[\s\S]*?--da-accent:#b7a8ff/);
+  const luxuryBlocks = [...css.matchAll(/body\.luxury-theme\{[^}]*\}/gs)];
+  const finalLuxury = luxuryBlocks.at(-1)?.[0] || '';
+  assert.match(finalLuxury, /color-scheme:light!important/);
+  assert.match(finalLuxury, /--da-bg:#edf2ff!important/);
+  assert.match(finalLuxury, /--da-accent:#526ee8!important/);
   assert.match(css, /body\.luxury-theme[\s\S]*?backdrop-filter:blur\(18px\)/);
 });
 
-test('chart canvas palettes match the approved black-gold, pure-white and indigo-glass themes', () => {
-  assert.match(html, /meta\.content=light\?'#ffffff':luxury\?'#090d20':'#090b10'/);
+test('chart canvas and Android theme-color metadata follow the bright indigo-glass palette', () => {
+  assert.match(html, /document\.documentElement\.style\.colorScheme=\(light\|\|luxury\)\?'light':'dark'/);
+  assert.match(html, /meta\.content=light\?'#ffffff':luxury\?'#edf2ff':'#090b10'/);
   assert.match(html, /bg:'#ffffff',text:'#152b40',grid:'#eaf2f8',line:'#d8e7f2'/);
-  assert.match(html, /bg:'#090d20',text:'#f1f3ff',grid:'#26325a',line:'#596ba5'/);
+  assert.match(html, /bg:'#edf2ff',text:'#202b55',grid:'#dbe4ff',line:'#b9c7ef'/);
   assert.match(html, /bg:'#090b10',text:'#f7f4eb',grid:'#272b34',line:'#5b4b2a'/);
 });
 
@@ -1112,6 +1117,16 @@ test('pinned Tether market row keeps the same frameless responsive treatment in 
     assert.ok(rules.includes(token),'pinned Tether styling includes '+token);
 });
 
+
+
+test('visual review fixture renders the pinned Tether row and its dedicated green SVG logo first', () => {
+  const harness = fs.readFileSync('tests/ui-visual-screenshots.cjs', 'utf8');
+  assert.match(harness, /class="coin tether-pinned"/);
+  assert.match(harness, /aria-label="لوگوی تتر USDT"/);
+  assert.match(harness, /fill="#26A17B"/);
+  assert.match(harness, /counts\.marketCards!==9/);
+  assert.match(harness, /tetherRow \+ rows\.map/);
+});
 
 test('Android biometric login is opt-in and uses the native encrypted credential vault', () => {
   assert.match(html, /id="saveCredentialsForBiometric"[^>]*type="checkbox"/);
