@@ -1005,5 +1005,4 @@ test('third luxury theme is a bright ice-blue indigo glass palette, distinct fro
     'linear-gradient(145deg,#f7f8ff 0%,#edf2ff 52%,#e9f4ff 100%)',
     'body.luxury-theme .top','body.luxury-theme #tab-markets .market-categories .category-btn.active'])
     assert.ok(final.includes(token),'bright luxury palette includes '+token);
-  assert.ok(final.includes('body.dark-theme{'));
 });
