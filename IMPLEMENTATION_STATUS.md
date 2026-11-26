@@ -1727,3 +1727,16 @@
 - [ ] اقدام لازم برای رفع ابهام CI: مالک مخزن از GitHub Actions > All workflows > Exact decimal tests، وضعیت runهای PR #63 و تنظیمات Actions/permissions را بررسی کند و در صورت غیرفعال بودن workflow آن را فعال کند؛ سپس synchronize یا اجرای دستی از UI انجام و لینک run ارسال شود.
 - [ ] پس از دریافت run واقعی، تمام Node و PostgreSQL 17 steps و logs باید بررسی شوند. تا آن زمان هیچ نتیجهٔ CI تأییدشده‌ای برای HEAD فعلی نداریم.
 - [!] هیچ Production، Migration، grant، policy، cron، Auth، Edge Function یا دادهٔ مالی تغییر نکرده است.
+
+### تطبیق مستقل ACL و Role Matrix برای ۴۶ تابع — شهرام ۱۱۳ — ۲۰۲۶-۱۱-۲۶
+
+- [x] وضعیت واقعی PR #63 و شاخه دوباره از GitHub بررسی شد: PR باز، Draft و ادغام‌نشده باقی مانده است. مقایسهٔ تازهٔ شاخه با main نشان می‌دهد وضعیت تاریخچه diverged و شاخه ۱۴۸ commit جلو / ۷ commit عقب است؛ هیچ merge، rebase یا تغییر main انجام نشد.
+- [x] manifest و Role Matrix هر دو ۴۶ امضای تابع دارند؛ تطبیق identity، مالک، ACL snapshot و definition fingerprint برای هر ۴۶ مورد بدون اختلاف انجام شد (۰ mismatch).
+- [x] تجزیهٔ مستقل رشته‌های ACL خام نشان داد هیچ‌یک از ۴۶ تابع به grantee عمومی PUBLIC مجوز EXECUTE ندارد؛ ۲ تابع anon-executable هستند و دقیقاً با allowlist و بررسی مستند دسترسی ناشناس تطبیق دارند: public.get_admin_market_listings و public.get_exchange_discovered_market_assets.
+- [x] شمارش ACLهای صریح EXECUTE در snapshot: anon=۲، authenticated=۲۶، service_role=۳۶، postgres=۴۶. این شمارش، ACL ثبت‌شده است و به‌تنهایی جایگزین آزمون privilege مؤثر PostgreSQL یا درخواست واقعی PostgREST نیست.
+- [x] فایل آزمون Manifest در شاخه شامل ۳۱ فراخوانی test است؛ موارد آن snapshot، fingerprint، allowlist anon، trigger binding، migration evidence، ACL matrix و race fixtures را پوشش می‌دهند.
+- [!] این مرحله فقط سازگاری ایستای snapshotهای مورخ ۲۰۲۶-۱۱-۲۵ را تأیید می‌کند؛ در این مرحله snapshot زندهٔ Production مجدداً گرفته نشد و نتیجه را به‌عنوان وضعیت فعلی Production تعمیم نمی‌دهیم.
+- [!] اجرای واقعی node --test و workflow PostgreSQL 17 برای HEAD جاری هنوز از ابزار متصل قابل تأیید نیست؛ نتیجهٔ CI سبز اعلام نمی‌شود.
+- [ ] شکاف باقیمانده: آزمون runtime در محیط Supabase آزمایشیِ دورریختنی برای anon/authenticated/service_role، privilege مؤثر با has_function_privilege، و endpointهای واقعی PostgREST/RPC؛ به‌علاوه بررسی race tests و logs در CI واقعی.
+- [ ] گام بعد: بررسی دقیق تست‌های منفی/مثبت runtime و fixture ACL در شاخه، مشخص‌کردن اینکه کدام سناریوها واقعاً در PostgreSQL 17 اجرا می‌شوند، و ثبت موارد فاقد پوشش؛ بدون هیچ فراخوانی مالی در Production و بدون تغییر مجوزها.
+- [ ] هیچ Production، Migration، grant/revoke، policy، cron، Edge Function، Auth، deploy یا دادهٔ مالی تغییر نکرده است.
