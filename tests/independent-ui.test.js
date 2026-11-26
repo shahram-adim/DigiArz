@@ -1136,7 +1136,8 @@ test('visual review captures authentication plus dashboard and market rows acros
   assert.match(harness,/marketRows\.scrollIntoViewIfNeeded\(\)/);
   assert.match(harness,/dashboard-marketrows/);
   assert.match(harness,/markets-assetrows/);
-  assert.match(harness,/viewport\.name,theme,'login'/);\n  assert.match(harness,/files\.length!==72/);
+  assert.match(harness,/viewport\.name,theme,'login'/);
+  assert.match(harness,/files\.length!==72/);
 });
 
 
