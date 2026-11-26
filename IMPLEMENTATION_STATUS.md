@@ -1569,3 +1569,11 @@
 - [!] CI برای commit جدید هنوز در GitHub قابل مشاهده/تأیید نیست؛ نتیجهٔ اجرای assertionها را به‌جای CI ثبت نمی‌کنیم.
 - [!] این نتیجه بر snapshot Production مورخ 2026-11-25 و fingerprintهای ثبت‌شده تکیه دارد؛ پیش از هر تغییر اجرایی باید snapshot تازه شود. هیچ Production mutation، Migration، db push، grant، policy، trigger، function، cron، سفارش یا موجودی تغییر نکرد.
 - [ ] گام بعد: اجرای CI روی commit جدید؛ سپس بررسی race دو‌نشستی `deactivate_my_account()` در برابر سه مسیر placement و workerها در PostgreSQL 17 دورریختنی با همین بدنه‌ها و Triggerهای واقعی. اختلاف قفل child در Stop-Limit worker (`FOR UPDATE OF c,parent` در Production در برابر candidate سه‌ردیفی) جداگانه حفظ و آزموده شود.
+### آزمون هم‌زمانی PostgreSQL 17 برای قفل حساب غیرفعال — ۲۰۲۶-۱۱-۲۶
+
+- [x] Fixture دورریختنی `tests/inactive-account-write-race.pg17.sql` با بدنهٔ دقیق تابع `private.guard_active_account_writes()` از Snapshot ثبت‌شدهٔ Production اضافه شد؛ Trigger `BEFORE INSERT` روی جدول آزمایشی orders نصب می‌شود.
+- [x] اسکریپت دو نشست `tests/inactive-account-write-race.pg17.sh` اضافه شد: سناریوی اول placement که ابتدا `FOR SHARE` می‌گیرد و سپس deactivation منتظر می‌ماند؛ سناریوی دوم deactivation که ابتدا ردیف profile را قفل می‌کند و INSERT بعدی پس از commit باید با پیام Account is inactive رد شود.
+- [x] مرحلهٔ CI روی PostgreSQL 17 به `.github/workflows/exact-decimal-tests.yml` اضافه شد؛ دیتابیس جداگانه `digiarz_inactive_account_race_test` ساخته می‌شود و هیچ اتصال یا تغییری به Supabase Production ندارد.
+- [!] آزمون هنوز در محیط محلی اجرا نشده؛ این محیط ابزار `psql`/PostgreSQL ندارد. اجرای قطعی به CI GitHub وابسته است؛ در آخرین بررسی، برای commit تازه هنوز Workflow run و status قابل مشاهده نبود.
+- [!] این آزمون رفتار قفل Trigger را به‌صورت جداگانه ثابت می‌کند، اما اجرای کامل بدنهٔ `deactivate_my_account()` و سه RPC placement با تمام وابستگی‌هایشان هنوز در fixture بازسازی نشده است؛ آن مرحله نباید با این تست محدود اشتباه گرفته شود.
+- [ ] گام بعد: تأیید اجرای CI؛ سپس ساخت fixture یکپارچه از schema و وابستگی‌های لازم برای اجرای واقعی توابع Production و آزمون دو‌نشستی placement/deactivation/worker، بدون استفاده از Snapshot به‌عنوان migration قابل اعمال.
