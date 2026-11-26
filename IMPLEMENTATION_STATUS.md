@@ -1714,3 +1714,16 @@
 - [ ] هیچ Production، Migration، grant، policy، cron، Edge Function، Auth یا دادهٔ مالی تغییر نکرده است.
 
 - [x] پس از ثبت این گزارش، HEAD نهایی checkpoint برابر `544c57d77adfe906897a76eb59b601690bf61d45` تأیید شد؛ PR #63 دارای ۱۴۶ commit و اختلاف شاخه با main برابر ۱۴۶ جلو / ۷ عقب است. PR همچنان Draft و باز، mergeable=false و ادغام‌نشده است.
+
+ 
+### بررسی مسیر فعال‌سازی GitHub Actions — شهرام ۱۱۲ — ۲۰۲۶-۱۱-۲۶
+
+- [x] Workflow با نام `Exact decimal tests` در هر دو شاخهٔ `main` و شاخهٔ PR موجود است.
+- [x] Triggerهای تعریف‌شده شامل `pull_request` با base branch برابر `main` و `push` فقط روی `main` هستند؛ برای شاخهٔ ممیزی، مسیر مورد انتظار `pull_request/synchronize` است، نه push مستقیم.
+- [x] workflow فایل شاخهٔ PR شامل مراحل Node و PostgreSQL 17 برای آزمون ACL/RLS و raceهاست؛ فایل workflow در main نیز موجود است.
+- [!] ابزار GitHub متصل‌شده در این محیط فقط فهرست محدود workflow runهای pull_request را برمی‌گرداند و برای HEAD فعلی فهرست خالی است؛ Combined Status نیز خالی است. API/ابزار فهرست عمومی Actions runs یا workflow_dispatch در دسترس نیست. بنابراین نمی‌توان از این محیط نتیجهٔ قطعی دربارهٔ disabled بودن Actions، محدودیت fork/token، یا trigger failure گرفت.
+- [!] هیچ run id معتبری برای مشاهدهٔ job/log یا rerun وجود ندارد؛ اجرای دستی workflow هم به‌علت نبود workflow_dispatch و نبود ابزار dispatch ممکن نیست. CI را سبز فرض نمی‌کنیم.
+- [x] PR #63 باز، Draft و ادغام‌نشده باقی است؛ HEAD فعلی `e6517005e8f36d0c34003debe37cada4ea18ae75`؛ mergeable=false. شاخه نسبت به main در وضعیت diverged است و ۷ commit عقب‌تر؛ هیچ rebase/merge انجام نشد.
+- [ ] اقدام لازم برای رفع ابهام CI: مالک مخزن از GitHub Actions > All workflows > Exact decimal tests، وضعیت runهای PR #63 و تنظیمات Actions/permissions را بررسی کند و در صورت غیرفعال بودن workflow آن را فعال کند؛ سپس synchronize یا اجرای دستی از UI انجام و لینک run ارسال شود.
+- [ ] پس از دریافت run واقعی، تمام Node و PostgreSQL 17 steps و logs باید بررسی شوند. تا آن زمان هیچ نتیجهٔ CI تأییدشده‌ای برای HEAD فعلی نداریم.
+- [!] هیچ Production، Migration، grant، policy، cron، Auth، Edge Function یا دادهٔ مالی تغییر نکرده است.
