@@ -5798,3 +5798,21 @@ body.luxury-theme #appView #tab-trade .advanced-order-list-v36 *,
 body.luxury-theme #appView #tab-trade .trade-entry-grid-v35 *{
   --legacy-panel-text:#202b55;
 }
+
+
+/* Specificity correction for legacy trade indicators and orderbook surfaces. */
+body.luxury-theme #appView #tab-trade .indicator-grid .performance-item,
+body.luxury-theme #appView #tab-trade .indicator-panel,
+body.luxury-theme #appView #tab-trade .orderbook-side,
+body.luxury-theme #appView #tab-trade .orderbook-mid{
+  background:linear-gradient(145deg,rgba(255,255,255,.99),rgba(232,239,255,.97))!important;
+  color:#202b55!important;
+  border:1px solid rgba(86,108,194,.19)!important;
+  box-shadow:0 10px 26px rgba(67,87,155,.07),inset 0 1px rgba(255,255,255,.98)!important;
+}
+body.luxury-theme #appView #tab-trade .indicator-grid .performance-item strong,
+body.luxury-theme #appView #tab-trade .indicator-grid .performance-item small,
+body.luxury-theme #appView #tab-trade .indicator-panel h3,
+body.luxury-theme #appView #tab-trade .orderbook-side h3{
+  color:#293b78!important;
+}
