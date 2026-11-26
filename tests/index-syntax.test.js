@@ -303,7 +303,7 @@ test('market rows preserve Persian and English identity, 24h change, prices and 
   const start = html.indexOf('function renderMarkets(){');
   const end = html.indexOf('function renderDashboardPortfolio(', start);
   const market = html.slice(start, end);
-  assert.ok(market.includes('persianName=String(item.name_fa||item.asset_name_fa||persianCoinName(item.symbol,englishName))'));
+  assert.ok(market.includes('persianName=String(marketPersianName(item))'));
   assert.match(market, /class="coin-name-fa"/);
   assert.match(market, /class="coin-symbol-en"/);
   assert.match(market, /class="coin-english-name"/);
