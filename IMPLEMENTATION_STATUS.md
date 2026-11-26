@@ -1684,3 +1684,6 @@
 - [ ] اجرای واقعی Node tests، Playwright screenshots و APK روی GitHub Actions هنوز باید از مسیر workflowهای موجود در base یا مسیر CI مجاز تأیید شود؛ صرف تغییر کد به معنی موفقیت تست نیست.
 - [ ] همگام‌سازی دو commit جدید Main همچنان بدون merge/rebase کور و بدون تغییر Main پیگیری می‌شود؛ PR #64 Draft باقی می‌ماند.
 - ایمنی: فقط فایل‌های UI، آزمون و مستندات در شاخهٔ Draft تغییر کردند؛ هیچ merge، انتشار، Pages deploy، Supabase، migration یا تغییر Production انجام نشد.
+
+- [x] trigger شاخهٔ push در workflow APK از نام شاخهٔ قدیمی به شاخهٔ فعال PR #64 اصلاح شد و workflow_dispatch نیز برای استفاده پس از در دسترس قرارگرفتن workflow در base افزوده شد.
+- [!] این اصلاح به‌تنهایی workflow را روی PR فعلی اجرا نمی‌کند؛ فایل workflow هنوز فقط در head PR موجود است و نتیجهٔ Actions همچنان باید از workflow موجود در base یا پس از فعال‌شدن فایل در base دریافت شود.
