@@ -5895,3 +5895,52 @@ body.luxury-theme #appView .mobile-bottom-nav button.active:after{background:#36
 body.dark-theme #appView #tab-markets #marketList>.coin:not(.tether-pinned):hover{
   background:rgba(235,199,104,.055)!important;
 }
+
+
+/* Final identity polish: coin logos and favorite stars have no decorative frames. */
+#dashboardMarketPreview .da-market-logo,
+#dashboardMarketPreview .da-market-logo-inner,
+#dashboardMarketPreview .da-market-logo img,
+#dashboardMarketPreview .da-market-logo-inner img{
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+  background-color:transparent!important;
+  filter:none!important;
+}
+#dashboardMarketPreview .da-market-logo,
+#dashboardMarketPreview .da-market-logo-inner{
+  padding:0!important;
+  overflow:visible!important;
+}
+#dashboardMarketPreview .da-market-logo img,
+#dashboardMarketPreview .da-market-logo-inner img{
+  object-fit:contain!important;
+  border-radius:0!important;
+}
+#dashboardMarketPreview .da-market-favorite{
+  border:0!important;
+  outline:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+  background-color:transparent!important;
+  padding:0!important;
+  color:var(--da-muted)!important;
+}
+#dashboardMarketPreview .da-market-favorite[aria-pressed="true"]{
+  color:var(--da-accent)!important;
+}
+body.dark-theme #dashboardMarketPreview .da-market-favorite[aria-pressed="true"]{color:#f2c85b!important}
+body.light-theme #dashboardMarketPreview .da-market-favorite[aria-pressed="true"]{color:#315bd5!important}
+body.luxury-theme #dashboardMarketPreview .da-market-favorite[aria-pressed="true"]{color:#3659ca!important}
+#tab-markets #marketList .favorite-btn,
+#tab-markets #marketList .favorite-btn.is-favorite{
+  border:0!important;
+  outline:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+  background-color:transparent!important;
+}
