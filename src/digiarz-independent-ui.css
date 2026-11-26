@@ -4089,3 +4089,505 @@ body.luxury-theme #dashboardMarketPreview .da-market-coin-card{
 .da-v2-wallet-assets .asset-row-share,.da-v2-wallet-assets .asset-share{display:none!important}
 @media(max-width:700px){.da-v2-wallet-toolbar{grid-template-columns:minmax(0,1fr) 125px;gap:7px}.da-v2-wallet-assets .asset-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;padding:11px}.da-v2-wallet-assets .asset-row .secondary{grid-column:1/-1;width:100%}.da-v2-wallet-assets .asset-row .price-stack{font-size:11px}}
 @media(max-width:380px){.da-v2-wallet-toolbar{grid-template-columns:1fr}.da-v2-wallet-assets .asset-row{grid-template-columns:1fr}.da-v2-wallet-assets .asset-row .secondary{grid-column:auto}}
+
+
+/* ================================================================
+   DigiArz Signature UI 2026-11-26 — premium redesign pass
+   One coherent final layer for dashboard, market and asset marks.
+   Visual-only: preserve data hooks, market logic and demo trading.
+   ================================================================ */
+:root{
+  --da-radius-xl:26px;
+  --da-radius-lg:20px;
+  --da-radius-md:14px;
+  --da-shadow-soft:0 18px 48px rgba(5,12,25,.08);
+  --da-shadow-float:0 22px 60px rgba(3,10,24,.16);
+  --da-focus:0 0 0 3px color-mix(in srgb,var(--da-accent) 22%,transparent);
+  --da-row-line:color-mix(in srgb,var(--da-line) 74%,transparent);
+  --da-motion-premium:cubic-bezier(.2,.75,.25,1);
+}
+body.dark-theme{
+  --da-bg:#080b11!important;--da-bg2:#0d121b!important;
+  --da-surface:rgba(20,26,37,.92)!important;--da-panel:rgba(17,23,34,.96)!important;
+  --da-line:rgba(220,190,112,.13)!important;--da-text:#f5f3ed!important;
+  --da-muted:#9ba7b7!important;--da-accent:#e8bd58!important;
+  --da-positive:#20c997!important;--da-negative:#ff6478!important;
+  background:
+    radial-gradient(ellipse at 82% -8%,rgba(180,135,44,.12),transparent 34%),
+    radial-gradient(ellipse at 0% 38%,rgba(31,68,112,.10),transparent 34%),
+    #080b11!important;
+}
+body.light-theme{
+  --da-bg:#fff!important;--da-bg2:#fff!important;
+  --da-surface:rgba(255,255,255,.96)!important;--da-panel:#fff!important;
+  --da-line:rgba(33,89,143,.12)!important;--da-text:#132b43!important;
+  --da-muted:#71849a!important;--da-accent:#176fc1!important;
+  --da-positive:#07875c!important;--da-negative:#d84d61!important;
+  background:#fff!important;color:#132b43!important;
+}
+body.luxury-theme{
+  --da-bg:#0e1028!important;--da-bg2:#141638!important;
+  --da-surface:rgba(26,30,72,.84)!important;--da-panel:rgba(22,26,64,.94)!important;
+  --da-line:rgba(173,184,255,.17)!important;--da-text:#f0f1ff!important;
+  --da-muted:#aab2d5!important;--da-accent:#b9c4ff!important;
+  --da-positive:#54d8b2!important;--da-negative:#ff8298!important;
+  background:
+    radial-gradient(ellipse at 80% -10%,rgba(103,112,211,.24),transparent 38%),
+    radial-gradient(ellipse at 0% 50%,rgba(65,54,145,.16),transparent 36%),
+    #0e1028!important;color:#f0f1ff!important;
+}
+body.dark-theme .wrap,body.light-theme .wrap,body.luxury-theme .wrap{
+  max-width:1480px!important;
+}
+#tab-dashboard,#tab-markets{
+  border:0!important;box-shadow:none!important;background:transparent!important;
+  min-width:0!important;
+}
+#tab-dashboard{
+  display:flex!important;flex-direction:column!important;gap:clamp(13px,1.8vw,22px)!important;
+  padding:clamp(12px,2vw,24px)!important;overflow:visible!important;
+}
+#tab-dashboard>.da-v2-topline{order:0!important}
+#tab-dashboard>.da-v2-hero{order:1!important}
+#tab-dashboard>.da-v2-wallet-card{order:2!important}
+#tab-dashboard>.da-v2-quick-grid{order:3!important}
+#tab-dashboard>.da-v2-section-head{order:4!important}
+#tab-dashboard>.da-market-glass{order:5!important}
+#tab-dashboard>#dashboardMarketPreviewUpdated{order:6!important}
+#tab-dashboard>.da-v2-trust-row{order:7!important}
+#tab-dashboard>.da-v2-bottom{order:8!important}
+#tab-dashboard>.dashboard-activity-center{order:9!important}
+#tab-dashboard>.da-v2-topline{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  padding:2px 4px 8px!important;margin:0!important;border:0!important;background:transparent!important;
+}
+#tab-dashboard .da-v2-brand{gap:10px!important;font-size:23px!important;letter-spacing:-.6px!important}
+#tab-dashboard .da-v2-brand small{font-size:10px!important;letter-spacing:0!important}
+#tab-dashboard .da-v2-logo{font-size:25px!important;font-weight:950!important}
+#tab-dashboard .da-v2-demo{
+  border:1px solid color-mix(in srgb,var(--da-accent) 34%,transparent)!important;
+  background:color-mix(in srgb,var(--da-accent) 10%,transparent)!important;
+  color:var(--da-accent)!important;border-radius:999px!important;
+  padding:7px 14px!important;font-size:10px!important;font-weight:900!important;letter-spacing:1.4px!important;
+}
+#tab-dashboard>.da-v2-hero{
+  position:relative!important;isolation:isolate!important;overflow:hidden!important;
+  display:grid!important;grid-template-columns:minmax(0,1.25fr) minmax(170px,.75fr)!important;
+  align-items:center!important;gap:20px!important;min-height:210px!important;
+  padding:clamp(22px,3vw,38px)!important;margin:0!important;border-radius:var(--da-radius-xl)!important;
+  border:1px solid var(--da-line)!important;box-shadow:var(--da-shadow-soft)!important;
+  background:
+    radial-gradient(circle at 82% 48%,color-mix(in srgb,var(--da-accent) 18%,transparent),transparent 32%),
+    linear-gradient(125deg,var(--da-surface),var(--da-panel))!important;
+}
+body.light-theme #tab-dashboard>.da-v2-hero{
+  background:linear-gradient(115deg,#fff 0%,#fff 64%,#f7fbff 100%)!important;
+  box-shadow:0 18px 46px rgba(24,79,132,.07)!important;
+}
+body.luxury-theme #tab-dashboard>.da-v2-hero{
+  background:
+    radial-gradient(circle at 82% 45%,rgba(126,139,255,.22),transparent 34%),
+    linear-gradient(125deg,rgba(32,37,91,.97),rgba(16,19,51,.98))!important;
+}
+#tab-dashboard .da-v2-hero-copy{max-width:680px!important;position:relative!important;z-index:2!important}
+#tab-dashboard .da-v2-eyebrow{
+  display:inline-flex!important;align-items:center!important;gap:7px!important;
+  color:var(--da-accent)!important;font-size:11px!important;font-weight:850!important;
+  letter-spacing:.15px!important;
+}
+#tab-dashboard .da-v2-eyebrow svg{width:15px!important;height:15px!important}
+#tab-dashboard .da-v2-hero h1{
+  margin:13px 0 9px!important;font-size:clamp(25px,3.1vw,39px)!important;
+  line-height:1.35!important;letter-spacing:-1px!important;font-weight:950!important;
+  color:var(--da-text)!important;
+}
+#tab-dashboard .da-v2-hero h1 em{font-style:normal!important;color:var(--da-accent)!important}
+#tab-dashboard .da-v2-hero p{
+  max-width:570px!important;margin:0 0 17px!important;color:var(--da-muted)!important;
+  font-size:13px!important;line-height:2!important;
+}
+#tab-dashboard .da-v2-primary{
+  min-height:43px!important;padding:10px 18px!important;border:0!important;border-radius:13px!important;
+  background:linear-gradient(120deg,var(--da-accent),color-mix(in srgb,var(--da-accent) 72%,#fff))!important;
+  color:#101522!important;font-weight:900!important;box-shadow:0 9px 22px color-mix(in srgb,var(--da-accent) 20%,transparent)!important;
+}
+body.light-theme #tab-dashboard .da-v2-primary{color:#fff!important;background:linear-gradient(120deg,#176fc1,#3897df)!important}
+#tab-dashboard .da-v2-hero-art{
+  width:min(100%,240px)!important;aspect-ratio:1!important;justify-self:center!important;
+  position:relative!important;opacity:.96!important;transform:scale(.96)!important;
+}
+#tab-dashboard .da-v2-hero-foot{display:none!important}
+#tab-dashboard>.da-v2-wallet-card{
+  display:block!important;margin:0!important;padding:clamp(15px,2vw,22px)!important;
+  border:1px solid var(--da-line)!important;border-radius:var(--da-radius-lg)!important;
+  background:var(--da-surface)!important;box-shadow:var(--da-shadow-soft)!important;
+}
+#tab-dashboard .da-v2-wallet-card .da-v2-section-head{
+  margin:0 0 13px!important;padding:0!important;align-items:center!important;
+}
+#tab-dashboard .da-v2-kicker{color:var(--da-accent)!important;font-size:9px!important;letter-spacing:1.4px!important;font-weight:900!important}
+#tab-dashboard .da-v2-wallet-card h2{color:var(--da-text)!important;font-size:16px!important;font-weight:900!important}
+#tab-dashboard .da-v2-wallet-subtitle{color:var(--da-muted)!important;font-size:10px!important}
+#tab-dashboard .da-v2-balance-main{
+  display:flex!important;align-items:baseline!important;gap:10px!important;
+  min-height:74px!important;padding:14px 17px!important;border-radius:16px!important;
+  background:linear-gradient(110deg,color-mix(in srgb,var(--da-accent) 13%,var(--da-panel)),var(--da-panel))!important;
+  border:1px solid color-mix(in srgb,var(--da-accent) 17%,transparent)!important;
+}
+#tab-dashboard .da-v2-balance-main span{color:var(--da-muted)!important;font-size:11px!important}
+#tab-dashboard .da-v2-balance-main strong{
+  color:var(--da-text)!important;font-size:clamp(25px,3vw,34px)!important;
+  font-weight:950!important;letter-spacing:-.8px!important;direction:ltr!important;
+}
+#tab-dashboard .da-v2-balance-main small{color:var(--da-accent)!important;font-weight:900!important}
+#tab-dashboard .da-v2-account-stats{
+  display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:9px!important;margin:10px 0!important;
+}
+#tab-dashboard .da-v2-account-stats>div{
+  min-width:0!important;padding:11px 13px!important;border-radius:13px!important;
+  background:color-mix(in srgb,var(--da-panel) 82%,transparent)!important;
+  border:1px solid var(--da-row-line)!important;
+}
+#tab-dashboard .da-v2-account-stats small{display:block!important;color:var(--da-muted)!important;font-size:10px!important}
+#tab-dashboard .da-v2-account-stats b{display:block!important;margin-top:5px!important;color:var(--da-text)!important;font-size:14px!important;font-weight:900!important}
+#tab-dashboard .da-v2-wallet-toolbar{margin-top:11px!important}
+#tab-dashboard .da-v2-wallet-assets .asset-row{
+  border:0!important;border-bottom:1px solid var(--da-row-line)!important;
+  border-radius:0!important;background:transparent!important;box-shadow:none!important;
+}
+#tab-dashboard .da-v2-wallet-link{
+  border:1px solid var(--da-line)!important;border-radius:12px!important;
+  background:transparent!important;color:var(--da-accent)!important;font-weight:850!important;
+}
+#tab-dashboard>.da-v2-quick-grid{
+  display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:10px!important;margin:0!important;
+}
+#tab-dashboard .da-v2-quick-grid button{
+  display:flex!important;align-items:center!important;justify-content:flex-start!important;
+  gap:11px!important;min-width:0!important;min-height:64px!important;padding:13px 15px!important;
+  border:1px solid var(--da-line)!important;border-radius:16px!important;
+  background:var(--da-surface)!important;color:var(--da-text)!important;
+  box-shadow:0 7px 20px rgba(2,8,20,.035)!important;
+  transition:transform var(--da-motion-premium),border-color var(--da-motion-premium),background var(--da-motion-premium)!important;
+}
+#tab-dashboard .da-v2-quick-grid button:hover{
+  transform:translateY(-2px)!important;border-color:color-mix(in srgb,var(--da-accent) 42%,transparent)!important;
+}
+#tab-dashboard .da-v2-quick-grid button svg{width:19px!important;height:19px!important;color:var(--da-accent)!important;flex:0 0 auto!important}
+#tab-dashboard .da-v2-quick-grid button b{font-size:11px!important;font-weight:850!important}
+#tab-dashboard>.da-v2-section-head{display:flex!important;align-items:end!important;justify-content:space-between!important;margin:2px 1px -3px!important}
+#tab-dashboard>.da-v2-section-head h2{font-size:clamp(18px,2vw,23px)!important;color:var(--da-text)!important;font-weight:950!important}
+#tab-dashboard .da-v2-link{color:var(--da-accent)!important;font-size:11px!important;font-weight:850!important}
+#tab-dashboard>.da-market-glass{
+  padding:clamp(12px,2vw,20px)!important;border:1px solid var(--da-line)!important;
+  border-radius:var(--da-radius-xl)!important;background:var(--da-surface)!important;
+  box-shadow:var(--da-shadow-soft)!important;min-width:0!important;
+}
+#tab-dashboard .da-market-toolbar{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(180px,.36fr)!important;gap:9px!important}
+#tab-dashboard .da-market-search,#tab-dashboard .da-market-sort{
+  min-height:47px!important;border:1px solid var(--da-line)!important;border-radius:13px!important;
+  background:var(--da-panel)!important;
+}
+#tab-dashboard .da-market-search input,#tab-dashboard .da-market-sort select{
+  color:var(--da-text)!important;background:transparent!important;border:0!important;box-shadow:none!important;
+}
+#tab-dashboard .da-market-search svg,#tab-dashboard .da-market-sort svg{color:var(--da-muted)!important}
+#tab-dashboard .da-market-filters{
+  display:flex!important;gap:7px!important;overflow-x:auto!important;padding:12px 1px 7px!important;
+  scrollbar-width:none!important;
+}
+#tab-dashboard .da-market-filters::-webkit-scrollbar{display:none!important}
+#tab-dashboard .da-market-filters button{
+  flex:0 0 auto!important;padding:8px 13px!important;border:1px solid var(--da-line)!important;
+  border-radius:999px!important;background:transparent!important;color:var(--da-muted)!important;
+  font-size:10px!important;font-weight:800!important;
+}
+#tab-dashboard .da-market-filters button.active{
+  color:var(--da-accent)!important;border-color:color-mix(in srgb,var(--da-accent) 42%,transparent)!important;
+  background:color-mix(in srgb,var(--da-accent) 11%,transparent)!important;
+}
+#tab-dashboard .da-market-results-head{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  gap:8px!important;padding:7px 2px 9px!important;color:var(--da-muted)!important;font-size:10px!important;
+}
+#tab-dashboard .da-market-live{color:var(--da-positive)!important;font-weight:850!important}
+#dashboardMarketPreview.dashboard-market-preview.da-v2-market-list{
+  display:flex!important;flex-direction:column!important;gap:0!important;
+  border-top:1px solid var(--da-row-line)!important;min-width:0!important;
+}
+#dashboardMarketPreview .da-market-coin-card{
+  display:grid!important;grid-template-columns:minmax(0,1fr) minmax(78px,.45fr) minmax(115px,.65fr)!important;
+  grid-template-areas:"identity spark change" "identity spark price"!important;
+  align-items:center!important;gap:4px 13px!important;min-width:0!important;
+  padding:13px 7px!important;border:0!important;border-bottom:1px solid var(--da-row-line)!important;
+  border-radius:0!important;background:transparent!important;box-shadow:none!important;
+}
+#dashboardMarketPreview .da-market-card-top{grid-area:identity!important;min-width:0!important}
+#dashboardMarketPreview .da-market-identity{display:flex!important;align-items:center!important;gap:12px!important;min-width:0!important}
+#dashboardMarketPreview .da-market-name-wrap b{color:var(--da-text)!important;font-size:12px!important;font-weight:900!important}
+#dashboardMarketPreview .da-market-name-wrap small{color:var(--da-muted)!important;font-size:9px!important}
+#dashboardMarketPreview .da-market-price{grid-area:price!important;color:var(--da-text)!important;font-size:12px!important;text-align:left!important;direction:ltr!important}
+#dashboardMarketPreview .da-market-toman{grid-area:change!important;color:var(--da-muted)!important;font-size:9px!important;text-align:left!important}
+#dashboardMarketPreview .da-market-card-foot{grid-area:change!important;justify-self:end!important}
+#dashboardMarketPreview .da-market-change{font-size:10px!important;font-weight:900!important}
+#dashboardMarketPreview .da-market-sparkline{grid-area:spark!important;width:100%!important;min-width:50px!important;height:34px!important}
+#dashboardMarketPreview .da-market-logo,#dashboardMarketPreview .da-market-logo-inner{
+  width:38px!important;height:38px!important;min-width:38px!important;flex:0 0 38px!important;
+  padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;
+  box-shadow:none!important;outline:0!important;overflow:visible!important;
+}
+#dashboardMarketPreview .da-market-logo-inner img{
+  width:100%!important;height:100%!important;object-fit:contain!important;
+}
+#dashboardMarketPreview .da-market-favorite{
+  border:0!important;background:transparent!important;box-shadow:none!important;
+  color:var(--da-accent)!important;padding:3px!important;
+}
+#tab-markets{
+  padding:clamp(12px,2vw,24px)!important;display:block!important;
+}
+#tab-markets>.section-title{
+  margin:0 0 16px!important;padding:0 2px 12px!important;border-bottom:1px solid var(--da-row-line)!important;
+}
+#tab-markets>.section-title h2{font-size:clamp(20px,2.4vw,27px)!important;font-weight:950!important;color:var(--da-text)!important}
+#tab-markets .market-hero-v34{
+  min-height:170px!important;display:grid!important;grid-template-columns:minmax(0,1fr) 170px!important;
+  align-items:center!important;gap:20px!important;padding:clamp(20px,3vw,32px)!important;
+  margin:0 0 18px!important;border:1px solid var(--da-line)!important;border-radius:var(--da-radius-xl)!important;
+  background:radial-gradient(circle at 85% 45%,color-mix(in srgb,var(--da-accent) 18%,transparent),transparent 32%),var(--da-surface)!important;
+  box-shadow:var(--da-shadow-soft)!important;
+}
+body.light-theme #tab-markets .market-hero-v34{background:linear-gradient(115deg,#fff,#f8fbff)!important}
+body.luxury-theme #tab-markets .market-hero-v34{background:radial-gradient(circle at 85% 45%,rgba(125,137,255,.22),transparent 34%),linear-gradient(120deg,#20265e,#121638)!important}
+#tab-markets .market-hero-copy h1{font-size:clamp(22px,3vw,34px)!important;font-weight:950!important;color:var(--da-text)!important;margin:9px 0!important}
+#tab-markets .market-hero-copy p{max-width:700px!important;color:var(--da-muted)!important;font-size:12px!important;line-height:2!important}
+#tab-markets .market-hero-kicker{color:var(--da-accent)!important;font-size:10px!important;font-weight:900!important;letter-spacing:.4px!important}
+#tab-markets .market-hero-pills{display:flex!important;flex-wrap:wrap!important;gap:7px!important;margin-top:13px!important}
+#tab-markets .market-hero-pills span{
+  border:1px solid var(--da-line)!important;border-radius:999px!important;
+  padding:6px 10px!important;color:var(--da-muted)!important;font-size:9px!important;
+  background:color-mix(in srgb,var(--da-panel) 70%,transparent)!important;
+}
+#tab-markets .market-hero-mark{width:132px!important;height:132px!important;justify-self:center!important;opacity:.85!important}
+#tab-markets .market-coin-mark{
+  border:1px solid color-mix(in srgb,var(--da-accent) 40%,transparent)!important;
+  background:color-mix(in srgb,var(--da-accent) 13%,transparent)!important;
+  box-shadow:0 0 50px color-mix(in srgb,var(--da-accent) 17%,transparent)!important;
+}
+#tab-markets .market-section-caption{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  margin:16px 2px 9px!important;color:var(--da-text)!important;
+}
+#tab-markets .market-section-caption strong{font-size:14px!important;font-weight:900!important}
+#tab-markets .fx-box{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  padding:13px 16px!important;border:1px solid var(--da-line)!important;border-radius:15px!important;
+  background:var(--da-surface)!important;box-shadow:none!important;
+}
+#tab-markets .fx-price{color:var(--da-accent)!important;font-weight:950!important;font-size:20px!important}
+#tab-markets .market-categories{
+  display:flex!important;gap:8px!important;overflow-x:auto!important;padding:12px 1px!important;
+  scrollbar-width:none!important;
+}
+#tab-markets .market-categories::-webkit-scrollbar{display:none!important}
+#tab-markets .market-categories .category-btn{
+  flex:0 0 104px!important;min-height:68px!important;gap:6px!important;
+  border:1px solid var(--da-line)!important;border-radius:14px!important;
+  background:var(--da-surface)!important;color:var(--da-muted)!important;
+}
+#tab-markets .market-categories .category-btn.active{
+  border-color:color-mix(in srgb,var(--da-accent) 48%,transparent)!important;
+  background:color-mix(in srgb,var(--da-accent) 11%,var(--da-surface))!important;color:var(--da-accent)!important;
+}
+#tab-markets .market-categories .category-btn svg{color:var(--da-accent)!important;stroke:currentColor!important}
+#tab-markets .market-tools-primary{
+  display:grid!important;grid-template-columns:minmax(0,1fr) minmax(150px,.28fr) minmax(185px,.38fr)!important;
+  gap:9px!important;margin:12px 0 16px!important;
+}
+#tab-markets .market-tools-primary input,#tab-markets .market-tools-primary select{
+  min-width:0!important;min-height:46px!important;border:1px solid var(--da-line)!important;
+  border-radius:13px!important;background:var(--da-panel)!important;color:var(--da-text)!important;
+}
+#tab-markets .volatility-panel{
+  margin:13px 0 16px!important;padding:15px!important;border:1px solid var(--da-line)!important;
+  border-radius:17px!important;background:var(--da-surface)!important;
+}
+#tab-markets .volatility-title{font-size:11px!important;color:var(--da-muted)!important;font-weight:850!important}
+#tab-markets .volatility-stat{border:0!important;border-radius:12px!important;background:var(--da-panel)!important;padding:12px!important}
+#tab-markets .volatility-stat strong{font-size:16px!important;color:var(--da-text)!important}
+#tab-markets .top-assets-panel{
+  margin:12px 0 18px!important;padding:14px!important;border:1px solid var(--da-line)!important;
+  border-radius:17px!important;background:var(--da-surface)!important;
+}
+#tab-markets .market-board-v34{
+  overflow:hidden!important;border:1px solid var(--da-line)!important;border-radius:var(--da-radius-xl)!important;
+  background:var(--da-surface)!important;box-shadow:var(--da-shadow-soft)!important;
+}
+#tab-markets .market-board-head{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  gap:10px!important;padding:17px 19px!important;border-bottom:1px solid var(--da-row-line)!important;
+}
+#tab-markets .market-board-head strong{font-size:15px!important;color:var(--da-text)!important;font-weight:950!important}
+#tab-markets .market-board-head small{display:block;color:var(--da-muted)!important;font-size:10px!important;margin-top:4px!important}
+#tab-markets .market-board-unit{color:var(--da-muted)!important;font-size:10px!important}
+#tab-markets .market-head{display:none!important}
+#tab-markets #marketList.market-list{
+  display:flex!important;flex-direction:column!important;gap:0!important;
+  padding:0 16px!important;background:transparent!important;border:0!important;
+}
+#tab-markets #marketList>.coin{
+  display:grid!important;grid-template-columns:38px minmax(190px,1.25fr) minmax(90px,.65fr) minmax(130px,.85fr) minmax(170px,1fr)!important;
+  grid-template-areas:"fav identity spark change price"!important;
+  align-items:center!important;gap:12px!important;min-width:0!important;
+  padding:14px 5px!important;border:0!important;border-bottom:1px solid var(--da-row-line)!important;
+  border-radius:0!important;background:transparent!important;box-shadow:none!important;
+  color:var(--da-text)!important;transition:background var(--da-motion-premium)!important;
+}
+#tab-markets #marketList>.coin:hover{background:color-mix(in srgb,var(--da-accent) 5%,transparent)!important}
+#tab-markets #marketList>.coin.selected{background:color-mix(in srgb,var(--da-accent) 8%,transparent)!important}
+#tab-markets #marketList>.coin>.favorite-btn{grid-area:fav!important;justify-self:center!important}
+#tab-markets #marketList>.coin>.coin-identity{grid-area:identity!important;display:flex!important;align-items:center!important;gap:12px!important;min-width:0!important;text-decoration:none!important}
+#tab-markets #marketList .coin-name-stack{display:grid!important;gap:2px!important;min-width:0!important;text-align:right!important}
+#tab-markets #marketList .coin-name-fa{font-size:12px!important;color:var(--da-text)!important;font-weight:900!important}
+#tab-markets #marketList .coin-symbol-en{font-size:9px!important;color:var(--da-muted)!important;font-weight:850!important}
+#tab-markets #marketList .coin-english-name{font-size:9px!important;color:var(--da-muted)!important;opacity:.82!important}
+#tab-markets #marketList .coin-sparkline{grid-area:spark!important;width:100%!important;height:34px!important;min-width:60px!important}
+#tab-markets #marketList .coin-change-wrap{grid-area:change!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:4px!important;min-width:0!important}
+#tab-markets #marketList .coin-change-label{font-size:9px!important;color:var(--da-muted)!important}
+#tab-markets #marketList .coin-change{
+  min-width:0!important;padding:5px 8px!important;border-radius:8px!important;
+  background:color-mix(in srgb,var(--da-positive) 11%,transparent)!important;
+  color:var(--da-positive)!important;font-size:10px!important;font-weight:900!important;
+}
+#tab-markets #marketList .coin-change.neg{background:color-mix(in srgb,var(--da-negative) 11%,transparent)!important;color:var(--da-negative)!important}
+#tab-markets #marketList .coin-volume{font-size:9px!important;color:var(--da-muted)!important;white-space:normal!important}
+#tab-markets #marketList>.coin>.price-stack{grid-area:price!important;display:flex!important;flex-direction:column!important;align-items:flex-end!important;gap:5px!important;min-width:0!important}
+#tab-markets #marketList .price-usd{font-size:13px!important;color:var(--da-text)!important;font-weight:950!important}
+#tab-markets #marketList .price-toman{font-size:10px!important;color:var(--da-muted)!important;font-weight:750!important}
+#tab-markets #marketList .coin-icon,#tab-markets #marketList .coin-icon img{
+  width:38px!important;height:38px!important;min-width:38px!important;flex:0 0 38px!important;
+  border:0!important;outline:0!important;border-radius:0!important;
+  background:transparent!important;background-color:transparent!important;
+  box-shadow:none!important;filter:none!important;object-fit:contain!important;
+}
+#tab-markets #marketList .coin-icon{display:inline-flex!important;align-items:center!important;justify-content:center!important;overflow:visible!important;padding:0!important;margin:0!important}
+#tab-markets #marketList .favorite-btn{
+  display:grid!important;place-items:center!important;width:30px!important;height:30px!important;
+  border:0!important;border-radius:9px!important;background:transparent!important;
+  box-shadow:none!important;color:var(--da-muted)!important;padding:0!important;
+}
+#tab-markets #marketList .favorite-btn.is-favorite{color:var(--da-accent)!important}
+#tab-markets #marketList .favorite-btn svg{width:17px!important;height:17px!important}
+#tab-dashboard .da-market-logo,#tab-dashboard .da-market-logo-inner,
+#tab-dashboard .da-market-logo-inner img,
+#tab-assets #assetList .asset-logo,#tab-assets #assetList .asset-logo img,
+#tab-chart .asset-detail-head .asset-logo,#tab-chart .asset-detail-head .asset-logo img,
+#tab-toman .coin-icon,#tab-toman .coin-icon img{
+  border:0!important;outline:0!important;border-radius:0!important;
+  background:transparent!important;background-color:transparent!important;
+  box-shadow:none!important;filter:none!important;
+}
+#tab-dashboard .da-market-logo,#tab-dashboard .da-market-logo-inner{
+  overflow:visible!important;padding:0!important;
+}
+#tab-dashboard .da-market-logo-inner img,#tab-assets #assetList .asset-logo img,
+#tab-chart .asset-detail-head .asset-logo img{object-fit:contain!important}
+#tab-dashboard .da-v2-wallet-assets .asset-row .asset-logo,
+#tab-assets #assetList .asset-row .asset-logo{
+  width:38px!important;height:38px!important;min-width:38px!important;
+  background:transparent!important;border:0!important;box-shadow:none!important;
+}
+#tab-dashboard .da-v2-wallet-assets .asset-row .asset-logo img,
+#tab-assets #assetList .asset-row .asset-logo img{width:100%!important;height:100%!important;object-fit:contain!important}
+#tab-dashboard .da-v2-trust-row,#tab-dashboard .da-v2-bottom{border-color:var(--da-line)!important;color:var(--da-muted)!important}
+#tab-dashboard .dashboard-activity-center{border:1px solid var(--da-line)!important;border-radius:18px!important;background:var(--da-surface)!important;padding:16px!important}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:0!important;box-shadow:var(--da-focus)!important}
+@media(max-width:900px){
+  #tab-markets .market-tools-primary{grid-template-columns:minmax(0,1fr) minmax(145px,.35fr)!important}
+  #tab-markets .market-tools-primary #marketSort{grid-column:1/-1!important}
+  #tab-markets #marketList>.coin{
+    grid-template-columns:34px minmax(155px,1.2fr) minmax(75px,.6fr) minmax(110px,.8fr) minmax(145px,1fr)!important;
+    gap:8px!important;
+  }
+}
+@media(max-width:700px){
+  #tab-dashboard{padding:10px 10px 20px!important;gap:11px!important}
+  #tab-dashboard>.da-v2-hero{
+    grid-template-columns:minmax(0,1fr)!important;min-height:0!important;
+    padding:18px 17px!important;border-radius:20px!important;
+  }
+  #tab-dashboard .da-v2-hero-art{display:none!important}
+  #tab-dashboard .da-v2-hero h1{font-size:23px!important;margin:9px 0 7px!important}
+  #tab-dashboard .da-v2-hero p{font-size:11px!important;line-height:1.85!important;margin-bottom:12px!important}
+  #tab-dashboard>.da-v2-wallet-card{padding:12px!important;border-radius:17px!important}
+  #tab-dashboard .da-v2-balance-main{min-height:58px!important;padding:10px 12px!important;flex-wrap:wrap!important}
+  #tab-dashboard .da-v2-balance-main strong{font-size:25px!important}
+  #tab-dashboard .da-v2-account-stats{gap:6px!important;margin:8px 0!important}
+  #tab-dashboard .da-v2-account-stats>div{padding:8px 7px!important}
+  #tab-dashboard .da-v2-account-stats small{font-size:8px!important}
+  #tab-dashboard .da-v2-account-stats b{font-size:11px!important}
+  #tab-dashboard>.da-v2-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
+  #tab-dashboard .da-v2-quick-grid button{min-height:51px!important;padding:9px 11px!important;gap:8px!important}
+  #tab-dashboard .da-v2-quick-grid button b{font-size:10px!important}
+  #tab-dashboard>.da-v2-section-head h2{font-size:17px!important}
+  #tab-dashboard>.da-market-glass{padding:10px!important;border-radius:18px!important}
+  #tab-dashboard .da-market-toolbar{grid-template-columns:minmax(0,1fr) 116px!important;gap:6px!important}
+  #tab-dashboard .da-market-search,#tab-dashboard .da-market-sort{min-height:42px!important}
+  #dashboardMarketPreview .da-market-coin-card{
+    grid-template-columns:minmax(0,1fr) 54px minmax(94px,.72fr)!important;
+    grid-template-areas:"identity spark change" "identity spark price"!important;
+    gap:3px 7px!important;padding:11px 2px!important;
+  }
+  #dashboardMarketPreview .da-market-identity{gap:8px!important}
+  #dashboardMarketPreview .da-market-logo,#dashboardMarketPreview .da-market-logo-inner{width:32px!important;height:32px!important;min-width:32px!important;flex-basis:32px!important}
+  #dashboardMarketPreview .da-market-name-wrap b{font-size:10px!important}
+  #dashboardMarketPreview .da-market-name-wrap small{font-size:8px!important}
+  #dashboardMarketPreview .da-market-price{font-size:10px!important}
+  #dashboardMarketPreview .da-market-toman{font-size:8px!important}
+  #dashboardMarketPreview .da-market-sparkline{height:28px!important;min-width:45px!important}
+  #tab-markets{padding:10px!important}
+  #tab-markets .market-hero-v34{
+    grid-template-columns:minmax(0,1fr)!important;min-height:0!important;
+    padding:17px!important;border-radius:18px!important;
+  }
+  #tab-markets .market-hero-mark{display:none!important}
+  #tab-markets .market-hero-copy h1{font-size:23px!important}
+  #tab-markets .market-hero-copy p{font-size:10px!important}
+  #tab-markets .market-hero-pills{gap:5px!important}
+  #tab-markets .market-tools-primary{grid-template-columns:minmax(0,1fr) 112px!important;gap:7px!important}
+  #tab-markets .market-tools-primary #marketSort{grid-column:1/-1!important}
+  #tab-markets .volatility-panel{padding:10px!important}
+  #tab-markets .volatility-grid{gap:6px!important}
+  #tab-markets .volatility-stat{padding:8px 6px!important}
+  #tab-markets .volatility-stat small{font-size:8px!important}
+  #tab-markets .volatility-stat strong{font-size:12px!important}
+  #tab-markets #marketList.market-list{padding:0 9px!important}
+  #tab-markets #marketList>.coin{
+    grid-template-columns:25px minmax(0,1fr) minmax(47px,.46fr) minmax(75px,.7fr) minmax(105px,.92fr)!important;
+    grid-template-areas:"fav identity change price" ". spark change price"!important;
+    gap:3px 6px!important;padding:10px 1px!important;min-height:72px!important;
+  }
+  #tab-markets #marketList .coin-icon,#tab-markets #marketList .coin-icon img{
+    width:31px!important;height:31px!important;min-width:31px!important;flex-basis:31px!important;
+  }
+  #tab-markets #marketList .coin-name-fa{font-size:10px!important}
+  #tab-markets #marketList .coin-symbol-en,#tab-markets #marketList .coin-english-name{font-size:8px!important}
+  #tab-markets #marketList .coin-sparkline{height:25px!important;min-width:35px!important}
+  #tab-markets #marketList .coin-change{font-size:8px!important;padding:4px 5px!important}
+  #tab-markets #marketList .coin-change-label{font-size:7px!important}
+  #tab-markets #marketList .coin-volume{font-size:7px!important;line-height:1.35!important}
+  #tab-markets #marketList .price-usd{font-size:10px!important}
+  #tab-markets #marketList .price-toman{font-size:8px!important}
+}
+@media(max-width:380px){
+  #tab-markets #marketList>.coin{
+    grid-template-columns:22px minmax(0,1fr) 42px minmax(68px,.72fr) minmax(94px,.9fr)!important;
+    gap:3px 4px!important;
+  }
+  #tab-dashboard .da-market-toolbar{grid-template-columns:minmax(0,1fr) 105px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  #tab-dashboard *,#tab-markets *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
