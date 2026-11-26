@@ -2257,3 +2257,10 @@
 - PR #64 همچنان Draft، باز، ادغام‌نشده و `mergeable=false` است؛ شاخه نسبت به main در آخرین compare برابر 206 جلو و 2 عقب است. دو commit عقب‌ماندهٔ QA/مستندات Stop-Limit و snapshot فقط‌خواندنی حفظ شده‌اند؛ هیچ merge/rebase انجام نشد.
 - ایمنی: هیچ deploy، انتشار، migration، db push یا تغییر Production/Supabase انجام نشد.
 - [ ] گام بعد: نصب APK روی دستگاه Android و اجرای تست کنترل‌شدهٔ enrollment، تغییر رمز، پاک‌سازی vault، ورود با رمز جدید و ثبت مجدد بیومتریک؛ سپس بررسی علت `mergeable=false` و اختلاف main به‌صورت جداگانه، بدون همگام‌سازی خودکار.
+
+
+### تصحیح وضعیت شاخه پس از ثبت گزارش — ۲۶ نوامبر ۲۰۲۶
+- [x] پس از ثبت گزارش APK/UI، commit مستندات `96c5a20922a31b74716a0abc14c28c1434907610` ایجاد و از GitHub بازخوانی شد.
+- [x] PR #64 اکنون head برابر `96c5a20922a31b74716a0abc14c28c1434907610` دارد؛ هنوز open، Draft، merged=false و mergeable=false است.
+- [x] compare تازه: شاخه 207 commit جلو و 2 commit عقب از main، با merge-base برابر `9855d6ea6cd188a5621c4e2c28c55e4cfb4d2587`. دو commit عقب‌مانده همچنان حفظ شده‌اند.
+- [!] APK تأییدشده همچنان دقیقاً از `f1ad70839d1fd8e3f7e98b5903440367fb269f8a` ساخته شده؛ تغییرات بعدی شامل تست/مستندات‌اند و نباید این APK را build روی head فعلی PR معرفی کرد.
