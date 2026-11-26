@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
-export PGPASSWORD="\${PGPASSWORD:-postgres}"
-DB_HOST="\${PGHOST:-localhost}"
-DB_USER="\${PGUSER:-postgres}"
-DB_NAME="\${PGDATABASE:-digiarz_inactive_account_rpc_race_test}"
+export PGPASSWORD="${PGPASSWORD:-postgres}"
+DB_HOST="${PGHOST:-localhost}"
+DB_USER="${PGUSER:-postgres}"
+DB_NAME="${PGDATABASE:-digiarz_inactive_account_rpc_race_test}"
 PSQL=(psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -v ON_ERROR_STOP=1 -X -q)
 USER_ID='99999999-9999-4999-8999-999999999999'
 PARENT_ID='99999999-9999-4999-8999-000000000001'
@@ -13,7 +13,7 @@ COND_ID='99999999-9999-4999-8999-000000000003'
 wait_for_activity() {
   local app="$1" predicate="$2"
   for attempt in {1..120}; do
-    if "\${PSQL[@]}" -At -c "SELECT 1 FROM pg_stat_activity WHERE application_name='$app' AND $predicate" | grep -q '^1$'; then
+    if "${PSQL[@]}" -At -c "SELECT 1 FROM pg_stat_activity WHERE application_name='$app' AND $predicate" | grep -q '^1$'; then
       return 0
     fi
     sleep 0.05
@@ -28,7 +28,7 @@ wait_for_lock_wait() {
   wait_for_activity "$1" "state='active' AND wait_event_type='Lock'"
 }
 
-"\${PSQL[@]}" <<SQL
+"${PSQL[@]}" <<SQL
 INSERT INTO public.profiles(id,is_active) VALUES ('$USER_ID',true);
 INSERT INTO public.wallets(user_id,balance_usdt) VALUES ('$USER_ID',1000);
 INSERT INTO public.demo_trading_pairs(pair_symbol,quote_asset,is_enabled)
@@ -53,7 +53,7 @@ VALUES ('$CHILD_ID','$USER_ID','USDT',10.01,0,0,'reserved');
 SQL
 
 # The Limit worker owns the child and reservation locks, then pauses on wallet.
-(PGAPPNAME=digiarz_cancel_wallet_hold "\${PSQL[@]}" <<SQL
+(PGAPPNAME=digiarz_cancel_wallet_hold "${PSQL[@]}" <<SQL
 BEGIN;
 SELECT user_id FROM public.wallets WHERE user_id='$USER_ID' FOR UPDATE;
 SELECT pg_sleep(2);
@@ -63,13 +63,13 @@ SQL
 WALLET_PID=$!
 wait_for_sleep_query digiarz_cancel_wallet_hold
 
-(PGAPPNAME=digiarz_limit_worker_cancel_race "\${PSQL[@]}" -c "SELECT public.process_limit_orders();") >/tmp/digiarz-cancel-limit-worker.log 2>&1 &
+(PGAPPNAME=digiarz_limit_worker_cancel_race "${PSQL[@]}" -c "SELECT public.process_limit_orders();") >/tmp/digiarz-cancel-limit-worker.log 2>&1 &
 LIMIT_PID=$!
 wait_for_lock_wait digiarz_limit_worker_cancel_race
 
 # Stop-Limit cancellation locks conditional -> parent -> child. It must wait
 # for the Limit worker's child lock, then cancel the partially-filled remainder.
-(PGAPPNAME=digiarz_stop_cancel "\${PSQL[@]}" -c "BEGIN; SELECT set_config('request.jwt.claim.sub','$USER_ID',true); SELECT public.cancel_stop_limit_order('$PARENT_ID'); COMMIT;") >/tmp/digiarz-stop-cancel.log 2>&1 &
+(PGAPPNAME=digiarz_stop_cancel "${PSQL[@]}" -c "BEGIN; SELECT set_config('request.jwt.claim.sub','$USER_ID',true); SELECT public.cancel_stop_limit_order('$PARENT_ID'); COMMIT;") >/tmp/digiarz-stop-cancel.log 2>&1 &
 CANCEL_PID=$!
 wait_for_lock_wait digiarz_stop_cancel
 
@@ -77,7 +77,7 @@ wait "$WALLET_PID"
 wait "$LIMIT_PID"
 wait "$CANCEL_PID"
 
-"\${PSQL[@]}" -c "DO \\$\\$ BEGIN
+"${PSQL[@]}" -c "DO \$\$ BEGIN
   IF (SELECT status FROM public.orders WHERE id='$CHILD_ID') IS DISTINCT FROM 'cancelled' THEN
     RAISE EXCEPTION 'child Limit order was not cancelled after partial fill';
   END IF;
@@ -101,5 +101,5 @@ wait "$CANCEL_PID"
      OR (SELECT count(*) FROM public.transactions WHERE user_id='$USER_ID') <> 1 THEN
     RAISE EXCEPTION 'partial-fill trade/transaction audit rows missing';
   END IF;
-END \\$\\$;"
+END \$\$;"
 echo "PASS: Stop-Limit cancellation waits for actual Limit child fill, then preserves partial-fill accounting and releases the remainder."
