@@ -1720,3 +1720,13 @@
 - [x] compare تازه: شاخه ۸۶ commit جلو و ۲ commit عقب از Main، وضعیت diverged؛ همگام‌سازی انجام نشد تا از merge/rebase ناخواسته جلوگیری شود.
 - [ ] گام بعد: دریافت نتیجه واقعی Actions؛ در صورت نبود اجرا، بررسی تنظیمات Actions و workflowهای base با دسترسی مجاز، سپس اجرای visual screenshotها و build APK candidate.
 - ایمنی: فقط workflow تست و مستندات در شاخهٔ PR تغییر کردند؛ Main، Production، Supabase، migration و انتشار دست‌نخورده‌اند.
+
+
+## بازبینی مجدد وضعیت PR #64 و مسیر CI — ۲۶ نوامبر ۲۰۲۶
+- [x] وضعیت زندهٔ PR #64 از GitHub خوانده شد: باز، Draft، ادغام‌نشده؛ head برابر `6d1d39bcdc7cb38e2795c35cb2259559a88bdf8b` و base برابر `9855d6ea6cd188a5621c4e2c28c55e4cfb4d2587` در متادیتای PR است.
+- [x] compare تازه با شاخهٔ جاری Main نشان داد ۸۷ commit جلو و ۲ commit عقب، وضعیت `diverged` و `mergeable=false`. دو commit جدید Main از آخرین merge-base آمده‌اند؛ هیچ merge/rebase انجام نشد.
+- [x] workflowهای `ui-visual-review.yml` و `android-candidate-apk.yml` در head شاخه وجود دارند؛ trigger push هر دو به نام شاخهٔ فعال اشاره می‌کند.
+- [!] فایل `ui-visual-review.yml` در `main` یافت نشد (404)، پس workflow تازه‌افزوده‌شده در base موجود نیست. wrapper اجراهای commit فقط runهای PR-triggered را برمی‌گرداند و برای head فعلی آرایهٔ خالی داد؛ combined status نیز check ثبت‌شده‌ای برای این SHA برنگرداند. بنابراین عدم مشاهدهٔ run در این اتصال، اثبات قطعی عدم اجرا در GitHub نیست، اما هیچ CI موفقی برای head فعلی قابل تأیید نیست.
+- [!] وجود workflow در head به‌تنهایی اجرای push را اثبات نمی‌کند؛ APK قبلی/قدیمی را نباید به‌عنوان خروجی این head معرفی کرد. ساخت APK جدید، screenshotهای Playwright و تست فیزیکی Android هنوز تأیید نشده‌اند.
+- [ ] گام بعد: یافتن مسیر معتبر اجرای workflow روی head بدون تغییر Main یا ادغام PR؛ سپس اجرای Node regression، گرفتن و بازبینی screenshotهای هر سه تم و ساخت APK candidate از همین SHA.
+- ایمنی: این checkpoint فقط مستند وضعیت است؛ هیچ کد اجرایی، Main، PR state، Pages، Supabase، Production، migration، wallet، order یا trade تغییر نکرد.
