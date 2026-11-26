@@ -1701,3 +1701,14 @@
 - [!] Git graph همچنان ۱۴۳ جلو / ۷ عقب و diverged است؛ محتوای پنج فایل main-side بررسی و در شاخه backport شد، اما تاریخچه هنوز rebase/merge نشده است.
 - [ ] گام بعد: فراهم‌کردن اجرای واقعی Node/Actions روی head فعلی، سپس بررسی دقیق علت divergence و انتخاب روش امن همگام‌سازی با تأیید مالک.
 - [ ] Production و داده‌های مالی دست‌نخورده باقی ماندند؛ هیچ Migration، grant، policy، cron، Auth، function یا deploy انجام نشد.
+
+ 
+### اصلاح خطای نحوی آزمون Manifest — checkpoint شهرام ۱۱۱ — ۲۰۲۶-۱۱-۲۶
+
+- [x] بازبینی Workflow تأیید کرد که تست‌های Node با `node --test tests/*.test.js` اجرا می‌شوند و Workflow شامل سرویس PostgreSQL 17 و مراحل آزمون ایزوله است.
+- [x] بازبینی واقعی فایل `tests/production-rpc-manifest.test.js` یک جداکنندهٔ اشتباهِ literal `\\n` قبل از تعریف یکی از تست‌ها پیدا کرد؛ این مورد می‌توانست parsing فایل JavaScript را بشکند.
+- [x] جداکننده اصلاح شد و اکنون ۳۱ فراخوانی تست در فایل دیده می‌شود؛ رشتهٔ literal اشتباه دیگر وجود ندارد.
+- [x] PR #63 همچنان باز، Draft و ادغام‌نشده است؛ HEAD فعلی پس از اصلاح `8b6b649b9d5557163082bd7060df7a41024c2148` است.
+- [!] برای این HEAD هنوز هیچ workflow run یا combined status قابل مشاهده نیست؛ تست‌ها را پاس‌شده اعلام نمی‌کنیم. ابزار محلی Node v22.16.0 دارد، اما `psql` نصب نیست و دسترسی شبکهٔ container برای clone از GitHub برقرار نشد؛ بنابراین اجرای کامل محلی ممکن نشد.
+- [ ] گام بعد: دریافت run واقعی PR از GitHub Actions؛ در صورت نبود run، بررسی تنظیمات Actions و علت عدم trigger از سمت مالک/تنظیمات مخزن. سپس تست Node و مراحل PostgreSQL 17 باید روی CI اجرا و logها بازبینی شوند.
+- [ ] هیچ Production، Migration، grant، policy، cron، Edge Function، Auth یا دادهٔ مالی تغییر نکرده است.
