@@ -1687,3 +1687,11 @@
 
 - [x] trigger شاخهٔ push در workflow APK از نام شاخهٔ قدیمی به شاخهٔ فعال PR #64 اصلاح شد و workflow_dispatch نیز برای استفاده پس از در دسترس قرارگرفتن workflow در base افزوده شد.
 - [!] این اصلاح به‌تنهایی workflow را روی PR فعلی اجرا نمی‌کند؛ فایل workflow هنوز فقط در head PR موجود است و نتیجهٔ Actions همچنان باید از workflow موجود در base یا پس از فعال‌شدن فایل در base دریافت شود.
+
+
+### Checkpoint پس از اصلاحات تم سوم و fixture تتر — ۲۶ نوامبر ۲۰۲۶
+- HEAD شاخه و PR #64: `2d6c875bd416c1055ab7470aa5d161ef15a1e041`.
+- PR #64 باز، Draft و ادغام‌نشده است؛ compare با Main همچنان ۸۱ commit جلو و ۲ commit عقب (`diverged`) و `mergeable=false`.
+- بازخوانی GitHub تأیید کرد همهٔ اصلاحات ثبت شده‌اند: پالت نمودار نیلی روشن، color-scheme روشن، متغیرهای نهایی CSS، fixture ردیف اول USDT با SVG سبز تتر، تست‌های جدید و اصلاح شاخهٔ trigger ساخت APK.
+- برای SHA نهایی هیچ workflow run در دسترس این اتصال برنگشت؛ بنابراین Node/Playwright/APK هنوز اجراشده یا موفق محسوب نمی‌شوند.
+- گام بعد: اجرای تست‌ها از محیط CI معتبر/موجود در base، بررسی تصاویر واقعی و سپس ساخت APK candidate. PR همچنان Draft؛ بدون merge یا Production action.
