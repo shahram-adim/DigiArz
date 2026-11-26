@@ -318,3 +318,9 @@ jobs:
           PGPASSWORD: postgres
         run: |
           PGDATABASE=digiarz_inactive_account_rpc_race_test bash tests/conditional-worker-reservation-rollback.pg17.sh
+
+      - name: Verify conditional worker retry exhaustion fails closed
+        env:
+          PGPASSWORD: postgres
+        run: |
+          PGDATABASE=digiarz_inactive_account_rpc_race_test bash tests/conditional-worker-retry-fail-closed.pg17.sh
