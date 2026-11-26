@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
-export PGPASSWORD="\${PGPASSWORD:-postgres}"
-DB_HOST="\${PGHOST:-localhost}"
-DB_USER="\${PGUSER:-postgres}"
-DB_NAME="\${PGDATABASE:-digiarz_inactive_account_rpc_race_test}"
+export PGPASSWORD="${PGPASSWORD:-postgres}"
+DB_HOST="${PGHOST:-localhost}"
+DB_USER="${PGUSER:-postgres}"
+DB_NAME="${PGDATABASE:-digiarz_inactive_account_rpc_race_test}"
 PSQL=(psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -v ON_ERROR_STOP=1 -X -q)
 USER_ID='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
 PARENT_ID='bbbbbbbb-bbbb-4bbb-8bbb-000000000001'
 COND_ID='bbbbbbbb-bbbb-4bbb-8bbb-000000000002'
 
-"\${PSQL[@]}" <<SQL
+"${PSQL[@]}" <<SQL
 -- Keep the previous one-shot rollback scenario from being retried in this test.
 UPDATE public.conditional_orders SET status='cancelled' WHERE user_id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 UPDATE public.orders SET status='cancelled' WHERE user_id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
@@ -53,10 +53,10 @@ VALUES ('$PARENT_ID','$USER_ID','BTC',0.1,0,0,'reserved');
 SQL
 
 for attempt in {1..10}; do
-  "\${PSQL[@]}" -c "SELECT public.process_conditional_orders();" >"/tmp/digiarz-conditional-retry-$attempt.log" 2>&1
+  "${PSQL[@]}" -c "SELECT public.process_conditional_orders();" >"/tmp/digiarz-conditional-retry-$attempt.log" 2>&1
 done
 
-"\${PSQL[@]}" -c "DO \\$\\$ BEGIN
+"${PSQL[@]}" -c "DO \$\$ BEGIN
   IF (SELECT attempt_count FROM public.conditional_orders WHERE id='$COND_ID') <> 10 THEN
     RAISE EXCEPTION 'conditional retry count did not reach ten';
   END IF;
@@ -77,6 +77,6 @@ done
      OR (SELECT count(*) FROM public.transactions WHERE user_id='$USER_ID') <> 0 THEN
     RAISE EXCEPTION 'failed market execution rows were persisted';
   END IF;
-END \\$\\$;"
-"\${PSQL[@]}" -c "DROP TRIGGER zz_test_fail_conditional_trade_insert ON public.trades;"
+END \$\$;"
+"${PSQL[@]}" -c "DROP TRIGGER zz_test_fail_conditional_trade_insert ON public.trades;"
 echo "PASS: ten failed conditional executions retain rollback safety, then reject the order and release its valid reservation."
