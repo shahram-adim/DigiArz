@@ -1130,13 +1130,13 @@ test('bright indigo market hero actions and mobile navigation retain readable li
 });
 
 
-test('mobile visual review captures dashboard and market asset rows after scrolling into view',()=>{
+test('visual review captures authentication plus dashboard and market rows across themes',()=>{
   const harness=fs.readFileSync('tests/ui-visual-screenshots.cjs','utf8');
   assert.match(harness,/marketPreview\.scrollIntoViewIfNeeded\(\)/);
   assert.match(harness,/marketRows\.scrollIntoViewIfNeeded\(\)/);
   assert.match(harness,/dashboard-marketrows/);
   assert.match(harness,/markets-assetrows/);
-  assert.match(harness,/files\.length!==66/);
+  assert.match(harness,/viewport\.name,theme,'login'/);\n  assert.match(harness,/files\.length!==72/);
 });
 
 
