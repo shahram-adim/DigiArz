@@ -1268,3 +1268,13 @@ test('all dynamically rendered market categories have dedicated offline vector i
   }
   assert.ok(html.includes("item.setAttribute('aria-pressed',active?'true':'false')"),'selected category exposes pressed state');
 });
+
+
+test('market loads Iranian-exchange Persian asset names before the Toman tab is opened',()=>{
+  assert.match(html,/function buildTomanAssetNameIndex\(rows\)/);
+  assert.match(html,/is_stale===false/);
+  assert.match(html,/function loadTomanAssetNameIndex\(\)/);
+  assert.match(html,/market_toman_performance'\)\.select\('asset_symbol,asset_name_fa,exchange,is_stale,fetched_at'\)/);
+  assert.match(html,/loadTomanAssetNameIndex\(\)\.then\(loaded=>\{if\(loaded\)\{renderMarkets\(\);renderDashboardMarketPreview\(\);renderDashboardSummary\(\)\}\}\)/);
+  assert.match(html,/tomanAssetNames=buildTomanAssetNameIndex\(rows\)/);
+});

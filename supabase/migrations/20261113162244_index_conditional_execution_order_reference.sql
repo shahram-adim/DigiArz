@@ -1,1 +1,0 @@
-CREATE INDEX IF NOT EXISTS conditional_orders_execution_order_id_idx ON public.conditional_orders(execution_order_id);

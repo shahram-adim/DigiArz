@@ -2251,7 +2251,7 @@ const DigiDecimal=window.DigiDecimal,DigiMarketHoldings=window.DigiMarketHolding
 if(!DigiDecimal)throw new Error('ابزار محاسبات دقیق بارگذاری نشد؛ صفحه را تازه‌سازی کنید.');
 if(!DigiMarketHoldings)throw new Error('ابزار تشخیص دارایی‌های بازار بارگذاری نشد؛ صفحه را تازه‌سازی کنید.');
 const authView=$('authView'),appView=$('appView'),authMsg=$('authMsg'),tradeMsg=$('tradeMsg');
-let supabaseClient=null,isRecoveryMode=false,appLoadPromise=null,currentFxRate=null,currentFxIsValid=false,currentWalletUsdt=0,marketRows=[],marketTickerMap=new Map(),assetRows=[],historyRows=[],historyHasMore=true,historyPageSize=50,historyLoadingMore=false,historyRequestId=0,historyCursor=null,allOrdersCursor=null,allOrdersHasMore=false,allOrdersLoadingMore=false,allOrdersPageSize=100,selectedSymbol='BTCUSDT',chart=null,candleSeries=null,lineSeries=null,areaSeries=null,volumeChart=null,volumeSeries=null,chartType='candle',chartInterval='24h',chartResizeObserver=null,activeMarketCategory='all',performanceRequestId=0,marketTickerRefreshPromise=null,marketTickerLastFetchedAt=0,dashboardLoadErrors=[],favoriteSymbols=loadFavoriteSymbols(),tomanAssetNames=new Map(),tomanMarketAutoTimer=null,tomanMarketHasFreshRows=false;
+let supabaseClient=null,isRecoveryMode=false,appLoadPromise=null,currentFxRate=null,currentFxIsValid=false,currentWalletUsdt=0,marketRows=[],marketTickerMap=new Map(),assetRows=[],historyRows=[],historyHasMore=true,historyPageSize=50,historyLoadingMore=false,historyRequestId=0,historyCursor=null,allOrdersCursor=null,allOrdersHasMore=false,allOrdersLoadingMore=false,allOrdersPageSize=100,selectedSymbol='BTCUSDT',chart=null,candleSeries=null,lineSeries=null,areaSeries=null,volumeChart=null,volumeSeries=null,chartType='candle',chartInterval='24h',chartResizeObserver=null,activeMarketCategory='all',performanceRequestId=0,marketTickerRefreshPromise=null,marketTickerLastFetchedAt=0,dashboardLoadErrors=[],favoriteSymbols=loadFavoriteSymbols(),tomanAssetNames=new Map(),tomanAssetNameIndexLoaded=false,tomanAssetNameIndexPromise=null,tomanMarketAutoTimer=null,tomanMarketHasFreshRows=false;
 let displayCurrencyMode='both',isSuperAdmin=false,featuredMarketRows=[];
 function initCurrencyMode(){try{const saved=localStorage.getItem('digiArzCurrencyMode');if(['usd','toman','both'].includes(saved))displayCurrencyMode=saved}catch(_){}const el=$('marketCurrencyMode');if(el)el.value=displayCurrencyMode}
 function setCurrencyMode(value){displayCurrencyMode=['usd','toman','both'].includes(value)?value:'both';try{localStorage.setItem('digiArzCurrencyMode',displayCurrencyMode)}catch(_){}renderMarkets();}
@@ -2362,7 +2362,7 @@ async function fetchAllSupabaseRows(queryFactory,pageSize=1000){
  return all;
 }
 function attachMarketAssetMetadata(marketData,pairData,metadataRows){const pairs=new Map((pairData||[]).filter(x=>x.is_enabled!==false).map(x=>[String(x.pair_symbol||'').toUpperCase(),x]));const assets=new Map((metadataRows||[]).map(x=>[String(x.coingecko_id||''),x]));return (marketData||[]).filter(x=>pairs.has(String(x.symbol||'').toUpperCase())).map(row=>{const pair=pairs.get(String(row.symbol||'').toUpperCase()),asset=assets.get(String(pair?.base_coingecko_id||''));return {...row,coingecko_id:pair?.base_coingecko_id||null,name:asset?.name||row.name||null,image_url:asset?.image_url||null,change:asset?.price_change_percentage_24h??null,change_updated_at:asset?.last_updated||null}})}
-async function loadMarkets(forceTickerRefresh=false){const [marketData,pairData,fr]=await Promise.all([fetchAllSupabaseRows(()=>supabaseClient.from('market_prices').select('symbol,price,source,updated_at').order('symbol')),fetchAllSupabaseRows(()=>supabaseClient.from('demo_trading_pairs').select('pair_symbol,is_enabled,base_coingecko_id').eq('is_enabled',true)),supabaseClient.from('market_fx_rates').select('price_toman,source,source_updated_at,is_stale').eq('symbol','USD_IRT').maybeSingle()]);const metadataIds=[...new Set((pairData||[]).map(x=>x.base_coingecko_id).filter(Boolean))],metadataChunks=[];for(let i=0;i<metadataIds.length;i+=100)metadataChunks.push(metadataIds.slice(i,i+100));const metadataRows=(await Promise.all(metadataChunks.map(ids=>fetchAllSupabaseRows(()=>supabaseClient.from('crypto_assets').select('coingecko_id,symbol,name,image_url,price_change_percentage_24h,last_updated').in('coingecko_id',ids))))).flat();const fx=fr.data;currentFxRate=null;currentFxIsValid=false;if(!fr.error&&fx){const rate=Number(fx.price_toman),updated=fx.source_updated_at?new Date(fx.source_updated_at).getTime():0,age=Date.now()-updated;if(Number.isFinite(rate)&&rate>0&&fx.is_stale===false&&updated>0&&age>=-120000&&age<=1200000){currentFxRate=rate;currentFxIsValid=true;$('fxRate').textContent=formatNum(rate,0)+' تومان';$('fxUpdated').textContent='منبع: '+safeText(fx.source||'نامشخص')+' · زمان منبع: '+new Date(fx.source_updated_at).toLocaleString('fa-IR')}else{$('fxRate').textContent='نرخ دلار قدیمی است';$('fxUpdated').textContent='منبع: '+safeText(fx.source||'نامشخص')+' · آخرین زمان منبع: '+(fx.source_updated_at?new Date(fx.source_updated_at).toLocaleString('fa-IR'):'نامشخص')+' · نرخ برای ارزش‌گذاری قابل اتکا نیست.'}}else{$('fxRate').textContent='نرخ دلار دریافت نشد';$('fxUpdated').textContent=fr.error?'خطا در دریافت نرخ دلار':'نرخ ثبت نشده است'}marketRows=attachMarketAssetMetadata(marketData,pairData,metadataRows);renderMarketPriceFreshness();renderCategoryButtons();renderMarkets();renderDashboardSummary();refreshMarketTickers(forceTickerRefresh).catch(e=>console.warn('Market ticker refresh:',e))}
+async function loadMarkets(forceTickerRefresh=false){const [marketData,pairData,fr]=await Promise.all([fetchAllSupabaseRows(()=>supabaseClient.from('market_prices').select('symbol,price,source,updated_at').order('symbol')),fetchAllSupabaseRows(()=>supabaseClient.from('demo_trading_pairs').select('pair_symbol,is_enabled,base_coingecko_id').eq('is_enabled',true)),supabaseClient.from('market_fx_rates').select('price_toman,source,source_updated_at,is_stale').eq('symbol','USD_IRT').maybeSingle()]);const metadataIds=[...new Set((pairData||[]).map(x=>x.base_coingecko_id).filter(Boolean))],metadataChunks=[];for(let i=0;i<metadataIds.length;i+=100)metadataChunks.push(metadataIds.slice(i,i+100));const metadataRows=(await Promise.all(metadataChunks.map(ids=>fetchAllSupabaseRows(()=>supabaseClient.from('crypto_assets').select('coingecko_id,symbol,name,image_url,price_change_percentage_24h,last_updated').in('coingecko_id',ids))))).flat();const fx=fr.data;currentFxRate=null;currentFxIsValid=false;if(!fr.error&&fx){const rate=Number(fx.price_toman),updated=fx.source_updated_at?new Date(fx.source_updated_at).getTime():0,age=Date.now()-updated;if(Number.isFinite(rate)&&rate>0&&fx.is_stale===false&&updated>0&&age>=-120000&&age<=1200000){currentFxRate=rate;currentFxIsValid=true;$('fxRate').textContent=formatNum(rate,0)+' تومان';$('fxUpdated').textContent='منبع: '+safeText(fx.source||'نامشخص')+' · زمان منبع: '+new Date(fx.source_updated_at).toLocaleString('fa-IR')}else{$('fxRate').textContent='نرخ دلار قدیمی است';$('fxUpdated').textContent='منبع: '+safeText(fx.source||'نامشخص')+' · آخرین زمان منبع: '+(fx.source_updated_at?new Date(fx.source_updated_at).toLocaleString('fa-IR'):'نامشخص')+' · نرخ برای ارزش‌گذاری قابل اتکا نیست.'}}else{$('fxRate').textContent='نرخ دلار دریافت نشد';$('fxUpdated').textContent=fr.error?'خطا در دریافت نرخ دلار':'نرخ ثبت نشده است'}marketRows=attachMarketAssetMetadata(marketData,pairData,metadataRows);renderMarketPriceFreshness();renderCategoryButtons();renderMarkets();renderDashboardSummary();loadTomanAssetNameIndex().then(loaded=>{if(loaded){renderMarkets();renderDashboardMarketPreview();renderDashboardSummary()}});refreshMarketTickers(forceTickerRefresh).catch(e=>console.warn('Market ticker refresh:',e))}
 let marketExtrasLoaded=false,marketExtrasPromise=null;
 async function loadMarketExtras(force=false){if(marketExtrasLoaded&&!force)return;if(marketExtrasPromise)return marketExtrasPromise;marketExtrasPromise=(async()=>{await Promise.allSettled([loadFeaturedMarketAssets(),refreshAutoMarkets()]);await refreshMarketTickers();marketExtrasLoaded=true;renderCategoryButtons();renderMarkets();renderDashboardSummary()})();try{return await marketExtrasPromise}finally{marketExtrasPromise=null}}
 async function loadFeaturedMarketAssets(){
@@ -2534,6 +2534,29 @@ function transliterateAssetNameToPersian(value){
 }
 function persianCoinName(symbol,englishName=''){const base=String(symbol||'').toUpperCase().replace(/USDT$/,'');return tomanAssetNames.get(base)||coinInfo[base]?.fa||extraPersianNames[base]||transliterateAssetNameToPersian(englishName||coinInfo[base]?.name||'')||base}
 function marketPersianName(item){const symbol=String(item?.symbol||item?.asset||'').toUpperCase(),base=symbol.replace(/USDT$/,'');const explicit=[item?.name_fa,item?.asset_name_fa].map(value=>String(value||'').trim()).find(Boolean)||'';const englishName=String(item?.name_en||item?.asset_name_en||item?.english_name||item?.name||coinInfo[base]?.name||base);return explicit||persianCoinName(symbol,englishName)}
+function buildTomanAssetNameIndex(rows){
+ const candidates=new Map(),priorityOf=exchange=>({bitpin:3,wallex:2,nobitex:1,bit24:1,kifpool:1}[String(exchange||'').toLowerCase()]||0);
+ for(const row of Array.isArray(rows)?rows:[]){
+  const symbol=String(row?.asset_symbol||'').trim().toUpperCase(),name=String(row?.asset_name_fa||'').trim();
+  if(!symbol||!name)continue;
+  const candidate={name,fresh:row.is_stale===false?1:0,priority:priorityOf(row.exchange),stamp:Date.parse(row.fetched_at||'')||0};
+  const previous=candidates.get(symbol);
+  if(!previous||candidate.fresh>previous.fresh||(candidate.fresh===previous.fresh&&(candidate.priority>previous.priority||(candidate.priority===previous.priority&&candidate.stamp>previous.stamp))))candidates.set(symbol,candidate);
+ }
+ return new Map([...candidates].map(([symbol,item])=>[symbol,item.name]));
+}
+async function loadTomanAssetNameIndex(){
+ if(tomanAssetNameIndexLoaded)return tomanAssetNames.size>0;
+ if(tomanAssetNameIndexPromise)return tomanAssetNameIndexPromise;
+ const task=(async()=>{
+  const rows=await fetchAllSupabaseRows(()=>supabaseClient.from('market_toman_performance').select('asset_symbol,asset_name_fa,exchange,is_stale,fetched_at').order('asset_symbol').order('exchange'));
+  tomanAssetNames=buildTomanAssetNameIndex(rows);
+  tomanAssetNameIndexLoaded=true;
+  return tomanAssetNames.size>0;
+ })();
+ tomanAssetNameIndexPromise=task;
+ try{return await task}catch(error){console.warn('Iranian exchange Persian-name index:',error);return false}finally{if(tomanAssetNameIndexPromise===task)tomanAssetNameIndexPromise=null}
+}
 async function discoverMultiExchangeMarkets(){
   const {data,error}=await supabaseClient.functions.invoke('market-data',{body:{action:'discover'}});
   if(error)throw error;
@@ -3330,16 +3353,8 @@ async function loadTomanMarket(){
  }
  const rows=(data||[]);
  tomanMarketHasFreshRows=rows.some(r=>r.is_stale===false);
- tomanAssetNames=new Map();
- const nameCandidates=new Map();
- for(const r of rows){
-   const symbol=String(r.asset_symbol||'').toUpperCase(),name=String(r.asset_name_fa||'').trim();
-   if(!symbol||!name)continue;
-   const priority=r.exchange==='bitpin'?3:r.exchange==='wallex'?2:1;
-   const previous=nameCandidates.get(symbol);
-   if(!previous||priority>previous.priority)nameCandidates.set(symbol,{name,priority});
- }
- for(const [symbol,item] of nameCandidates)tomanAssetNames.set(symbol,item.name);
+ tomanAssetNames=buildTomanAssetNameIndex(rows);
+ tomanAssetNameIndexLoaded=true;
  const filtered=rows.filter(r=>!q||String(r.asset_symbol||'').toUpperCase().includes(q)||String(r.asset_name_fa||'').toUpperCase().includes(q));
  if(!filtered.length){body.innerHTML='<tr><td colspan="13" class="muted">داده‌ای برای این جست‌وجو وجود ندارد. ابتدا «دریافت قیمت‌های تازه» را اجرا کنید.</td></tr>';renderMarkets();return true;}
  body.innerHTML=filtered.map(r=>{
