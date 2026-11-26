@@ -131,7 +131,7 @@ const server = http.createServer((req, res) => {
           document.body.classList.toggle('light-theme', selected==='light');
           document.body.classList.toggle('luxury-theme', selected==='luxury');
           document.body.classList.toggle('dark-theme', selected==='dark');
-          document.documentElement.style.colorScheme = selected==='light'?'light':'dark';
+          document.documentElement.style.colorScheme = selected==='dark'?'dark':'light';
           document.body.classList.remove('auth-page-active');
           document.body.classList.add('dashboard-page-active');
           const auth=document.getElementById('authView'), app=document.getElementById('appView');
