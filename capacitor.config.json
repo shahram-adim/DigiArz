@@ -1,0 +1,9 @@
+{
+  "appId": "com.digiarz.app",
+  "appName": "DigiArz",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}

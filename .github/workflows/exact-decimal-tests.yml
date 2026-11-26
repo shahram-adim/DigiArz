@@ -1,0 +1,263 @@
+name: Exact decimal tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  exact-decimal:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: digiarz_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d digiarz_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run exact decimal and browser integration tests
+        run: node --test tests/*.test.js
+      - name: Run PostgreSQL arithmetic and Toman upsert regressions
+        env:
+          PGPASSWORD: postgres
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          psql -h localhost -U postgres -d digiarz_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_arithmetic.sql \
+            -f supabase/tests/toman_market_upsert_idempotency.sql
+      - name: Rehearse exact-decimal schema widening in disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_type_widening_test;"
+          psql -h localhost -U postgres -d digiarz_type_widening_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_setup.sql \
+            -f supabase/drafts/2026-11-15_exact_decimal_type_widening.sql \
+            -f supabase/tests/exact_decimal_type_widening_integration.sql \
+            -f supabase/tests/exact_decimal_type_widening_schema_verify.sql
+      - name: Verify widening preflight rejects invalid data atomically
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_type_widening_negative_test;"
+          psql -h localhost -U postgres -d digiarz_type_widening_negative_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_setup.sql \
+            -f supabase/tests/exact_decimal_type_widening_negative.sql
+          if psql -h localhost -U postgres -d digiarz_type_widening_negative_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-15_exact_decimal_type_widening.sql; then
+            echo "Expected widening preflight rejection, but migration succeeded."
+            exit 1
+          fi
+          psql -h localhost -U postgres -d digiarz_type_widening_negative_test -v ON_ERROR_STOP=1 \
+            -c "DO \$\$ BEGIN IF (SELECT format_type(a.atttypid,a.atttypmod) FROM pg_attribute a WHERE a.attrelid='public.orders'::regclass AND a.attname='amount') <> 'numeric(24,8)' THEN RAISE EXCEPTION 'failed preflight changed schema'; END IF; END \$\$;"
+      - name: Verify widening migration honors lock timeout atomically
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_type_widening_lock_test;"
+          psql -h localhost -U postgres -d digiarz_type_widening_lock_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_setup.sql
+          PGAPPNAME=digiarz_widening_lock_blocker psql -h localhost -U postgres -d digiarz_type_widening_lock_test \
+            -v ON_ERROR_STOP=1 -c "BEGIN; LOCK TABLE public.orders IN ACCESS SHARE MODE; SELECT pg_sleep(12); COMMIT;" \
+            > /tmp/digiarz-lock-blocker.log 2>&1 &
+          LOCK_PID=$!
+          LOCK_READY=0
+          for attempt in $(seq 1 40); do
+            ACTIVE=$(psql -h localhost -U postgres -d digiarz_type_widening_lock_test -At \
+              -c "SELECT count(*) FROM pg_stat_activity WHERE application_name='digiarz_widening_lock_blocker' AND state='active' AND query LIKE '%pg_sleep(12)%';")
+            if [ "$ACTIVE" = "1" ]; then
+              LOCK_READY=1
+              break
+            fi
+            sleep 0.25
+          done
+          if [ "$LOCK_READY" != "1" ]; then
+            cat /tmp/digiarz-lock-blocker.log
+            kill "$LOCK_PID" || true
+            echo "Timed out waiting for the blocker to acquire ACCESS SHARE on orders."
+            exit 1
+          fi
+          if psql -h localhost -U postgres -d digiarz_type_widening_lock_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-15_exact_decimal_type_widening.sql \
+            > /tmp/digiarz-lock-migration.log 2>&1; then
+            cat /tmp/digiarz-lock-migration.log
+            wait "$LOCK_PID"
+            echo "Expected lock_timeout rejection, but migration succeeded."
+            exit 1
+          fi
+          cat /tmp/digiarz-lock-migration.log
+          if ! grep -Eiq 'lock timeout|canceling statement due to lock timeout' /tmp/digiarz-lock-migration.log; then
+            wait "$LOCK_PID"
+            echo "Migration failed for a reason other than the expected lock timeout."
+            exit 1
+          fi
+          wait "$LOCK_PID"
+          psql -h localhost -U postgres -d digiarz_type_widening_lock_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_lock_verify.sql \
+            -f supabase/tests/exact_decimal_type_widening_schema_verify.sql
+      - name: Verify widening DDL transaction rolls back after mid-migration failure
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_type_widening_atomic_test;"
+          psql -h localhost -U postgres -d digiarz_type_widening_atomic_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_setup.sql
+          if psql -h localhost -U postgres -d digiarz_type_widening_atomic_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_atomic_failure.sql \
+            > /tmp/digiarz-atomic-migration.log 2>&1; then
+            cat /tmp/digiarz-atomic-migration.log
+            echo "Expected intentional mid-transaction DDL failure, but script succeeded."
+            exit 1
+          fi
+          cat /tmp/digiarz-atomic-migration.log
+          if ! grep -Eiq 'does not exist|undefined table' /tmp/digiarz-atomic-migration.log; then
+            echo "DDL rehearsal failed for a reason other than the intentional missing table."
+            exit 1
+          fi
+          psql -h localhost -U postgres -d digiarz_type_widening_atomic_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_lock_verify.sql \
+            -f supabase/tests/exact_decimal_type_widening_schema_verify.sql
+      - name: Compile and run isolated Market and Limit entrypoint integration
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_market_limit_test;"
+          psql -h localhost -U postgres -d digiarz_market_limit_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_stop_limit_setup.sql \
+            -f supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql \
+            -f supabase/tests/exact_decimal_market_limit_entrypoints.sql
+      - name: Rehearse the combined atomic exact-decimal rollout candidate
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_rollout_rounding_test;"
+          psql -h localhost -U postgres -d digiarz_rollout_rounding_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_stop_limit_setup.sql \
+            -f supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql \
+            -f supabase/tests/exact_decimal_limit_rounding_buffer.sql
+
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_rollout_stop_race_test;"
+          psql -h localhost -U postgres -d digiarz_rollout_stop_race_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_stop_limit_setup.sql \
+            -f supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql \
+            -f supabase/tests/exact_decimal_stop_limit_cancel_race_setup.sql
+          DB_NAME=digiarz_rollout_stop_race_test bash supabase/tests/exact_decimal_stop_limit_cancel_race.sh
+
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_rollout_conditional_race_test;"
+          psql -h localhost -U postgres -d digiarz_rollout_conditional_race_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_conditional_exit_setup.sql \
+            -f supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql \
+            -f supabase/tests/exact_decimal_conditional_exit_worker.sql \
+            -f supabase/tests/exact_decimal_conditional_cancel_race_setup.sql
+          DB_NAME=digiarz_rollout_conditional_race_test bash supabase/tests/exact_decimal_conditional_cancel_race.sh
+      - name: Verify cumulative per-fill USDT rounding reserves
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_rounding_buffer_test;"
+          psql -h localhost -U postgres -d digiarz_rounding_buffer_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_stop_limit_setup.sql \
+            -f supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql \
+            -f supabase/drafts/2026-11-15_exact_decimal_process_limit_orders.sql \
+            -f supabase/tests/exact_decimal_limit_rounding_buffer.sql
+      - name: Compile and run isolated Stop-Limit and TP-SL placement entrypoints
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_conditional_entrypoints_test;"
+          psql -h localhost -U postgres -d digiarz_conditional_entrypoints_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_stop_limit_setup.sql \
+            -f supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql \
+            -f supabase/tests/exact_decimal_conditional_entrypoints.sql
+      - name: Compile and run isolated exact-decimal Limit worker integration
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_limit_worker_setup.sql \
+            -f supabase/drafts/2026-11-15_exact_decimal_process_limit_orders.sql \
+            -f supabase/tests/exact_decimal_limit_worker_integration.sql
+      - name: Compile and run isolated Limit cancellation lifecycle integration
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_cancel_setup.sql \
+            -f supabase/tests/exact_decimal_cancel_integration.sql
+      - name: Run real two-session Limit worker and cancellation race tests
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d digiarz_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_cancel_race_setup.sql
+          bash supabase/tests/exact_decimal_cancel_race.sh
+      - name: Run real two-session TP-SL conditional execution and cancellation races
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_conditional_race_test;"
+          psql -h localhost -U postgres -d digiarz_conditional_race_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_conditional_exit_setup.sql \
+            -f supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql \
+            -f supabase/tests/exact_decimal_conditional_exit_worker.sql \
+            -f supabase/tests/exact_decimal_conditional_cancel_race_setup.sql
+          bash supabase/tests/exact_decimal_conditional_cancel_race.sh
+      - name: Run real two-session Stop-Limit child execution and cancellation races
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_stop_limit_race_test;"
+          psql -h localhost -U postgres -d digiarz_stop_limit_race_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_stop_limit_setup.sql \
+            -f supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql \
+            -f supabase/tests/exact_decimal_stop_limit_worker.sql \
+            -f supabase/drafts/2026-11-15_exact_decimal_process_limit_orders.sql \
+            -f supabase/tests/exact_decimal_stop_limit_cancel_race_setup.sql
+          bash supabase/tests/exact_decimal_stop_limit_cancel_race.sh
+      - name: Compile and run isolated Stop-Limit parent-child lifecycle integration
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_stop_limit_test;"
+          psql -h localhost -U postgres -d digiarz_stop_limit_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_stop_limit_setup.sql \
+            -f supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql \
+            -f supabase/tests/exact_decimal_stop_limit_worker.sql \
+            -f supabase/drafts/2026-11-15_exact_decimal_process_limit_orders.sql \
+            -f supabase/tests/exact_decimal_stop_limit_integration.sql
+      - name: Run captured Production Stop-Limit worker invalid-reservation retry regression
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_stop_limit_prod_snapshot_test;"
+          psql -h localhost -U postgres -d digiarz_stop_limit_prod_snapshot_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_stop_limit_setup.sql \
+            -f supabase/tests/stop_limit_production_worker_sentinel.sql \
+            -f supabase/tests/stop_limit_production_worker_snapshot.sql \
+            -f supabase/tests/stop_limit_production_worker_retry_exhaustion.sql
+      - name: Compile and run isolated TP-SL conditional exit lifecycle integration
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_conditional_exit_test;"
+          psql -h localhost -U postgres -d digiarz_conditional_exit_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_conditional_exit_setup.sql \
+            -f supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql \
+            -f supabase/tests/exact_decimal_conditional_exit_worker.sql \
+            -f supabase/tests/exact_decimal_conditional_exit_integration.sql
+
+# TP/SL conditional worker diagnostics are enabled in the isolated CI fixture.
