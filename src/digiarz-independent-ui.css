@@ -4763,3 +4763,258 @@ body.luxury-theme #tab-chart .asset-detail-head .asset-logo{
   box-shadow:none!important;
   text-shadow:none!important;
 }
+
+
+/* DigiArz layout correction + luminous indigo glass theme — 2026-11-26 */
+#appView [id^="tab-"].hidden{
+  display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+#appView [id^="tab-"]:not(.hidden){
+  visibility:visible!important;
+  pointer-events:auto!important;
+}
+#appView #tab-dashboard.hidden,
+#appView #tab-markets.hidden{
+  display:none!important;
+}
+#appView #tab-dashboard:not(.hidden){display:flex!important}
+#appView #tab-markets:not(.hidden){display:block!important}
+
+/* Keep every page as a distinct viewport section; no hidden page may leak into the scroll flow. */
+#appView [id^="tab-"]{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  flex:0 0 auto!important;
+  isolation:isolate;
+}
+#appView [id^="tab-"]:not(.hidden){
+  animation:da-page-enter .24s var(--da-motion-premium) both;
+}
+@keyframes da-page-enter{
+  from{opacity:.0;transform:translateY(7px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* Stable desktop market grid: favorite, identity, live sparkline, 24h change, dual-currency price. */
+#tab-markets #marketList>.coin{
+  grid-template-columns:34px minmax(160px,1.25fr) minmax(76px,.55fr) minmax(100px,.72fr) minmax(125px,.9fr)!important;
+  grid-template-rows:minmax(58px,auto)!important;
+  grid-template-areas:"fav identity spark change price"!important;
+  align-items:center!important;
+  gap:10px!important;
+  padding:12px 8px!important;
+}
+#tab-markets #marketList>.coin>.favorite-btn{grid-area:fav!important}
+#tab-markets #marketList>.coin>.coin-identity{grid-area:identity!important}
+#tab-markets #marketList>.coin>.coin-sparkline{grid-area:spark!important;display:block!important}
+#tab-markets #marketList>.coin>.coin-change-wrap{grid-area:change!important}
+#tab-markets #marketList>.coin>.price-stack{grid-area:price!important}
+#tab-markets #marketList>.coin .coin-sparkline{min-width:0!important;width:100%!important}
+#tab-markets #marketList>.coin .coin-change-wrap{align-items:center!important;text-align:center!important}
+#tab-markets #marketList>.coin .price-stack{align-items:flex-end!important;white-space:nowrap!important}
+#tab-markets #marketList>.coin .coin-name-stack{min-width:0!important}
+#tab-markets #marketList>.coin .coin-name-fa,
+#tab-markets #marketList>.coin .coin-english-name{overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+#tab-markets .market-tools-primary{align-items:center!important}
+#tab-markets .market-board-v34{overflow:hidden!important}
+#tab-markets .market-categories .category-btn{white-space:nowrap!important}
+#tab-dashboard>.da-v2-hero,
+#tab-dashboard>.da-v2-wallet-card,
+#tab-dashboard>.da-v2-quick-grid,
+#tab-dashboard>.da-v2-section-head,
+#tab-dashboard>.da-market-glass{width:100%!important;min-width:0!important}
+#tab-dashboard .da-v2-wallet-card{overflow:hidden!important}
+#tab-dashboard .da-v2-account-stats>div{min-width:0!important;overflow-wrap:anywhere!important}
+#tab-dashboard .da-market-glass{overflow:hidden!important}
+#dashboardMarketPreview .da-market-coin-card{min-width:0!important}
+#dashboardMarketPreview .da-market-name-wrap{min-width:0!important;overflow:hidden!important}
+#dashboardMarketPreview .da-market-name-wrap b,
+#dashboardMarketPreview .da-market-name-wrap small{overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+
+/* Theme three is intentionally a bright periwinkle / ice-blue glass surface, not another dark theme. */
+body.luxury-theme{
+  color-scheme:light!important;
+  --da-bg:#edf2ff!important;
+  --da-bg2:#f5f7ff!important;
+  --da-surface:rgba(255,255,255,.94)!important;
+  --da-panel:#f4f6ff!important;
+  --da-line:rgba(86,108,194,.18)!important;
+  --da-text:#202b55!important;
+  --da-muted:#69769d!important;
+  --da-accent:#526ee8!important;
+  --da-positive:#07865e!important;
+  --da-negative:#d94f70!important;
+  --da-row-line:rgba(86,108,194,.16)!important;
+  background:
+    radial-gradient(ellipse at 8% 0%,rgba(125,151,255,.28),transparent 34%),
+    radial-gradient(ellipse at 94% 16%,rgba(166,205,255,.34),transparent 32%),
+    linear-gradient(145deg,#f7f8ff 0%,#edf2ff 52%,#e9f4ff 100%)!important;
+  color:#202b55!important;
+}
+html:has(body.luxury-theme){background:#edf2ff!important;color-scheme:light!important}
+body.luxury-theme .wrap{background:transparent!important}
+body.luxury-theme .top,
+body.luxury-theme .tabs,
+body.luxury-theme .mobile-bottom-nav{
+  background:rgba(255,255,255,.86)!important;
+  border:1px solid rgba(86,108,194,.16)!important;
+  box-shadow:0 14px 38px rgba(69,91,165,.09)!important;
+  backdrop-filter:blur(22px)!important;
+}
+body.luxury-theme .brand,
+body.luxury-theme h1,body.luxury-theme h2,body.luxury-theme h3,
+body.luxury-theme .section-title h2,
+body.luxury-theme #tab-dashboard .da-v2-hero h1,
+body.luxury-theme #tab-markets .market-hero-copy h1{color:#202b55!important}
+body.luxury-theme .top .muted,
+body.luxury-theme .muted,
+body.luxury-theme .small{color:#69769d!important}
+body.luxury-theme .card,
+body.luxury-theme .stat,
+body.luxury-theme .trade-box,
+body.luxury-theme .fx-box,
+body.luxury-theme .performance-item,
+body.luxury-theme .indicator-panel,
+body.luxury-theme .asset-row,
+body.luxury-theme .market-list>div,
+body.luxury-theme .news-item,
+body.luxury-theme .review-row,
+body.luxury-theme .dashboard-activity-center{
+  background:rgba(255,255,255,.91)!important;
+  border-color:rgba(86,108,194,.15)!important;
+  color:#202b55!important;
+  box-shadow:0 12px 34px rgba(69,91,165,.07)!important;
+}
+body.luxury-theme button{
+  background:linear-gradient(135deg,#627cf0,#8ea5ff)!important;
+  color:#fff!important;
+  box-shadow:0 8px 20px rgba(82,110,232,.16)!important;
+}
+body.luxury-theme button.secondary,
+body.luxury-theme .theme-switch,
+body.luxury-theme .tabs button,
+body.luxury-theme .mobile-bottom-nav button,
+body.luxury-theme .da-v2-quick-grid button,
+body.luxury-theme .da-market-filters button,
+body.luxury-theme .chart-types button,
+body.luxury-theme .timeframes button{
+  background:rgba(255,255,255,.82)!important;
+  color:#52618f!important;
+  border:1px solid rgba(86,108,194,.16)!important;
+  box-shadow:none!important;
+}
+body.luxury-theme .tabs button.active,
+body.luxury-theme .mobile-bottom-nav button.active,
+body.luxury-theme .da-market-filters button.active,
+body.luxury-theme .chart-types button.active,
+body.luxury-theme .timeframes button.active{
+  background:linear-gradient(135deg,#627cf0,#8ea5ff)!important;
+  color:#fff!important;
+  border-color:transparent!important;
+}
+body.luxury-theme input,
+body.luxury-theme select,
+body.luxury-theme textarea,
+body.luxury-theme #tab-dashboard .da-market-search,
+body.luxury-theme #tab-dashboard .da-market-sort{
+  background:rgba(255,255,255,.96)!important;
+  color:#202b55!important;
+  border:1px solid rgba(86,108,194,.2)!important;
+}
+body.luxury-theme input::placeholder,
+body.luxury-theme textarea::placeholder{color:#8994b5!important}
+body.luxury-theme #tab-dashboard>.da-v2-hero,
+body.luxury-theme #tab-markets .market-hero-v34,
+body.luxury-theme .hero,
+body.luxury-theme .market-hero-v34{
+  background:
+    radial-gradient(circle at 85% 22%,rgba(130,153,255,.22),transparent 36%),
+    linear-gradient(125deg,rgba(255,255,255,.97),rgba(239,244,255,.96))!important;
+  border:1px solid rgba(86,108,194,.18)!important;
+  box-shadow:0 20px 48px rgba(69,91,165,.10)!important;
+}
+body.luxury-theme #tab-dashboard .da-v2-balance-main,
+body.luxury-theme #tab-dashboard .da-v2-account-stats>div,
+body.luxury-theme #tab-dashboard .da-market-coin-card,
+body.luxury-theme #tab-markets #marketList>.coin,
+body.luxury-theme #tab-markets .volatility-stat,
+body.luxury-theme #tab-markets .market-board-v34{
+  background:rgba(255,255,255,.76)!important;
+  border-color:rgba(86,108,194,.15)!important;
+  color:#202b55!important;
+}
+body.luxury-theme #tab-dashboard .da-v2-balance-main strong,
+body.luxury-theme #tab-dashboard .da-v2-account-stats b,
+body.luxury-theme #dashboardMarketPreview .da-market-price,
+body.luxury-theme #tab-markets #marketList .price-usd,
+body.luxury-theme #tab-markets .volatility-stat strong{color:#202b55!important}
+body.luxury-theme #dashboardMarketPreview .da-market-toman,
+body.luxury-theme #tab-markets #marketList .price-toman{color:#69769d!important}
+body.luxury-theme #tab-dashboard .da-v2-kicker,
+body.luxury-theme #tab-dashboard .da-v2-eyebrow,
+body.luxury-theme #tab-dashboard .da-v2-link,
+body.luxury-theme #tab-markets .market-hero-kicker,
+body.luxury-theme #tab-markets .fx-price{color:#526ee8!important}
+body.luxury-theme #tab-markets .market-categories .category-btn{
+  background:rgba(255,255,255,.82)!important;
+  color:#69769d!important;
+  border-color:rgba(86,108,194,.16)!important;
+}
+body.luxury-theme #tab-markets .market-categories .category-btn.active{
+  background:rgba(98,124,240,.12)!important;
+  color:#435fd5!important;
+  border-color:rgba(82,110,232,.42)!important;
+}
+body.luxury-theme #tab-markets #marketList>.coin:hover,
+body.luxury-theme #tab-dashboard .da-market-coin-card:hover{
+  background:rgba(226,233,255,.76)!important;
+}
+body.luxury-theme .notice{background:#eef2ff!important;color:#354577!important;border-color:#d6defc!important}
+body.luxury-theme .notice.warn{background:#fff7e7!important;color:#79551b!important}
+body.luxury-theme .notice.err{background:#fff0f3!important;color:#9a3651!important}
+body.luxury-theme .notice.ok{background:#eafaf3!important;color:#176c51!important}
+body.luxury-theme #authView{
+  background:linear-gradient(135deg,#f7f8ff,#eaf0ff)!important;
+  border-color:rgba(86,108,194,.2)!important;
+  box-shadow:0 24px 70px rgba(69,91,165,.14)!important;
+}
+body.luxury-theme #authView .auth-visual,
+body.luxury-theme #authView .auth-form{
+  background:linear-gradient(145deg,#f7f8ff,#eaf0ff)!important;
+  color:#202b55!important;
+}
+body.luxury-theme #authView .auth-form h2,
+body.luxury-theme #authView .auth-form label,
+body.luxury-theme #authView .ref-brand-lockup strong{color:#202b55!important}
+body.luxury-theme #authView .auth-form input{background:#fff!important;color:#202b55!important}
+body.luxury-theme .mobile-bottom-nav button{color:#69769d!important}
+@media(max-width:900px){
+  #tab-markets #marketList>.coin{
+    grid-template-columns:26px minmax(0,1fr) 42px 58px 86px!important;
+    grid-template-areas:"fav identity spark change price" ". identity spark change price"!important;
+    grid-template-rows:minmax(36px,auto) minmax(30px,auto)!important;
+    gap:2px 5px!important;padding:9px 2px!important;min-height:70px!important;
+  }
+  #tab-markets #marketList>.coin>.favorite-btn{grid-area:fav!important}
+  #tab-markets #marketList>.coin>.coin-identity{grid-area:identity!important}
+  #tab-markets #marketList>.coin>.coin-sparkline{grid-area:spark!important}
+  #tab-markets #marketList>.coin>.coin-change-wrap{grid-area:change!important}
+  #tab-markets #marketList>.coin>.price-stack{grid-area:price!important}
+}
+@media(max-width:390px){
+  #tab-markets #marketList>.coin{
+    grid-template-columns:22px minmax(0,1fr) 34px 48px 76px!important;
+    gap:2px 3px!important;padding:8px 0!important;
+  }
+  #tab-markets #marketList .coin-name-fa{font-size:9px!important}
+  #tab-markets #marketList .coin-symbol-en,
+  #tab-markets #marketList .coin-english-name{font-size:7px!important}
+  #tab-markets #marketList .price-usd{font-size:9px!important}
+  #tab-markets #marketList .price-toman{font-size:7px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  #appView [id^="tab-"]:not(.hidden){animation:none!important}
+}
