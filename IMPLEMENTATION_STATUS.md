@@ -2154,3 +2154,11 @@
 - [!] Run #45873990436 روی commit تست `9394297` هنگام آخرین بررسی in_progress بود؛ Run #45874005767 visual review و #45874005846 APK برای آخرین commit `caf2723` pending بودند. APK قبلی #45873974389 روی CSS-only commit `f0cbf84` در حال اجرا بود و جای build آخرین commit را نمی‌گیرد.
 - [ ] منتظر نتیجه UI regression و APK build روی آخرین commit بمان؛ در صورت موفقیت، artifactها را دریافت و تصاویر را بازبینی کن.
 - ایمنی: هیچ merge، rebase، release، Pages deploy، Supabase، migration یا Production data change انجام نشد.
+
+
+## پیگیری شکست آزمون‌های پالت تم سوم — ۲۶ نوامبر ۲۰۲۶
+- [x] اجرای UI review شماره `45874005767` روی commit `caf2723` شکست خورد؛ لاگ نشان داد دو assertion قدیمی باقی مانده بودند (theme-color انتظار `#edf2ff` و chart palette قدیمی `#edf2ff/#202b55/#dbe4ff/#b9c7ef`).
+- [x] هر دو assertion دقیقاً با palette فعلی `#dce4ff/#263b91/#cbd5ff/#aebdf5` همگام شدند.
+- Commit اصلاح تست: `4b6861a63721edbda1193a2ebc1e7096bd4b5015`.
+- [ ] باید UI visual review و APK build برای همین commit نهایی دوباره اجرا و بررسی شوند؛ اجرای APK قبلی روی commit قدیمی‌تر هنوز در حال اجرا/صف بوده و معادل آخرین نسخه نیست.
+- هیچ merge/rebase/deploy/Production یا Supabase تغییری انجام نشد.
