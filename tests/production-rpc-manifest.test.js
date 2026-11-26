@@ -376,6 +376,7 @@ test('Production role matrix exactly reconciles every captured function ACL and 
 });
 
 
+
 test('inactive-account guards serialize order, reservation and conditional-order writes', () => {
   const fn = (schema, name) => {
     const found = manifest.functions.find(item => item.schema_name === schema && item.function_name === name);
@@ -384,8 +385,8 @@ test('inactive-account guards serialize order, reservation and conditional-order
   };
 
   const guard = fn('private', 'guard_active_account_writes');
-  assert.match(guard, /from public\\.profiles p[\\s\\S]*where p\\.id = new\\.user_id[\\s\\S]*for share;/i);
-  assert.match(guard, /coalesce\\(v_active, false\\) is not true[\\s\\S]*raise exception/i);
+  assert.match(guard, /from public\.profiles p[\s\S]*where p\.id = new\.user_id[\s\S]*for share;/i);
+  assert.match(guard, /coalesce\(v_active, false\) is not true[\s\S]*raise exception/i);
 
   const guardedInsertTriggers = inventory.trigger_bindings.filter(trigger =>
     trigger.function_schema === 'private' &&
@@ -398,7 +399,7 @@ test('inactive-account guards serialize order, reservation and conditional-order
   );
   for (const relation of ['orders', 'trades', 'transactions']) {
     const trigger = guardedInsertTriggers.find(item => item.relation_name === relation);
-    assert.match(trigger.trigger_definition, /BEFORE INSERT ON public\\./i);
+    assert.match(trigger.trigger_definition, /BEFORE INSERT ON public\./i);
   }
 
   const placements = [
@@ -408,7 +409,7 @@ test('inactive-account guards serialize order, reservation and conditional-order
   ];
   for (const [name, ...writes] of placements) {
     const body = fn('public', name);
-    assert.match(body, /current_account_is_active\\(\\)/i, name + ' must reject inactive accounts before placement');
+    assert.match(body, /current_account_is_active\(\)/i, name + ' must reject inactive accounts before placement');
     let previous = body.indexOf('current_account_is_active()');
     assert.notEqual(previous, -1, name + ' active-account check missing');
     for (const write of writes) {
@@ -420,13 +421,13 @@ test('inactive-account guards serialize order, reservation and conditional-order
 
   for (const name of ['process_conditional_orders', 'process_stop_limit_orders']) {
     const body = fn('public', name);
-    assert.match(body, /join public\\.profiles p on p\\.id=c\\.user_id and p\\.is_active is true/i, name + ' must filter inactive accounts');
+    assert.match(body, /join public\.profiles p on p\.id=c\.user_id and p\.is_active is true/i, name + ' must filter inactive accounts');
     assert.match(body, /for share;/i, name + ' must hold the active profile row lock during worker writes');
   }
 
   const limitWorker = fn('public', 'process_limit_orders');
-  assert.match(limitWorker, /exists \\(select 1 from public\\.profiles as p where p\\.id = o\\.user_id and p\\.is_active is true\\)/i);
-  assert.match(limitWorker, /insert into public\\.trades/i, 'Limit worker must pass through the guarded trade INSERT');
+  assert.match(limitWorker, /exists \(select 1 from public\.profiles as p where p\.id = o\.user_id and p\.is_active is true\)/i);
+  assert.match(limitWorker, /insert into public\.trades/i, 'Limit worker must pass through the guarded trade INSERT');
   assert.ok(guardedInsertTriggers.some(trigger => trigger.relation_name === 'trades'));
 
   const deactivate = fn('public', 'deactivate_my_account');
@@ -455,8 +456,8 @@ test('inactive-account guards serialize order, reservation and conditional-order
   ]) {
     const body = fn('public', name);
     for (const table of tables) {
-      assert.match(body, new RegExp('UPDATE\\\\s+public\\\\.' + table, 'i'), name + ' must retain cleanup path for ' + table);
-      assert.doesNotMatch(body, new RegExp('INSERT\\\\s+INTO\\\\s+public\\\\.' + table, 'i'), name + ' must not create new ' + table + ' rows');
+      assert.match(body, new RegExp('UPDATE\\s+public\\.' + table, 'i'), name + ' must retain cleanup path for ' + table);
+      assert.doesNotMatch(body, new RegExp('INSERT\\s+INTO\\s+public\\.' + table, 'i'), name + ' must not create new ' + table + ' rows');
     }
   }
 });
