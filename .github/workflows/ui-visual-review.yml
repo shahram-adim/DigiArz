@@ -1,0 +1,44 @@
+name: DigiArz UI visual review
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "src/digiarz-independent-ui.css"
+      - "tests/ui-visual-screenshots.cjs"
+      - ".github/workflows/ui-visual-review.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: digiarz-ui-visual-review-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install isolated Playwright runner
+        run: npm install --no-save --no-package-lock playwright@1.55.0
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Capture all themes and application sections
+        run: node tests/ui-visual-screenshots.cjs
+      - name: Upload visual review screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: DigiArz-UI-visual-review
+          path: artifacts/ui-visual/
+          if-no-files-found: error
+          retention-days: 14
+# theme-class harness: render each requested palette distinctly.
