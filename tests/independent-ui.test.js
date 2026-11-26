@@ -1051,3 +1051,13 @@ test('bright indigo market hero actions and mobile navigation retain readable li
     'body.luxury-theme .mobile-bottom-nav button','body.luxury-theme .mobile-bottom-nav button.active'])
     assert.ok(final.includes(token),'bright indigo contrast rule includes '+token);
 });
+
+
+test('mobile visual review captures dashboard and market asset rows after scrolling into view',()=>{
+  const harness=fs.readFileSync('tests/ui-visual-screenshots.cjs','utf8');
+  assert.match(harness,/marketPreview\.scrollIntoViewIfNeeded\(\)/);
+  assert.match(harness,/marketRows\.scrollIntoViewIfNeeded\(\)/);
+  assert.match(harness,/dashboard-marketrows/);
+  assert.match(harness,/markets-assetrows/);
+  assert.match(harness,/files\.length!==66/);
+});
