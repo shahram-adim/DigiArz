@@ -5556,3 +5556,25 @@ body.luxury-theme #appView .stat:hover{border-color:rgba(82,110,232,.3)!importan
 @media(prefers-reduced-motion:reduce){
  #appView *,#appView *:before,#appView *:after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
 }
+
+
+/* Final resolved palette tokens for the bright icy-indigo glass theme. */
+body.luxury-theme{
+  color-scheme:light!important;
+  --da-bg:#edf2ff!important;--da-bg2:#f5f7ff!important;
+  --da-surface:rgba(255,255,255,.94)!important;--da-surface2:rgba(255,255,255,.82)!important;
+  --da-panel:#f4f6ff!important;--da-line:rgba(86,108,194,.18)!important;
+  --da-text:#202b55!important;--da-muted:#69769d!important;
+  --da-accent:#526ee8!important;--da-accent-soft:rgba(82,110,232,.12)!important;
+  --da-blue:#526ee8!important;--da-mint:#526ee8!important;
+  --da-green:#07865e!important;--da-red:#d94f70!important;--da-purple:#7866d8!important;
+  --da-positive:#07865e!important;--da-negative:#d94f70!important;
+  --bg:#edf2ff!important;--panel:rgba(255,255,255,.94)!important;
+  --panel2:rgba(255,255,255,.82)!important;--line:rgba(86,108,194,.18)!important;
+  --text:#202b55!important;--muted:#69769d!important;--field:#fff!important;
+  --soft:#f4f6ff!important;--yellow:#526ee8!important;
+  background:radial-gradient(ellipse at 8% 0%,rgba(125,151,255,.28),transparent 34%),
+    radial-gradient(ellipse at 94% 16%,rgba(166,205,255,.34),transparent 32%),
+    linear-gradient(145deg,#f7f8ff 0%,#edf2ff 52%,#e9f4ff 100%)!important;
+  color:#202b55!important;
+}
