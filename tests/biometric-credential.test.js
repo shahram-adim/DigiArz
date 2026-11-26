@@ -52,3 +52,10 @@ test('Capacitor native setup registers the biometric plugin and adds AndroidX Bi
   assert.match(nativeSetup, /registerPlugin\(BiometricCredentialPlugin\.class\)/);
   assert.match(nativeSetup, /androidx\.biometric:biometric:1\.1\.0/);
 });
+
+test('saved biometric credentials remain removable when strong biometrics are unavailable', () => {
+  const setup = html.slice(html.indexOf('async function setupBiometricControls()'), html.indexOf('async function clearBiometricCredentials()'));
+  assert.ok(setup.indexOf('state?.hasCredentials') < setup.indexOf('if(!state?.available)'), 'saved-credential state must be handled before the unavailable-device return');
+  assert.match(setup, /clearButton\?\.classList\.remove\('hidden'\)/);
+  assert.match(setup, /if\(optInLabel\)optInLabel\.classList\.add\('hidden'\);return/);
+});
