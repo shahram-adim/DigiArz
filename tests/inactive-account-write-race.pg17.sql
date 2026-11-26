@@ -1,6 +1,8 @@
 \set ON_ERROR_STOP on
 CREATE SCHEMA IF NOT EXISTS private;
 DROP TABLE IF EXISTS public.orders CASCADE;
+DROP TABLE IF EXISTS public.trades CASCADE;
+DROP TABLE IF EXISTS public.transactions CASCADE;
 DROP TABLE IF EXISTS public.profiles CASCADE;
 CREATE TABLE public.profiles (
   id uuid PRIMARY KEY,
@@ -8,6 +10,16 @@ CREATE TABLE public.profiles (
   deactivated_at timestamptz
 );
 CREATE TABLE public.orders (
+  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  user_id uuid NOT NULL REFERENCES public.profiles(id),
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE public.trades (
+  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  user_id uuid NOT NULL REFERENCES public.profiles(id),
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE public.transactions (
   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   user_id uuid NOT NULL REFERENCES public.profiles(id),
   created_at timestamptz NOT NULL DEFAULT now()
@@ -36,4 +48,10 @@ $function$;
 
 CREATE TRIGGER guard_active_account_orders
 BEFORE INSERT ON public.orders
+FOR EACH ROW EXECUTE FUNCTION private.guard_active_account_writes();
+CREATE TRIGGER guard_active_account_trades
+BEFORE INSERT ON public.trades
+FOR EACH ROW EXECUTE FUNCTION private.guard_active_account_writes();
+CREATE TRIGGER guard_active_account_transactions
+BEFORE INSERT ON public.transactions
 FOR EACH ROW EXECUTE FUNCTION private.guard_active_account_writes();
