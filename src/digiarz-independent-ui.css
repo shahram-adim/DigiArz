@@ -6046,6 +6046,7 @@ body.luxury-theme #appView .mobile-bottom-nav button.active:after{background:#ff
 /* Icy-indigo refinement v2: increase theme identity without turning it dark.
    Keep the page luminous, but give its surfaces a stronger cool-indigo glass tint. */
 body.luxury-theme{
+  color-scheme:light!important;
   --da-bg:#dce4ff!important;
   --da-bg2:#e7edff!important;
   --da-surface:rgba(237,242,255,.96)!important;
