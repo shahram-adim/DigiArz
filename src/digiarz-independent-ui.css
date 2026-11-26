@@ -5180,3 +5180,35 @@ body.luxury-theme #tab-dashboard .da-v2-bottom{
   #dashboardMarketPreview .da-market-toman{font-size:8px!important}
   #tab-markets .market-hero-v34{padding:10px!important}
 }
+
+
+/* Visual review follow-up: brighten indigo market controls and navigation. */
+body.luxury-theme #tab-markets .market-hero-v34,
+body.luxury-theme #tab-markets .market-hero-v34 *{color:#26345f!important}
+body.luxury-theme #tab-markets .market-hero-v34 .market-hero-copy h1,
+body.luxury-theme #tab-markets .market-hero-v34 .market-hero-copy p,
+body.luxury-theme #tab-markets .market-hero-v34 .market-hero-kicker{color:#26345f!important}
+body.luxury-theme #tab-markets .market-hero-actions button,
+body.luxury-theme #tab-markets .market-hero-actions .btn,
+body.luxury-theme #tab-markets .market-tools-primary button{
+  background:linear-gradient(145deg,#fff,#edf2ff)!important;color:#344575!important;
+  border:1px solid rgba(86,108,194,.22)!important;box-shadow:0 5px 15px rgba(69,91,165,.07)!important;
+}
+body.luxury-theme #tab-markets .market-hero-actions button.primary,
+body.luxury-theme #tab-markets .market-hero-actions button.active{
+  background:linear-gradient(135deg,#627cf0,#8ea5ff)!important;color:#fff!important;border-color:transparent!important;
+}
+body.luxury-theme .mobile-bottom-nav{
+  background:rgba(255,255,255,.96)!important;border:1px solid rgba(86,108,194,.18)!important;
+  box-shadow:0 12px 30px rgba(69,91,165,.14)!important;
+}
+body.luxury-theme .mobile-bottom-nav button{
+  background:rgba(255,255,255,.88)!important;color:#52618e!important;border:1px solid rgba(86,108,194,.14)!important;
+}
+body.luxury-theme .mobile-bottom-nav button.active{
+  background:linear-gradient(135deg,#627cf0,#8ea5ff)!important;color:#fff!important;border-color:transparent!important;
+}
+body.luxury-theme #themeToggle,body.luxury-theme .theme-toggle,body.luxury-theme .header-theme-toggle{
+  background:#fff!important;color:#435fd5!important;border:1px solid rgba(86,108,194,.18)!important;
+  box-shadow:0 5px 14px rgba(69,91,165,.08)!important;
+}
