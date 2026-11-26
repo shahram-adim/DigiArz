@@ -1040,3 +1040,14 @@ test('mobile market hero and category navigation use compact spacing',()=>{
     '#tab-markets .market-board-v34{margin-top:8px!important}'])
     assert.ok(final.includes(token),'mobile market layout includes '+token);
 });
+
+
+test('bright indigo market hero actions and mobile navigation retain readable light-theme contrast',()=>{
+  const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
+  const final=css.slice(css.lastIndexOf('Visual review follow-up: brighten indigo market controls'));
+  for(const token of ['body.luxury-theme #tab-markets .market-hero-v34 *',
+    'color:#26345f!important','body.luxury-theme #tab-markets .market-hero-actions button',
+    'background:linear-gradient(145deg,#fff,#edf2ff)!important',
+    'body.luxury-theme .mobile-bottom-nav button','body.luxury-theme .mobile-bottom-nav button.active'])
+    assert.ok(final.includes(token),'bright indigo contrast rule includes '+token);
+});
