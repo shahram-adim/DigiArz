@@ -15,7 +15,7 @@ permissions:
 
 concurrency:
   group: digiarz-ui-visual-review-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   screenshots:
