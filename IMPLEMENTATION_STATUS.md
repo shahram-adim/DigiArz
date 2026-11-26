@@ -2118,3 +2118,16 @@
 - CI برای کامیت اصلاح بیومتریک هنوز نتیجه تأییدشده ندارد؛ تست روی دستگاه Android واقعی نیز انجام نشده است.
 - ادامه از این نقطه: ابتدا وضعیت Actions/CI کامیت `f6c2e05` و تست‌های syntax/UI را بررسی کن؛ سپس ممیزی امنیتی افزونه BiometricCredential (لغو/تلاش ناموفق، تغییر enrollment، حذف کلید، ثبت plugin در MainActivity و Gradle) را کامل کن.
 - هیچ Merge، Rebase، انتشار، Pages deploy، Supabase/Production، migration، یا تغییر wallet/order/trade انجام نشده است؛ این محدودیت‌ها همچنان پابرجا هستند.
+
+
+## گزارش ادامهٔ بازبینی UI سه تم و APK — ۲۶ نوامبر ۲۰۲۶
+- [x] GitHub Actions رابط کاربری Run #45872620358 روی commit `a2b88dcecf15cebf444b3f6a09978da207093074` با نتیجه `success` پایان یافت؛ تست‌های source-level، نصب Playwright/Chromium، capture تمام ۳ تم و ۱۰ بخش برنامه در دو viewport و بارگذاری تصاویر موفق شدند.
+- [x] Artifact تصاویر `DigiArz-UI-visual-review` با شناسه `15142893554` دریافت و بازبینی شد. README آن تصریح می‌کند درخواست‌های Supabase مسدود بوده‌اند و market/wallet/asset/top-volume fixtureها synthetic و DOM-only هستند؛ پس تصاویر، داده زنده یا صحت فید واقعی را اثبات نمی‌کنند.
+- [x] بازبینی بصری تصاویر موبایل: تم مشکی/طلایی هویت جدا دارد؛ تم سفید روشن است؛ تم سوم هویت icy-indigo دارد اما در نماهای موبایل به تم سفید نزدیک است و باید تمایز نیلی/آبی آن تقویت شود. ردیف‌های بازار بدون قاب و Tether در ابتدای فهرست دیده می‌شوند.
+- [x] Android candidate APK Run #45872608229 روی commit `e3407fea4e1896eb457ad09bb619abe7218ed310` با نتیجه `success` پایان یافت؛ build، verify/provenance و upload همگی موفق شدند.
+- [x] Artifact APK با شناسه `15143119247` دریافت شد؛ فایل `app-debug.apk` برابر 4,141,296 بایت است. SHA-256: `ae612bb333da4bf24ad0a75eb1e6f192e1dae64bf31a5e22c651a77d50cb175d`.
+- [!] APK یک debug candidate است؛ نصب واقعی روی دستگاه Android، ورود Supabase واقعی و جریان end-to-end اثرانگشت/چهره هنوز آزموده نشده‌اند.
+- [!] PR #64 همچنان open و Draft و merged=false است. آخرین head `a2b88dcecf15cebf444b3f6a09978da207093074`، base ثبت‌شده در PR `9855d6ea6cd188a5621c4e2c28c55e4cfb4d2587` است؛ main فعلی `6916b940f63877f0f2589ad1652791b85e01d823` است. مقایسه واقعی main...branch برابر 176 ahead و 2 behind و diverged است.
+- [x] دو commit عقب‌مانده main در QA/مستندات Stop-Limit و تست‌های source snapshot قرار دارند؛ فایل مشترک با شاخه UI، `IMPLEMENTATION_STATUS.md` است. فایل‌های SQL/QA مالی در این شاخه وارد نشده‌اند؛ هیچ rebase/merge انجام نشد.
+- [ ] گام بعد: تقویت تمایز تم سوم و اجرای دوباره visual regression؛ سپس بررسی نصب APK روی گوشی واقعی و تست بیومتریک. جداگانه، مرور تعارض/اختلاف مستندات `IMPLEMENTATION_STATUS.md` پیش از هر sync با main.
+- ایمنی: هیچ merge، rebase، release، Pages deployment، Supabase، migration، Production DB، wallet، order یا trade تغییری انجام نشد.
