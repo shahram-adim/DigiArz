@@ -5727,3 +5727,29 @@ body.luxury-theme #appView .buy{
 body.luxury-theme #appView .sell{
   background:linear-gradient(135deg,#d94f70,#ec718b)!important;color:#fff!important;
 }
+
+
+/* Remove the remaining legacy navy promotional/hero panels in icy-indigo mode. */
+body.luxury-theme #appView .market-hero-v34,
+body.luxury-theme #appView .trade-workspace-banner-v35{
+  background:
+    radial-gradient(circle at 88% 20%,rgba(111,137,239,.13),transparent 34%),
+    linear-gradient(120deg,rgba(255,255,255,.99),rgba(226,234,255,.96))!important;
+  border:1px solid rgba(82,110,232,.2)!important;
+  box-shadow:0 12px 30px rgba(69,88,160,.09),inset 0 1px rgba(255,255,255,.98)!important;
+}
+body.luxury-theme #appView .trade-workspace-copy h1,
+body.luxury-theme #appView .market-hero-title,
+body.luxury-theme #appView .trade-workspace-copy p{
+  color:#26376f!important;
+}
+body.luxury-theme #appView .trade-workspace-kicker,
+body.luxury-theme #appView .market-hero-kicker{
+  color:#526ee8!important;
+}
+body.luxury-theme #appView .trade-workspace-badges span,
+body.luxury-theme #appView .market-hero-v34 .market-hero-meta{
+  color:#53638f!important;
+  background:rgba(255,255,255,.78)!important;
+  border:1px solid rgba(82,110,232,.14)!important;
+}
