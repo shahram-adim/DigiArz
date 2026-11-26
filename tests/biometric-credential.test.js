@@ -74,3 +74,11 @@ test('saved biometric credentials remain removable when strong biometrics are un
   assert.match(setup, /clearButton\?\.classList\.remove\('hidden'\)/);
   assert.match(setup, /if\(optInLabel\)optInLabel\.classList\.add\('hidden'\);return/);
 });
+
+
+test('biometric UI accurately describes strong device biometrics, including secure face recognition', () => {
+  assert.match(html, /اثر انگشت یا تشخیص چهرهٔ امن دستگاه/);
+  assert.match(html, /ورود با بیومتریک امن دستگاه/);
+  assert.match(java, /BIOMETRIC_STRONG/);
+  assert.doesNotMatch(java, /BIOMETRIC_WEAK/);
+});
