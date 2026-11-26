@@ -1013,6 +1013,24 @@ test('market asset rows remain frameless across all themes while retaining a sub
   assert.ok(final.includes('background:transparent!important;'));
 });
 
+
+test('dashboard coin logos and favorite stars stay completely frameless in every theme',()=>{
+  const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
+  const final=css.slice(css.lastIndexOf('Final identity polish: coin logos and favorite stars have no decorative frames.'));
+  for(const token of [
+    '#dashboardMarketPreview .da-market-logo',
+    '#dashboardMarketPreview .da-market-logo-inner',
+    'box-shadow:none!important;',
+    'background:transparent!important;',
+    '#dashboardMarketPreview .da-market-favorite',
+    '#dashboardMarketPreview .da-market-favorite[aria-pressed="true"]',
+    'body.dark-theme #dashboardMarketPreview .da-market-favorite[aria-pressed="true"]',
+    'body.light-theme #dashboardMarketPreview .da-market-favorite[aria-pressed="true"]',
+    'body.luxury-theme #dashboardMarketPreview .da-market-favorite[aria-pressed="true"]',
+    '#tab-markets #marketList .favorite-btn'
+  ]) assert.ok(final.includes(token),'frameless identity treatment includes '+token);
+});
+
 test('third luxury theme is a bright ice-blue indigo glass palette, distinct from the black-gold dark theme',()=>{
   const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
   const final=css.slice(css.lastIndexOf('DigiArz layout correction + luminous indigo glass theme'));
