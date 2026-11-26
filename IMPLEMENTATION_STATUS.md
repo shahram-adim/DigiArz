@@ -1577,3 +1577,11 @@
 - [!] آزمون هنوز در محیط محلی اجرا نشده؛ این محیط ابزار `psql`/PostgreSQL ندارد. اجرای قطعی به CI GitHub وابسته است؛ در آخرین بررسی، برای commit تازه هنوز Workflow run و status قابل مشاهده نبود.
 - [!] این آزمون رفتار قفل Trigger را به‌صورت جداگانه ثابت می‌کند، اما اجرای کامل بدنهٔ `deactivate_my_account()` و سه RPC placement با تمام وابستگی‌هایشان هنوز در fixture بازسازی نشده است؛ آن مرحله نباید با این تست محدود اشتباه گرفته شود.
 - [ ] گام بعد: تأیید اجرای CI؛ سپس ساخت fixture یکپارچه از schema و وابستگی‌های لازم برای اجرای واقعی توابع Production و آزمون دو‌نشستی placement/deactivation/worker، بدون استفاده از Snapshot به‌عنوان migration قابل اعمال.
+### تکمیل Fixture هم‌زمانی برای هر سه Trigger حساب — ۲۰۲۶-۱۱-۲۶
+
+- [x] Fixture PostgreSQL 17 اکنون سه جدول مستقل `orders`، `trades` و `transactions` را می‌سازد و Trigger واقعیِ snapshot‌شدهٔ `private.guard_active_account_writes()` را روی هر سه جدول نصب می‌کند.
+- [x] آزمون دو‌نشستی هر دو ترتیب قفل را پوشش می‌دهد: placement ابتدا قفل می‌گیرد و سپس deactivation منتظر می‌ماند؛ یا deactivation ابتدا قفل می‌گیرد و INSERT بعدی باید در هر سه جدول با خطای حساب غیرفعال رد شود.
+- [x] حذف sleep ثابت برای شروع هماهنگی نشست‌ها انجام شد؛ اسکریپت اکنون با `pg_stat_activity` و `application_name` منتظر می‌ماند تا تراکنش واقعاً قفل را گرفته و به `pg_sleep` رسیده باشد، سپس نشست دوم را آغاز می‌کند.
+- [!] این Fixture هنوز آزمون کامل RPCهای placement و `deactivate_my_account()` نیست؛ فقط تابع Trigger واقعی و ترتیب قفل profile را در سه مسیر INSERT بازسازی می‌کند. اجرای کامل بدنه‌ها و وابستگی‌ها مرحلهٔ بعدی است.
+- [!] آخرین اجرای موفقی که در GitHub دیده شد مربوط به head قبلی است و گام جدید «PostgreSQL 17 two-session inactive-account write race» در آن run وجود نداشت. برای commit فعلی `a9135c8fd851eb1e0491034d3884e25ccc8202b7` هنوز نتیجهٔ CI تأیید نشده است؛ تا مشاهدهٔ run مربوط به head فعلی، CI را موفق اعلام نمی‌کنیم.
+- [ ] گام بعد: دریافت نتیجهٔ CI روی head جدید؛ سپس توسعهٔ fixture یکپارچه برای اجرای بدنه‌های واقعی `deactivate_my_account()`, `place_limit_order()`, `place_stop_limit_order()` و `place_conditional_exit_order()` با وابستگی‌های واقعی و سناریوهای worker.
