@@ -1301,3 +1301,20 @@ test('market loads Iranian-exchange Persian asset names before the Toman tab is 
   assert.match(html,/loadTomanAssetNameIndex\(\)\.then\(loaded=>\{if\(loaded\)\{renderMarkets\(\);renderDashboardMarketPreview\(\);renderDashboardSummary\(\)\}\}\)/);
   assert.match(html,/tomanAssetNames=buildTomanAssetNameIndex\(rows\)/);
 });
+
+
+test('icy-indigo premium identity is visibly distinct from white while remaining light and glassy',()=>{
+  const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
+  const final=css.slice(css.lastIndexOf('Premium identity pass: make icy-indigo clearly distinct'));
+  for(const token of [
+    '--da-bg:#e5eaff!important;',
+    'linear-gradient(145deg,#eef1ff 0%,#e3e9ff 48%,#e7f0ff 100%)',
+    'body.luxury-theme .top',
+    'linear-gradient(115deg,rgba(231,237,255,.94),rgba(215,226,255,.86))',
+    'body.luxury-theme #appView .hero',
+    'linear-gradient(125deg,#dce5ff 0%,#cbd8ff 48%,#e4edff 100%)',
+    'body.luxury-theme #appView .mobile-bottom-nav button.active',
+    'color:#fff!important;'
+  ]) assert.ok(final.includes(token),'premium icy-indigo layer includes '+token);
+  assert.ok(final.includes('color-scheme:light')===false,'third theme must not switch to dark color scheme');
+});
