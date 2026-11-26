@@ -508,3 +508,21 @@ test('Stop-Limit Production worker lock scope is explicit for child-order concur
   // declare the unlocked child row safe. A two-session worker/deactivation
   // fixture must decide whether expanding the lock set is necessary.
 });
+
+
+test('Stop-Limit worker race fixture embeds the captured Production body and tests next-cycle convergence', () => {
+  const worker = manifest.functions.find(fn => fn.schema_name === 'public' && fn.function_name === 'process_stop_limit_orders');
+  const fixture = fs.readFileSync('tests/inactive-account-rpc-race.pg17.sql', 'utf8');
+  const fixtureStart = fixture.lastIndexOf('CREATE OR REPLACE FUNCTION public.process_stop_limit_orders()');
+  assert.notEqual(fixtureStart, -1, 'captured Stop-Limit worker missing from PostgreSQL fixture');
+  assert.ok(fixture.slice(fixtureStart).trim().startsWith(worker.definition.trim()),
+    'Stop-Limit worker fixture must preserve the exact captured Production definition');
+
+  const race = fs.readFileSync('tests/stop-limit-child-sync-race.pg17.sh', 'utf8');
+  assert.match(race, /PGAPPNAME=digiarz_child_fill_hold/);
+  assert.match(race, /wait_for_sleep_query digiarz_child_fill_hold/);
+  assert.match(race, /public\.process_stop_limit_orders\(\)/);
+  assert.match(race, /expected one-cycle parent lag/);
+  assert.match(race, /parent did not converge to child filled state/);
+  assert.match(race, /conditional did not converge to child filled state/);
+});
