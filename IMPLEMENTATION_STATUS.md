@@ -2099,3 +2099,12 @@
 - [x] بررسی PRهای باز، PR #64 را به‌عنوان candidate UI فعلی تأیید کرد؛ PRهای #61 و #60 نیز باز هستند و نباید به‌طور موازی با #64 ادغام شوند.
 - [ ] اقدام بعدی: تهیه patch گزینشی از تغییرات HTML/CSS و وابستگی‌های SW/package/native، بازبینی diff در برابر main و ساخت candidate تمیز فقط پس از روشن شدن تمام تغییرات رفتاری. فعلاً هیچ شاخه جدیدی ساخته و هیچ کدی منتقل نشده است.
 - ایمنی: فقط خواندن GitHub و افزودن این گزارش به شاخه موجود؛ هیچ merge، rebase، deployment، release، Production، Supabase، migration، wallet، order یا trade تغییری نکرد.
+
+
+## اصلاح خطای نحوی راه‌اندازی بیومتریک — ۲۶ نوامبر ۲۰۲۶
+- [x] ممیزی کد واقعی شاخه نشان داد تابع `setupBiometricControls()` حاوی `await vault.isAvailable()` بود اما با `function` معمولی تعریف شده بود؛ این ترکیب در JavaScript خطای نحوی ایجاد می‌کند و می‌تواند اجرای کل اسکریپت اصلی را متوقف کند.
+- [x] فقط همان declaration در شاخه آزمایشی به `async function setupBiometricControls()` اصلاح شد؛ فراخوانی در `start()` بدون await باقی ماند، چون تابع خطاهای داخلی را catch می‌کند و عملیات اختیاری بیومتریک نباید راه‌اندازی سایر بخش‌ها را مسدود کند.
+- Commit اصلاح: `f6c2e05e562679ee66ac07d54e24fc8c9932c8fa`.
+- [ ] تست syntax و UI workflow برای commit اصلاح‌شده باید در GitHub Actions تأیید شود؛ نتیجه اجرا هنوز در این مرحله در دسترس نیست.
+- [!] مقایسه تازه: شاخه اکنون 166 commit جلو و 2 عقب، همچنان diverged است؛ merge-base هنوز `9855d6ea6cd188a5621c4e2c28c55e4cfb4d2587` و PR #64 همچنان Draft است. توضیحات PR درباره «ساخته‌شده از main فعلی 9855d6e با صفر commit عقب» نادرست/قدیمی است؛ main فعلی `6916b940...` است.
+- ایمنی: اصلاح فقط روی شاخه candidate؛ هیچ merge، deploy، release، Pages، Supabase، migration یا Production data change انجام نشد.
