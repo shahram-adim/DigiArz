@@ -81,4 +81,7 @@ test('biometric UI accurately describes strong device biometrics, including secu
   assert.match(html, /ورود با بیومتریک امن دستگاه/);
   assert.match(java, /BIOMETRIC_STRONG/);
   assert.doesNotMatch(java, /BIOMETRIC_WEAK/);
+  assert.match(java, /بیومتریک قوی دستگاه را تأیید کنید/);
+  assert.doesNotMatch(java, /اثر انگشت را تأیید کنید/);
+  assert.doesNotMatch(java, /اثر انگشت دستگاه تغییر کرده باشد/);
 });
