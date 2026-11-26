@@ -4319,7 +4319,7 @@ body.light-theme #tab-dashboard .da-v2-primary{color:#fff!important;background:l
 }
 #dashboardMarketPreview .da-market-coin-card{
   display:grid!important;grid-template-columns:minmax(0,1fr) minmax(78px,.45fr) minmax(115px,.65fr)!important;
-  grid-template-areas:"identity spark change" "identity spark price"!important;
+  grid-template-areas:"identity spark price" "identity spark toman" "identity spark change"!important;
   align-items:center!important;gap:4px 13px!important;min-width:0!important;
   padding:13px 7px!important;border:0!important;border-bottom:1px solid var(--da-row-line)!important;
   border-radius:0!important;background:transparent!important;box-shadow:none!important;
@@ -4329,7 +4329,7 @@ body.light-theme #tab-dashboard .da-v2-primary{color:#fff!important;background:l
 #dashboardMarketPreview .da-market-name-wrap b{color:var(--da-text)!important;font-size:12px!important;font-weight:900!important}
 #dashboardMarketPreview .da-market-name-wrap small{color:var(--da-muted)!important;font-size:9px!important}
 #dashboardMarketPreview .da-market-price{grid-area:price!important;color:var(--da-text)!important;font-size:12px!important;text-align:left!important;direction:ltr!important}
-#dashboardMarketPreview .da-market-toman{grid-area:change!important;color:var(--da-muted)!important;font-size:9px!important;text-align:left!important}
+#dashboardMarketPreview .da-market-toman{grid-area:toman!important;color:var(--da-muted)!important;font-size:9px!important;text-align:left!important}
 #dashboardMarketPreview .da-market-card-foot{grid-area:change!important;justify-self:end!important}
 #dashboardMarketPreview .da-market-change{font-size:10px!important;font-weight:900!important}
 #dashboardMarketPreview .da-market-sparkline{grid-area:spark!important;width:100%!important;min-width:50px!important;height:34px!important}
@@ -4537,7 +4537,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{ou
   #tab-dashboard .da-market-search,#tab-dashboard .da-market-sort{min-height:42px!important}
   #dashboardMarketPreview .da-market-coin-card{
     grid-template-columns:minmax(0,1fr) 54px minmax(94px,.72fr)!important;
-    grid-template-areas:"identity spark change" "identity spark price"!important;
+    grid-template-areas:"identity spark price" "identity spark toman" "identity spark change"!important;
     gap:3px 7px!important;padding:11px 2px!important;
   }
   #dashboardMarketPreview .da-market-identity{gap:8px!important}
