@@ -1215,7 +1215,7 @@ test('all dynamically rendered market categories have dedicated offline vector i
   const renderer=html.slice(rendererStart,rendererEnd);
   const categories=['layout-grid','wallet','trending-up','badge-plus','star','trending-down','bar-chart-3','trophy','landmark','smile','globe-2','shield-check','brain-circuit','gamepad-2'];
   for(const name of categories) {
-    assert.match(renderer,new RegExp("['\\\"]"+name+"['\\\"]\\s*:"),'dedicated offline SVG path exists for '+name);
+    assert.match(renderer,new RegExp("(?:['\"])?"+name+"(?:['\"])?\\s*:"),'dedicated offline SVG path exists for '+name);
   }
   assert.ok(html.includes("item.setAttribute('aria-pressed',active?'true':'false')"),'selected category exposes pressed state');
 });
