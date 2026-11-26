@@ -597,3 +597,19 @@ test('Conditional worker uses captured market engine and rolls back reservation 
   assert.match(race, /failure diagnostic was not recorded/);
   assert.match(race, /market execution rows survived failed subtransaction/);
 });
+
+
+test('Conditional worker retry exhaustion rejects the order and releases only a valid reservation', () => {
+  const conditional = manifest.functions.find(fn => fn.schema_name === 'public' && fn.function_name === 'process_conditional_orders');
+  assert.match(conditional.definition, /attempt_count=attempt_count\+1,last_error=left\(SQLERRM,500\)/i);
+  assert.match(conditional.definition, /attempt_count FROM public\.conditional_orders[\s\S]*?>=10/i);
+  assert.match(conditional.definition, /v_res\.status='reserved'[\s\S]*?SET released_amount=reserved_amount-consumed_amount,status='released'/i);
+  assert.match(conditional.definition, /SET status='rejected',remaining_amount=amount-filled_amount/i);
+
+  const race = fs.readFileSync('tests/conditional-worker-retry-fail-closed.pg17.sh', 'utf8');
+  assert.match(race, /for attempt in \{1\.\.10\}/);
+  assert.match(race, /conditional retry count did not reach ten/);
+  assert.match(race, /conditional order did not fail closed after ten attempts/);
+  assert.match(race, /valid reservation was not released at retry exhaustion/);
+  assert.match(race, /failed market executions changed user balances/);
+});
