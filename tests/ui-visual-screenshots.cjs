@@ -27,7 +27,13 @@ async function seedVisualFixtures(page) {
     const dashboard = document.getElementById('dashboardMarketPreview');
     const assets = document.getElementById('assetList');
     const top = document.getElementById('topAssetsList');
-    if (market) market.innerHTML = rows.map(row => {
+    const tetherRow = '<div class="coin tether-pinned" data-symbol="USDT" role="group" aria-label="تتر USDT · ارز پایدار و دارایی مبنا">'+
+      '<button class="favorite-btn" type="button" aria-label="افزودن تتر به علاقه‌مندی‌ها">☆</button>'+
+      '<div class="coin-identity tether-identity"><span class="coin-icon tether-logo" role="img" aria-label="لوگوی تتر USDT"><svg viewBox="0 0 48 48" width="100%" height="100%" aria-hidden="true"><circle cx="24" cy="24" r="23" fill="#26A17B"/><path d="M11 11h26v5H26.5v5.2c6.3.4 10.8 1.5 10.8 2.9s-5.9 3-13.3 3-13.3-1.6-13.3-3 4.5-2.5 10.8-2.9V16H11v-5zm13 9.5c-6.8 0-12.3 1.1-12.3 2.6s5.5 2.6 12.3 2.6 12.3-1.1 12.3-2.6-5.5-2.6-12.3-2.6zM21.5 25h5v12h-5z" fill="#fff"/></svg></span><span class="coin-name-stack"><b class="coin-name-fa">تتر</b><small class="coin-symbol-en" dir="ltr">USDT</small><small class="coin-english-name" dir="ltr">Tether</small></span><span class="tether-pin-label">ارز مبنا</span></div>'+
+      '<span class="coin-sparkline tether-peg-indicator" aria-label="ارزش هدف یک دلار آمریکا">≈ $1</span>'+
+      '<div class="coin-change-wrap tether-meta"><small class="coin-change-label">استیبل‌کوین دلاری</small><span class="coin-change pos">ثبات قیمت</span><small class="coin-volume">دارایی مبنا برای بازارهای USDT</small></div>'+
+      '<div class="price-stack"><div class="price-usd"><strong>$ 1.00</strong></div><div class="price-toman"><strong>۵۸۴٬۲۰۰ تومان</strong></div></div></div>';
+  if (market) market.innerHTML = tetherRow + rows.map(row => {
       const changeClass = row.change >= 0 ? 'pos' : 'neg';
       const arrow = row.change >= 0 ? '▲ +' : '▼ ';
       return '<div class="coin" data-symbol="'+row.symbol+'">'+
@@ -77,7 +83,7 @@ async function seedVisualFixtures(page) {
       topCards:top?.querySelectorAll(':scope > .top-asset-card').length||0
     };
   }, visualFixtures);
-  if (counts.marketCards!==8 || counts.dashboardCards!==8 || counts.assetCards!==3 || counts.topCards!==4) {
+  if (counts.marketCards!==9 || counts.dashboardCards!==8 || counts.assetCards!==3 || counts.topCards!==4) {
     throw new Error('Visual DOM fixture incomplete: '+JSON.stringify(counts));
   }
   return counts;
