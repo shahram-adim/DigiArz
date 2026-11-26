@@ -1991,3 +1991,13 @@
 - [!] تغییرات فقط در کد وب و تست شاخه مستقل ثبت شده‌اند؛ Edge Function یا Supabase Production تغییر یا deploy نشده است. تا اجرای CI، موفقیت آزمون این commit تأییدشده نیست.
 - [ ] بررسی همه بخش‌های دیگر که تصویر ارز نشان می‌دهند، به‌ویژه مسیر پیش‌نمایش ورود و تاریخچه، و سپس بررسی artifact تصویری و آزمون فیزیکی APK.
 - ایمنی: هیچ تغییر در دیتابیس، Migration، wallet، order، trade، cron، deployment، release، merge یا rebase انجام نشده است.
+
+
+## نتیجه CI ممیزی لوگو و APK — ۲۶ نوامبر ۲۰۲۶
+- [x] UI Visual Review run `45863962701` روی commit کد `dfb4a0d11df3e0fd27618df070c4096087f56a79` موفق شد؛ آزمون‌های source-level، تصویربرداری Playwright/Chromium از همه تم‌ها و بخش‌ها و بارگذاری artifact همگی سبز شدند.
+- [x] artifact تصویری `15140645125` با نام `DigiArz-UI-visual-review` و حجم 23,933,456 بایت؛ صفحه اجرا: https://github.com/shahram-adim/DigiArz/actions/runs/45863962701 . داده‌های تصویری fixture هستند، نه آزمون live-production.
+- [x] Android Candidate APK run `45863962939` روی همان commit موفق شد؛ build، verify و upload artifact همگی موفق شدند.
+- [x] artifact APK `15140440455` با نام `DigiArz-Candidate-Android-debug-APK`، حجم ZIP برابر 3,695,132 بایت، digest برابر `sha256:9adc8bc03a847206071e1010a2d776ac3abb4184bf3e882c5b9a8200d966094a` و انقضا `2026-12-10T17:02:07Z`. صفحه دریافت: https://github.com/shahram-adim/DigiArz/actions/runs/45863962939
+- [!] این CI روی commit کد `dfb4a0d` اجرا شد. commit بعدی `d2f494e` تست جدید را اضافه کرد و UI Visual Review run `45864030917` هنوز در وضعیت pending است؛ تا پایان آن، تست assertion جدید روی آخرین تست‌commit نهایی تلقی نمی‌شود. APK روی تغییرات کد `dfb4a0d` ساخته شده و گزارش مستندسازی بعدی در `70773e0` کد برنامه را تغییر نداده است.
+- [ ] تست فیزیکی APK و کنترل لوگوهای رسمی با داده واقعی همچنان نیازمند بررسی مالک است.
+- ایمنی: فقط فایل‌های فرانت‌اند، تست و گزارش روی شاخه مستقل تغییر کرده‌اند؛ هیچ Edge Function یا Supabase Production deploy یا تغییری نداشته است.
