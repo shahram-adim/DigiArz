@@ -1888,3 +1888,15 @@
 - [ ] APK جدید را پس از موفقیت run دریافت و SHA-256/BUILD-INFO آن را بررسی کن؛ سپس فقط برای آزمون Debug روی گوشی ارائه شود.
 - [ ] نصب فیزیکی APK، ورود/خروج، اثرانگشت، ناوبری، داده واقعی بازار و کیف پول همچنان تأییدنشده‌اند.
 - ایمنی: تمام تغییرات فقط در شاخه مستقل PR #64 و تست‌های تصویری/کد UI هستند؛ هیچ merge، release، Pages deployment، Supabase، Production، migration، wallet، order یا trade انجام نشده است.
+
+
+## نتیجهٔ حذف قاب ردیف‌های بازار و APK بازبینی — ۲۶ نوامبر ۲۰۲۶
+- [x] UI Visual Review run `45850651631` روی commit CSS `1856f8dab046a13b0e224bdd3527ab0f265b6d1d` با نتیجه success پایان یافت؛ artifact `15133641874` شامل ۶۶ تصویر، حجم 23,933,774 بایت، digest برابر `sha256:d6fadd37eb7754816eb9c660b46b402302bcdd2437c386b08c30869d38f435d2`.
+- [x] بازبینی تصاویر موبایل هر سه تم تأیید کرد ردیف‌های بازار دیگر قاب بیرونی، border یا shadow ندارند؛ تتر همچنان با نشان سبز و SVG اختصاصی در بالای فهرست باقی است. تصاویر سایر ارزها در این harness از glyphهای fixture استفاده می‌کنند و لوگوهای واقعی همه دارایی‌ها را تأیید نمی‌کنند.
+- [x] Android Candidate APK run `45850651655` روی همان commit با نتیجه success پایان یافت؛ artifact `15132828012`، حجم ZIP برابر 3,693,560 بایت، digest برابر `sha256:9f1dcca0b54c7b321af3d92160b8810ad543266aca4f1c614eb2a667191834a8`.
+- [x] APK استخراج و SHA-256 آن با BUILD-INFO تطبیق داده شد: `DigiArz-candidate-frameless-rows.apk`، نسخه 1.0.0، حجم 4,139,659 بایت، source commit `1856f8dab046a13b0e224bdd3527ab0f265b6d1d`، workflow run `45850651655`، SHA-256 `e91ad69bcbe6b1dc08b29bea99c346ec66b269da9266ae0cf16ec868107f9332`.
+- [!] UI Visual Review run `45850688818` برای commit تست `9c6c534c0e0ac115c4783ff75a1f352a65ab8424` هنوز در حال اجراست؛ این commit فقط تست رگرسیون را تغییر داده و فایل اجرایی برنامه نسبت به APK ساخته‌شده تغییر نکرده است.
+- [ ] نتیجهٔ نهایی run `45850688818` را تأیید و در صورت موفقیت checkpoint را ببند.
+- [ ] APK Debug را برای نصب آزمایشی ارائه کن؛ کاربر باید نصب، ورود/خروج، اثرانگشت، ناوبری و صفحات را روی گوشی واقعی بررسی کند. داده زندهٔ بازار/کیف پول از fixtureهای screenshot قابل تأیید نیست.
+- [ ] پیش از هر ادغام، دو commit عقب‌ماندگی Main و `mergeable=false` در PR #64 باید در یک برنامهٔ کنترل‌شده بررسی شوند؛ فعلاً Draft باقی بماند.
+- ایمنی: هیچ merge، release، Pages deployment، Supabase، Production، migration، wallet، order یا trade انجام نشده است.
