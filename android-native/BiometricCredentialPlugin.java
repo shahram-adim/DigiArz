@@ -109,7 +109,12 @@ public class BiometricCredentialPlugin extends Plugin {
                 SecretKey existing = (SecretKey) keyStore.getKey(KEY_ALIAS, null);
                 if (existing != null) {
                     Cipher probe = Cipher.getInstance("AES/GCM/NoPadding");
-                    probe.init(Cipher.ENCRYPT_MODE, existing);
+                    try {
+                        probe.init(Cipher.ENCRYPT_MODE, existing);
+                    } catch (android.security.keystore.UserNotAuthenticatedException authenticationRequired) {
+                        // Per-use authentication is expected; the subsequent BiometricPrompt
+                        // will authorize the actual encryption operation.
+                    }
                     return;
                 }
             } catch (
