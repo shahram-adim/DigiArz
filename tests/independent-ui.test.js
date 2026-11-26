@@ -1116,6 +1116,8 @@ test('pinned Tether market row keeps the same frameless responsive treatment in 
 test('Android biometric login is opt-in and uses the native encrypted credential vault', () => {
   assert.match(html, /id="saveCredentialsForBiometric"[^>]*type="checkbox"/);
   assert.match(html, /id="biometricLoginBtn"/);
+  assert.match(html, /id="clearBiometricCredentialsBtn"/);
+  assert.match(html, /vault\.clearCredentials\(\)/);
   assert.match(html, /vault\.saveCredentials\(\{email,password\}\)/);
   assert.match(html, /vault\.getCredentials\(\)/);
   assert.doesNotMatch(html, /localStorage\.setItem\([^,]*(?:password|credential)/i);
