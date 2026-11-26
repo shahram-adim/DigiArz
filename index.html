@@ -2310,10 +2310,22 @@ async function saveNewPassword(){
   if(!before.session)throw new Error('نشست بازیابی معتبر نیست یا منقضی شده است؛ لینک تازه‌ای درخواست کنید.');
   const {error}=await supabaseClient.auth.updateUser({password});
   if(error)throw error;
+  let biometricVaultCleared=true;
+  const biometricVault=window.Capacitor?.Plugins?.BiometricCredential;
+  if(biometricVault){
+   try{
+    await biometricVault.clearCredentials();
+    $('biometricLoginBtn')?.classList.add('hidden');
+    $('clearBiometricCredentialsBtn')?.classList.add('hidden');
+   }catch(vaultError){
+    biometricVaultCleared=false;
+    console.warn('Password changed but saved biometric credentials could not be cleared:',vaultError);
+   }
+  }
   $('newPassword').value='';
   $('confirmPassword').value='';
   hideRecoveryForm();
-  showMessage(authMsg,'رمز عبور با موفقیت تغییر کرد.','ok');
+  showMessage(authMsg,biometricVaultCleared?'رمز عبور با موفقیت تغییر کرد؛ اطلاعات ورود بیومتریک قبلی نیز پاک شد.':'رمز عبور تغییر کرد، اما پاک‌سازی اطلاعات بیومتریک ناموفق بود؛ پیش از استفاده دوباره، آن را از صفحه ورود پاک کنید.','ok');
   try{
    const {data:sessionData,error:sessionError}=await supabaseClient.auth.getSession();
    if(sessionError)throw sessionError;
@@ -3691,7 +3703,20 @@ async function loginWithBiometrics(){
  if(!vault||!supabaseClient)return;
  button.disabled=true;showMessage(authMsg,'برای ورود، اثر انگشت خود را تأیید کنید…','warn');
  try{const credentials=await vault.getCredentials();if(!credentials?.email||!credentials?.password)throw new Error('اطلاعات ورود ذخیره‌شده پیدا نشد.');const {data,error}=await supabaseClient.auth.signInWithPassword({email:credentials.email,password:credentials.password});if(error)throw error;if(!data.session)throw new Error('نشست معتبر از سرور دریافت نشد.');showMessage(authMsg,'ورود بیومتریک تأیید شد.','ok');await showApp(data.session)}
- catch(error){showMessage(authMsg,'ورود با اثر انگشت انجام نشد: '+(error?.message||String(error)),'err')}
+ catch(error){
+  const staleCredential=error?.code==='invalid_credentials'||/invalid login credentials|invalid_credentials/i.test(error?.message||String(error));
+  if(staleCredential){
+   try{
+    await vault.clearCredentials();
+    button.classList.add('hidden');
+    $('clearBiometricCredentialsBtn')?.classList.add('hidden');
+    showMessage(authMsg,'رمز ذخیره‌شده دیگر معتبر نیست و از این گوشی پاک شد؛ با رمز جدید وارد شوید و در صورت تمایل اثر انگشت را دوباره فعال کنید.','warn');
+   }catch(clearError){
+    $('clearBiometricCredentialsBtn')?.classList.remove('hidden');
+    showMessage(authMsg,'رمز ذخیره‌شده معتبر نیست؛ با رمز جدید وارد شوید و اطلاعات بیومتریک قبلی را پاک کنید.','warn');
+   }
+  }else showMessage(authMsg,'ورود با اثر انگشت انجام نشد: '+(error?.message||String(error)),'err');
+ }
  finally{button.disabled=false}
 }
 async function start(){
