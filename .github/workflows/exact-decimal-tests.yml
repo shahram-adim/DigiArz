@@ -285,3 +285,12 @@ jobs:
           psql -h localhost -U postgres -d digiarz_inactive_account_race_test -v ON_ERROR_STOP=1 \
             -f tests/inactive-account-write-race.pg17.sql
           PGDATABASE=digiarz_inactive_account_race_test bash tests/inactive-account-write-race.pg17.sh
+
+      - name: Run captured Production placement RPC and account deactivation races
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_inactive_account_rpc_race_test;"
+          psql -h localhost -U postgres -d digiarz_inactive_account_rpc_race_test -v ON_ERROR_STOP=1 \
+            -f tests/inactive-account-rpc-race.pg17.sql
+          PGDATABASE=digiarz_inactive_account_rpc_race_test bash tests/inactive-account-rpc-race.pg17.sh
