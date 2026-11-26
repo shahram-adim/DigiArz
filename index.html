@@ -2535,7 +2535,7 @@ function transliterateAssetNameToPersian(value){
 function persianCoinName(symbol,englishName=''){const base=String(symbol||'').toUpperCase().replace(/USDT$/,'');return tomanAssetNames.get(base)||coinInfo[base]?.fa||extraPersianNames[base]||transliterateAssetNameToPersian(englishName||coinInfo[base]?.name||'')||base}
 function marketPersianName(item){const symbol=String(item?.symbol||item?.asset||'').toUpperCase(),base=symbol.replace(/USDT$/,'');const explicit=[item?.name_fa,item?.asset_name_fa].map(value=>String(value||'').trim()).find(Boolean)||'';const englishName=String(item?.name_en||item?.asset_name_en||item?.english_name||item?.name||coinInfo[base]?.name||base);return explicit||persianCoinName(symbol,englishName)}
 function buildTomanAssetNameIndex(rows){
- const candidates=new Map(),priorityOf=exchange=>({bitpin:3,wallex:2,nobitex:1,bit24:1,kifpool:1}[String(exchange||'').toLowerCase()]||0);
+ const candidates=new Map(),priorityOf=exchange=>({bit24:5,kifpool:4,nobitex:3,wallex:2,bitpin:1}[String(exchange||'').toLowerCase()]||0);
  for(const row of Array.isArray(rows)?rows:[]){
   const symbol=String(row?.asset_symbol||'').trim().toUpperCase(),name=String(row?.asset_name_fa||'').trim();
   if(!symbol||!name)continue;

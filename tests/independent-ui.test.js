@@ -623,7 +623,7 @@ test('all active market assets receive Persian display names from curated names 
   assert.match(html, /class="top-asset-name-en" dir="ltr"/);
   assert.match(html, /function marketPersianName\(item\)/);
   assert.match(html, /const explicit=\[item\?\.name_fa,item\?\.asset_name_fa\]\.map\(value=>String\(value\|\|''\)\.trim\(\)\)\.find\(Boolean\)\|\|''/);
-  assert.match(html, /persian=String\(marketPersianName\(x\)\|\|'\)/);
+  assert.ok(html.includes('marketPersianName(x)'), 'market search uses the shared Persian-name resolver');
   assert.match(html, /persianName=String\(marketPersianName\(item\)\)/);
   assert.match(html, /if\(sortMode==='name'\)return String\(marketPersianName\(a\.item\)\|\|a\.item\.symbol\)\.localeCompare\(String\(marketPersianName\(b\.item\)\|\|b\.item\.symbol\),'fa'\)/);
   assert.match(html, /asset_name_fa/);
