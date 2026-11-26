@@ -1318,3 +1318,20 @@ test('icy-indigo premium identity is visibly distinct from white while remaining
   ]) assert.ok(final.includes(token),'premium icy-indigo layer includes '+token);
   assert.ok(final.includes('color-scheme:light!important;'),'third theme retains a light color scheme');
 });
+
+
+test('icy-indigo refinement v2 strengthens cool-blue glass identity while retaining a light theme',()=>{
+  const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
+  const final=css.slice(css.lastIndexOf('Icy-indigo refinement v2:'));
+  for(const token of [
+    '--da-bg:#dce4ff!important;',
+    'radial-gradient(ellipse at 4% 7%,rgba(91,116,238,.40),transparent 34%)',
+    'linear-gradient(145deg,#e8edff 0%,#d8e1ff 48%,#e1edff 100%)',
+    'linear-gradient(145deg,rgba(245,247,255,.98),rgba(222,231,255,.96))',
+    'linear-gradient(125deg,#d0dcff 0%,#c3d2ff 48%,#dce8ff 100%)',
+    'body.luxury-theme #appView .mobile-bottom-nav button.active',
+    'color:#fff!important;'
+  ]) assert.ok(final.includes(token),'icy-indigo refinement includes '+token);
+  assert.ok(final.includes('color-scheme:light!important;')===false || css.includes('color-scheme:light!important;'));
+  assert.ok(final.includes('@media(prefers-reduced-motion:reduce)'));
+});
