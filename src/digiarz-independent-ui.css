@@ -5660,3 +5660,70 @@ body.luxury-theme #authView .auth-form input{
   background:rgba(255,255,255,.96)!important;border-color:rgba(86,108,194,.22)!important;
   color:#202b55!important;
 }
+
+
+/* Theme 3 consistency pass: neutralize legacy dark trading/chart surfaces. */
+body.luxury-theme #appView .card,
+body.luxury-theme #appView .stat,
+body.luxury-theme #appView .trade-box,
+body.luxury-theme #appView .fx-box,
+body.luxury-theme #appView .performance-item,
+body.luxury-theme #appView .indicator-panel,
+body.luxury-theme #appView .asset-row,
+body.luxury-theme #appView .market-list>div,
+body.luxury-theme #appView .news-item,
+body.luxury-theme #appView .review-row,
+body.luxury-theme #appView .orderbook-side,
+body.luxury-theme #appView .orderbook-mid,
+body.luxury-theme #appView .trade-asset-preview,
+body.luxury-theme #appView #tab-trade .detail-section{
+  background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(237,242,255,.94))!important;
+  color:#202b55!important;
+  border-color:rgba(86,108,194,.18)!important;
+  box-shadow:0 10px 28px rgba(67,87,155,.075),inset 0 1px rgba(255,255,255,.96)!important;
+}
+body.luxury-theme #appView #priceChart,
+body.luxury-theme #appView #volumeChart{
+  background:linear-gradient(145deg,#fff,#edf2ff)!important;
+  border:1px solid rgba(86,108,194,.22)!important;
+}
+body.luxury-theme #appView #priceChart canvas,
+body.luxury-theme #appView #volumeChart canvas{
+  background:transparent!important;
+}
+body.luxury-theme #appView .timeframes button,
+body.luxury-theme #appView .chart-types button{
+  background:rgba(255,255,255,.9)!important;
+  color:#52618b!important;
+  border:1px solid rgba(86,108,194,.2)!important;
+}
+body.luxury-theme #appView .timeframes button.active,
+body.luxury-theme #appView .chart-types button.active{
+  background:linear-gradient(135deg,#526ee8,#7188ef)!important;
+  color:#fff!important;border-color:#526ee8!important;
+  box-shadow:0 6px 16px rgba(82,110,232,.2)!important;
+}
+body.luxury-theme #appView .performance-item small,
+body.luxury-theme #appView .chart-caption,
+body.luxury-theme #appView .trade-box .muted{
+  color:#69769d!important;
+}
+body.luxury-theme #appView .trade-box h3{
+  color:#293b78!important;border-bottom-color:rgba(86,108,194,.16)!important;
+}
+body.luxury-theme #appView input,
+body.luxury-theme #appView select,
+body.luxury-theme #appView textarea{
+  background:rgba(255,255,255,.96)!important;color:#202b55!important;
+  border-color:rgba(86,108,194,.22)!important;
+}
+body.luxury-theme #appView .secondary{
+  background:linear-gradient(135deg,#e9eeff,#dce5ff)!important;
+  color:#435fd5!important;border:1px solid rgba(82,110,232,.18)!important;
+}
+body.luxury-theme #appView .buy{
+  background:linear-gradient(135deg,#07865e,#12a879)!important;color:#fff!important;
+}
+body.luxury-theme #appView .sell{
+  background:linear-gradient(135deg,#d94f70,#ec718b)!important;color:#fff!important;
+}
