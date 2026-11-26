@@ -1484,3 +1484,10 @@
 - [x] assertion به `v62` اصلاح شد؛ commit اصلاحی `704be545f2b137fb60cce2b1d11fe31c54588077`.
 - [!] نتیجهٔ اجرای مجدد Exact Decimal، UI Visual Review و Android APK روی head جدید تا زمان این یادداشت هنوز pending/in progress است؛ موفقیت نهایی اعلام نمی‌شود.
 - گام بعد: فقط نتیجهٔ سه workflow روی head `704be545` را بررسی کن؛ اگر UI visual fixture در مرورگر خطا داشت، همان harness را اصلاح کن؛ APK تنها از artifact همین head یا head جدیدتر و پس از موفقیت workflow ارائه شود.
+
+
+### کنترل اجرای موازی CI — ۲۰۲۶-۱۱-۲۶
+- [x] workflow تصویری از `cancel-in-progress: true` به `false` تغییر کرد تا اجرای screenshotهای سه‌تم هنگام رسیدن commit بعدی لغو نشود.
+- [x] مسیر `tests/**` به triggerهای Android candidate اضافه شد تا تغییر تست‌های UI نیز APK متناسب با همان candidate را بازسازی کند.
+- [x] commit تنظیم workflowها: `33386c21a4ce5f889265fe05210e15e6dce58c1a`.
+- [!] روی همین head، Exact Decimal / UI Visual Review / Android APK در حال اجرا یا صف هستند؛ artifact APK جدید هنوز دریافت نشده است.
