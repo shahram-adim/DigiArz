@@ -37,7 +37,7 @@ test('three themes resolve to distinct black-gold, white-glass and bright indigo
 
 test('chart canvas and Android theme-color metadata follow the bright indigo-glass palette', () => {
   assert.match(html, /document\.documentElement\.style\.colorScheme=\(light\|\|luxury\)\?'light':'dark'/);
-  assert.match(html, /meta\.content=light\?'#ffffff':luxury\?'#edf2ff':'#090b10'/);
+  assert.match(html, /meta\.content=light\?'#ffffff':luxury\?'#dce4ff':'#090b10'/);
   assert.match(html, /bg:'#ffffff',text:'#152b40',grid:'#eaf2f8',line:'#d8e7f2'/);
   assert.match(html, /bg:'#dce4ff',text:'#263b91',grid:'#cbd5ff',line:'#aebdf5'/);
   assert.match(html, /bg:'#090b10',text:'#f7f4eb',grid:'#272b34',line:'#5b4b2a'/);
@@ -1079,7 +1079,7 @@ test('third luxury theme is a bright ice-blue indigo glass palette, distinct fro
   const final=css.slice(css.lastIndexOf('DigiArz layout correction + luminous indigo glass theme'));
   for(const token of ['color-scheme:light!important','--da-bg:#e5eaff!important',
     '--da-surface:rgba(255,255,255,.94)!important','--da-accent:#405bd0!important',
-    'linear-gradient(145deg,#f7f8ff 0%,#edf2ff 52%,#e9f4ff 100%)',
+    'linear-gradient(145deg,#f7f8ff 0%,#dce4ff 52%,#e9f4ff 100%)',
     'body.luxury-theme .top','body.luxury-theme #tab-markets .market-categories .category-btn.active'])
     assert.ok(final.includes(token),'bright luxury palette includes '+token);
 });
@@ -1095,7 +1095,7 @@ test('bright indigo dashboard overrides inherited dark account and market surfac
     'body.luxury-theme #tab-dashboard .da-v2-balance-main',
     'body.luxury-theme #tab-dashboard .da-market-coin-card',
     'background:#fff!important;',
-    'color:#202b55!important;'
+    'color:#263b91!important;'
   ]) assert.ok(final.includes(token),'bright dashboard override includes '+token);
 });
 
@@ -1124,7 +1124,7 @@ test('bright indigo market hero actions and mobile navigation retain readable li
   const final=css.slice(css.lastIndexOf('Visual review follow-up: brighten indigo market controls'));
   for(const token of ['body.luxury-theme #tab-markets .market-hero-v34 *',
     'color:#26345f!important','body.luxury-theme #tab-markets .market-hero-actions button',
-    'background:linear-gradient(145deg,#fff,#edf2ff)!important',
+    'background:linear-gradient(145deg,#fff,#dce4ff)!important',
     'body.luxury-theme .mobile-bottom-nav button','body.luxury-theme .mobile-bottom-nav button.active'])
     assert.ok(final.includes(token),'bright indigo contrast rule includes '+token);
 });
