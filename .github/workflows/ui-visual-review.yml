@@ -1,6 +1,14 @@
 name: DigiArz UI visual review
 
 on:
+  push:
+    branches:
+      - redesign/ui-mainline-clean-2026-11-26
+    paths:
+      - "index.html"
+      - "src/digiarz-independent-ui.css"
+      - "tests/**"
+      - ".github/workflows/ui-visual-review.yml"
   pull_request:
     branches: [main]
     paths:
@@ -28,6 +36,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+      - name: Run source-level regression tests
+        run: node --test tests/independent-ui.test.js tests/index-syntax.test.js tests/service-worker.test.js
       - name: Install isolated Playwright runner
         run: npm install --no-save --no-package-lock playwright@1.55.0
       - name: Install Chromium
