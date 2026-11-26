@@ -5753,3 +5753,48 @@ body.luxury-theme #appView .market-hero-v34 .market-hero-meta{
   background:rgba(255,255,255,.78)!important;
   border:1px solid rgba(82,110,232,.14)!important;
 }
+
+
+/* Final trade workspace palette lock: the trade page contains legacy nested
+   order/risk/strategy panels that must inherit the icy-indigo glass palette too. */
+body.luxury-theme #appView #tab-trade .orders-center-v36,
+body.luxury-theme #appView #tab-trade .orders-center-intro,
+body.luxury-theme #appView #tab-trade .orders-type-rail,
+body.luxury-theme #appView #tab-trade .advanced-order-form-v36,
+body.luxury-theme #appView #tab-trade .advanced-order-list-v36,
+body.luxury-theme #appView #tab-trade .trade-entry-grid-v35,
+body.luxury-theme #appView #tab-trade .trade-entry-grid-v35 .trade-box,
+body.luxury-theme #appView #tab-trade .trade-entry-grid-v35 .trade-box:first-child,
+body.luxury-theme #appView #tab-trade .trade-entry-grid-v35 .trade-box:last-child,
+body.luxury-theme #appView #tab-trade .detail-section,
+body.luxury-theme #appView #tab-trade .detail-section > .trade-box,
+body.luxury-theme #appView #tab-trade .detail-section > .market-list,
+body.luxury-theme #appView #tab-trade .risk-panel,
+body.luxury-theme #appView #tab-trade .risk-management-panel,
+body.luxury-theme #appView #tab-trade .strategy-panel,
+body.luxury-theme #appView #tab-trade .strategy-management-panel{
+  background:linear-gradient(145deg,rgba(255,255,255,.99),rgba(232,239,255,.97))!important;
+  color:#202b55!important;
+  border-color:rgba(86,108,194,.19)!important;
+  box-shadow:0 11px 30px rgba(67,87,155,.075),inset 0 1px rgba(255,255,255,.98)!important;
+}
+body.luxury-theme #appView #tab-trade .orders-center-intro h2,
+body.luxury-theme #appView #tab-trade .orders-center-intro p,
+body.luxury-theme #appView #tab-trade .orders-center-kicker,
+body.luxury-theme #appView #tab-trade .detail-section h2,
+body.luxury-theme #appView #tab-trade .detail-section h3,
+body.luxury-theme #appView #tab-trade .trade-entry-grid-v35 h2,
+body.luxury-theme #appView #tab-trade .trade-entry-grid-v35 h3{
+  color:#293b78!important;
+}
+body.luxury-theme #appView #tab-trade .orders-type-rail span,
+body.luxury-theme #appView #tab-trade .orders-type-rail b{
+  color:#52618b!important;background:rgba(255,255,255,.78)!important;
+  border-color:rgba(86,108,194,.16)!important;
+}
+body.luxury-theme #appView #tab-trade .orders-center-v36 *,
+body.luxury-theme #appView #tab-trade .advanced-order-form-v36 *,
+body.luxury-theme #appView #tab-trade .advanced-order-list-v36 *,
+body.luxury-theme #appView #tab-trade .trade-entry-grid-v35 *{
+  --legacy-panel-text:#202b55;
+}
