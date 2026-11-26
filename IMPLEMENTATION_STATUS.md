@@ -1836,3 +1836,16 @@
 - [ ] هنوز بخش‌های ورودی/فرم و بعضی سطوح داخلی بازار سفارش، داده‌های ساختگی/placeholder دارند؛ fixture تست اتصال Supabase را مسدود می‌کند، پس داده زنده/نمودار زنده تأیید نشده است.
 - [ ] نصب APK روی گوشی واقعی، تست login/biometric، ناوبری و تعامل واقعی همچنان باقی است.
 - وضعیت شاخه: PR #64 باید Draft و ادغام‌نشده باقی بماند؛ هیچ merge/rebase، Main، Production، Supabase یا انتشار انجام نشده است.
+
+
+## ادامهٔ بررسی و تأیید artifactهای UI/APK — ۲۶ نوامبر ۲۰۲۶
+- [x] وضعیت واقعی PR #64 بازخوانی شد: Draft و ادغام‌نشده؛ شاخه `redesign/ui-mainline-clean-2026-11-26`، HEAD برابر `d20a8b5141d7f6715eaf110aa0fcf86a73df1647` و والد مستقیم آن commit کد `8f692f1c32f722a369d3a7b12109fe8a1d7ada67` است؛ commit HEAD فقط همین گزارش وضعیت را تغییر داده و کد UI/APK همان کد commit 8f692f1 است.
+- [x] مقایسه با Main: صفر commit عقب، ۱۱۰ commit جلو؛ GitHub در snapshot فعلی وضعیت mergeability را `dirty / mergeable=false` گزارش کرده است. این وضعیت باید پیش از هر تصمیم ادغام جداگانه بررسی شود؛ هیچ ادغامی انجام نشود.
+- [x] UI Visual Review run `45825892090` روی commit کد `8f692f1` موفق شد؛ artifact `15119678093` شامل ۶۶ تصویر، حجم ZIP حدود 22.7 MB.
+- [x] Android Candidate APK run `45825892142` روی همان commit موفق شد؛ artifact `15120487116` دریافت و محتوای ZIP بررسی شد.
+- [x] APK استخراج و شناسایی شد: `app-debug.apk`، نسخه 1.0.0، حجم 4,137,112 بایت، SHA-256 برابر `3f733cc9201aaae801d90da83bf76ab86cc59385c963e40c3ceedf90745f8eed`. مسیر استخراج‌شده در محیط کاری: `/mnt/data/digiarz_apk_candidate/app-debug.apk`.
+- [!] این APK فقط Debug Candidate است، نه نسخهٔ Release امضاشده برای انتشار عمومی. لینک artifact GitHub موقت است و تا ۱۰ دسامبر ۲۰۲۶ اعتبار دارد.
+- [ ] آزمون Exact Decimal در آخرین اجرای PR که قابل مشاهده است روی commit قدیمی‌تر `83dab6d` موفق بوده؛ برای commit کد `8f692f1` اجرای تازهٔ مستقل آن در فهرست PR-runها مشاهده نشد. UI Visual Review و APK روی 8f692f1 موفق‌اند.
+- [ ] نصب فیزیکی APK روی گوشی Android و بررسی ورود/بیومتریک، ناوبری، صفحات و داده‌های واقعی بازار/کیف پول همچنان باقی است. تصاویر بصری با fixture ساختگی تولید شده‌اند و صحت داده زنده را ثابت نمی‌کنند.
+- [ ] پیش از ادغام، علت `mergeable=false / dirty` روشن و وضعیت تست Exact Decimal روی head جاری تکمیل شود.
+- ایمنی: فقط فایل وضعیت در شاخه Draft به‌روزرسانی می‌شود؛ هیچ Merge، Release، Pages deploy، Supabase، migration یا تغییر Production مجاز/انجام‌شده نیست.
