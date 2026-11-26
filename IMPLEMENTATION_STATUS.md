@@ -1967,3 +1967,16 @@
 - [!] اجرای UI Visual Review شماره ۱۲۳ روی commit قبلی شکست خورده بود: ۱۲۸ از ۱۲۹ تست موفق و یک assertion در تست نام فارسی قرمز شد؛ screenshot اجرا نشد. تغییر assertion و اولویت منبع در commit جدید نیازمند اجرای CI مجدد است.
 - [ ] CI سبز، اسکرین‌شات‌های هر سه تم، و نصب فیزیکی APK هنوز تأیید نشده‌اند.
 - ایمنی: فقط فرانت‌اند، تست و گزارش در شاخه Draft تغییر می‌کنند؛ هیچ Production، Supabase، migration، سفارش، معامله، کیف پول، deployment یا release تغییر نمی‌کند.
+
+
+## تأیید CI نام فارسی، تصاویر هر سه تم و APK — ۲۶ نوامبر ۲۰۲۶
+- [x] آخرین کد برنامه در commit `75ea8ddac8883860aacf8cbd902b1f3834271952` قرار دارد؛ اصلاح اولویت منابع نام فارسی و مقاوم‌سازی assertion در این commit ثبت شده است.
+- [x] UI Visual Review run `45859021958` با نتیجه success پایان یافت. مراحل source-level regression، نصب Playwright، نصب Chromium، ثبت تصاویر همه تم‌ها و بخش‌های برنامه و آپلود artifact همگی موفق‌اند.
+- [x] artifact تصاویر `15138205275` با نام `DigiArz-UI-visual-review`، حجم 23,933,448 بایت؛ لینک اجرا: https://github.com/shahram-adim/DigiArz/actions/runs/45859021958 . این تصاویر با fixtureهای بصری ساخته می‌شوند و اثبات داده زنده یا لوگوی رسمی تمام دارایی‌ها نیستند.
+- [x] Android Candidate APK run `45859021880` با نتیجه success پایان یافت. مراحل تولید دارایی وب، ساخت پروژه Capacitor، نصب پل بومی بیومتریک، sync اندروید، build و verify APK و آپلود artifact همگی موفق‌اند.
+- [x] artifact APK `15138390207` با نام `DigiArz-Candidate-Android-debug-APK`، حجم ZIP برابر 3,695,108 بایت، digest برابر `sha256:edb97858cbfa463e21a57873d4d121c44c242ee3b8ceccfa6b4bb520176010c9`؛ مهلت انقضا 2026-12-10T16:29:41Z. لینک دریافت از صفحه اجرا: https://github.com/shahram-adim/DigiArz/actions/runs/45859021880
+- [!] APK یک build آزمایشی Debug است؛ نصب فیزیکی روی گوشی، ورود/خروج واقعی، اثرانگشت/چهره، ناوبری، و دریافت بازار واقعی هنوز از سوی مالک آزموده نشده‌اند.
+- [!] ممیزی لوگو: مسیر اصلی image_url/metadata، سپس app-assets و CoinCap حفظ شده است؛ در شکست منابع، SVG نمادین جایگزین نمایش داده می‌شود. SVG fallback لوگوی رسمی نیست و harness تصویری از glyphهای fixture استفاده می‌کند؛ پوشش لوگوهای رسمی باید روی دستگاه و با داده واقعی سنجیده شود.
+- [ ] گام بعد: بازبینی خروجی تصویری هر سه تم از artifact، سپس ممیزی تکمیلی پوشش لوگو/منابع برای دارایی‌ها و ارائه APK Debug برای تست فیزیکی.
+- [ ] PR #64 باز، Draft، ادغام‌نشده و `mergeable=false` است. شاخه نسبت به main برابر 148 commit جلو و 2 commit عقب و وضعیت `diverged` دارد؛ هیچ rebase/merge انجام نشود مگر با برنامه و تأیید صریح مالک.
+- ایمنی: هیچ merge، release، Pages deployment، Supabase، Production، migration، wallet، order یا trade انجام نشده است.
