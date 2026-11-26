@@ -1629,3 +1629,11 @@
 - [x] بدنهٔ هر چهار تابع موردنیاز این مسیر (`process_limit_orders`, `process_stop_limit_orders`, `cancel_limit_order`, `cancel_stop_limit_order`) در fixture با manifest تطبیق دقیق دارد؛ اسکریپت از نظر Bash syntax بررسی شد و تست Node از نظر syntax و وجود سناریو بررسی شد.
 - [!] هنوز اجرای SQL/PostgreSQL 17 و نتیجهٔ CI برای head فعلی تأیید نشده است؛ این وضعیت صرفاً آماده‌سازی و بررسی ایستا است.
 - [ ] گام بعد: آزمون cancellation و workerها در هر دو ترتیب قفل، سپس سناریوهای failure/rollback در `process_conditional_orders()` و کنترل دقیق reservation پس از exception؛ در پایان بررسی CI روی commit جدید.
+### آزمون Rollback و اتمیک‌بودن Reservation در Worker شرطی — ۲۰۲۶-۱۱-۲۶
+
+- [x] بدنه‌های واقعی `process_conditional_orders()` و `execute_demo_trade()` با manifest Production تطبیق داده و به Fixture PostgreSQL 17 اضافه شدند.
+- [x] اسکریپت `tests/conditional-worker-reservation-rollback.pg17.sh` یک خطای کنترل‌شده را پس از به‌روزرسانی wallet/asset و هنگام INSERT در `trades` تزریق می‌کند؛ Trigger خطا فقط برای کاربر آزمایشی مشخص فعال است.
+- [x] آزمون بررسی می‌کند که exception داخل بلوک اجرای Worker، آزادسازی reservation را rollback کند و تغییرات wallet، asset balance، order، trade و transaction باقی نمانند؛ در عین حال `attempt_count` و `last_error` برای retry ثبت شوند.
+- [x] اسکریپت به workflow PostgreSQL 17 اضافه شد؛ `bash -n` موفق بود؛ تست Node از نظر syntax و تطبیق دقیق دو بدنه با manifest بررسی شد.
+- [!] این گام هنوز فقط static/syntax validation دارد؛ PostgreSQL واقعی و CI برای head فعلی اجرا/تأیید نشده‌اند.
+- [ ] گام بعد: بررسی سناریوی retry تا سقف ۱۰ تلاش و حالت fail-closed، سپس اجرای CI و رسیدگی به هر خطای fixture؛ هیچ تغییر Production تا تأیید صریح انجام نمی‌شود.
