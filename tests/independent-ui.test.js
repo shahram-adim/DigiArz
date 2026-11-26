@@ -939,3 +939,17 @@ test('visual screenshots seed DOM-only synthetic market rows without depending o
   assert.doesNotMatch(harness,/renderMarkets\(\)/);
   assert.doesNotMatch(harness,/renderDashboardSummary\(\)/);
 });
+
+
+test('theme-qualified logo transparency overrides legacy theme tile rules with stronger selectors',()=>{
+  const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
+  const final=css.slice(css.lastIndexOf('Theme-specific high-specificity reset'));
+  for(const theme of ['dark-theme','light-theme','luxury-theme']){
+    assert.ok(final.includes('body.'+theme+' #tab-dashboard #dashboardMarketPreview .da-market-logo'));
+    assert.ok(final.includes('body.'+theme+' #tab-markets #marketList>.coin .coin-icon'));
+    assert.ok(final.includes('body.'+theme+' #tab-assets #assetList .asset-row .asset-logo'));
+  }
+  assert.ok(final.includes('background:transparent!important;'));
+  assert.ok(final.includes('background-image:none!important;'));
+  assert.ok(final.includes('border:0!important;'));
+});
