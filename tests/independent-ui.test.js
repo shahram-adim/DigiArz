@@ -901,3 +901,13 @@ test('market and dashboard retain their live data and interaction hooks after th
   assert.match(html,/function renderMarkets\(/);
   assert.match(html,/function renderDashboardMarketPreview\(/);
 });
+
+
+test('logo tile removal also covers top-volume assets, trade previews and fallback marks throughout the app',()=>{
+  const finalCss=css.slice(css.lastIndexOf('Signature logo normalization'));
+  for(const token of ['.coin-icon,.coin-icon img,.asset-logo,.asset-logo img,.coin-logo-fallback',
+    '.top-asset-card .coin-icon','.trade-asset-preview .asset-logo',
+    'background:transparent!important','background-image:none!important',
+    'box-shadow:none!important','object-fit:contain!important'])
+    assert.ok(finalCss.includes(token),'global logo reset includes '+token);
+});
