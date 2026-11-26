@@ -953,3 +953,13 @@ test('theme-qualified logo transparency overrides legacy theme tile rules with s
   assert.ok(final.includes('background-image:none!important;'));
   assert.ok(final.includes('border:0!important;'));
 });
+
+
+test('theme-specific logo override contains valid CSS line breaks and no escaped newline sequences',()=>{
+  const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
+  const final=css.slice(css.lastIndexOf('Theme-specific high-specificity reset'));
+  assert.ok(final.includes('body.dark-theme .da-v2-logo,\nbody.dark-theme .coin-icon'));
+  assert.ok(final.includes('body.light-theme .da-v2-logo,\nbody.light-theme .coin-icon'));
+  assert.ok(final.includes('body.luxury-theme .da-v2-logo,\nbody.luxury-theme .coin-icon'));
+  assert.equal(final.includes('\\n'),false,'CSS selectors must use real newlines, not escaped backslash-n');
+});
