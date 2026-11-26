@@ -2232,3 +2232,13 @@
 - [!] تغییر رمز و ورود بیومتریک هنوز روی گوشی واقعی و حساب واقعی آزمایش نشده‌اند؛ هیچ رمز یا دادهٔ کاربری واقعی دستکاری نشده است.
 - وضعیت PR #64: باز و Draft، mergeable=false، merged=false؛ شاخه 204 commit جلو و 2 عقب از main است. دو commit عقب‌مانده مربوط به QA و snapshot فقط‌خواندنی Stop-Limit هستند و دست‌نخورده باقی مانده‌اند.
 - هیچ merge، rebase، deploy، انتشار، migration یا تغییر Supabase/Production انجام نشد.
+
+
+## نتیجهٔ بازبینی بصری و تلاش ساخت APK — ۲۶ نوامبر ۲۰۲۶
+- [x] اجرای UI visual review روی commit `f1ad70839d1fd8e3f7e98b5903440367fb269f8a` موفق شد: run `45876179024`، artifact `15144788757`، ۶۶ تصویر (دو viewport × سه تم × ده بخش + دو close-up). فایل‌ها دریافت و README و تصاویر بررسی شدند.
+- [x] بازبینی close-up بازار تم نیلی-یخی انجام شد؛ ساختار ردیف‌ها، نام فارسی/نماد، قیمت USD/تومان، درصد تغییر و ستاره دیده می‌شود. داده‌های market/dashboard همچنان fixture مصنوعی هستند و Supabase API در محیط تصویربرداری مسدود بوده است.
+- [!] ساخت APK همان commit در run `45876178982` شکست خورد؛ خطا ناشی از HTTP 429 Too Many Requests از Maven Central هنگام دریافت dependencyهای Gradle از جمله Kotlin stdlib و jsr305 بود، نه خطای compile شناخته‌شده در کد DigiArz. build، verify و upload artifact اجرا نشدند.
+- [x] فقط job ناموفق در workflow ساخت APK مجدداً صف شد؛ run `45876178982` اکنون queued است. لینک: `https://github.com/shahram-adim/DigiArz/actions/runs/45876178982`.
+- [ ] UI review جدیدتر روی commit تست `ee40da2` با run `45876183333` هنوز در حال اجرا/تکمیل است.
+- وضعیت PR #64: باز و Draft، head فعلی `5f3c73519057b761236c8b125fe09a1a63bc2847`، merged=false، mergeable=false؛ شاخه 205 جلو و 2 عقب از main است. دو commit عقب‌ماندهٔ main مربوط به QA و snapshot فقط‌خواندنی Stop-Limit حفظ شده‌اند.
+- هیچ merge/rebase/deploy، انتشار، migration یا تغییر Supabase/Production انجام نشده است.
