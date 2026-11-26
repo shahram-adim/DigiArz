@@ -1923,3 +1923,13 @@
 - [ ] پس از اتمام runها، artifact UI و APK نهایی را دریافت و SHA-256/BUILD-INFO را بررسی کن؛ سپس APK فقط برای تست Debug فیزیکی ارائه شود.
 - [ ] PR #64 همچنان Draft و ادغام‌نشده بماند. main فعلی `6916b940f63877f0f2589ad1652791b85e01d823` است، در حالی که base ثبت‌شده PR `9855d6ea6cd188a5621c4e2c28c55e4cfb4d2587` است؛ مقایسهٔ head فعلی با main: ۱۳۲ commit جلو و ۲ commit عقب، merge base برابر `9855d6e`. دو commit جدید main شامل تغییرات `IMPLEMENTATION_STATUS.md` و QA/SQL مربوط به Stop-Limit هستند؛ بدون بررسی و برنامهٔ کنترل‌شده هیچ update/rebase/merge انجام نشود.
 - ایمنی: هیچ merge، release، Pages deployment، Supabase، Production، migration، wallet، order یا trade انجام نشده است.
+
+
+### تأیید نهایی fallback لوگو، frameless UI و APK — ۲۶ نوامبر ۲۰۲۶
+- [x] UI Visual Review run `45852515856` روی commit تست `79e88872e99e83731d1febaa9893fdeec1f4f9c8` با نتیجه success پایان یافت؛ source-level regression، Playwright/Chromium و ۶۶ تصویر تکمیل شدند. artifact `15134570757`، حجم 23,933,758 بایت، digest `sha256:3c699a990e886a3576f4f3d2fea8945728fdbb08b7a509eb13d1d4857f604639`.
+- [x] Android Candidate APK run `45852509484` روی commit CSS `8d9755db97cd06cf4ae27c8d1045c02cd3ea3ee2` با نتیجه success پایان یافت؛ artifact `15133558941`، حجم ZIP برابر 3,694,427 بایت، digest `sha256:65781fc58a658fc07baf0535fd784c6dcfe721345588bd60514960917d301a8e`.
+- [x] APK استخراج و BUILD-INFO بررسی شد: نسخه `1.0.0`، workflow run `45852509484`، build time `2026-11-26T15:49:50Z`، APK size 4,140,443 bytes، SHA-256 `4199f3f01caa93fc52a7e7eab4fe905efe3ff57de711700cd8be0a39d4e112be`. مسیر استخراج‌شده: `/mnt/data/DigiArz-candidate-logo-fallback.apk`.
+- [!] artifact تصاویر از fixtureهای DOM ساختگی استفاده می‌کند؛ ۶۶ تصویر برای ساختار و تم‌هاست، نه اثبات دریافت لوگوهای رسمی یا داده‌های زنده. منطق اصلی لوگو اکنون در خطای هر دو provider یک SVG monogram جایگزین رنگی نشان می‌دهد؛ لوگوهای رسمی باید روی گوشی با اتصال واقعی و دادهٔ زنده بررسی شوند.
+- [ ] آزمون فیزیکی APK (نصب، ورود/خروج، بیومتریک، ناوبری، هر سه تم، فهرست بازار و لوگوهای واقعی) از سوی مالک باقی است.
+- [ ] PR #64 هنوز Draft/open/unmerged است. main روی `6916b940f63877f0f2589ad1652791b85e01d823` قرار دارد و PR base روی `9855d6ea6cd188a5621c4e2c28c55e4cfb4d2587`؛ اختلاف ۲ commit عقب و ۱۳۲ جلو. دو commit جدید main شامل فایل وضعیت و QA/SQL Stop-Limit هستند؛ برای جلوگیری از از دست رفتن آن‌ها، update/rebase/merge انجام نشده است.
+- ایمنی: هیچ merge، release، Pages deployment، Supabase، Production، migration، wallet، order یا trade انجام نشده است.
