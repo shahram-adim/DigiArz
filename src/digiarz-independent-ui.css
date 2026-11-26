@@ -5966,6 +5966,7 @@ body.luxury-theme #dashboardMarketPreview .da-market-favorite[aria-pressed="true
 /* Premium identity pass: make icy-indigo clearly distinct from pure white,
    while keeping the third theme bright, glassy and comfortably readable. */
 body.luxury-theme{
+  color-scheme:light!important;
   --da-bg:#e5eaff!important;
   --da-bg2:#eef1ff!important;
   --da-surface:rgba(246,248,255,.94)!important;
