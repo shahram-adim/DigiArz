@@ -865,3 +865,39 @@ test('v14 mobile dashboard compresses top sections so market controls clear the 
   assert.ok(v14.includes('min-height:34px!important'));
   assert.ok(v14.includes('#tab-dashboard .da-market-glass{padding:7px!important}'));
 });
+
+
+test('2026-11-26 signature UI layer establishes the dashboard hierarchy and premium three-theme surfaces',()=>{
+  const marker='DigiArz Signature UI 2026-11-26';
+  const finalCss=css.slice(css.lastIndexOf(marker));
+  assert.ok(finalCss.length>5000,'signature redesign layer is present');
+  for(const token of ['#tab-dashboard>.da-v2-hero{order:1!important}',
+    '#tab-dashboard>.da-v2-wallet-card{order:2!important}',
+    '#tab-dashboard>.da-v2-quick-grid{order:3!important}',
+    '#tab-dashboard>.da-market-glass{order:5!important}',
+    'body.dark-theme{','body.light-theme{','body.luxury-theme{',
+    'grid-template-areas:"fav identity change price" ". spark change price"',
+    '#tab-markets #marketList>.coin','--da-radius-xl:26px'])
+    assert.ok(finalCss.includes(token),'signature layer includes '+token);
+});
+
+test('all visible cryptocurrency logo holders are fully transparent and frameless across app sections',()=>{
+  const marker='DigiArz Signature UI 2026-11-26';
+  const finalCss=css.slice(css.lastIndexOf(marker));
+  for(const token of ['#tab-markets #marketList .coin-icon',
+    '#tab-dashboard .da-market-logo','#tab-assets #assetList .asset-logo',
+    '#tab-chart .asset-detail-head .asset-logo','#tab-toman .coin-icon',
+    'background:transparent!important','background-color:transparent!important',
+    'border:0!important','box-shadow:none!important','object-fit:contain!important'])
+    assert.ok(finalCss.includes(token),'frameless logo coverage includes '+token);
+});
+
+test('market and dashboard retain their live data and interaction hooks after the visual-only redesign',()=>{
+  for(const token of ['id="dashboardMarketPreview"','id="dashboardMarketSearch"',
+    'id="dashboardMarketSort"','id="dashboardMarketFilters"','id="marketList"',
+    'id="marketSearch"','id="marketCategories"','id="marketSort"',
+    'id="marketCurrencyMode"','id="refreshMarketPageBtn"'])
+    assert.ok(html.includes(token),'required market hook remains: '+token);
+  assert.match(html,/function renderMarkets\(/);
+  assert.match(html,/function renderDashboardMarketPreview\(/);
+});
