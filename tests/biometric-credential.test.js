@@ -53,6 +53,21 @@ test('Capacitor native setup registers the biometric plugin and adds AndroidX Bi
   assert.match(nativeSetup, /androidx\.biometric:biometric:1\.1\.0/);
 });
 
+test('password recovery clears the obsolete biometric credential vault after a successful password update', () => {
+  const recovery = html.slice(html.indexOf('async function saveNewPassword()'), html.indexOf('async function showApp('));
+  assert.match(recovery, /auth\.updateUser\(\{password\}\)/);
+  assert.match(recovery, /await biometricVault\.clearCredentials\(\)/);
+  assert.match(recovery, /biometricLoginBtn.*classList\.add\('hidden'\)/);
+  assert.match(recovery, /پاک‌سازی اطلاعات بیومتریک ناموفق بود/);
+});
+
+test('invalid saved password is cleared after Supabase rejects biometric login', () => {
+  const login = html.slice(html.indexOf('async function loginWithBiometrics()'), html.indexOf('async function start()'));
+  assert.match(login, /error\?\.code==='invalid_credentials'/);
+  assert.match(login, /await vault\.clearCredentials\(\)/);
+  assert.match(login, /با رمز جدید وارد شوید/);
+});
+
 test('saved biometric credentials remain removable when strong biometrics are unavailable', () => {
   const setup = html.slice(html.indexOf('async function setupBiometricControls()'), html.indexOf('async function clearBiometricCredentials()'));
   assert.ok(setup.indexOf('state?.hasCredentials') < setup.indexOf('if(!state?.available)'), 'saved-credential state must be handled before the unavailable-device return');
