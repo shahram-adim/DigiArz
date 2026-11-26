@@ -30,8 +30,8 @@ test('three themes resolve to distinct black-gold, white-glass and bright indigo
   const luxuryBlocks = [...css.matchAll(/body\.luxury-theme\{[^}]*\}/gs)];
   const finalLuxury = luxuryBlocks.at(-1)?.[0] || '';
   assert.match(finalLuxury, /color-scheme:light!important/);
-  assert.match(finalLuxury, /--da-bg:#edf2ff!important/);
-  assert.match(finalLuxury, /--da-accent:#526ee8!important/);
+  assert.match(finalLuxury, /--da-bg:#e5eaff!important/);
+  assert.match(finalLuxury, /--da-accent:#405bd0!important/);
   assert.match(css, /body\.luxury-theme[\s\S]*?backdrop-filter:blur\(18px\)/);
 });
 
@@ -1077,8 +1077,8 @@ test('catalog coin logos always use the validated app-assets proxy and skip empt
 test('third luxury theme is a bright ice-blue indigo glass palette, distinct from the black-gold dark theme',()=>{
   const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
   const final=css.slice(css.lastIndexOf('DigiArz layout correction + luminous indigo glass theme'));
-  for(const token of ['color-scheme:light!important','--da-bg:#edf2ff!important',
-    '--da-surface:rgba(255,255,255,.94)!important','--da-accent:#526ee8!important',
+  for(const token of ['color-scheme:light!important','--da-bg:#e5eaff!important',
+    '--da-surface:rgba(255,255,255,.94)!important','--da-accent:#405bd0!important',
     'linear-gradient(145deg,#f7f8ff 0%,#edf2ff 52%,#e9f4ff 100%)',
     'body.luxury-theme .top','body.luxury-theme #tab-markets .market-categories .category-btn.active'])
     assert.ok(final.includes(token),'bright luxury palette includes '+token);
