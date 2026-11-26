@@ -945,10 +945,13 @@ test('final universal logo-card override removes all logo backgrounds and frames
 });
 
 
-test('visual screenshot harness reapplies market fixtures after app startup before every capture',()=>{
+
+test('visual screenshots seed DOM-only synthetic market rows without depending on private app functions',()=>{
   const harness=fs.readFileSync('tests/ui-visual-screenshots.cjs','utf8');
-  assert.match(harness,/Reapply deterministic fixtures after app startup and tab transitions/);
-  assert.match(harness,/fixtureCounts\.marketRows !== 8/);
-  assert.match(harness,/fixtureCounts\.marketCards !== 8/);
-  assert.match(harness,/fixtureCounts\.dashboardCards !== 8/);
+  assert.match(harness,/async function seedVisualFixtures\(page\)/);
+  assert.match(harness,/market\.innerHTML = rows\.map/);
+  assert.match(harness,/dashboard\.innerHTML = rows\.map/);
+  assert.match(harness,/await seedVisualFixtures\(page\)/);
+  assert.doesNotMatch(harness,/renderMarkets\(\)/);
+  assert.doesNotMatch(harness,/renderDashboardSummary\(\)/);
 });
