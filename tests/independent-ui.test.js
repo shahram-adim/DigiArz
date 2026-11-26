@@ -1051,6 +1051,26 @@ test('coin logo failures render a visible branded SVG fallback instead of hiding
     'failed logo must not be hidden leaving an empty slot');
 });
 
+test('catalog coin logos always use the validated app-assets proxy and skip empty metadata URLs',()=>{
+  const html=fs.readFileSync('index.html','utf8');
+  assert.ok(html.includes("item=>cleanCoinSymbol(item.symbol||item.asset||'')===clean&&safeCoinImageUrl(item.image_url)"),
+    'logo lookup skips empty or invalid image metadata rows');
+  const logoStart=html.indexOf('function coinLogo(');
+  const logoEnd=html.indexOf('function updateQuickTradeEstimate(',logoStart);
+  const logoBlock=html.slice(logoStart,logoEnd);
+  assert.ok(logoBlock.includes('initial=logoUrl(clean,custom)'),
+    'catalog metadata image is sent through the server-side allowlisted proxy');
+  assert.ok(logoBlock.includes('const fallbacks=[logoUrl(symbol),'),
+    'failed curated logo falls back to the proxy provider chain');
+  const chartStart=html.indexOf('async function openChart(');
+  const chartEnd=html.indexOf('function ',chartStart+20);
+  const chartBlock=html.slice(chartStart,chartEnd);
+  assert.ok(chartBlock.includes("const detailImageUrl=getCoinLogoImageUrl(base)"),
+    'asset detail reads catalog logo metadata');
+  assert.ok(chartBlock.includes("$('detailLogo').src=logoUrl(base,detailImageUrl)"),
+    'asset detail never loads catalog-supplied image URLs directly');
+});
+
 test('third luxury theme is a bright ice-blue indigo glass palette, distinct from the black-gold dark theme',()=>{
   const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
   const final=css.slice(css.lastIndexOf('DigiArz layout correction + luminous indigo glass theme'));
