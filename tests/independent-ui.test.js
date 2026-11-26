@@ -159,8 +159,8 @@ test('full indigo-glass foundation covers trading wallet and navigation surfaces
     'body.luxury-theme .orders-center-v36',
     'body.luxury-theme input', 'body.luxury-theme #priceChart'
   ]) assert.ok(foundation.includes(token), 'indigo foundation includes ' + token);
-  assert.match(html, /luxury\\?\\{bg:'#edf2ff',text:'#202b55',grid:'#dbe4ff',line:'#b9c7ef'\\}/);
-  assert.match(html, /luxury\\?'#edf2ff'/);
+  assert.match(html, /luxury\?\{bg:'#edf2ff',text:'#202b55',grid:'#dbe4ff',line:'#b9c7ef'\}/);
+  assert.match(html, /luxury\?'#edf2ff'/);
   assert.ok(!html.includes('لوکس شیشه‌ای'));
 });
 
@@ -938,7 +938,7 @@ test('final universal logo-card override removes all logo backgrounds and frames
 test('visual screenshots seed DOM-only synthetic market rows without depending on private app functions',()=>{
   const harness=fs.readFileSync('tests/ui-visual-screenshots.cjs','utf8');
   assert.match(harness,/async function seedVisualFixtures\(page\)/);
-  assert.match(harness,/if\\s*\\(market\\)\\s*market\\.innerHTML\\s*=\\s*tetherRow\\s*\\+\\s*rows\\.map/);
+  assert.match(harness,/if\s*\(market\)\s*market\.innerHTML\s*=\s*tetherRow\s*\+\s*rows\.map/);
   assert.match(harness,/dashboard\.innerHTML = rows\.map/);
   assert.match(harness,/await seedVisualFixtures\(page\)/);
   assert.doesNotMatch(harness,/renderMarkets\(\)/);
