@@ -20,6 +20,7 @@ test('explicit re-enrollment recovers from an invalidated Android Keystore key',
   assert.match(java, /KeyPermanentlyInvalidatedException/);
   assert.match(java, /UnrecoverableKeyException/);
   assert.match(java, /probe\.init\(Cipher\.ENCRYPT_MODE, existing\)/);
+  assert.match(java, /UserNotAuthenticatedException authenticationRequired/);
   assert.match(java, /previous ciphertext cannot be recovered with an invalidated key/);
   assert.match(java, /getSharedPreferences\(PREFS, Context\.MODE_PRIVATE\)\.edit\(\)\.clear\(\)\.apply\(\)/);
   assert.match(java, /keyStore\.deleteEntry\(KEY_ALIAS\)/);
