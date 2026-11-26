@@ -2242,3 +2242,18 @@
 - [ ] UI review جدیدتر روی commit تست `ee40da2` با run `45876183333` هنوز در حال اجرا/تکمیل است.
 - وضعیت PR #64: باز و Draft، head فعلی `5f3c73519057b761236c8b125fe09a1a63bc2847`، merged=false، mergeable=false؛ شاخه 205 جلو و 2 عقب از main است. دو commit عقب‌ماندهٔ main مربوط به QA و snapshot فقط‌خواندنی Stop-Limit حفظ شده‌اند.
 - هیچ merge/rebase/deploy، انتشار، migration یا تغییر Supabase/Production انجام نشده است.
+
+
+## تأیید APK بیومتریک و بازبینی UI — ۲۶ نوامبر ۲۰۲۶
+- [x] تلاش دوم workflow ساخت APK با run `45876178982`، attempt 2، روی commit کد `f1ad70839d1fd8e3f7e98b5903440367fb269f8a` با نتیجه `success` پایان یافت؛ تمام مراحل build، verify و upload موفق شدند.
+- [x] Artifact با شناسه `15144869028` دریافت شد؛ آرشیو ZIP سالم است و شامل `app-debug.apk` و `BUILD-INFO.txt` است.
+- [x] منشأ داخل BUILD-INFO با run و commit تطبیق دارد؛ نسخه `1.0.0`، ref شاخه `redesign/ui-mainline-clean-2026-11-26` و زمان ساخت UTC ثبت شده است.
+- [x] SHA-256 مستقل APK برابر `4bf34abeb25b5ca3a41905305407bd8daab1f3b2d186e2457c734ae71c05ed72` (4,143,313 bytes) است و با BUILD-INFO تطبیق دارد. SHA-256 آرشیو ZIP برابر `1fef4aff97cccf0b9f19740c9a61cc144bcf8491466851c3cb616d5b6a6fa97e` و با digest اعلام‌شده GitHub برابر است.
+- [x] UI visual review run `45876183333` روی commit تست `ee40da2e60719851685d034100189b6284a90ac0` با نتیجه `success` پایان یافت؛ artifact `15144374522` دریافت شد و ۶۶ تصویر در دو viewport، سه تم و ده بخش به‌همراه close-upها بازبینی شدند.
+- [x] بازبینی منتخب نشان می‌دهد تم مشکی/طلایی، سفید روشن و نیلی-یخی از هم متمایزند و ردیف‌های بازار در هر سه تم بدون قاب اضافی، با نام/نماد، قیمت، درصد تغییر و ستاره ارائه شده‌اند.
+- [!] README تصویربرداری تأیید می‌کند درخواست‌های Supabase مسدود بوده و ردیف‌های بازار/داشبورد/دارایی/حجم fixtureهای مصنوعی DOM-only هستند؛ این تست، قیمت زنده، اتصال backend، کیف پول یا RPC را تأیید نمی‌کند.
+- [!] APK از commit `f1ad708` ساخته شده، در حالی که head مستندات/تست PR اکنون `b41d745` است؛ compare نشان می‌دهد سه commit بعدی فقط `IMPLEMENTATION_STATUS.md` و `tests/biometric-credential.test.js` را تغییر داده‌اند، نه فایل‌های اجرایی APK. با این حال APK را دقیقاً با commit خودش معرفی می‌کنیم و آن را build روی آخرین head نمی‌نامیم.
+- [!] نصب روی گوشی واقعی، ورود با حساب واقعی Supabase، تغییر رمز و ورود مجدد با بیومتریک هنوز آزمایش نشده‌اند.
+- PR #64 همچنان Draft، باز، ادغام‌نشده و `mergeable=false` است؛ شاخه نسبت به main در آخرین compare برابر 206 جلو و 2 عقب است. دو commit عقب‌ماندهٔ QA/مستندات Stop-Limit و snapshot فقط‌خواندنی حفظ شده‌اند؛ هیچ merge/rebase انجام نشد.
+- ایمنی: هیچ deploy، انتشار، migration، db push یا تغییر Production/Supabase انجام نشد.
+- [ ] گام بعد: نصب APK روی دستگاه Android و اجرای تست کنترل‌شدهٔ enrollment، تغییر رمز، پاک‌سازی vault، ورود با رمز جدید و ثبت مجدد بیومتریک؛ سپس بررسی علت `mergeable=false` و اختلاف main به‌صورت جداگانه، بدون همگام‌سازی خودکار.
