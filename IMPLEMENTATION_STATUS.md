@@ -1740,3 +1740,16 @@
 - [ ] شکاف باقیمانده: آزمون runtime در محیط Supabase آزمایشیِ دورریختنی برای anon/authenticated/service_role، privilege مؤثر با has_function_privilege، و endpointهای واقعی PostgREST/RPC؛ به‌علاوه بررسی race tests و logs در CI واقعی.
 - [ ] گام بعد: بررسی دقیق تست‌های منفی/مثبت runtime و fixture ACL در شاخه، مشخص‌کردن اینکه کدام سناریوها واقعاً در PostgreSQL 17 اجرا می‌شوند، و ثبت موارد فاقد پوشش؛ بدون هیچ فراخوانی مالی در Production و بدون تغییر مجوزها.
 - [ ] هیچ Production، Migration، grant/revoke، policy، cron، Edge Function، Auth، deploy یا دادهٔ مالی تغییر نکرده است.
+
+### تفکیک آزمون ایستای نقش‌ها از آزمون ACL در PostgreSQL 17 — شهرام ۱۱۴ — ۲۰۲۶-۱۱-۲۶
+
+- [x] فایل تولیدکنندهٔ Fixture و مرحلهٔ متناظر در Workflow بررسی شد. Workflow دستور Node برای ساخت Fixture و سپس psql برای اجرای آن روی دیتابیس موقت PostgreSQL 17 را دارد.
+- [x] Fixture برای هر ۴۶ امضای تابع، تابع stub با همان identity و مالک postgres می‌سازد؛ بدنهٔ Production را اجرا یا نصب نمی‌کند. سپس ACLها را از Role Matrix بازسازی می‌کند.
+- [x] در صورت اجرای موفق مرحله، PostgreSQL برای هر تابع تابع has_function_privilege را برای anon، authenticated، service_role و postgres ارزیابی می‌کند: ۴۶ × ۴ = ۱۸۴ assertion مؤثر EXECUTE. این بخش یک آزمون runtime واقعیِ semantics مجوز در PostgreSQL موقت است، نه صرفاً تست متنی Node.
+- [x] بررسی آرگومان‌های ۴۶ امضا با parser Fixture انجام شد؛ تمام انواع ورودی در قالب پشتیبانی‌شدهٔ generator هستند و هیچ امضای خارج از قالب پیدا نشد.
+- [!] محدودیت مهم: این Fixture ACLهای ثبت‌شده را بازسازی می‌کند؛ ACL زندهٔ Production را مستقیماً نمی‌خواند، بدنه‌های اصلی ۴۶ تابع را اجرا نمی‌کند، عضویت‌ها و تنظیمات خاص نقش‌های Production را بازسازی کامل نمی‌کند و PostgREST/JWT endpoint را فراخوانی نمی‌کند. بنابراین ۱۸۴ assertion در صورت اجرای CI، فقط اثبات‌کنندهٔ رفتار ACL بازسازی‌شده در محیط موقت هستند.
+- [!] تست‌های Node در production-rpc-manifest.test.js عمدتاً کنترل ایستای snapshot، بدنه، migration evidence، role matrix و قرارداد race fixture هستند. تست‌هایی که صرفاً وجود فرمان‌ها یا عبارت‌های SQL/shell را بررسی می‌کنند، اجرای واقعی آن سناریو را ثابت نمی‌کنند.
+- [!] فایل Workflow مرحلهٔ ACL موقت را تعریف کرده، اما اجرای موفق آن روی HEAD جاری از دادهٔ قابل مشاهدهٔ GitHub در این نشست تأیید نشد؛ این مرحله را پاس‌شده اعلام نمی‌کنیم.
+- [ ] شکاف‌های باقی‌مانده: (۱) اجرای موفق Workflow روی HEAD فعلی و بررسی log مرحلهٔ ACL، (۲) آزمون endpointهای واقعی PostgREST با anon و JWT کاربر عادی در پروژهٔ آزمایشی ایزوله، (۳) مقایسهٔ has_function_privilege روی کاتالوگ Production به‌صورت read-only و تازه، (۴) بررسی membership/inheritance و USAGE schema در کنار EXECUTE، (۵) تست‌های منفی دسترسی و پاسخ HTTP.
+- [ ] گام بعد: طراحی ماتریس endpoint آزمایشی بدون استفاده از کلید یا دادهٔ Production؛ ابتدا تعیین متغیرهای محیطی و روش امن فراهم‌کردن پروژهٔ disposable، سپس افزودن تست‌های HTTP فقط در صورت وجود محیط آزمایشی و secrets مناسب.
+- [ ] هیچ اتصال یا فراخوانی RPC مالی Production انجام نشد؛ هیچ grant/revoke، policy، migration، cron، deploy، Auth یا داده‌ای تغییر نکرد.
