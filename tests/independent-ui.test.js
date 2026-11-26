@@ -1338,8 +1338,8 @@ test('icy-indigo refinement v2 strengthens cool-blue glass identity while retain
 
 test('third theme keeps asset and category icons softly visible on glass surfaces', () => {
   const css = fs.readFileSync('src/digiarz-independent-ui.css', 'utf8');
-  assert.match(css, /body\.luxury-theme #appView \\.coin-icon/);
-  assert.match(css, /opacity:\\.94!important/);
-  assert.match(css, /body\.luxury-theme #appView \\.favorite-btn/);
-  assert.match(css, /stroke:#6277c8!important/);
+  assert.ok(css.includes('body.luxury-theme #appView .coin-icon'));
+  assert.ok(css.includes('opacity:.94!important;'));
+  assert.ok(css.includes('body.luxury-theme #appView .favorite-btn'));
+  assert.ok(css.includes('stroke:#6277c8!important;'));
 });
