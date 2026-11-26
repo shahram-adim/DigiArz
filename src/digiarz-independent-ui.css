@@ -5944,3 +5944,20 @@ body.luxury-theme #dashboardMarketPreview .da-market-favorite[aria-pressed="true
   background:transparent!important;
   background-color:transparent!important;
 }
+
+
+/* Accessible branded monogram fallback when both remote logo sources fail. */
+.coin-logo-fallback{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  overflow:visible!important;
+  padding:0!important;
+  border:0!important;
+  outline:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+  background-color:transparent!important;
+}
+.coin-logo-fallback svg{display:block!important;width:100%!important;height:100%!important;min-width:100%!important;min-height:100%!important}
