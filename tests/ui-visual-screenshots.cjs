@@ -103,6 +103,17 @@ const server = http.createServer((req, res) => {
   });
 });
 
+async function resetPageScroll(page) {
+  await page.evaluate(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    for (const element of document.querySelectorAll('*')) {
+      if (element.scrollTop) element.scrollTop = 0;
+    }
+  });
+}
+
 (async () => {
   await new Promise(resolve => server.listen(4173, '127.0.0.1', resolve));
   const browser = await chromium.launch({ headless: true });
@@ -156,6 +167,8 @@ const server = http.createServer((req, res) => {
           }, tab);
           if (!rendered) throw new Error('Section did not render visibly: tab-'+tab);
           await seedVisualFixtures(page);
+          await resetPageScroll(page);
+          await page.waitForTimeout(60);
           const filename=[viewport.name,theme,tab].join('-')+'.png';
           await page.screenshot({path:path.join(output,filename),fullPage:viewport.name==='desktop',animations:'disabled'});
           if (viewport.name==='mobile' && tab==='dashboard') {
