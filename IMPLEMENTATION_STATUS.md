@@ -1775,3 +1775,12 @@
 - [x] commit اصلاح نهایی `7e278642c05c956bb9276b4e15d79290e40fa027` با assertionهای literal ثبت شد. اجرای push شماره `45822362280` تا زمان ثبت این checkpoint مرحلهٔ ۱۲۲ تست منبعی را با موفقیت گذرانده و در مرحلهٔ Playwright capture در حال اجراست؛ نتیجهٔ نهایی و artifact تازه هنوز تأیید نشده‌اند.
 - [ ] پس از پایان run `45822362280`، نتیجه و artifact ۶۶ تصویر را بازیابی و بازبینی کنیم؛ سپس workflow APK را روی HEAD به‌روز اجرا/تأیید کنیم تا APK با آخرین commit شاخه منطبق باشد.
 - ایمنی: فقط تست‌ها و این مستندات در شاخهٔ Draft تغییر می‌کنند؛ هیچ merge/rebase، تغییر Main، انتشار Pages، Supabase، Production، migration، wallet، order یا trade انجام نشده است.
+
+
+## نتیجه اجرای تست و بازبینی وضعیت شاخه — ۲۶ نوامبر ۲۰۲۶
+- [x] اجرای UI push run شماره `45822362280` روی commit `87a6bc663675c36a47c0dff94223f4928d13d428` با نتیجه `success` پایان یافت؛ مرحله Node regression و Playwright capture و بارگذاری artifact موفق گزارش شدند.
+- [x] artifact تصویری تازه با شناسه `15118652157` و نام `DigiArz-UI-visual-review` ایجاد شد؛ حجم حدود 21.3 MB و ۶۶ تصویر طبق harness. تصاویر از fixtureهای ساختگی DOM-only استفاده می‌کنند.
+- [!] commit نهایی‌تر تست‌ها `7e278642c05c956bb9276b4e15d79290e40fa027` نیز workflow جداگانه `45822444984` را trigger کرده است؛ در زمان این ثبت، تست منبعی آن موفق شده اما نصب Chromium هنوز در حال اجراست. نتیجهٔ نهایی این اجرای دوم هنوز تأیید نشده است.
+- [x] compare تازهٔ شاخه با Main: ۹۸ commit جلو، ۲ commit عقب، وضعیت diverged؛ PR #64 همچنان باز و Draft است. هیچ merge یا rebase انجام نشده است.
+- [ ] پس از پایان run `45822444984`، نتیجه نهایی آن را ثبت کنیم. سپس در صورت نیاز workflow APK را برای آخرین HEAD به‌صورت مستقل اجرا کنیم؛ APK موجود از نظر فایل‌های اجرایی با این تغییرات تست/مستندات هم‌کد است، اما SHA provenance آن به commit `ef761602...` تعلق دارد.
+- ایمنی: فقط تست و مستندات در شاخهٔ candidate تغییر کرده‌اند؛ Main، Production، Supabase، Pages، migration، wallet، order و trade دست‌نخورده‌اند.
