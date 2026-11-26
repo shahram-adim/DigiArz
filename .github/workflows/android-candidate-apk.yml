@@ -9,6 +9,8 @@ on:
       - "sw.js"
       - "icon*.svg"
       - "src/**"
+      - "android-native/**"
+      - "scripts/**"
       - "tests/**"
       - "package.json"
       - "capacitor.config.json"
@@ -22,6 +24,8 @@ on:
       - "sw.js"
       - "icon*.svg"
       - "src/**"
+      - "android-native/**"
+      - "scripts/**"
       - "package.json"
       - "capacitor.config.json"
       - ".github/workflows/android-candidate-apk.yml"
@@ -55,6 +59,8 @@ jobs:
         run: npm run build:web
       - name: Generate Android project
         run: npx cap add android
+      - name: Install native biometric credential bridge
+        run: npm run prepare:android
       - name: Sync Android project
         run: npx cap sync android
       - name: Build installable debug APK
