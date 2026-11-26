@@ -5578,3 +5578,85 @@ body.luxury-theme{
     linear-gradient(145deg,#f7f8ff 0%,#edf2ff 52%,#e9f4ff 100%)!important;
   color:#202b55!important;
 }
+
+
+/* Final icy-indigo surfaces: remove legacy dark/sky-blue overrides that survived
+   the token migration on Assets, History, Settings and the dashboard/login hero. */
+body.luxury-theme #appView #tab-assets #assetSummary .stat,
+body.luxury-theme #appView #tab-settings .setting-row,
+body.luxury-theme #appView #tab-history .table-wrap{
+  background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(235,241,255,.96))!important;
+  border:1px solid rgba(82,110,232,.19)!important;
+  box-shadow:0 12px 30px rgba(67,87,155,.08),inset 0 1px rgba(255,255,255,.96)!important;
+  color:#202b55!important;
+}
+body.luxury-theme #appView #tab-assets #assetSummary .stat:before{
+  background:linear-gradient(90deg,transparent,#7188ee,transparent)!important;
+}
+body.luxury-theme #appView #tab-assets #assetList .asset-row,
+body.luxury-theme #appView #tab-orders .order-history-card{
+  border-bottom-color:rgba(86,108,194,.16)!important;color:#202b55!important;
+}
+body.luxury-theme #appView #tab-assets #assetList .asset-share span{
+  background:linear-gradient(90deg,#526ee8,#9eafff)!important;
+}
+body.luxury-theme #appView #tab-history .table-wrap th{
+  background:#e7edff!important;color:#344a9a!important;
+}
+body.luxury-theme #appView #tab-history .table-wrap td{
+  border-bottom:1px solid rgba(86,108,194,.12)!important;color:#29375f!important;
+}
+body.luxury-theme #appView #tab-history .table-wrap tbody tr:nth-child(even) td{
+  background:rgba(235,241,255,.62)!important;
+}
+body.luxury-theme #appView #tab-history .table-wrap tbody tr:hover{
+  background:rgba(98,124,240,.09)!important;
+}
+body.luxury-theme #appView #tab-settings .theme-choice-group button{
+  background:rgba(255,255,255,.88)!important;color:#52618b!important;
+  border:1px solid rgba(93,115,190,.2)!important;box-shadow:none!important;
+}
+body.luxury-theme #appView #tab-settings .theme-choice-group button[aria-pressed=true]{
+  background:linear-gradient(135deg,#e8edff,#dce5ff)!important;
+  color:#435fd5!important;border-color:rgba(82,110,232,.42)!important;
+  box-shadow:0 6px 16px rgba(82,110,232,.11)!important;
+}
+body.luxury-theme #appView .da-v2-hero,
+body.luxury-theme #appView .hero{
+  background:
+    radial-gradient(ellipse at 82% 18%,rgba(255,255,255,.92),transparent 42%),
+    linear-gradient(125deg,#f8faff 0%,#e6edff 55%,#dceaff 100%)!important;
+  border:1px solid rgba(82,110,232,.2)!important;
+  box-shadow:0 16px 38px rgba(67,87,155,.10),inset 0 1px rgba(255,255,255,.96)!important;
+  color:#202b55!important;
+}
+body.luxury-theme #appView .da-v2-hero h1,
+body.luxury-theme #appView .da-v2-hero h1 em,
+body.luxury-theme #appView .da-v2-hero p,
+body.luxury-theme #appView .hero-title,
+body.luxury-theme #appView .hero-label,
+body.luxury-theme #appView .hero-sub{
+  color:#293b78!important;
+}
+body.luxury-theme #authView .auth-reference-visual{
+  background:
+    radial-gradient(ellipse at 78% 24%,rgba(255,255,255,.94),transparent 43%),
+    radial-gradient(ellipse at 12% 92%,rgba(174,194,255,.34),transparent 42%),
+    linear-gradient(145deg,#f8faff 0%,#e8efff 58%,#dce8ff 100%)!important;
+}
+body.luxury-theme #authView .ref-brand-lockup strong,
+body.luxury-theme #authView .ref-brand-lockup em,
+body.luxury-theme #authView .ref-market-copy h1,
+body.luxury-theme #authView .ref-market-copy h1 span,
+body.luxury-theme #authView .ref-market-copy p,
+body.luxury-theme #authView .ref-demo-footer{color:#293b78!important}
+body.luxury-theme #authView .auth-form{
+  background:linear-gradient(145deg,rgba(255,255,255,.97),rgba(237,242,255,.95))!important;
+  border:1px solid rgba(82,110,232,.2)!important;
+  box-shadow:0 16px 38px rgba(67,87,155,.10),inset 0 1px rgba(255,255,255,.95)!important;
+}
+body.luxury-theme #authView .auth-form h2{color:#202b55!important}
+body.luxury-theme #authView .auth-form input{
+  background:rgba(255,255,255,.96)!important;border-color:rgba(86,108,194,.22)!important;
+  color:#202b55!important;
+}
