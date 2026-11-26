@@ -1148,3 +1148,22 @@ test('native Android build registers a biometric credential plugin backed by And
   assert.match(script, /BiometricCredentialPlugin\.java/);
   assert.match(script, /androidx\.biometric:biometric/);
 });
+
+
+test('final icy-indigo override neutralizes legacy dark asset, history, settings and sky-blue hero surfaces',()=>{
+  const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
+  const final=css.slice(css.lastIndexOf('Final icy-indigo surfaces: remove legacy dark/sky-blue overrides'));
+  assert.ok(final.length>0,'final icy-indigo correction layer exists');
+  for(const token of [
+    'body.luxury-theme #appView #tab-assets #assetSummary .stat',
+    'body.luxury-theme #appView #tab-settings .setting-row',
+    'body.luxury-theme #appView #tab-history .table-wrap',
+    'background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(235,241,255,.96))!important;',
+    'body.luxury-theme #appView #tab-history .table-wrap th',
+    'body.luxury-theme #appView #tab-settings .theme-choice-group button[aria-pressed=true]',
+    'body.luxury-theme #appView .da-v2-hero',
+    'linear-gradient(125deg,#f8faff 0%,#e6edff 55%,#dceaff 100%)',
+    'body.luxury-theme #authView .auth-reference-visual',
+    'body.luxury-theme #authView .auth-form input'
+  ]) assert.ok(final.includes(token),'final icy-indigo correction includes '+token);
+});
