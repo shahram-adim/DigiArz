@@ -1751,3 +1751,14 @@
 - [!] compare بلافاصله پیش از این اصلاح: ۹۱ commit جلو و ۲ commit عقب؛ با این commit تست و checkpoint مستندات جدید، شمارش جلوتر از Main افزایش می‌یابد. این اختلاف فقط تغییرات شاخهٔ candidate را نشان می‌دهد و هیچ merge/rebase صورت نگرفته است.
 - [!] combined status و wrapper اجراهای PR برای commit مستندات قبلی خالی بودند؛ هیچ نتیجهٔ CI برای کد جدید قابل تأیید نیست. تست محلی نیز در این محیط اجرا نشده است.
 - [ ] گام بعد: بررسی اجرای واقعی Actions و گرفتن screenshots/APK از آخرین HEAD؛ در صورت نبود مسیر قابل دسترسی، باید اجرای workflow از GitHub UI یا فعال‌سازی کنترل‌شدهٔ Actions توسط مالک انجام شود. هیچ تغییر Main/Production بدون تأیید انجام نمی‌شود.
+
+
+## بازبینی تکمیلی مسیر اجرا و بستهٔ اندروید — ۲۶ نوامبر ۲۰۲۶
+- [x] آخرین فایل‌های workflow، harness تصویری، package.json، capacitor.config.json و اسکریپت نصب پل native دوباره از شاخه خوانده شدند.
+- [x] برخلاف برداشت قبلی، workflow تصویری و APK هر دو trigger صریح push روی شاخهٔ candidate دارند؛ پس صرفاً نبود workflow در main مانع اجرای push روی شاخه نیست. workflow تصویری paths شامل tests/** است و اصلاح تست commit 3573d03 باید trigger را پوشش دهد. workflow APK نیز مسیرهای src/**، android-native/**، scripts/** و package.json را پوشش می‌دهد.
+- [!] ابزار متصل fetch_commit_workflow_runs فقط اجراهای pull_request را برمی‌گرداند و combined status خالی نیز نبود اجرای push را ثابت نمی‌کند. بنابراین وضعیت push workflow هنوز از این اتصال قابل مشاهده/تأیید نیست؛ به‌جای نتیجه‌گیری اشتباه، به عنوان محدودیت مشاهده ثبت شد.
+- [x] پیکربندی build اندروید شامل Capacitor 6.2.1، appId برابر com.digiarz.app، webDir برابر www و Java 17 است. workflow مراحل build:web، cap add android، نصب پل بیومتریک، cap sync و assembleDebug را تعریف می‌کند.
+- [!] APK هنوز artifact تأییدشده نیست؛ workflow فقط تعریف شده و اجرای موفق/فایل خروجی از GitHub قابل مشاهده نیست. نصب و تست واقعی روی دستگاه هم انجام نشده است.
+- [!] بازبینی harness نشان می‌دهد fixtureهای بازار/داشبورد/دارایی‌ها مصنوعی‌اند و برای هفت/هشت ارز از glyph متنی استفاده می‌کنند؛ اسکرین‌شات‌ها فقط ساختار/پوستهٔ UI را ارزیابی می‌کنند، نه صحت لوگوها یا دادهٔ زنده. تتر با SVG اختصاصی در fixture نمایش داده شده است.
+- [ ] گام بعد: با دسترسی به فهرست همهٔ workflow runها یا اجرای دستی workflow در GitHub UI، وضعیت run commit مربوط به tests/** را بازیابی کنیم؛ سپس artifact 66 screenshot را دانلود و بازبینی کنیم. پس از تأیید تست UI، workflow APK را اجرا و SHA-256 و BUILD-INFO را کنترل کنیم.
+- ایمنی: این مرحله فقط بازبینی read-only و ثبت مستندات بود؛ هیچ فایل اجرایی، Main، PR state، Pages، Supabase، Production، migration، سفارش یا معامله تغییر نکرد.
