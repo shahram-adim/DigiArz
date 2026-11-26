@@ -184,12 +184,32 @@ async function resetPageScroll(page) {
             await page.screenshot({path:path.join(output,['mobile',theme,'markets-assetrows'].join('-')+'.png'),fullPage:false,animations:'disabled'});
           }
         }
+        // Capture the authentication screen independently for every theme and viewport.
+        await page.evaluate(() => {
+          const auth=document.getElementById('authView');
+          const app=document.getElementById('appView');
+          document.body.classList.remove('dashboard-page-active');
+          document.body.classList.add('auth-page-active');
+          if (app) { app.classList.remove('app-view-active'); app.classList.add('hidden'); app.style.display='none'; }
+          if (auth) { auth.classList.remove('hidden'); auth.style.display='grid'; }
+        });
+        await resetPageScroll(page);
+        await page.waitForTimeout(80);
+        await page.screenshot({path:path.join(output,[viewport.name,theme,'login'].join('-')+'.png'),fullPage:viewport.name==='desktop',animations:'disabled'});
+        await page.evaluate(() => {
+          const auth=document.getElementById('authView');
+          const app=document.getElementById('appView');
+          document.body.classList.remove('auth-page-active');
+          document.body.classList.add('dashboard-page-active');
+          if (auth) { auth.classList.add('hidden'); auth.style.display='none'; }
+          if (app) { app.classList.remove('hidden'); app.classList.add('app-view-active'); app.style.display='block'; }
+        });
       }
       await context.close();
     }
     const files=fs.readdirSync(output).filter(name=>name.endsWith('.png'));
-    if (files.length!==66) throw new Error('Expected 66 screenshots, got '+files.length);
-    fs.writeFileSync(path.join(output,'README.txt'),'DigiArz UI visual review screenshots\n66 captures: 2 viewports x 3 themes x 10 app sections, plus mobile dashboard/market row close-ups.\nSupabase API requests were blocked; no production data was changed.\nMarket, dashboard, asset and top-volume rows are synthetic DOM-only fixtures. Mobile row close-ups scroll to the actual rendered asset lists.\n');
+    if (files.length!==72) throw new Error('Expected 72 screenshots, got '+files.length);
+    fs.writeFileSync(path.join(output,'README.txt'),'DigiArz UI visual review screenshots\n72 captures: 2 viewports x 3 themes x 10 app sections, 6 authentication screens, plus mobile dashboard/market row close-ups.\nSupabase API requests were blocked; no production data was changed.\nMarket, dashboard, asset and top-volume rows are synthetic DOM-only fixtures. Authentication captures use the local UI shell only; no credentials are submitted. Mobile row close-ups scroll to the actual rendered asset lists.\n');
     console.log('Created '+files.length+' screenshots in '+output);
   } finally {
     await browser.close();
