@@ -5860,3 +5860,22 @@ body.luxury-theme #appView #tab-trade .orderbook-row .buy,
 body.luxury-theme #appView #tab-trade .orderbook-row .sell{
   background:transparent!important;
 }
+
+
+/* Final icon finish: quieter inactive glyphs and a clearly selected destination. */
+#appView .mobile-bottom-nav button{position:relative;isolation:isolate}
+#appView .mobile-bottom-nav button svg{display:block;opacity:.72;stroke-width:1.7;transition:opacity .18s ease,transform .18s ease,filter .18s ease,stroke-width .18s ease}
+#appView .mobile-bottom-nav button:not(.active) svg{filter:saturate(.58)}
+#appView .mobile-bottom-nav button.active svg{opacity:1;stroke-width:2.35;transform:translateY(-2px) scale(1.06);filter:drop-shadow(0 2px 5px currentColor)}
+#appView .mobile-bottom-nav button.active span{font-weight:850;letter-spacing:-.15px}
+#appView .mobile-bottom-nav button.active:after{inset:5px 27% auto;height:2px;background:currentColor;box-shadow:0 0 9px currentColor;opacity:.9}
+body.dark-theme #appView .mobile-bottom-nav button:not(.active){color:#a0a8b6!important}
+body.dark-theme #appView .mobile-bottom-nav button.active{color:#f2c85b!important;background:linear-gradient(145deg,rgba(224,177,65,.20),rgba(224,177,65,.07))!important;border-color:rgba(224,177,65,.38)!important}
+body.light-theme #appView .mobile-bottom-nav button:not(.active){color:#8792a5!important}
+body.light-theme #appView .mobile-bottom-nav button.active{color:#315bd5!important;background:linear-gradient(145deg,#fff,#eaf0ff)!important;border-color:rgba(67,105,224,.32)!important}
+body.luxury-theme #appView .mobile-bottom-nav button:not(.active){color:#8c9ab7!important}
+body.luxury-theme #appView .mobile-bottom-nav button.active{color:#3659ca!important;background:linear-gradient(145deg,#fff,#e6edff)!important;border-color:rgba(73,102,220,.42)!important;box-shadow:0 7px 18px rgba(67,91,190,.13),inset 0 1px rgba(255,255,255,.9)!important}
+body.dark-theme #appView .mobile-bottom-nav button.active:after{background:#f2c85b}
+body.light-theme #appView .mobile-bottom-nav button.active:after{background:#315bd5}
+body.luxury-theme #appView .mobile-bottom-nav button.active:after{background:#3659ca}
+@media(prefers-reduced-motion:reduce){#appView .mobile-bottom-nav button svg{transition:none!important}}
