@@ -30,7 +30,18 @@ test('Production SECURITY DEFINER snapshot is complete and internally consistent
   }
 });
 
-test('Production snapshot has an explicit allowlist for anonymous SECURITY DEFINER execution', () => {
+
+test('Production SECURITY DEFINER definition MD5 fingerprints are recomputed from all 46 captured bodies', () => {
+  const crypto = require('node:crypto');
+  assert.equal(manifest.functions.length, 46);
+  for (const fn of manifest.functions) {
+    const identity = fn.schema_name + '.' + fn.function_name + '(' + fn.identity_arguments + ')';
+    const actual = crypto.createHash('md5').update(fn.definition, 'utf8').digest('hex');
+    assert.match(fn.definition_md5, /^[a-f0-9]{32}$/i, 'malformed captured MD5: ' + identity);
+    assert.equal(actual, fn.definition_md5, 'definition MD5 does not match captured body: ' + identity);
+  }
+});
+\ntest('Production snapshot has an explicit allowlist for anonymous SECURITY DEFINER execution', () => {
   const actual = manifest.functions
     .filter(fn => /(?:^|,)anon=X\//.test(fn.raw_acl))
     .map(fn => fn.schema_name + '.' + fn.function_name)
