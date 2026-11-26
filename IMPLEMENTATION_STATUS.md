@@ -1,5 +1,5 @@
 # DigiArz — وضعیت اجرای پروژه
-آخرین به‌روزرسانی: 2026-11-19
+آخرین به‌روزرسانی: 2026-11-26
 شاخه: `main`
 مخزن: https://github.com/shahram-adim/DigiArz
 
@@ -1443,3 +1443,28 @@
 - [x] `node --test` برای `stop-limit-production-entrypoint-source.test.js` اجرا شد: ۵ آزمون، ۵ موفق، صفر شکست.
 - [x] تطبیق مستقیم snapshotهای GitHub با خروجی تازه `pg_get_functiondef` در Production نیز byte-for-byte موفق شد؛ fingerprintها و ACLهای ثبت‌شده با وضعیت زنده برابرند.
 - [!] GitHub Combined Status برای کامیت نهایی در این اتصال خالی برگشت و ابزار workflow فقط اجراهای pull-request را نمایش می‌دهد؛ بنابراین نتیجهٔ push-triggered CI برای کامیت‌های جدید هنوز قابل تأیید نیست. CI قبلی Run #1974 روی commit `e9339bd` موفق بود، اما آن را به این commitهای جدید تعمیم نمی‌دهیم.
+
+
+## تکمیل منبع‌وفاداری Worker سفارش Limit برای QA Stop-Limit — ۲۰۲۶-۱۱-۲۶
+
+### وضعیت مبنا و اقدام
+- HEAD شاخه `main` پیش از این اقدام: `9855d6ea6cd188a5621c4e2c28c55e4cfb4d2587`.
+- Supabase `gfoaubfilhttnwjykaox` در وضعیت `ACTIVE_HEALTHY` و PostgreSQL `17.11.0.018`؛ ledger برابر ۵۵ Migration و آخرین نسخه `20261121050216`.
+- تعریف زنده `public.process_limit_orders()` فقط از کاتالوگ PostgreSQL خوانده شد؛ fingerprint برابر `00ab429596fb99392666632967cde9c0`.
+- مالک `postgres`، `SECURITY DEFINER`، `search_path=""` و ACL تأیید شد: `anon=false`، `authenticated=false`، `service_role=true`.
+- [x] snapshot صرفاً آزمایشی در `supabase/tests/stop_limit_production_process_limit_orders_snapshot.sql` ثبت شد.
+- [x] آزمون source-contract در `tests/stop-limit-production-limit-worker-source.test.js` اضافه شد: fingerprint، قفل advisory و ردیف سفارش، حساب فعال، جفت فعال، تازگی قیمت، اعتبار رزرو، قفل کیف پول، fill حداکثر ۲۵٪، و ثبت order/reservation/trade/transaction را بررسی می‌کند.
+- [x] آزمون عمداً شکاف فعلی quantization تسویه USDT را نیز ثبت می‌کند: `v_gross` و `v_fee` بدون round صریح هشت‌رقمی محاسبه می‌شوند. این مورد هنوز اصلاح نشده و باید پیش از rollout مالی بازبینی شود.
+- [x] Exact-decimal Run #2062 (`45717025545`) روی HEAD قبلی `9855d6e` موفق بود؛ نتیجه آن به commit جدید تعمیم داده نمی‌شود.
+
+### محدودیت و ایمنی
+- این snapshot برای QA است، migration نیست و روی Production اجرا نشده است.
+- هیچ worker/RPC مالی اجرا نشد و هیچ سفارش، معامله، رزرو، موجودی، کیف پول یا سابقه مالی خوانده/تغییر داده نشد.
+- هیچ schema، migration، grant، RLS، cron، Edge Function یا تنظیم Auth تغییر نکرد.
+- هنوز ۱۷ منبع SQL از ۵۵ Migration اعمال‌شده در مخزن موجود نیست و ۲۰ اختلاف timestamp باز است؛ Development Branch ایزوله نیز در پروژه فعلی موجود نیست. ساخت محیط کامل source-faithful همچنان مسدود به بازیابی DDL معتبر است.
+
+### نتیجه و گام بعد
+- نتیجه CI برای آزمون تازه پس از push باید جداگانه بررسی شود.
+- سپس DDL پایه جداول مالی و trigger/constraintهای وابسته از منبع معتبر بازیابی و harness PostgreSQL 17 دورریختنی ساخته شود.
+- اجرای جزئی/کامل، لغو، idempotency و raceهای parent-child فقط در همان محیط ایزوله انجام شود.
+- پیش از هر انتشار، محاسبه و quantization هشت‌رقمی USDT در worker بازبینی و با آزمون حسابداری مستقل اثبات شود.
