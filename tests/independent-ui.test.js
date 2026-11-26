@@ -1079,7 +1079,7 @@ test('third luxury theme is a bright ice-blue indigo glass palette, distinct fro
   const final=css.slice(css.lastIndexOf('DigiArz layout correction + luminous indigo glass theme'));
   for(const token of ['color-scheme:light!important','--da-bg:#e5eaff!important',
     '--da-surface:rgba(255,255,255,.94)!important','--da-accent:#405bd0!important',
-    'linear-gradient(145deg,#f7f8ff 0%,#dce4ff 52%,#e9f4ff 100%)',
+    'linear-gradient(145deg,#e8edff 0%,#d8e1ff 48%,#e1edff 100%)',
     'body.luxury-theme .top','body.luxury-theme #tab-markets .market-categories .category-btn.active'])
     assert.ok(final.includes(token),'bright luxury palette includes '+token);
 });
@@ -1124,7 +1124,7 @@ test('bright indigo market hero actions and mobile navigation retain readable li
   const final=css.slice(css.lastIndexOf('Visual review follow-up: brighten indigo market controls'));
   for(const token of ['body.luxury-theme #tab-markets .market-hero-v34 *',
     'color:#26345f!important','body.luxury-theme #tab-markets .market-hero-actions button',
-    'background:linear-gradient(145deg,#fff,#dce4ff)!important',
+    'background:linear-gradient(145deg,#fff,#edf2ff)!important',
     'body.luxury-theme .mobile-bottom-nav button','body.luxury-theme .mobile-bottom-nav button.active'])
     assert.ok(final.includes(token),'bright indigo contrast rule includes '+token);
 });
