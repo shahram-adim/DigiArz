@@ -30,8 +30,8 @@ test('three themes resolve to distinct black-gold, white-glass and bright indigo
   const luxuryBlocks = [...css.matchAll(/body\.luxury-theme\{[^}]*\}/gs)];
   const finalLuxury = luxuryBlocks.at(-1)?.[0] || '';
   assert.match(finalLuxury, /color-scheme:light!important/);
-  assert.match(finalLuxury, /--da-bg:#e5eaff!important/);
-  assert.match(finalLuxury, /--da-accent:#405bd0!important/);
+  assert.match(finalLuxury, /--da-bg:#dce4ff!important/);
+  assert.match(finalLuxury, /--da-accent:#344fc5!important/);
   assert.match(css, /body\.luxury-theme[\s\S]*?backdrop-filter:blur\(18px\)/);
 });
 
@@ -39,7 +39,7 @@ test('chart canvas and Android theme-color metadata follow the bright indigo-gla
   assert.match(html, /document\.documentElement\.style\.colorScheme=\(light\|\|luxury\)\?'light':'dark'/);
   assert.match(html, /meta\.content=light\?'#ffffff':luxury\?'#edf2ff':'#090b10'/);
   assert.match(html, /bg:'#ffffff',text:'#152b40',grid:'#eaf2f8',line:'#d8e7f2'/);
-  assert.match(html, /bg:'#edf2ff',text:'#202b55',grid:'#dbe4ff',line:'#b9c7ef'/);
+  assert.match(html, /bg:'#dce4ff',text:'#263b91',grid:'#cbd5ff',line:'#aebdf5'/);
   assert.match(html, /bg:'#090b10',text:'#f7f4eb',grid:'#272b34',line:'#5b4b2a'/);
 });
 
@@ -160,7 +160,7 @@ test('full indigo-glass foundation covers trading wallet and navigation surfaces
     'body.luxury-theme input', 'body.luxury-theme #priceChart'
   ]) assert.ok(foundation.includes(token), 'indigo foundation includes ' + token);
   assert.ok(html.includes("luxury?{bg:'#edf2ff',text:'#202b55',grid:'#dbe4ff',line:'#b9c7ef'}"));
-  assert.ok(html.includes("luxury?'#edf2ff'"));
+  assert.ok(html.includes("luxury?'#dce4ff'"));
   assert.ok(!html.includes('لوکس شیشه‌ای'));
 });
 
