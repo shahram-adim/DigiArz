@@ -5212,3 +5212,29 @@ body.luxury-theme #themeToggle,body.luxury-theme .theme-toggle,body.luxury-theme
   background:#fff!important;color:#435fd5!important;border:1px solid rgba(86,108,194,.18)!important;
   box-shadow:0 5px 14px rgba(69,91,165,.08)!important;
 }
+
+
+/* High-specificity visual-review correction for the third, icy-indigo theme. */
+body.luxury-theme #appView #tab-markets #marketList>.coin .price-stack .price-usd,
+body.luxury-theme #appView #tab-markets #marketList>.coin .price-stack .price-usd strong{
+  color:#1c2b50!important;opacity:1!important;text-shadow:none!important;
+}
+body.luxury-theme #appView #tab-markets #marketList>.coin .price-stack .price-toman,
+body.luxury-theme #appView #tab-markets #marketList>.coin .price-stack .price-toman strong{
+  color:#586b9c!important;opacity:1!important;text-shadow:none!important;
+}
+body.luxury-theme #appView #tab-markets #marketList>.coin .coin-sparkline{
+  color:#8192c4!important;opacity:.9!important;
+}
+body.luxury-theme #appView .mobile-bottom-nav{
+  background:rgba(255,255,255,.98)!important;border:1px solid #dbe4ff!important;
+  box-shadow:0 10px 28px rgba(67,87,155,.16)!important;
+}
+body.luxury-theme #appView .mobile-bottom-nav button{
+  background:transparent!important;color:#52618b!important;border:1px solid transparent!important;
+  box-shadow:none!important;
+}
+body.luxury-theme #appView .mobile-bottom-nav button.active{
+  background:linear-gradient(135deg,#607cf0,#8fa5ff)!important;color:#fff!important;
+  border-color:transparent!important;
+}
