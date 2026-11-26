@@ -4740,3 +4740,26 @@ body.luxury-theme #tab-dashboard .top-asset-card .coin-icon img{
   box-shadow:none!important;
   filter:none!important;
 }
+
+
+/* Logo identity buttons must not inherit the app-wide primary-button gradient. */
+body.dark-theme #tab-dashboard #dashboardMarketPreview .da-market-identity,
+body.dark-theme #tab-markets #marketList>.coin .coin-identity,
+body.dark-theme #tab-assets #assetList .asset-row .asset-symbol,
+body.dark-theme #tab-chart .asset-detail-head .asset-logo,
+body.light-theme #tab-dashboard #dashboardMarketPreview .da-market-identity,
+body.light-theme #tab-markets #marketList>.coin .coin-identity,
+body.light-theme #tab-assets #assetList .asset-row .asset-symbol,
+body.light-theme #tab-chart .asset-detail-head .asset-logo,
+body.luxury-theme #tab-dashboard #dashboardMarketPreview .da-market-identity,
+body.luxury-theme #tab-markets #marketList>.coin .coin-identity,
+body.luxury-theme #tab-assets #assetList .asset-row .asset-symbol,
+body.luxury-theme #tab-chart .asset-detail-head .asset-logo{
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  text-shadow:none!important;
+}
