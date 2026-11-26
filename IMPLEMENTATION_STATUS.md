@@ -1637,3 +1637,10 @@
 - [x] اسکریپت به workflow PostgreSQL 17 اضافه شد؛ `bash -n` موفق بود؛ تست Node از نظر syntax و تطبیق دقیق دو بدنه با manifest بررسی شد.
 - [!] این گام هنوز فقط static/syntax validation دارد؛ PostgreSQL واقعی و CI برای head فعلی اجرا/تأیید نشده‌اند.
 - [ ] گام بعد: بررسی سناریوی retry تا سقف ۱۰ تلاش و حالت fail-closed، سپس اجرای CI و رسیدگی به هر خطای fixture؛ هیچ تغییر Production تا تأیید صریح انجام نمی‌شود.
+### آزمون Retry Exhaustion و Fail-Closed در Worker شرطی — ۲۰۲۶-۱۱-۲۶
+
+- [x] اسکریپت مستقل `tests/conditional-worker-retry-fail-closed.pg17.sh` اضافه شد؛ خطای اجرای بازار برای کاربر آزمایشی در هر یک از ۱۰ تلاش تزریق می‌شود.
+- [x] پس از ۱۰ شکست، آزمون انتظار دارد `attempt_count=10`، سفارش والد و conditional هر دو `rejected`، reservation معتبر `released` با مبلغ آزادشدهٔ کامل، و موجودی wallet/asset بدون تغییر باقی بماند.
+- [x] سناریو به CI PostgreSQL 17 اضافه شد؛ `bash -n` موفق بود؛ تست Node از نظر syntax و تطبیق بدنه‌های Production با Fixture بررسی شد.
+- [!] آزمون SQL و CI هنوز واقعاً اجرا نشده‌اند؛ نتایج بالا فقط تأیید ایستای فایل‌ها و syntax هستند.
+- [ ] گام بعد: اجرای CI کامل و رفع خطاهای احتمالی Fixture؛ سپس ممیزی نهایی سناریوهای دو‌نشستی، جمع‌بندی یافته‌های باز و تعیین اینکه کدام موارد نیازمند اصلاح طراحی یا تغییر Production با تأیید مالک هستند.
