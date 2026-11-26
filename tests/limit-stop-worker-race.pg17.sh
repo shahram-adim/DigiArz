@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
-export PGPASSWORD="\${PGPASSWORD:-postgres}"
-DB_HOST="\${PGHOST:-localhost}"
-DB_USER="\${PGUSER:-postgres}"
-DB_NAME="\${PGDATABASE:-digiarz_inactive_account_rpc_race_test}"
+export PGPASSWORD="${PGPASSWORD:-postgres}"
+DB_HOST="${PGHOST:-localhost}"
+DB_USER="${PGUSER:-postgres}"
+DB_NAME="${PGDATABASE:-digiarz_inactive_account_rpc_race_test}"
 PSQL=(psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -v ON_ERROR_STOP=1 -X -q)
 USER_ID='88888888-8888-4888-8888-888888888888'
 PARENT_ID='88888888-8888-4888-8888-000000000001'
@@ -14,7 +14,7 @@ MARKET_PRICE='90'
 wait_for_activity() {
   local app="$1" predicate="$2"
   for attempt in {1..120}; do
-    if "\${PSQL[@]}" -At -c "SELECT 1 FROM pg_stat_activity WHERE application_name='$app' AND $predicate" | grep -q '^1$'; then
+    if "${PSQL[@]}" -At -c "SELECT 1 FROM pg_stat_activity WHERE application_name='$app' AND $predicate" | grep -q '^1$'; then
       return 0
     fi
     sleep 0.05
@@ -32,7 +32,7 @@ wait_for_lock_wait() {
 # Seed one triggered Stop-Limit parent and its pending Limit child. The real
 # process_limit_orders() worker will fill 25% of the child while its wallet
 # lock is deliberately held by another transaction.
-"\${PSQL[@]}" <<SQL
+"${PSQL[@]}" <<SQL
 INSERT INTO public.profiles(id,is_active) VALUES ('$USER_ID',true);
 INSERT INTO public.wallets(user_id,balance_usdt) VALUES ('$USER_ID',1000);
 INSERT INTO public.demo_trading_pairs(pair_symbol,quote_asset,is_enabled)
@@ -60,7 +60,7 @@ SQL
 
 # Hold the wallet row. The actual Limit worker locks child + reservation first,
 # then waits on this wallet lock while retaining the child order lock.
-(PGAPPNAME=digiarz_wallet_lock_hold "\${PSQL[@]}" <<SQL
+(PGAPPNAME=digiarz_wallet_lock_hold "${PSQL[@]}" <<SQL
 BEGIN;
 SELECT user_id FROM public.wallets WHERE user_id='$USER_ID' FOR UPDATE;
 SELECT pg_sleep(2);
@@ -70,14 +70,14 @@ SQL
 WALLET_PID=$!
 wait_for_sleep_query digiarz_wallet_lock_hold
 
-(PGAPPNAME=digiarz_limit_worker "\${PSQL[@]}" -c "SELECT public.process_limit_orders();") >/tmp/digiarz-limit-worker.log 2>&1 &
+(PGAPPNAME=digiarz_limit_worker "${PSQL[@]}" -c "SELECT public.process_limit_orders();") >/tmp/digiarz-limit-worker.log 2>&1 &
 LIMIT_PID=$!
 wait_for_lock_wait digiarz_limit_worker
 
 # Stop-Limit runs while Limit owns the child order row lock. The captured
 # Stop-Limit query locks only conditional + parent, so it still reads the
 # committed pre-fill child version and completes one sync pass.
-SYNCED=$("\${PSQL[@]}" -At -c "SELECT public.process_stop_limit_orders()->>'synced'")
+SYNCED=$("${PSQL[@]}" -At -c "SELECT public.process_stop_limit_orders()->>'synced'")
 [[ "$SYNCED" == "1" ]] || { echo "Stop-Limit worker did not sync while child was locked; synced=$SYNCED"; exit 1; }
 
 wait "$WALLET_PID"
@@ -85,7 +85,7 @@ wait "$LIMIT_PID"
 
 # The real Limit worker has now partially filled the child and written trade +
 # transaction rows, but the parent has the previous snapshot for one cycle.
-"\${PSQL[@]}" -c "DO \\$\\$ BEGIN
+"${PSQL[@]}" -c "DO \$\$ BEGIN
   IF (SELECT status FROM public.orders WHERE id='$CHILD_ID') IS DISTINCT FROM 'partially_filled' THEN
     RAISE EXCEPTION 'Limit worker did not partially fill child';
   END IF;
@@ -103,15 +103,15 @@ wait "$LIMIT_PID"
   IF (SELECT count(*) FROM public.transactions WHERE user_id='$USER_ID') <> 1 THEN
     RAISE EXCEPTION 'guarded transaction row missing';
   END IF;
-END \\$\\$;"
+END \$\$;"
 
 # The next Stop-Limit cycle sees the committed child fill and updates the
 # parent quantities to the current child state.
-"\${PSQL[@]}" -c "SELECT public.process_stop_limit_orders();" >/tmp/digiarz-stop-limit-followup.log 2>&1
-"\${PSQL[@]}" -c "DO \\$\\$ BEGIN
+"${PSQL[@]}" -c "SELECT public.process_stop_limit_orders();" >/tmp/digiarz-stop-limit-followup.log 2>&1
+"${PSQL[@]}" -c "DO \$\$ BEGIN
   IF (SELECT filled_amount FROM public.orders WHERE id='$PARENT_ID') IS DISTINCT FROM 0.025
      OR (SELECT remaining_amount FROM public.orders WHERE id='$PARENT_ID') IS DISTINCT FROM 0.075 THEN
     RAISE EXCEPTION 'Stop-Limit parent quantities did not converge after the next worker pass';
   END IF;
-END \\$\\$;"
+END \$\$;"
 echo "PASS: real Limit worker and captured Stop-Limit worker reproduce one-cycle parent quantity lag under concurrent child fill; next Stop-Limit pass converges."
