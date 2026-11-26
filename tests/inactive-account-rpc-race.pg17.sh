@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
-export PGPASSWORD="\${PGPASSWORD:-postgres}"
-DB_HOST="\${PGHOST:-localhost}"
-DB_USER="\${PGUSER:-postgres}"
-DB_NAME="\${PGDATABASE:-digiarz_inactive_account_rpc_race_test}"
+export PGPASSWORD="${PGPASSWORD:-postgres}"
+DB_HOST="${PGHOST:-localhost}"
+DB_USER="${PGUSER:-postgres}"
+DB_NAME="${PGDATABASE:-digiarz_inactive_account_rpc_race_test}"
 PSQL=(psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -v ON_ERROR_STOP=1 -X -q)
 
 wait_for_activity() {
   local app="$1" predicate="$2"
   for attempt in {1..160}; do
-    if "\${PSQL[@]}" -At -c "SELECT 1 FROM pg_stat_activity WHERE application_name='$app' AND $predicate" | grep -q '^1$'; then
+    if "${PSQL[@]}" -At -c "SELECT 1 FROM pg_stat_activity WHERE application_name='$app' AND $predicate" | grep -q '^1$'; then
       return 0
     fi
     sleep 0.05
@@ -29,23 +29,23 @@ assert_placement_then_deactivation() {
   local place_app="place_first_$tag"
   local deactivate_app="deactivate_after_$tag"
 
-  (PGAPPNAME="$place_app" "\${PSQL[@]}" -c "BEGIN; SELECT set_config('request.jwt.claim.sub','$uid',true); SELECT $call; SELECT pg_sleep(2); COMMIT;") >/tmp/digiarz-$tag-place-first.log 2>&1 &
+  (PGAPPNAME="$place_app" "${PSQL[@]}" -c "BEGIN; SELECT set_config('request.jwt.claim.sub','$uid',true); SELECT $call; SELECT pg_sleep(2); COMMIT;") >/tmp/digiarz-$tag-place-first.log 2>&1 &
   local place_pid=$!
   wait_for_sleep_query "$place_app"
 
-  (PGAPPNAME="$deactivate_app" "\${PSQL[@]}" -c "BEGIN; SELECT set_config('request.jwt.claim.sub','$uid',true); SELECT public.deactivate_my_account(); COMMIT;") >/tmp/digiarz-$tag-deactivate-after.log 2>&1 &
+  (PGAPPNAME="$deactivate_app" "${PSQL[@]}" -c "BEGIN; SELECT set_config('request.jwt.claim.sub','$uid',true); SELECT public.deactivate_my_account(); COMMIT;") >/tmp/digiarz-$tag-deactivate-after.log 2>&1 &
   local deactivate_pid=$!
   wait_for_lock_wait "$deactivate_app"
 
   wait "$place_pid"
   wait "$deactivate_pid"
 
-  "\${PSQL[@]}" -c "DO \\\$\\\$ BEGIN
+  "${PSQL[@]}" -c "DO \$\$ BEGIN
     IF (SELECT is_active FROM public.profiles WHERE id='$uid') IS DISTINCT FROM false THEN RAISE EXCEPTION 'profile remained active: $tag'; END IF;
     IF EXISTS (SELECT 1 FROM public.orders WHERE user_id='$uid' AND status NOT IN ('cancelled','filled','rejected')) THEN RAISE EXCEPTION 'pending order survived deactivation: $tag'; END IF;
     IF EXISTS (SELECT 1 FROM public.order_reservations WHERE user_id='$uid' AND status='reserved') THEN RAISE EXCEPTION 'reservation remained active: $tag'; END IF;
     IF EXISTS (SELECT 1 FROM public.conditional_orders WHERE user_id='$uid' AND status='pending') THEN RAISE EXCEPTION 'conditional remained pending: $tag'; END IF;
-  END \\\$\\\$;"
+  END \$\$;"
 }
 
 assert_deactivation_then_placement() {
@@ -53,15 +53,15 @@ assert_deactivation_then_placement() {
   local hold_app="wallet_hold_$tag"
   local place_app="place_after_deactivate_$tag"
 
-  (PGAPPNAME="$hold_app" "\${PSQL[@]}" -c "BEGIN; SELECT user_id FROM public.wallets WHERE user_id='$uid' FOR UPDATE; SELECT pg_sleep(2); COMMIT;") >/tmp/digiarz-$tag-wallet-hold.log 2>&1 &
+  (PGAPPNAME="$hold_app" "${PSQL[@]}" -c "BEGIN; SELECT user_id FROM public.wallets WHERE user_id='$uid' FOR UPDATE; SELECT pg_sleep(2); COMMIT;") >/tmp/digiarz-$tag-wallet-hold.log 2>&1 &
   local hold_pid=$!
   wait_for_sleep_query "$hold_app"
 
-  (PGAPPNAME="$place_app" "\${PSQL[@]}" -c "BEGIN; SELECT set_config('request.jwt.claim.sub','$uid',true); SELECT $call; COMMIT;") >/tmp/digiarz-$tag-place-after.log 2>&1 &
+  (PGAPPNAME="$place_app" "${PSQL[@]}" -c "BEGIN; SELECT set_config('request.jwt.claim.sub','$uid',true); SELECT $call; COMMIT;") >/tmp/digiarz-$tag-place-after.log 2>&1 &
   local place_pid=$!
   wait_for_lock_wait "$place_app"
 
-  "\${PSQL[@]}" -c "BEGIN; SELECT set_config('request.jwt.claim.sub','$uid',true); SELECT public.deactivate_my_account(); COMMIT;" >/tmp/digiarz-$tag-deactivate-first.log 2>&1
+  "${PSQL[@]}" -c "BEGIN; SELECT set_config('request.jwt.claim.sub','$uid',true); SELECT public.deactivate_my_account(); COMMIT;" >/tmp/digiarz-$tag-deactivate-first.log 2>&1
   wait "$hold_pid"
 
   if wait "$place_pid"; then
@@ -70,12 +70,12 @@ assert_deactivation_then_placement() {
   fi
   grep -q "Account is inactive" "/tmp/digiarz-$tag-place-after.log"
 
-  "\${PSQL[@]}" -c "DO \\\$\\\$ BEGIN
+  "${PSQL[@]}" -c "DO \$\$ BEGIN
     IF (SELECT is_active FROM public.profiles WHERE id='$uid') IS DISTINCT FROM false THEN RAISE EXCEPTION 'profile remained active: $tag'; END IF;
     IF EXISTS (SELECT 1 FROM public.orders WHERE user_id='$uid') THEN RAISE EXCEPTION 'order inserted after deactivation: $tag'; END IF;
     IF EXISTS (SELECT 1 FROM public.order_reservations WHERE user_id='$uid') THEN RAISE EXCEPTION 'reservation inserted after deactivation: $tag'; END IF;
     IF EXISTS (SELECT 1 FROM public.conditional_orders WHERE user_id='$uid') THEN RAISE EXCEPTION 'conditional inserted after deactivation: $tag'; END IF;
-  END \\\$\\\$;"
+  END \$\$;"
 }
 
 # Placement wins the profile-row lock first; deactivation waits, then cancels
