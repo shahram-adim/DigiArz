@@ -1900,3 +1900,10 @@
 - [ ] APK Debug را برای نصب آزمایشی ارائه کن؛ کاربر باید نصب، ورود/خروج، اثرانگشت، ناوبری و صفحات را روی گوشی واقعی بررسی کند. داده زندهٔ بازار/کیف پول از fixtureهای screenshot قابل تأیید نیست.
 - [ ] پیش از هر ادغام، دو commit عقب‌ماندگی Main و `mergeable=false` در PR #64 باید در یک برنامهٔ کنترل‌شده بررسی شوند؛ فعلاً Draft باقی بماند.
 - ایمنی: هیچ merge، release، Pages deployment، Supabase، Production، migration، wallet، order یا trade انجام نشده است.
+
+
+### تکمیل اجرای رگرسیون UI روی commit تست نهایی — ۲۶ نوامبر ۲۰۲۶
+- [x] UI Visual Review run `45850688818` روی commit `9c6c534c0e0ac115c4783ff75a1f352a65ab8424` با نتیجه success پایان یافت؛ source-level regression، Playwright/Chromium، ثبت ۶۶ تصویر و آپلود artifact همگی موفق شدند.
+- [x] artifact نهایی تست `15133567077`، نام `DigiArz-UI-visual-review`، حجم 23,933,822 بایت، digest برابر `sha256:46ee930e35856f8231f7d152679e6036465d6142c6272709928b6eafdd70513e`؛ این commit فقط تست را نسبت به APK ساخته‌شده تغییر داده است.
+- [x] checkpoint تست تصویری این مرحله بسته شد؛ UI و APK workflows روی commit CSS موفق‌اند و تست تصویری روی commit تست بعدی نیز موفق است.
+- [ ] گام بعد: APK Debug تأییدشده را برای آزمون فیزیکی ارائه کن و نتیجهٔ نصب/ورود/اثر انگشت/ناوبری را از مالک دریافت کن. PR #64 همچنان Draft بماند تا آزمون دستگاه و بررسی divergence/mergeability تکمیل شود.
