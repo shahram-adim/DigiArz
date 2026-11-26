@@ -3666,8 +3666,17 @@ function bindTabs(){$('exchangeSyncRefreshBtn')?.addEventListener('click',loadEx
 async function setupBiometricControls(){
  const panel=$('biometricOptions'),button=$('biometricLoginBtn'),vault=window.Capacitor?.Plugins?.BiometricCredential;
  if(!panel||!button||!vault)return;
- try{const state=await vault.isAvailable();if(!state?.available)return;panel.classList.remove('hidden');if(state.hasCredentials){button.classList.remove('hidden');$('clearBiometricCredentialsBtn')?.classList.remove('hidden')}button.addEventListener('click',loginWithBiometrics);$('clearBiometricCredentialsBtn')?.addEventListener('click',clearBiometricCredentials)}
- catch(error){console.warn('DigiArz biometric availability check failed:',error)}
+ const optInLabel=$('saveCredentialsForBiometric')?.closest('label'),clearButton=$('clearBiometricCredentialsBtn');
+ try{
+  const state=await vault.isAvailable();
+  if(state?.hasCredentials){panel.classList.remove('hidden');clearButton?.classList.remove('hidden')}
+  if(!state?.available){if(optInLabel)optInLabel.classList.add('hidden');return}
+  panel.classList.remove('hidden');
+  if(optInLabel)optInLabel.classList.remove('hidden');
+  if(state.hasCredentials)button.classList.remove('hidden');
+  button.addEventListener('click',loginWithBiometrics);
+  clearButton?.addEventListener('click',clearBiometricCredentials);
+ }catch(error){console.warn('DigiArz biometric availability check failed:',error)}
 }
 async function clearBiometricCredentials(){
  const vault=window.Capacitor?.Plugins?.BiometricCredential;
