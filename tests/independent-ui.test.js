@@ -1206,3 +1206,16 @@ test('offline icon fallback renders vector artwork and exposes a clear active na
     assert.ok(final.includes(token),'active icon treatment includes '+token);
   }
 });
+
+
+test('all dynamically rendered market categories have dedicated offline vector icons',()=>{
+  const html=fs.readFileSync('index.html','utf8');
+  const rendererStart=html.indexOf('function renderLucideIcons()');
+  const rendererEnd=html.indexOf('function showMessage',rendererStart);
+  const renderer=html.slice(rendererStart,rendererEnd);
+  const categories=['layout-grid','wallet','trending-up','badge-plus','star','trending-down','bar-chart-3','trophy','landmark','smile','globe-2','shield-check','brain-circuit','gamepad-2'];
+  for(const name of categories) {
+    assert.match(renderer,new RegExp("['\\\"]"+name+"['\\\"]\\s*:"),'dedicated offline SVG path exists for '+name);
+  }
+  assert.ok(html.includes("item.setAttribute('aria-pressed',active?'true':'false')"),'selected category exposes pressed state');
+});
