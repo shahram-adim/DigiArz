@@ -1594,3 +1594,12 @@
 - [!] این Fixture برای توابع ثبت سفارش و deactivation از بدنهٔ واقعی استفاده می‌کند، اما schema آن یک test double حداقلی است؛ هنوز workerهای پردازش سفارش و مسیر اجرای معاملهٔ market در این سناریوی کامل وارد نشده‌اند.
 - [!] اجرای CI برای commit جدید هنوز مشاهده نشده؛ آخرین run موفق قدیمی، گام تازهٔ RPC race را اجرا نکرده است. تا مشاهدهٔ run مربوط به head فعلی، نتیجهٔ CI نامشخص باقی می‌ماند.
 - [ ] گام بعد: اجرای CI؛ سپس افزودن مسیرهای worker (`process_limit_orders`, `process_stop_limit_orders`, `process_conditional_orders`) و بررسی تعامل آن‌ها با deactivation، به‌ویژه قفل child و آزادسازی reservation در خطا.
+### ممیزی Workerهای معاملاتی و ثبت محدودهٔ قفل‌ها — ۲۰۲۶-۱۱-۲۶
+
+- [x] بدنهٔ Production و fingerprint سه Worker `process_limit_orders`، `process_conditional_orders` و `process_stop_limit_orders` از manifest بررسی شد؛ fingerprintها به‌ترتیب `00ab429596fb99392666632967cde9c0`، `5cfbf0e2e73474ae64e42643b3feb28a` و `66357ab4a2247019f22a8b6ab6eac6fe` هستند.
+- [x] تست رگرسیون `tests/production-rpc-manifest.test.js` دو گروه assertion جدید دارد: فیلتر حساب فعال، قفل ردیف سفارش، reservation و wallet در Workerها؛ و ثبت دقیق محدودهٔ قفل Stop-Limit.
+- [x] کنترل‌های Workerها: `process_limit_orders` سفارش‌ها را با `FOR UPDATE SKIP LOCKED` انتخاب می‌کند، reservation و wallet را جداگانه قفل می‌کند و trade/transaction درج می‌کند. دو Worker شرطی، حساب فعال را join می‌کنند، والد و conditional را با `FOR UPDATE OF c,o SKIP LOCKED` قفل می‌کنند، reservation را `FOR UPDATE` می‌گیرند و شکست execution را در بلوک exception مدیریت می‌کنند.
+- [!] نکتهٔ بازبینی Stop-Limit: در حلقهٔ همگام‌سازی child، ردیف child به‌صورت JOIN خوانده می‌شود ولی lock صریح `FOR UPDATE OF c,parent SKIP LOCKED` فقط conditional و parent را قفل می‌کند. این تست فقط وضعیت فعلی snapshot را ثبت می‌کند و ایمن‌بودن child بدون قفل را اثبات نمی‌کند؛ باید با آزمون دو‌نشستی worker/cancel/child-fill بررسی شود.
+- [x] فایل تست از نظر syntax در V8 parse شد و assertionهای افزوده‌شده در برابر بدنه‌های manifest ارزیابی شدند؛ این بررسی معادل اجرای کامل `node --test tests/*.test.js` نیست.
+- [!] آخرین workflow قابل مشاهده هنوز روی commit قدیمی `28db91b9518981c8bba7d9c56e26aad416acb2f3` موفق شده است؛ برای head فعلی `64415390675f5989d4e19ee843d31f38ad8afcbe` هنوز run تازه‌ای ثبت نشده. CI را موفق اعلام نمی‌کنیم.
+- [ ] گام بعد: fixture یکپارچهٔ Workerها با بدنه‌های واقعی Production و جدول‌های دورریختنی، با اولویت رقابت Stop-Limit child synchronization در برابر fill/cancel و سپس آزمون rollback و atomicity reservation در Workerهای conditional.
