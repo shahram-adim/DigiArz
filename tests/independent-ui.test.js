@@ -1171,5 +1171,5 @@ test('final icy-indigo override neutralizes legacy dark asset, history, settings
 
 test('visual screenshot harness preserves light color scheme for both white and icy-indigo themes', () => {
   const harness = fs.readFileSync('tests/ui-visual-screenshots.cjs', 'utf8');
-  assert.match(harness, /document\\.documentElement\\.style\\.colorScheme = selected===\x27dark\x27\?\x27dark\x27:\x27light\x27/);
+  assert.ok(harness.includes("document.documentElement.style.colorScheme = selected==='dark'?'dark':'light';"));
 });
