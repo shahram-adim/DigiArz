@@ -469,3 +469,42 @@ test('inactive-account guards serialize order, reservation and conditional-order
     }
   }
 });
+
+
+test('captured Production order workers preserve active-account, row-lock and reservation safeguards', () => {
+  const byName = name => manifest.functions.find(fn => fn.schema_name === 'public' && fn.function_name === name);
+  const limit = byName('process_limit_orders');
+  const conditional = byName('process_conditional_orders');
+  const stopLimit = byName('process_stop_limit_orders');
+
+  assert.equal(limit.definition_md5, '00ab429596fb99392666632967cde9c0');
+  assert.equal(conditional.definition_md5, '5cfbf0e2e73474ae64e42643b3feb28a');
+  assert.equal(stopLimit.definition_md5, '66357ab4a2247019f22a8b6ab6eac6fe');
+
+  assert.match(limit.definition, /EXISTS\s*\(SELECT 1 FROM public\.profiles AS p WHERE p\.id = o\.user_id AND p\.is_active IS TRUE\)/i);
+  assert.match(limit.definition, /FROM public\.orders AS o[\s\S]*?FOR UPDATE SKIP LOCKED/i);
+  assert.match(limit.definition, /FROM public\.order_reservations AS r[\s\S]*?FOR UPDATE;/i);
+  assert.match(limit.definition, /FROM public\.wallets AS w[\s\S]*?FOR UPDATE;/i);
+  assert.match(limit.definition, /INSERT INTO public\.trades/i);
+  assert.match(limit.definition, /INSERT INTO public\.transactions/i);
+
+  for (const worker of [conditional, stopLimit]) {
+    assert.match(worker.definition, /JOIN public\.profiles p ON p\.id=c\.user_id AND p\.is_active IS TRUE/i);
+    assert.match(worker.definition, /FOR UPDATE OF c,o SKIP LOCKED/i);
+    assert.match(worker.definition, /FROM public\.order_reservations r[\s\S]*?FOR UPDATE;/i);
+    assert.match(worker.definition, /EXCEPTION WHEN OTHERS THEN/i);
+    assert.match(worker.definition, /SET released_amount=reserved_amount-consumed_amount/i);
+  }
+});
+
+test('Stop-Limit Production worker lock scope is explicit for child-order concurrency review', () => {
+  const worker = manifest.functions.find(fn => fn.schema_name === 'public' && fn.function_name === 'process_stop_limit_orders');
+  const definition = worker.definition;
+  assert.match(definition, /JOIN public\.orders child ON child\.id=c\.execution_order_id AND child\.user_id=c\.user_id/i);
+  assert.match(definition, /FOR UPDATE OF c,parent SKIP LOCKED/i);
+  assert.doesNotMatch(definition, /FOR UPDATE OF c,parent,child/i);
+  assert.doesNotMatch(definition, /FOR UPDATE OF c,parent,\s*child/i);
+  // This assertion records the captured Production lock scope; it does not
+  // declare the unlocked child row safe. A two-session worker/deactivation
+  // fixture must decide whether expanding the lock set is necessary.
+});
