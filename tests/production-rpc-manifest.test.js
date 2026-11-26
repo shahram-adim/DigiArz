@@ -419,10 +419,18 @@ test('inactive-account guards serialize order, reservation and conditional-order
     }
   }
 
-  for (const name of ['process_conditional_orders', 'process_stop_limit_orders']) {
+  for (const [name, downstream] of [
+    ['process_conditional_orders', 'execute_demo_trade'],
+    ['process_stop_limit_orders', 'place_limit_order']
+  ]) {
     const body = fn('public', name);
     assert.match(body, /join public\.profiles p on p\.id=c\.user_id and p\.is_active is true/i, name + ' must filter inactive accounts');
-    assert.match(body, /for share;/i, name + ' must hold the active profile row lock during worker writes');
+    assert.match(body, /select mp\.price into v_market_price[\s\S]*from public\.market_prices mp[\s\S]*for share;/i,
+      name + ' market-price FOR SHARE must not be mistaken for a profile lock');
+    assert.match(body, new RegExp('public\\.' + downstream + '\\('), name + ' must call its guarded execution entrypoint');
+    const execution = fn('public', downstream);
+    assert.match(execution, /current_account_is_active\(\)/i, downstream + ' must recheck account state at execution');
+    assert.match(execution, /insert into public\.orders/i, downstream + ' must pass through the guarded order INSERT');
   }
 
   const limitWorker = fn('public', 'process_limit_orders');
