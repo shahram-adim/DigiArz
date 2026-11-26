@@ -1603,3 +1603,12 @@
 - [x] فایل تست از نظر syntax در V8 parse شد و assertionهای افزوده‌شده در برابر بدنه‌های manifest ارزیابی شدند؛ این بررسی معادل اجرای کامل `node --test tests/*.test.js` نیست.
 - [!] آخرین workflow قابل مشاهده هنوز روی commit قدیمی `28db91b9518981c8bba7d9c56e26aad416acb2f3` موفق شده است؛ برای head فعلی `64415390675f5989d4e19ee843d31f38ad8afcbe` هنوز run تازه‌ای ثبت نشده. CI را موفق اعلام نمی‌کنیم.
 - [ ] گام بعد: fixture یکپارچهٔ Workerها با بدنه‌های واقعی Production و جدول‌های دورریختنی، با اولویت رقابت Stop-Limit child synchronization در برابر fill/cancel و سپس آزمون rollback و atomicity reservation در Workerهای conditional.
+### آزمون دو‌نشستی همگام‌سازی سفارش فرزند Stop-Limit — ۲۰۲۶-۱۱-۲۶
+
+- [x] بدنهٔ کامل `public.process_stop_limit_orders()` با fingerprint `66357ab4a2247019f22a8b6ab6eac6fe` عیناً به Fixture PostgreSQL 17 افزوده شد؛ ستون‌های تکمیلی `conditional_orders` و جدول `market_prices` نیز فقط در دیتابیس آزمایشی ساخته می‌شوند.
+- [x] اسکریپت `tests/stop-limit-child-sync-race.pg17.sh` سناریوی دو‌نشستی را می‌سازد: نشست اول ردیف child را به حالت filled می‌برد و قفل آن را موقتاً نگه می‌دارد؛ در این فاصله Worker واقعی Stop-Limit اجرا می‌شود. چون SELECT همگام‌سازی child را قفل نمی‌کند، نسخهٔ قبلی child را می‌خواند و parent/conditional برای یک چرخه عقب می‌مانند؛ اجرای بعدی Worker باید هر دو را به filled همگام کند.
+- [x] این آزمون به workflow PostgreSQL 17 اضافه شد و تست Node رگرسیون، برابری دقیق بدنهٔ Worker با manifest و وجود سناریوی race و همگرایی چرخهٔ بعد را کنترل می‌کند.
+- [x] `bash -n` برای اسکریپت جدید موفق بود؛ فایل تست Node نیز از نظر syntax parse شد و تطبیق دقیق بدنهٔ Worker و وجود اجزای آزمون بررسی شد.
+- [!] این سناریو race را با UPDATE هم‌زمان ردیف child بازسازی می‌کند؛ هنوز خود `process_limit_orders()` به‌عنوان نشست تولیدکنندهٔ fill در همین سناریو اجرا نشده است. گام بعد باید Worker واقعی Limit را در fixture وارد کند تا رقابت Worker-به-Worker با همان قفل‌ها و جدول‌های لازم سنجیده شود.
+- [!] اجرای PostgreSQL 17 و CI برای head فعلی هنوز تأیید نشده؛ بررسی syntax محلی جایگزین اجرای SQL/CI نیست.
+- [ ] گام بعد: افزودن بدنهٔ واقعی `process_limit_orders()` و dependencies لازم به fixture؛ سپس رقابت دو Worker، و در ادامه آزمون atomicity و rollback reservation در `process_conditional_orders()`.
