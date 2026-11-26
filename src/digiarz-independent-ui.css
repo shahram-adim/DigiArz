@@ -6114,3 +6114,25 @@ body.luxury-theme #appView .mobile-bottom-nav button:not(.active){color:#7786b3!
 @media(prefers-reduced-motion:reduce){
   body.luxury-theme #appView .mobile-bottom-nav button{transition:none!important}
 }
+
+
+/* Third-theme icon legibility: calm indigo accents, but keep marks readable on glass. */
+body.luxury-theme #appView .coin-icon,
+body.luxury-theme #appView .coin-icon img,
+body.luxury-theme #appView .coin-icon svg,
+body.luxury-theme #appView .asset-logo,
+body.luxury-theme #appView .asset-logo img,
+body.luxury-theme #appView .asset-logo svg{
+  opacity:.94!important;
+  filter:saturate(.82) contrast(1.08);
+}
+body.luxury-theme #appView .favorite-btn{
+  color:#596daF!important;
+  opacity:.94!important;
+  background:transparent!important;
+  border-color:transparent!important;
+}
+body.luxury-theme #appView .category-btn svg{
+  stroke:#6277c8!important;
+  opacity:.9!important;
+}
