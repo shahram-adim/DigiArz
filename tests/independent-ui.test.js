@@ -943,3 +943,12 @@ test('final universal logo-card override removes all logo backgrounds and frames
     assert.ok(final.includes(token),'final override removes '+token);
   }
 });
+
+
+test('visual screenshot harness reapplies market fixtures after app startup before every capture',()=>{
+  const harness=fs.readFileSync('tests/ui-visual-screenshots.cjs','utf8');
+  assert.match(harness,/Reapply deterministic fixtures after app startup and tab transitions/);
+  assert.match(harness,/fixtureCounts\.marketRows !== 8/);
+  assert.match(harness,/fixtureCounts\.marketCards !== 8/);
+  assert.match(harness,/fixtureCounts\.dashboardCards !== 8/);
+});
