@@ -2131,3 +2131,15 @@
 - [x] دو commit عقب‌مانده main در QA/مستندات Stop-Limit و تست‌های source snapshot قرار دارند؛ فایل مشترک با شاخه UI، `IMPLEMENTATION_STATUS.md` است. فایل‌های SQL/QA مالی در این شاخه وارد نشده‌اند؛ هیچ rebase/merge انجام نشد.
 - [ ] گام بعد: تقویت تمایز تم سوم و اجرای دوباره visual regression؛ سپس بررسی نصب APK روی گوشی واقعی و تست بیومتریک. جداگانه، مرور تعارض/اختلاف مستندات `IMPLEMENTATION_STATUS.md` پیش از هر sync با main.
 - ایمنی: هیچ merge، rebase، release، Pages deployment، Supabase، migration، Production DB، wallet، order یا trade تغییری انجام نشد.
+
+
+## اصلاح هویت بصری تم سوم و آزمون رگرسیون — ۲۶ نوامبر ۲۰۲۶
+- [x] بازبینی آخرین لایه CSS نشان داد تم سوم روشن و نیلی است، اما در نماهای موبایل به تم سفید نزدیک می‌ماند؛ به‌جای تیره‌کردن آن، شدت tint آبی/نیلی و تفاوت سطوح شیشه‌ای تقویت شد.
+- [x] در انتهای `src/digiarz-independent-ui.css` لایه `Icy-indigo refinement v2` اضافه شد: پس‌زمینه چندلایه نیلی-یخی، کارت‌ها و پنل‌های شیشه‌ای با tint متمایزتر، هدر/تب‌ها، Hero و نوار ناوبری فعال. `color-scheme:light` و خوانایی متن تیره حفظ شده‌اند.
+- [x] تست رگرسیون اختصاصی در `tests/independent-ui.test.js` اضافه شد تا رنگ‌های کلیدی، گرادیان‌ها، حالت روشن و reduced-motion را کنترل کند.
+- Commit CSS: `eb6065e17978cbc93cabb95abc4ded114c82da9b`.
+- Commit تست: `59e7a7cb93dd4e0ca52b0be002eebe59fe7f163c`.
+- [!] UI visual review Run #45873474786 برای commit تست `59e7a7c` در آخرین بررسی pending بود؛ خروجی تازه هنوز بازبینی نشده است. چند اجرای میانی به‌علت pushهای متوالی cancelled شدند؛ آن‌ها را موفق محسوب نکن.
+- [!] APK build مربوط به CSS جدید نیز باید از آخرین commit ساخته شود؛ APK قبلی قبل از این تغییر CSS است و نسخهٔ تازه محسوب نمی‌شود.
+- [ ] پس از پایان CI، تصاویر تم سوم را در تمام صفحات و viewportهای موبایل بررسی کن؛ سپس APK جدید را بساز/بررسی کن و نصب واقعی روی Android را انجام بده.
+- ایمنی: فقط CSS و تست روی شاخه Draft تغییر کردند؛ هیچ merge، rebase، release، Pages deploy، Supabase، migration یا Production data change انجام نشد.
