@@ -2065,3 +2065,13 @@
 - [!] ابزار متصل فعلی فقط خواندن workflow runs مرتبط با PR و artifactها را پشتیبانی می‌کند و امکان dispatch دستی workflow در این نشست ارائه نشده؛ بنابراین تست تازه را نمی‌توان از اینجا راه‌اندازی یا موفق اعلام کرد.
 - [ ] اقدام بعدی: اجرای دستی workflow از GitHub Actions یا دریافت push-triggered run از مخزن؛ سپس بررسی artifact تازه و تطبیق سه تم در صفحات/viewportها.
 - ایمنی: هیچ تغییر اجرایی در UI انجام نشد؛ هیچ merge، rebase، deploy، Production یا Supabase انجام نشد.
+
+## بررسی دو کامیت عقب‌مانده main و CI مالی — ۲۶ نوامبر ۲۰۲۶
+- [x] مقایسه دوطرفه تأیید کرد main شامل دو کامیت خارج از شاخه UI است: `882591331c8d303c4d4eeb95ebc7f99e2efeb731` (ثبت snapshot و آزمون منبع Worker سفارش Limit) و `6916b940f63877f0f2589ad1652791b85e01d823` (ثبت نتیجه CI و وضعیت بازار تومانی).
+- [x] این دو کامیت شامل تغییرات QA/مستندات Stop-Limit و وضعیت بازارند؛ هیچ‌کدام را به شاخه UI منتقل نکردم تا scope PR طراحی با تغییرات مالی مخلوط نشود.
+- [x] Run #2111 با شناسه `45811382494` روی commit `8825913` از طریق جزئیات job بررسی شد: job با نتیجه success؛ همه ۲۲ مرحله اصلی PostgreSQL 17 و تست Node/browser و cleanup موفق بودند.
+- [!] این CI فقط harness دورریختنی GitHub Actions را پوشش می‌دهد؛ معادل تست Supabase ایزوله با schema/ACL دقیق Production نیست.
+- [!] یافته مهم QA: تابع زنده `process_limit_orders()` هنوز gross و fee را صریحاً تا ۸ رقم quantize نمی‌کند؛ این مانع حسابداری برای هر rollout است و در Production اصلاح نشده.
+- [!] داده بازار تومانی در snapshot main که در commit ثبت شده کهنه است: ۳۷۳ ردیف، آخرین دریافت ۱۷ نوامبر ۲۰۲۶، صفر ردیف تازه در پنج دقیقه؛ لاگ refresh نیز POST/502 داشته. این موضوع باید در مسیر جداگانه بازار بررسی شود، نه با PR طراحی.
+- [ ] گام امن بعدی UI: ساخت candidate تازه بر پایه HEAD فعلی main و انتقال گزینشی ۹ فایل UI با بازبینی دقیق، نه merge کردن تاریخچه diverged فعلی.
+- ایمنی: هیچ تغییر Supabase/Production، migration، worker، cron، merge، rebase یا deploy انجام نشد.
