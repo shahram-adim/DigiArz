@@ -976,3 +976,34 @@ test('market and dashboard logo identity buttons do not inherit primary-button g
   assert.ok(final.includes('background-image:none!important;'));
   assert.ok(final.includes('box-shadow:none!important;'));
 });
+
+
+test('layout correction hides inactive dashboard and market tabs despite their explicit display rules',()=>{
+  const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
+  const final=css.slice(css.lastIndexOf('DigiArz layout correction + luminous indigo glass theme'));
+  assert.ok(final.includes('#appView [id^="tab-"].hidden{'));
+  assert.ok(final.includes('display:none!important;'));
+  assert.ok(final.includes('#appView #tab-dashboard.hidden'));
+  assert.ok(final.includes('#appView #tab-markets.hidden'));
+  assert.ok(final.includes('#appView #tab-dashboard:not(.hidden){display:flex!important}'));
+  assert.ok(final.includes('#appView #tab-markets:not(.hidden){display:block!important}'));
+});
+
+test('market row grid uses five matching columns and named areas at desktop and mobile widths',()=>{
+  const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
+  const final=css.slice(css.lastIndexOf('DigiArz layout correction + luminous indigo glass theme'));
+  assert.ok(final.includes('grid-template-areas:"fav identity spark change price"!important;'));
+  assert.ok(final.includes('grid-template-areas:"fav identity spark change price" ". identity spark change price"!important;'));
+  assert.ok(final.includes('grid-template-columns:22px minmax(0,1fr) 34px 48px 76px!important;'));
+});
+
+test('third luxury theme is a bright ice-blue indigo glass palette, distinct from the black-gold dark theme',()=>{
+  const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
+  const final=css.slice(css.lastIndexOf('DigiArz layout correction + luminous indigo glass theme'));
+  for(const token of ['color-scheme:light!important','--da-bg:#edf2ff!important',
+    '--da-surface:rgba(255,255,255,.94)!important','--da-accent:#526ee8!important',
+    'linear-gradient(145deg,#f7f8ff 0%,#edf2ff 52%,#e9f4ff 100%)',
+    'body.luxury-theme .top','body.luxury-theme #tab-markets .market-categories .category-btn.active'])
+    assert.ok(final.includes(token),'bright luxury palette includes '+token);
+  assert.ok(final.includes('body.dark-theme{'));
+});
