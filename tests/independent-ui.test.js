@@ -927,3 +927,19 @@ test('visual review seeds deterministic market and wallet fixtures without conta
   assert.match(harness,/supabase\\.co/);
   assert.match(harness,/these rows are synthetic and are never written/);
 });
+
+
+test('final universal logo-card override removes all logo backgrounds and frames across the app',()=>{
+  const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
+  const final=css.slice(css.lastIndexOf('Final universal logo-card transparency override'));
+  for(const selector of ['.da-v2-logo','.coin-icon','.asset-logo','.coin-logo',
+    '.da-market-logo','.da-market-logo-inner','#tab-dashboard .da-v2-logo',
+    '#tab-markets #marketList .coin-icon','#tab-assets #assetList .asset-row .asset-logo',
+    '#tab-chart .asset-detail-head .asset-logo','#tab-toman .coin-icon']){
+    assert.ok(final.includes(selector),'final override covers '+selector);
+  }
+  for(const token of ['background:transparent!important','background-color:transparent!important',
+    'background-image:none!important','border:0!important','box-shadow:none!important']){
+    assert.ok(final.includes(token),'final override removes '+token);
+  }
+});
