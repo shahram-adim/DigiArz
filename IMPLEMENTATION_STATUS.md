@@ -2206,3 +2206,16 @@
 - [!] PR #64 همچنان Draft و باز است؛ head اکنون bb0c350d62e47bd3afae3881aebb8f2ebd1f2331، main برابر 6916b940f63877f0f2589ad1652791b85e01d823 و merge-base برابر 9855d6ea6cd188a5621c4e2c28c55e4cfb4d2587 است؛ اختلاف 200 ahead / 2 behind و mergeable=false.
 - [x] دو commit عقب‌مانده main مربوط به QA/مستندات Stop-Limit و snapshot فقط‌خواندنی تابع Limit هستند؛ هیچ کدام به Production اعمال نشده‌اند. هیچ sync/rebase/merge انجام نشد.
 - ایمنی: فقط UI و تست در شاخه Draft تغییر کردند؛ هیچ Supabase، migration، wallet، order، trade، release یا deploy تغییر نکرد.
+
+
+## اعتبارسنجی APK و بازبینی بصری نامزد UI — ۲۶ نوامبر ۲۰۲۶
+- [x] ساخت APK مستقل PR موفق: workflow run `45875527103`، commit کد `e556526beec417160a37ae528f27e75fe28eb2d8`، artifact ID `15144198897`.
+- [x] APK از artifact دریافت و استخراج شد؛ `BUILD-INFO.txt` با commit و run مطابقت دارد.
+- [x] SHA-256 واقعی فایل `app-debug.apk`: `e75b489392975eb4ab0e9078a30ad500b33292d777da85b914388bc8c13987a6`؛ اندازهٔ فایل 4,142,927 bytes. Digest آرشیو artifact در GitHub جداگانه `d5c00c1eea4a880fe97c0ab2180668cc1864be3ed1e116bda045e0ba2a1cceb3` است.
+- [x] UI visual review برای commit کد `e556526` موفق: run `45875527160`، artifact ID `15145292069`.
+- [x] بازبینی بصری ۶۶ تصویر در ۲ viewport، سه تم و ۱۰ بخش انجام شد؛ سه هویت بصری تاریک/طلایی، سفید و نیلی-یخی از هم قابل تشخیص‌اند.
+- [x] اجرای تصویری بعدی روی commit تست `bb0c350d62e47bd3afae3881aebb8f2ebd1f2331` capture و upload تصاویر را انجام داد؛ run `45875541965`، artifact ID `15143444393`.
+- [!] README تصاویر تأیید می‌کند درخواست‌های Supabase مسدود بوده‌اند و ردیف‌های بازار/داشبورد/دارایی fixtureهای synthetic و DOM-only هستند؛ قیمت زنده، اتصال backend و صحت دادهٔ واقعی تأیید نشده‌اند.
+- [!] APK یک debug candidate است؛ نصب روی گوشی فیزیکی، ورود واقعی، biometric enrollment و حذف credential هنوز آزمایش نشده‌اند.
+- لینک‌ها: APK `https://github.com/shahram-adim/DigiArz/actions/runs/45875527103`؛ UI `https://github.com/shahram-adim/DigiArz/actions/runs/45875527160`؛ visual retest `https://github.com/shahram-adim/DigiArz/actions/runs/45875541965`.
+- هیچ merge/rebase/deploy، انتشار یا تغییر Supabase/Production انجام نشده است.
