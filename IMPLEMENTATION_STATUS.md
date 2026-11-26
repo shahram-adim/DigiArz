@@ -1710,3 +1710,13 @@
 - [!] برای commit تست جدید هیچ workflow run برگشتی وجود ندارد؛ CI/APK تأییدشده نیست.
 - [ ] گام بعد: اجرای Node regression و Playwright از مسیر CI معتبر، بازبینی اسکرین‌شات تم سوم و مقایسه با تم دوم، سپس بررسی یکپارچگی داشبورد/بازار در هر سه تم.
 - ایمنی: فقط stylesheet، تست و این مستندات در شاخه Draft تغییر می‌کنند؛ هیچ merge، release، Pages deploy، Supabase، migration یا تغییر Production انجام نشد.
+
+
+## فعال‌سازی مسیر تست روی push شاخه candidate — ۲۶ نوامبر ۲۰۲۶
+- [x] workflow بازبینی بصری UI به‌روزرسانی شد تا pushهای شاخه redesign/ui-mainline-clean-2026-11-26 را نیز دریافت کند.
+- [x] اجرای تست‌های منبع Node با دستور node --test برای independent-ui، index-syntax و service-worker پیش از نصب Playwright به workflow اضافه شد.
+- [x] تغییر workflow در commit 8257c2797dadd82322a38319f3d42c0d484ea3f0 ثبت شد.
+- [!] بررسی اجراهای متصل به این SHA هنوز workflow run برنگرداند؛ بنابراین نمی‌توان گفت workflow اجرا شده یا تست‌ها موفق‌اند. باید وضعیت Actions در GitHub نیز بررسی شود؛ احتمال دارد اجرای workflow برای این شاخه/مخزن غیرفعال یا در دسترس اتصال نباشد.
+- [x] compare تازه: شاخه ۸۶ commit جلو و ۲ commit عقب از Main، وضعیت diverged؛ همگام‌سازی انجام نشد تا از merge/rebase ناخواسته جلوگیری شود.
+- [ ] گام بعد: دریافت نتیجه واقعی Actions؛ در صورت نبود اجرا، بررسی تنظیمات Actions و workflowهای base با دسترسی مجاز، سپس اجرای visual screenshotها و build APK candidate.
+- ایمنی: فقط workflow تست و مستندات در شاخهٔ PR تغییر کردند؛ Main، Production، Supabase، migration و انتشار دست‌نخورده‌اند.
