@@ -374,3 +374,89 @@ test('Production role matrix exactly reconciles every captured function ACL and 
     assert.equal(row.expected_execute.postgres, true, row.identity + ' postgres owner execution expectation');
   }
 });
+
+
+test('inactive-account guards serialize order, reservation and conditional-order writes', () => {
+  const fn = (schema, name) => {
+    const found = manifest.functions.find(item => item.schema_name === schema && item.function_name === name);
+    assert.ok(found, 'missing captured Production function: ' + schema + '.' + name);
+    return found.definition;
+  };
+
+  const guard = fn('private', 'guard_active_account_writes');
+  assert.match(guard, /from public\\.profiles p[\\s\\S]*where p\\.id = new\\.user_id[\\s\\S]*for share;/i);
+  assert.match(guard, /coalesce\\(v_active, false\\) is not true[\\s\\S]*raise exception/i);
+
+  const guardedInsertTriggers = inventory.trigger_bindings.filter(trigger =>
+    trigger.function_schema === 'private' &&
+    trigger.function_name === 'guard_active_account_writes' &&
+    /^CREATE TRIGGER guard_active_account_/.test(trigger.trigger_definition)
+  );
+  assert.deepEqual(
+    guardedInsertTriggers.map(trigger => trigger.relation_schema + '.' + trigger.relation_name).sort(),
+    ['public.orders', 'public.trades', 'public.transactions']
+  );
+  for (const relation of ['orders', 'trades', 'transactions']) {
+    const trigger = guardedInsertTriggers.find(item => item.relation_name === relation);
+    assert.match(trigger.trigger_definition, /BEFORE INSERT ON public\\./i);
+  }
+
+  const placements = [
+    ['place_limit_order', 'INSERT INTO public.orders', 'INSERT INTO public.order_reservations'],
+    ['place_conditional_exit_order', 'INSERT INTO public.orders', 'INSERT INTO public.order_reservations', 'INSERT INTO public.conditional_orders'],
+    ['place_stop_limit_order', 'INSERT INTO public.orders', 'INSERT INTO public.order_reservations', 'INSERT INTO public.conditional_orders']
+  ];
+  for (const [name, ...writes] of placements) {
+    const body = fn('public', name);
+    assert.match(body, /current_account_is_active\\(\\)/i, name + ' must reject inactive accounts before placement');
+    let previous = body.indexOf('current_account_is_active()');
+    assert.notEqual(previous, -1, name + ' active-account check missing');
+    for (const write of writes) {
+      const at = body.indexOf(write);
+      assert.ok(at > previous, name + ' write order changed: ' + write);
+      previous = at;
+    }
+  }
+
+  for (const name of ['process_conditional_orders', 'process_stop_limit_orders']) {
+    const body = fn('public', name);
+    assert.match(body, /join public\\.profiles p on p\\.id=c\\.user_id and p\\.is_active is true/i, name + ' must filter inactive accounts');
+    assert.match(body, /for share;/i, name + ' must hold the active profile row lock during worker writes');
+  }
+
+  const limitWorker = fn('public', 'process_limit_orders');
+  assert.match(limitWorker, /exists \\(select 1 from public\\.profiles as p where p\\.id = o\\.user_id and p\\.is_active is true\\)/i);
+  assert.match(limitWorker, /insert into public\\.trades/i, 'Limit worker must pass through the guarded trade INSERT');
+  assert.ok(guardedInsertTriggers.some(trigger => trigger.relation_name === 'trades'));
+
+  const deactivate = fn('public', 'deactivate_my_account');
+  const deactivateAt = deactivate.indexOf('SET is_active=false');
+  assert.notEqual(deactivateAt, -1);
+  for (const write of ['UPDATE public.order_reservations', 'UPDATE public.conditional_orders']) {
+    assert.ok(deactivate.indexOf(write) > deactivateAt, 'deactivation must mark profile inactive before cleanup: ' + write);
+  }
+
+  const relation = name => {
+    const found = inventory.relations.find(item => item.schema === 'public' && item.name === name);
+    assert.ok(found, 'missing Production relation ACL snapshot: ' + name);
+    return found;
+  };
+  for (const name of ['order_reservations', 'conditional_orders']) {
+    const acl = relation(name);
+    assert.equal(acl.authenticated_insert, false, name + ' must not allow direct authenticated INSERT');
+    assert.equal(acl.authenticated_update, false, name + ' must not allow direct authenticated UPDATE');
+    assert.equal(acl.authenticated_delete, false, name + ' must not allow direct authenticated DELETE');
+  }
+
+  for (const [name, tables] of [
+    ['cancel_limit_order', ['order_reservations']],
+    ['cancel_conditional_exit_order', ['order_reservations', 'conditional_orders']],
+    ['cancel_stop_limit_order', ['order_reservations', 'conditional_orders']]
+  ]) {
+    const body = fn('public', name);
+    for (const table of tables) {
+      assert.match(body, new RegExp('UPDATE\\\\s+public\\\\.' + table, 'i'), name + ' must retain cleanup path for ' + table);
+      assert.doesNotMatch(body, new RegExp('INSERT\\\\s+INTO\\\\s+public\\\\.' + table, 'i'), name + ' must not create new ' + table + ' rows');
+    }
+  }
+});
