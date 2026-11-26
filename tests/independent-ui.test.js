@@ -1031,6 +1031,22 @@ test('dashboard coin logos and favorite stars stay completely frameless in every
   ]) assert.ok(final.includes(token),'frameless identity treatment includes '+token);
 });
 
+
+test('coin logo failures render a visible branded SVG fallback instead of hiding the asset mark',()=>{
+  const html=fs.readFileSync('index.html','utf8');
+  const start=html.indexOf('function renderCoinLogoFallback(');
+  const end=html.indexOf('function coinLogo(',start);
+  const fallback=html.slice(start,end);
+  assert.ok(start>=0&&end>start,'coin logo fallback helper exists before coinLogo');
+  for(const token of ['const colors={BTC:','ETH:','#627eea','SOL:','BNB:','XRP:','DOGE:','ADA:',
+    'holder.innerHTML=','<svg viewBox="0 0 48 48"','aria-label','function handleCoinLogoError'])
+    assert.ok(fallback.includes(token),'logo fallback includes '+token);
+  assert.ok(fallback.includes('if(holder)renderCoinLogoFallback(holder,symbol)'),
+    'failed remote logo is replaced with a visible SVG mark');
+  assert.ok(!fallback.includes('img.style.display=\'none\';if(holder)'),
+    'failed logo must not be hidden leaving an empty slot');
+});
+
 test('third luxury theme is a bright ice-blue indigo glass palette, distinct from the black-gold dark theme',()=>{
   const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
   const final=css.slice(css.lastIndexOf('DigiArz layout correction + luminous indigo glass theme'));
