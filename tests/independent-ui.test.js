@@ -1072,3 +1072,42 @@ test('third theme market price text and bottom navigation use high-contrast ligh
   '#appView .mobile-bottom-nav button.active'])
   assert.ok(final.includes(token),'third-theme contrast correction includes '+token);
 });
+
+
+test('market category icons are positioned directly below the asset-list heading',()=>{
+  const html=fs.readFileSync('index.html','utf8');
+  const heading=html.indexOf('<strong>فهرست دارایی‌ها</strong>');
+  const categories=html.indexOf('id="marketCategories"');
+  const list=html.indexOf('id="marketList"');
+  assert.ok(heading>=0&&categories>heading&&list>categories,
+    'market category icons must follow the asset heading and precede the asset rows');
+  assert.equal((html.match(/id="marketCategories"/g)||[]).length,1,
+    'category navigation must have one live mount point');
+});
+
+test('USDT is pinned first in the market list with a dedicated Tether logo and peg display',()=>{
+  const html=fs.readFileSync('index.html','utf8');
+  const start=html.indexOf('function renderMarkets(){');
+  const end=html.indexOf('function renderDashboardPortfolio(',start);
+  const market=html.slice(start,end);
+  assert.ok(market.indexOf("tether.className='coin tether-pinned'")>=0);
+  assert.ok(market.indexOf("fragment.appendChild(tether)")<market.indexOf('for(const item of visibleRows)'),
+    'the Tether row must be inserted before all filtered market assets');
+  assert.ok(market.includes("coinLogo('USDT','coin-icon')"));
+  assert.ok(market.includes("currentFxIsValid?formatNum(currentFxRate,0)+' تومان'"));
+  assert.ok(html.includes('function coinLogo(symbol,sizeClass='));
+  assert.ok(html.includes('if(clean===\'USDT\')return'));
+  assert.ok(html.includes('fill="#26A17B"'));
+});
+
+test('pinned Tether market row keeps the same frameless responsive treatment in all themes',()=>{
+  const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
+  const rules=css.slice(css.lastIndexOf('Market asset hierarchy: category shortcuts'));
+  for(const token of ['#tab-markets #marketList>.coin.tether-pinned',
+    'border-color:transparent!important',
+    'body.dark-theme #tab-markets #marketList>.coin.tether-pinned',
+    'body.light-theme #tab-markets #marketList>.coin.tether-pinned',
+    'body.luxury-theme #tab-markets #marketList>.coin.tether-pinned',
+    '.tether-logo svg'])
+    assert.ok(rules.includes(token),'pinned Tether styling includes '+token);
+});
