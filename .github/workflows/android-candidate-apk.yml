@@ -15,9 +15,10 @@ on:
       - "package.json"
       - "capacitor.config.json"
       - ".github/workflows/android-candidate-apk.yml"
+  workflow_dispatch:
   push:
     branches:
-      - redesign/ui-clean-rebuild-2026
+      - redesign/ui-mainline-clean-2026-11-26
     paths:
       - "index.html"
       - "manifest.webmanifest"
