@@ -5018,3 +5018,98 @@ body.luxury-theme .mobile-bottom-nav button{color:#69769d!important}
 @media(prefers-reduced-motion:reduce){
   #appView [id^="tab-"]:not(.hidden){animation:none!important}
 }
+
+
+/* Bright-theme contrast pass 2: remove inherited midnight surfaces from dashboard cards. */
+body.luxury-theme #tab-dashboard .da-v2-account-card,
+body.luxury-theme #tab-dashboard .da-market-glass,
+body.luxury-theme #tab-dashboard .dashboard-activity-panel{
+  background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(239,245,255,.98))!important;
+  color:#202b55!important;
+  border:1px solid rgba(86,108,194,.20)!important;
+  box-shadow:0 14px 34px rgba(69,91,165,.10),inset 0 1px rgba(255,255,255,.95)!important;
+}
+body.luxury-theme #tab-dashboard .da-v2-section-head h2,
+body.luxury-theme #tab-dashboard .da-v2-account-card h2,
+body.luxury-theme #tab-dashboard .da-market-results-head,
+body.luxury-theme #tab-dashboard .da-v2-account-card label,
+body.luxury-theme #tab-dashboard .da-v2-account-card span{
+  color:#26345f!important;
+}
+body.luxury-theme #tab-dashboard .da-v2-balance-main,
+body.luxury-theme #tab-dashboard .da-v2-account-stats>div,
+body.luxury-theme #tab-dashboard .da-v2-wallet-assets .asset-row{
+  background:#fff!important;
+  border:1px solid rgba(86,108,194,.16)!important;
+  color:#202b55!important;
+  box-shadow:0 5px 16px rgba(69,91,165,.055)!important;
+}
+body.luxury-theme #tab-dashboard .da-v2-balance-main strong,
+body.luxury-theme #tab-dashboard .da-v2-account-stats b,
+body.luxury-theme #tab-dashboard .da-v2-wallet-assets .price-stack,
+body.luxury-theme #tab-dashboard .da-v2-wallet-assets .asset-row-main{
+  color:#202b55!important;
+}
+body.luxury-theme #tab-dashboard .da-v2-account-stats small,
+body.luxury-theme #tab-dashboard .da-v2-wallet-subtitle,
+body.luxury-theme #tab-dashboard .da-v2-wallet-count,
+body.luxury-theme #tab-dashboard .da-v2-wallet-assets .asset-row-sub{
+  color:#69769d!important;
+}
+body.luxury-theme #tab-dashboard .da-v2-quick-grid button{
+  background:linear-gradient(145deg,#fff,#edf2ff)!important;
+  color:#344575!important;
+  border:1px solid rgba(86,108,194,.19)!important;
+  box-shadow:0 8px 22px rgba(69,91,165,.07)!important;
+}
+body.luxury-theme #tab-dashboard .da-v2-quick-grid button i{
+  color:#526ee8!important;
+}
+body.luxury-theme #tab-dashboard .da-market-coin-card{
+  background:linear-gradient(110deg,#fff,#f7f9ff)!important;
+  color:#202b55!important;
+  border:1px solid rgba(86,108,194,.16)!important;
+  box-shadow:0 5px 16px rgba(69,91,165,.055)!important;
+}
+body.luxury-theme #tab-dashboard .da-market-coin-card .da-market-name-wrap,
+body.luxury-theme #tab-dashboard .da-market-coin-card .da-market-name-wrap b,
+body.luxury-theme #tab-dashboard .da-market-coin-card .da-market-name-wrap small,
+body.luxury-theme #tab-dashboard .da-market-coin-card .da-market-price{
+  color:#202b55!important;
+}
+body.luxury-theme #tab-dashboard .da-market-coin-card .da-market-toman,
+body.luxury-theme #tab-dashboard .da-market-coin-card .muted{
+  color:#69769d!important;
+}
+body.luxury-theme #tab-dashboard .da-market-coin-card .da-market-favorite{
+  background:transparent!important;color:#7887b7!important;box-shadow:none!important;
+}
+body.luxury-theme #tab-dashboard .da-market-glass .da-market-filters button{
+  background:#fff!important;color:#596b9d!important;border:1px solid rgba(86,108,194,.17)!important;
+}
+body.luxury-theme #tab-dashboard .da-market-glass .da-market-filters button.active{
+  background:#e8edff!important;color:#435fd5!important;border-color:#9aaaf5!important;
+}
+body.luxury-theme #tab-markets #marketList>.coin{
+  background:rgba(255,255,255,.97)!important;
+  color:#202b55!important;
+  border-bottom:1px solid rgba(86,108,194,.13)!important;
+}
+body.luxury-theme #tab-markets #marketList>.coin .coin-name-fa,
+body.luxury-theme #tab-markets #marketList>.coin .coin-english-name,
+body.luxury-theme #tab-markets #marketList>.coin .price-usd{
+  color:#202b55!important;
+}
+body.luxury-theme #tab-markets #marketList>.coin .price-toman,
+body.luxury-theme #tab-markets #marketList>.coin .coin-symbol-en{
+  color:#69769d!important;
+}
+body.luxury-theme #tab-dashboard .da-v2-trust-row,
+body.luxury-theme #tab-dashboard .da-v2-bottom{
+  color:#69769d!important;border-color:rgba(86,108,194,.16)!important;
+}
+@media(max-width:700px){
+  body.luxury-theme #tab-dashboard .da-v2-account-card,
+  body.luxury-theme #tab-dashboard .da-market-glass{padding:11px!important}
+  body.luxury-theme #tab-dashboard .da-v2-wallet-assets .asset-row{gap:7px!important;padding:9px!important}
+}
