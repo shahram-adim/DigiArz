@@ -548,3 +548,28 @@ test('Limit and Stop-Limit worker-to-worker race fixture uses captured Productio
   assert.match(race, /public\.trades/);
   assert.match(race, /public\.transactions/);
 });
+
+
+test('Stop-Limit cancellation serializes with child fills and preserves partial reservation accounting', () => {
+  const stopCancel = manifest.functions.find(fn => fn.schema_name === 'public' && fn.function_name === 'cancel_stop_limit_order');
+  const limitCancel = manifest.functions.find(fn => fn.schema_name === 'public' && fn.function_name === 'cancel_limit_order');
+  const fixture = fs.readFileSync('tests/inactive-account-rpc-race.pg17.sql', 'utf8');
+  for (const fn of [stopCancel, limitCancel]) {
+    const start = fixture.lastIndexOf('CREATE OR REPLACE FUNCTION public.' + fn.function_name + '(');
+    assert.notEqual(start, -1, 'captured cancellation RPC missing: ' + fn.function_name);
+    assert.ok(fixture.slice(start).trim().startsWith(fn.definition.trim()),
+      'cancellation fixture must use exact captured Production body: ' + fn.function_name);
+  }
+
+  assert.match(stopCancel.definition, /FROM public\.conditional_orders[\s\S]*?FOR UPDATE;/i);
+  assert.match(stopCancel.definition, /FROM public\.orders[\s\S]*?FOR UPDATE;/i);
+  assert.match(stopCancel.definition, /FROM public\.orders[\s\S]*?v_cond\.execution_order_id[\s\S]*?FOR UPDATE;/i);
+  assert.match(stopCancel.definition, /public\.cancel_limit_order\(v_child\.id\)/i);
+
+  const race = fs.readFileSync('tests/stop-limit-cancel-limit-race.pg17.sh', 'utf8');
+  assert.match(race, /PGAPPNAME=digiarz_limit_worker_cancel_race/);
+  assert.match(race, /PGAPPNAME=digiarz_stop_cancel/);
+  assert.match(race, /wait_for_lock_wait digiarz_stop_cancel/);
+  assert.match(race, /child partial fill accounting was not preserved/);
+  assert.match(race, /reservation consumption\/release accounting was not preserved/);
+});
