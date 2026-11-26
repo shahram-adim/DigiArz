@@ -5271,3 +5271,90 @@ body.luxury-theme #tab-markets #marketList>.coin.tether-pinned{background:linear
   #tab-markets #marketList>.coin.tether-pinned .tether-pin-label{font-size:8px;padding:2px 5px}
   #tab-markets #marketList>.coin.tether-pinned .coin-volume{white-space:normal}
 }
+
+
+/* Unified icon-state system across all three themes and every navigation surface.
+   Inactive icons stay restrained; selected controls gain a clear, accessible active cue. */
+#appView .tabs button .icon-tab,
+#appView .tabs button .icon-tab svg,
+#appView .mobile-bottom-nav button svg,
+#appView .market-categories .category-btn .category-icon,
+#appView .market-categories .category-btn svg,
+#appView .da-v2-quick-grid button svg{
+  transition:color .18s ease,background-color .18s ease,filter .18s ease,transform .18s ease,box-shadow .18s ease;
+}
+#appView .tabs button:not(.active) .icon-tab,
+#appView .tabs button:not(.active) .icon-tab svg,
+#appView .mobile-bottom-nav button:not(.active) svg,
+#appView .market-categories .category-btn:not(.active) svg,
+#appView .da-v2-quick-grid button:not(.active) svg{
+  opacity:.76;filter:saturate(.72);
+}
+#appView .tabs button.active .icon-tab,
+#appView .tabs button.active .icon-tab svg,
+#appView .mobile-bottom-nav button.active svg,
+#appView .market-categories .category-btn.active svg{
+  opacity:1;filter:saturate(1.12) drop-shadow(0 0 5px currentColor);
+  transform:translateY(-1px);
+}
+#appView .tabs button.active,
+#appView .mobile-bottom-nav button.active,
+#appView .market-categories .category-btn.active{
+  position:relative;
+}
+#appView .tabs button.active:after,
+#appView .mobile-bottom-nav button.active:after,
+#appView .market-categories .category-btn.active:after{
+  content:"";position:absolute;pointer-events:none;border-radius:999px;
+}
+
+/* Theme 1 — black/gold: calm muted icons, unmistakable warm-gold selection. */
+body.dark-theme #appView .tabs button:not(.active) .icon-tab,
+body.dark-theme #appView .tabs button:not(.active) svg,
+body.dark-theme #appView .mobile-bottom-nav button:not(.active) svg,
+body.dark-theme #appView .market-categories .category-btn:not(.active) svg,
+body.dark-theme #appView .da-v2-quick-grid button:not(.active) svg{color:#9aa3b2!important}
+body.dark-theme #appView .tabs button.active,
+body.dark-theme #appView .mobile-bottom-nav button.active{color:#f2c85b!important;background:rgba(224,177,65,.12)!important}
+body.dark-theme #appView .tabs button.active svg,
+body.dark-theme #appView .mobile-bottom-nav button.active svg,
+body.dark-theme #appView .market-categories .category-btn.active svg,
+body.dark-theme #appView .da-v2-quick-grid button:focus-visible svg{color:#ffd76d!important}
+body.dark-theme #appView .tabs button.active:after{inset:auto 22% 2px;height:2px;background:#e9bd4d;box-shadow:0 0 10px rgba(233,189,77,.55)}
+body.dark-theme #appView .market-categories .category-btn.active{background:rgba(233,189,77,.14)!important;border-color:rgba(233,189,77,.5)!important;color:#f7d77e!important;box-shadow:0 5px 18px rgba(233,189,77,.10)!important}
+
+/* Theme 2 — clean white/glass: soft slate inactive, crisp blue selected. */
+body.light-theme #appView .tabs button:not(.active) .icon-tab,
+body.light-theme #appView .tabs button:not(.active) svg,
+body.light-theme #appView .mobile-bottom-nav button:not(.active) svg,
+body.light-theme #appView .market-categories .category-btn:not(.active) svg,
+body.light-theme #appView .da-v2-quick-grid button:not(.active) svg{color:#8490a4!important}
+body.light-theme #appView .tabs button.active,
+body.light-theme #appView .mobile-bottom-nav button.active{color:#315bd5!important;background:rgba(67,105,224,.09)!important}
+body.light-theme #appView .tabs button.active svg,
+body.light-theme #appView .mobile-bottom-nav button.active svg,
+body.light-theme #appView .market-categories .category-btn.active svg,
+body.light-theme #appView .da-v2-quick-grid button:focus-visible svg{color:#315fe3!important}
+body.light-theme #appView .tabs button.active:after{inset:auto 22% 2px;height:2px;background:#416be8;box-shadow:0 0 9px rgba(65,107,232,.25)}
+body.light-theme #appView .market-categories .category-btn.active{background:rgba(65,107,232,.09)!important;border-color:rgba(65,107,232,.38)!important;color:#315bd5!important;box-shadow:0 5px 16px rgba(65,107,232,.08)!important}
+
+/* Theme 3 — icy indigo: restrained blue-grey inactive, luminous indigo active. */
+body.luxury-theme #appView .tabs button:not(.active) .icon-tab,
+body.luxury-theme #appView .tabs button:not(.active) svg,
+body.luxury-theme #appView .mobile-bottom-nav button:not(.active) svg,
+body.luxury-theme #appView .market-categories .category-btn:not(.active) svg,
+body.luxury-theme #appView .da-v2-quick-grid button:not(.active) svg{color:#8492b5!important}
+body.luxury-theme #appView .tabs button.active,
+body.luxury-theme #appView .mobile-bottom-nav button.active{color:#435fd5!important;background:rgba(98,124,240,.11)!important}
+body.luxury-theme #appView .tabs button.active svg,
+body.luxury-theme #appView .mobile-bottom-nav button.active svg,
+body.luxury-theme #appView .market-categories .category-btn.active svg,
+body.luxury-theme #appView .da-v2-quick-grid button:focus-visible svg{color:#526fe8!important}
+body.luxury-theme #appView .tabs button.active:after{inset:auto 22% 2px;height:2px;background:#627cf0;box-shadow:0 0 10px rgba(98,124,240,.35)}
+body.luxury-theme #appView .market-categories .category-btn.active{background:rgba(98,124,240,.12)!important;border-color:rgba(82,110,232,.45)!important;color:#435fd5!important;box-shadow:0 5px 17px rgba(82,110,232,.10)!important}
+
+/* Quick-action icon buttons remain calm at rest and respond clearly to keyboard focus. */
+#appView .da-v2-quick-grid button:focus-visible{outline:2px solid currentColor!important;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){
+ #appView .tabs button *,#appView .mobile-bottom-nav button *,#appView .market-categories .category-btn *{transition:none!important}
+}
