@@ -151,7 +151,7 @@ const server = http.createServer((req, res) => {
           if (!rendered) throw new Error('Section did not render visibly: tab-'+tab);
           await seedVisualFixtures(page);
           const filename=[viewport.name,theme,tab].join('-')+'.png';
-          await page.screenshot({path:path.join(output,filename),fullPage:true,animations:'disabled'});
+          await page.screenshot({path:path.join(output,filename),fullPage:viewport.name==='desktop',animations:'disabled'});
         }
       }
       await context.close();
