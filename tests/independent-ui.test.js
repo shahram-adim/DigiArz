@@ -1173,3 +1173,15 @@ test('visual screenshot harness preserves light color scheme for both white and 
   const harness = fs.readFileSync('tests/ui-visual-screenshots.cjs', 'utf8');
   assert.ok(harness.includes("document.documentElement.style.colorScheme = selected==='dark'?'dark':'light';"));
 });
+
+
+test('icy-indigo trading theme also neutralizes nested order-book headers and rows',()=>{
+  const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
+  const final=css.slice(css.lastIndexOf('Order-book header/rows: finish the icy-indigo treatment'));
+  for(const token of [
+    'body.luxury-theme #appView #tab-trade .orderbook-head',
+    'body.luxury-theme #appView #tab-trade .orderbook-row',
+    'background:rgba(255,255,255,.88)!important;',
+    'color:#52618b!important;'
+  ]) assert.ok(final.includes(token),'icy-indigo order-book correction includes '+token);
+});
