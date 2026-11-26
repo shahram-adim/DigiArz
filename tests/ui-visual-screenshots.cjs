@@ -45,6 +45,43 @@ const server = http.createServer((req, res) => {
       });
       await page.goto('http://127.0.0.1:4173/index.html', { waitUntil: 'domcontentloaded' });
       await page.waitForTimeout(1200);
+      // Deterministic visual-only market/account fixtures. Supabase remains blocked;
+      // these rows are synthetic and are never written to the application or backend.
+      await page.evaluate(() => {
+        const now = new Date().toISOString();
+        const samples = [
+          ['BTCUSDT','Bitcoin','بیت‌کوین',67420.5,2.42,1825000000],
+          ['ETHUSDT','Ethereum','اتریوم',3521.8,1.78,925000000],
+          ['SOLUSDT','Solana','سولانا',172.65,2.75,412000000],
+          ['BNBUSDT','BNB','بایننس کوین',612.4,-0.64,185000000],
+          ['XRPUSDT','XRP','ریپل',0.624,0.91,142000000],
+          ['DOGEUSDT','Dogecoin','دوج‌کوین',0.1642,-1.12,98000000],
+          ['ADAUSDT','Cardano','کاردانو',0.482,0.35,76000000],
+          ['AAVEUSDT','Aave','آوه',96.8,2.17,54000000]
+        ];
+        marketRows = samples.map(([symbol,name,name_fa,price,change,quoteVolume]) => ({
+          symbol,name,name_en:name,name_fa,price:String(price),change,
+          updated_at:now,change_updated_at:now,source:'visual-fixture'
+        }));
+        featuredMarketRows = marketRows.slice(0,4);
+        marketTickerLastFetchedAt = Date.now();
+        marketTickerMap = new Map(samples.map(([symbol,, ,price,change,quoteVolume]) => [
+          symbol,{symbol,last:String(price),change,quoteVolume,closeTime:Date.now()}
+        ]));
+        currentFxRate = 584200;
+        currentFxIsValid = true;
+        currentWalletUsdt = 200;
+        assetRows = [
+          {asset:'BTC',balance:'0.025'},
+          {asset:'ETH',balance:'0.8'},
+          {asset:'SOL',balance:'3.5'},
+          {asset:'USDT',balance:'50'}
+        ];
+        try { renderMarkets(); } catch (error) { console.warn('Visual market fixture:',error.message); }
+        try { renderDashboardSummary(); } catch (error) { console.warn('Visual dashboard fixture:',error.message); }
+        try { renderTopAssets(); } catch (error) { console.warn('Visual top-assets fixture:',error.message); }
+        try { renderAssets(); } catch (error) { console.warn('Visual portfolio fixture:',error.message); }
+      });
       for (const theme of themes) {
         await page.evaluate(selected => {
           document.body.classList.toggle('light-theme', selected === 'light');
