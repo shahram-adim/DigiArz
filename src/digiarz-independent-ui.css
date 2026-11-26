@@ -5879,3 +5879,19 @@ body.dark-theme #appView .mobile-bottom-nav button.active:after{background:#f2c8
 body.light-theme #appView .mobile-bottom-nav button.active:after{background:#315bd5}
 body.luxury-theme #appView .mobile-bottom-nav button.active:after{background:#3659ca}
 @media(prefers-reduced-motion:reduce){#appView .mobile-bottom-nav button svg{transition:none!important}}
+
+
+/* Market asset rows: preserve spacing and hover feedback without card frames. */
+#appView #tab-markets #marketList>.coin:not(.tether-pinned){
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
+#appView #tab-markets #marketList>.coin:not(.tether-pinned):hover{
+  background:rgba(112,132,190,.055)!important;
+  box-shadow:none!important;
+}
+body.dark-theme #appView #tab-markets #marketList>.coin:not(.tether-pinned):hover{
+  background:rgba(235,199,104,.055)!important;
+}
