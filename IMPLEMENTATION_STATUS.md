@@ -1468,3 +1468,18 @@
 - سپس DDL پایه جداول مالی و trigger/constraintهای وابسته از منبع معتبر بازیابی و harness PostgreSQL 17 دورریختنی ساخته شود.
 - اجرای جزئی/کامل، لغو، idempotency و raceهای parent-child فقط در همان محیط ایزوله انجام شود.
 - پیش از هر انتشار، محاسبه و quantization هشت‌رقمی USDT در worker بازبینی و با آزمون حسابداری مستقل اثبات شود.
+
+
+### نتیجه CI و بازبینی داده بازار — ۲۰۲۶-۱۱-۲۶
+- [x] Exact-decimal Run #2111 (`45811382494`) روی commit `882591331c8d303c4d4eeb95ebc7f99e2efeb731` با نتیجه `success` پایان یافت. مرحله Node/browser و تمام ۲۲ مرحله اصلی PostgreSQL 17، شامل Limit worker، لغو، raceهای دو نشست، Stop-Limit parent/child، regression شاخه invalid-reservation و TP/SL موفق شدند؛ cleanup نیز موفق بود.
+- [x] آزمون source-contract تازهٔ `process_limit_orders()` در مرحله Node/browser اجرا شد؛ این آزمون فقط snapshot منبع را بررسی می‌کند و Worker زنده را اجرا نمی‌کند.
+- [!] همهٔ سناریوهای چرخه کامل در PostgreSQL دورریختنی GitHub Actions اجرا شده‌اند؛ این نتیجه جایگزین محیط Supabase ایزوله با schema/ACL دقیق Production نیست.
+- [!] شکاف quantization تسویه USDT در تابع زنده `process_limit_orders()` همچنان باز است: gross و fee بدون round صریح ۸ رقمی محاسبه می‌شوند. هیچ اصلاحی روی Production انجام نشده است.
+- [x] بازبینی فقط‌خواندنی بازار تومانی: `market_toman_prices` شامل ۳۷۳ ردیف است (نوبیتکس ۲۲۱، والکس ۱۵۲)؛ آخرین `fetched_at` برابر `2026-11-17 22:04:26 UTC` و تعداد ردیف تازه در ۵ دقیقه صفر است.
+- [x] لاگ ۲۴ ساعت اخیر تابع Production `refresh-toman-market-prices` نسخه ۳: تعداد ۱۵ درخواست POST با 502 و ۱۶ درخواست OPTIONS با 200. پاسخ OPTIONS موفقیت دریافت/ذخیره قیمت را ثابت نمی‌کند.
+- [!] تابع Production هنوز سه provider نوبیتکس/والکس/بیت‌پین و مسیر DELETE دارد؛ نسخه main از upsert بدون prune استفاده می‌کند، اما هنوز بیت‌۲۴ و کیف پول من در این تابع متصل نشده‌اند. هیچ Deploy یا refresh دستی انجام نشد.
+
+### گام بعد
+1. بازیابی DDL معتبر جداول مالی و trigger/constraintهای پایه؛ سپس ساخت harness PostgreSQL 17 با تطبیق schema/ACL.
+2. بررسی و طراحی اصلاح quantization تسویه USDT برای Worker واقعی، با آزمون‌های مرزی gross/fee/net و رزرو؛ بدون تغییر Production.
+3. پس از دروازه Stop-Limit، بازگشت به اتصال چهار منبع قیمت تومانی و اصلاح مسیر UI؛ داده کهنه نباید زنده نمایش داده شود.

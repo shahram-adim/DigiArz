@@ -477,3 +477,19 @@ See \`docs/superpowers/reports/2026-11-15-exact-decimal-implementation-checkpoin
 2. Recover authoritative base DDL for the financial tables and dependent constraints/triggers from a trusted backup or migration artifact.
 3. Build a disposable PostgreSQL 17 schema/ACL parity harness and run the exact captured Limit worker plus Stop-Limit parent/child lifecycle there.
 4. Resolve the eight-decimal USDT settlement quantization review before any Production rollout.
+
+
+## CI verification and fresh Toman market snapshot — 2026-11-26
+
+- [x] Exact-decimal Run #2111 (`45811382494`) completed with `success` on commit `882591331c8d303c4d4eeb95ebc7f99e2efeb731`. Node/browser and all 22 substantive PostgreSQL 17 steps passed, including Limit worker/cancel, two-session races, Stop-Limit parent/child lifecycle, captured Production invalid-reservation regression, and TP/SL; cleanup passed.
+- [x] The new `process_limit_orders()` source-contract test ran in the Node/browser step. It checks the captured function only; it does not invoke the live worker.
+- [!] All lifecycle tests still run against disposable GitHub Actions PostgreSQL, not an isolated Supabase database with exact Production schema/ACL parity.
+- [!] The live Limit worker's gross/fee USDT settlement remains without explicit eight-decimal quantization; this is recorded as an unresolved accounting gate.
+- [x] Read-only Production market snapshot: `market_toman_prices` has 373 rows (Nobitex 221, Wallex 152); newest `fetched_at` is `2026-11-17 22:04:26 UTC`; zero rows are fresh within five minutes.
+- [x] Last-24-hour logs for Production `refresh-toman-market-prices` v3 show 15 POST/502 and 16 OPTIONS/200. OPTIONS success is not evidence of a successful price refresh.
+- [!] The live v3 function still uses Nobitex, Wallex, and Bitpin and contains a DELETE path. The current main source uses upsert without pruning but still does not connect Bit24 or Kifpool. No deploy or manual refresh was attempted.
+
+### Next steps
+1. Recover authoritative base DDL and build a disposable PostgreSQL 17 schema/ACL parity harness.
+2. Design and test the eight-decimal USDT settlement fix for the actual Limit worker, including gross/fee/net and reservation edge cases; do not modify Production.
+3. After the Stop-Limit gate, complete the four approved Toman providers and stale-data UI handling.
