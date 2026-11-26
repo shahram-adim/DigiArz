@@ -1907,3 +1907,19 @@
 - [x] artifact نهایی تست `15133567077`، نام `DigiArz-UI-visual-review`، حجم 23,933,822 بایت، digest برابر `sha256:46ee930e35856f8231f7d152679e6036465d6142c6272709928b6eafdd70513e`؛ این commit فقط تست را نسبت به APK ساخته‌شده تغییر داده است.
 - [x] checkpoint تست تصویری این مرحله بسته شد؛ UI و APK workflows روی commit CSS موفق‌اند و تست تصویری روی commit تست بعدی نیز موفق است.
 - [ ] گام بعد: APK Debug تأییدشده را برای آزمون فیزیکی ارائه کن و نتیجهٔ نصب/ورود/اثر انگشت/ناوبری را از مالک دریافت کن. PR #64 همچنان Draft بماند تا آزمون دستگاه و بررسی divergence/mergeability تکمیل شود.
+
+
+## حذف قاب لوگو/ستاره و fallback پایدار لوگو — ۲۶ نوامبر ۲۰۲۶
+- [x] بازبینی تصاویر واقعی artifact قبلی نشان داد CSS داشبورد هنوز برای لوگوها حلقهٔ سایه‌دار و برای ستارهٔ علاقه‌مندی قاب/پس‌زمینه داشت؛ این با خواستهٔ «لوگو و ستاره بدون قاب» سازگار نبود.
+- [x] CSS نهایی هر سه تم اصلاح شد: قاب، outline، shadow و background از لوگوهای داشبورد حذف شد؛ دکمهٔ ستاره نیز بدون قاب و پس‌زمینه است و فقط ستارهٔ انتخاب‌شده رنگ تم را می‌گیرد. ستاره‌های صفحهٔ بازار نیز صریحاً frameless شدند. commit CSS `0a6020309c54b6ae8246499819ee4ad1633d1c9a`.
+- [x] تست رگرسیون برای frameless logo/favorite در هر سه تم افزوده شد؛ commit `f9c94cf113fdcea70591e869e7f78601349cad0a`.
+- [x] ممیزی منبع لوگوها نشان داد مسیر تولیدی از metadata/image_url، تابع Supabase app-assets و سپس CoinCap استفاده می‌کند؛ ولی اگر هر دو منبع تصویر fail شوند، کد قبلی لوگو را پنهان می‌کرد و فقط یک حرف کم‌رنگ می‌گذاشت.
+- [x] تابع `renderCoinLogoFallback` اضافه شد: پس از شکست هر دو منبع، به‌جای فضای خالی، نشان SVG برداری با رنگ شناخته‌شده و نماد کوتاه ارز نمایش داده می‌شود؛ برای BTC/ETH/SOL/BNB/XRP/DOGE/ADA/AAVE و چند دارایی پرکاربرد رنگ‌های مشخص تعریف شد. این نشان جایگزینِ قابل‌تشخیص است، نه ادعای لوگوی رسمی؛ دریافت لوگوی اصلی از منابع موجود دست‌نخورده است. commit `b10e3fea634b313cef07c60324bca0c02df9d0d3`.
+- [x] CSS fallback برداری بدون قاب و تست رگرسیون برای عدم مخفی‌شدن لوگو اضافه شد؛ commit CSS `8d9755db97cd06cf4ae27c8d1045c02cd3ea3ee2` و commit تست `79e88872e99e83731d1febaa9893fdeec1f4f9c8`.
+- [x] اجرای UI Visual Review روی commit `b10e3fea634b313cef07c60324bca0c02df9d0d3` با نتیجه success پایان یافت؛ artifact `15134460766` (run `45852473182`، ۶۶ تصویر). APK build روی همان commit نیز موفق شد؛ artifact `15134433169` (run `45852473357`).
+- [!] اجرای نهایی UI Visual Review برای commit تست `79e88872e99e83731d1febaa9893fdeec1f4f9c8` در لحظهٔ ثبت: source-level regression موفق، Playwright screenshot capture در حال اجرا (run `45852515856`).
+- [!] APK شامل CSS نهایی fallback در حال build/verify است (run `45852509484`, source CSS commit `8d9755d`).
+- [!] بررسی تصاویر قبلی نشان داد screenshot harness از glyphهای ساختگی استفاده می‌کند و تصاویر آن اثبات لوگوهای واقعی نیستند؛ fallback برداری در برنامهٔ اصلی افزوده شد، اما لوگوهای اصلی بازار فقط پس از اتصال و آزمون واقعی اپ با دادهٔ زنده تأیید می‌شوند.
+- [ ] پس از اتمام runها، artifact UI و APK نهایی را دریافت و SHA-256/BUILD-INFO را بررسی کن؛ سپس APK فقط برای تست Debug فیزیکی ارائه شود.
+- [ ] PR #64 همچنان Draft و ادغام‌نشده بماند. main فعلی `6916b940f63877f0f2589ad1652791b85e01d823` است، در حالی که base ثبت‌شده PR `9855d6ea6cd188a5621c4e2c28c55e4cfb4d2587` است؛ مقایسهٔ head فعلی با main: ۱۳۲ commit جلو و ۲ commit عقب، merge base برابر `9855d6e`. دو commit جدید main شامل تغییرات `IMPLEMENTATION_STATUS.md` و QA/SQL مربوط به Stop-Limit هستند؛ بدون بررسی و برنامهٔ کنترل‌شده هیچ update/rebase/merge انجام نشود.
+- ایمنی: هیچ merge، release، Pages deployment، Supabase، Production، migration، wallet، order یا trade انجام نشده است.
