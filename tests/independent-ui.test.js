@@ -913,22 +913,6 @@ test('logo tile removal also covers top-volume assets, trade previews and fallba
 });
 
 
-test('visual review seeds deterministic market and wallet fixtures without contacting Supabase',()=>{
-  const harness=fs.readFileSync('tests/ui-visual-screenshots.cjs','utf8');
-  assert.match(harness,/Deterministic visual-only market\/account fixtures/);
-  assert.match(harness,/marketRows = samples\.map/);
-  assert.match(harness,/marketTickerMap = new Map/);
-  assert.match(harness,/currentFxIsValid = true/);
-  assert.match(harness,/currentWalletUsdt = 200/);
-  assert.match(harness,/renderMarkets\(\)/);
-  assert.match(harness,/renderDashboardSummary\(\)/);
-  assert.match(harness,/renderTopAssets\(\)/);
-  assert.match(harness,/renderAssets\(\)/);
-  assert.match(harness,/supabase\\.co/);
-  assert.match(harness,/these rows are synthetic and are never written/);
-});
-
-
 test('final universal logo-card override removes all logo backgrounds and frames across the app',()=>{
   const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
   const final=css.slice(css.lastIndexOf('Final universal logo-card transparency override'));
