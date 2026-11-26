@@ -6041,3 +6041,75 @@ body.luxury-theme #appView .mobile-bottom-nav button.active:after{background:#ff
 @media(prefers-reduced-motion:reduce){
   body.luxury-theme #appView .mobile-bottom-nav button{transition:none!important}
 }
+
+
+/* Icy-indigo refinement v2: increase theme identity without turning it dark.
+   Keep the page luminous, but give its surfaces a stronger cool-indigo glass tint. */
+body.luxury-theme{
+  --da-bg:#dce4ff!important;
+  --da-bg2:#e7edff!important;
+  --da-surface:rgba(237,242,255,.96)!important;
+  --da-surface2:rgba(224,233,255,.92)!important;
+  --da-panel:#e2eaff!important;
+  --da-line:rgba(62,82,184,.28)!important;
+  --da-accent:#344fc5!important;
+  --da-accent-soft:rgba(52,79,197,.17)!important;
+  background:
+    radial-gradient(ellipse at 4% 7%,rgba(91,116,238,.40),transparent 34%),
+    radial-gradient(ellipse at 96% 24%,rgba(105,160,255,.36),transparent 36%),
+    radial-gradient(ellipse at 48% 100%,rgba(140,157,255,.22),transparent 44%),
+    linear-gradient(145deg,#e8edff 0%,#d8e1ff 48%,#e1edff 100%)!important;
+}
+body.luxury-theme #appView .card,
+body.luxury-theme #appView .stat,
+body.luxury-theme #appView .trade-box,
+body.luxury-theme #appView .setting-row,
+body.luxury-theme #appView .performance-item,
+body.luxury-theme #appView .indicator-panel,
+body.luxury-theme #appView .market-list,
+body.luxury-theme #appView .news-item,
+body.luxury-theme #appView .review-row{
+  background:linear-gradient(145deg,rgba(245,247,255,.98),rgba(222,231,255,.96))!important;
+  border-color:rgba(62,82,184,.24)!important;
+  box-shadow:0 12px 30px rgba(54,72,160,.11),inset 0 1px rgba(255,255,255,.98)!important;
+}
+body.luxury-theme .top{
+  background:linear-gradient(115deg,rgba(218,228,255,.97),rgba(202,216,255,.94))!important;
+  border-color:rgba(62,82,184,.32)!important;
+}
+body.luxury-theme .tabs{
+  background:linear-gradient(120deg,rgba(205,218,255,.92),rgba(224,231,255,.92))!important;
+  border-color:rgba(62,82,184,.28)!important;
+}
+body.luxury-theme #appView .hero,
+body.luxury-theme #appView .da-v2-hero,
+body.luxury-theme #appView .market-hero-v34,
+body.luxury-theme #appView .trade-workspace-banner-v35{
+  background:
+    radial-gradient(ellipse at 82% 12%,rgba(255,255,255,.82),transparent 38%),
+    radial-gradient(ellipse at 8% 100%,rgba(103,128,244,.32),transparent 48%),
+    linear-gradient(125deg,#d0dcff 0%,#c3d2ff 48%,#dce8ff 100%)!important;
+  border-color:rgba(54,78,186,.34)!important;
+  box-shadow:0 18px 42px rgba(49,68,156,.17),inset 0 1px rgba(255,255,255,.98)!important;
+}
+body.luxury-theme #appView .section-title h2,
+body.luxury-theme #appView .section-title h3,
+body.luxury-theme #appView .hero-title,
+body.luxury-theme #appView .hero-label,
+body.luxury-theme #appView .da-v2-hero h1,
+body.luxury-theme #appView .market-hero-title{
+  color:#263b91!important;
+}
+body.luxury-theme #appView .mobile-bottom-nav{
+  background:rgba(210,222,255,.96)!important;
+  border-color:rgba(62,82,184,.32)!important;
+}
+body.luxury-theme #appView .mobile-bottom-nav button.active{
+  background:linear-gradient(145deg,#405fd5,#304bbd)!important;
+  color:#fff!important;
+  box-shadow:0 8px 22px rgba(48,75,189,.34),inset 0 1px rgba(255,255,255,.34)!important;
+}
+body.luxury-theme #appView .mobile-bottom-nav button:not(.active){color:#7786b3!important}
+@media(prefers-reduced-motion:reduce){
+  body.luxury-theme #appView .mobile-bottom-nav button{transition:none!important}
+}
