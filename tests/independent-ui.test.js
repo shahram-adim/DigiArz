@@ -1061,3 +1061,14 @@ test('mobile visual review captures dashboard and market asset rows after scroll
   assert.match(harness,/markets-assetrows/);
   assert.match(harness,/files\.length!==66/);
 });
+
+
+test('third theme market price text and bottom navigation use high-contrast light surfaces',()=>{
+ const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
+ const final=css.slice(css.lastIndexOf('High-specificity visual-review correction'));
+ for(const token of ['#appView #tab-markets #marketList>.coin .price-stack .price-usd strong',
+  'color:#1c2b50!important;opacity:1!important',
+  '#appView .mobile-bottom-nav','background:rgba(255,255,255,.98)!important',
+  '#appView .mobile-bottom-nav button.active'])
+  assert.ok(final.includes(token),'third-theme contrast correction includes '+token);
+});
