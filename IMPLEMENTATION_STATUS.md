@@ -1654,3 +1654,12 @@
 - [!] علت دقیق ایجادنشدن اجرای تازه هنوز قطعی نیست؛ فایل workflow trigger مناسب دارد و PR همچنان باز است. برای اثبات، باید پس از commit ثبت این checkpoint، رویداد synchronize جدید PR و run متناظر بررسی شود. ابزار در دسترس برای اجرای دستی workflow یا دسترسی تنظیمات Actions شناسایی نشد.
 - [!] محیط اجرای محلی این نشست Node 22 دارد، اما `psql`، PostgreSQL، Docker و ابزار YAML parser ندارد؛ دسترسی شبکهٔ خروجی هم برای دریافت مستقیم فایل‌های GitHub برقرار نیست. بنابراین اجرای واقعی تست‌های Bash/SQL یا PostgreSQL محلی در این محیط ممکن نیست.
 - [ ] گام بعد: بررسی run جدیدی که با ثبت این checkpoint روی PR ایجاد می‌شود؛ اگر اجرا نشد، با دادهٔ event/Actions آن‌گاه تفکیک کنیم که مشکل در event، workflow policy یا GitHub Actions availability است. سپس اجرای تست‌ها و رفع خطاهای واقعی CI؛ بدون تغییر Production.
+
+### تطبیق ایستای Fixture و تعیین محدودهٔ پوشش CI — ۲۰۲۶-۱۱-۲۶
+
+- [x] manifest Production شامل ۴۶ تابع است؛ بدنهٔ شش تابع مورد استفاده در سناریوهای جدید `process_stop_limit_orders`، `process_limit_orders`، `cancel_limit_order`، `cancel_stop_limit_order`، `execute_demo_trade` و `process_conditional_orders` با Fixture به‌صورت رشته‌ای و دقیق تطبیق داده شد؛ هر شش مورد `exact_body=true`.
+- [x] فایل `tests/production-rpc-manifest.test.js` شامل ۳۰ مورد `test(...)` است و از نظر JavaScript syntax با parser موتور V8 بررسی شد؛ این فقط parse است و اجرای `node --test` محسوب نمی‌شود.
+- [x] هر شش اسکریپت جدید/مرتبط race دارای shebang، `set -euo pipefail` و guard متغیر `PGDATABASE` هستند؛ هفت مرحلهٔ PostgreSQL جدید نیز در workflow وجود دارند.
+- [!] اجرای Actions پس از commit مستندسازی با SHA `3898eb7694be6da32ce15f29ac3ad2494033f314` ایجاد نشد؛ فهرست ۷۴ اجرای ثبت‌شده همچنان آخرین run را #2055 نشان می‌دهد. بنابراین هنوز event جدید `pull_request/synchronize` یا run تازه‌ای قابل مشاهده نیست. علت می‌تواند محدودیت توکن/اتصال هنگام ایجاد commit یا policy اجرای Actions باشد، اما با دادهٔ فعلی نمی‌توان علت قطعی را اعلام کرد.
+- [!] Run #2055 با موفقیت تمام شده و ۲۴ مرحلهٔ اصلی قبلی را پاس کرده است، اما در فهرست stepهای آن هفت مرحلهٔ تازهٔ PostgreSQL که در workflow فعلی افزوده شده‌اند وجود ندارند؛ بنابراین آن run پوشش آزمون‌های جدید را اثبات نمی‌کند.
+- [ ] گام بعد: فراهم‌کردن یک اجرای واقعی از workflow روی head فعلی (از طریق GitHub Actions UI یا رویداد push مجاز از سوی GitHub)، سپس بررسی تمام job logs و رفع هر خطای Fixture. ابزار فعلی امکان اجرای workflow یا `workflow_dispatch` را در اختیار نمی‌گذارد.
