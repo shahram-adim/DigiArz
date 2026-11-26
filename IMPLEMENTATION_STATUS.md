@@ -1612,3 +1612,12 @@
 - [!] این سناریو race را با UPDATE هم‌زمان ردیف child بازسازی می‌کند؛ هنوز خود `process_limit_orders()` به‌عنوان نشست تولیدکنندهٔ fill در همین سناریو اجرا نشده است. گام بعد باید Worker واقعی Limit را در fixture وارد کند تا رقابت Worker-به-Worker با همان قفل‌ها و جدول‌های لازم سنجیده شود.
 - [!] اجرای PostgreSQL 17 و CI برای head فعلی هنوز تأیید نشده؛ بررسی syntax محلی جایگزین اجرای SQL/CI نیست.
 - [ ] گام بعد: افزودن بدنهٔ واقعی `process_limit_orders()` و dependencies لازم به fixture؛ سپس رقابت دو Worker، و در ادامه آزمون atomicity و rollback reservation در `process_conditional_orders()`.
+### رقابت واقعی Worker Limit با Worker همگام‌سازی Stop-Limit — ۲۰۲۶-۱۱-۲۶
+
+- [x] بدنهٔ واقعی `public.process_limit_orders()` با fingerprint `00ab429596fb99392666632967cde9c0` به Fixture دورریختنی افزوده شد؛ جدول‌های `trades` و `transactions` و Triggerهای guard حساب فعال نیز در همان محیط آزمایشی ساخته شدند.
+- [x] اسکریپت `tests/limit-stop-worker-race.pg17.sh` رقابت واقعی دو Worker را بازسازی می‌کند: نشست Limit سفارش child و reservation را قفل می‌کند و پشت قفل wallet منتظر می‌ماند؛ هم‌زمان Stop-Limit Worker اجرا می‌شود و باید بتواند بدون قفل‌کردن child یک چرخهٔ sync را انجام دهد.
+- [x] آزمون بررسی می‌کند که Limit Worker پس از آزادشدن wallet، partial fill واقعی ۲۵٪، trade و transaction را ثبت کند؛ parent در همان چرخه یک snapshot عقب بماند؛ و اجرای بعدی Stop-Limit مقادیر parent را با child همگام کند.
+- [x] بدنهٔ هر دو Worker در Fixture با manifest تطبیق دقیق دارد؛ اسکریپت جدید با `bash -n` بررسی شد؛ تست Node از نظر syntax parse شد و markerهای آزمون و workflow بررسی شدند.
+- [!] این آزمون عمداً رفتار فعلی را characterise می‌کند: یک چرخه تأخیر در مقادیر parent و سپس همگرایی. این تأخیر باید از نظر تجربهٔ کاربری و منطق وضعیت سفارش تأیید شود؛ اگر همگام‌سازی فوری الزام محصول است، باید طراحی قفل و Worker بازنگری شود. این تست به‌تنهایی اثبات نمی‌کند که تأخیر یک‌چرخه از نظر محصول پذیرفتنی است.
+- [!] اجرای واقعی SQL/PostgreSQL 17 و CI روی head فعلی هنوز مشاهده نشده؛ `bash -n` و بررسی static جایگزین اجرای CI نیستند.
+- [ ] گام بعد: بررسی مسیرهای cancel و child-fill در کنار این رقابت، سپس اجرای CI کامل؛ پس از آن آزمون rollback/atomicity reservation در `process_conditional_orders()` و سناریوی شکست فراخوانی `execute_demo_trade()`.
