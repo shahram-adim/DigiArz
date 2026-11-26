@@ -5841,3 +5841,22 @@ body.luxury-theme #appView #tab-trade .market-summary{
 body.luxury-theme #appView #tab-trade .market-summary .stat{
   border-radius:16px!important;
 }
+
+
+/* Order-book header/rows: finish the icy-indigo treatment at the nested level. */
+body.luxury-theme #appView #tab-trade .orderbook-head,
+body.luxury-theme #appView #tab-trade .orderbook-head span,
+body.luxury-theme #appView #tab-trade .orderbook-row,
+body.luxury-theme #appView #tab-trade .orderbook-row span{
+  background:rgba(255,255,255,.88)!important;
+  color:#52618b!important;
+  border-color:rgba(86,108,194,.16)!important;
+}
+body.luxury-theme #appView #tab-trade .orderbook-side h4,
+body.luxury-theme #appView #tab-trade .orderbook-status{
+  color:#52618b!important;
+}
+body.luxury-theme #appView #tab-trade .orderbook-row .buy,
+body.luxury-theme #appView #tab-trade .orderbook-row .sell{
+  background:transparent!important;
+}
