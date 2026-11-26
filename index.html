@@ -2617,7 +2617,7 @@ function applyTheme(theme){
  document.body.classList.toggle('light-theme',light);
  document.body.classList.toggle('luxury-theme',luxury);
  document.body.classList.toggle('dark-theme',dark);
- document.documentElement.style.colorScheme=light?'light':'dark';
+ document.documentElement.style.colorScheme=(light||luxury)?'light':'dark';
  const labels={light:'روشن',dark:'تاریک',luxury:'نیلی شیشه‌ای'};
  const authThemeButton=$('authThemeToggle');
  const next={light:'dark',dark:'luxury',luxury:'light'}[selected];
@@ -2633,8 +2633,8 @@ function applyTheme(theme){
   el.classList.toggle('active',active);el.setAttribute('aria-pressed',active?'true':'false');
  });
  const meta=document.querySelector('meta[name="theme-color"]');
- if(meta)meta.content=light?'#ffffff':luxury?'#090d20':'#090b10';
- const palette=light?{bg:'#ffffff',text:'#152b40',grid:'#eaf2f8',line:'#d8e7f2'}:luxury?{bg:'#090d20',text:'#f1f3ff',grid:'#26325a',line:'#596ba5'}:{bg:'#090b10',text:'#f7f4eb',grid:'#272b34',line:'#5b4b2a'};
+ if(meta)meta.content=light?'#ffffff':luxury?'#edf2ff':'#090b10';
+ const palette=light?{bg:'#ffffff',text:'#152b40',grid:'#eaf2f8',line:'#d8e7f2'}:luxury?{bg:'#edf2ff',text:'#202b55',grid:'#dbe4ff',line:'#b9c7ef'}:{bg:'#090b10',text:'#f7f4eb',grid:'#272b34',line:'#5b4b2a'};
  const options={layout:{background:{color:palette.bg},textColor:palette.text},grid:{vertLines:{color:palette.grid},horzLines:{color:palette.grid}},rightPriceScale:{borderColor:palette.line},timeScale:{borderColor:palette.line}};
  if(chart)chart.applyOptions(options);
  if(volumeChart)volumeChart.applyOptions(options);
