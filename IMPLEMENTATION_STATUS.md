@@ -1712,3 +1712,5 @@
 - [!] برای این HEAD هنوز هیچ workflow run یا combined status قابل مشاهده نیست؛ تست‌ها را پاس‌شده اعلام نمی‌کنیم. ابزار محلی Node v22.16.0 دارد، اما `psql` نصب نیست و دسترسی شبکهٔ container برای clone از GitHub برقرار نشد؛ بنابراین اجرای کامل محلی ممکن نشد.
 - [ ] گام بعد: دریافت run واقعی PR از GitHub Actions؛ در صورت نبود run، بررسی تنظیمات Actions و علت عدم trigger از سمت مالک/تنظیمات مخزن. سپس تست Node و مراحل PostgreSQL 17 باید روی CI اجرا و logها بازبینی شوند.
 - [ ] هیچ Production، Migration، grant، policy، cron، Edge Function، Auth یا دادهٔ مالی تغییر نکرده است.
+
+- [x] پس از ثبت این گزارش، HEAD نهایی checkpoint برابر `544c57d77adfe906897a76eb59b601690bf61d45` تأیید شد؛ PR #63 دارای ۱۴۶ commit و اختلاف شاخه با main برابر ۱۴۶ جلو / ۷ عقب است. PR همچنان Draft و باز، mergeable=false و ادغام‌نشده است.
