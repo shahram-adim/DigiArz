@@ -1680,3 +1680,14 @@
 - [x] `node --test` برای `stop-limit-production-entrypoint-source.test.js` اجرا شد: ۵ آزمون، ۵ موفق، صفر شکست.
 - [x] تطبیق مستقیم snapshotهای GitHub با خروجی تازه `pg_get_functiondef` در Production نیز byte-for-byte موفق شد؛ fingerprintها و ACLهای ثبت‌شده با وضعیت زنده برابرند.
 - [!] GitHub Combined Status برای کامیت نهایی در این اتصال خالی برگشت و ابزار workflow فقط اجراهای pull-request را نمایش می‌دهد؛ بنابراین نتیجهٔ push-triggered CI برای کامیت‌های جدید هنوز قابل تأیید نیست. CI قبلی Run #1974 روی commit `e9339bd` موفق بود، اما آن را به این commitهای جدید تعمیم نمی‌دهیم.
+
+ 
+### همگام‌سازی کنترل‌شدهٔ هفت تغییر عقب‌مانده از main — checkpoint شهرام ۱۱۰ — ۲۰۲۶-۱۱-۲۶
+
+- [x] پنج فایلِ تغییرکرده/افزوده‌شده در main بررسی شدند. دو سند موجود در شاخه با حفظ محتوای اختصاصی ممیزی، فقط با بخش‌های جدید تأییدشده تکمیل شدند.
+- [x] سه فایل غایب به‌صورت byte-for-byte از main به شاخهٔ ممیزی اضافه شدند: آزمون source-contract و دو snapshot تابع Production مربوط به place/cancel Limit.
+- [x] هیچ rebase، merge، cherry-pick یا تغییر main انجام نشد؛ تغییرات فقط به شاخهٔ ممیزی اضافه شدند.
+- [x] تغییرات قبلی آزمون Fingerprint مستقل ۴۶ تابع حفظ شدند.
+- [!] اجرای Node و CI برای head جدید هنوز باید از نتیجهٔ واقعی Actions تأیید شود؛ وجود commit یا trigger به معنی موفقیت CI نیست.
+- [ ] گام بعد: بررسی diff نهایی و runهای CI روی آخرین head؛ سپس تحلیل دقیق هر اختلاف با main و رفع هر تعارض احتمالی، بدون ادغام PR.
+- [ ] هیچ Production، Migration، grant، policy، cron، Edge Function، Auth یا دادهٔ مالی تغییر نکرده است.
