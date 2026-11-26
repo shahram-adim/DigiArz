@@ -1060,7 +1060,10 @@ test('catalog coin logos always use the validated app-assets proxy and skip empt
   const logoBlock=html.slice(logoStart,logoEnd);
   assert.ok(logoBlock.includes('initial=logoUrl(clean,custom)'),
     'catalog metadata image is sent through the server-side allowlisted proxy');
-  assert.ok(logoBlock.includes('const fallbacks=[logoUrl(symbol),'),
+  const errorStart=html.indexOf('function handleCoinLogoError(');
+  const errorEnd=html.indexOf('function coinLogo(',errorStart);
+  const errorBlock=html.slice(errorStart,errorEnd);
+  assert.ok(errorBlock.includes('const fallbacks=[logoUrl(symbol),'),
     'failed curated logo falls back to the proxy provider chain');
   const chartStart=html.indexOf('async function openChart(');
   const chartEnd=html.indexOf('function ',chartStart+20);
