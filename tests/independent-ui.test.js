@@ -1316,5 +1316,5 @@ test('icy-indigo premium identity is visibly distinct from white while remaining
     'body.luxury-theme #appView .mobile-bottom-nav button.active',
     'color:#fff!important;'
   ]) assert.ok(final.includes(token),'premium icy-indigo layer includes '+token);
-  assert.ok(final.includes('color-scheme:light')===false,'third theme must not switch to dark color scheme');
+  assert.ok(final.includes('color-scheme:light!important;'),'third theme retains a light color scheme');
 });
