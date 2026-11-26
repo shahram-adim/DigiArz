@@ -1111,3 +1111,23 @@ test('pinned Tether market row keeps the same frameless responsive treatment in 
     '.tether-logo svg'])
     assert.ok(rules.includes(token),'pinned Tether styling includes '+token);
 });
+
+
+test('Android biometric login is opt-in and uses the native encrypted credential vault', () => {
+  assert.match(html, /id="saveCredentialsForBiometric"[^>]*type="checkbox"/);
+  assert.match(html, /id="biometricLoginBtn"/);
+  assert.match(html, /vault\.saveCredentials\(\{email,password\}\)/);
+  assert.match(html, /vault\.getCredentials\(\)/);
+  assert.doesNotMatch(html, /localStorage\.setItem\([^,]*(?:password|credential)/i);
+});
+
+test('native Android build registers a biometric credential plugin backed by Android Keystore', () => {
+  const plugin = fs.readFileSync('android-native/BiometricCredentialPlugin.java', 'utf8');
+  const script = fs.readFileSync('scripts/prepare-android-native.sh', 'utf8');
+  assert.match(plugin, /AndroidKeyStore/);
+  assert.match(plugin, /setUserAuthenticationRequired\(true\)/);
+  assert.match(plugin, /BiometricPrompt/);
+  assert.match(plugin, /AES\/GCM\/NoPadding/);
+  assert.match(script, /BiometricCredentialPlugin\.java/);
+  assert.match(script, /androidx\.biometric:biometric/);
+});
