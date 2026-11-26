@@ -1556,3 +1556,16 @@
 - [!] دو policy ثبت‌شده در snapshot، `order_reservations` و `conditional_orders`، فقط مالکیت user_id را کنترل می‌کنند و helper فعال‌بودن حساب را فراخوانی نمی‌کنند؛ fixture این رفتار را آشکار و مستند می‌کند، نه اینکه آن را خودسرانه اصلاح کند. profile self-read نیز همچنان یک ردیف را نشان می‌دهد.
 - [!] `auth.uid()` همچنان shim مبتنی بر claim محلی است؛ JWT verification واقعی Supabase، triggerها و مسیرهای write در این تست اثبات نشده‌اند.
 - [ ] CI برای نسخهٔ جدید fixture هنوز اجرا/تأیید نشده است؛ هیچ نتیجهٔ موفقی برای این تغییر اعلام نمی‌شود.
+
+### ممیزی مسیر نوشتن حساب غیرفعال — ۲۰۲۶-۱۱-۲۶
+
+- [x] تعریف ثبت‌شدهٔ Production برای `private.guard_active_account_writes()` با fingerprint `29b8e23c1de8eb4762a8cf1a9c9343ce` بررسی شد: ردیف `profiles` مربوط به `NEW.user_id` را با `FOR SHARE` قفل می‌کند و در صورت غیرفعال بودن حساب، INSERT را رد می‌کند.
+- [x] اتصال Triggerهای واقعی snapshot تأیید شد: `BEFORE INSERT` روی `orders`، `trades` و `transactions`. بنابراین ایجاد reservation/conditional پس از INSERT سفارش در همان تراکنش، زیر قفل ردیف profile انجام می‌شود؛ deactivation که `profiles.is_active=false` را UPDATE می‌کند با این قفل serialize می‌شود.
+- [x] سه مسیر placement یعنی `place_limit_order`، `place_conditional_exit_order` و `place_stop_limit_order` ابتدا active-account را بررسی می‌کنند و سپس `orders` را پیش از `order_reservations` و `conditional_orders` درج می‌کنند.
+- [x] workerهای `process_conditional_orders` و `process_stop_limit_orders` فقط profile فعال را انتخاب و `FOR SHARE` می‌گیرند؛ `process_limit_orders` نیز فقط سفارش حساب فعال را انتخاب می‌کند و درج Trade آن از Trigger محافظت‌شده عبور می‌کند.
+- [x] `deactivate_my_account()` ابتدا profile را غیرفعال می‌کند و سپس reservationها و conditionalها را پاک‌سازی/لغو می‌کند.
+- [x] ACL زندهٔ snapshot نشان می‌دهد نقش `authenticated` روی `order_reservations` و `conditional_orders` مجوز مستقیم INSERT/UPDATE/DELETE ندارد. مسیرهای cancellation بررسی‌شده فقط reservation/conditional موجود را آزاد یا لغو می‌کنند و ردیف جدید نمی‌سازند.
+- [x] ۱۶ assertion مستقل روی manifest و relation/trigger inventory برای این قراردادها اجرا شد؛ ۱۶/۱۶ موفق. تست رگرسیون متناظر به `tests/production-rpc-manifest.test.js` افزوده شد؛ commit تست `ccc915535ad14c17c527b5a83d197a7cd6cebc9f`.
+- [!] CI برای commit جدید هنوز در GitHub قابل مشاهده/تأیید نیست؛ نتیجهٔ اجرای assertionها را به‌جای CI ثبت نمی‌کنیم.
+- [!] این نتیجه بر snapshot Production مورخ 2026-11-25 و fingerprintهای ثبت‌شده تکیه دارد؛ پیش از هر تغییر اجرایی باید snapshot تازه شود. هیچ Production mutation، Migration، db push، grant، policy، trigger، function، cron، سفارش یا موجودی تغییر نکرد.
+- [ ] گام بعد: اجرای CI روی commit جدید؛ سپس بررسی race دو‌نشستی `deactivate_my_account()` در برابر سه مسیر placement و workerها در PostgreSQL 17 دورریختنی با همین بدنه‌ها و Triggerهای واقعی. اختلاف قفل child در Stop-Limit worker (`FOR UPDATE OF c,parent` در Production در برابر candidate سه‌ردیفی) جداگانه حفظ و آزموده شود.
