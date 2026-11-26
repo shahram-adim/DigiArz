@@ -1,0 +1,87 @@
+name: DigiArz Candidate Android APK — isolated PR artifact
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "manifest.webmanifest"
+      - "sw.js"
+      - "icon*.svg"
+      - "src/**"
+      - "package.json"
+      - "capacitor.config.json"
+      - ".github/workflows/android-candidate-apk.yml"
+  push:
+    branches:
+      - redesign/ui-clean-rebuild-2026
+    paths:
+      - "index.html"
+      - "manifest.webmanifest"
+      - "sw.js"
+      - "icon*.svg"
+      - "src/**"
+      - "package.json"
+      - "capacitor.config.json"
+      - ".github/workflows/android-candidate-apk.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: digiarz-candidate-apk-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-candidate-debug-apk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout isolated PR candidate
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Install Capacitor dependencies
+        run: npm install --no-audit --no-fund
+      - name: Prepare web assets
+        run: npm run build:web
+      - name: Generate Android project
+        run: npx cap add android
+      - name: Sync Android project
+        run: npx cap sync android
+      - name: Build installable debug APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleDebug
+      - name: Verify APK and record provenance
+        run: |
+          APK="android/app/build/outputs/apk/debug/app-debug.apk"
+          test -s "$APK"
+          VERSION="$(node -p "require('./package.json').version || 'unspecified'")"
+          {
+            echo "app=DigiArz"
+            echo "package_version=$VERSION"
+            echo "git_commit=$GITHUB_SHA"
+            echo "git_ref=$GITHUB_REF"
+            echo "workflow_run_id=$GITHUB_RUN_ID"
+            echo "built_at_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "apk_sha256=$(sha256sum "$APK" | cut -d ' ' -f 1)"
+          } > android/app/build/outputs/apk/debug/BUILD-INFO.txt
+          cat android/app/build/outputs/apk/debug/BUILD-INFO.txt
+      - name: Upload candidate APK artifact only
+        uses: actions/upload-artifact@v4
+        with:
+          name: DigiArz-Candidate-Android-debug-APK
+          path: |
+            android/app/build/outputs/apk/debug/app-debug.apk
+            android/app/build/outputs/apk/debug/BUILD-INFO.txt
+          if-no-files-found: error
+          retention-days: 14
