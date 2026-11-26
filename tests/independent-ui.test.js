@@ -1006,3 +1006,18 @@ test('third luxury theme is a bright ice-blue indigo glass palette, distinct fro
     'body.luxury-theme .top','body.luxury-theme #tab-markets .market-categories .category-btn.active'])
     assert.ok(final.includes(token),'bright luxury palette includes '+token);
 });
+
+
+test('bright indigo dashboard overrides inherited dark account and market surfaces',()=>{
+  const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
+  const final=css.slice(css.lastIndexOf('Bright-theme contrast pass 2'));
+  for(const token of [
+    'body.luxury-theme #tab-dashboard .da-v2-account-card',
+    'body.luxury-theme #tab-dashboard .da-market-glass',
+    'linear-gradient(145deg,rgba(255,255,255,.98),rgba(239,245,255,.98))',
+    'body.luxury-theme #tab-dashboard .da-v2-balance-main',
+    'body.luxury-theme #tab-dashboard .da-market-coin-card',
+    'background:#fff!important;',
+    'color:#202b55!important;'
+  ]) assert.ok(final.includes(token),'bright dashboard override includes '+token);
+});
