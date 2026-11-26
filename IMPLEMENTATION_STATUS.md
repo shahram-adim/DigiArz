@@ -2143,3 +2143,14 @@
 - [!] APK build مربوط به CSS جدید نیز باید از آخرین commit ساخته شود؛ APK قبلی قبل از این تغییر CSS است و نسخهٔ تازه محسوب نمی‌شود.
 - [ ] پس از پایان CI، تصاویر تم سوم را در تمام صفحات و viewportهای موبایل بررسی کن؛ سپس APK جدید را بساز/بررسی کن و نصب واقعی روی Android را انجام بده.
 - ایمنی: فقط CSS و تست روی شاخه Draft تغییر کردند؛ هیچ merge، rebase، release، Pages deploy، Supabase، migration یا Production data change انجام نشد.
+
+
+## رفع ناسازگاری آزمون‌های تم نیلی — ۲۶ نوامبر ۲۰۲۶
+- [x] تحلیل لاگ Run #45873474786 نشان داد ۳ مورد از ۱۳۸ تست شکست خورده‌اند؛ هر سه assertionهای قدیمی پالت بودند: انتظار `color-scheme:light` در آخرین بلوک، مقدار قدیمی theme-color/chart و مقدار قدیمی chart foundation. ۱۳۵ تست دیگر موفق بودند.
+- [x] CSS تم سوم صریحاً `color-scheme:light!important` دارد؛ پالت جدید پس‌زمینه `#dce4ff` و accent `#344fc5` است.
+- [x] `index.html` رنگ نوار وضعیت Android و chart canvas را با پالت جدید همگام کرد: پس‌زمینه `#dce4ff` و متن chart `#263b91`.
+- [x] تست‌های قدیمی `tests/independent-ui.test.js` با مقادیر جدید همگام شدند.
+- Commit CSS: `f0cbf84a753cf4e32b0ac2aa0fee395b7fda6a05`; commit تست: `939429755b691fbed6af5f1c69c49b87ab8b3d3a`; commit هماهنگی HTML: `caf2723cb64e9a6b5d53e0fe866f4deeec0b30be`.
+- [!] Run #45873990436 روی commit تست `9394297` هنگام آخرین بررسی in_progress بود؛ Run #45874005767 visual review و #45874005846 APK برای آخرین commit `caf2723` pending بودند. APK قبلی #45873974389 روی CSS-only commit `f0cbf84` در حال اجرا بود و جای build آخرین commit را نمی‌گیرد.
+- [ ] منتظر نتیجه UI regression و APK build روی آخرین commit بمان؛ در صورت موفقیت، artifactها را دریافت و تصاویر را بازبینی کن.
+- ایمنی: هیچ merge، rebase، release، Pages deploy، Supabase، migration یا Production data change انجام نشد.
