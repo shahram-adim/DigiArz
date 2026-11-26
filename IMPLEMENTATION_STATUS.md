@@ -2086,3 +2086,16 @@
 - [x] تست‌های UI شامل assertionهای وابسته به متن دقیق CSS و نام cache نسخه‌دار هستند؛ پس از هر انتقال/بازآرایی باید روی candidate جدید اجرا شوند. تست تصویری به‌تنهایی جای تست واقعی فید، لوگو و APK را نمی‌گیرد.
 - [ ] گام بعد: ممیزی دقیق تغییرات index.html، CSS و service worker در برابر main و تعیین فایل‌های حداقلی وابسته؛ سپس ساخت شاخه candidate از HEAD فعلی main و انتقال کنترل‌شده. هنوز شاخه جدید ساخته یا هیچ فایل اجرایی منتقل نشده است.
 - ایمنی: فقط خواندن GitHub و ثبت گزارش؛ هیچ branch، merge، rebase، migration، Production یا Supabase تغییر نکرد.
+
+
+## ممیزی تطبیق شاخه طراحی با main — ۲۶ نوامبر ۲۰۲۶، ۲۱:۰۲
+- [x] وضعیت واقعی GitHub دوباره خوانده شد: main روی `6916b940f63877f0f2589ad1652791b85e01d823` است؛ شاخه `redesign/ui-mainline-clean-2026-11-26` نسبت به آن 165 commit جلو و 2 commit عقب و همچنان `diverged` است؛ merge-base برابر `9855d6ea6cd188a5621c4e2c28c55e4cfb4d2587` است.
+- [!] PR #64 هنوز Draft است و متن توضیحاتش ادعا می‌کند candidate از HEAD برابر `9855d6e` ساخته شده و صفر commit عقب است؛ این متن با main فعلی و مقایسه واقعی ناسازگار/کهنه است. PR #61 نیز باز و دست‌نخورده است.
+- [x] مقایسه واقعی 13 فایل تغییرکرده را تأیید کرد. در main، `index.html` هنوز stylesheet مستقل را بارگذاری نمی‌کند؛ در شاخه، `src/digiarz-independent-ui.css?v=3` در انتهای سند بارگذاری شده است. فایل CSS شاخه 401,660 بایت است.
+- [x] `sw.js` در main از cache `digiarz-shell-v58` استفاده می‌کند؛ شاخه از `v62` استفاده می‌کند و stylesheet مستقل را به app shell اضافه کرده است. این تغییر وابسته به انتقال HTML/CSS است و نباید جداگانه حذف شود.
+- [x] `package.json` در شاخه اسکریپت `prepare:android` را اضافه کرده؛ وابستگی‌های اصلی Capacitor همان نسخه‌های 6.2.1 باقی مانده‌اند.
+- [x] اتصال UI بیومتریک در `index.html` وجود دارد: کد از `window.Capacitor?.Plugins?.BiometricCredential` برای `saveCredentials/getCredentials/clearCredentials` استفاده می‌کند؛ نام کلاس Java در HTML مستقیماً ذکر نشده و ثبت native توسط اسکریپت آماده‌سازی Android انجام می‌شود. بنابراین آزمون JS bridge، قالب MainActivity، build و تست دستگاه واقعی همچنان شرط تأیید end-to-end است.
+- [!] فایل اصلی `index.html` در شاخه 513,792 بایت و در main 492,996 بایت است؛ تغییرات UI شامل بازنویسی لوگوی Tether و مسیر fallback لوگو نیز هست. انتقال کامل فایل بدون مرور diff و اجرای regression می‌تواند تغییرات خارج از ظاهر را هم وارد کند.
+- [x] بررسی PRهای باز، PR #64 را به‌عنوان candidate UI فعلی تأیید کرد؛ PRهای #61 و #60 نیز باز هستند و نباید به‌طور موازی با #64 ادغام شوند.
+- [ ] اقدام بعدی: تهیه patch گزینشی از تغییرات HTML/CSS و وابستگی‌های SW/package/native، بازبینی diff در برابر main و ساخت candidate تمیز فقط پس از روشن شدن تمام تغییرات رفتاری. فعلاً هیچ شاخه جدیدی ساخته و هیچ کدی منتقل نشده است.
+- ایمنی: فقط خواندن GitHub و افزودن این گزارش به شاخه موجود؛ هیچ merge، rebase، deployment، release، Production، Supabase، migration، wallet، order یا trade تغییری نکرد.
