@@ -1730,3 +1730,16 @@
 - [!] وجود workflow در head به‌تنهایی اجرای push را اثبات نمی‌کند؛ APK قبلی/قدیمی را نباید به‌عنوان خروجی این head معرفی کرد. ساخت APK جدید، screenshotهای Playwright و تست فیزیکی Android هنوز تأیید نشده‌اند.
 - [ ] گام بعد: یافتن مسیر معتبر اجرای workflow روی head بدون تغییر Main یا ادغام PR؛ سپس اجرای Node regression، گرفتن و بازبینی screenshotهای هر سه تم و ساخت APK candidate از همین SHA.
 - ایمنی: این checkpoint فقط مستند وضعیت است؛ هیچ کد اجرایی، Main، PR state، Pages، Supabase، Production، migration، wallet، order یا trade تغییر نکرد.
+
+
+## اصلاح دقت شبیه‌سازی تم سوم در تست تصویری و بازبینی CI — ۲۶ نوامبر ۲۰۲۶
+- [x] وضعیت زندهٔ PR #64 بازخوانی شد: باز و Draft است؛ عنوان «Port premium three-theme UI rebuild onto current main». متن PR در زمان ایجاد، merge-base را 9855d6ea6cd188a5621c4e2c28c55e4cfb4d2587 ثبت کرده بود.
+- [x] compare تازهٔ main...redesign/ui-mainline-clean-2026-11-26: شاخه ۸۸ commit جلو و ۲ commit عقب، وضعیت diverged؛ Main فعلی روی 6916b940f63877f0f2589ad1652791b85e01d823 است و merge-base همان 9855d6e مانده است. هیچ همگام‌سازی، merge یا rebase انجام نشد.
+- [x] بازبینی workflowها تأیید کرد هر دو workflow تست بصری و APK فقط در شاخهٔ PR وجود دارند و در main وجود ندارند. workflowهای تازه در base حاضر نیستند؛ trigger pull_request از این جهت قابل اتکا نیست و workflow_dispatch نیز از این اتصال قابل فراخوانی نیست. ابزار GitHub موجود فقط اجراهای PR-triggered یک commit را برمی‌گرداند و ابزار فهرست‌کردن/dispatch تمام workflow runها در دسترس نیست.
+- [!] برای HEAD قبلی 6d1d39bcdc7cb38e2795c35cb2259559a88bdf8b، combined status خالی و wrapper workflow runها نیز خالی بود؛ این فقط یعنی اجرای موفق قابل تأیید نیست، نه اثبات قطعی اینکه GitHub Actions هیچ اجرا نداشته است.
+- [x] ممیزی harness تصویری یک ایراد واقعی یافت: در زمان capture، تم سوم (luxury) به‌اشتباه document.documentElement.style.colorScheme='dark' می‌گرفت، درحالی‌که پالت تم سوم روشن نیلی/یخی است. خط به شرط درست تغییر کرد تا فقط تم مشکی dark و هر دو تم روشن light بگیرند.
+- [x] اصلاح harness در commit f57db07bac3460d8d6060b94daf7aa8b8ea42b9b ثبت شد و تست رگرسیون محافظ در commit 05c1a1ea8c286af24f1595b0a8db374292a8aaeb اضافه شد.
+- [!] harness هنوز fixtureهای مصنوعی DOM را به کار می‌برد؛ لوگوی تتر در آن SVG سبز اختصاصی است، اما برای بیشتر ارزها glyph متنی (مانند ₿ و ◆) استفاده می‌شود. این تصاویر صحت لوگوهای واقعی در داده/رابط زنده را اثبات نمی‌کنند و باید در مرحلهٔ visual review از placeholderها تفکیک شوند.
+- [!] تست‌های Node، Playwright، screenshots و APK پس از این دو commit هنوز اجرا/موفقیت‌شان از GitHub قابل تأیید نیست. package.json فقط build:web و prepare:android را تعریف می‌کند؛ APK نیازمند اجرای واقعی زنجیرهٔ Capacitor/Gradle در محیط Android است.
+- [ ] گام بعد: یافتن راه معتبر اجرای push workflow و دریافت artifact بدون افزودن workflow به Main؛ سپس اجرای Node regression، Playwright و APK روی HEAD تازه و بازبینی screenshotها. اگر GitHub Actions برای push شاخه اجرا نمی‌شود، برای فعال‌سازی مسیر base باید از مالک اجازهٔ اقدام مشخص در تنظیمات/شاخهٔ Main گرفته شود؛ تا آن زمان هیچ merge یا تغییر Main انجام نشود.
+- ایمنی: فقط harness تست، تست رگرسیون و مستندات در شاخهٔ Draft تغییر کردند؛ Main، Pages، Supabase، Production، migration، کیف پول، سفارش و معامله دست‌نخورده‌اند.
