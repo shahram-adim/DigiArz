@@ -573,3 +573,27 @@ test('Stop-Limit cancellation serializes with child fills and preserves partial 
   assert.match(race, /child partial fill accounting was not preserved/);
   assert.match(race, /reservation consumption\/release accounting was not preserved/);
 });
+
+
+test('Conditional worker uses captured market engine and rolls back reservation release on execution failure', () => {
+  const conditional = manifest.functions.find(fn => fn.schema_name === 'public' && fn.function_name === 'process_conditional_orders');
+  const marketEngine = manifest.functions.find(fn => fn.schema_name === 'public' && fn.function_name === 'execute_demo_trade');
+  const fixture = fs.readFileSync('tests/inactive-account-rpc-race.pg17.sql', 'utf8');
+  for (const fn of [conditional, marketEngine]) {
+    const start = fixture.lastIndexOf('CREATE OR REPLACE FUNCTION public.' + fn.function_name + '(');
+    assert.notEqual(start, -1, 'captured function missing from fixture: ' + fn.function_name);
+    assert.ok(fixture.slice(start).trim().startsWith(fn.definition.trim()),
+      'fixture must use exact captured Production body: ' + fn.function_name);
+  }
+  assert.match(conditional.definition, /BEGIN[\s\S]*?UPDATE public\.order_reservations[\s\S]*?status='released'[\s\S]*?public\.execute_demo_trade/i);
+  assert.match(conditional.definition, /EXCEPTION WHEN OTHERS THEN[\s\S]*?failed execution block rolled back the reservation release/i);
+  assert.match(conditional.definition, /attempt_count=attempt_count\+1,last_error=left\(SQLERRM,500\)/i);
+
+  const race = fs.readFileSync('tests/conditional-worker-reservation-rollback.pg17.sh', 'utf8');
+  assert.match(race, /intentional test failure after market balance updates/);
+  assert.match(race, /reservation release was not rolled back/);
+  assert.match(race, /wallet update survived failed market execution/);
+  assert.match(race, /asset balance update survived failed market execution/);
+  assert.match(race, /failure diagnostic was not recorded/);
+  assert.match(race, /market execution rows survived failed subtransaction/);
+});
