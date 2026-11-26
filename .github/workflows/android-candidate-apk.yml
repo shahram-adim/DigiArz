@@ -9,6 +9,7 @@ on:
       - "sw.js"
       - "icon*.svg"
       - "src/**"
+      - "tests/**"
       - "package.json"
       - "capacitor.config.json"
       - ".github/workflows/android-candidate-apk.yml"
