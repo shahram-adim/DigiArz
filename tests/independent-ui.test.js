@@ -622,7 +622,8 @@ test('all active market assets receive Persian display names from curated names 
   assert.match(html, /persianCoinName\(symbol,englishName\)/);
   assert.match(html, /class="top-asset-name-en" dir="ltr"/);
   assert.match(html, /function marketPersianName\(item\)/);
-  assert.match(html, /const explicit=String\(item\?\.name_fa\|\|item\?\.asset_name_fa\|\|'\)\.trim\(\)/);\n  assert.match(html, /persian=String\(marketPersianName\(x\)\|\|'\)/);\n  assert.match(html, /persianName=String\(marketPersianName\(item\)\)/);
+  assert.match(html, /const explicit=String\(item\?\.name_fa\|\|item\?\.asset_name_fa\|\|'\)\.trim\(\)/);
+  assert.match(html, /persian=String\(marketPersianName\(x\)\|\|'\)/);\n  assert.match(html, /persianName=String\(marketPersianName\(item\)\)/);
   assert.match(html, /asset_name_fa/);
   assert.match(html, /asset_name_en/);
 });
@@ -633,6 +634,7 @@ test('dashboard hides account activity from regular users and keeps it available
   assert.match(html, /const englishName=String\(row\.item\.name_en\|\|row\.item\.asset_name_en\|\|row\.item\.english_name\|\|row\.item\.name\|\|coinInfo\[base\]\?\.name\|\|base\)/);
   assert.match(html, /className='da-market-name-en'/);
   assert.match(html, /name\.textContent=String\(row\.item\.name_fa\|\|row\.item\.asset_name_fa\|\|persianCoinName\(symbol,englishName\)/);
+  assert.match(html, /fa=marketPersianName\(x\.item\)\|\|''/);
   assert.match(html, /englishName=String\(item\.name_en\|\|item\.asset_name_en\|\|item\.english_name\|\|coinInfo\[base\]\?\.name\|\|item\.name\|\|base\)/);
   assert.match(html, /class="da-v2-bottom"/);
 });
