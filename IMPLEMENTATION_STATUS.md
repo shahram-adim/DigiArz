@@ -1621,3 +1621,11 @@
 - [!] این آزمون عمداً رفتار فعلی را characterise می‌کند: یک چرخه تأخیر در مقادیر parent و سپس همگرایی. این تأخیر باید از نظر تجربهٔ کاربری و منطق وضعیت سفارش تأیید شود؛ اگر همگام‌سازی فوری الزام محصول است، باید طراحی قفل و Worker بازنگری شود. این تست به‌تنهایی اثبات نمی‌کند که تأخیر یک‌چرخه از نظر محصول پذیرفتنی است.
 - [!] اجرای واقعی SQL/PostgreSQL 17 و CI روی head فعلی هنوز مشاهده نشده؛ `bash -n` و بررسی static جایگزین اجرای CI نیستند.
 - [ ] گام بعد: بررسی مسیرهای cancel و child-fill در کنار این رقابت، سپس اجرای CI کامل؛ پس از آن آزمون rollback/atomicity reservation در `process_conditional_orders()` و سناریوی شکست فراخوانی `execute_demo_trade()`.
+### رقابت لغو Stop-Limit با اجرای واقعی Limit child — ۲۰۲۶-۱۱-۲۶
+
+- [x] بدنه‌های Production دو RPC `cancel_stop_limit_order()` و `cancel_limit_order()` با fingerprintهای snapshot به fixture افزوده شدند.
+- [x] اسکریپت `tests/stop-limit-cancel-limit-race.pg17.sh` سناریوی سه‌نشستی را می‌سازد: قفل wallet اجرای Limit را پس از قفل‌کردن child/reservation متوقف می‌کند؛ سپس Stop-Limit cancellation conditional و parent را قفل کرده و هنگام گرفتن child منتظر می‌ماند؛ پس از تکمیل partial fill، cancellation باید باقی‌مانده را لغو کند.
+- [x] assertions وضعیت child/parent/conditional، حفظ مقدار fill شده، مقدار باقی‌مانده، وضعیت reservation، و وجود trade/transaction را کنترل می‌کنند.
+- [x] بدنهٔ هر چهار تابع موردنیاز این مسیر (`process_limit_orders`, `process_stop_limit_orders`, `cancel_limit_order`, `cancel_stop_limit_order`) در fixture با manifest تطبیق دقیق دارد؛ اسکریپت از نظر Bash syntax بررسی شد و تست Node از نظر syntax و وجود سناریو بررسی شد.
+- [!] هنوز اجرای SQL/PostgreSQL 17 و نتیجهٔ CI برای head فعلی تأیید نشده است؛ این وضعیت صرفاً آماده‌سازی و بررسی ایستا است.
+- [ ] گام بعد: آزمون cancellation و workerها در هر دو ترتیب قفل، سپس سناریوهای failure/rollback در `process_conditional_orders()` و کنترل دقیق reservation پس از exception؛ در پایان بررسی CI روی commit جدید.
