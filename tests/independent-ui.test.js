@@ -1185,3 +1185,24 @@ test('icy-indigo trading theme also neutralizes nested order-book headers and ro
     'color:#52618b!important;'
   ]) assert.ok(final.includes(token),'icy-indigo order-book correction includes '+token);
 });
+
+
+test('offline icon fallback renders vector artwork and exposes a clear active navigation state',()=>{
+  const html=fs.readFileSync('index.html','utf8');
+  const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
+  const rendererStart=html.indexOf('function renderLucideIcons()');
+  const rendererEnd=html.indexOf('function showMessage',rendererStart);
+  assert.ok(rendererStart>=0&&rendererEnd>rendererStart,'icon renderer is located');
+  const renderer=html.slice(rendererStart,rendererEnd);
+  assert.ok(renderer.includes('const iconPaths='),'offline vector path library exists');
+  assert.ok(renderer.includes('viewBox="0 0 24 24"'),'fallback renders scalable SVG');
+  assert.ok(renderer.includes("paths.map(d=>'<path d=\"'+d+'\"/>').join('')"),'fallback renders vector paths');
+  assert.doesNotMatch(renderer,/glyphs|textContent=/,'fallback does not regress to Unicode placeholder glyphs');
+  assert.match(html,/<button type="button" class="active" data-tab="dashboard" aria-current="page">/,'home is selected on initial dashboard render');
+  assert.ok(html.includes("b.setAttribute('aria-current','page')"),'tab changes announce the selected page');
+  assert.ok(html.includes("b.removeAttribute('aria-current')"),'inactive tabs clear current-page semantics');
+  const final=css.slice(css.lastIndexOf('Final icon finish: quieter inactive glyphs'));
+  for(const token of ['stroke-width:2.35','button.active:after','body.dark-theme #appView .mobile-bottom-nav button.active','body.light-theme #appView .mobile-bottom-nav button.active','body.luxury-theme #appView .mobile-bottom-nav button.active']) {
+    assert.ok(final.includes(token),'active icon treatment includes '+token);
+  }
+});
