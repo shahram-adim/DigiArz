@@ -1585,3 +1585,12 @@
 - [!] این Fixture هنوز آزمون کامل RPCهای placement و `deactivate_my_account()` نیست؛ فقط تابع Trigger واقعی و ترتیب قفل profile را در سه مسیر INSERT بازسازی می‌کند. اجرای کامل بدنه‌ها و وابستگی‌ها مرحلهٔ بعدی است.
 - [!] آخرین اجرای موفقی که در GitHub دیده شد مربوط به head قبلی است و گام جدید «PostgreSQL 17 two-session inactive-account write race» در آن run وجود نداشت. برای commit فعلی `a9135c8fd851eb1e0491034d3884e25ccc8202b7` هنوز نتیجهٔ CI تأیید نشده است؛ تا مشاهدهٔ run مربوط به head فعلی، CI را موفق اعلام نمی‌کنیم.
 - [ ] گام بعد: دریافت نتیجهٔ CI روی head جدید؛ سپس توسعهٔ fixture یکپارچه برای اجرای بدنه‌های واقعی `deactivate_my_account()`, `place_limit_order()`, `place_stop_limit_order()` و `place_conditional_exit_order()` با وابستگی‌های واقعی و سناریوهای worker.
+### آزمون یکپارچهٔ RPCهای واقعی ثبت سفارش در برابر غیرفعال‌سازی — ۲۰۲۶-۱۱-۲۶
+
+- [x] Fixture جداگانهٔ `tests/inactive-account-rpc-race.pg17.sql` ساخته شد؛ بدنهٔ هفت تابع از جمله `deactivate_my_account()`, سه RPC ثبت سفارش، `current_account_is_active()`, `get_demo_trading_fee_rate()` و Trigger محافظ، با manifest ثبت‌شدهٔ Production تطبیق لفظ‌به‌لفظ دارد. جدول‌ها فقط حداقل ستون‌های لازم را در دیتابیس دورریختنی بازسازی می‌کنند.
+- [x] `tests/inactive-account-rpc-race.pg17.sh` برای هر سه RPC (Limit، Stop-Limit و TP/SL) هر دو ترتیب رقابت را اجرا می‌کند: placement اول و deactivation منتظر؛ و deactivation اول در حالی که placement پس از active-check روی قفل wallet متوقف است، سپس پس از آزادشدن wallet باید Trigger حساب غیرفعال آن را رد کند.
+- [x] آزمون placement-first علاوه بر وضعیت inactive، لغو سفارش و آزادسازی reservation و conditional را کنترل می‌کند؛ آزمون deactivation-first تضمین می‌کند هیچ order/reservation/conditional جدیدی ثبت نشود.
+- [x] تعریف هر هفت تابع در fixture با نسخهٔ manifest تطبیق دقیق دارد؛ تست به workflow PostgreSQL 17 اضافه شد.
+- [!] این Fixture برای توابع ثبت سفارش و deactivation از بدنهٔ واقعی استفاده می‌کند، اما schema آن یک test double حداقلی است؛ هنوز workerهای پردازش سفارش و مسیر اجرای معاملهٔ market در این سناریوی کامل وارد نشده‌اند.
+- [!] اجرای CI برای commit جدید هنوز مشاهده نشده؛ آخرین run موفق قدیمی، گام تازهٔ RPC race را اجرا نکرده است. تا مشاهدهٔ run مربوط به head فعلی، نتیجهٔ CI نامشخص باقی می‌ماند.
+- [ ] گام بعد: اجرای CI؛ سپس افزودن مسیرهای worker (`process_limit_orders`, `process_stop_limit_orders`, `process_conditional_orders`) و بررسی تعامل آن‌ها با deactivation، به‌ویژه قفل child و آزادسازی reservation در خطا.
