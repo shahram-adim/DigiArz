@@ -5830,3 +5830,14 @@ body.luxury-theme #appView #tab-trade .market-summary .stat small,
 body.luxury-theme #appView #tab-trade .market-summary .stat .value{
   color:#293b78!important;
 }
+
+
+/* Remove the parent navy slab behind the now-light market summary tiles. */
+body.luxury-theme #appView #tab-trade .market-summary{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+body.luxury-theme #appView #tab-trade .market-summary .stat{
+  border-radius:16px!important;
+}
