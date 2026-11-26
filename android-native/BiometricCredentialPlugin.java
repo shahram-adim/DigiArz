@@ -81,7 +81,7 @@ public class BiometricCredentialPlugin extends Plugin {
             cipher.init(Cipher.DECRYPT_MODE, getSecretKey(), new GCMParameterSpec(128, iv));
             authenticate(call, cipher, false, null, null, ciphertext, null);
         } catch (Exception error) {
-            call.reject("بازیابی مخزن امن ممکن نشد؛ ممکن است اثر انگشت دستگاه تغییر کرده باشد.", "VAULT_DECRYPT_FAILED");
+            call.reject("بازیابی مخزن امن ممکن نشد؛ ممکن است تنظیمات بیومتریک دستگاه تغییر کرده باشد.", "VAULT_DECRYPT_FAILED");
         }
     }
 
@@ -160,12 +160,12 @@ public class BiometricCredentialPlugin extends Plugin {
         BiometricManager manager = BiometricManager.from(getContext());
         if (manager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG)
             != BiometricManager.BIOMETRIC_SUCCESS) {
-            call.reject("اثر انگشت یا بیومتریک قوی روی این دستگاه آماده نیست.", "BIOMETRIC_UNAVAILABLE");
+            call.reject("بیومتریک قوی روی این دستگاه آماده نیست.", "BIOMETRIC_UNAVAILABLE");
             return;
         }
         BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
             .setTitle(encrypt ? "ذخیره امن اطلاعات DigiArz" : "ورود امن به DigiArz")
-            .setSubtitle(encrypt ? "برای رمزنگاری اطلاعات ورود، اثر انگشت را تأیید کنید." : "برای بازیابی اطلاعات ورود، اثر انگشت را تأیید کنید.")
+            .setSubtitle(encrypt ? "برای رمزنگاری اطلاعات ورود، بیومتریک قوی دستگاه را تأیید کنید." : "برای بازیابی اطلاعات ورود، بیومتریک قوی دستگاه را تأیید کنید.")
             .setNegativeButtonText("لغو")
             .setConfirmationRequired(false)
             .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
