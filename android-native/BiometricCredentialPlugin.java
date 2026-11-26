@@ -104,7 +104,25 @@ public class BiometricCredentialPlugin extends Plugin {
     private void ensureKey() throws Exception {
         KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
         keyStore.load(null);
-        if (keyStore.containsAlias(KEY_ALIAS)) return;
+        if (keyStore.containsAlias(KEY_ALIAS)) {
+            try {
+                SecretKey existing = (SecretKey) keyStore.getKey(KEY_ALIAS, null);
+                if (existing != null) {
+                    Cipher probe = Cipher.getInstance("AES/GCM/NoPadding");
+                    probe.init(Cipher.ENCRYPT_MODE, existing);
+                    return;
+                }
+            } catch (
+                android.security.keystore.KeyPermanentlyInvalidatedException |
+                java.security.UnrecoverableKeyException invalidated
+            ) {
+                // A biometric enrollment change can permanently invalidate this key.
+                // This path runs only when the user explicitly opts to save credentials again.
+            }
+            // The previous ciphertext cannot be recovered with an invalidated key.
+            getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().clear().apply();
+            keyStore.deleteEntry(KEY_ALIAS);
+        }
         KeyGenerator generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
         KeyGenParameterSpec spec = new KeyGenParameterSpec.Builder(
             KEY_ALIAS, KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT
