@@ -294,3 +294,9 @@ jobs:
           psql -h localhost -U postgres -d digiarz_inactive_account_rpc_race_test -v ON_ERROR_STOP=1 \
             -f tests/inactive-account-rpc-race.pg17.sql
           PGDATABASE=digiarz_inactive_account_rpc_race_test bash tests/inactive-account-rpc-race.pg17.sh
+
+      - name: Reproduce captured Stop-Limit child-fill synchronization race
+        env:
+          PGPASSWORD: postgres
+        run: |
+          PGDATABASE=digiarz_inactive_account_rpc_race_test bash tests/stop-limit-child-sync-race.pg17.sh
