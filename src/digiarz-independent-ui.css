@@ -4591,3 +4591,25 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{ou
 @media(prefers-reduced-motion:reduce){
   #tab-dashboard *,#tab-markets *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 }
+
+
+/* Signature logo normalization — every coin/asset logo uses the raw mark, never a tile. */
+.coin-icon,.coin-icon img,.asset-logo,.asset-logo img,.coin-logo-fallback,
+.da-market-logo,.da-market-logo-inner,.da-market-logo-inner img,
+.top-asset-card .coin-icon,.top-asset-card .coin-icon img,
+.trade-asset-preview .asset-logo,.trade-asset-preview .asset-logo img,
+#tab-markets #marketList .coin-icon,#tab-markets #marketList .coin-icon img,
+#tab-dashboard #dashboardMarketPreview .da-market-logo,
+#tab-dashboard #dashboardMarketPreview .da-market-logo-inner,
+#tab-dashboard #dashboardMarketPreview .da-market-logo-inner img{
+  border:0!important;outline:0!important;border-radius:0!important;
+  background:transparent!important;background-color:transparent!important;
+  background-image:none!important;box-shadow:none!important;filter:none!important;
+}
+.coin-icon,.asset-logo,.da-market-logo,.da-market-logo-inner{
+  overflow:visible!important;padding:0!important;
+}
+.coin-icon img,.asset-logo img,.da-market-logo-inner img{
+  display:block!important;width:100%!important;height:100%!important;
+  object-fit:contain!important;
+}
