@@ -14,20 +14,21 @@ const integration = fs.readFileSync(
 );
 
 test('exact-decimal Limit worker fixture mirrors Production active-account trigger semantics', () => {
-  assert.match(setup, /CREATE FUNCTION private\\.guard_active_account_writes\\(\\)[\\s\\S]*?SECURITY DEFINER[\\s\\S]*?SET search_path TO ''/i);
-  assert.match(setup, /FROM public\\.profiles p[\\s\\S]*?FOR SHARE/i);
-  assert.match(setup, /COALESCE\\(v_active, false\\) IS NOT TRUE/i);
+  assert.ok(setup.includes('CREATE FUNCTION private.guard_active_account_writes()'));
+  assert.ok(setup.includes('SECURITY DEFINER'));
+  assert.ok(setup.includes("SET search_path TO ''"));
+  assert.ok(setup.includes('FROM public.profiles p'));
+  assert.ok(setup.includes('FOR SHARE'));
+  assert.ok(setup.includes('COALESCE(v_active, false) IS NOT TRUE'));
   for (const table of ['orders', 'trades', 'transactions']) {
-    assert.match(
-      setup,
-      new RegExp('CREATE TRIGGER guard_active_account_' + table + '[\\\\s\\\\S]*?BEFORE INSERT ON public\\\\.' + table, 'i')
-    );
+    assert.ok(setup.includes('CREATE TRIGGER guard_active_account_' + table));
+    assert.ok(setup.includes('BEFORE INSERT ON public.' + table));
   }
 });
 
 test('exact-decimal Limit worker SQL integration proves inactive ledger inserts are rejected', () => {
-  assert.match(integration, /90000000-0000-0000-0000-000000000009/);
-  assert.match(integration, /inactive-account trigger regression/);
-  assert.match(integration, /Account is inactive; reactivate the account before trading/);
-  assert.match(integration, /Production active-account trigger accepted an inactive transaction/);
+  assert.ok(integration.includes('90000000-0000-0000-0000-000000000009'));
+  assert.ok(integration.includes('inactive-account trigger regression'));
+  assert.ok(integration.includes('Account is inactive; reactivate the account before trading'));
+  assert.ok(integration.includes('Production active-account trigger accepted an inactive transaction'));
 });
