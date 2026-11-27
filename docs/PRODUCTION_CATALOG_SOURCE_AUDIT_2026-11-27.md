@@ -97,3 +97,36 @@ The data now supports three distinct categories:
 3. **Duplicate ticker with weak/no corroboration, stale metadata, or no supported quote/price path** — must not be automatically provisioned simply because it exists in the broad provider catalog.
 
 No rows were modified and no prices were refreshed by this audit.
+
+
+## Price-refresh pipeline source audit (read-only, 2026-11-27)
+### Scheduled entrypoints
+- Cron job 3 `digiarz-market-price-refresh` is active every minute and invokes `public.refresh_market_prices()`.
+- Cron job 17 `digiarz-market-price-overflow` is active on minute 5,15,25,35,45,55 and invokes `private.request_market_price_overflow()`.
+- Recent run history showed the sampled invocations succeeded; this does not prove that every provider returned complete market data or that every pair was updated.
+
+### Primary refresh behavior
+The exact applied `public.refresh_market_prices()` source was retrieved read-only:
+- It processes queued HTTP responses for CoinGecko, KuCoin, and Gate.io.
+- CoinGecko response handling loops enabled `demo_trading_pairs` plus active curated `admin_market_listings`, mapping provider IDs to pair symbols.
+- KuCoin and Gate.io response handling only upserts symbols that match an enabled `demo_trading_pairs.pair_symbol`.
+- It enqueues the first 515 sorted distinct provider IDs from enabled pairs plus active curated listings to CoinGecko, and requests full KuCoin and Gate.io ticker feeds.
+- It uses an advisory transaction lock and avoids enqueuing a new provider batch while tracked requests or provider queue entries remain.
+- The CoinGecko processing branch writes the returned USD value to `market_prices` under the mapped pair symbol. Gate.io and KuCoin can overwrite the same symbol with their own last-trade value and source, so source precedence is effectively dependent on response processing order rather than a documented per-pair priority policy.
+
+### Overflow behavior
+The exact `private.request_market_price_overflow()` source was retrieved:
+- It derives the same distinct ID set from enabled pairs plus active curated listings.
+- It skips the first 515 IDs and queues remaining IDs in batches of 500.
+- It inserts request IDs into `private.market_price_sync_requests`; the column default for provider is `CoinGecko`, so overflow requests inherit that provider.
+- It checks outstanding request rows and CoinGecko HTTP queue entries before scheduling more work.
+
+### Implications and open questions
+1. The pipeline can cover more than 515 IDs through the overflow job, but the ID universe is still only enabled pairs plus active curated listings. If every admitted catalog asset is to be tradable, canonical admission must ensure a pair exists before relying on this pipeline to refresh its price.
+2. The price pipeline does not refresh arbitrary unenabled catalog rows. This is appropriate only if discovery and admission are separate and the admission path creates the pair before the asset is presented as tradable.
+3. Current source handling does not establish a deterministic trusted source priority for each pair: Gate.io/KuCoin can overwrite CoinGecko. A new eligibility check must validate the exact source policy and freshness expected for the pair, not just `price > 0`.
+4. The five stale enabled rows all show CoinGecko as their last source and are more than seven days old. This audit did not establish why they were not refreshed. Need inspect provider response completeness, request/response history, source market coverage, and pair mapping without running refresh functions or modifying queues.
+5. The overflow scheduler and primary refresh must remain untouched until separately approved; both are Production financial/market data jobs.
+
+### Current queue snapshot
+At inspection time, three tracked price requests existed (one each for CoinGecko, Gate.io, and KuCoin). This is a point-in-time in-flight snapshot only.
