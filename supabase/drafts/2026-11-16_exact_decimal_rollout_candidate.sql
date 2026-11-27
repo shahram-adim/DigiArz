@@ -72,6 +72,82 @@ BEGIN
   ) THEN
     RAISE EXCEPTION 'conditional_orders contains values outside numeric(34,18) contract';
   END IF;
+
+  -- Reject active Limit orders whose current reservation cannot support the
+  -- candidate worker's remaining sell quantity or whose asset/status is wrong.
+  IF EXISTS (
+    SELECT 1
+    FROM public.orders o
+    LEFT JOIN public.order_reservations r
+      ON r.order_id=o.id AND r.user_id=o.user_id
+    WHERE o.order_type='limit'
+      AND o.status IN ('pending','partially_filled')
+      AND (
+        r.id IS NULL
+        OR r.status <> 'reserved'
+        OR r.asset IS DISTINCT FROM
+          CASE WHEN o.side='buy' THEN 'USDT'
+               ELSE left(o.symbol,length(o.symbol)-4) END
+        OR r.reserved_amount-r.consumed_amount-r.released_amount <= 0
+        OR (o.side='sell'
+            AND r.reserved_amount-r.consumed_amount-r.released_amount
+                < o.remaining_amount)
+      )
+  ) THEN
+    RAISE EXCEPTION 'active Limit orders contain missing, invalid, wrong-asset, or underfunded reservations';
+  END IF;
+
+  -- The unchanged TP/SL worker consumes the entire conditional reservation
+  -- after executing c.amount. Require exact one-to-one quantity accounting.
+  -- Stop-Limit parents must retain a valid same-asset reservation until their
+  -- worker atomically replaces it with the child Limit reservation.
+  IF EXISTS (
+    SELECT 1
+    FROM public.conditional_orders c
+    LEFT JOIN public.orders o
+      ON o.id=c.order_id AND o.user_id=c.user_id
+    LEFT JOIN public.order_reservations r
+      ON r.order_id=c.order_id AND r.user_id=c.user_id
+    WHERE c.status='pending'
+      AND (
+        o.id IS NULL
+        OR o.status <> 'pending'
+        OR o.order_type <> 'conditional'
+        OR o.side IS DISTINCT FROM c.side
+        OR o.amount IS DISTINCT FROM c.amount
+        OR r.id IS NULL
+        OR r.status <> 'reserved'
+        OR r.asset IS DISTINCT FROM
+          CASE WHEN c.side='buy' THEN 'USDT'
+               ELSE left(c.symbol,length(c.symbol)-4) END
+        OR r.consumed_amount < 0
+        OR r.released_amount < 0
+        OR r.consumed_amount+r.released_amount > r.reserved_amount
+        OR (c.order_kind IN ('take_profit','stop_loss')
+            AND (
+              c.side <> 'sell'
+              OR r.reserved_amount <> c.amount
+              OR r.consumed_amount <> 0
+              OR r.released_amount <> 0
+            ))
+        OR (c.order_kind='stop_limit' AND c.side='sell'
+            AND r.reserved_amount-r.consumed_amount-r.released_amount < c.amount)
+      )
+  ) THEN
+    RAISE EXCEPTION 'pending conditional orders contain parent/reservation inconsistencies';
+  END IF;
+
+  -- A reserved amount attached to a terminal/triggered parent is stale;
+  -- triggered Stop-Limit parents must have released the parent reservation.
+  IF EXISTS (
+    SELECT 1
+    FROM public.order_reservations r
+    JOIN public.orders o ON o.id=r.order_id AND o.user_id=r.user_id
+    WHERE r.status='reserved'
+      AND o.status IN ('filled','cancelled','rejected','triggered')
+  ) THEN
+    RAISE EXCEPTION 'terminal or triggered orders retain active reservations';
+  END IF;
 END
 $preflight$;
 
