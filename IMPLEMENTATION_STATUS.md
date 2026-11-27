@@ -1958,3 +1958,13 @@
 - [x] Current PR #67 remains open, Draft, unmerged; branch remains based on main with no behind commits at the last comparison. The PR body now records the catalog-admin source findings and the new audit tooling.
 - [ ] Next: check the latest docs-only head's CI, then use the verified fingerprint only when an authorized, stable current Production snapshot is appropriate. After source/schema reconciliation, prepare canonical pair/asset migration candidate and end-to-end disposable Market/Limit/TP-SL/Stop-Limit tests. OCO remains a separate state machine.
 - [x] No Production/Supabase write, migration/db push, financial data change, cron/worker/grant/RLS change, merge, deploy/release, APK/Pages publication or cost was made.
+
+## Shahram 167 — strengthen canonical pair/ledger consistency fixture (2026-11-27)
+- [x] Rechecked live PR #67: open, Draft, unmerged, mergeable; branch is 118 commits ahead and 0 behind main at base fbfb5e974e754088a32c9fdcd76fc2ca9ab0f98b.
+- [x] Latest CI before this change: run 46040715926 on head 593e66d709bf3894451c56574004050265022088 completed SUCCESS; all 27 main steps passed, including real two-session Limit/TP-SL/Stop-Limit race steps 17–19, authoritative conditional migrations step 25, duplicate-ticker candidate step 26 and read-only fingerprint step 27.
+- [x] Reviewed the canonical fixture and found its original proof did not enforce database-level consistency between a pair ID and the base/quote IDs copied onto orders/trades, nor did it bind a reservation to the same user/order at the schema level.
+- [x] Strengthened only the disposable fixture supabase/tests/canonical_asset_identity_candidate.sql: pair composite uniqueness/FK; order-to-pair composite FK; trade-to-order composite FK; one reservation per order and composite same-user FK; order filled/remaining accounting check.
+- [x] Added worker fail-closed checks for mismatched order/pair identity and reservation owner; added regression assertions for pair/base mismatch rejection and malformed same-ticker reservation preservation followed by successful retry.
+- [!] The new candidate-fixture CI is pending. This remains a miniature disposable Market/Limit proof, not an authoritative Production migration or proof of real Market/Limit/TP-SL/Stop-Limit canonical source parity.
+- [ ] Next after CI: inspect exact step logs; if green, continue building a coordinated canonical-ID source-parity harness and catalog provisioning/disable candidate. Do not copy fixture logic into Production or treat this as rollout-ready.
+- [x] No Production query/write, migration/db push, pair/price/wallet/order/trade/reservation/Cron/worker/Edge Function/grant/RLS change, merge, deploy/release, APK/Pages publication or cost was made.
