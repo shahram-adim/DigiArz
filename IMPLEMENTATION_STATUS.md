@@ -2081,3 +2081,13 @@
 - [!] Current head docs update 784b6ee257d843eb160a459e0c60073e4b87fdac and status update require fresh CI. Run 2379 is the successful code/test head; no green claim yet for the newest docs head.
 - [ ] Next: await docs-head CI; then freeze the canonical dependency manifest and build a non-executable draft of the additive canonical schema/function migration. Migration replay remains blocked by 17 missing applied SQL sources, 20 timestamp mismatches and 2 local-only migrations.
 - [x] No Production data/schema/function/ACL/RLS/Cron/worker/Auth change, no merge/db push/deploy/release, no APK/Pages publication or cost.
+
+
+## Shahram 181 — OCO gap documented; canonical rollout remains blocked (2026-11-27)
+
+- [x] Rechecked PR #67 live: open, Draft, unmerged, mergeable; branch `plan/all-catalog-assets-tradable-2026-11-27`, reviewed head before this documentation change `4507cf38cbb385f53ecd2a8416126e70c3116b37`.
+- [x] Latest exact-decimal workflow associated with that head: run `46046043108`, completed SUCCESS. Its job contains 27 substantive steps, including authoritative TP/SL and Stop-Limit migration lifecycle tests (with explicitly isolated Market/Limit adapters), and the independent canonical identity fixture. This does not prove canonical IDs are propagated through the authoritative trading call graph.
+- [x] Confirmed authoritative checked-in migration paths expose TP/SL and Stop-Limit, but no OCO group/sibling lifecycle exists. Added `docs/OCO_LINKED_ORDER_DESIGN_2026-11-27.md` as a design-only specification covering shared reservation, atomic winner claim, cancellation races, partial-fill policy, canonical IDs, security boundaries, and disposable test matrix.
+- [!] OCO is still NOT implemented. The new design document commit is `2658c9d472f4589c60e7c6c2bf8732dc577780cf`; it has not yet received a fresh CI run. Do not claim CI success for the updated documentation head.
+- [!] No canonical schema/function migration has been drafted or applied. Market/Limit engine parity, end-to-end canonical IDs through TP/SL and Stop-Limit, OCO implementation, provider-observed freshness, full catalog price coverage, and migration-ledger reconciliation remain blockers.
+- [x] No Production data/schema/function/ACL/RLS/Cron/worker/Auth change; no merge, db push, deploy/release, APK/Pages publication, or cost.
