@@ -69,3 +69,14 @@ test('the refresh handler never deletes current-price rows from a partial provid
   assert.match(source, /Retain omitted rows/);
   assert.match(source, /old fetched_at values as stale/);
 });
+
+
+test('PostgreSQL fixture reproduces the deployed plain-insert 23505 and verifies the idempotent upsert path', () => {
+  const sql = fs.readFileSync(path.join(__dirname, '../supabase/tests/toman_market_upsert_idempotency.sql'), 'utf8');
+  assert.match(sql, /CONSTRAINT market_toman_prices_exchange_asset_symbol_quote_currency_key\s+UNIQUE \(exchange, asset_symbol, quote_currency\)/);
+  assert.match(sql, /EXCEPTION WHEN unique_violation/);
+  assert.match(sql, /RETURNED_SQLSTATE/);
+  assert.match(sql, /v_sqlstate <> '23505'/);
+  assert.match(sql, /ON CONFLICT \(exchange, asset_symbol, quote_currency\)/);
+  assert.match(sql, /ROLLBACK;/);
+});
