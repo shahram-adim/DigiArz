@@ -2241,3 +2241,14 @@
 - [!] Confirmed local-only KuCoin/Gate.io migration files are documented as older `refresh_market_prices()` replacements that omit the later 515-ID CoinGecko cap; do not apply or push them as-is.
 - [x] Evidence and status docs updated only. No Production writes, business-row reads, migration replay/repair, function/ACL/RLS/trigger/Cron/worker/Auth change, db push, merge, deploy, APK/Pages publication or cost.
 - [ ] Next: recover missing applied SQL bodies and trusted deployment artifacts; inspect timestamp variants and reconcile the live/local price-refresh implementation; then extend source-parity coverage for catalog auto-activation and every external writer. Keep PR #67 Draft and non-deployable.
+
+
+### Shahram 192 follow-up — missing migration source sweep and CI 2411 verified (2026-11-27)
+
+- [x] Rechecked live PR #67: open, Draft, unmerged, mergeable=true; current HEAD before this documentation commit was `e0e810102d7410bacfc7e03ccf029daf8bffad48`.
+- [x] CI run #2411 / `46051903125` completed SUCCESS on that exact HEAD. All 28 substantive steps passed, including authoritative TP/SL and Stop-Limit migration harness, authoritative Market/Limit migration harness, exact-decimal and concurrency checks, duplicate-ticker canonical isolation, and schema fingerprint.
+- [x] Performed another bounded recovery attempt for the 17 missing applied migration SQL sources: GitHub code search for four representative names returned only `supabase/MIGRATION_RECONCILIATION.md`; recursive trees of eight relevant historical branches contained none of the sampled exact missing filenames. This is not exhaustive proof of absence across all Git objects, backups, deployment artifacts or other branches.
+- [x] Updated `docs/TRADING_LEDGER_SCHEMA_RECOVERY_EVIDENCE_2026-11-27.md` with the branch/code-search scope, exact CI run and remaining source-of-truth boundary.
+- [!] The 17 applied migrations with no matching local SQL source and 20 same-name timestamp mismatches remain unresolved. Do not reconstruct their SQL from names, live catalog state or neighboring migration bodies. Do not repair migration history or run db push.
+- [ ] Next: recover missing SQL bodies from a trusted deployment artifact/backup or historical Git object; inspect all 20 timestamp variants against authoritative deployment records; reconcile live/local price-refresh and catalog auto-activation writer source; extend disposable source-parity harness. Keep PR #67 Draft and non-deployable.
+- [x] No Production writes, business-row reads, migration replay/repair, function/ACL/RLS/trigger/Cron/worker/Auth change, db push, merge, deploy, APK/Pages publication or cost.
