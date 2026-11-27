@@ -1788,3 +1788,13 @@
 - [!] Candidate success remains disposable-fixture evidence only. No Production code was changed; current production source does not yet request provider-observed timestamp and duplicate-ticker ledger identity remains a blocking architecture item for the owner's all-assets-tradable requirement.
 - [ ] Next: design canonical internal asset identity across pairs/orders/trades/reservations/balances/UI and add disposable lifecycle tests for distinct canonical IDs sharing a display ticker. Then verify the latest docs-only CI and continue external service_role caller inventory.
 - [x] No Production/Supabase write, SQL/Edge Function invocation, schema/pair/price/queue/Cron/worker/grant/RLS change, migration/db push, merge, deploy, release or cost was made.
+
+
+## Shahram 185 — timestamp rounding fix passed; canonical-ID market-trade prototype added (2026-11-27)
+- [x] A flaky timestamp regression was traced to PostgreSQL numeric-to-bigint cast rounding Unix seconds forward. Test fixtures now use floor(epoch) before conversion; receive-time is no longer accidentally newer/older due to rounding.
+- [x] GitHub Actions run 46033468800 on exact candidate commit cf71096f493b8c7db2a6b562b1c282aca748bbb8 completed SUCCESS; the full workflow, fair scheduler PostgreSQL 17 fixture and concurrency test passed.
+- [x] Added design-only architecture document docs/CANONICAL_ASSET_IDENTITY_DESIGN_2026-11-27.md: immutable internal asset UUID, provider-ID mapping, pair_id, prices keyed by pair, ledger balances/reservations/orders/trades by canonical asset IDs, and migration/backfill safety.
+- [x] Added isolated SQL prototype supabase/tests/canonical_asset_identity_candidate.sql and wired it into CI. It models two distinct canonical assets with the same DOT display ticker and same visible DOT/USDT label, but distinct pair IDs, provider IDs, prices and balances; Market buy/sell uses pair_id and verifies no cross-asset balance contamination, fee arithmetic, provider-ID uniqueness and stale-price rejection.
+- [!] The new canonical-identity SQL test is wired but not yet CI-verified on the latest branch commit; current proof is design/prototype only and covers Market buy/sell, not yet Limit, TP/SL, OCO or Stop-Limit worker lifecycle.
+- [ ] Next: confirm CI on current HEAD including the new canonical identity fixture; then extend the fixture to reservations and Limit/TP-SL/Stop-Limit worker lifecycle, concurrency, unauthorized caller and UI/portfolio mapping tests.
+- [x] No Production/Supabase write, SQL/Edge Function invocation, schema/pair/price/queue/Cron/worker/grant/RLS change, migration/db push, merge, deploy, release or cost was made.
