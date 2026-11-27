@@ -363,7 +363,36 @@ BEGIN
 END;
 $$;
 
-DO $$
+
+-- Pair administration is scoped exclusively by immutable pair_id, never display_pair.
+CREATE OR REPLACE FUNCTION canonical_asset_candidate.disable_pair(p_pair_id uuid)
+RETURNS integer
+LANGUAGE plpgsql
+AS $
+DECLARE
+  v_cancelled integer;
+BEGIN
+  UPDATE canonical_asset_candidate.pairs
+  SET is_enabled=false
+  WHERE pair_id=p_pair_id AND is_enabled;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'pair unavailable' USING ERRCODE='23514';
+  END IF;
+
+  UPDATE canonical_asset_candidate.orders
+  SET status='cancelled',remaining_amount=0
+  WHERE pair_id=p_pair_id AND status='pending';
+  GET DIAGNOSTICS v_cancelled = ROW_COUNT;
+
+  DELETE FROM canonical_asset_candidate.reservations r
+  USING canonical_asset_candidate.orders o
+  WHERE r.order_id=o.order_id AND o.pair_id=p_pair_id AND o.status='cancelled';
+
+  RETURN v_cancelled;
+END;
+$;
+
+DO $
 DECLARE
   v_user uuid := '10000000-0000-0000-0000-000000000001';
   v_dot_a uuid := '20000000-0000-0000-0000-000000000001';
@@ -376,6 +405,8 @@ DECLARE
   v_limit_sell uuid;
   v_limit_stale uuid;
   v_limit_bad_reservation uuid;
+  v_disable_a uuid;
+  v_disable_b uuid;
   v_processed integer;
   v_a numeric;
   v_b numeric;
@@ -562,6 +593,24 @@ BEGIN
   EXCEPTION WHEN check_violation THEN
     NULL;
   END;
+
+  -- Disabling one same-label pair must not cancel another pair's orders/reservations.
+  v_disable_a := canonical_asset_candidate.place_limit_order(v_user,v_pair_a,'sell',0.1,30);
+  v_disable_b := canonical_asset_candidate.place_limit_order(v_user,v_pair_b,'sell',0.1,30);
+  IF canonical_asset_candidate.disable_pair(v_pair_a)<>1 THEN
+    RAISE EXCEPTION 'pair disable did not cancel exactly one pending order';
+  END IF;
+  IF (SELECT status FROM canonical_asset_candidate.orders WHERE order_id=v_disable_a)<>'cancelled'
+     OR EXISTS (SELECT 1 FROM canonical_asset_candidate.reservations WHERE order_id=v_disable_a) THEN
+    RAISE EXCEPTION 'disabled pair retained its pending order/reservation';
+  END IF;
+  IF (SELECT status FROM canonical_asset_candidate.orders WHERE order_id=v_disable_b)<>'pending'
+     OR NOT EXISTS (SELECT 1 FROM canonical_asset_candidate.reservations WHERE order_id=v_disable_b) THEN
+    RAISE EXCEPTION 'pair disable crossed into another same-display-symbol pair';
+  END IF;
+  IF NOT (SELECT is_enabled FROM canonical_asset_candidate.pairs WHERE pair_id=v_pair_b) THEN
+    RAISE EXCEPTION 'unrelated same-label pair was disabled';
+  END IF;
 
   RAISE NOTICE 'Canonical asset identity / duplicate ticker Market and Limit lifecycle: PASS';
 END $$;
