@@ -1573,3 +1573,15 @@
 - [x] همه بررسی‌های Supabase فقط‌خواندنی بودند؛ هیچ ردیف مالی یا داده کاربر برای تست خوانده یا تغییر داده نشد.
 - [x] هیچ Worker/RPC مالی اجرا نشد.
 - [x] هیچ Migration، Grant، Policy، Cron، Edge Function Deploy، refresh دستی، حذف داده یا انتشار APK انجام نشد.
+
+
+## Shahram 167 — read-only Production catalog source and collision audit (2026-11-27)
+- Recovered the exact applied `public.refresh_crypto_assets()` definition from Production via `pg_get_functiondef`; it is SECURITY DEFINER with empty search_path, service_role-only EXECUTE, and upserts CoinGecko catalog rows by canonical `coingecko_id`, replacing `symbol` with the uppercased provider ticker and setting `is_active=true`. It does not provision trading pairs.
+- The function processes paginated CoinGecko responses under a transaction advisory lock; it validates non-empty ID/symbol/name and positive price but does not enforce ticker uniqueness or pair-symbol format before catalog upsert.
+- Read-only schema inventory: `crypto_assets` has no unique symbol constraint; `demo_trading_pairs` has unique `pair_symbol` and unique `base_coingecko_id`, FK to crypto_assets, and USDT-only quote constraint. `admin_market_listings` has a before insert/update uniqueness trigger; no triggers were returned for `crypto_assets` or `demo_trading_pairs` in the inspected catalog.
+- Live read-only counts: 19,012 active catalog assets; 2,365 duplicate active ticker groups containing 6,662 rows; 420 enabled pairs; 0 enabled pairs missing a market_prices row.
+- Recovered current activation bodies: automatic and manual paths still impose curated-list, $1m volume, rank <= 2,000, recent exchange-observation, ticker-uniqueness, and fresh CoinGecko price conditions.
+- Added `docs/PRODUCTION_CATALOG_SOURCE_AUDIT_2026-11-27.md` to PR #67 with the source/schema findings and design consequences.
+- Key blocker: do not bulk-provision all active catalog rows by ticker. Canonical ID must remain authoritative; duplicate tickers require a collision-resolution or supported alternative market-symbol policy before any asset is marked tradable.
+- No Production function was executed; no Production data/schema/pairs/prices/grants/RLS/Cron/workers changed. No migration, db push, merge, deploy, release, or paid infrastructure action.
+- Remaining: complete writer/caller and price-refresh coverage inventory, generate a compact read-only duplicate-ticker reconciliation, then build source-faithful disposable PostgreSQL tests and a reviewed migration proposal.
