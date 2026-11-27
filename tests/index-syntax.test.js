@@ -267,6 +267,7 @@ test('market change fallback uses the crypto asset metadata timestamp, not the n
   vm.runInNewContext(html.slice(start, end) + '\nthis.getMarketChange24h=getMarketChange24h;', context);
   assert.equal(context.getMarketChange24h({change:12,updated_at:'fresh',change_updated_at:'stale'}), null);
   assert.equal(context.getMarketChange24h({change:12,updated_at:'stale',change_updated_at:'fresh'}), 12);
+  assert.equal(context.getMarketChange24h({change:12,updated_at:'fresh',change_updated_at:null}), null);
 });
 
 test('24h ticker batches retain successful results when an independent batch fails', () => {
