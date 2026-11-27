@@ -361,3 +361,11 @@ The live public.get_crypto_market(...) function computes trade_enabled from a po
 
 
 The live private.guard_active_account_writes() implementation does not call current_account_is_active(). It directly reads public.profiles.is_active for NEW.user_id with FOR SHARE, rejects missing/inactive profiles, and returns NEW only for an active account. The source-contract test now asserts this exact row-locking behavior rather than assuming a helper call.
+
+
+### Reservation and account/fee API dependencies
+
+Three additional live Production definitions were captured as test-only snapshots and added to the catalog source contract suite:
+- public.get_my_order_reservations(uuid[]) (97189e59fbf37bb5f85b215dadd13dfd) is owner-scoped and limits the request to 1–100 order IDs, but returns only text asset plus reservation arithmetic/status. The UI/API contract must be extended to include canonical asset/pair identifiers without weakening user scoping.
+- public.current_account_is_active() (d932cd1d0da21bb96bdc0a381f7dcbc3) reads the active profile for auth.uid(); the write guard trigger independently reads NEW.user_id and locks the profile row FOR SHARE.
+- public.get_demo_trading_fee_rate(text,text) (546d80d7105228ed97da26c5ed0c7b7f) selects enabled maker/taker fee by quote asset. Preserve this quote-level fee behavior while moving pair identity to pair_id.
