@@ -126,6 +126,23 @@ jobs:
             -c "DO \$verify\$ BEGIN
               IF (SELECT format_type(a.atttypid,a.atttypmod) FROM pg_attribute a WHERE a.attrelid='public.orders'::regclass AND a.attname='amount') <> 'numeric(24,8)' THEN RAISE EXCEPTION 'failed Stop-Limit price preflight changed schema'; END IF;
             END \$verify\$;"
+      - name: Verify TP-SL parent trigger-price mismatch fails atomically
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_bad_tp_sl_parent_price_test;"
+          psql -h localhost -U postgres -d digiarz_bad_tp_sl_parent_price_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_setup.sql \
+            -f supabase/tests/exact_decimal_rollout_bad_tp_sl_parent_price.sql
+          if psql -h localhost -U postgres -d digiarz_bad_tp_sl_parent_price_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql; then
+            echo "Expected TP-SL parent trigger-price mismatch to fail rollout preflight."
+            exit 1
+          fi
+          psql -h localhost -U postgres -d digiarz_bad_tp_sl_parent_price_test -v ON_ERROR_STOP=1 \
+            -c "DO \$verify\$ BEGIN
+              IF (SELECT format_type(a.atttypid,a.atttypmod) FROM pg_attribute a WHERE a.attrelid='public.orders'::regclass AND a.attname='amount') <> 'numeric(24,8)' THEN RAISE EXCEPTION 'failed TP-SL price preflight changed schema'; END IF;
+            END \$verify\$;"
       - name: Verify widening migration honors lock timeout atomically
         env:
           PGPASSWORD: postgres
