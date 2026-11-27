@@ -113,7 +113,7 @@ test('activation removes old shell caches and claims clients', async () => {
   let activatePromise;
   harness.listeners.get('activate')({ waitUntil(value) { activatePromise = Promise.resolve(value); } });
   await activatePromise;
-  assert.deepEqual(harness.deleted, ['digiarz-shell-v53', 'digiarz-shell-v54', 'digiarz-shell-v55', 'digiarz-shell-v56', 'digiarz-shell-v57', 'digiarz-shell-v62']);
+  assert.deepEqual(harness.deleted, ['digiarz-shell-v53', 'digiarz-shell-v54', 'digiarz-shell-v55', 'digiarz-shell-v56', 'digiarz-shell-v57', 'digiarz-shell-v62', 'digiarz-shell-v65']);
   assert.equal(harness.claimed, true);
 });
 
