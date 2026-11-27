@@ -7,7 +7,7 @@ const css = fs.readFileSync('src/digiarz-independent-ui.css', 'utf8');
 const sw = fs.readFileSync('sw.js', 'utf8');
 
 test('independent stylesheet loads after all inline styles and before the document closes', () => {
-  const link = '<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=3">';
+  const link = '<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=4">';
   assert.ok(html.includes(link));
   assert.ok(html.lastIndexOf(link) > html.lastIndexOf('</style>'));
   assert.ok(html.indexOf(link) < html.lastIndexOf('</body>'));
