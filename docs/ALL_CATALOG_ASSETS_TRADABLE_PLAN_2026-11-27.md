@@ -121,3 +121,12 @@ Before implementing provisioning, Phase A must also reconcile these Production w
 - `exchange_asset_observations` sync and the `auto_list_verified_exchange_asset` trigger stage/list observations; they do not themselves create canonical `crypto_assets` rows or trading pairs. `admin_market_listings` is not the canonical asset catalog.
 
 **Blocking design requirement:** all mutations that can change canonical ID, active status, or ticker must pass one shared collision-aware admission/reconciliation path. Metadata refresh may update price/name/image fields, but a ticker change that conflicts with another active canonical asset or an enabled pair must fail closed or be atomically reconciled under the same canonical-identity lock. No such change is implemented in this PR yet.
+
+
+### Provider-observed timestamp contract (added 2026-11-27)
+
+- A price observation must carry two distinct timestamps: provider-observed/update time and local receive/process time. The latter must never be substituted for the former when deciding whether a quote is fresh.
+- CoinGecko's `/simple/price` endpoint supports `include_last_updated_at=true` and returns `last_updated_at` as a Unix timestamp per canonical CoinGecko ID. The future scheduler request must ask for it explicitly, convert seconds to `timestamptz`, and fail closed/retry if the field is absent, invalid, stale, or implausibly future-dated. See CoinGecko support documentation: https://support.coingecko.com/articles/7785031254-how-can-i-determine-if-the-pricing-data-for-the-coin-is-outdated-or-stale and API reference: https://coingecko-api-v3.readme.io/v3.0.1/reference/simple-price.
+- Keep `received_at` separately for latency/operations metrics. For KuCoin/Gate.io and any additional provider, first verify the meaning and units of its source timestamp; do not treat a last-fetch timestamp as a last-price-update timestamp without evidence.
+- The current captured Production CoinGecko simple-price request does not include `include_last_updated_at`; its current `market_prices.updated_at` therefore records local processing time, not an independently proven provider observation time. This is a blocker for strict provider-observed freshness until the request/response contract is changed in a reviewed candidate.
+- Candidate fixture now parses `last_updated_at`, passes that observation time to the freshness validator, and retries responses with missing/invalid observation timestamps. Its CI remains required before further design claims.
