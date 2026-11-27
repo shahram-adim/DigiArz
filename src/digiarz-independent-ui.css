@@ -6541,3 +6541,17 @@ body.light-theme select,
 body.light-theme textarea{background:#ffffff!important;border-color:#d5e8fa!important}
 body.light-theme #authView .auth-form{background:linear-gradient(145deg,#ffffff,#f5faff)!important}
 body.light-theme #tab-markets .market-board-v34 .coin{background:linear-gradient(145deg,#ffffff,#f5faff)!important;border-color:#d5e8fa!important}
+
+/* 2026-11-27: eliminate neutral-gray page canvas in the white theme. */
+html:has(body.light-theme),
+body.light-theme,
+body.light-theme .wrap,
+body.light-theme main,
+body.light-theme #appView,
+body.light-theme .content,
+body.light-theme .page,
+body.light-theme .dashboard-page,
+body.light-theme .market-page{
+  background-color:#ffffff!important;
+  background-image:none!important;
+}
