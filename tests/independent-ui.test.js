@@ -7,7 +7,7 @@ const css = fs.readFileSync('src/digiarz-independent-ui.css', 'utf8');
 const sw = fs.readFileSync('sw.js', 'utf8');
 
 test('independent stylesheet loads after all inline styles and before the document closes', () => {
-  const link = '<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=7">';
+  const link = '<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=8">';
   assert.ok(html.includes(link));
   assert.ok(html.lastIndexOf(link) > html.lastIndexOf('</style>'));
   assert.ok(html.indexOf(link) < html.lastIndexOf('</body>'));
@@ -96,7 +96,7 @@ test('Android screenshot correction uses a two-row mobile market layout and comp
 });
 
 test('service worker precaches the new stylesheet under a fresh shell cache', () => {
-  assert.match(sw, /digiarz-independent-ui\.css\?v=7/);
+  assert.match(sw, /digiarz-independent-ui\.css\?v=8/);
 });
 
 test('mobile layouts and reduced-motion accessibility rules are present', () => {
@@ -141,7 +141,7 @@ test('luxury theme final overrides neutralize legacy sky-blue auth and dashboard
   for (const token of [
     'rgba(43,37,91,.82)', 'rgba(183,168,255,.30)', '#30275f',
     '#b7a8ff', '#d0c6ff', 'body.luxury-theme .da-v2-coin',
-    'body.luxury-theme .mobile-bottom-nav button.active'
+    'body.luxury-theme #appView .mobile-bottom-nav button.active'
   ]) assert.ok(finalRules.includes(token), 'final indigo rules include ' + token);
   assert.ok(css.lastIndexOf('body.luxury-theme #authView.auth-reference-layout') > css.indexOf('background:rgba(239,249,255,.92)'));
 });
@@ -152,7 +152,7 @@ test('full indigo-glass foundation covers trading wallet and navigation surfaces
   assert.ok(foundation.length > 0);
   for (const token of [
     '--bg:#111027!important', '--panel:rgba(31,26,72,.78)!important',
-    'body.luxury-theme .tabs', 'body.luxury-theme .mobile-bottom-nav',
+    'body.luxury-theme .tabs', 'body.luxury-theme #appView .mobile-bottom-nav',
     'body.luxury-theme .trade-box', 'body.luxury-theme .asset-row',
     'body.luxury-theme .advanced-order-form-v36',
     'body.luxury-theme .orders-center-v36',
@@ -1128,7 +1128,7 @@ test('bright indigo market hero actions and mobile navigation retain readable li
   for(const token of ['body.luxury-theme #tab-markets .market-hero-v34 *',
     'color:#26345f!important','body.luxury-theme #tab-markets .market-hero-actions button',
     'background:linear-gradient(145deg,#fff,#edf2ff)!important',
-    'body.luxury-theme .mobile-bottom-nav button','body.luxury-theme .mobile-bottom-nav button.active'])
+    'body.luxury-theme #appView .mobile-bottom-nav button','body.luxury-theme #appView .mobile-bottom-nav button.active'])
     assert.ok(final.includes(token),'bright indigo contrast rule includes '+token);
 });
 
@@ -1233,11 +1233,11 @@ test('final icy-indigo override neutralizes legacy dark asset, history, settings
   const final=css.slice(css.lastIndexOf('Final icy-indigo surfaces: remove legacy dark/sky-blue overrides'));
   assert.ok(final.length>0,'final icy-indigo correction layer exists');
   for(const token of [
-    'body.luxury-theme #tab-assets #assetSummary .stat',
-    'body.luxury-theme #tab-settings .setting-row',
-    'body.luxury-theme #tab-history .table-wrap',
+    'body.luxury-theme #appView #tab-assets #assetSummary .stat',
+    'body.luxury-theme #appView #tab-settings .setting-row',
+    'body.luxury-theme #appView #tab-history .table-wrap',
     'background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(235,241,255,.96))!important;',
-    'body.luxury-theme #tab-history .table-wrap th',
+    'body.luxury-theme #appView #tab-history .table-wrap th',
     'body.luxury-theme #tab-settings .theme-choice-group button[aria-pressed=true]',
     'body.luxury-theme .da-v2-hero',
     'linear-gradient(125deg,#f8faff 0%,#e6edff 55%,#dceaff 100%)',
@@ -1257,8 +1257,8 @@ test('icy-indigo trading theme also neutralizes nested order-book headers and ro
   const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
   const final=css.slice(css.lastIndexOf('Order-book header/rows: finish the icy-indigo treatment'));
   for(const token of [
-    'body.luxury-theme #tab-trade .orderbook-head',
-    'body.luxury-theme #tab-trade .orderbook-row',
+    'body.luxury-theme #appView #tab-trade .orderbook-head',
+    'body.luxury-theme #appView #tab-trade .orderbook-row',
     'background:rgba(255,255,255,.88)!important;',
     'color:#52618b!important;'
   ]) assert.ok(final.includes(token),'icy-indigo order-book correction includes '+token);
@@ -1280,7 +1280,7 @@ test('offline icon fallback renders vector artwork and exposes a clear active na
   assert.ok(html.includes("b.setAttribute('aria-current','page')"),'tab changes announce the selected page');
   assert.ok(html.includes("b.removeAttribute('aria-current')"),'inactive tabs clear current-page semantics');
   const final=css.slice(css.lastIndexOf('Final icon finish: quieter inactive glyphs'));
-  for(const token of ['stroke-width:2.35','button.active:after','body.dark-theme .mobile-bottom-nav button.active','body.light-theme .mobile-bottom-nav button.active','body.luxury-theme .mobile-bottom-nav button.active']) {
+  for(const token of ['stroke-width:2.35','button.active:after','body.dark-theme #appView .mobile-bottom-nav button.active','body.light-theme #appView .mobile-bottom-nav button.active','body.luxury-theme #appView .mobile-bottom-nav button.active']) {
     assert.ok(final.includes(token),'active icon treatment includes '+token);
   }
 });
@@ -1319,7 +1319,7 @@ test('icy-indigo premium identity is visibly distinct from white while remaining
     'linear-gradient(115deg,rgba(231,237,255,.94),rgba(215,226,255,.86))',
     'body.luxury-theme .hero',
     'linear-gradient(125deg,#dce5ff 0%,#cbd8ff 48%,#e4edff 100%)',
-    'body.luxury-theme .mobile-bottom-nav button.active',
+    'body.luxury-theme #appView .mobile-bottom-nav button.active',
     'color:#fff!important;'
   ]) assert.ok(final.includes(token),'premium icy-indigo layer includes '+token);
   assert.ok(final.includes('color-scheme:light!important;'),'third theme retains a light color scheme');
@@ -1335,7 +1335,7 @@ test('icy-indigo refinement v2 strengthens cool-blue glass identity while retain
     'linear-gradient(145deg,#e8edff 0%,#d8e1ff 48%,#e1edff 100%)',
     'linear-gradient(145deg,rgba(245,247,255,.98),rgba(222,231,255,.96))',
     'linear-gradient(125deg,#d0dcff 0%,#c3d2ff 48%,#dce8ff 100%)',
-    'body.luxury-theme .mobile-bottom-nav button.active',
+    'body.luxury-theme #appView .mobile-bottom-nav button.active',
     'color:#fff!important;'
   ]) assert.ok(final.includes(token),'icy-indigo refinement includes '+token);
   assert.ok(final.includes('color-scheme:light!important;')===false || css.includes('color-scheme:light!important;'));
@@ -1472,10 +1472,10 @@ test('icon labels remain readable across themes and compact mobile navigation',(
   const marker='/* 2026-11-27 — icon-label readability pass across all three themes.';
   const rules=css.slice(css.lastIndexOf(marker));
   assert.ok(rules.length>0,'final icon-label readability pass exists');
-  assert.ok(!rules.includes('#appView'),'readability rules do not depend on a missing wrapper');
-  for(const selector of ['.category-btn .category-label','.da-v2-quick-grid button b',
-    '.mobile-bottom-nav button span','body.light-theme .category-btn .category-label',
-    'body.luxury-theme .category-btn .category-label']){
+  assert.ok(rules.includes('#appView'),'readability rules are scoped to the real application wrapper');
+  for(const selector of ['#appView .category-btn .category-label','#appView .da-v2-quick-grid button b',
+    '#appView .mobile-bottom-nav button span','body.light-theme #appView .category-btn .category-label',
+    'body.luxury-theme #appView .category-btn .category-label']){
     assert.ok(rules.includes(selector),'icon label contrast/size is explicitly covered: '+selector);
   }
   assert.match(rules,/font-size:12px!important/,'category labels have a readable desktop baseline');
