@@ -2068,3 +2068,16 @@
 - [!] The corrected test commit 6119376bc08d2abf9f262681f0c20d4c9836ecca and later docs/status heads require fresh CI. No green claim yet for the complete 19-function catalog/guard suite.
 - [ ] Next: verify latest CI and then capture get_my_order_reservations plus any remaining user-facing reservation/fee helper dependencies before freezing the canonical migration dependency manifest.
 - [x] No Production changes, merge, migration/db push, deploy/release, cron/worker/grant/RLS changes, publication or costs.
+
+
+## Shahram 179 — live catalog source suite and reservation API pinned; CI passed (2026-11-27)
+
+- [x] Run 2379 (46045817184) completed SUCCESS on commit 30f1fbaa361c4ee3b26d48a8266781820cc1945d. Node/browser integration output: 131 tests, 131 pass, 0 fail.
+- [x] The successful suite includes all 18 catalog/discovery function fingerprint snapshots, active-account guard fingerprint/trigger behavior, current market-read ticker-price contract, provider symbol mutation, curated/volume/rank gates, exchange ambiguity staging, and reservation read API source contract.
+- [x] Captured additional live Production snapshots for current_account_is_active(), get_demo_trading_fee_rate(text,text), and get_my_order_reservations(uuid[]). Reservation API is owner-scoped and bounded to 1–100 order IDs, but currently returns ticker text asset only; canonical ID fields are required in the future API.
+- [x] Security Advisor read-only review at 2026-11-27 17:58 UTC: 2 anon-executable SECURITY DEFINER functions (get_admin_market_listings and get_exchange_discovered_market_assets), 23 authenticated-executable SECURITY DEFINER functions, 15 RLS-enabled tables without policies, and leaked-password protection disabled. Function bodies show the two anon functions return curated market metadata / recent unmatched or ambiguous public exchange discovery fields, not user rows. Intentionality still needs owner confirmation.
+- [x] The separate table listing also flags two private pg_net backup tables with RLS disabled; follow-up metadata check found no direct anon/authenticated/service_role table grants, only postgres grants, so public exposure was not established.
+- [!] No grants, policies, RLS state or Auth settings were changed. Do not blanket-revoke authenticated user RPCs; inspect individual authorization checks. Do not auto-enable RLS on worker tables without an access design.
+- [!] Current head docs update 784b6ee257d843eb160a459e0c60073e4b87fdac and status update require fresh CI. Run 2379 is the successful code/test head; no green claim yet for the newest docs head.
+- [ ] Next: await docs-head CI; then freeze the canonical dependency manifest and build a non-executable draft of the additive canonical schema/function migration. Migration replay remains blocked by 17 missing applied SQL sources, 20 timestamp mismatches and 2 local-only migrations.
+- [x] No Production data/schema/function/ACL/RLS/Cron/worker/Auth change, no merge/db push/deploy/release, no APK/Pages publication or cost.
