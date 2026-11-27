@@ -1,14 +1,19 @@
 -- End-to-end accounting checks for the candidate Limit worker.
 -- Runs only against the disposable PostgreSQL 17 CI database.
+INSERT INTO auth.users (id) VALUES
+('10000000-0000-0000-0000-000000000001'),
+('20000000-0000-0000-0000-000000000002'),
+('30000000-0000-0000-0000-000000000003');
 INSERT INTO public.profiles (id, is_active) VALUES
 ('10000000-0000-0000-0000-000000000001', true),
 ('20000000-0000-0000-0000-000000000002', true),
 ('30000000-0000-0000-0000-000000000003', true);
 
-INSERT INTO public.demo_trading_pairs (pair_symbol, quote_asset, is_enabled)
-VALUES ('BTCUSDT', 'USDT', true);
-INSERT INTO public.market_prices (symbol, price, updated_at)
-VALUES ('BTCUSDT', 10.000000000000000001, now());
+INSERT INTO public.crypto_assets (coingecko_id) VALUES ('bitcoin');
+INSERT INTO public.demo_trading_pairs (pair_symbol, base_coingecko_id, quote_asset, is_enabled)
+VALUES ('BTCUSDT', 'bitcoin', 'USDT', true);
+INSERT INTO public.market_prices (symbol, price, source, updated_at)
+VALUES ('BTCUSDT', 10.000000000000000001, 'fixture', now());
 
 INSERT INTO public.wallets (user_id, balance_usdt) VALUES
 ('10000000-0000-0000-0000-000000000001', 1000),
@@ -162,6 +167,9 @@ BEGIN
   END IF;
 
   -- Oversized quote settlements must be skipped before touching either ledger.
+  INSERT INTO auth.users (id) VALUES
+    ('40000000-0000-0000-0000-000000000004'),
+    ('50000000-0000-0000-0000-000000000005');
   INSERT INTO public.profiles (id, is_active) VALUES
     ('40000000-0000-0000-0000-000000000004', true),
     ('50000000-0000-0000-0000-000000000005', true);
@@ -245,6 +253,8 @@ $test$;
 
 -- Production also guards INSERTs into orders, trades, and transactions.
 -- Prove the disposable worker fixture rejects a ledger write for an inactive account.
+INSERT INTO auth.users (id)
+VALUES ('90000000-0000-0000-0000-000000000009');
 INSERT INTO public.profiles (id, is_active)
 VALUES ('90000000-0000-0000-0000-000000000009', false);
 
