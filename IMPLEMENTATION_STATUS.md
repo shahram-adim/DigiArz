@@ -1734,3 +1734,13 @@
 - [!] اجرای #2259 مربوط به نسخهٔ قبل از اصلاح cursor و سقف هم‌زمانی است؛ اجرای نسخه‌های اصلاح‌شده هنوز در حال انجام است و PASS نهایی برای HEAD فعلی اعلام نمی‌شود.
 - [ ] گام بعد: نتیجهٔ CI روی آخرین commit شامل wrap-around و in-flight cap را بررسی کنیم؛ در صورت شکست، فقط fixture/test را اصلاح و دوباره اجرا کنیم. سپس آزمون fairness در برابر هجوم پیوستهٔ admission و آزمون retry خطای HTTP را اضافه کنیم.
 - [x] هیچ Production/Supabase write، تغییر Cron/صف/قیمت/جفت‌ارز، Worker/Edge Function، Migration/db push، merge، deploy، release یا هزینه‌ای انجام نشد.
+
+
+## Shahram 180 — provider failure retry and canonical pair collision tests (2026-11-27)
+- [x] آزمون پاسخ HTTP ناموفق (503) اضافه شد: batch باید در ledger با وضعیت failure ثبت شود، شناسه به retry برود و پس از پاسخ موفق بعدی قیمت معتبر دریافت کند.
+- [x] آزمون برخورد نماد اضافه شد: پذیرش canonical ID دوم با همان pair symbol باید با unique constraint رد شود؛ هیچ نگاشت ticker مبهمی ساخته نمی‌شود.
+- [x] آزمون‌های مرحلهٔ candidate اکنون شامل 1200 دارایی، 12 batch، wrap-around، priority admission، omission و retry، HTTP failure و recovery، duplicate delivery، stale/NaN rejection، source priority، in-flight cap و عدم هم‌پوشانی شناسه‌ها هستند.
+- [x] اجرای CI روی commit `8f70a67c7fdd0209e2cef7822fcac881b6d4fe57`، run #2261، با نتیجهٔ SUCCESS تکمیل شد؛ تست بازسازی Production و candidate شامل اصلاح cursor/wrap-around موفق بودند.
+- [!] اجرای نسخهٔ کامل‌تر با in-flight cap و تست‌های HTTP 503/canonical collision روی HEAD جدید هنوز در GitHub Actions در حال اجراست؛ تا نتیجهٔ دقیق آن PASS نهایی اعلام نمی‌شود.
+- [ ] گام بعد: تأیید CI روی آخرین HEAD؛ سپس بررسی fairness در برابر ورود پیوستهٔ دارایی‌های جدید، سقف retry، source observation timestamps و inventory کامل writerهای catalog. Candidate هنوز صرفاً fixture آزمایشی است و برای Production آماده نیست.
+- [x] هیچ تغییر Production/Supabase، Cron/queue/price/pair، Worker/Edge Function، Migration/db push، merge، deploy، release یا هزینه‌ای انجام نشد.
