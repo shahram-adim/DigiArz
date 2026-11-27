@@ -6429,3 +6429,37 @@ body.luxury-theme #tab-chart .detail-trade .trade-box .field label,
 body.luxury-theme #tab-chart .detail-trade .trade-box .muted{
   color:#465a84!important;
 }
+
+
+/* Indigo-glass legibility pass — dashboard wallet and compact market labels. */
+body.luxury-theme #tab-dashboard .da-v2-account-card .da-v2-wallet-subtitle,
+body.luxury-theme #tab-dashboard .da-v2-account-card .da-v2-wallet-count,
+body.luxury-theme #tab-dashboard .da-v2-account-card .da-v2-account-stats small,
+body.luxury-theme #tab-dashboard .da-v2-account-card .da-v2-trust-row,
+body.luxury-theme #tab-dashboard .da-v2-account-card .da-v2-balance-main span,
+body.luxury-theme #tab-dashboard .da-v2-account-card .da-v2-balance-main small,
+body.luxury-theme #tab-dashboard .da-v2-account-card .muted,
+body.luxury-theme #tab-dashboard .da-v2-account-card .small,
+body.luxury-theme #tab-dashboard .da-v2-account-card small{
+  color:#40537d!important;
+}
+body.luxury-theme #tab-dashboard .da-v2-account-card .da-v2-wallet-link{
+  background:#e5eaff!important;border:1px solid #aebbea!important;color:#344fc5!important;
+}
+body.luxury-theme .top .muted,
+body.luxury-theme .top .tag,
+body.luxury-theme .tabs button:not(.active),
+body.luxury-theme .mobile-bottom-nav button:not(.active),
+body.luxury-theme #tab-markets .market-head,
+body.luxury-theme #tab-markets .market-board-unit,
+body.luxury-theme #tab-markets .market-note,
+body.luxury-theme #tab-markets .market-hero-pills span,
+body.luxury-theme #tab-markets .coin-change-label,
+body.luxury-theme #tab-markets .coin-symbol-en,
+body.luxury-theme #tab-markets .coin-english-name{
+  color:#40537d!important;
+}
+body.luxury-theme #tab-markets .market-head,
+body.luxury-theme #tab-markets .market-board-unit{
+  background:#e6ebff!important;border-color:#aebbea!important;
+}
