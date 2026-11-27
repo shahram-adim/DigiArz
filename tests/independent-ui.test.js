@@ -1414,3 +1414,15 @@ test('mobile market list reserves scroll clearance above the fixed bottom naviga
   assert.ok(fix.includes('#tab-markets #marketList{')&&fix.includes('padding-bottom:160px!important;'));
   assert.ok(fix.includes('#tab-markets #marketList>.coin:last-child{')&&fix.includes('scroll-margin-bottom:160px!important;'));
 });
+
+
+test('admin wallet adjustments preserve decimal strings and enforce wallet storage scale',()=>{
+  const html=fs.readFileSync('index.html','utf8');
+  const start=html.indexOf('async function submitAdminAdjustment('),end=html.indexOf('let dashboardMarketFilter',start);
+  assert.ok(start>=0&&end>start,'admin adjustment handler exists');
+  const handler=html.slice(start,end);
+  assert.ok(handler.includes("parseQuickTradeDecimal(amountRaw,currency==='USDT'?8:0,13)"),'USDT allows eight decimals while Toman is integer-only');
+  assert.ok(handler.includes("DigiDecimal.compareDecimal(amount,'1000000000000')>0"),'server amount cap is checked without floating-point conversion');
+  assert.ok(handler.includes('p_amount:amount'),'RPC receives the validated decimal string');
+  assert.ok(!handler.includes('Number(')&&!handler.includes('parseFloat('),'admin wallet amount avoids binary floating-point conversion');
+});
