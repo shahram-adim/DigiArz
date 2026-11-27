@@ -83,3 +83,11 @@ test('catalog-parity integration seeds referenced auth users and the real market
   assert.ok(integration.includes('base_coingecko_id'));
   assert.ok(integration.includes('(symbol, price, source, updated_at)'));
 });
+
+test('candidate Limit worker owner, security mode, search_path, and EXECUTE ACL are asserted in PostgreSQL integration', () => {
+  assert.ok(integration.includes('REVOKE ALL ON FUNCTION public.process_limit_orders() FROM PUBLIC'));
+  assert.ok(integration.includes('REVOKE EXECUTE ON FUNCTION public.process_limit_orders() FROM anon, authenticated'));
+  assert.ok(integration.includes('GRANT EXECUTE ON FUNCTION public.process_limit_orders() TO service_role'));
+  assert.ok(integration.includes('pg_get_userbyid(p.proowner)'));
+  assert.ok(integration.includes('has_function_privilege'));
+});
