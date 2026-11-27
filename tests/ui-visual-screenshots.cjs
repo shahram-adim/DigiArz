@@ -212,10 +212,12 @@ async function resetPageScroll(page) {
               };
             };
             const edge = document.elementsFromPoint(2, Math.min(200, innerHeight-1)).slice(0,8).map(inspect);
-            const cards=[...document.querySelectorAll('#tab-dashboard > *, #tab-dashboard .card, #tab-dashboard .stat, #tab-dashboard .trade-box, #tab-dashboard .da-v2-hero, #tab-dashboard .da-v2-account-card')].filter(el=>{
-              const r=el.getBoundingClientRect(); return r.width>0&&r.height>0;
-            }).slice(0,30).map(inspect);
-            return {viewport:{width:innerWidth,height:innerHeight}, bodyClass:document.body.className, selectors:selectors.map(describe), edgeAtX2Y200:edge, dashboardCardEffects:cards};
+            const cards=[...document.querySelectorAll('body *')].filter(el=>{
+              const r=el.getBoundingClientRect(), s=getComputedStyle(el);
+              return r.width>0&&r.height>0&&(s.boxShadow!=='none'||s.filter!=='none'||s.backdropFilter!=='none'||getComputedStyle(el,'::before').boxShadow!=='none'||getComputedStyle(el,'::after').boxShadow!=='none');
+            }).slice(0,160).map(inspect);
+            const edgePixels=[100,200,400,600,800].filter(y=>y<innerHeight).map(y=>({y,elements:document.elementsFromPoint(2,y).slice(0,10).map(inspect)}));
+            return {viewport:{width:innerWidth,height:innerHeight}, bodyClass:document.body.className, selectors:selectors.map(describe), edgeAtX2Y200:edge, edgeHitTests:edgePixels, dashboardCardEffects:cards};
           }));
         }
         for (const tab of tabs) {
