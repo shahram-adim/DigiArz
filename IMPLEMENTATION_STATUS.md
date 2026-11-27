@@ -2058,3 +2058,13 @@
 - [!] Runs 2366–2370 are expected failures from the pre-correction commit(s); the corrected test commit 415d66784f27906bd60aa2270b8123e4d091c758 and later docs/status heads require fresh CI. No green claim is made for the corrected suite yet.
 - [ ] Next: verify CI for corrected market-read contract and active-account guard snapshot; then capture the full current DDL/index/trigger/policy dependency matrix and draft an isolated additive canonical migration only after the missing migration sources are accounted for.
 - [x] No Production changes, no merge/db push/migration/deploy/release, no cron/worker/grant/RLS changes, no publication and no new costs.
+
+
+## Shahram 178 — active-account guard source contract corrected (2026-11-27)
+
+- [x] Inspected CI run 46045575608 / Run #2371. The corrected market-read contract passed; the remaining failure was a mistaken test assumption that private.guard_active_account_writes() calls current_account_is_active().
+- [x] Verified exact live guard body: it SELECTs profiles.is_active for NEW.user_id FOR SHARE, rejects missing/inactive profiles and returns NEW only for an active account. It intentionally performs the active-account check directly inside the trigger.
+- [x] Updated tests/canonical-asset-catalog-source.test.js to assert the exact SELECT/FOR SHARE/coalesce guard contract; clarified the implementation in the canonical design doc.
+- [!] The corrected test commit 6119376bc08d2abf9f262681f0c20d4c9836ecca and later docs/status heads require fresh CI. No green claim yet for the complete 19-function catalog/guard suite.
+- [ ] Next: verify latest CI and then capture get_my_order_reservations plus any remaining user-facing reservation/fee helper dependencies before freezing the canonical migration dependency manifest.
+- [x] No Production changes, merge, migration/db push, deploy/release, cron/worker/grant/RLS changes, publication or costs.
