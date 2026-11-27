@@ -1983,3 +1983,10 @@
 - [!] CI runs 46043153310 (owner assertion correction), 46043173872 (status update) and 46043222735 (pair-disable candidate) were still in progress at the time of this entry. No pass is claimed yet.
 - [ ] Await CI; if pair-disable fixture passes, extend canonical pair identity through authoritative TP/SL and Stop-Limit parent/child plus pair-scoped cancellation races. OCO remains a distinct not-yet-built state machine.
 - [x] This work changes only disposable tests/docs in the Draft branch. No Production/Supabase data/schema/function/ACL/RLS/Cron/worker changes, merge, deploy/release, APK/Pages publication or cost.
+## Shahram 170 — correct candidate fixture assertions and SQL delimiters (2026-11-27)
+- [x] Inspected completed CI failures for runs 46043153310, 46043173872, 46043222735, 46043237020 and 46043298257. Candidate step 26 exposed three test-fixture defects: (1) the expected balances after the second valid sell fill were understated; observed correct accounting was base A 1.35 and quote 9975.4485; (2) the ownership mutation assertion did not reliably prove a violating insert against an existing order, so it was replaced with a direct invalid reservation INSERT followed by restoration of the valid reservation; (3) the newly added pair-disable function and DO block had malformed dollar-quote delimiters.
+- [x] Corrected the expected balances, replaced the reservation ownership assertion with a direct FK-negative INSERT test, and used named dollar-quote delimiters $disable_pair$ and $candidate_test$.
+- [x] Verified the corrected source around the new function and DO block via GitHub file read. These corrections are test-only.
+- [!] The corrected head commit b8f08f9322dda517443f443ab189260086ef93b9 is awaiting a new CI run; no success is claimed.
+- [ ] Next: inspect the new run's step 26 and full workflow; if green, move to source-faithful canonical identity for real conditional-order and Stop-Limit parent/child paths. OCO remains separate.
+- [x] No Production/Supabase data or schema changes, no merge, db push, deploy/release, APK/Pages publication, Cron/worker/grant/RLS changes or costs.
