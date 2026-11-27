@@ -14,6 +14,12 @@ test('portfolio total sums wallet and asset values without float drift', () => {
   assert.equal(P.sum(['0.1', '0.2', '0.00000001', '999999999999.12345678']), '999999999999.42345679');
 });
 
+test('values and totals support the full 24-digit database integer range', () => {
+  assert.equal(P.value('1', '123456789012345678901234'), '123456789012345678901234');
+  assert.equal(P.sum(['9999999999999999', '1']), '10000000000000000');
+  assert.equal(P.compare('12345678901234567890.1', '12345678901234567890.0'), 1);
+});
+
 test('invalid and negative balances are never counted as positive holdings', () => {
   assert.equal(P.positiveOrZero('-12.5'), '0');
   assert.equal(P.positiveOrZero('NaN'), '0');
