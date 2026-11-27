@@ -1437,3 +1437,17 @@ test('login hero presents ten distinct cryptocurrency marks around the globe and
   assert.ok(css.includes('#authView .ref-orbit-coin{'),'orbit marks have dedicated responsive styling');
   assert.ok(html.includes('icons/bnb@2x.png'),'BNB orbit uses the correct BNB logo asset');
 });
+
+test('white theme page canvas removes neutral-gray background from every outer application surface',()=>{
+  const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
+  const marker='/* 2026-11-27: eliminate neutral-gray page canvas in the white theme. */';
+  const final=css.slice(css.lastIndexOf(marker));
+  assert.ok(final.length>0,'final white canvas correction exists');
+  for(const selector of ['html:has(body.light-theme)','body.light-theme','body.light-theme .wrap',
+    'body.light-theme main','body.light-theme #appView','body.light-theme .content',
+    'body.light-theme .page','body.light-theme .dashboard-page','body.light-theme .market-page']){
+    assert.ok(final.includes(selector),'white canvas correction covers '+selector);
+  }
+  assert.match(final,/background-color:#ffffff!important/);
+  assert.match(final,/background-image:none!important/);
+});
