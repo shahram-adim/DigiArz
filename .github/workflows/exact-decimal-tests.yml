@@ -297,4 +297,13 @@ jobs:
           psql -h localhost -U postgres -d digiarz_canonical_asset_candidate_test -v ON_ERROR_STOP=1 \
             -f supabase/tests/canonical_asset_identity_candidate.sql
 
+      - name: Verify read-only canonical asset identity schema fingerprint
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_canonical_asset_fingerprint_test;"
+          psql -h localhost -U postgres -d digiarz_canonical_asset_fingerprint_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/canonical_asset_identity_fingerprint_setup.sql \
+            -f supabase/audit/canonical_asset_identity_schema_fingerprint.sql
+
 # TP/SL conditional worker diagnostics are enabled in the isolated CI fixture.
