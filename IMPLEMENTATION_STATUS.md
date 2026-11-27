@@ -1855,3 +1855,12 @@
 - [!] The correction is on commit 776802892afc80b164e8b7907333df775e8b1e8a; a new CI run is required. No pass is claimed yet.
 - [ ] Next: verify the rerun through step 25, fix any additional source/harness issues, then extend the actual migration-derived candidate to canonical pair/asset IDs and duplicate-ticker-safe pricing/reservations. OCO remains separate.
 - [x] No Production/Supabase write, SQL/Edge Function invocation, migration/db push, pair/price/wallet/order/trade/reservation/Cron/worker/grant/RLS change, merge, deploy, release, APK/Pages publication or cost was made.
+
+
+## Shahram 193 — authoritative TP/SL + Stop-Limit migration harness CI passed (2026-11-27)
+- [x] GitHub Actions run 46037695694 completed SUCCESS on the corrected source-parity harness commit 776802892afc80b164e8b7907333df775e8b1e8a.
+- [x] The new workflow step 25 applied the exact checked-in authoritative migrations 20261113162051_add_demo_take_profit_stop_loss_engine.sql and 20261113181827_add_stop_limit_order_engine.sql to a fresh PostgreSQL 17 database, then exercised the migration-defined TP conditional execution and Stop-Limit parent/child trigger lifecycle.
+- [x] The harness verified conditional_orders RLS/read-only authenticated table grants and that process_conditional_orders/process_stop_limit_orders are executable by service_role but not authenticated. The canonical identity fixture (step 26) also passed in the same run.
+- [!] This is source coverage of the real conditional/Stop-Limit migration bodies with explicit isolated adapters for the separate Market/Limit matching engines. It is not complete trade-engine source parity and does not establish canonical pair/asset IDs: the authoritative migrations still use ticker strings for pair lookup, price lookup and reservations. The harness currently exercises take_profit (not a separate stop_loss case); stop_loss branch coverage remains to be added.
+- [ ] Next: create a canonical-ID candidate from these verified authoritative function bodies; carry pair_id/base_asset_id/quote_asset_id through conditional parent/child orders, reservations and execution workers; replace ticker-based price lookup with pair-keyed lookup; add stop_loss, stale price, malformed reservation, retry and cancellation race tests. OCO remains a separate linked-order lifecycle.
+- [x] No Production/Supabase write, SQL/Edge Function invocation, migration/db push, pair/price/wallet/order/trade/reservation/Cron/worker/grant/RLS change, merge, deploy, release, APK/Pages publication or cost was made.
