@@ -1912,3 +1912,12 @@
 - [x] `orders.symbol`، `trades.symbol`، `conditional_orders.symbol`، `order_reservations.asset` و `asset_balances.asset` همگی متن هستند و شناسه canonical در آن‌ها وجود ندارد. جدول‌های مالی/بازار اصلی در این snapshot RLS-enabled گزارش شدند.
 - [!] این snapshot بازیابی‌شده تاریخی است و برابری آن با Production امروز ثابت نشده؛ ACLهای Recovery-Test نیز در restore حذف شده‌اند. از این پروژه برای آزمون مالی استفاده نمی‌شود و grants/owners آن مبنای طراحی نیست.
 - [ ] گام بعد: ساخت inventory دقیق از کلیدها، unique indexes، FKها، triggers، policies و writerها در یک snapshot مجاز و جاری؛ سپس طراحی migration candidate یکپارچه. هیچ Production query/write، migration، db push یا تغییر هزینه‌ای در این مرحله انجام نشد.
+
+
+
+## تکمیل fingerprint کاتالوگ Recovery-Test برای قیود و ایندکس‌ها — ۲۷ نوامبر ۲۰۲۶
+- [x] یک query صرفاً `pg_catalog` روی پروژهٔ تاریخی Recovery-Test اجرا شد؛ فقط indexes، constraints، triggers، RLS و policies جدول‌های هدف را خواند. هیچ جدول مالی/کاربری scan نشد و هیچ داده یا schema تغییر نکرد.
+- [x] کلیدهای یکتا/قیود مهم snapshot مشخص شدند: `demo_trading_pairs(pair_symbol)` و `demo_trading_pairs(base_coingecko_id)`؛ `market_prices(symbol)`؛ `crypto_assets(coingecko_id)` با ایندکس غیر یکتای lower(symbol)؛ `asset_balances(user_id,asset)`؛ `order_reservations(order_id)` و FK مرکب order/user؛ `orders(id,user_id)`؛ `conditional_orders(order_id)`.
+- [x] سه trigger account guard در snapshot روی INSERTهای orders، trades و transactions هستند. قیدهای حسابداری سفارش و رزرو نیز در design doc ثبت شدند تا در migration canonical حذف یا تضعیف نشوند.
+- [!] این snapshot همچنان Recovery-Test تاریخی است و برابری Production امروز ثابت نشده؛ ACLهای restore حذف شده‌اند. هیچ grant یا owner از این snapshot کپی نمی‌شود.
+- [ ] مرحله بعد: تولید manifest ساختاری canonical برای disposable PostgreSQL از همین DDL مستندشده و افزودن parity assertions؛ پیش از هر candidate migration باید schema source gaps و writerهای catalog تکمیل شوند.
