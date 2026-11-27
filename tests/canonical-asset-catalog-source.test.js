@@ -64,7 +64,8 @@ test('live active-account write guard remains attached to orders, trades and tra
   const snapshot = definitions.private_guard_active_account_writes.snapshot;
   const definition = definitions.private_guard_active_account_writes.definition;
   assert.match(snapshot, /Attached BEFORE INSERT to public\.orders, public\.trades and public\.transactions/i);
-  assert.match(definition, /current_account_is_active\(\)/i);
+  assert.match(definition, /SELECT p\.is_active INTO v_active[\s\S]*?FROM public\.profiles p[\s\S]*?WHERE p\.id = NEW\.user_id[\s\S]*?FOR SHARE/i);
+  assert.match(definition, /COALESCE\(v_active, false\) IS NOT TRUE/i);
   assert.match(definition, /Account is inactive/i);
 });
 
