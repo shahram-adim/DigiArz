@@ -81,3 +81,17 @@ A canonical Market/Limit candidate must preserve the authoritative behavior (wal
 ## Safety boundary
 
 No Production SQL was run for this note. No business/user rows were read. No migration, function, table, index, trigger, RLS, grant, cron, worker, account, wallet, order, reservation, trade, or balance was changed. No db push, merge, deployment, APK/Pages publication, or cost was incurred.
+
+
+## Additional historical Production metadata recovered from repository audit records
+
+A second bounded repository search found older read-only Production inspection records on `main`, especially `docs/STOP_LIMIT_QA_MATRIX.md` and `docs/superpowers/reports/2026-11-15-exact-decimal-backend-rpc-review.md`. These records add useful historical schema evidence that was not included in the 2026-11-21 Recovery-Test summary:
+
+- Historical typmods at the 2026-11-15 inspection: `market_prices.price numeric(38,18)`; `orders.amount/price numeric(24,8)`; `trades.amount/price numeric(24,8)`; `asset_balances.balance numeric(28,8)`; `wallets.balance_usdt` and `transactions.amount numeric(24,8)`; order fill/residual, reservation amounts and conditional-order numeric fields were unconstrained numeric.
+- Historical constraints: order accounting equality `filled_amount + remaining_amount = amount`, order positive/range checks, nonnegative asset balance, positive trade amount/price, and reservation nonnegative/accounting checks `consumed_amount + released_amount <= reserved_amount`.
+- Historical FK dependencies: `conditional_orders` references parent and execution orders; `order_reservations` references order/user; `trades` references orders. These were identifier relationships, not numeric-column dependencies.
+- Historical trigger inventory on the four reviewed core tables: account guard triggers on `orders` and `trades`; none recorded on `asset_balances` or `order_reservations`.
+- Historical index summary: indexes covered primary/unique identifiers, user/asset, reservation status, order creation time and trade order/time paths; no index keyed/included the numeric amount/price/balance fields.
+- Historical RLS summary: user/account-scoped policies on the four reviewed tables; policies did not reference numeric columns. The wider Recovery-Test snapshot later counted 21 policies overall.
+
+**Evidence limits:** these are dated, human-authored audit summaries, not raw catalog export or base-table CREATE DDL. They do not prove the schema stayed unchanged after 2026-11-15, do not provide exact constraint/index/policy names or expressions, and do not close the Production-vs-Recovery-Test comparison. The exact original CREATE TABLE statements, all column defaults/nullability, complete index definitions, policy expressions, table ACLs and current migration ledger remain outstanding. Use these records to guide the metadata fingerprint comparison, never as a substitute for it.
