@@ -278,6 +278,17 @@ jobs:
           bash supabase/tests/market_price_scheduler_candidate_concurrency.sh
 
 
+      - name: Apply authoritative TP-SL and Stop-Limit migrations in disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_authoritative_conditional_test;"
+          psql -h localhost -U postgres -d digiarz_authoritative_conditional_test -v ON_ERROR_STOP=1 \\
+            -f supabase/tests/authoritative_conditional_source_parity_setup.sql \\
+            -f supabase/migrations/20261113162051_add_demo_take_profit_stop_loss_engine.sql \\
+            -f supabase/migrations/20261113181827_add_stop_limit_order_engine.sql \\
+            -f supabase/tests/authoritative_conditional_source_parity.sql
+
       - name: Prove canonical asset identity isolates duplicate-ticker demo trades
         env:
           PGPASSWORD: postgres
