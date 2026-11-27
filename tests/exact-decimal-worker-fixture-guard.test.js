@@ -62,7 +62,7 @@ test('Limit worker fixture mirrors Production catalog and the coordinated widene
     'wallets_nonnegative_balance',
     'trades_order_id_fk',
     'transactions_amount_nonzero',
-    'demo_trading_pairs_base_coingecko_id',
+    'demo_trading_pairs_unique_base',
     'market_prices_price_check',
     'ENABLE ROW LEVEL SECURITY',
     'CREATE POLICY "View own orders"',
