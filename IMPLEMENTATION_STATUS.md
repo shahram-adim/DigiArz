@@ -1947,3 +1947,14 @@
 - [!] غیرفعال‌سازی symbol-based در مدل duplicate ticker یک خطر cross-asset است؛ اصلاح باید همراه pair_id و asset_id و در همان تغییر هماهنگ Market/Limit/TP-SL/Stop-Limit انجام شود، نه به‌صورت patch مستقل روی Production.
 - [x] یافته‌ها و fingerprintهای تاریخی در design doc ثبت شدند. تابع `refresh_market_prices()` در Recovery-Test قدیمی‌تر از migration محدودیت ۵۱۵ شناسه است و برای تعریف جاری Production به آن استناد نمی‌شود.
 - [ ] گام بعد: آماده‌سازی manifest از writerها و lifecycle مدیریت pair و طراحی candidate canonical provisioning/disable در PostgreSQL موقت. هیچ Production query/write، migration، db push، تغییر cron یا هزینه‌ای انجام نشد.
+
+
+
+## Shahram 166 — canonical fingerprint query verified in disposable PostgreSQL (2026-11-27)
+- [x] Corrected the Node test regex syntax after CI run `46040194262` exposed the initial test-file parse error. The rerun `46040236103` passed the Node test stage and all PostgreSQL steps through step 11; run `46040272364` later completed SUCCESS on the full workflow before the fingerprint execution step was added.
+- [x] Added disposable bootstrap `supabase/tests/canonical_asset_identity_fingerprint_setup.sql` and workflow step 27 to execute the exact read-only query `supabase/audit/canonical_asset_identity_schema_fingerprint.sql` in a fresh PostgreSQL 17 database.
+- [x] GitHub Actions run `46040451729` on commit `780312d3fdc69e21581c405afffee322e3bdc119` completed SUCCESS. Step 27 (read-only canonical schema fingerprint) passed; all 27 main steps succeeded.
+- [x] The fingerprint SQL was tested only in disposable PostgreSQL. It has not been run on Production. It reads catalogs/information_schema/pg_cron metadata only and does not scan business rows or write data.
+- [x] Current PR #67 remains open, Draft, unmerged; branch remains based on main with no behind commits at the last comparison. The PR body now records the catalog-admin source findings and the new audit tooling.
+- [ ] Next: check the latest docs-only head's CI, then use the verified fingerprint only when an authorized, stable current Production snapshot is appropriate. After source/schema reconciliation, prepare canonical pair/asset migration candidate and end-to-end disposable Market/Limit/TP-SL/Stop-Limit tests. OCO remains a separate state machine.
+- [x] No Production/Supabase write, migration/db push, financial data change, cron/worker/grant/RLS change, merge, deploy/release, APK/Pages publication or cost was made.
