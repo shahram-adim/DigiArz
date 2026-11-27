@@ -187,7 +187,7 @@ CREATE OR REPLACE FUNCTION canonical_asset_candidate.place_limit_order(
   p_user_id uuid,p_pair_id uuid,p_side text,p_amount numeric,p_limit_price numeric
 ) RETURNS uuid
 LANGUAGE plpgsql
-AS $
+AS $$
 DECLARE
   v_pair canonical_asset_candidate.pairs%ROWTYPE;
   v_price canonical_asset_candidate.prices%ROWTYPE;
@@ -264,7 +264,7 @@ $$;
 CREATE OR REPLACE FUNCTION canonical_asset_candidate.process_limit_orders()
 RETURNS integer
 LANGUAGE plpgsql
-AS $
+AS $$
 DECLARE
   v_order canonical_asset_candidate.orders%ROWTYPE;
   v_pair canonical_asset_candidate.pairs%ROWTYPE;
