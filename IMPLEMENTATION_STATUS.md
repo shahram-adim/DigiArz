@@ -1798,3 +1798,12 @@
 - [!] The new canonical-identity SQL test is wired but not yet CI-verified on the latest branch commit; current proof is design/prototype only and covers Market buy/sell, not yet Limit, TP/SL, OCO or Stop-Limit worker lifecycle.
 - [ ] Next: confirm CI on current HEAD including the new canonical identity fixture; then extend the fixture to reservations and Limit/TP-SL/Stop-Limit worker lifecycle, concurrency, unauthorized caller and UI/portfolio mapping tests.
 - [x] No Production/Supabase write, SQL/Edge Function invocation, schema/pair/price/queue/Cron/worker/grant/RLS change, migration/db push, merge, deploy, release or cost was made.
+
+
+## Shahram 186 — canonical duplicate-ticker Market trade prototype CI passed (2026-11-27)
+- [x] GitHub Actions run 46033780380 روی commit c74bdb268c09c97b86c0dfd3131e830b8a836f13 با نتیجهٔ SUCCESS تمام شد؛ تمام 25 مرحلهٔ workflow موفق شدند.
+- [x] مرحلهٔ 24 زمان‌بند عادلانه و concurrency fixture در PostgreSQL 17 موفق شد؛ مرحلهٔ 25 نیز canonical asset identity candidate را اجرا کرد و موفق شد.
+- [x] آزمون canonical identity دو دارایی متفاوت با نماد نمایشی یکسان DOT و جفت نمایشی یکسان DOT/USDT را با pair_id جداگانه معامله کرد؛ خرید و فروش یکی روی موجودی دیگری اثر نگذاشت. کارمزد 0.1٪، نگاشت یکتای provider ID و رد قیمت stale هم تأیید شد.
+- [!] این فقط نمونهٔ Market buy/sell در schema جداشدهٔ disposable است؛ هنوز به معنی پیاده‌سازی در Production نیست و Limit، reservations واقعی، TP/SL، OCO، Stop-Limit، worker lifecycle، RLS/authorization و UI/portfolio باید به همان شناسهٔ canonical منتقل و جداگانه تست شوند.
+- [ ] گام بعد: گسترش prototype به reservation و چرخهٔ Limit/TP-SL/Stop-Limit، سپس تست concurrency/admission و UI read-pathها. هم‌زمان آخرین docs-only CI و PR status را تأیید کنیم.
+- [x] هیچ Production/Supabase write، migration/db push، SQL/Edge Function invocation، تغییر schema/pair/price/queue/Cron/worker/grant/RLS، merge، deploy، release یا هزینه‌ای انجام نشد.
