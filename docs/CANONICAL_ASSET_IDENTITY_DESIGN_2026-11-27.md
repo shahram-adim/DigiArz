@@ -102,3 +102,10 @@ This document is an architecture proposal only. It creates no SQL migration and 
 - It models two canonical assets with the same DOT display ticker and same DOT/USDT display pair, but different immutable asset IDs, provider IDs, pair IDs, price rows and balances. Market buy/sell uses pair_id and stores canonical IDs on orders/trades; stale price and duplicate provider ID are rejected.
 - GitHub Actions run 46033780380 on commit `c74bdb268c09c97b86c0dfd3131e830b8a836f13` passed all 25 workflow steps, including this fixture and the separate fair-scheduler concurrency test.
 - Scope limitation: this proof covers Market buy/sell only. Limit reservations, TP/SL, OCO, Stop-Limit, worker authorization, RLS, catalog admission concurrency, portfolio/UI mapping and a safe Production backfill are not yet implemented or tested. This remains a disposable prototype, not a Production migration.
+
+
+### Limit-order prototype extension (2026-11-27)
+
+- The disposable fixture now also models limit-order placement, quote/base reservations by canonical `asset_id`, pair-keyed worker execution, fee-aware release of unused quote reservation, and stale-price retry without releasing the wrong asset.
+- It tests one buy Limit and one sell Limit on two same-ticker assets and confirms each reservation and fill remains attached to the correct canonical ID. It also checks that a stale quote leaves the order pending and reserved until a fresh observation arrives.
+- This extension is awaiting the current PostgreSQL 17 CI run; it is not yet a passed regression and is not Production code.
