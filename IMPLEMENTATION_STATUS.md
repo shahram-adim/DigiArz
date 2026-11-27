@@ -1744,3 +1744,14 @@
 - [!] اجرای نسخهٔ کامل‌تر با in-flight cap و تست‌های HTTP 503/canonical collision روی HEAD جدید هنوز در GitHub Actions در حال اجراست؛ تا نتیجهٔ دقیق آن PASS نهایی اعلام نمی‌شود.
 - [ ] گام بعد: تأیید CI روی آخرین HEAD؛ سپس بررسی fairness در برابر ورود پیوستهٔ دارایی‌های جدید، سقف retry، source observation timestamps و inventory کامل writerهای catalog. Candidate هنوز صرفاً fixture آزمایشی است و برای Production آماده نیست.
 - [x] هیچ تغییر Production/Supabase، Cron/queue/price/pair، Worker/Edge Function، Migration/db push، merge، deploy، release یا هزینه‌ای انجام نشد.
+
+
+## Shahram 181 — CI failure diagnosis and scheduler fairness hardening (2026-11-27)
+- [x] وضعیت زندهٔ PR #66 و #67 و Actions بررسی شد؛ هر دو PR همچنان باز، Draft و ادغام‌نشده‌اند. PR #67 روی HEAD ab6ba198... دارای CI failure بود؛ تمام مراحل قبلی workflow موفق و مرحلهٔ candidate scheduler ناموفق بود.
+- [x] بازبینی SQL نشان داد انتهای بلوک DO به‌اشتباه END $; نوشته شده بود؛ terminator به END $$; اصلاح شد. GitHub Actions log text از wrapper قابل دریافت نبود، بنابراین علت شکست با جزئیات log ادعا نمی‌شود؛ این خطای نحوی مستقل و قطعی در فایل بود.
+- [x] بازبینی fairness نشان داد مرتب‌سازی laneها به‌صورت priority → retry → normal می‌توانست در صورت ورود پیوستهٔ دارایی‌های جدید، lane عادی را گرسنه نگه دارد.
+- [x] انتخاب batch به سهمیهٔ وزنی تغییر کرد: در batchهای حداقل ۳تایی، حداقل ۲۰٪ برای priority، ۲۰٪ برای retryهای سررسیدشده و ۶۰٪ برای چرخش عادی؛ سهمیهٔ خالی بین laneهای باقی‌مانده پر می‌شود. برای batchهای کوچک‌تر، مسیر عادی سهمیهٔ اصلی را حفظ می‌کند.
+- [x] آزمون admission storm اضافه شد: در پنج دور، هر بار ده دارایی تازه وارد صف priority می‌شوند و تست باید حداقل شش دارایی عادی را در هر batch حفظ کند.
+- [!] این اصلاحات هنوز CI دقیق HEAD جدید را نگذرانده‌اند؛ تا اجرای تازهٔ PostgreSQL 17 و concurrency test موفق نشود، candidate را PASS یا Production-ready نمی‌دانیم.
+- [ ] گام بعد: نتیجهٔ CI جدید را بررسی کنیم؛ اگر شکست ماند، جزئیات مرحله و SQL را جداگانه عیب‌یابی کنیم. سپس timestamp مشاهده‌شده توسط provider، سقف retry/backoff و inventory کامل تمام write-pathهای catalog را تکمیل کنیم.
+- [x] فقط فایل تست candidate و این سند روی شاخهٔ Draft تغییر کردند؛ هیچ Production/Supabase write، migration/db push، Cron/queue/price/pair، Worker/Edge Function، grant/RLS، merge، deploy، release یا هزینه‌ای انجام نشد.
