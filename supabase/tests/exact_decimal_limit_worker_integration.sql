@@ -393,6 +393,84 @@ BEGIN
 END
 $fee_boundary$;
 
+-- Sell-side fee half-quantum boundary: each 1 BTC fill at 0.000005 USDT
+-- has gross 0.00000500 and a 0.000000005 fee, rounded to 0.00000001.
+INSERT INTO auth.users (id)
+VALUES ('61000000-0000-0000-0000-000000000061');
+INSERT INTO public.profiles (id, is_active)
+VALUES ('61000000-0000-0000-0000-000000000061', true);
+INSERT INTO public.wallets (user_id, balance_usdt)
+VALUES ('61000000-0000-0000-0000-000000000061', 0);
+INSERT INTO public.asset_balances (user_id, asset, balance)
+VALUES ('61000000-0000-0000-0000-000000000061', 'BTC', 4);
+INSERT INTO public.orders (
+  id, user_id, symbol, side, order_type, amount, price,
+  filled_amount, remaining_amount, status
+) VALUES (
+  '61000000-0000-0000-0000-000000000161',
+  '61000000-0000-0000-0000-000000000061',
+  'BTCUSDT', 'sell', 'limit', 4, 0.000005,
+  0, 4, 'pending'
+);
+INSERT INTO public.order_reservations (
+  id, order_id, user_id, asset, reserved_amount,
+  consumed_amount, released_amount, status
+) VALUES (
+  '61000000-0000-0000-0000-000000000661',
+  '61000000-0000-0000-0000-000000000161',
+  '61000000-0000-0000-0000-000000000061',
+  'BTC', 4, 0, 0, 'reserved'
+);
+
+DO $sell_fee_boundary$
+DECLARE
+  v_cycle integer;
+  v_value numeric;
+BEGIN
+  FOR v_cycle IN 1..4 LOOP
+    PERFORM public.process_limit_orders();
+
+    SELECT balance_usdt INTO v_value
+    FROM public.wallets
+    WHERE user_id='61000000-0000-0000-0000-000000000061';
+    IF v_value <> (v_cycle * 0.00000499)::numeric THEN
+      RAISE EXCEPTION 'Sell half-quantum net proceeds mismatch at cycle %: %',
+        v_cycle, v_value;
+    END IF;
+
+    SELECT consumed_amount INTO v_value
+    FROM public.order_reservations
+    WHERE order_id='61000000-0000-0000-0000-000000000161';
+    IF v_value <> v_cycle::numeric THEN
+      RAISE EXCEPTION 'Sell half-quantum base reserve mismatch at cycle %: %',
+        v_cycle, v_value;
+    END IF;
+  END LOOP;
+
+  IF (SELECT status FROM public.orders
+      WHERE id='61000000-0000-0000-0000-000000000161') <> 'filled' THEN
+    RAISE EXCEPTION 'Sell half-quantum fee order did not complete';
+  END IF;
+  IF (SELECT balance FROM public.asset_balances
+      WHERE user_id='61000000-0000-0000-0000-000000000061' AND asset='BTC') <> 0 THEN
+    RAISE EXCEPTION 'Sell half-quantum fee did not debit full base inventory';
+  END IF;
+  SELECT sum(amount) INTO v_value
+  FROM public.transactions
+  WHERE user_id='61000000-0000-0000-0000-000000000061'
+    AND currency='USDT' AND transaction_type='limit_sell';
+  IF v_value <> 0.00001996::numeric THEN
+    RAISE EXCEPTION 'Sell half-quantum fee transaction ledger mismatch: %', v_value;
+  END IF;
+  SELECT sum(amount) INTO v_value
+  FROM public.trades
+  WHERE order_id='61000000-0000-0000-0000-000000000161';
+  IF v_value <> 4::numeric THEN
+    RAISE EXCEPTION 'Sell half-quantum trade quantity mismatch: %', v_value;
+  END IF;
+END
+$sell_fee_boundary$;
+
 -- Repeated partial fills must preserve the exact remaining reserve at every cycle.
 INSERT INTO auth.users (id)
 VALUES ('77000000-0000-0000-0000-000000000007');
