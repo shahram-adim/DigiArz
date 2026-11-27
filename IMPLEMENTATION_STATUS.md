@@ -1755,3 +1755,15 @@
 - [!] این اصلاحات هنوز CI دقیق HEAD جدید را نگذرانده‌اند؛ تا اجرای تازهٔ PostgreSQL 17 و concurrency test موفق نشود، candidate را PASS یا Production-ready نمی‌دانیم.
 - [ ] گام بعد: نتیجهٔ CI جدید را بررسی کنیم؛ اگر شکست ماند، جزئیات مرحله و SQL را جداگانه عیب‌یابی کنیم. سپس timestamp مشاهده‌شده توسط provider، سقف retry/backoff و inventory کامل تمام write-pathهای catalog را تکمیل کنیم.
 - [x] فقط فایل تست candidate و این سند روی شاخهٔ Draft تغییر کردند؛ هیچ Production/Supabase write، migration/db push، Cron/queue/price/pair، Worker/Edge Function، grant/RLS، merge، deploy، release یا هزینه‌ای انجام نشد.
+
+
+## Shahram 182 — weighted scheduler backfill correction and Production writer inventory (2026-11-27)
+- [x] دریافت log دقیق CI نشان داد پس از اصلاح terminator، آزمون admission storm به‌درستی یک نقص دیگر را آشکار کرد: وقتی lane retry خالی بود، fill با ترتیب priority-first سهمیهٔ استفاده‌نشده را دوباره به priority می‌داد و در batch ده‌تایی چهار دارایی تازه را وارد می‌کرد؛ lane عادی همچنان شش جایگاه داشت، اما سقف ۲۰٪ priority رعایت نمی‌شد.
+- [x] ترتیب backfill اصلاح شد: سهمیهٔ خالی ابتدا به normal، سپس retry و در آخر priority اختصاص می‌یابد. آزمون storm همچنان حداکثر دو priority و حداقل شش normal را در هر batch ده‌تایی مطالبه می‌کند.
+- [x] ممیزی read-only Production تکمیل‌تر شد: توابع SQL، triggerها، RLS/policies و table grants بررسی شدند؛ Edge Functionهای فعال نیز فهرست و sourceهای مرتبط بازیابی شدند.
+- [x] دو writer اضافی برای crypto_assets/market_prices پیدا شد: Edge Function admin-refresh-crypto-asset نماد کاتالوگ را با service_role به‌روزرسانی می‌کند، و Edge Functionهای index-ts و refresh-market-prices می‌توانند قیمت مجموعهٔ محدود و hard-coded را در market_prices upsert کنند.
+- [x] نتیجهٔ مهم امنیت/یکپارچگی: anon و authenticated روی چهار جدول فقط SELECT دارند، اما service_role دسترسی مستقیم DML دارد؛ trigger یکتایی فقط admin_market_listings را پوشش می‌دهد و روی crypto_assets/demo_trading_pairs/market_prices triggerی در inventory مشاهده نشد. بنابراین همهٔ service-role writerها باید در طراحی واحد در نظر گرفته شوند.
+- [x] یافته‌ها در docs/PRODUCTION_CATALOG_SOURCE_AUDIT_2026-11-27.md و docs/ALL_CATALOG_ASSETS_TRADABLE_PLAN_2026-11-27.md ثبت شدند.
+- [!] اجرای CI پس از اصلاح backfill هنوز در انتظار است؛ candidate تا عبور از PostgreSQL 17 و concurrency test آماده یا تأییدشده محسوب نمی‌شود.
+- [ ] گام بعد: نتیجهٔ CI روی HEAD جدید؛ سپس افزودن آزمون timestamp واقعی مشاهده‌شده توسط provider و تکمیل بررسی تمام مصرف‌کنندگان بیرونی service_role. پس از آن می‌توان طرح catalog admission/provisioning را در disposable PostgreSQL مدل کرد.
+- [x] تمام کوئری‌های Supabase این مرحله SELECT-only بودند؛ هیچ Edge Function یا SQL function اجرا/تغییر نکرد، هیچ جدول/قیمت/جفت‌ارز/صف/Cron/worker/دادهٔ Production تغییر نکرد. هیچ migration/db push، merge، deploy، release یا هزینه‌ای انجام نشد.
