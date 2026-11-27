@@ -1975,3 +1975,11 @@
 - [!] New head 742d2263b1bb23420230882166bbfed69e6ccb7b is awaiting CI. Do not mark the canonical candidate step green until step 26 and full workflow complete successfully.
 - [ ] After CI, extend candidate coverage from the miniature Market/Limit harness to canonical identity through the authoritative conditional-order parent/child lifecycle and pair-scoped cancellation; then build the OCO linked-order state machine tests.
 - [x] No Production/Supabase changes, merge, migration/db push, deploy/release, publication, Cron/worker/grant/RLS changes or costs.
+## Shahram 169 — pair-scoped disable isolation candidate (2026-11-27)
+- [x] Added a disposable pair-administration function to the canonical fixture. It disables a single pair by pair_id, cancels only that pair's pending orders, and releases only those reservations; it never filters by display ticker.
+- [x] Added a duplicate-display-pair regression: two separate DOT/USDT pairs each have a pending Limit sell; disabling pair A must cancel/release A only, while pair B remains enabled, pending and reserved.
+- [x] Preserved the order accounting invariant on cancellation: status changes to cancelled while filled_amount + remaining_amount continues to equal amount.
+- [x] Corrected the reservation-owner test after CI runs 46042843291 and 46042889895 exposed that the prior assertion ran after fill had deleted the reservation. The assertion now runs while the pending reservation exists; prior failures were test assertion placement, not production behavior.
+- [!] CI runs 46043153310 (owner assertion correction), 46043173872 (status update) and 46043222735 (pair-disable candidate) were still in progress at the time of this entry. No pass is claimed yet.
+- [ ] Await CI; if pair-disable fixture passes, extend canonical pair identity through authoritative TP/SL and Stop-Limit parent/child plus pair-scoped cancellation races. OCO remains a distinct not-yet-built state machine.
+- [x] This work changes only disposable tests/docs in the Draft branch. No Production/Supabase data/schema/function/ACL/RLS/Cron/worker changes, merge, deploy/release, APK/Pages publication or cost.
