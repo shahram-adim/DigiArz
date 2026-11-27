@@ -310,3 +310,46 @@ The metadata listing returned a CRITICAL Advisor warning because private.digiarz
 Therefore the Advisor's broad exposure warning is not corroborated by the current direct table grants; public Data API reachability was not established. RLS-disabled remains a defense-in-depth finding and should be reviewed separately. No RLS change was applied: enabling RLS without an access design could block intended recovery access, and any remediation requires explicit owner approval.
 
 This live capture supersedes the older Recovery-Test schema snapshot for the relations/functions listed above. It does not resolve the missing applied Migration SQL inventory (17 absent source files and timestamp mismatches remain a separate deployment blocker).
+
+
+## Catalog discovery, admission, and display dependency inventory — live Production 2026-11-27
+
+A second metadata-only catalog scan found 33 public/private functions whose source references the catalog, pair, price, order, reservation, balance or conditional-order relations. The canonical migration must account for the complete catalog path, not only the trading RPCs.
+
+The relevant catalog/discovery chain was captured as test-only live snapshots and pinned by tests/canonical-asset-catalog-source.test.js:
+- Catalog refresh: public.refresh_crypto_assets() (f14765ffd1166380f58e391b34163259) upserts by coingecko_id but updates mutable symbol from provider response.
+- Exchange observation auto-listing: private.auto_list_verified_exchange_asset() (49880c0892cad6081acb6ce071090a5d) auto-lists only when exactly one active catalog asset has the ticker and rejects curated/pair ticker collisions.
+- Listing uniqueness trigger: private.enforce_unique_admin_market_listing_symbol() (6e9a7e9f7d8cd5f0ac20f3216ee5f0b3) blocks another curated asset with the same ticker and a collision with an existing pair symbol.
+- Pair auto-activation: private.auto_activate_verified_exchange_pairs() (fd177baeee1a5bdd927458413f69bfb6) joins curated listings and market_prices by ticker; it also requires volume >= USD 1,000,000, rank <= 2,000 when present, fresh CoinGecko price <= 2 minutes and a recent matched exchange observation.
+- Admin pair activation: public.admin_enable_market_pair(text) (848f7c1ebe114c558c1ce73e76dd13bd) applies the curated-list, volume, rank and ticker-price gates before writing pair_symbol.
+- Market display/read: public.get_crypto_assets(text,integer,integer,text) (b85d4a1073e425c2ac29899152168cf2) reads catalog rows; public.get_crypto_market(text,integer,integer,text,boolean) (6cf991bfee5e7fb759fec4112962f788) derives trade_enabled using ticker-keyed pair and price relations.
+- Exchange discovery/matching: public.process_iran_exchange_asset_sync() (889c3728e54154a799e55ed8b9bc2edb) stages observations and uses ticker/name/alias candidate matching, explicitly preserving ambiguous status; public.get_exchange_discovered_market_assets() (87f9f56829abb50b2ff1fb878684e89c) exposes staged discovery.
+- Additional captured support paths: private.request_market_price_overflow(), public.admin_add_market_listing(), public.admin_review_market_listings(), public.admin_search_market_assets(), public.get_admin_market_listings(), public.process_bit24_exchange_sync(), public.recover_stale_crypto_assets_sync(), public.refresh_crypto_assets_toman(), and public.request_market_price_refresh().
+
+### Requirement impact
+
+- The current pipeline has two distinct kinds of exclusion that must not be conflated: unresolved identity ambiguity (a legitimate safety hold) and product-selection gates (curated membership, minimum volume and rank). The owner's rule requires every valid catalog asset, present or future, to become tradable; product-selection gates must not permanently keep a valid asset view-only.
+- Ambiguous exchange matches must remain quarantined until a deterministic canonical provider mapping is proven. Never auto-pick by ticker or merge balances.
+- Provider symbol changes must update display metadata, not internal asset identity. CoinGecko ID mapping is a provider identity; an internal immutable asset UUID should be the financial FK.
+- Pair activation must be keyed by canonical asset + quote asset and pair_id. Price refresh from CoinGecko, KuCoin and Gate.io must resolve provider observations to that pair ID before upsert; market display must bind to the same pair_id.
+- A ticker collision should no longer block a distinct asset's catalog admission or pair activation. Display labels can remain duplicated; financial keys cannot.
+- The live catalog source snapshots and hash assertions are TEST FIXTURES ONLY. They record the current behavior to be replaced, not a production patch.
+
+### Active-account trigger boundary
+
+A separate read-only trigger query confirmed:
+- public.orders has BEFORE INSERT trigger guard_active_account_orders;
+- public.trades has BEFORE INSERT trigger guard_active_account_trades;
+- public.transactions has BEFORE INSERT trigger guard_active_account_transactions;
+- all three call private.guard_active_account_writes(), live md5 29b8e23c1de8eb4762a8cf1a9c9343ce, owner postgres, SECURITY DEFINER, empty search_path.
+
+This guard must remain attached to the same financial write paths after canonical columns and functions are introduced. A test-only snapshot and hash/behavior assertion were added.
+
+### Migration-ledger reconciliation recheck
+
+The current live Supabase migration ledger and GitHub main tree were re-compared on 2026-11-27:
+- 55 applied ledger entries; 40 SQL files under supabase/migrations/.
+- 17 applied migrations still have no corresponding local SQL source.
+- 20 local filenames have timestamp prefixes that differ from their applied ledger versions.
+- 2 local-only migrations remain unrecorded remotely (the KuCoin and Gate.io intermediate market-price replacements).
+This is unchanged from the last recorded reconciliation. It remains a hard stop for any db push/replay. Do not repair migration history or replay the local-only market-price files.
