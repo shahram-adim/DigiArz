@@ -10,7 +10,7 @@ test('portfolio market value multiplies precise quantity and price without binar
   assert.equal(P.value('0.00000001', '0.00000001'), '0.0000000000000001');
 });
 
-test('portfolio total sums wallet and asset values at the database-supported eight decimals', () => {
+test('portfolio total sums wallet and asset values without float drift', () => {
   assert.equal(P.sum(['0.1', '0.2', '0.00000001', '999999999999.12345678']), '999999999999.42345679');
 });
 
