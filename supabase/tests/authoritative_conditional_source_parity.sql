@@ -35,8 +35,22 @@ BEGIN
     RAISE EXCEPTION 'authoritative TP/SL lifecycle did not reach filled';
   END IF;
 
-  -- The authoritative worker intentionally clears its temporary JWT claims;
-  -- restore the caller identity before invoking the next authenticated RPC.
+  -- Stop-loss branch: current price 13 is below trigger 14, so the real
+  -- migration worker must execute this exit (the opposite inequality to TP).
+  PERFORM set_config('request.jwt.claim.sub',v_user::text,true);
+  v_sl:=public.place_conditional_exit_order('DOTUSDT','stop_loss',1,14);
+  v_order_id:=(v_sl->>'order_id')::uuid;
+  v_cond_id:=(v_sl->>'conditional_order_id')::uuid;
+  v_result:=public.process_conditional_orders();
+  IF COALESCE((v_result->>'triggered')::integer,0)<>1 THEN
+    RAISE EXCEPTION 'authoritative Stop-Loss worker did not trigger: %',v_result;
+  END IF;
+  IF (SELECT status FROM public.conditional_orders WHERE id=v_cond_id)<>'filled'
+     OR (SELECT status FROM public.orders WHERE id=v_order_id)<>'filled' THEN
+    RAISE EXCEPTION 'authoritative Stop-Loss lifecycle did not reach filled';
+  END IF;
+
+  -- Each real conditional worker clears its temporary JWT claims.
   PERFORM set_config('request.jwt.claim.sub',v_user::text,true);
 
   -- Stop-Limit buy: the exact migration places a parent, triggers it, and
