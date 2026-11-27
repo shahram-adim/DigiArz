@@ -269,3 +269,11 @@ No test fixture, SQL migration, workflow, or executable source was changed in th
 - `public.refresh_market_prices()` and the private scheduler/activation/trigger functions in this inventory are executable by `postgres` only in the inspected ACL snapshot.
 - `public.admin_add_market_listing(text)`, `public.admin_remove_market_listing(text)`, `public.admin_enable_market_pair(text)`, and `public.admin_disable_market_pair(text,text)` are executable by `authenticated`, `service_role`, and `postgres`; their function bodies perform super-admin checks. EXECUTE grant alone is not authorization proof; the body-level checks remain required.
 - These are point-in-time effective ACL observations. Any implementation must re-check grants, function owner, SECURITY DEFINER search_path, and body-level authorization on the exact candidate migration and live Production before release.
+
+
+### Live index/uniqueness snapshot (read-only, 2026-11-27)
+
+- `crypto_assets` has a primary key on `coingecko_id`; `crypto_assets_symbol_idx` on `lower(symbol)` and `crypto_assets_upper_symbol_active_idx` on `upper(symbol) WHERE is_active IS TRUE` are both ordinary non-unique indexes. No unique active-ticker index exists.
+- `admin_market_listings` has a primary key on `coingecko_id`; its ticker collision guard is trigger-based, not a global catalog uniqueness constraint.
+- `demo_trading_pairs` has a primary key on `pair_symbol` and unique index `demo_trading_pairs_unique_base` on `base_coingecko_id`; this guarantees one pair per canonical ID and one canonical ID per pair symbol, but does not guarantee `crypto_assets.symbol` remains synchronized with the pair's `pair_symbol`.
+- `market_prices` has a primary key on `symbol` only. No canonical asset foreign key was observed in the index inventory.
