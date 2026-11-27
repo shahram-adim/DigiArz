@@ -1533,3 +1533,43 @@
 
 - [x] No user financial rows were read or changed for testing; no financial worker/RPC was executed. Only catalog metadata and constant-only arithmetic were queried.
 - [x] No migration, grant, policy, cron, Edge Function, Auth setting, deletion, or release was performed.
+
+
+## اثبات ریشه خطای 502 بازار تومانی و Regression CI — 2026-11-27
+
+### مبنای زنده در ابتدای این نوبت
+- HEAD واقعی `main`: `df0a9927451f3b8092997b6d573e62fda235b84d`؛ Check Run مربوط به workflow `exact-decimal` روی همین SHA در `2026-11-26 22:42:21 UTC` با نتیجه `success` پایان یافته است.
+- Supabase `gfoaubfilhttnwjykaox`: `ACTIVE_HEALTHY`، PostgreSQL `17.11.0.018`، ۵۵ Migration تا `20261121050216` و بدون Development Branch.
+- Edge Function `refresh-toman-market-prices` در Production نسخه ۳ است؛ SHA-256 فایل مستقر `bd85141a8dbe59329235b5266ee391c6953865e97e91253f3e3e3946b155b391`.
+- جدول `market_toman_prices` یک unique index روی `(exchange, asset_symbol, quote_currency)` دارد.
+
+### علت 502 اکنون با لاگ PostgreSQL تأیید شد
+- در ۲۴ ساعت لاگ قابل‌دسترسی همین Function: ۹ POST با 502 و ۹ OPTIONS با 200.
+- در همان بازه ۹ خطای PostgreSQL با SQLSTATE `23505` برای قید `market_toman_prices_exchange_asset_symbol_quote_currency_key` ثبت شد.
+- نمونه خطای دقیق: `Key (exchange, asset_symbol, quote_currency)=(nobitex, BTC, TOMAN) already exists.`
+- خطای PostgreSQL در `2026-11-26 19:17:15.959 UTC` و POST 502 متناظر در `19:17:16.012 UTC` ثبت شده است.
+- SQL ثبت‌شده از PostgREST یک INSERT ساده بدون `ON CONFLICT` است؛ این با منبع مستقر v3 که POST بدون conflict resolution می‌فرستد، منطبق است.
+
+**نتیجه:** علت خطاهای 502 مشاهده‌شده در این بازه، درج تکراری کلید یکتا توسط Function v3 است؛ دیگر صرفاً فرضیه نیست. خطاهای مستقل provider/network در آینده همچنان ممکن‌اند.
+
+### اقدام ملموس این نوبت
+- [x] آزمون SQL `supabase/tests/toman_market_upsert_idempotency.sql` گسترش یافت: درج ساده تکراری را روی TEMP TABLE با همان نام قید Production بازتولید می‌کند و SQLSTATE `23505` را assert می‌کند؛ سپس upsert و حفظ یک ردیف/آخرین قیمت/زمان را اثبات می‌کند.
+- [x] آزمون Node `tests/toman-market-persistence.test.js` guard جدیدی برای قید، SQLSTATE، conflict target و ROLLBACK دارد.
+- [x] Workflow موجود این SQL را در PostgreSQL 17 دورریختنی اجرا می‌کند؛ workflow جدید یا هزینه‌زا ایجاد نشد.
+- [x] گزارش ممیزی `docs/TOMAN_MARKET_FEED_AUDIT_2026-11-22.md` با شواهد مستقیم و مرز اطمینان به‌روز شد.
+- [x] Commitهای این نوبت: SQL regression `a45c1e3d7f99fe7549e78470e98463c10d4e5cd6`، Node guard `9f1794b592121eec19ccffb43b480758bec367eb`، گزارش ممیزی `4cd457c1a51c7a0765356ff2f50a9e79378cebf6`.
+
+### وضعیت داده بازار و UI
+- [x] ۳۷۳ ردیف قیمت جاری فقط برای Nobitex=221 و Wallex=152 موجود است؛ آخرین دریافت `2026-11-17 22:04:26.622 UTC` و صفر ردیف تازه در پنج دقیقه.
+- [x] ساختار `index.html` دوباره شمرده شد: ۲۴۴ شناسه یکتا و بدون تکرار؛ ۹ مسیر اصلی `dashboard, markets, toman, trade, orders, assets, history, settings, admin`؛ manifest و Service Worker موجودند؛ `dir=rtl` و رنگ منتخب مشکی/زرد دیده می‌شود.
+- [!] Bit24 و Kifpool هنوز در تابع قیمت تومانی مستقر نیستند؛ قرارداد قیمت/واحد و parser معتبر آن‌ها باید پیش از اتصال جداگانه بررسی شود.
+
+### گام بعد
+1. پس از تأیید صریح مالک، استقرار کنترل‌شده تابع main برای رفع INSERT/23505؛ پیش از آن، تفاوت مسیر DELETE قدیمی با سیاست بدون prune در main و اثر آن بر داده‌های فعلی بازبینی شود.
+2. افزودن Bit24 و Kifpool فقط پس از تأیید قرارداد API، واحد قیمت، نماد و طبقه‌بندی دارایی؛ آزمون fixture برای سهام/توکن‌شده‌ها و پاسخ ناقص.
+3. ادامه QA حسابداری Limit/Stop-Limit: بازیابی DDL پایه معتبر، schema/ACL parity و آزمون quantization هشت‌رقمی USDT. CI دورریختنی به‌تنهایی اثبات محیط Supabase ایزوله Production-parity نیست.
+
+### ایمنی این نوبت
+- [x] همه بررسی‌های Supabase فقط‌خواندنی بودند؛ هیچ ردیف مالی یا داده کاربر برای تست خوانده یا تغییر داده نشد.
+- [x] هیچ Worker/RPC مالی اجرا نشد.
+- [x] هیچ Migration، Grant، Policy، Cron، Edge Function Deploy، refresh دستی، حذف داده یا انتشار APK انجام نشد.
