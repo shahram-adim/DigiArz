@@ -74,16 +74,21 @@ BEGIN
 END $$;
 
 CREATE OR REPLACE FUNCTION scheduler_candidate.schedule_next_batch(
-  p_batch_size integer DEFAULT 100
+  p_batch_size integer DEFAULT 100,
+  p_max_inflight integer DEFAULT 3
 ) RETURNS bigint LANGUAGE plpgsql AS $$
 DECLARE
   v_cursor text;
   v_ids text[];
   v_cursor_after text;
   v_batch bigint;
+  v_inflight integer;
 BEGIN
   IF p_batch_size < 1 OR p_batch_size > 500 THEN
     RAISE EXCEPTION 'batch size out of range';
+  END IF;
+  IF p_max_inflight < 1 OR p_max_inflight > 10 THEN
+    RAISE EXCEPTION 'max in-flight batch count out of range';
   END IF;
   IF NOT pg_try_advisory_xact_lock(742019,31) THEN
     RETURN NULL;
@@ -91,6 +96,9 @@ BEGIN
 
   SELECT cursor_id INTO v_cursor
   FROM scheduler_candidate.state WHERE singleton FOR UPDATE;
+
+  SELECT count(*) INTO v_inflight FROM scheduler_candidate.batches WHERE state='in_flight';
+  IF v_inflight >= p_max_inflight THEN RETURN NULL; END IF;
 
   WITH active_ids AS (
     SELECT DISTINCT unnest(b.requested_ids) AS id
@@ -330,6 +338,14 @@ BEGIN
   IF (SELECT price FROM scheduler_candidate.prices WHERE pair_symbol='NEWUSDT')<>5 THEN
     RAISE EXCEPTION 'source priority result is not deterministic';
   END IF;
-END $$;
+
+  -- Bound the number of outstanding provider batches.
+  PERFORM scheduler_candidate.schedule_next_batch(10,3);
+  PERFORM scheduler_candidate.schedule_next_batch(10,3);
+  PERFORM scheduler_candidate.schedule_next_batch(10,3);
+  IF scheduler_candidate.schedule_next_batch(10,3) IS NOT NULL THEN
+    RAISE EXCEPTION 'scheduler exceeded configured in-flight batch cap';
+  END IF;
+END $;
 
 SELECT 'PASS: candidate fairness, retry, idempotency, priority admission and source precedence' AS result;
