@@ -1063,8 +1063,12 @@ test('catalog coin logos always use the validated app-assets proxy and skip empt
   const errorStart=html.indexOf('function handleCoinLogoError(');
   const errorEnd=html.indexOf('function coinLogo(',errorStart);
   const errorBlock=html.slice(errorStart,errorEnd);
-  assert.ok(errorBlock.includes('const fallbacks=[logoUrl(symbol),'),
-    'failed curated logo falls back to the proxy provider chain');
+  assert.ok(errorBlock.includes("const hasCustomImage=img.dataset.customImageUrl==='1'"),
+    'logo fallback distinguishes a failed curated image from a failed proxy request');
+  assert.ok(errorBlock.includes('const fallbacks=hasCustomImage?[logoUrl(symbol),publicFallback]:[publicFallback]'),
+    'a failed default proxy request skips a duplicate retry and uses an independent public icon');
+  assert.ok(errorBlock.includes('if(holder)renderCoinLogoFallback(holder,symbol)'),
+    'all failed remote sources end with the local branded SVG fallback');
   const chartStart=html.indexOf('async function openChart(');
   const chartEnd=html.indexOf('function ',chartStart+20);
   const chartBlock=html.slice(chartStart,chartEnd);
