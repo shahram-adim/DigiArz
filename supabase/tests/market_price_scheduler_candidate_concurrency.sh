@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-: "\${DB_NAME:=digiarz_market_scheduler_candidate_test}"
+: "${DB_NAME:=digiarz_market_scheduler_candidate_test}"
 LOCK_LOG=/tmp/digiarz-market-scheduler-lock.log
 PGAPPNAME=digiarz_scheduler_lock_holder psql -h localhost -U postgres -d "$DB_NAME" \
   -v ON_ERROR_STOP=1 -c "BEGIN; SELECT pg_advisory_xact_lock(742019,31); SELECT pg_sleep(8); COMMIT;" \
