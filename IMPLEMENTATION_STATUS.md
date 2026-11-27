@@ -2190,3 +2190,14 @@
 - [!] No authoritative base-table creation DDL for the financial ledger was recovered in the bounded current-source search; this is not proof it does not exist in full Git history or Production. Do not infer it from test fixtures.
 - [ ] Next: obtain an authorized metadata-only Production fingerprint for financial tables, constraints/indexes/triggers/RLS/policies/grants and relevant helper ACLs; compare with Recovery-Test/source evidence. No business/user rows. Reconcile migration ledger separately before any deployable canonical migration.
 - [x] No Production SQL/query/write in this step; no Production migration, schema/function/ACL/RLS/trigger/Cron/worker/Auth change; no db push, merge, deploy, APK/Pages publication or cost.
+
+
+## Shahram 190 — historical ledger evidence recovered; CI 2404 green (2026-11-27)
+
+- [x] Rechecked PR #67 and branch: open, Draft, unmerged, mergeable=true; 205 commits ahead / 0 behind main at the start of this step. No merge/rebase attempted.
+- [x] CI run #2404 / `46049917020` completed SUCCESS on the then-current head `a7f4a8268c4e15617f974fdadb1b8d17c13d72c2`; all 28 substantive steps passed, including fair scheduler candidate, authoritative TP/SL and Stop-Limit migrations, duplicate-ticker canonical isolation, schema fingerprint, and authoritative Market/Limit migration on disposable PostgreSQL 17.
+- [x] Expanded the schema recovery search across historical repository audit records. `docs/STOP_LIMIT_QA_MATRIX.md` and `docs/superpowers/reports/2026-11-15-exact-decimal-backend-rpc-review.md` preserve dated, read-only Production observations from 2026-11-15: historical typmods, accounting checks, FK relationships, index coverage summary, account-guard trigger placement, and RLS scope.
+- [x] Added those historical observations and explicit age/source limitations to `docs/TRADING_LEDGER_SCHEMA_RECOVERY_EVIDENCE_2026-11-27.md`, commit `d717d6fd4724147ab58caccaeebe4d1cf0a3d494`.
+- [!] The newly recovered material is human-authored historical audit evidence, not raw catalog DDL/export. It does not prove current Production state, provide every exact constraint/index/policy expression, or supply full defaults/nullability/ACLs. The 2026-11-21 Recovery-Test snapshot remains unverified against Production; ACL evidence there remains unusable because restore omitted owner/ACL.
+- [ ] Next: continue searching version history/source records for authoritative base CREATE TABLE migrations and exact schema export; if unavailable, keep the metadata-only Production fingerprint as a hard blocker. No business/user rows. Reconcile migration ledger separately.
+- [x] No Production SQL/query/write in this step; no Production migration, schema/function/ACL/RLS/trigger/Cron/worker/Auth change; no db push, merge, deploy, APK/Pages publication or cost.
