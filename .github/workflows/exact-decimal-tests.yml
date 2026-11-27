@@ -268,4 +268,13 @@ jobs:
           psql -h localhost -U postgres -d digiarz_market_scheduler_test -v ON_ERROR_STOP=1 \
             -f supabase/tests/market_price_scheduler_production_snapshot.sql
 
+      - name: Exercise fair scheduler candidate in disposable PostgreSQL 17
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_market_scheduler_candidate_test;"
+          psql -h localhost -U postgres -d digiarz_market_scheduler_candidate_test -v ON_ERROR_STOP=1 \\
+            -f supabase/tests/market_price_scheduler_candidate.sql
+          bash supabase/tests/market_price_scheduler_candidate_concurrency.sh
+
 # TP/SL conditional worker diagnostics are enabled in the isolated CI fixture.
