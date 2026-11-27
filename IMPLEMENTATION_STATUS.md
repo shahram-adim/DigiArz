@@ -1622,3 +1622,12 @@
 - Added the evidence and safe conclusion to the Production audit document. Do not copy catalog USD prices into executable USDT pairs without a validated quote/source path.
 - No Production writes, function calls, queue changes, price refresh, pair mutation, Cron/worker change, migration/db push, merge/deploy/release, or paid infrastructure action.
 - Remaining: determine first-515 vs overflow membership for the five IDs, inspect exact market coverage in Gate.io/KuCoin and their provider price policy, then finish all catalog and pair writers/callers inventory.
+
+
+## Shahram 171 — stale pair provider coverage pinpointed (2026-11-27)
+- Reconstructed the live price-refresh ID universe read-only: 898 unique provider IDs from enabled pairs + active curated listings.
+- All five stale pairs rank after position 515 (523, 629, 677, 773, 789), so they rely on overflow rather than the primary CoinGecko batch.
+- Latest retained Gate.io and KuCoin ticker payloads do not contain any of the five exact pair symbols. Latest CoinGecko payload likewise omitted their exact provider IDs.
+- The evidence narrows the issue to overflow coverage/response inclusion plus no exchange ticker fallback for these symbols. Historical request URLs/batch membership are not retained, so it remains unknown whether the overflow scheduler requested the IDs and CoinGecko omitted them, or the request set failed to include them.
+- No Production action taken; no jobs invoked, queues altered, prices refreshed, pairs modified, migrations or releases.
+- Updated the Production audit document and implementation status. Next: review the overflow request scheduler and provider response lifecycle/source-parity in a disposable environment, and design persistent request metadata/coverage reporting as part of the future migration plan.
