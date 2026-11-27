@@ -1816,3 +1816,10 @@
 - [!] Latest GitHub Actions run 46034202824 on commit 8761aa5320e99c9cfc8bec115e1a23138b02921d was still running at step 6 when this checkpoint was recorded; Limit lifecycle is not yet CI-confirmed. The earlier Market-only canonical identity test passed in run 46033780380.
 - [ ] Next: await run 46034202824; fix any SQL or arithmetic failures, then extend canonical identity through TP/SL, OCO and Stop-Limit child worker paths and concurrency/authorization tests.
 - [x] All work remains isolated to the disposable test schema and documentation. No Production/Supabase write, migration/db push, pair/price/queue/Cron/worker/grant/RLS change, merge, deploy, release or cost was made.
+
+
+## Shahram 188 — Limit prototype dollar-quote CI syntax fix (2026-11-27)
+- [x] CI on the Limit prototype exposed a syntax error in the two new PL/pgSQL function bodies: their opening delimiter had been written as AS $ instead of AS $$, while the closing delimiter was correct. The fixture was corrected to use proper dollar-quoted bodies for both place_limit_order and process_limit_orders.
+- [!] The corrected exact file is now on commit f62acfe1c1fc2633478113edc3f95678d354d57c; GitHub Actions run 46034498934 was still in progress at Initialize containers when recorded. No PASS is claimed for Limit yet.
+- [ ] Next: verify run 46034498934 through candidate PostgreSQL step 25; fix any further SQL/runtime issue, then extend canonical identity to TP/SL, OCO and Stop-Limit.
+- [x] All changes remain isolated to the disposable test fixture and documentation. No Production/Supabase write, migration/db push, pair/price/queue/Cron/worker/grant/RLS change, merge, deploy, release or cost was made.
