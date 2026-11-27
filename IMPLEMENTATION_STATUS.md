@@ -1902,3 +1902,13 @@
 - [!] Confirmed the next change cannot be a few nullable columns: pair resolution, price source, reservation asset, Market/Limit execution and parent/child lifecycle must move together to immutable pair/base/quote IDs. Display ticker must remain non-authoritative; ambiguous legacy symbol-only calls must fail closed.
 - [ ] Next: inventory base schema and all writers/readers for `crypto_assets`, `demo_trading_pairs`, `market_prices`, balances, orders and reservations; then prepare a disposable-only coordinated canonical migration candidate and test actual Market/Limit/TP-SL/Stop-Limit bodies. OCO remains separate.
 - [x] No Production/Supabase write, SQL invocation, migration/db push, pair/price/wallet/order/trade/reservation/Cron/worker/grant/RLS change, merge, deploy, release, APK/Pages publication or cost was made.
+
+
+
+## تکمیل مرجع ساختار جدول‌ها از Recovery-Test — ۲۷ نوامبر ۲۰۲۶
+- [x] وضعیت پروژهٔ موجود `DigiArz-Recovery-Test` با ref `zrriqwyolcjhbappocuw` بررسی شد: ACTIVE_HEALTHY، PostgreSQL 17.11.0.019. هیچ پروژه/branch جدید و هیچ هزینه‌ای ایجاد نشد.
+- [x] فقط metadata با `list_tables(verbose=true)` در schemaهای public/private خوانده شد؛ هیچ SELECT از ردیف‌های کاربران/مالی یا اجرای تابعی انجام نشد و این پروژه برای تست استفاده نشد.
+- [x] snapshot تاریخی نشان می‌دهد `crypto_assets` با `coingecko_id` کلید اصلی دارد و `symbol` کلید یکتا نیست؛ `demo_trading_pairs` با `pair_symbol` کلید اصلی و `base_coingecko_id` یکتا است؛ `market_prices` با `symbol` کلید اصلی است. این ساختار duplicate display ticker را در مسیر pair/price فعلی پشتیبانی نمی‌کند.
+- [x] `orders.symbol`، `trades.symbol`، `conditional_orders.symbol`، `order_reservations.asset` و `asset_balances.asset` همگی متن هستند و شناسه canonical در آن‌ها وجود ندارد. جدول‌های مالی/بازار اصلی در این snapshot RLS-enabled گزارش شدند.
+- [!] این snapshot بازیابی‌شده تاریخی است و برابری آن با Production امروز ثابت نشده؛ ACLهای Recovery-Test نیز در restore حذف شده‌اند. از این پروژه برای آزمون مالی استفاده نمی‌شود و grants/owners آن مبنای طراحی نیست.
+- [ ] گام بعد: ساخت inventory دقیق از کلیدها، unique indexes، FKها، triggers، policies و writerها در یک snapshot مجاز و جاری؛ سپس طراحی migration candidate یکپارچه. هیچ Production query/write، migration، db push یا تغییر هزینه‌ای در این مرحله انجام نشد.
