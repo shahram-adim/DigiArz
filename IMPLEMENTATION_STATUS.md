@@ -1807,3 +1807,12 @@
 - [!] این فقط نمونهٔ Market buy/sell در schema جداشدهٔ disposable است؛ هنوز به معنی پیاده‌سازی در Production نیست و Limit، reservations واقعی، TP/SL، OCO، Stop-Limit، worker lifecycle، RLS/authorization و UI/portfolio باید به همان شناسهٔ canonical منتقل و جداگانه تست شوند.
 - [ ] گام بعد: گسترش prototype به reservation و چرخهٔ Limit/TP-SL/Stop-Limit، سپس تست concurrency/admission و UI read-pathها. هم‌زمان آخرین docs-only CI و PR status را تأیید کنیم.
 - [x] هیچ Production/Supabase write، migration/db push، SQL/Edge Function invocation، تغییر schema/pair/price/queue/Cron/worker/grant/RLS، merge، deploy، release یا هزینه‌ای انجام نشد.
+
+
+## Shahram 187 — canonical Limit reservations and worker lifecycle added (2026-11-27)
+- [x] Disposable canonical identity fixture expanded: orders now retain order_type, pair_id, base_asset_id and quote_asset_id; limit reservations point to the exact canonical base/quote asset; worker resolves the pair and price by pair_id and never parses ticker suffixes.
+- [x] Added buy-limit and sell-limit placement with fee-aware reservation, canonical asset balance locking, and worker fill/release behavior. Added stale-price worker test: pending limit order keeps its canonical reservation while stale, then fills only after a fresh provider observation.
+- [x] Test expected balances include the 0.1% fee and verify that two assets sharing DOT do not contaminate each other's balances/reservations/trades.
+- [!] Latest GitHub Actions run 46034202824 on commit 8761aa5320e99c9cfc8bec115e1a23138b02921d was still running at step 6 when this checkpoint was recorded; Limit lifecycle is not yet CI-confirmed. The earlier Market-only canonical identity test passed in run 46033780380.
+- [ ] Next: await run 46034202824; fix any SQL or arithmetic failures, then extend canonical identity through TP/SL, OCO and Stop-Limit child worker paths and concurrency/authorization tests.
+- [x] All work remains isolated to the disposable test schema and documentation. No Production/Supabase write, migration/db push, pair/price/queue/Cron/worker/grant/RLS change, merge, deploy, release or cost was made.
