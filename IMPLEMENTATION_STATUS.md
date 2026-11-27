@@ -1968,3 +1968,10 @@
 - [!] The new candidate-fixture CI is pending. This remains a miniature disposable Market/Limit proof, not an authoritative Production migration or proof of real Market/Limit/TP-SL/Stop-Limit canonical source parity.
 - [ ] Next after CI: inspect exact step logs; if green, continue building a coordinated canonical-ID source-parity harness and catalog provisioning/disable candidate. Do not copy fixture logic into Production or treat this as rollout-ready.
 - [x] No Production query/write, migration/db push, pair/price/wallet/order/trade/reservation/Cron/worker/Edge Function/grant/RLS change, merge, deploy/release, APK/Pages publication or cost was made.
+
+## Shahram 168 — fix reservation-owner regression assertion (2026-11-27)
+- [x] Rechecked CI for the previous canonical fixture change. Runs 46042843291 and 46042889895 both failed at step 26; steps 1–25 passed. The failure was in the new test assertion, not a production migration: the test attempted to mutate a reservation after its order had already filled and the worker had correctly deleted the reservation, so zero rows changed and the test's own sentinel exception fired.
+- [x] Moved the owner-mismatch mutation assertion to the pending-order phase, immediately after verifying the reservation exists and before the fresh-price fill. This makes the composite same-user FK assertion exercise an actual row.
+- [!] New head 742d2263b1bb23420230882166bbfed69e6ccb7b is awaiting CI. Do not mark the canonical candidate step green until step 26 and full workflow complete successfully.
+- [ ] After CI, extend candidate coverage from the miniature Market/Limit harness to canonical identity through the authoritative conditional-order parent/child lifecycle and pair-scoped cancellation; then build the OCO linked-order state machine tests.
+- [x] No Production/Supabase changes, merge, migration/db push, deploy/release, publication, Cron/worker/grant/RLS changes or costs.
