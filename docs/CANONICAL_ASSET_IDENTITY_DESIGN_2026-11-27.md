@@ -160,3 +160,19 @@ This section records a second pass over the checked-in migration bodies, not an 
 ### Next implementation gate
 
 Build the next candidate as a coordinated set, not piecemeal nullable columns: (a) canonical pair/asset schema and pair-keyed price source; (b) canonical Market and Limit RPC/worker bodies; (c) canonical TP/SL and Stop-Limit placement/worker/cancel bodies calling those engines; (d) RLS/grant and active-account invariants; (e) exact migration-source parity plus duplicate-ticker, stale-price, malformed-reservation, retry, and two-session cancel/worker race tests. OCO remains a separate linked-order state machine. Until all pieces pass in disposable PostgreSQL, the owner requirement is not end-to-end implemented.
+
+
+
+## Recovered schema metadata reference (Recovery-Test snapshot only) — 2026-11-27
+
+A metadata-only `list_tables(verbose=true)` read was made against the existing isolated `DigiArz-Recovery-Test` project (`zrriqwyolcjhbappocuw`, PostgreSQL 17.11.0.019, ACTIVE_HEALTHY). No table rows or user records were queried, and this project was not used for tests. This is a restored historical backup snapshot, not a current Production schema assertion.
+
+The returned metadata confirms these structural facts in that snapshot:
+
+- `crypto_assets`: primary key `coingecko_id`; `symbol` is ordinary text and the table metadata reports no symbol uniqueness constraint. Provider ID and display ticker are distinct concepts.
+- `demo_trading_pairs`: primary key `pair_symbol`; `base_coingecko_id` is separately unique and FK-references `crypto_assets.coingecko_id`; `quote_asset` is constrained to USDT. This schema cannot represent two enabled canonical pairs with the same display pair label.
+- `market_prices`: primary key `symbol`, not pair UUID. It is therefore a symbol-addressed price relation in this snapshot.
+- `orders.symbol`, `trades.symbol`, `conditional_orders.symbol` and `order_reservations.asset` are text columns. `asset_balances.asset` is also text. Canonical asset IDs are absent from these rows.
+- `orders`, `trades`, `conditional_orders`, `order_reservations`, `asset_balances`, `wallets`, `market_prices`, `crypto_assets` and `demo_trading_pairs` all report RLS enabled in this snapshot.
+
+This confirms the design direction, but not current Production parity: Recovery-Test was restored from a backup and its ACLs were deliberately omitted during restore. The next schema candidate must not copy its grants/owners blindly. Reconcile this metadata against an authorized current Production catalog snapshot when the service is stable, and separately recover the original base DDL/missing migration sources. Do not query business rows or use this backup project as a test database.
