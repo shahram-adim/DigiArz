@@ -1938,3 +1938,12 @@
 - [x] برای اینکه فقط regex کافی نباشد، setup کاملاً مصنوعی `canonical_asset_identity_fingerprint_setup.sql` و step جدید CI اضافه شد تا خود SQL fingerprint روی PostgreSQL موقت اجرا و syntax آن تأیید شود. setup فقط roleهای آزمایشی و جدول خالی `cron.job` می‌سازد.
 - [!] اجرای کامل CI روی commit workflow جدید `780312d` هنوز باید بررسی شود؛ تا موفقیت step جدید، اجرای SQL fingerprint را تأییدشده اعلام نکنید.
 - [x] هیچ query از این fingerprint روی Production اجرا نشده؛ هیچ Production/Supabase write یا migration/db push، merge، deploy/release یا هزینه‌ای انجام نشده است.
+
+
+
+### ممیزی تکمیلی writerهای کاتالوگ و مدیریت pair — Recovery-Test تاریخی
+- [x] از pg_proc فقط تعریف و fingerprint توابع مرتبط در snapshot تاریخی خوانده شد؛ هیچ ردیف تجاری/کاربری خوانده نشد. `refresh_crypto_assets()` در snapshot ۸٬۸۸۵ بایت است و `symbol` را همراه upsert بر اساس `coingecko_id` به‌روزرسانی می‌کند؛ این snapshot trigger/قید یکتای سراسری برای `crypto_assets.symbol` نشان نداد.
+- [x] trigger function `private.auto_list_verified_exchange_asset()`، `admin_enable_market_pair()` و `admin_disable_market_pair()` بررسی شدند. فعال‌سازی به curated list/volume/rank محدود است؛ غیرفعال‌سازی با وجود یافتن pair بر اساس CoinGecko ID، سفارش‌ها و رزروها را با `symbol` فیلتر می‌کند.
+- [!] غیرفعال‌سازی symbol-based در مدل duplicate ticker یک خطر cross-asset است؛ اصلاح باید همراه pair_id و asset_id و در همان تغییر هماهنگ Market/Limit/TP-SL/Stop-Limit انجام شود، نه به‌صورت patch مستقل روی Production.
+- [x] یافته‌ها و fingerprintهای تاریخی در design doc ثبت شدند. تابع `refresh_market_prices()` در Recovery-Test قدیمی‌تر از migration محدودیت ۵۱۵ شناسه است و برای تعریف جاری Production به آن استناد نمی‌شود.
+- [ ] گام بعد: آماده‌سازی manifest از writerها و lifecycle مدیریت pair و طراحی candidate canonical provisioning/disable در PostgreSQL موقت. هیچ Production query/write، migration، db push، تغییر cron یا هزینه‌ای انجام نشد.
