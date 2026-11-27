@@ -64,6 +64,37 @@ jobs:
           fi
           psql -h localhost -U postgres -d digiarz_type_widening_negative_test -v ON_ERROR_STOP=1 \
             -c "DO \$\$ BEGIN IF (SELECT format_type(a.atttypid,a.atttypmod) FROM pg_attribute a WHERE a.attrelid='public.orders'::regclass AND a.attname='amount') <> 'numeric(24,8)' THEN RAISE EXCEPTION 'failed preflight changed schema'; END IF; END \$\$;"
+      - name: Verify combined rollout rejects invalid cross-ledger reservations atomically
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_bad_sell_reservation_test;"
+          psql -h localhost -U postgres -d digiarz_bad_sell_reservation_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_setup.sql \
+            -f supabase/tests/exact_decimal_rollout_bad_sell_reservation.sql
+          if psql -h localhost -U postgres -d digiarz_bad_sell_reservation_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql; then
+            echo "Expected under-reserved active sell order to fail rollout preflight."
+            exit 1
+          fi
+          psql -h localhost -U postgres -d digiarz_bad_sell_reservation_test -v ON_ERROR_STOP=1 -c "DO \$verify\$ BEGIN
+            IF (SELECT format_type(a.atttypid,a.atttypmod) FROM pg_attribute a WHERE a.attrelid='public.orders'::regclass AND a.attname='amount') <> 'numeric(24,8)' THEN RAISE EXCEPTION 'failed sell-reservation preflight changed schema'; END IF;
+            IF NOT EXISTS (SELECT 1 FROM public.orders o JOIN public.order_reservations r ON r.order_id=o.id AND r.user_id=o.user_id WHERE o.id='10000000-0000-4000-8000-000000000003' AND r.reserved_amount-r.consumed_amount-r.released_amount < o.remaining_amount) THEN RAISE EXCEPTION 'negative sell-reservation fixture changed unexpectedly'; END IF;
+          END \$verify\$;"
+
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_bad_conditional_reservation_test;"
+          psql -h localhost -U postgres -d digiarz_bad_conditional_reservation_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_setup.sql \
+            -f supabase/tests/exact_decimal_rollout_bad_conditional_reservation.sql
+          if psql -h localhost -U postgres -d digiarz_bad_conditional_reservation_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql; then
+            echo "Expected mismatched TP/SL reservation to fail rollout preflight."
+            exit 1
+          fi
+          psql -h localhost -U postgres -d digiarz_bad_conditional_reservation_test -v ON_ERROR_STOP=1 -c "DO \$verify\$ BEGIN
+            IF (SELECT format_type(a.atttypid,a.atttypmod) FROM pg_attribute a WHERE a.attrelid='public.conditional_orders'::regclass AND a.attname='amount') <> 'numeric' THEN RAISE EXCEPTION 'failed conditional-reservation preflight changed schema'; END IF;
+            IF NOT EXISTS (SELECT 1 FROM public.conditional_orders c JOIN public.order_reservations r ON r.order_id=c.order_id AND r.user_id=c.user_id WHERE c.order_id='10000000-0000-4000-8000-000000000002' AND r.reserved_amount <> c.amount) THEN RAISE EXCEPTION 'negative conditional-reservation fixture changed unexpectedly'; END IF;
+          END \$verify\$;"
       - name: Verify widening migration honors lock timeout atomically
         env:
           PGPASSWORD: postgres
