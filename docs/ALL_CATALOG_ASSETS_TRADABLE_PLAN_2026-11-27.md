@@ -142,3 +142,8 @@ Before implementing provisioning, Phase A must also reconcile these Production w
 
 
 **Current scale of the collision problem:** the read-only Production snapshot recorded 19,012 active catalog assets, 2,365 duplicate active ticker groups, and 6,662 active asset rows inside those groups. These are point-in-time counts from the audit, not a catalog-size cap. The canonical-ledger identity design must cover these collisions at scale; it cannot be solved by manually selecting a single asset from each ticker group.
+
+
+### Canonical identity design artifact
+
+The proposed end-to-end internal asset identity model, duplicate-ticker handling, ledger migration sequence and required disposable tests are documented in [CANONICAL_ASSET_IDENTITY_DESIGN_2026-11-27.md](CANONICAL_ASSET_IDENTITY_DESIGN_2026-11-27.md). It is design-only and does not authorize or implement a Production migration.
