@@ -393,4 +393,147 @@ BEGIN
 END
 $fee_boundary$;
 
-SELECT 'exact-decimal Limit worker integration and fee-boundary and Production account guards: PASS' AS result;
+-- Repeated partial fills must preserve the exact remaining reserve at every cycle.
+INSERT INTO auth.users (id)
+VALUES ('77000000-0000-0000-0000-000000000007');
+INSERT INTO public.profiles (id, is_active)
+VALUES ('77000000-0000-0000-0000-000000000007', true);
+INSERT INTO public.wallets (user_id, balance_usdt)
+VALUES ('77000000-0000-0000-0000-000000000007', 10);
+INSERT INTO public.asset_balances (user_id, asset, balance)
+VALUES ('77000000-0000-0000-0000-000000000007', 'BTC', 0);
+UPDATE public.market_prices SET price=1, updated_at=now()
+WHERE symbol='BTCUSDT';
+INSERT INTO public.orders (
+  id, user_id, symbol, side, order_type, amount, price,
+  filled_amount, remaining_amount, status
+) VALUES (
+  '77000000-0000-0000-0000-000000000077',
+  '77000000-0000-0000-0000-000000000007',
+  'BTCUSDT', 'buy', 'limit', 4, 1, 0, 4, 'pending'
+);
+INSERT INTO public.order_reservations (
+  id, order_id, user_id, asset, reserved_amount,
+  consumed_amount, released_amount, status
+) VALUES (
+  '77000000-0000-0000-0000-000000000777',
+  '77000000-0000-0000-0000-000000000077',
+  '77000000-0000-0000-0000-000000000007',
+  'USDT', 4.0040001, 0, 0, 'reserved'
+);
+
+DO $partial_reserve$
+DECLARE
+  v_cycle integer;
+  v_consumed numeric;
+  v_released numeric;
+  v_expected numeric[] := ARRAY[1.001, 2.002, 3.003, 4.004]::numeric[];
+  v_expected_release numeric[] := ARRAY[0, 0, 0, 0.0000001]::numeric[];
+BEGIN
+  FOR v_cycle IN 1..4 LOOP
+    PERFORM public.process_limit_orders();
+    SELECT consumed_amount, released_amount
+    INTO v_consumed, v_released
+    FROM public.order_reservations
+    WHERE order_id='77000000-0000-0000-0000-000000000077';
+
+    IF v_consumed <> v_expected[v_cycle]
+       OR v_released <> v_expected_release[v_cycle] THEN
+      RAISE EXCEPTION
+        'Partial-fill reserve mismatch at cycle %: consumed %, released %',
+        v_cycle, v_consumed, v_released;
+    END IF;
+
+    IF v_cycle < 4 AND (
+      SELECT status FROM public.order_reservations
+      WHERE order_id='77000000-0000-0000-0000-000000000077'
+    ) <> 'reserved' THEN
+      RAISE EXCEPTION 'Reservation left reserved state before final fill at cycle %', v_cycle;
+    END IF;
+  END LOOP;
+
+  IF (SELECT status FROM public.orders
+      WHERE id='77000000-0000-0000-0000-000000000077') <> 'filled' THEN
+    RAISE EXCEPTION 'Repeated partial-fill order did not complete';
+  END IF;
+  IF (SELECT status FROM public.order_reservations
+      WHERE order_id='77000000-0000-0000-0000-000000000077') <> 'released' THEN
+    RAISE EXCEPTION 'Final reserve dust was not released';
+  END IF;
+  IF (SELECT balance_usdt FROM public.wallets
+      WHERE user_id='77000000-0000-0000-0000-000000000007') <> 5.996 THEN
+    RAISE EXCEPTION 'Repeated partial-fill wallet settlement mismatch';
+  END IF;
+END
+$partial_reserve$;
+
+-- If the remaining quarter cannot produce one 8-place quote unit, the worker
+-- must absorb it into the current fill rather than leave unfillable base dust.
+INSERT INTO auth.users (id)
+VALUES ('88000000-0000-0000-0000-000000000008');
+INSERT INTO public.profiles (id, is_active)
+VALUES ('88000000-0000-0000-0000-000000000008', true);
+INSERT INTO public.wallets (user_id, balance_usdt)
+VALUES ('88000000-0000-0000-0000-000000000008', 1);
+INSERT INTO public.asset_balances (user_id, asset, balance)
+VALUES ('88000000-0000-0000-0000-000000000008', 'BTC', 0);
+UPDATE public.market_prices SET price=0.06, updated_at=now()
+WHERE symbol='BTCUSDT';
+INSERT INTO public.orders (
+  id, user_id, symbol, side, order_type, amount, price,
+  filled_amount, remaining_amount, status
+) VALUES (
+  '88000000-0000-0000-0000-000000000088',
+  '88000000-0000-0000-0000-000000000008',
+  'BTCUSDT', 'buy', 'limit', 0.0000001, 0.06,
+  0, 0.0000001, 'pending'
+);
+INSERT INTO public.order_reservations (
+  id, order_id, user_id, asset, reserved_amount,
+  consumed_amount, released_amount, status
+) VALUES (
+  '88000000-0000-0000-0000-000000000888',
+  '88000000-0000-0000-0000-000000000088',
+  '88000000-0000-0000-0000-000000000008',
+  'USDT', 0.00000002, 0, 0, 'reserved'
+);
+
+DO $dust_remainder$
+DECLARE
+  v_value numeric;
+BEGIN
+  PERFORM public.process_limit_orders();
+
+  IF (SELECT status FROM public.orders
+      WHERE id='88000000-0000-0000-0000-000000000088') <> 'filled' THEN
+    RAISE EXCEPTION 'Unsettleable remainder was not absorbed into the fill';
+  END IF;
+  SELECT filled_amount INTO v_value FROM public.orders
+  WHERE id='88000000-0000-0000-0000-000000000088';
+  IF v_value <> 0.0000001::numeric THEN
+    RAISE EXCEPTION 'Dust-remainder fill quantity mismatch: %', v_value;
+  END IF;
+  SELECT sum(amount) INTO v_value FROM public.trades
+  WHERE order_id='88000000-0000-0000-0000-000000000088';
+  IF v_value <> 0.0000001::numeric THEN
+    RAISE EXCEPTION 'Dust-remainder trade quantity mismatch: %', v_value;
+  END IF;
+  SELECT balance_usdt INTO v_value FROM public.wallets
+  WHERE user_id='88000000-0000-0000-0000-000000000008';
+  IF v_value <> 0.99999999::numeric THEN
+    RAISE EXCEPTION 'Dust-remainder wallet debit mismatch: %', v_value;
+  END IF;
+  SELECT consumed_amount INTO v_value FROM public.order_reservations
+  WHERE order_id='88000000-0000-0000-0000-000000000088';
+  IF v_value <> 0.00000001::numeric THEN
+    RAISE EXCEPTION 'Dust-remainder reservation consumption mismatch: %', v_value;
+  END IF;
+  SELECT released_amount INTO v_value FROM public.order_reservations
+  WHERE order_id='88000000-0000-0000-0000-000000000088';
+  IF v_value <> 0.00000001::numeric THEN
+    RAISE EXCEPTION 'Dust-remainder reservation release mismatch: %', v_value;
+  END IF;
+END
+$dust_remainder$;
+
+SELECT 'exact-decimal Limit worker integration, fee boundary, partial-reserve lifecycle, dust remainder, and account guards: PASS' AS result;
