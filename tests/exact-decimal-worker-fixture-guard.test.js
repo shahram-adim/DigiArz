@@ -45,3 +45,41 @@ test('Limit cancellation race fixture deactivates only after the pending order w
   assert.ok(raceSetup.includes("('72000000-0000-0000-0000-000000000002',true)"));
   assert.ok(raceSetup.includes("WHERE id='72000000-0000-0000-0000-000000000002'"));
 });
+
+test('Limit worker fixture mirrors Production catalog and the coordinated widened numeric contract', () => {
+  for (const fragment of [
+    'CREATE SCHEMA auth;',
+    'CREATE TABLE auth.users',
+    'REFERENCES auth.users(id) ON DELETE CASCADE',
+    'orders_amount_accounting_chk',
+    'orders_filled_amount_range_chk',
+    'orders_limit_price_required_chk',
+    'orders_limit_active_created_at_idx',
+    'order_reservations_order_user_fk',
+    'order_reservations_accounting_check',
+    'order_reservations_user_status_idx',
+    'asset_balances_user_asset_unique',
+    'wallets_nonnegative_balance',
+    'trades_order_id_fk',
+    'transactions_amount_nonzero',
+    'demo_trading_pairs_base_coingecko_id',
+    'market_prices_price_check',
+    'ENABLE ROW LEVEL SECURITY',
+    'CREATE POLICY "View own orders"',
+    'CREATE POLICY "Users can view own order reservations"',
+    'CREATE POLICY "market_prices_anon_public_read"',
+    'numeric(34,18)',
+    'numeric(38,18)'
+  ]) {
+    assert.ok(setup.includes(fragment), 'missing Production catalog fixture element: ' + fragment);
+  }
+  for (const table of ['orders', 'trades', 'transactions']) {
+    assert.ok(setup.includes('CREATE TRIGGER guard_active_account_' + table));
+  }
+});
+
+test('catalog-parity integration seeds referenced auth users and the real market-pair key shape', () => {
+  assert.ok(integration.includes('INSERT INTO auth.users'));
+  assert.ok(integration.includes('base_coingecko_id'));
+  assert.ok(integration.includes('(symbol, price, source, updated_at)'));
+});
