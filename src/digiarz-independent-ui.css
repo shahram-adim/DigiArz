@@ -6463,3 +6463,15 @@ body.luxury-theme #tab-markets .market-head,
 body.luxury-theme #tab-markets .market-board-unit{
   background:#e6ebff!important;border-color:#aebbea!important;
 }
+
+
+/* Mobile market list: reserve a clear viewport lane above the fixed bottom bar.
+   Keep the rows themselves unchanged and allow the final asset to scroll fully clear. */
+@media(max-width:700px){
+  #tab-markets #marketList{
+    padding-bottom:112px!important;
+  }
+  #tab-markets #marketList>.coin:last-child{
+    scroll-margin-bottom:112px!important;
+  }
+}
