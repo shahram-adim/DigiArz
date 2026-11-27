@@ -1723,3 +1723,14 @@
 - [!] این candidate هنوز prototype آزمایشی است؛ سیاست واقعی provider، زمان مشاهدهٔ قیمت، نرخ درخواست، RLS/grants، schema نهایی و اتصال atomic به catalog admission نیازمند ممیزی و تست بیشتر است. هیچ‌یک برای Production آماده یا مجاز اعلام نشده است.
 - [ ] گام بعد: نتیجهٔ CI را بررسی و خطاها را اصلاح کنیم؛ سپس آزمون‌های retry failure، cycle wrap، duplicate canonical symbol و مسیرهای امنیتی را اضافه کنیم.
 - [x] هیچ Supabase/Production write، Cron/worker/Edge Function، price/pair/order/balance change، migration/db push، merge، deploy، release یا هزینه‌ای انجام نشد.
+
+
+## Shahram 179 — candidate scheduler CI, cursor correction, and bounded concurrency (2026-11-27)
+- [x] اولین اجرای کامل candidate scheduler در GitHub Actions، run #2259، روی commit `55366d23745573bae79aaf6a522447229931ca5f` با نتیجهٔ SUCCESS انجام شد؛ هر دو گام بازسازی منبع Production و اجرای candidate در PostgreSQL 17 موفق بودند.
+- [x] در بازبینی مستقل منطق، ایراد مهم cursor پیدا شد: اگر یک batch پاسخ ناقص می‌گرفت، cursor قبلی جلو نمی‌رفت و دارایی‌های قبلاً موفق ممکن بود دوباره انتخاب شوند. cursor اکنون فقط بر مبنای آخرین canonical ID انتخاب‌شده از lane عادی پیش می‌رود؛ IDهای omitted جداگانه در retry باقی می‌مانند.
+- [x] مرتب‌سازی lane عادی از `transaction_timestamp()` استفاده می‌کند تا ترتیب IDها با تغییر لحظه‌ای timestamp هر ردیف ناپایدار نشود.
+- [x] آزمون wrap-around پس از پوشش 1200 دارایی اضافه شد؛ انتظار دارد پس از آخرین ID، چرخهٔ بعدی از `asset-0001` آغاز شود.
+- [x] سقف configurable برای تعداد batchهای in-flight (پیش‌فرض 3، محدودهٔ candidate برابر 1 تا 10) اضافه شد؛ تست، سقف و عدم هم‌پوشانی IDهای batchهای معلق را کنترل می‌کند.
+- [!] اجرای #2259 مربوط به نسخهٔ قبل از اصلاح cursor و سقف هم‌زمانی است؛ اجرای نسخه‌های اصلاح‌شده هنوز در حال انجام است و PASS نهایی برای HEAD فعلی اعلام نمی‌شود.
+- [ ] گام بعد: نتیجهٔ CI روی آخرین commit شامل wrap-around و in-flight cap را بررسی کنیم؛ در صورت شکست، فقط fixture/test را اصلاح و دوباره اجرا کنیم. سپس آزمون fairness در برابر هجوم پیوستهٔ admission و آزمون retry خطای HTTP را اضافه کنیم.
+- [x] هیچ Production/Supabase write، تغییر Cron/صف/قیمت/جفت‌ارز، Worker/Edge Function، Migration/db push، merge، deploy، release یا هزینه‌ای انجام نشد.
