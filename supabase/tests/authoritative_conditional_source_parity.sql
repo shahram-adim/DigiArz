@@ -35,6 +35,10 @@ BEGIN
     RAISE EXCEPTION 'authoritative TP/SL lifecycle did not reach filled';
   END IF;
 
+  -- The authoritative worker intentionally clears its temporary JWT claims;
+  -- restore the caller identity before invoking the next authenticated RPC.
+  PERFORM set_config('request.jwt.claim.sub',v_user::text,true);
+
   -- Stop-Limit buy: the exact migration places a parent, triggers it, and
   -- links the child returned by the isolated Limit-engine adapter.
   INSERT INTO public.market_prices(symbol,price,updated_at)
