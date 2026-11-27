@@ -237,6 +237,9 @@ DECLARE
     v_required_amount numeric := 0;
     v_order_id uuid;
     v_fee_rate numeric;
+    v_gross numeric;
+    v_fee numeric;
+    v_net numeric;
 BEGIN
     v_uid := auth.uid();
 
@@ -302,6 +305,13 @@ BEGIN
     END IF;
 
     v_fee_rate := public.get_demo_trading_fee_rate('USDT', 'maker');
+    v_gross := round(p_amount * p_limit_price, 8);
+    v_fee := round(v_gross * v_fee_rate, 8);
+    v_net := v_gross - v_fee;
+    IF v_side = 'sell'
+       AND (v_net <= 0 OR v_net > 9999999999999999.99999999::numeric) THEN
+        RAISE EXCEPTION 'Sell order settlement exceeds numeric(24,8) USDT capacity';
+    END IF;
     IF v_side = 'buy' THEN
         v_asset := 'USDT';
         v_required_amount := round(p_amount * p_limit_price, 8)
@@ -422,6 +432,9 @@ DECLARE
   v_reserved numeric := 0;
   v_required numeric := 0;
   v_fee_rate numeric := 0;
+  v_gross numeric;
+  v_fee numeric;
+  v_net numeric;
   v_reserve_asset text;
   v_order_id uuid;
   v_conditional_id uuid;
@@ -469,6 +482,13 @@ BEGIN
   IF NOT FOUND THEN RAISE EXCEPTION 'User wallet not found'; END IF;
 
   v_fee_rate := public.get_demo_trading_fee_rate('USDT','maker');
+  v_gross := round(p_amount * p_limit_price, 8);
+  v_fee := round(v_gross * v_fee_rate, 8);
+  v_net := v_gross - v_fee;
+  IF v_side='sell'
+     AND (v_net <= 0 OR v_net > 9999999999999999.99999999::numeric) THEN
+    RAISE EXCEPTION 'Stop-Limit sell settlement exceeds numeric(24,8) USDT capacity';
+  END IF;
   IF v_side='buy' THEN
     v_reserve_asset := 'USDT';
     v_required := round(p_amount*p_limit_price,8)
@@ -540,6 +560,10 @@ DECLARE
   v_wallet numeric;
   v_balance numeric;
   v_reserved numeric := 0;
+  v_fee_rate numeric;
+  v_gross numeric;
+  v_fee numeric;
+  v_net numeric;
   v_order_id uuid;
   v_conditional_id uuid;
 BEGIN
@@ -560,6 +584,13 @@ BEGIN
   END IF;
   IF round(p_amount * p_trigger_price, 8) <= 0 THEN
     RAISE EXCEPTION 'Conditional exit notional rounds to zero USDT';
+  END IF;
+  v_fee_rate := public.get_demo_trading_fee_rate('USDT', 'taker');
+  v_gross := round(p_amount * p_trigger_price, 8);
+  v_fee := round(v_gross * v_fee_rate, 8);
+  v_net := v_gross - v_fee;
+  IF v_net <= 0 OR v_net > 9999999999999999.99999999::numeric THEN
+    RAISE EXCEPTION 'Conditional exit settlement exceeds numeric(24,8) USDT capacity';
   END IF;
   v_base := left(v_symbol,length(v_symbol)-4);
   IF v_base IS NULL OR v_base='' OR v_base='USDT' THEN RAISE EXCEPTION 'Invalid base asset'; END IF;

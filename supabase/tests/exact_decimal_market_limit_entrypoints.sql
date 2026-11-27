@@ -73,6 +73,16 @@ BEGIN
     RAISE EXCEPTION 'Limit sell reservation precision mismatch: %',v_reserved;
   END IF;
 
+  -- Sell orders above the 8-place USDT transaction ledger capacity must fail before persistence.
+  UPDATE public.asset_balances SET balance=10 WHERE user_id=v_uid AND asset='BTC';
+  BEGIN
+    PERFORM public.place_limit_order('BTCUSDT','sell',2,9999999999999999);
+    RAISE EXCEPTION 'Expected oversized Limit sell settlement to be rejected';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Expected oversized Limit sell settlement to be rejected' THEN RAISE; END IF;
+    IF SQLERRM NOT LIKE '%Sell order settlement exceeds numeric(24,8) USDT capacity%' THEN RAISE; END IF;
+  END;
+
   -- Reject more than 18 fractional digits rather than silently rounding.
   BEGIN
     PERFORM public.place_limit_order(

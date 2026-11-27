@@ -98,3 +98,10 @@ Do not interpret the current passing worker/cancel lifecycle suites as proof tha
 - The two previously open lock interleavings are **Passed** in disposable PostgreSQL CI.
 - The financial rollout remains **Blocked** by live-vs-candidate worker arithmetic parity, coordinated numeric typmods/precision, complete candidate caller/worker/ACL compatibility, and the absence of historical ledger evidence.
 - This addendum is evidence/documentation only. No Production SQL writes, Migration, function replacement, ACL/RLS change, Cron change, Edge Function deployment, merge, or release was performed.
+
+
+## Sell-side quote-ledger capacity follow-up — 2026-11-27
+
+A source-level review found a preflight gap in the draft placement RPCs: Limit Sell, Stop-Limit Sell, and TP/SL Sell previously rejected only zero-rounded quote notional, while the candidate Limit worker rejects a net sell settlement above the maximum representable `numeric(24,8)` USDT amount. Such an order could be accepted and reserved but remain unfillable by the worker. The entrypoint candidates and combined rollout candidate now calculate the 8-place gross and fee, derive net proceeds using the matching maker/taker fee schedule, and reject a net amount above the USDT ledger capacity before inserting an order or reservation. Disposable PostgreSQL integration assertions cover all three sell paths and verify that no order is persisted after rejection; the source-contract test checks both standalone and combined candidates.
+
+A distinct remaining edge is wallet headroom: `execute_demo_trade` and the Limit worker currently bound the credit amount, but must also verify that the existing `wallets.balance_usdt` plus incoming net proceeds remains within `numeric(24,8)` capacity before the UPDATE. This requires explicit candidate-worker/market-execution regression tests and remains a release blocker until covered. No Production function, row, schema, grant, or Cron job was changed.

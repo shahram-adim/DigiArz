@@ -11,6 +11,7 @@ DECLARE
   v_limit numeric;
   v_reserved numeric;
   v_asset text;
+  v_count integer;
 BEGIN
   INSERT INTO public.profiles(id,is_active) VALUES(v_uid,true);
   INSERT INTO public.demo_trading_pairs(pair_symbol,quote_asset,is_enabled)
@@ -81,6 +82,31 @@ BEGIN
   FROM public.order_reservations WHERE order_id=v_order_id;
   IF v_asset <> 'BTC' OR v_reserved <> 0.333333333333333333 THEN
     RAISE EXCEPTION 'TP/SL reservation mismatch: asset %, amount %',v_asset,v_reserved;
+  END IF;
+
+  -- Over-cap sell notionals must be rejected before creating parent/reservation rows.
+  UPDATE public.asset_balances SET balance=10 WHERE user_id=v_uid AND asset='BTC';
+  BEGIN
+    PERFORM public.place_stop_limit_order(
+      'BTCUSDT','sell',2,9999999999999999,9999999999999998
+    );
+    RAISE EXCEPTION 'Expected oversized Stop-Limit sell settlement to be rejected';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Expected oversized Stop-Limit sell settlement to be rejected' THEN RAISE; END IF;
+    IF SQLERRM NOT LIKE '%Stop-Limit sell settlement exceeds numeric(24,8) USDT capacity%' THEN RAISE; END IF;
+  END;
+  BEGIN
+    PERFORM public.place_conditional_exit_order(
+      'BTCUSDT','take_profit',2,9999999999999999
+    );
+    RAISE EXCEPTION 'Expected oversized TP/SL sell settlement to be rejected';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Expected oversized TP/SL sell settlement to be rejected' THEN RAISE; END IF;
+    IF SQLERRM NOT LIKE '%Conditional exit settlement exceeds numeric(24,8) USDT capacity%' THEN RAISE; END IF;
+  END;
+  SELECT count(*) INTO v_count FROM public.orders WHERE user_id=v_uid;
+  IF v_count <> 3 THEN
+    RAISE EXCEPTION 'Rejected over-cap sell entrypoint persisted an order: %',v_count;
   END IF;
 
   -- Reject quantities that would settle to zero USDT.
