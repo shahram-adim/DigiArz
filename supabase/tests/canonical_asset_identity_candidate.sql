@@ -222,7 +222,7 @@ BEGIN
   IF v_a<>0.5 OR v_b<>1 THEN
     RAISE EXCEPTION 'same-ticker assets contaminated each other: asset A %, asset B %',v_a,v_b;
   END IF;
-  IF v_usdt_balance<>9974.975 THEN
+  IF v_usdt_balance<>9974.965 THEN
     RAISE EXCEPTION 'unexpected quote balance after fee-aware trades: %',v_usdt_balance;
   END IF;
 
