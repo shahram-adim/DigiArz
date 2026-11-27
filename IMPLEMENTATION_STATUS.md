@@ -1710,3 +1710,16 @@
 - [!] این مرحله فقط طراحی است؛ هیچ جدول، تابع، migration، Cron، queue یا worker جدیدی ساخته/اجرا نشده است. اندازهٔ batch، تعداد درخواست هم‌زمان، retry delays و منبع قیمت مجاز باید با تست و محدودیت providerها تعیین شوند.
 - [ ] گام بعد: پیاده‌سازی candidate scheduler فقط در disposable PostgreSQL 17، با آزمون‌های fairness، retry، idempotency، concurrency و source-priority؛ سپس تکمیل inventory writerهای کاتالوگ و اتصال آن به provisioning candidate.
 - [x] هیچ Production/Supabase write، migration/db push، Cron/worker change، merge، deploy، release یا هزینه‌ای انجام نشد.
+
+
+## Shahram 178 — fair scheduler candidate added to disposable PostgreSQL tests (2026-11-27)
+- [x] وضعیت زنده پیش از تغییر بررسی شد: PR #66 برابر 69 جلو/0 عقب و PR #67 برابر 27 جلو/0 عقب از `main`؛ هر دو باز و Draft هستند.
+- [x] candidate scheduler آزمایشی در `supabase/tests/market_price_scheduler_candidate.sql` و فقط در schema جداگانهٔ `scheduler_candidate` اضافه شد؛ این migration Production نیست.
+- [x] منطق candidate شامل صف اولویت برای پذیرش دارایی جدید، cursor چرخشی روی canonical ID، ledger درخواست با requested/returned/omitted IDs، جلوگیری از درخواست تکراری در batchهای in-flight، retry با backoff، تکمیل idempotent و سیاست تقدم قطعی منبع قیمت است.
+- [x] آزمون‌ها پوشش 1200 دارایی در 12 batch، نبود تکرار در یک چرخه، اولویت دارایی تازه، ثبت پاسخ ناقص و retry، idempotency تحویل مجدد پاسخ، رد قیمت stale/NaN و جلوگیری از overwrite منبع با اولویت پایین‌تر را دارند.
+- [x] آزمون هم‌زمانی دو session در `supabase/tests/market_price_scheduler_candidate_concurrency.sh` اضافه شد؛ session اول advisory transaction lock را نگه می‌دارد و invocation دوم باید بدون ایجاد batch خارج شود.
+- [x] workflow PostgreSQL 17 یک دیتابیس مستقل برای candidate test می‌سازد و هر دو تست را اجرا می‌کند.
+- [!] نتیجهٔ candidate هنوز تأیید نشده است؛ باید GitHub Actions روی HEAD دقیق اجرا و تمام مراحل بررسی شوند. اجرای محلی PostgreSQL در این محیط در دسترس نیست.
+- [!] این candidate هنوز prototype آزمایشی است؛ سیاست واقعی provider، زمان مشاهدهٔ قیمت، نرخ درخواست، RLS/grants، schema نهایی و اتصال atomic به catalog admission نیازمند ممیزی و تست بیشتر است. هیچ‌یک برای Production آماده یا مجاز اعلام نشده است.
+- [ ] گام بعد: نتیجهٔ CI را بررسی و خطاها را اصلاح کنیم؛ سپس آزمون‌های retry failure، cycle wrap، duplicate canonical symbol و مسیرهای امنیتی را اضافه کنیم.
+- [x] هیچ Supabase/Production write، Cron/worker/Edge Function، price/pair/order/balance change، migration/db push، merge، deploy، release یا هزینه‌ای انجام نشد.
