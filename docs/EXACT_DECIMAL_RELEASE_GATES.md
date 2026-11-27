@@ -54,8 +54,8 @@ The existing disposable PostgreSQL suite already covers:
 | Limit worker vs same-user same-asset Sell placement | Real two-session race in exact-decimal workflow | Passed on HEAD `53ad1b69e5b5161c143008213fa3b2b2e57e9862` |
 | Stop-Limit cancel vs child Limit worker | `exact_decimal_stop_limit_cancel_race.sh` | Existing coverage; re-run with full suite |
 | TP/SL cancel vs conditional worker | `exact_decimal_conditional_cancel_race.sh` | Existing coverage; re-run with full suite |
-| Conditional worker vs same-user placement | No dedicated two-session placement interleaving identified in this review | **Open** |
-| Concurrent cancellation through Stop-Limit parent and child Limit RPC | Existing Stop-Limit tests serialize cancellation against worker, but do not prove two independent cancellation callers are deadlock-free | **Open** |
+| Conditional worker vs same-user placement | Dedicated two-session race; CI run 45995474050 on HEAD e7e53468 | **Passed** |
+| Concurrent cancellation through Stop-Limit parent and child Limit RPC | Dedicated two-session parent-vs-child cancellation race; CI run 45995474050 on HEAD e7e53468 | **Passed** |
 
 For each open case, use separate PostgreSQL sessions with distinct `application_name`, deterministic barriers (test-only trigger/advisory barrier), bounded `lock_timeout`/test timeout, and capture `pg_stat_activity`, `pg_locks`, wait events, and PostgreSQL deadlock diagnostics. After both sessions finish, assert:
 
@@ -74,3 +74,27 @@ Do not interpret the current passing worker/cancel lifecycle suites as proof tha
 - The 18-decimal base-quantity proposal remains blocked until dependent column widths, every caller, every worker, and every ledger field share a compatible precision contract.
 - The live Limit worker's missing explicit 8-decimal settlement quantization remains a release-blocking accounting defect until corrected and rehearsed.
 - Production history cannot be declared reconciled while source ledger history is absent.
+
+
+## Fresh evidence addendum — 2026-11-27 12:07 UTC
+
+### Two previously open interleavings are now covered
+- [x] Conditional worker vs same-user Sell placement: the dedicated two-session disposable-PostgreSQL test passed in GitHub Actions run [45995295489](https://github.com/shahram-adim/DigiArz/actions/runs/45995295489) on intermediate HEAD `7c77a4aaa0a78e4232c8cb2af7dd0fe436c92b0d`.
+- [x] Stop-Limit parent cancellation vs direct child `cancel_limit_order(child)`: the dedicated two-session disposable-PostgreSQL test passed in GitHub Actions run [45995474050](https://github.com/shahram-adim/DigiArz/actions/runs/45995474050) on final HEAD `e7e53468beb71385ebeaf0b2d45a3ebfa11454b9`.
+- [x] The final exact-decimal workflow run [45995474050](https://github.com/shahram-adim/DigiArz/actions/runs/45995474050) completed with `success` on exact HEAD `e7e53468beb71385ebeaf0b2d45a3ebfa11454b9`; both new tests and the existing two-session lifecycle/race tests passed. The earlier run on the intermediate HEAD is not used as evidence for the final HEAD; run 45995474050 is the final-HEAD evidence.
+- [!] These tests establish the specific interleavings they exercise; they do not prove every possible cross-entrypoint lock graph or replace a production-faithful schema/ACL harness.
+
+### Fresh Production read-only snapshot
+- [x] Supabase project `gfoaubfilhttnwjykaox` is `ACTIVE_HEALTHY`, PostgreSQL `17.11.0.018`.
+- [x] Current financial row counts: `orders=0`, `trades=0`, `asset_balances=0`, `order_reservations=0`, `conditional_orders=0`, `transactions=0`, `wallets=1`. This is a point-in-time snapshot, not historical ledger reconciliation.
+- [x] Current Production function fingerprints remain unchanged from the earlier audit: `process_limit_orders=00ab429596fb99392666632967cde9c0`, `process_stop_limit_orders=66357ab4a2247019f22a8b6ab6eac6fe`, `process_conditional_orders=5cfbf0e2e73474ae64e42643b3feb28a`, `execute_demo_trade=4289e358b0c7293fc33f86c2511486d7`, `place_limit_order=3eab167c47bf8ff2e1705b9f243380ec`, `place_stop_limit_order=d6f4ff7478b83fbabbab519c7c711bcd`, `place_conditional_exit_order=e4de4667d89e6663f04d92d47ac4d5cf`, `cancel_limit_order=69360684173b6aabebc5ff4e4de2eed9`, `cancel_stop_limit_order=82cedc2c442b0c826a8684044aed5f8d`, `cancel_conditional_exit_order=efa4c8a200d299f76b0d2cbe2d0b49e9`.
+- [x] Relevant live column types still include `orders.amount/price numeric(24,8)`, `trades.amount/price numeric(24,8)`, `asset_balances.balance numeric(28,8)`, `wallets.balance_usdt numeric(24,8)`, and `transactions.amount numeric(24,8)`; reservation and conditional amount/price fields remain unconstrained `numeric`. Therefore the proposed 18-place base-quantity contract is not deployable as-is.
+- [x] Production Cron jobs 8, 9, and 12 (`digiarz-limit-orders`, `digiarz-conditional-orders`, `digiarz-stop-limit-orders`) remain active at `* * * * *`. No Cron change was made.
+- [!] Current Advisor snapshot (observed 2026-11-27 12:07:10 UTC): 2 anon-executable SECURITY DEFINER RPCs, 23 authenticated-executable SECURITY DEFINER RPCs, 15 RLS-enabled/no-policy findings, 9 unindexed foreign keys, 11 RLS init-plan findings, 12 unused-index findings, and leaked-password protection disabled. These are review findings; no ACL, RLS, index, or Auth setting was changed.
+- [!] The accounting quantization defect in the live Limit worker remains a release blocker. The current candidate entrypoint SQL does not itself replace `process_limit_orders()`; the separate worker candidate must be included and validated together with the entrypoints and coordinated column widths.
+- [!] Empty financial tables mean there is no historical trade/transaction ledger from which to reconstruct prior wallet movements. Do not call the current snapshot a completed historical reconciliation.
+
+### Current release decision
+- The two previously open lock interleavings are **Passed** in disposable PostgreSQL CI.
+- The financial rollout remains **Blocked** by live-vs-candidate worker arithmetic parity, coordinated numeric typmods/precision, complete candidate caller/worker/ACL compatibility, and the absence of historical ledger evidence.
+- This addendum is evidence/documentation only. No Production SQL writes, Migration, function replacement, ACL/RLS change, Cron change, Edge Function deployment, merge, or release was performed.
