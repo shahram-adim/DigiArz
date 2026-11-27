@@ -7,22 +7,22 @@ const sql = fs.readFileSync('supabase/audit/canonical_asset_identity_schema_fing
 
 function stripCommentsAndStringLiterals(source) {
   return source
-    .replace(/--[^\\n]*/g, '')
-    .replace(/\\/\\*[\\s\\S]*?\\*\\//g, '')
+    .replace(/--[^\n]*/g, '')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/'(?:''|[^'])*'/g, "''");
 }
 
 test('canonical asset identity fingerprint is a single read-only catalog query', () => {
   const executable = stripCommentsAndStringLiterals(sql);
-  assert.match(executable, /^\\s*WITH\\b/i);
-  assert.match(executable, /\\bSELECT\\b/i);
+  assert.match(executable, /^\s*WITH\b/i);
+  assert.match(executable, /\bSELECT\b/i);
   assert.doesNotMatch(
     executable,
-    /\\b(?:INSERT|UPDATE|DELETE|MERGE|CREATE|ALTER|DROP|TRUNCATE|GRANT|REVOKE|CALL|DO|COPY)\\b/i
+    /\b(?:INSERT|UPDATE|DELETE|MERGE|CREATE|ALTER|DROP|TRUNCATE|GRANT|REVOKE|CALL|DO|COPY)\b/i
   );
   assert.doesNotMatch(
     executable,
-    /\\b(?:FROM|JOIN)\\s+public\\.(?:crypto_assets|admin_market_listings|exchange_asset_observations|demo_trading_pairs|market_prices|orders|trades|conditional_orders|order_reservations|asset_balances|wallets|transactions)\\b/i
+    /\b(?:FROM|JOIN)\s+public\.(?:crypto_assets|admin_market_listings|exchange_asset_observations|demo_trading_pairs|market_prices|orders|trades|conditional_orders|order_reservations|asset_balances|wallets|transactions)\b/i
   );
   assert.equal((executable.match(/;/g) || []).length, 1);
 });
