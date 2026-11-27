@@ -6469,9 +6469,9 @@ body.luxury-theme #tab-markets .market-board-unit{
    Keep the rows themselves unchanged and allow the final asset to scroll fully clear. */
 @media(max-width:700px){
   #tab-markets #marketList{
-    padding-bottom:112px!important;
+    padding-bottom:160px!important;
   }
   #tab-markets #marketList>.coin:last-child{
-    scroll-margin-bottom:112px!important;
+    scroll-margin-bottom:160px!important;
   }
 }
