@@ -130,3 +130,33 @@ Inspection of .github/workflows/exact-decimal-tests.yml shows an important limit
 - Therefore run 46036165275 proves that the canonical prototype fixture compiles and passes in PostgreSQL 17, but it does not prove canonical identity is integrated with actual TP/SL/Stop-Limit SQL, nor that the production migrations themselves are compatible with duplicate ticker IDs.
 - A dedicated source-parity harness is required: bootstrap the real schema dependencies, apply or extract the exact authoritative migration definitions in a disposable database, then apply the canonical-ID candidate and exercise the real RPC/worker call graph. Where migrations cannot be applied verbatim because of Supabase-only dependencies, the harness must document and assert each dependency substitution rather than silently replacing financial functions with miniature lookalikes.
 - Until that harness exists and passes, mark canonical identity as prototype-only and all-catalog trading as not implemented end-to-end.
+
+
+
+## Exact authoritative conditional call-chain audit — 2026-11-27
+
+This section records a second pass over the checked-in migration bodies, not an implementation claim:
+
+| Layer | Exact source function | Current identity used | Required canonical replacement |
+|---|---|---|---|
+| TP/SL placement | `place_conditional_exit_order(text,text,numeric,numeric)` in `20261113162051_add_demo_take_profit_stop_loss_engine.sql` | `p_symbol`, suffix-derived `v_base`, `demo_trading_pairs.pair_symbol`, `asset_balances.asset`, `order_reservations.asset` | Accept/resolve `pair_id`; load base/quote IDs from the enabled pair row; reserve by `asset_id`; persist all three IDs on parent and conditional row |
+| TP/SL execution | `process_conditional_orders()` in the same migration | `conditional_orders.symbol`, `market_prices.symbol`, ticker-derived reservation validation; calls `execute_demo_trade(symbol,...)` | Load pair and assets by immutable IDs; read price by `pair_id`; validate reservation asset ID; execute Market with the same pair/asset IDs |
+| TP/SL cancellation | `cancel_conditional_exit_order(uuid)` | Parent UUID + text-asset reservation | Preserve parent/row locking and exact one-row transitions, but validate/release the reservation for the stored canonical asset ID |
+| Stop-Limit placement | `place_stop_limit_order(text,text,numeric,numeric,numeric)` in `20261113181827_add_stop_limit_order_engine.sql` | suffix-derived base ticker, pair_symbol, text reservation asset | Pair ID is the authoritative input; reserve base or quote asset ID; parent order and conditional row persist pair/base/quote IDs |
+| Stop-Limit trigger | `process_stop_limit_orders()` in the same migration | `conditional_orders.symbol`, `market_prices.symbol`, text reservation validation; calls `place_limit_order(symbol,...)` | Pair-keyed price and ID reservation validation; create child through canonical Limit entrypoint with the same IDs; assert parent/child ID equality |
+| Stop-Limit cancellation/sync | `cancel_stop_limit_order(uuid)` and the triggered-child sync loop | UUID parent-child relation, but child/parent rows do not carry canonical IDs | Preserve UUID linkage, copy/fail closed on mismatched pair/base/quote IDs, and keep cancellation-vs-worker serialization |
+| Market execution | `execute_demo_trade(text,text,numeric,numeric)` in `20261113161641_enforce_active_accounts_in_demo_trade_and_limit_engine.sql` | pair_symbol, symbol-keyed market price, suffix-derived base, text balances/reservations, symbol-only orders/trades | Canonical pair and asset IDs must drive price, balances, orders, trades and transactions; display symbol is a snapshot only |
+| Limit placement/worker | `place_limit_order(text,text,numeric,numeric)` and `process_limit_orders()` in the same migration | pair_symbol, ticker-derived base, symbol-keyed price, text reservation and asset balance | Canonical pair/asset IDs must flow from placement through partial fills, reservation consumption/release and trades |
+
+### Structural consequences
+
+1. Merely adding nullable UUID columns is unsafe. Every write path must populate and validate them, and workers must reject rows whose IDs do not agree with the referenced pair.
+2. The current pair model's `pair_symbol` uniqueness and the current ticker-derived price lookup cannot distinguish two canonical assets that share the same display ticker/pair label. The canonical model must make `pair_id` authoritative and allow display labels to be non-unique; all indexes, conflict targets and upserts must be reviewed together. Do not remove legacy uniqueness until every reader/writer has moved and duplicate-ticker reconciliation is complete.
+3. A compatibility adapter that accepts a symbol and chooses a pair by ticker is not an acceptable canonical entrypoint. If legacy RPC signatures must remain temporarily, they may resolve only when exactly one enabled pair matches; zero or multiple matches must fail closed.
+4. Conditional parent and Stop-Limit child must carry the same `pair_id/base_asset_id/quote_asset_id`. A child with a different pair identity must never be accepted even if its display symbol matches.
+5. The successful authoritative harness still substitutes downstream Market/Limit entrypoints with explicitly isolated adapters. It proves conditional/Stop-Limit lifecycle logic and its stale/malformed-reservation guards, not canonical-ID source parity or actual Market/Limit settlement.
+6. Existing passing CI runs `46038710233` (commit `966a7ce`) and `46038816951` (latest code commit `ce83b536`) both completed SUCCESS. Steps 17–22, 25 and 26 all passed in both. The new stale-price and malformed-reservation assertions therefore pass in the authoritative conditional/Stop-Limit disposable harness. They do not close the canonical-ID integration gap.
+
+### Next implementation gate
+
+Build the next candidate as a coordinated set, not piecemeal nullable columns: (a) canonical pair/asset schema and pair-keyed price source; (b) canonical Market and Limit RPC/worker bodies; (c) canonical TP/SL and Stop-Limit placement/worker/cancel bodies calling those engines; (d) RLS/grant and active-account invariants; (e) exact migration-source parity plus duplicate-ticker, stale-price, malformed-reservation, retry, and two-session cancel/worker race tests. OCO remains a separate linked-order state machine. Until all pieces pass in disposable PostgreSQL, the owner requirement is not end-to-end implemented.
