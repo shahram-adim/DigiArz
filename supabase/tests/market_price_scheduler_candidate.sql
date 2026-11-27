@@ -245,6 +245,7 @@ DECLARE
   v_ids text[];
   v_before integer;
   v_after integer;
+  v_ids_json jsonb;
 BEGIN
   FOR i IN 1..1200 LOOP
     PERFORM scheduler_candidate.admit_asset(
