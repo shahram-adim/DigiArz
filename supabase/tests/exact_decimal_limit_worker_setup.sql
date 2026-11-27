@@ -154,7 +154,8 @@ CREATE TABLE public.trades (
   amount numeric(34,18) NOT NULL,
   price numeric(34,18) NOT NULL,
   created_at timestamptz DEFAULT now(),
-  order_id uuid REFERENCES public.orders(id) ON DELETE SET NULL,
+  order_id uuid,
+  CONSTRAINT trades_order_id_fk FOREIGN KEY (order_id) REFERENCES public.orders(id) ON DELETE SET NULL,
   CONSTRAINT trades_amount_positive CHECK (amount > 0),
   CONSTRAINT trades_price_positive CHECK (price > 0),
   CONSTRAINT trades_side_valid CHECK (side = ANY (ARRAY['buy','sell']))
