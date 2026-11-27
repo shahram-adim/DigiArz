@@ -176,3 +176,21 @@ The returned metadata confirms these structural facts in that snapshot:
 - `orders`, `trades`, `conditional_orders`, `order_reservations`, `asset_balances`, `wallets`, `market_prices`, `crypto_assets` and `demo_trading_pairs` all report RLS enabled in this snapshot.
 
 This confirms the design direction, but not current Production parity: Recovery-Test was restored from a backup and its ACLs were deliberately omitted during restore. The next schema candidate must not copy its grants/owners blindly. Reconcile this metadata against an authorized current Production catalog snapshot when the service is stable, and separately recover the original base DDL/missing migration sources. Do not query business rows or use this backup project as a test database.
+
+
+
+### Index/constraint/trigger detail from the same historical snapshot
+
+A read-only catalog query on Recovery-Test (PostgreSQL 17.11) also captured exact indexes, constraints, triggers and policies for the relevant tables. Important details:
+
+- `demo_trading_pairs_pkey` is unique on `pair_symbol`; `demo_trading_pairs_unique_base` is unique on `base_coingecko_id`.
+- `market_prices_pkey` is unique on `symbol`. A ticker collision cannot be represented as two independent price rows in this model.
+- `crypto_assets_pkey` is unique on `coingecko_id`; `crypto_assets_symbol_idx` is only a non-unique lower(symbol) index.
+- `asset_balances_user_asset_unique` enforces one text-asset balance per user. Canonical migration must replace the conflict target with `(user_id, asset_id)` while preserving no-duplicate-balance semantics.
+- `order_reservations_order_unique` preserves one reservation per order; `order_reservations_order_user_fk` binds it to the same user as the parent order. Keep both invariants while adding the canonical asset FK.
+- `orders_id_user_id_unique` is the referenced composite key for the reservation FK; the order accounting checks enforce filled + remaining = amount and bounded filled/remaining values.
+- `conditional_orders_order_id_key` is unique; parent/conditional one-to-one relationship must remain. Stop-Limit child linkage remains a separate `execution_order_id` FK.
+- The snapshot's three custom account-guard triggers are BEFORE INSERT on `orders`, `trades` and `transactions`, all calling `private.guard_active_account_writes()`. No custom trigger on `crypto_assets` was present in the returned relevant-table trigger set.
+- RLS is enabled but not FORCE RLS on the listed tables in this snapshot. Policies include public/anon read for catalog/pairs/prices and own-row reads for financial tables. New canonical tables and ID columns must preserve the least-privilege model; workers stay service_role-only.
+
+These are historical Recovery-Test facts, not current Production assertions. The restored project's ACLs were omitted; its role/function privileges are not a valid source for production grants. The source-faithful candidate must retain the current Production ACLs from a separate authorized catalog capture or authoritative migration source.
