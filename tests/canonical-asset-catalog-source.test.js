@@ -24,6 +24,9 @@ const entries = [
   ['private','enforce_unique_admin_market_listing_symbol','6e9a7e9f7d8cd5f0ac20f3216ee5f0b3'],
   ['private','request_market_price_overflow','e6ed136175b0d340c9a86e51f7917a76'],
   ['private','guard_active_account_writes','29b8e23c1de8eb4762a8cf1a9c9343ce'],
+  ['public','current_account_is_active','d932cd1d0da21bb96bdc0a381f7dcbc3'],
+  ['public','get_demo_trading_fee_rate','546d80d7105228ed97da26c5ed0c7b7f'],
+  ['public','get_my_order_reservations','97189e59fbf37bb5f85b215dadd13dfd'],
   ['public','admin_add_market_listing','8b3d0c18e54b08f01c27bc24491e3448'],
   ['public','admin_enable_market_pair','848f7c1ebe114c558c1ce73e76dd13bd'],
   ['public','admin_review_market_listings','93e96328ff9b8d8f3739b57ce49eb397'],
@@ -67,6 +70,21 @@ test('live active-account write guard remains attached to orders, trades and tra
   assert.match(definition, /SELECT p\.is_active INTO v_active[\s\S]*?FROM public\.profiles p[\s\S]*?WHERE p\.id = NEW\.user_id[\s\S]*?FOR SHARE/i);
   assert.match(definition, /COALESCE\(v_active, false\) IS NOT TRUE/i);
   assert.match(definition, /Account is inactive/i);
+});
+
+test('reservation read API is owner-scoped but exposes only mutable ticker text', () => {
+  const reservations = definitions.public_get_my_order_reservations.definition;
+  assert.match(reservations, /auth\.uid\(\)/i);
+  assert.match(reservations, /r\.user_id\s*=\s*\(select auth\.uid\(\)\)/i);
+  assert.match(reservations, /r\.asset/i);
+  assert.doesNotMatch(reservations, /asset_id|pair_id|base_asset_id|quote_asset_id/i);
+});
+
+test('current-account helper and fee lookup dependencies remain pinned', () => {
+  assert.match(definitions.public_current_account_is_active.definition, /public\.profiles/i);
+  assert.match(definitions.public_current_account_is_active.definition, /auth\.uid\(\)/i);
+  assert.match(definitions.public_get_demo_trading_fee_rate.definition, /public\.demo_trading_fees/i);
+  assert.match(definitions.public_get_demo_trading_fee_rate.definition, /maker_fee_rate|taker_fee_rate/i);
 });
 
 test('catalog refresh treats CoinGecko ID as conflict key but mutates the ticker field', () => {
