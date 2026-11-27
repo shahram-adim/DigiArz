@@ -6,7 +6,7 @@ globalThis.DigiDecimal = D;
 const P = require('../src/portfolio-valuation.js');
 
 test('portfolio market value multiplies precise quantity and price without binary float drift', () => {
-  assert.equal(P.value('0.12345678', '12345.678901234567890123'), '1524.15787515');
+  assert.equal(P.value('0.12345678', '12345.678901234567890123'), '1524.15776406');
   assert.equal(P.value('0.00000001', '0.00000001'), '0');
 });
 
@@ -26,5 +26,5 @@ test('malformed market values are rejected instead of contaminating portfolio to
 });
 
 test('portfolio valuation retains the expected eight-place precision', () => {
-  assert.equal(P.value('1.23456789', '2.00000001'), '2.46913590');
+  assert.equal(P.value('1.23456789', '2.00000001'), '2.46913579');
 });
