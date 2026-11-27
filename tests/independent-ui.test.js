@@ -96,7 +96,7 @@ test('Android screenshot correction uses a two-row mobile market layout and comp
 });
 
 test('service worker precaches the new stylesheet under a fresh shell cache', () => {
-  assert.match(sw, /digiarz-shell-v62/);
+  assert.match(sw, /digiarz-shell-v63/);
   assert.match(sw, /digiarz-independent-ui\.css\?v=3/);
 });
 
