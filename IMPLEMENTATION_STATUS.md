@@ -1890,3 +1890,15 @@
 - [!] کد تست در commit `966a7ce00e560b200fb7fc3ab3c4cc8976047935` ثبت شد. CI run `46038710233` برای همین commit آغاز شده و در زمان این ثبت هنوز در حال اجراست؛ تا نتیجه نهایی، این سه regression را تأییدشده تلقی نکنید.
 - [ ] پس از CI: بررسی لاگ step 25 و رفع هر خطا؛ سپس ثبت نتیجه نهایی و ادامه طراحی canonical IDs برای TP/SL و Stop-Limit. این harness همچنان Market/Limit adapters جداشده دارد و هنوز canonical identity را به migrationهای authoritative منتقل نمی‌کند.
 - [x] فقط فایل تست و مستندات شاخه تغییر کرده‌اند؛ هیچ Production DB، migration اجرایی، Supabase SQL، cron/worker، merge، deploy/release یا هزینه‌ای تغییر نکرده است.
+
+
+
+## Shahram 165 — authoritative conditional regressions green; canonical call-chain mapped (2026-11-27)
+- [x] Rechecked live PR #67: open, Draft, unmerged, mergeable; HEAD at start of checkpoint was `ce83b53610e7daea12fbc927b7d1ca214486696d`.
+- [x] CI run `46038710233` for test commit `966a7ce00e560b200fb7fc3ab3c4cc8976047935` completed SUCCESS.
+- [x] CI run `46038816951` for latest code commit `ce83b53610e7daea12fbc927b7d1ca214486696d` completed SUCCESS. Both runs passed steps 17–22 (including two-session cancellation/worker races), step 25 (exact authoritative TP/SL and Stop-Limit migrations in disposable PostgreSQL), and step 26 (duplicate-ticker canonical fixture).
+- [x] Therefore the added TP/SL stale-price, Stop-Limit stale-price and malformed-reservation/retry cases in `authoritative_conditional_source_parity.sql` are CI-verified on the successful runs. The harness still uses explicit Market/Limit adapters; it does not prove canonical-ID integration with those engines.
+- [x] Re-read exact source bodies for `execute_demo_trade`, `place_limit_order`, `process_limit_orders`, `place_conditional_exit_order`, `cancel_conditional_exit_order`, `process_conditional_orders`, `place_stop_limit_order`, `cancel_stop_limit_order` and `process_stop_limit_orders`. Added a source-to-target call-chain matrix and structural constraints to `docs/CANONICAL_ASSET_IDENTITY_DESIGN_2026-11-27.md`.
+- [!] Confirmed the next change cannot be a few nullable columns: pair resolution, price source, reservation asset, Market/Limit execution and parent/child lifecycle must move together to immutable pair/base/quote IDs. Display ticker must remain non-authoritative; ambiguous legacy symbol-only calls must fail closed.
+- [ ] Next: inventory base schema and all writers/readers for `crypto_assets`, `demo_trading_pairs`, `market_prices`, balances, orders and reservations; then prepare a disposable-only coordinated canonical migration candidate and test actual Market/Limit/TP-SL/Stop-Limit bodies. OCO remains separate.
+- [x] No Production/Supabase write, SQL invocation, migration/db push, pair/price/wallet/order/trade/reservation/Cron/worker/grant/RLS change, merge, deploy, release, APK/Pages publication or cost was made.
