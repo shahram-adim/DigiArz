@@ -285,3 +285,10 @@ No test fixture, SQL migration, workflow, or executable source was changed in th
 - The current handler stamps `market_prices.updated_at=now()` when the HTTP response is processed. This is a local write/receive timestamp, not proof of when the upstream price observation itself was last updated.
 - CoinGecko documents `include_last_updated_at=true` as the way to receive the price update timestamp (Unix seconds) from `/simple/price`: https://support.coingecko.com/articles/7785031254-how-can-i-determine-if-the-pricing-data-for-the-coin-is-outdated-or-stale.
 - Therefore current two-minute freshness checks based only on `market_prices.updated_at` can establish recent local processing, but cannot independently establish provider-observed freshness. A future candidate must store/validate provider observation time separately from received/processed time; no Production request or schema was changed.
+
+
+### Ledger symbol dependence for duplicate-ticker handling (read-only, 2026-11-27)
+
+- Column metadata confirms `orders.symbol`, `trades.symbol`, `conditional_orders.symbol`, `asset_balances.asset`, and `order_reservations.asset` are text fields; the current trading RPCs and workers derive the base asset code from the pair symbol by removing the `USDT` suffix.
+- `demo_trading_pairs` uniquely maps `pair_symbol` and `base_coingecko_id`, but the ledger rows do not carry a canonical CoinGecko asset ID in the inspected schema. This makes duplicate-ticker support a ledger-identity problem, not only a pair-table collision problem.
+- A future duplicate-ticker solution must preserve immutable canonical asset identity end-to-end across pair, order, trade, reservation, balance, and portfolio paths. A synthetic ticker alias alone is insufficient without updating those consumers and validating old rows. No Production data/schema was changed.
