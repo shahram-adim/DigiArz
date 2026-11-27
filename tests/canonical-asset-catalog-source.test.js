@@ -23,6 +23,7 @@ const entries = [
   ['private','auto_list_verified_exchange_asset','49880c0892cad6081acb6ce071090a5d'],
   ['private','enforce_unique_admin_market_listing_symbol','6e9a7e9f7d8cd5f0ac20f3216ee5f0b3'],
   ['private','request_market_price_overflow','e6ed136175b0d340c9a86e51f7917a76'],
+  ['private','guard_active_account_writes','29b8e23c1de8eb4762a8cf1a9c9343ce'],
   ['public','admin_add_market_listing','8b3d0c18e54b08f01c27bc24491e3448'],
   ['public','admin_enable_market_pair','848f7c1ebe114c558c1ce73e76dd13bd'],
   ['public','admin_review_market_listings','93e96328ff9b8d8f3739b57ce49eb397'],
@@ -58,6 +59,14 @@ for (const [schema,name,fingerprint] of entries) {
     assert.match(item.snapshot, /owner=postgres/i);
   });
 }
+
+test('live active-account write guard remains attached to orders, trades and transactions', () => {
+  const snapshot = definitions.private_guard_active_account_writes.snapshot;
+  const definition = definitions.private_guard_active_account_writes.definition;
+  assert.match(snapshot, /Attached BEFORE INSERT to public\.orders, public\.trades and public\.transactions/i);
+  assert.match(definition, /current_account_is_active\(\)/i);
+  assert.match(definition, /Account is inactive/i);
+});
 
 test('catalog refresh treats CoinGecko ID as conflict key but mutates the ticker field', () => {
   const source = definitions.public_refresh_crypto_assets.definition;
