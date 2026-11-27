@@ -95,6 +95,37 @@ jobs:
             IF (SELECT format_type(a.atttypid,a.atttypmod) FROM pg_attribute a WHERE a.attrelid='public.conditional_orders'::regclass AND a.attname='amount') <> 'numeric' THEN RAISE EXCEPTION 'failed conditional-reservation preflight changed schema'; END IF;
             IF NOT EXISTS (SELECT 1 FROM public.conditional_orders c JOIN public.order_reservations r ON r.order_id=c.order_id AND r.user_id=c.user_id WHERE c.order_id='10000000-0000-4000-8000-000000000002' AND r.reserved_amount <> c.amount) THEN RAISE EXCEPTION 'negative conditional-reservation fixture changed unexpectedly'; END IF;
           END \$verify\$;"
+      - name: Verify conditional parent symbol and Stop-Limit price mismatches atomically
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_bad_conditional_symbol_test;"
+          psql -h localhost -U postgres -d digiarz_bad_conditional_symbol_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_setup.sql \
+            -f supabase/tests/exact_decimal_rollout_bad_conditional_symbol.sql
+          if psql -h localhost -U postgres -d digiarz_bad_conditional_symbol_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql; then
+            echo "Expected conditional parent-symbol mismatch to fail rollout preflight."
+            exit 1
+          fi
+          psql -h localhost -U postgres -d digiarz_bad_conditional_symbol_test -v ON_ERROR_STOP=1 \
+            -c "DO \$verify\$ BEGIN
+              IF (SELECT format_type(a.atttypid,a.atttypmod) FROM pg_attribute a WHERE a.attrelid='public.orders'::regclass AND a.attname='amount') <> 'numeric(24,8)' THEN RAISE EXCEPTION 'failed symbol preflight changed schema'; END IF;
+            END \$verify\$;"
+
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_bad_stop_limit_price_test;"
+          psql -h localhost -U postgres -d digiarz_bad_stop_limit_price_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_setup.sql \
+            -f supabase/tests/exact_decimal_rollout_bad_stop_limit_price.sql
+          if psql -h localhost -U postgres -d digiarz_bad_stop_limit_price_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql; then
+            echo "Expected Stop-Limit parent-price mismatch to fail rollout preflight."
+            exit 1
+          fi
+          psql -h localhost -U postgres -d digiarz_bad_stop_limit_price_test -v ON_ERROR_STOP=1 \
+            -c "DO \$verify\$ BEGIN
+              IF (SELECT format_type(a.atttypid,a.atttypmod) FROM pg_attribute a WHERE a.attrelid='public.orders'::regclass AND a.attname='amount') <> 'numeric(24,8)' THEN RAISE EXCEPTION 'failed Stop-Limit price preflight changed schema'; END IF;
+            END \$verify\$;"
       - name: Verify widening migration honors lock timeout atomically
         env:
           PGPASSWORD: postgres
