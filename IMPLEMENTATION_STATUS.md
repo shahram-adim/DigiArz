@@ -1990,3 +1990,11 @@
 - [!] The corrected head commit b8f08f9322dda517443f443ab189260086ef93b9 is awaiting a new CI run; no success is claimed.
 - [ ] Next: inspect the new run's step 26 and full workflow; if green, move to source-faithful canonical identity for real conditional-order and Stop-Limit parent/child paths. OCO remains separate.
 - [x] No Production/Supabase data or schema changes, no merge, db push, deploy/release, APK/Pages publication, Cron/worker/grant/RLS changes or costs.
+## Shahram 171 — canonical conditional parent/child identity proof (2026-11-27)
+- [x] Extended only the disposable canonical candidate fixture with a conditional_orders relation carrying pair_id/base_asset_id/quote_asset_id and composite FKs for both parent order and execution child.
+- [x] Added a negative regression: a child order for a different canonical pair with the same display label cannot attach to the parent; the correct same-pair child is accepted.
+- [x] Extended pair-scoped disable candidate to cancel conditional parent/child rows and release the parent's reservation only for the disabled pair. The paired duplicate-label scenario asserts pair B's triggered parent, child, reservation and state remain intact when pair A is disabled.
+- [!] This is a candidate invariant fixture, not a rewrite or execution of the authoritative Production TP/SL/Stop-Limit RPC bodies. It does not yet cover the full production worker retry/cancellation race or OCO.
+- [!] CI run 46043559923 for commit b8f08f9322dda517443f443ab189260086ef93b9 was in progress when the conditional fixture extension was added. The new head 5116ecb896a9c216ebd18e5c16d845670e103f29 needs its own CI result; no pass is claimed.
+- [ ] Next: verify current CI and step 26 for the corrected base fixture; then execute the new parent/child identity tests in disposable PostgreSQL. Build a source-faithful wrapper around actual conditional/Stop-Limit migration definitions, retaining actual reservation/worker/cancellation code, before advancing to OCO.
+- [x] No Production/Supabase data/schema/function/ACL/RLS/Cron/worker changes, no merge/db push/deploy/release/publication, and no new costs.
