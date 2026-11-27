@@ -304,7 +304,7 @@ BEGIN
       WHERE EXISTS (SELECT 1 FROM scheduler_candidate.batches b
         WHERE b.batch_id<>v_batch AND b.state='processed' AND u.id=ANY(b.requested_ids));
     IF v_count<>0 THEN RAISE EXCEPTION 'duplicate scheduling detected'; END IF;
-    SELECT jsonb_object_agg(u.id,jsonb_build_object('usd',1.25,'last_updated_at',extract(epoch from clock_timestamp())::bigint)) INTO STRICT v_ids_json
+    SELECT jsonb_object_agg(u.id,jsonb_build_object('usd',1.25,'last_updated_at',floor(extract(epoch from clock_timestamp()))::bigint)) INTO STRICT v_ids_json
     FROM unnest(v_ids) AS u(id);
     PERFORM scheduler_candidate.complete_batch(v_batch,200,v_ids_json);
   END LOOP;
@@ -320,7 +320,7 @@ BEGIN
     RAISE EXCEPTION 'cursor did not wrap to first canonical ID: %',v_ids[1];
   END IF;
   PERFORM scheduler_candidate.complete_batch(v_batch,200,
-    (SELECT jsonb_object_agg(u.id,jsonb_build_object('usd',1.30,'last_updated_at',extract(epoch from clock_timestamp())::bigint)) FROM unnest(v_ids) AS u(id)));
+    (SELECT jsonb_object_agg(u.id,jsonb_build_object('usd',1.30,'last_updated_at',floor(extract(epoch from clock_timestamp()))::bigint)) FROM unnest(v_ids) AS u(id)));
 
   -- Newly admitted assets are scheduled before ordinary cursor assets.
   PERFORM scheduler_candidate.admit_asset('new-priority','NEWUSDT');
@@ -338,8 +338,8 @@ BEGIN
   v_batch := scheduler_candidate.schedule_next_batch(5);
   SELECT requested_ids INTO v_ids FROM scheduler_candidate.batches WHERE batch_id=v_batch;
   IF NOT ('new-priority'=ANY(v_ids)) THEN RAISE EXCEPTION 'due retry was not scheduled'; END IF;
-  PERFORM scheduler_candidate.complete_batch(v_batch,200,jsonb_build_object('new-priority',jsonb_build_object('usd',2.5,'last_updated_at',extract(epoch from clock_timestamp())::bigint)));
-  PERFORM scheduler_candidate.complete_batch(v_batch,200,jsonb_build_object('new-priority',jsonb_build_object('usd',999,'last_updated_at',extract(epoch from clock_timestamp())::bigint)));
+  PERFORM scheduler_candidate.complete_batch(v_batch,200,jsonb_build_object('new-priority',jsonb_build_object('usd',2.5,'last_updated_at',floor(extract(epoch from clock_timestamp()))::bigint)));
+  PERFORM scheduler_candidate.complete_batch(v_batch,200,jsonb_build_object('new-priority',jsonb_build_object('usd',999,'last_updated_at',floor(extract(epoch from clock_timestamp()))::bigint)));
   IF (SELECT price FROM scheduler_candidate.prices WHERE pair_symbol='NEWUSDT')<>2.5 THEN
     RAISE EXCEPTION 'duplicate completion was not idempotent';
   END IF;
@@ -377,7 +377,7 @@ BEGIN
   SET next_attempt_at=clock_timestamp()-interval '1 second'
   WHERE coingecko_id='http-error-asset';
   v_batch := scheduler_candidate.schedule_next_batch(5);
-  PERFORM scheduler_candidate.complete_batch(v_batch,200,jsonb_build_object('http-error-asset',jsonb_build_object('usd',7.5,'last_updated_at',extract(epoch from clock_timestamp())::bigint)));
+  PERFORM scheduler_candidate.complete_batch(v_batch,200,jsonb_build_object('http-error-asset',jsonb_build_object('usd',7.5,'last_updated_at',floor(extract(epoch from clock_timestamp()))::bigint)));
   IF (SELECT price FROM scheduler_candidate.prices WHERE pair_symbol='ERRUSDT')<>7.5 THEN
     RAISE EXCEPTION 'HTTP-failed asset did not recover on retry';
   END IF;
@@ -416,7 +416,7 @@ BEGIN
     IF cardinality(v_ids)-v_count<6 THEN
       RAISE EXCEPTION 'ordinary catalog lane starved during admission storm';
     END IF;
-    SELECT jsonb_object_agg(u.id,jsonb_build_object('usd',8.5,'last_updated_at',extract(epoch from clock_timestamp())::bigint)) INTO v_ids_json
+    SELECT jsonb_object_agg(u.id,jsonb_build_object('usd',8.5,'last_updated_at',floor(extract(epoch from clock_timestamp()))::bigint)) INTO v_ids_json
     FROM unnest(v_ids) AS u(id);
     PERFORM scheduler_candidate.complete_batch(v_batch,200,v_ids_json);
   END LOOP;
