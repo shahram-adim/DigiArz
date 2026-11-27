@@ -215,3 +215,49 @@ No test fixture, SQL migration, workflow, or executable source was changed in th
 - Important refinement: the primary refresh function itself has a back-pressure guard after processing old responses; the starvation hypothesis must model the precise order: primary refresh processes a response and may enqueue a new primary request only when all queues/tracking are empty; overflow then checks those same outstanding structures at its scheduled offsets. Do not simplify this into an assertion that the primary always blindly enqueues every minute.
 - The captured source now makes a faithful disposable PostgreSQL regression possible. It still cannot prove which historical batch omitted each stale asset because requested-ID history was not durably stored.
 - All Supabase reads were SELECT-only. No Production function was invoked; no queues, prices, pairs, Cron, schema, grants, RLS, workers, orders, balances, or user data were changed. No migration/db push, merge, deploy, release, or paid infrastructure action occurred.
+
+
+## Production writer inventory — SQL functions, triggers, grants, policies and active Edge Functions (read-only, 2026-11-27)
+
+### SQL function bodies referencing the four catalog/market tables
+
+- A live `pg_proc`/`prosrc` inventory found these direct SQL mutation targets:
+  - `public.refresh_crypto_assets()` — INSERT/UPSERT into `crypto_assets`; the previously captured exact body updates canonical provider ID rows and may change `symbol`.
+  - `public.refresh_crypto_assets_toman()` — UPDATE of `crypto_assets.price_toman` only; does not change symbol or canonical ID.
+  - `private.auto_list_verified_exchange_asset()` — INSERT into `admin_market_listings`, triggered by matched active `exchange_asset_observations`.
+  - `public.admin_add_market_listing(text)` — INSERT into `admin_market_listings`.
+  - `public.admin_remove_market_listing(text)` — DELETE from `admin_market_listings`.
+  - `public.admin_enable_market_pair(text)` and `private.auto_activate_verified_exchange_pairs()` — INSERT into `demo_trading_pairs`.
+  - `public.admin_disable_market_pair(text,text)` — UPDATE of `demo_trading_pairs` and related open orders/reservations as part of the disable workflow.
+  - `public.refresh_market_prices()` — INSERT/UPSERT into `market_prices`.
+- Other functions in the reference inventory read these tables or process exchange observations / financial records; a textual reference alone was not classified as a table writer. The SQL inventory is based on current `pg_proc.prosrc`, so dynamic SQL or direct statements issued by external service-role clients remain a separate evidence boundary.
+
+### Trigger and constraint observations
+
+- `admin_market_listings` has BEFORE INSERT OR UPDATE OF `coingecko_id` trigger `admin_market_listing_unique_ticker`, invoking `private.enforce_unique_admin_market_listing_symbol()`.
+- `exchange_asset_observations` has AFTER INSERT OR UPDATE OF `match_status, coingecko_id, is_active` trigger `trg_auto_list_verified_exchange_asset`, invoking `private.auto_list_verified_exchange_asset()`.
+- No non-internal trigger was returned for `crypto_assets`, `demo_trading_pairs`, or `market_prices` in the inspected Production catalog.
+- Consequence: the curated-list trigger does not protect a ticker change made directly on `crypto_assets` after the asset is already listed or paired. The exact active Edge Function `admin-refresh-crypto-asset` (version 2; source SHA-256 `46615bb47902709c8a46de777ffd300be23eff9f39de98f49648f952653e2512`) updates `crypto_assets.symbol` through a service-role client after checking format, but its source does not perform a global duplicate-ticker check or atomically reconcile an existing pair symbol. This is a material canonical-identity/pair-integrity gap to close before implementing auto-provisioning; no function was invoked or changed.
+
+### Table grants and RLS policies
+
+- `anon` and `authenticated` have SELECT only on `crypto_assets`, `admin_market_listings`, `demo_trading_pairs`, and `market_prices`; no direct INSERT/UPDATE/DELETE grants were returned for those roles.
+- `service_role` has broad table privileges (including INSERT/UPDATE/DELETE) on all four tables; `postgres` has owner-level privileges. Therefore SQL function inventory alone cannot prove all writes: every active service-role Edge Function and any external service-role client must be included in the review.
+- RLS is enabled on all four tables. Policies are SELECT-only: public read on crypto assets, listings and pairs; market prices has separate anon and authenticated SELECT policies. No INSERT/UPDATE/DELETE policy was returned for anon/authenticated.
+
+### Active Edge Function writer inventory
+
+- `admin-refresh-crypto-asset` v2 writes `crypto_assets` via service-role `.update()`; this is the second catalog metadata/symbol writer beside `refresh_crypto_assets()`.
+- `index-ts` v3 writes `market_prices` via service-role REST upsert for its hard-coded Binance symbol list; source SHA-256 `d33b150e0de08416627092fb5d7eecdcdcf21fb9ac87d5b5118f27e4480d3f86`.
+- `refresh-market-prices` v5 writes `market_prices` via service-role upsert for a separate hard-coded 12-symbol list; source SHA-256 `0f234ec99750afff5f0561ab41d2d87a78f2e3a6856025f4f0a89254aabea0`.
+- `sync-iran-exchange-assets` v7 writes only `exchange_asset_observations`, not the canonical asset or pair tables; source SHA-256 `5a05817feaf065bcf2f0a9134337107821dfeacfee4e7441ed01e9870fb698d6`.
+- `refresh-toman-market-prices` v3 writes `market_toman_prices` and `market_toman_price_history`, not `market_prices` or `crypto_assets`.
+- `market-data`, `market-ticker-stats`, and `app-assets` were inspected and did not show direct writes to the four catalog/market tables.
+- No active `cron.job` row directly invokes the two hard-coded price Edge Functions; current PostgreSQL market price cron job 3 calls `public.refresh_market_prices()` every minute. External schedulers or direct authenticated secret invocations of active Edge Functions are not ruled out by the `cron.job` inventory.
+
+### Design consequences
+
+1. Catalog admission must be distinguished from metadata refresh. Both `refresh_crypto_assets()` and `admin-refresh-crypto-asset` can change provider metadata; symbol mutation must pass the same collision/reconciliation rule as pair provisioning or be rejected atomically.
+2. Price scheduler/source precedence must account for two additional active Edge Function writers that can overwrite `market_prices` for a limited hard-coded symbol universe. They are not a substitute for full-catalog coverage and must be reconciled or explicitly excluded in a future approved design.
+3. Service-role credentials are a privileged write boundary. A complete deployment inventory must cover all active Edge Functions and any external service-role callers; do not infer safety solely from anon/authenticated grants or SECURITY DEFINER RPC grants.
+4. No table privileges, policies, triggers, Edge Functions, SQL functions, Cron jobs, or Production data were changed. All database operations in this inventory were SELECT-only; Edge Function source retrieval was read-only.
