@@ -2286,3 +2286,14 @@
 - [!] UI workflow run 45963550080 روی commit 05e42355a5a1f74ecc6f9b6c169bb56ea20642be با 153/154 تست شکست خورد؛ تنها شکست assertion متن خطای ورودی نامعتبر بود و در commit بعدی اصلاح شد. run جدید 45963746304 مرحلهٔ منبعی را با موفقیت گذرانده است.
 - [!] PR #64 باز، Draft، merged=false و mergeable=false باقی است؛ compare با main فعلی df0a9927451f3b8092997b6d573e62fda235b84d برابر 265 commit جلو و 3 commit عقب است. هیچ merge/rebase انجام نشد.
 - [x] وضعیت Production همچنان فقط‌خواندنی است؛ هیچ Edge Function، Cron، Worker، DB، Wallet، سفارش یا تنظیم Auth تغییر نکرده است.
+## تأیید ریشه‌ای 502 بازار تومانی با تطبیق PostgreSQL و Edge logs — ۲۷ نوامبر ۲۰۲۶
+- [x] نسخهٔ واقعاً مستقر Supabase برای refresh-toman-market-prices نسخه ۳ و SHA-256 برابر bd85141a8dbe59329235b5266ee391c6953865e97e91253f3e3e3946b155b391 است؛ source آن ۱۳٬۵۷۶ کاراکتر دارد، upsert/dedupe/provider-summary/stage logging ندارد و DELETE cleanup دارد.
+- [x] فایل منبع هم‌نام در GitHub main با blob SHA برابر 9ad3d944bcf61a22296b4b124dda8120d39933f4 و طول ۱۴٬۱۹۹ کاراکتر، upsert با on_conflict دقیق، dedupe، provider summary ساختاریافته، stage logging و بدون DELETE دارد. بنابراین منبع GitHub main و کد Production واقعاً متفاوت‌اند؛ اصلاحات از قبل در main موجودند و نباید دوباره پیاده‌سازی شوند.
+- [x] PostgreSQL در ۲۴ ساعت لاگ در دسترس دقیقاً ۱۲ خطای duplicate key با SQLSTATE 23505 روی constraint market_toman_prices_exchange_asset_symbol_quote_currency_key ثبت کرده است.
+- [x] Edge logs در همان بازه دقیقاً ۱۲ پاسخ POST/502 و ۱۳ پاسخ POST/200 ثبت کرده‌اند. تطبیق زمانی self-join نشان داد هر ۱۲ خطای duplicate key با یکی از ۱۲ پاسخ 502 در فاصله کمتر از ۱۰۰۰ms جفت می‌شود؛ میانگین فاصله ۵۲٫۵ms و بیشینه ۶۴ms است. این ۱۲/۱۲ تطبیق، علت تمام 502های موجود در بازه را به‌طور قطعی به INSERT تکراری نسخه مستقر نسبت می‌دهد.
+- [x] snapshot تازه فقط‌خواندنی: market_toman_prices برابر ۳۷۳ ردیف، صفر ردیف تازه در پنج دقیقه، آخرین fetched_at برابر ۱۷ نوامبر؛ market_prices برابر ۸۹۹ ردیف و ۶۶۸ ردیف تازه در پنج دقیقه.
+- [x] کد اصلاحی و تست‌های persistence از قبل در GitHub main وجود دارند؛ تغییر لازم برای رفع این علت، استقرار کنترل‌شدهٔ همان کد اصلاحی موجود پس از بررسی کامل و تأیید مالک است، نه Migration یا تغییر schema.
+- [!] Production دست‌نخورده باقی ماند: هیچ Edge Function deploy، refresh دستی، DELETE، upsert، Cron change یا DB write انجام نشد. استقرار تا تأیید صریح مالک متوقف است.
+- [x] UI visual workflow run 45963746304 روی کد 87aa23b3acc7511b488f2716cea22e14152bdb87 با نتیجه success پایان یافت؛ source-level tests و capture تصویری موفق شدند.
+- [ ] APK workflow run 45963723457 هنوز باید از نظر build، provenance و artifact نهایی بررسی شود.
+- [!] PR #64 همچنان Draft، باز، ادغام‌نشده و mergeable=false است؛ وضعیت compare با main فعلی: ۲۶۸ جلو و ۳ عقب. هیچ merge/rebase انجام نشد.
