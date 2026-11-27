@@ -502,3 +502,15 @@ test('Toman refresh distinguishes a successful write from a failed table reload'
   assert.equal(status.type, 'err');
   assert.match(status.message, /ذخیره 373 قیمت انجام شد، اما بازخوانی جدول ناموفق بود/);
 });
+
+
+test('market metadata batch failures do not reject the entire market load', () => {
+  const start = html.indexOf('async function loadMarkets(');
+  const end = html.indexOf('\nlet marketExtrasLoaded=', start);
+  assert.ok(start >= 0 && end > start, 'market loader boundaries found');
+  const loader = html.slice(start, end);
+  assert.match(loader, /Promise\.allSettled\(metadataChunks\.map/);
+  assert.match(loader, /collectMarketTickerBatchResults\(metadataResults\)/);
+  assert.match(loader, /metadataCollected\.rows/);
+  assert.match(loader, /Some market asset metadata batches failed/);
+});
