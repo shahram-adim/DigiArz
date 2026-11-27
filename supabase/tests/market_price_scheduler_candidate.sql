@@ -19,6 +19,7 @@ INSERT INTO scheduler_candidate.state(singleton) VALUES (true);
 CREATE TABLE scheduler_candidate.batches (
   batch_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   requested_ids text[] NOT NULL,
+  cursor_after_id text,
   state text NOT NULL CHECK (state IN ('in_flight','processed','failed')),
   created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
   completed_at timestamptz,
@@ -78,6 +79,7 @@ CREATE OR REPLACE FUNCTION scheduler_candidate.schedule_next_batch(
 DECLARE
   v_cursor text;
   v_ids text[];
+  v_cursor_after text;
   v_batch bigint;
 BEGIN
   IF p_batch_size < 1 OR p_batch_size > 500 THEN
@@ -117,8 +119,8 @@ BEGIN
     FROM candidates c
     WHERE NOT EXISTS (SELECT 1 FROM active_ids x WHERE x.id=c.id)
   )
-  SELECT array_agg(id ORDER BY lane, queued_at, id)
-  INTO v_ids
+  SELECT array_agg(id ORDER BY lane, queued_at, id), max(id) FILTER (WHERE lane=2)
+  INTO v_ids,v_cursor_after
   FROM (
     SELECT id,lane,queued_at
     FROM eligible
@@ -132,8 +134,8 @@ BEGIN
     RETURN NULL;
   END IF;
 
-  INSERT INTO scheduler_candidate.batches(requested_ids,state)
-  VALUES(v_ids,'in_flight') RETURNING batch_id INTO v_batch;
+  INSERT INTO scheduler_candidate.batches(requested_ids,cursor_after_id,state)
+  VALUES(v_ids,v_cursor_after,'in_flight') RETURNING batch_id INTO v_batch;
 
   RETURN v_batch;
 END $$;
@@ -230,11 +232,7 @@ BEGIN
 
   UPDATE scheduler_candidate.state
   SET cursor_id=COALESCE(
-      (SELECT max(a.coingecko_id)
-       FROM scheduler_candidate.assets a
-       WHERE a.coingecko_id=ANY(v_ids)
-         AND NOT EXISTS (SELECT 1 FROM scheduler_candidate.priority_queue p WHERE p.coingecko_id=a.coingecko_id)
-         AND NOT EXISTS (SELECT 1 FROM scheduler_candidate.retry_queue r WHERE r.coingecko_id=a.coingecko_id)),
+      (SELECT cursor_after_id FROM scheduler_candidate.batches WHERE batch_id=p_batch),
       cursor_id),
       updated_at=v_now
   WHERE singleton;
@@ -280,6 +278,15 @@ BEGIN
   FROM scheduler_candidate.batches b CROSS JOIN LATERAL unnest(b.returned_ids) AS u(id)
   WHERE b.state='processed';
   IF v_count<>1200 THEN RAISE EXCEPTION 'fair cycle covered % of 1200 assets',v_count; END IF;
+
+  -- The cursor wraps after the final ID and starts a fresh fair cycle.
+  v_batch := scheduler_candidate.schedule_next_batch(100);
+  SELECT requested_ids INTO v_ids FROM scheduler_candidate.batches WHERE batch_id=v_batch;
+  IF v_ids[1] <> 'asset-0001' THEN
+    RAISE EXCEPTION 'cursor did not wrap to first canonical ID: %',v_ids[1];
+  END IF;
+  PERFORM scheduler_candidate.complete_batch(v_batch,200,
+    (SELECT jsonb_object_agg(u.id,jsonb_build_object('usd',1.30)) FROM unnest(v_ids) AS u(id)));
 
   -- Newly admitted assets are scheduled before ordinary cursor assets.
   PERFORM scheduler_candidate.admit_asset('new-priority','NEWUSDT');
