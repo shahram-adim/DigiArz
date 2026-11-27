@@ -2048,3 +2048,13 @@
 - [!] The new catalog snapshots/tests are documentation and regression fixtures only. They do not remove product gates or change any Production function. Every catalog asset becomes tradable only after a later canonical lifecycle migration is source-faithfully designed and approved.
 - [ ] Next: verify CI for the new 18-function catalog source suite and active-account guard snapshot. Then prepare the staged additive canonical schema/function migration candidate in drafts, with explicit ambiguity quarantine and rollback/rehearsal plan. First resolve all missing/mismatched migration sources before any replay or db push.
 - [x] All Supabase calls in this step were SELECT/catalog/function-definition reads only; no business/user rows were selected and no Production state was changed. No merge, db push, migration, deploy/release, cron/worker/grant/RLS change, APK/Pages publication or cost.
+
+
+## Shahram 177 — correct market-read source contract and pin catalog pipeline (2026-11-27)
+
+- [x] Reviewed CI run 46045360757 / Run #2366: all 18 catalog function fingerprint tests and the provider/listing/activation/matching contracts passed; one market-read assertion failed because it incorrectly expected get_crypto_market() to join demo_trading_pairs.
+- [x] Re-read the exact live snapshot. Actual behavior is narrower and weaker: trade_enabled is true when a positive market_prices row exists for ca.symbol || 'USDT' within one minute; the function does not join demo_trading_pairs or check is_enabled.
+- [x] Corrected tests/canonical-asset-catalog-source.test.js to assert the actual live contract and explicitly reject any assumption that the API verifies enabled pair identity. Recorded the functional gap in docs/CANONICAL_ASSET_IDENTITY_DESIGN_2026-11-27.md.
+- [!] Runs 2366–2370 are expected failures from the pre-correction commit(s); the corrected test commit 415d66784f27906bd60aa2270b8123e4d091c758 and later docs/status heads require fresh CI. No green claim is made for the corrected suite yet.
+- [ ] Next: verify CI for corrected market-read contract and active-account guard snapshot; then capture the full current DDL/index/trigger/policy dependency matrix and draft an isolated additive canonical migration only after the missing migration sources are accounted for.
+- [x] No Production changes, no merge/db push/migration/deploy/release, no cron/worker/grant/RLS changes, no publication and no new costs.
