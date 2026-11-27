@@ -43,7 +43,8 @@
   function sum(values, scale = SCALE) {
     let total = parse('0');
     for (const item of Array.isArray(values) ? values : []) {
-      const parsed = parse(item);
+      let parsed;
+      try { parsed = parse(item); } catch (_) { throw new TypeError('Invalid portfolio amount'); }
       if (parsed.coefficient < 0n) throw new TypeError('Negative portfolio amount');
       total = parse(D.addDecimal(total, parsed, scale));
     }
