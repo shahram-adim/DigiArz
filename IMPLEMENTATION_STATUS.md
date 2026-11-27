@@ -2126,3 +2126,14 @@
 - [ ] Next: create a canonical Market/Limit candidate migration in a separate disposable schema/branch artifact that preserves exact behavior while adding pair_id/asset_id and duplicate-ticker isolation; run full source-parity tests before extending TP/SL/Stop-Limit. Do not prepare a Production rollout until migration ledger reconciliation and source fingerprints are resolved.
 - [x] PR #67 remains open, Draft, unmerged, mergeable; latest head at checkpoint `a411a73df6a47dc77b4b83950b59b6a19ee22b95`, 191 commits ahead and 0 behind main.
 - [x] No Production writes/schema/function/ACL/RLS/Cron/worker/Auth changes; no merge/db push/migration replay/history repair, deployment/release, APK/Pages publication, or cost.
+
+
+## Shahram 185 — canonical Market/Limit parity gap review (2026-11-27)
+
+- [x] Reviewed exact authoritative Market/Limit migration source against the existing canonical duplicate-ticker fixture after CI #2391 passed.
+- [x] Added `docs/CANONICAL_MARKET_LIMIT_PARITY_GAP_REVIEW_2026-11-27.md`, commit `05ab1df2295269b78878bc1bda9e0de4593762a2`.
+- [x] Identified material semantic gaps that prohibit copying the prototype into a migration: production uses separate USDT wallet and base-asset ledger; fee helper + 8-decimal rounding; one-minute receive-time freshness; 25%-of-original Limit partial fills; consumed/released reservation ledger; global advisory lock + SKIP LOCKED + wallet-first lock order; active-account and auth.uid() guards; transaction ledger writes. Prototype uses a unified balance table, hardcoded fee, 2-minute observed-time freshness, one-shot fills, and deletes simplified reservations.
+- [!] Existing canonical prototype proves duplicate ticker isolation only in a simplified model. It is not authoritative Market/Limit parity and must not be used as a financial migration.
+- [ ] Next: create a canonical Market/Limit candidate that retains the authoritative source semantics while replacing ticker identity with pair_id/base_asset_id/quote_asset_id. Apply only after exact authoritative migration in disposable PG17 and test same-ticker pair A/B, four partial fills, exact reserve consumption/release, stale/missing/future prices, disabled pair, inactive account, auth, and two-session races.
+- [x] CI #2391 / run `46048133466` completed SUCCESS on pre-review head `a411a73df6a47dc77b4b83950b59b6a19ee22b95`; step 28 authoritative Market/Limit migration baseline passed.
+- [x] PR #67 remains open Draft and unmerged; branch head now advances with documentation commits; no Production writes, migration/db push, history repair, merge, deploy, APK/Pages publication, or cost.
