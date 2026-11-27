@@ -1701,3 +1701,12 @@
 - [x] PR #67 در آخرین compare برابر 24 commit جلو و صفر عقب از `main` بود؛ PR #66 برابر 69 جلو و صفر عقب. هر دو باز، Draft و ادغام‌نشده‌اند.
 - [ ] مرحلهٔ بعد: candidate طراحی‌شده با cursor پایدار و batch/response ledger را جدا از بدنهٔ Production در disposable PostgreSQL پیاده و آزمون کنیم؛ سپس inventory تمام مسیرهای نوشتن کاتالوگ/جفت‌ارز را کامل کنیم.
 - [x] هیچ تغییر Production/Supabase، Cron، صف، قیمت، جفت‌ارز، Worker، Migration، db push، merge، deploy، release یا هزینه‌ای انجام نشد.
+
+
+## Shahram 177 — fair scheduler candidate design (2026-11-27)
+- [x] پس از موفقیت تست exact-source مرحلهٔ 176، طراحی candidate مستقل در `docs/MARKET_PRICE_SCHEDULER_FAIRNESS_DESIGN_2026-11-27.md` ثبت شد.
+- [x] طرح شامل cursor لغوی پایدار و wrap-around، ledger ماندگار هر batch با requested/returned/omitted IDs، صف اولویت برای دارایی‌های تازه‌پذیرفته‌شده، retry/backoff برای IDهای حذف‌شده از پاسخ، سقف in-flight کنترل‌شده، و سیاست قطعی تقدم منبع قیمت است.
+- [x] وابستگی‌های بین scheduler و نیاز «همهٔ ارزهای کاتالوگ قابل معامله باشند» مشخص شد: provisioning جفت‌ارز و enqueue اولویت قیمت باید در یک تراکنش اتمیک انجام شوند؛ معامله فقط با قیمت معتبر، تازه و نگاشت canonical یکتا مجاز است.
+- [!] این مرحله فقط طراحی است؛ هیچ جدول، تابع، migration، Cron، queue یا worker جدیدی ساخته/اجرا نشده است. اندازهٔ batch، تعداد درخواست هم‌زمان، retry delays و منبع قیمت مجاز باید با تست و محدودیت providerها تعیین شوند.
+- [ ] گام بعد: پیاده‌سازی candidate scheduler فقط در disposable PostgreSQL 17، با آزمون‌های fairness، retry، idempotency، concurrency و source-priority؛ سپس تکمیل inventory writerهای کاتالوگ و اتصال آن به provisioning candidate.
+- [x] هیچ Production/Supabase write، migration/db push، Cron/worker change، merge، deploy، release یا هزینه‌ای انجام نشد.
