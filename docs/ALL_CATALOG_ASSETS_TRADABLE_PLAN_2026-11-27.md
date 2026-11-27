@@ -108,3 +108,16 @@ Required source-parity checks:
 ## Explicit non-actions / release gates
 
 This plan is source review and design only. It does not modify Production, enabled pairs, prices, balances, orders, trades, reservations, cron jobs, workers, Edge Functions, grants, RLS, or infrastructure. No migration or `supabase db push` is authorized. No merge, deploy, APK/Pages release, or paid plan change is authorized. Any Production rollout requires separate explicit owner approval after test evidence and a reviewed migration plan.
+
+
+### Phase A addendum — privileged writer boundary discovered (2026-11-27)
+
+Before implementing provisioning, Phase A must also reconcile these Production writer paths:
+
+- `public.refresh_crypto_assets()` upserts canonical catalog metadata and may change the ticker from CoinGecko.
+- Active Edge Function `admin-refresh-crypto-asset` v2 also updates `crypto_assets.symbol` using the service-role key. Its current source validates ticker syntax but does not check all active catalog collisions or atomically update/reject a conflicting existing pair mapping.
+- `public.refresh_market_prices()` is not the only `market_prices` writer: active Edge Functions `index-ts` v3 and `refresh-market-prices` v5 also upsert a hard-coded limited Binance symbol set. A future price scheduler must define precedence across these writers and full-catalog coverage; it cannot assume the SQL Cron function is the sole writer.
+- `anon`/`authenticated` are SELECT-only on the four core tables and their RLS policies are read-only, but `service_role` has broad direct DML privileges. Inventory every active Edge Function and external service-role caller before claiming complete write-path coverage.
+- `exchange_asset_observations` sync and the `auto_list_verified_exchange_asset` trigger stage/list observations; they do not themselves create canonical `crypto_assets` rows or trading pairs. `admin_market_listings` is not the canonical asset catalog.
+
+**Blocking design requirement:** all mutations that can change canonical ID, active status, or ticker must pass one shared collision-aware admission/reconciliation path. Metadata refresh may update price/name/image fields, but a ticker change that conflicts with another active canonical asset or an enabled pair must fail closed or be atomically reconciled under the same canonical-identity lock. No such change is implemented in this PR yet.
