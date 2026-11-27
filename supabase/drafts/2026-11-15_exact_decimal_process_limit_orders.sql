@@ -32,6 +32,7 @@ DECLARE
     v_consumed numeric;
     v_released numeric;
     v_target_remaining_reserve numeric;
+    v_wallet_balance numeric;
     v_base_asset text;
     v_processed integer := 0;
     v_partial integer := 0;
@@ -157,12 +158,12 @@ BEGIN
         -- Lock order here is order row -> reservation row -> wallet row.
         -- cancel_limit_order locks order row -> reservation row, so the
         -- shared prefix prevents worker/cancel lock-order inversion.
-        PERFORM 1
+        SELECT w.balance_usdt INTO v_wallet_balance
         FROM public.wallets AS w
         WHERE w.user_id = v_order.user_id
         FOR UPDATE;
 
-        IF NOT FOUND THEN
+        IF NOT FOUND OR v_wallet_balance IS NULL OR v_wallet_balance < 0 THEN
             v_skipped := v_skipped + 1;
             CONTINUE;
         END IF;
@@ -242,7 +243,8 @@ BEGIN
             IF v_reservation.asset <> v_base_asset
                OR v_reservation.consumed_amount
                   + v_reservation.released_amount + v_qty
-                  > v_reservation.reserved_amount THEN
+                  > v_reservation.reserved_amount
+               OR v_wallet_balance > 9999999999999999.99999999::numeric - v_net THEN
                 v_skipped := v_skipped + 1;
                 CONTINUE;
             END IF;
