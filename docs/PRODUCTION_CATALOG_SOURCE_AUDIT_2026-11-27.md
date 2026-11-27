@@ -60,3 +60,40 @@ Definitions retrieved read-only show:
 
 ## Explicit non-actions
 No Production writes, pair activation/deactivation, migrations, db push, function execution, cron/worker changes, Edge Function changes, grants/RLS changes, merge, deployment, APK/Pages release, or paid infrastructure changes were performed or authorized.
+
+
+## Follow-up reconciliation and price-freshness snapshot (read-only, 2026-11-27)
+### Correct interpretation of same-ticker exchange matches
+A deeper row-level inspection clarifies that some duplicate ticker groups contain distinct, legitimately matched assets rather than one incorrect match. For example, `DOT` has both:
+- `polkadot` — name Polkadot, matched by AbanTether, Bit24, Kifpool, Nobitex, and Wallex.
+- `dot` — name Dot, matched by Exir and Tabdeal.
+
+This is not evidence that the `dot` record is Polkadot; it demonstrates why ticker-only joins are unsafe and why provider ID plus exchange name/market evidence must be retained. Some other same-ticker groups include unrelated provider assets (e.g. BTC has Bitcoin plus several unrelated tokens using BTC as ticker; PEPE has Pepe plus multiple unrelated assets). The matched observation set for each provider ID must be assessed independently.
+
+### Collision-group prioritization
+Corrected counts using independent correlated subqueries (avoiding row multiplication from joining listings, pairs, and observations together) show that the major already-enabled ticker groups include:
+- SOL: 2 active IDs; 1 curated ID; 1 enabled pair.
+- DOGE: 6 active IDs; 1 enabled pair.
+- ETH: 3 active IDs; 1 enabled pair.
+- BTC: 10 active IDs; 1 enabled pair.
+- XRP: 3 active IDs; 1 enabled pair.
+- ADA: 2 active IDs; 1 enabled pair.
+- PEPE: 21 active IDs; no enabled pair in the inspected collision-group aggregate.
+- DOT: 3 active IDs; no enabled pair in the inspected collision-group aggregate.
+These values describe current live rows, not a recommendation to auto-enable any of them.
+
+### Existing enabled-pair price freshness
+Read-only aggregate over all 420 enabled pairs:
+- 420 have a matching `market_prices` row and all 420 prices are positive.
+- 415 are newer than two minutes; 5 are older than two minutes.
+- 390 currently show source `Gate.io`, 14 `CoinGecko`, and 3 distinct sources overall.
+- The five stale rows are NBISONUSDT, TSMONUSDT, RIVERUSDT, TQQQONUSDT, and TONUSDT. Their timestamps are 2026-11-19 22:56 UTC (approximately 7.7 days old at inspection time).
+This confirms a pair-row existence check alone is not sufficient. Tradability must be gated on a live, positive, trusted, market-specific price with a strict freshness limit, and the price refresh process must demonstrably cover every provisioned pair.
+
+### Current reconciliation status
+The data now supports three distinct categories:
+1. **Unambiguous provider identity with active exchange corroboration** — candidate for a canonical market mapping after verifying quote/price support.
+2. **Duplicate ticker but distinct, individually corroborated assets** — cannot both use the same `BASEUSDT` pair key; requires a collision-safe symbol policy or explicit unsupported status until such a route exists.
+3. **Duplicate ticker with weak/no corroboration, stale metadata, or no supported quote/price path** — must not be automatically provisioned simply because it exists in the broad provider catalog.
+
+No rows were modified and no prices were refreshed by this audit.
