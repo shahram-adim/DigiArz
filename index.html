@@ -2651,17 +2651,36 @@ function handleCoinLogoError(img){
 }
 function coinLogo(symbol,sizeClass='coin-icon',imageUrl=''){const clean=cleanCoinSymbol(symbol);if(clean==='USDT')return `<span class="${sizeClass} tether-logo" role="img" aria-label="لوگوی تتر USDT"><svg viewBox="0 0 48 48" width="100%" height="100%" aria-hidden="true" focusable="false"><circle cx="24" cy="24" r="23" fill="#26A17B"/><path d="M11 11h26v5H26.5v5.2c6.3.4 10.8 1.5 10.8 2.9s-5.9 3-13.3 3-13.3-1.6-13.3-3 4.5-2.5 10.8-2.9V16H11v-5zm13.0 9.5c-6.8 0-12.3 1.1-12.3 2.6s5.5 2.6 12.3 2.6 12.3-1.1 12.3-2.6-5.5-2.6-12.3-2.6zM21.5 25h5v12h-5z" fill="#fff"/></svg></span>`;const custom=safeCoinImageUrl(imageUrl)||getCoinLogoImageUrl(clean),initial=logoUrl(clean,custom);return `<span class="${sizeClass}" aria-label="لوگوی ${safeText(clean)}"><img src="${safeText(initial)}" data-symbol="${safeText(clean)}" data-custom-image-url="${custom?'1':'0'}" data-image-url="${safeText(custom)}" data-fallback-index="0" alt="${safeText(clean)}" loading="lazy" decoding="async" onerror="handleCoinLogoError(this)"></span>`}
 function updateQuickTradeEstimate(side){
- const symbol=String($(side+'Symbol')?.value||'').trim().toUpperCase(),amount=Number($(side+'Amount')?.value),root=$(side+'Estimate');if(!root)return;
- const item=marketRows.find(x=>String(x.symbol).toUpperCase()===symbol),price=item?getTrustedMarketPrice(item):null,ticker=item?getFreshMarketTicker(item):null;
- if(!item||!Number.isFinite(price)||price<=0||!ticker){root.textContent='قیمت معتبر و تازه برای این جفت‌ارز در دسترس نیست؛ برآورد نمایش داده نمی‌شود.';return}
+ const symbol=String($(side+'Symbol')?.value||'').trim().toUpperCase(),amountRaw=String($(side+'Amount')?.value??'').trim(),root=$(side+'Estimate');if(!root)return;
+ const item=marketRows.find(x=>String(x.symbol).toUpperCase()===symbol),price=item?getTrustedMarketPriceExact(item):null,ticker=item?getFreshMarketTicker(item):null;
+ if(!item||price===null||!ticker){root.textContent='قیمت معتبر و تازه برای این جفت‌ارز در دسترس نیست؛ برآورد نمایش داده نمی‌شود.';return}
  const base=symbol.replace(/USDT$/,''),asset=side==='buy'?'USDT':base;
- const gross=side==='buy'?Number(currentWalletUsdt||0):Number(assetRows.find(x=>String(x.asset).toUpperCase()===base)?.balance||0);
- const reserved=quickTradeReservedByAsset.get(asset)||0,available=Math.max(0,gross-reserved),balanceText=quickTradeReservationState==='ok'?'موجودی کل: '+formatNum(gross,8)+' '+asset+' · رزرو سفارش‌ها: '+formatNum(reserved,8)+' · قابل استفاده تخمینی: '+formatNum(available,8)+' '+asset:'وضعیت رزرو سفارش‌ها نامشخص است؛ موجودی قابل استفاده قابل تأیید نیست.';
- if(!Number.isFinite(amount)||amount<=0){root.textContent='قیمت مرجع: '+formatNum(price,8)+' USDT · '+balanceText;return}
- const total=amount*price,toman=currentFxIsValid?total*currentFxRate:null;
- root.innerHTML='<span>قیمت مرجع: <b dir="ltr">'+formatNum(price,8)+' USDT</b></span><span>ارزش ناخالص تقریبی: <b dir="ltr">'+formatNum(total,4)+' USDT</b></span><span>'+safeText(balanceText)+'</span><span>'+(toman!==null?'معادل تقریبی '+formatTomanMarketPrice(toman)+' تومان':'نرخ تومان فعلاً موجود نیست')+'</span><small>این برآورد نمایشی است؛ قیمت نهایی و کنترل موجودی را موتور امن سرور تعیین می‌کند.</small>';
+ const gross=parseQuickTradeDecimal(side==='buy'?currentWalletUsdt:assetRows.find(x=>String(x.asset).toUpperCase()===base)?.balance,18,24);
+ const reserved=parseQuickTradeDecimal(quickTradeReservedByAsset.get(asset)||'0',18,24);
+ if(gross===null||reserved===null){root.textContent='موجودی یا رزرو قابل‌خواندن نیست؛ برآورد موجودی نمایش داده نمی‌شود.';return}
+ const available=DigiDecimal.compareDecimal(gross,reserved)>0?DigiDecimal.subtractDecimal(gross,reserved,18):'0';
+ const balanceText=quickTradeReservationState==='ok'?'موجودی کل: '+formatNum(gross,8)+' '+asset+' · رزرو سفارش‌ها: '+formatNum(reserved,8)+' · قابل استفاده تخمینی: '+formatNum(available,8)+' '+asset:'وضعیت رزرو سفارش‌ها نامشخص است؛ موجودی قابل استفاده قابل تأیید نیست.';
+ let amount=null;
+ if(amountRaw){amount=parseQuickTradeDecimal(amountRaw,ORDER_INPUT_MAX_FRACTION_DIGITS,16)}
+ if(amount===null||DigiDecimal.compareDecimal(amount,'0')<=0){root.textContent='قیمت مرجع: '+formatNum(price,8)+' USDT · '+balanceText;return}
+ const total=DigiDecimal.multiplyDecimal(amount,price,8,'down'),toman=currentFxIsValid?Number(total)*Number(currentFxRate):null;
+ root.innerHTML='<span>قیمت مرجع: <b dir="ltr">'+formatNum(price,8)+' USDT</b></span><span>ارزش ناخالص تقریبی: <b dir="ltr">'+formatNum(total,4)+' USDT</b></span><span>'+safeText(balanceText)+'</span><span>'+(toman!==null&&Number.isFinite(toman)?'معادل تقریبی '+formatTomanMarketPrice(toman)+' تومان':'نرخ تومان فعلاً موجود نیست')+'</span><small>این برآورد نمایشی است؛ قیمت نهایی و کنترل موجودی را موتور امن سرور تعیین می‌کند.</small>';
 }
-function setQuickTradePercent(side,percent){const symbol=String($(side+'Symbol')?.value||'').trim().toUpperCase(),base=symbol.replace(/USDT$/,''),item=marketRows.find(x=>String(x.symbol).toUpperCase()===symbol),price=item?getTrustedMarketPrice(item):null,ticker=item?getFreshMarketTicker(item):null;if(!base||!Number.isFinite(price)||price<=0||!ticker){showMessage(tradeMsg,'قیمت تازه و معتبر در دسترس نیست؛ درصد موجودی قابل محاسبه نیست.','err');return}if(quickTradeReservationState!=='ok'){showMessage(tradeMsg,'وضعیت رزرو سفارش‌ها مشخص نیست؛ برای جلوگیری از مصرف دوباره دارایی، انتخاب درصدی غیرفعال است.','err');return}const asset=side==='buy'?'USDT':base,gross=side==='buy'?Number(currentWalletUsdt||0):Number(assetRows.find(x=>String(x.asset).toUpperCase()===base)?.balance||0),reserved=quickTradeReservedByAsset.get(asset)||0,available=Math.max(0,gross-reserved);if(!Number.isFinite(gross)||gross<0||!Number.isFinite(reserved)||reserved<0){showMessage(tradeMsg,'موجودی یا رزرو معتبر نیست؛ مقدار سفارش تغییر نکرد.','err');return}const fraction=Math.max(0,Math.min(100,Number(percent)))/100,amount=side==='buy'?(available*fraction)/price:available*fraction;if(!Number.isFinite(amount)||amount<=0){showMessage(tradeMsg,'موجودی قابل استفاده برای این سفارش کافی نیست.','err');return}const input=$(side+'Amount');input.value=Number(amount.toPrecision(12)).toString();input.dispatchEvent(new Event('input',{bubbles:true}));hideMessage(tradeMsg)}
+function setQuickTradePercent(side,percent){
+ const symbol=String($(side+'Symbol')?.value||'').trim().toUpperCase(),base=symbol.replace(/USDT$/,''),item=marketRows.find(x=>String(x.symbol).toUpperCase()===symbol),price=item?getTrustedMarketPriceExact(item):null,ticker=item?getFreshMarketTicker(item):null;
+ if(!base||price===null||DigiDecimal.compareDecimal(price,'0')<=0||!ticker){showMessage(tradeMsg,'قیمت تازه و معتبر در دسترس نیست؛ درصد موجودی قابل محاسبه نیست.','err');return}
+ if(quickTradeReservationState!=='ok'){showMessage(tradeMsg,'وضعیت رزرو سفارش‌ها مشخص نیست؛ برای جلوگیری از مصرف دوباره دارایی، انتخاب درصدی غیرفعال است.','err');return}
+ const asset=side==='buy'?'USDT':base,gross=parseQuickTradeDecimal(side==='buy'?currentWalletUsdt:assetRows.find(x=>String(x.asset).toUpperCase()===base)?.balance,18,24),reserved=parseQuickTradeDecimal(quickTradeReservedByAsset.get(asset)||'0',18,24);
+ if(gross===null||reserved===null||DigiDecimal.compareDecimal(gross,'0')<0||DigiDecimal.compareDecimal(reserved,'0')<0){showMessage(tradeMsg,'موجودی یا رزرو معتبر نیست؛ مقدار سفارش تغییر نکرد.','err');return}
+ const pct=parseQuickTradeDecimal(percent,2,3);
+ if(pct===null||DigiDecimal.compareDecimal(pct,'0')<0||DigiDecimal.compareDecimal(pct,'100')>0){showMessage(tradeMsg,'درصد انتخابی معتبر نیست؛ مقدار سفارش تغییر نکرد.','err');return}
+ const available=DigiDecimal.compareDecimal(gross,reserved)>0?DigiDecimal.subtractDecimal(gross,reserved,18):'0';
+ const fraction=DigiDecimal.divideDecimal(pct,'100',8,'down');
+ const amount=side==='buy'?DigiDecimal.divideDecimal(DigiDecimal.multiplyDecimal(available,fraction,18,'down'),price,8,'down'):DigiDecimal.multiplyDecimal(available,fraction,8,'down');
+ if(DigiDecimal.compareDecimal(amount,'0')<=0){showMessage(tradeMsg,'موجودی قابل استفاده برای این سفارش کافی نیست.','err');return}
+ const input=$(side+'Amount');if(!input){showMessage(tradeMsg,'فیلد مقدار سفارش پیدا نشد؛ مقدار تغییر نکرد.','err');return}
+ input.value=amount;input.dispatchEvent(new Event('input',{bubbles:true}));hideMessage(tradeMsg)
+}
 function updateTradeAssetPreview(side){const input=$(side+'Symbol'),root=$(side+'AssetPreview');if(!input||!root)return;const symbol=String(input.value||'').trim().toUpperCase(),base=cleanCoinSymbol(symbol);root.innerHTML=base?`${coinLogo(base,'asset-logo')}<b dir="ltr">${safeText(symbol)}</b>`:'<span>نماد ارز را وارد کنید</span>'}
 function applyTheme(theme){
  const selected=['light','dark','luxury'].includes(theme)?theme:'dark';
@@ -2719,7 +2738,7 @@ async function refreshMarketTickersUnlocked(){
   const rows=await fetchBinance24hrTickerRows();
   const next=new Map(rows.filter(x=>String(x.symbol||'').endsWith('USDT')).map(x=>{
    const raw=x.priceChangePercent,parsed=raw===null||raw===undefined||raw===''?NaN:Number(raw);
-   return [x.symbol,{change:Number.isFinite(parsed)?parsed:null,last:Number(x.lastPrice),quoteVolume:Number(x.quoteVolume),baseVolume:Number(x.volume),high:Number(x.highPrice),low:Number(x.lowPrice),open:Number(x.openPrice),closeTime:Number(x.closeTime),trades:Number(x.count)}]
+   return [x.symbol,{change:Number.isFinite(parsed)?parsed:null,last:String(x.lastPrice??''),quoteVolume:Number(x.quoteVolume),baseVolume:Number(x.volume),high:Number(x.highPrice),low:Number(x.lowPrice),open:Number(x.openPrice),closeTime:Number(x.closeTime),trades:Number(x.count)}]
   }));
   if(!next.size)throw new Error('Binance داده جفت‌ارزهای USDT برنگرداند');
   marketTickerMap=next;
@@ -2789,11 +2808,18 @@ function compareMarketChange(a,b,direction='desc'){
 function sortMarketRowsByChange(rows,direction='desc'){
  return rows.filter(item=>getMarketChange24h(item)!==null).sort((a,b)=>compareMarketChange(a,b,direction));
 }
+function parseQuickTradeDecimal(value,maxFractionDigits=18,maxIntegerDigits=24){
+ try{return DigiDecimal.toString(DigiDecimal.parseDecimal(String(value??'0'),{maxFractionDigits,maxIntegerDigits}))}catch(_){return null}
+}
+function getTrustedMarketPriceExact(item){
+ const ticker=getFreshMarketTicker(item),live=parseQuickTradeDecimal(ticker?.last,18,16);
+ if(live!==null&&DigiDecimal.compareDecimal(live,'0')>0)return live;
+ const stored=isMarketTimestampFresh(item?.updated_at)?parseQuickTradeDecimal(item?.price,18,16):null;
+ return stored!==null&&DigiDecimal.compareDecimal(stored,'0')>0?stored:null;
+}
 function getTrustedMarketPrice(item){
- const ticker=getFreshMarketTicker(item),live=Number(ticker?.last);
- if(Number.isFinite(live)&&live>0)return live;
- const stored=Number(item?.price);
- return isMarketTimestampFresh(item?.updated_at)&&Number.isFinite(stored)&&stored>0?stored:null;
+ const exact=getTrustedMarketPriceExact(item),value=exact===null?null:Number(exact);
+ return value!==null&&Number.isFinite(value)&&value>0?value:null;
 }
 let marketSparklineObserver=null;
 const marketSparklineCache=new Map();
