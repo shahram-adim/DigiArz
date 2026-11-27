@@ -198,11 +198,24 @@ async function resetPageScroll(page) {
               const style = getComputedStyle(el);
               return {selector, tag:el.tagName, className:el.className?.toString?.()||'', backgroundColor:style.backgroundColor, backgroundImage:style.backgroundImage, color:style.color};
             };
-            const edge = document.elementsFromPoint(2, Math.min(200, innerHeight-1)).slice(0,8).map(el => {
+            const inspect = el => {
               const style=getComputedStyle(el);
-              return {tag:el.tagName,id:el.id,className:el.className?.toString?.()||'',backgroundColor:style.backgroundColor,backgroundImage:style.backgroundImage};
-            });
-            return {viewport:{width:innerWidth,height:innerHeight}, bodyClass:document.body.className, selectors:selectors.map(describe), edgeAtX2Y200:edge};
+              const before=getComputedStyle(el,'::before'), after=getComputedStyle(el,'::after');
+              const rect=el.getBoundingClientRect();
+              return {
+                tag:el.tagName,id:el.id,className:el.className?.toString?.()||'',
+                rect:{x:Math.round(rect.x),y:Math.round(rect.y),width:Math.round(rect.width),height:Math.round(rect.height)},
+                backgroundColor:style.backgroundColor,backgroundImage:style.backgroundImage,
+                boxShadow:style.boxShadow,filter:style.filter,opacity:style.opacity,
+                before:{content:before.content,backgroundColor:before.backgroundColor,backgroundImage:before.backgroundImage,boxShadow:before.boxShadow},
+                after:{content:after.content,backgroundColor:after.backgroundColor,backgroundImage:after.backgroundImage,boxShadow:after.boxShadow}
+              };
+            };
+            const edge = document.elementsFromPoint(2, Math.min(200, innerHeight-1)).slice(0,8).map(inspect);
+            const cards=[...document.querySelectorAll('#tab-dashboard > *, #tab-dashboard .card, #tab-dashboard .stat, #tab-dashboard .trade-box, #tab-dashboard .da-v2-hero, #tab-dashboard .da-v2-account-card')].filter(el=>{
+              const r=el.getBoundingClientRect(); return r.width>0&&r.height>0;
+            }).slice(0,30).map(inspect);
+            return {viewport:{width:innerWidth,height:innerHeight}, bodyClass:document.body.className, selectors:selectors.map(describe), edgeAtX2Y200:edge, dashboardCardEffects:cards};
           }));
         }
         for (const tab of tabs) {
