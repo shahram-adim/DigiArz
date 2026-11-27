@@ -6618,7 +6618,7 @@ body.luxury-theme .mobile-bottom-nav button.active{color:#fff!important}
   .category-btn .category-label{font-size:11px!important}
 }
 
-/* Ensure the rules apply to the real document structure (no #appView wrapper exists). */
+/* Ensure the rules apply directly to the real document structure. */
 body .mobile-bottom-nav button span{letter-spacing:0!important;text-shadow:0 0 .01px currentColor}
 @media(max-width:600px){body .mobile-bottom-nav{min-height:72px!important}body .mobile-bottom-nav button{min-height:64px!important}body .mobile-bottom-nav button span{font-size:11.5px!important}}
 @media(max-width:360px){body .mobile-bottom-nav button span{font-size:10.5px!important}}
