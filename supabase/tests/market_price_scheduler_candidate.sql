@@ -100,20 +100,21 @@ BEGIN
   SELECT count(*) INTO v_inflight FROM scheduler_candidate.batches WHERE state='in_flight';
   IF v_inflight >= p_max_inflight THEN RETURN NULL; END IF;
 
+  -- Weighted lanes prevent an endless stream of admissions/retries from starving
+  -- the ordinary catalog rotation. For batches >=3, reserve 20% priority,
+  -- 20% due retries and 60% normal IDs; unused quota is backfilled.
   WITH active_ids AS (
     SELECT DISTINCT unnest(b.requested_ids) AS id
     FROM scheduler_candidate.batches b WHERE b.state='in_flight'
   ),
   candidates AS (
     SELECT a.coingecko_id AS id, 0 AS lane, q.enqueued_at AS queued_at
-    FROM scheduler_candidate.priority_queue q
-    JOIN scheduler_candidate.assets a USING(coingecko_id)
+    FROM scheduler_candidate.priority_queue q JOIN scheduler_candidate.assets a USING(coingecko_id)
     WHERE a.is_enabled
     UNION ALL
     SELECT a.coingecko_id, 1, r.next_attempt_at
-    FROM scheduler_candidate.retry_queue r
-    JOIN scheduler_candidate.assets a USING(coingecko_id)
-    WHERE a.is_enabled AND r.next_attempt_at <= clock_timestamp()
+    FROM scheduler_candidate.retry_queue r JOIN scheduler_candidate.assets a USING(coingecko_id)
+    WHERE a.is_enabled AND r.next_attempt_at<=clock_timestamp()
       AND NOT EXISTS (SELECT 1 FROM scheduler_candidate.priority_queue p WHERE p.coingecko_id=a.coingecko_id)
     UNION ALL
     SELECT a.coingecko_id, 2, transaction_timestamp()
@@ -122,21 +123,40 @@ BEGIN
       AND NOT EXISTS (SELECT 1 FROM scheduler_candidate.priority_queue p WHERE p.coingecko_id=a.coingecko_id)
       AND NOT EXISTS (SELECT 1 FROM scheduler_candidate.retry_queue r WHERE r.coingecko_id=a.coingecko_id)
   ),
-  eligible AS (
-    SELECT c.id,c.lane,c.queued_at
+  ranked AS (
+    SELECT c.id,c.lane,c.queued_at,
+      row_number() OVER (PARTITION BY c.lane ORDER BY
+        CASE WHEN c.lane=2 AND v_cursor IS NOT NULL AND c.id<=v_cursor THEN 1 ELSE 0 END,
+        c.queued_at,c.id) AS lane_rank
     FROM candidates c
     WHERE NOT EXISTS (SELECT 1 FROM active_ids x WHERE x.id=c.id)
+  ),
+  quotas AS (
+    SELECT
+      CASE WHEN p_batch_size>=3 THEN greatest(1,ceil(p_batch_size*0.2)::integer) ELSE 0 END AS priority_limit,
+      CASE WHEN p_batch_size>=3 THEN greatest(1,ceil(p_batch_size*0.2)::integer) ELSE 0 END AS retry_limit,
+      p_batch_size - 2*CASE WHEN p_batch_size>=3 THEN greatest(1,ceil(p_batch_size*0.2)::integer) ELSE 0 END AS normal_limit
+  ),
+  quota_picks AS (
+    SELECT r.* FROM ranked r CROSS JOIN quotas q
+    WHERE (r.lane=0 AND r.lane_rank<=q.priority_limit)
+       OR (r.lane=1 AND r.lane_rank<=q.retry_limit)
+       OR (r.lane=2 AND r.lane_rank<=q.normal_limit)
+  ),
+  fill_picks AS (
+    SELECT r.* FROM ranked r
+    WHERE NOT EXISTS (SELECT 1 FROM quota_picks q WHERE q.id=r.id)
+    ORDER BY r.lane,r.lane_rank
+    LIMIT greatest(0,p_batch_size-(SELECT count(*) FROM quota_picks))
+  ),
+  picked AS (
+    SELECT * FROM quota_picks
+    UNION ALL SELECT * FROM fill_picks
   )
-  SELECT array_agg(id ORDER BY lane, queued_at, id), max(id) FILTER (WHERE lane=2)
+  SELECT array_agg(id ORDER BY lane,lane_rank),
+         (SELECT id FROM picked WHERE lane=2 ORDER BY lane_rank DESC LIMIT 1)
   INTO v_ids,v_cursor_after
-  FROM (
-    SELECT id,lane,queued_at
-    FROM eligible
-    ORDER BY lane,
-      CASE WHEN lane=2 AND v_cursor IS NOT NULL AND id<=v_cursor THEN 1 ELSE 0 END,
-      queued_at,id
-    LIMIT p_batch_size
-  ) picked;
+  FROM picked;
 
   IF COALESCE(cardinality(v_ids),0)=0 THEN
     RETURN NULL;
@@ -363,6 +383,26 @@ BEGIN
   EXCEPTION WHEN unique_violation THEN
     NULL;
   END;
+
+  -- Continuous admission storm must not starve ordinary catalog assets.
+  FOR i IN 1..5 LOOP
+    FOR j IN 1..10 LOOP
+      PERFORM scheduler_candidate.admit_asset(
+        'storm-'||i::text||'-'||j::text,
+        'ST'||lpad((i*10+j)::text,3,'0')||'USDT'
+      );
+    END LOOP;
+    v_batch := scheduler_candidate.schedule_next_batch(10);
+    SELECT requested_ids INTO v_ids FROM scheduler_candidate.batches WHERE batch_id=v_batch;
+    SELECT count(*) INTO v_count FROM unnest(v_ids) AS u(id) WHERE id LIKE 'storm-%';
+    IF v_count>2 THEN RAISE EXCEPTION 'priority storm consumed % of 10 slots',v_count; END IF;
+    IF cardinality(v_ids)-v_count<6 THEN
+      RAISE EXCEPTION 'ordinary catalog lane starved during admission storm';
+    END IF;
+    SELECT jsonb_object_agg(u.id,jsonb_build_object('usd',8.5)) INTO v_ids_json
+    FROM unnest(v_ids) AS u(id);
+    PERFORM scheduler_candidate.complete_batch(v_batch,200,v_ids_json);
+  END LOOP;
 
   -- Bound the number of outstanding provider batches.
   PERFORM scheduler_candidate.schedule_next_batch(10,3);
