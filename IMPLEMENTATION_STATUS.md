@@ -1872,3 +1872,12 @@
 - [!] Commit: `81f64761a572338f0f348f3350ff713d3f737bb0`. At checkpoint, GitHub's PR-run/status lookup has not surfaced a new CI run for this head; Stop-Loss coverage is added but NOT yet CI-verified.
 - [ ] Next: confirm CI executes the updated harness; then extend source-parity candidate with canonical `pair_id`, `base_asset_id`, `quote_asset_id` across TP/SL and Stop-Limit parent/child, reservations and execution calls. Market/Limit adapters must eventually be replaced with actual authoritative matching-engine bodies. Add stale-price, malformed-reservation and cancellation/worker race coverage for conditional paths.
 - [x] No Production/Supabase write, SQL/Edge Function invocation, migration/db push, pair/price/wallet/order/trade/reservation/Cron/worker/grant/RLS change, merge, deploy, release, APK/Pages publication or cost was made.
+
+
+## تأیید CI تست Stop-Loss در PR #67 — ۲۷ نوامبر ۲۰۲۶
+- [x] وضعیت زنده PR #67 بازبینی شد: باز، Draft، ادغام‌نشده و mergeable؛ HEAD برابر `e7e33a1b1fea07f8d40a136e148225eb8777e7ae`، شاخه ۹۹ commit جلوتر از main و بدون commit عقب‌تر.
+- [x] اجرای GitHub Actions با شناسه `46038127085` برای همین HEAD پیدا و jobها بررسی شد؛ job اصلی و هر ۲۶ مرحله موفق هستند.
+- [x] مرحله ۲۵ (`Apply authoritative TP-SL and Stop-Limit migrations in disposable PostgreSQL`) موفق است. فایل `supabase/tests/authoritative_conditional_source_parity.sql` در همین HEAD مسیرهای take_profit و stop_loss را جداگانه اجرا می‌کند؛ برای Stop-Loss، trigger count=1 و وضعیت هر دو `conditional_orders` و سفارش والد `orders` برابر `filled` را assert می‌کند.
+- [x] بنابراین تست Stop-Loss افزوده‌شده در commit `81f6476` اکنون در CI روی HEAD نهایی تأیید شده است. این نتیجه صرفاً برای PostgreSQL disposable است و هیچ ادعایی درباره اجرای Production ندارد.
+- [ ] گام بعد: طراحی source-parity canonical identity برای TP/SL و Stop-Limit؛ انتقال `pair_id`، `base_asset_id` و `quote_asset_id` از ورودی تا parent/child، reservation و worker؛ lookup قیمت pair-keyed؛ سپس duplicate ticker، stale price، invalid reservation و cancellation/worker race tests. Market/Limit adapters باید با بدنه واقعی موتورهای authoritative جایگزین شوند.
+- [x] هیچ تغییر Production، Migration/db push، SQL روی Supabase، merge، deploy/release، انتشار APK/Pages یا هزینه‌ای انجام نشد.
