@@ -150,6 +150,12 @@ jobs:
             -f supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql \
             -f supabase/tests/exact_decimal_limit_rounding_buffer.sql
 
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_rollout_full_schema_test;"
+          psql -h localhost -U postgres -d digiarz_rollout_full_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_setup.sql \
+            -f supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql \
+            -f supabase/tests/exact_decimal_type_widening_schema_verify.sql
+
           psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_rollout_stop_race_test;"
           psql -h localhost -U postgres -d digiarz_rollout_stop_race_test -v ON_ERROR_STOP=1 \
             -f supabase/tests/exact_decimal_stop_limit_setup.sql \
