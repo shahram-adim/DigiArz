@@ -215,3 +215,35 @@ A metadata/function-definition-only read on the restored Recovery-Test snapshot 
 - Product gates such as curated-list membership, minimum 24h volume and top-2,000 rank must not block an admitted valid asset. Financial gates remain: immutable identity mapping, supported quote, active asset/pair, trusted positive fresh pair price, account authorization and reservation/accounting invariants.
 - Pair disable must operate on a single `pair_id`; it must never cancel by display symbol. Conditional parent, Stop-Limit child, ordinary Limit child and reservations must all match the same canonical pair/base/quote IDs.
 - The read-only fingerprint now includes catalog writer/admin functions so a future current Production snapshot can verify whether these historical definitions still match. No function from Recovery-Test is copied into Production or used as a live-source claim.
+
+
+## Authoritative TP/SL and Stop-Limit identity call-chain — source review 2026-11-27
+
+Reviewed the exact mainline migration sources:
+- `20261113162051_add_demo_take_profit_stop_loss_engine.sql` (blob `3360c21a69b7fae83a7f2494428367d1b7658e81`)
+- `20261113181827_add_stop_limit_order_engine.sql` (blob `3f421c6380630d74b846cd66dc7b121786237c0f`)
+
+### TP/SL source behavior that must be migrated together
+- `place_conditional_exit_order(text,...)` accepts `p_symbol`, derives `v_base=left(symbol,length-4)`, validates `demo_trading_pairs.pair_symbol`, reads `asset_balances.asset` and active reservations by ticker text, then creates the parent `orders`, `order_reservations` and `conditional_orders` rows with only `symbol`.
+- `process_conditional_orders()` reads `market_prices` by `symbol`, validates reservation asset against the ticker-derived base, releases the parent reservation in a subtransaction, sets the user's JWT claims, calls `execute_demo_trade(symbol,...)`, and records the returned execution order ID on `conditional_orders`.
+- `cancel_conditional_exit_order(uuid)` locks conditional parent and reservation by order/user, releases the unconsumed reservation, then updates parent and conditional states. The cancellation must additionally prove that reservation, parent and pair/base/quote identity all agree.
+- Therefore canonical migration cannot be a UI adapter: placement, trigger worker, called Market RPC, cancellation, parent/child linkage, and reservation validation must all carry the same `pair_id/base_asset_id/quote_asset_id`. The current symbol-only path cannot disambiguate duplicate ticker pairs.
+
+### Stop-Limit source behavior that must be migrated together
+- `place_stop_limit_order(...)` is also symbol-input based; it derives base ticker text and writes the conditional parent and reservation using text asset/symbol.
+- `process_stop_limit_orders()` reads price by symbol, validates reservation asset against the ticker-derived base (or USDT for buys), releases the parent reservation transactionally, sets JWT claims and calls `place_limit_order(symbol,...)` to create the child, then stores `execution_order_id` on the conditional row.
+- The synchronization pass joins parent and child by IDs and copies child fill/status to the parent. The source lock clause is `FOR UPDATE OF c,parent SKIP LOCKED`; the child is read but not included in that lock list. Preserve and explicitly test the authoritative lock semantics unless a separately reviewed change is approved.
+- `cancel_stop_limit_order(uuid)` has two distinct branches: pending parent cancellation releases its reservation; triggered cancellation calls `cancel_limit_order(child_id)`, then synchronizes parent and conditional status from the child. Pair identity must be checked across parent, conditional row, child, reservation and called Limit RPC before cancellation or synchronization.
+
+### Required canonical invariants
+1. Parent order, conditional row, execution child, reservation and trade must share the same immutable user/pair/base/quote tuple. Enforce with composite FKs where possible, not only PL/pgSQL checks.
+2. Price reads and trigger evaluation must use `pair_id`, not display symbol.
+3. A trigger worker may only create a child for the exact parent pair; it must not resolve the child by ticker alone.
+4. Pair disable must cancel/release only rows carrying that `pair_id`; same-label pairs remain untouched.
+5. Keep existing advisory locks, row-lock order, SKIP LOCKED semantics, bounded retry behavior, account-active guards, RLS, SECURITY DEFINER ownership/search_path and service_role-only worker grants source-faithful.
+6. Backfill of historical symbol-only rows remains ambiguous when one ticker maps to multiple canonical assets. Quarantine ambiguous rows; never guess a mapping or merge balances.
+
+### OCO scope boundary
+No authoritative OCO table, placement/cancellation RPC or worker was found in the reviewed source search. OCO must be designed as a separate linked-order state machine (one parent group, two mutually exclusive legs, atomic winner/loser transition, reservation ownership and race/idempotency guarantees). It is not implemented by the TP/SL or Stop-Limit candidate above and must not be claimed as complete.
+
+This is source-review/design evidence only. No migration or Production function was changed or executed.
