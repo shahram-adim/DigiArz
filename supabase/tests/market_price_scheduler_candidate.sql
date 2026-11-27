@@ -146,7 +146,8 @@ BEGIN
   fill_picks AS (
     SELECT r.* FROM ranked r
     WHERE NOT EXISTS (SELECT 1 FROM quota_picks q WHERE q.id=r.id)
-    ORDER BY r.lane,r.lane_rank
+    -- Backfill unused quota into normal first, then retry, and priority last.
+    ORDER BY CASE r.lane WHEN 2 THEN 0 WHEN 1 THEN 1 ELSE 2 END,r.lane_rank
     LIMIT greatest(0,p_batch_size-(SELECT count(*) FROM quota_picks))
   ),
   picked AS (
