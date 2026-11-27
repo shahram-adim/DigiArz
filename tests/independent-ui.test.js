@@ -1370,3 +1370,15 @@ test('quick-trade sizing and estimates preserve exact decimal strings under the 
   assert.equal(decimal.divideDecimal(buyBudget,'0.00000003',8,'down'),'833333333.41666666');
   assert.equal(decimal.multiplyDecimal('0.123456789012345678','0.25',8,'down'),'0.03086419');
 });
+
+
+test('detail quick-trade input preserves the original decimal string',()=>{
+  const html=fs.readFileSync('index.html','utf8');
+  const detail=html.slice(html.indexOf('async function tradeDetail(side)'),html.indexOf('async function refreshAll()'));
+  assert.ok(detail.includes("String($(buy?'detailBuyAmount':'detailSellAmount')?.value??'').trim()"),'detail amount is read as text');
+  assert.ok(detail.includes("$(buy?'buyAmount':'sellAmount').value=amount"),'detail amount is copied without Number coercion');
+  assert.ok(!detail.includes('Number('),'detail path does not convert the user amount to binary floating point');
+  const trade=html.slice(html.indexOf('async function trade(side)'),html.indexOf('let orderBookTimer'));
+  assert.ok(trade.includes('p_amount:amount,p_price:price'),'server RPC receives the exact decimal strings');
+  assert.ok(trade.includes("readExactInput(buy?'buyAmount':'sellAmount'"),'the shared order input parser validates the exact decimal');
+});
