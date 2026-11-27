@@ -149,3 +149,12 @@ Do not copy `crypto_assets.current_price_usd` into `market_prices` as an ad-hoc 
 - Inspect the overflow scheduler's exact ID set and the current request batching without invoking it.
 - Determine whether Gate.io/KuCoin have exact market symbols for the tokenized assets and whether those quotes are currently excluded due to missing exchange listings.
 - Consider adding durable request metadata (provider, requested IDs, batch number, response outcome) in a future migration proposal; do not change Production now.
+
+
+## Primary-vs-overflow and exchange-market coverage check (read-only, 2026-11-27)
+- Reconstructed the exact current ID universe used by the refresh/overflow functions: **898 distinct provider IDs** (enabled pair base IDs plus active curated listing IDs).
+- The five stale assets rank 523, 629, 677, 773, and 789 in the sorted ID set. All five are in the overflow range (>515), not the primary batch.
+- The latest retained Gate.io and KuCoin response bodies were checked for the exact enabled pair symbols. None of the five symbols (NBISONUSDT, TSMONUSDT, RIVERUSDT, TQQQONUSDT, TONUSDT) appeared in either response.
+- This points to a specific coverage gap: all five stale pairs depend on the CoinGecko overflow request, but the latest CoinGecko response does not include their exact IDs, and neither exchange ticker feed supplies the exact pair symbol. The primary CoinGecko batch and exchange ticker feeds cannot refresh them under the current mapping rules.
+- This does not yet prove whether the overflow request is failing to include them or CoinGecko is omitting them from its response. Historical request URLs/batch contents are not durably recorded, so the two cases cannot be separated from retained response bodies alone.
+- Operational implication: all five rows have no currently observed executable market source in the inspected Gate.io/KuCoin ticker snapshots; a stale cached price must not be used to authorize demo trading. Pair admission needs a verified source/market route, not merely a catalog USD valuation.
