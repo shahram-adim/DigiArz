@@ -1,5 +1,34 @@
 -- End-to-end accounting checks for the candidate Limit worker.
 -- Runs only against the disposable PostgreSQL 17 CI database.
+
+-- Match the live function owner and EXECUTE ACL in the isolated rehearsal.
+REVOKE ALL ON FUNCTION public.process_limit_orders() FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.process_limit_orders() FROM anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.process_limit_orders() TO service_role;
+
+DO $acl_test$
+DECLARE
+  v_owner text;
+  v_security_definer boolean;
+  v_search_path text[];
+BEGIN
+  SELECT pg_get_userbyid(p.proowner), p.prosecdef, p.proconfig
+  INTO v_owner, v_security_definer, v_search_path
+  FROM pg_proc p
+  WHERE p.oid='public.process_limit_orders()'::regprocedure;
+
+  IF v_owner <> 'postgres' OR NOT v_security_definer
+     OR NOT (v_search_path @> ARRAY['search_path=""']) THEN
+    RAISE EXCEPTION 'Limit worker owner/SECURITY DEFINER/search_path mismatch: %, %, %',
+      v_owner, v_security_definer, v_search_path;
+  END IF;
+  IF has_function_privilege('anon','public.process_limit_orders()','EXECUTE')
+     OR has_function_privilege('authenticated','public.process_limit_orders()','EXECUTE')
+     OR NOT has_function_privilege('service_role','public.process_limit_orders()','EXECUTE') THEN
+    RAISE EXCEPTION 'Limit worker EXECUTE ACL differs from Production';
+  END IF;
+END
+$acl_test$;
 INSERT INTO auth.users (id) VALUES
 ('10000000-0000-0000-0000-000000000001'),
 ('20000000-0000-0000-0000-000000000002'),
