@@ -119,6 +119,59 @@ BEGIN
     IF SQLERRM = 'Expected >18-place TP/SL amount to be rejected' THEN RAISE; END IF;
   END;
 
+
+  -- Reject zero/negative Stop-Limit quantities and >18-place trigger/limit prices.
+  FOREACH v_amount IN ARRAY ARRAY[0::numeric, -0.1::numeric] LOOP
+    BEGIN
+      PERFORM public.place_stop_limit_order('BTCUSDT','buy',v_amount,10,11);
+      RAISE EXCEPTION 'Expected invalid Stop-Limit quantity to be rejected: %',v_amount;
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'Expected invalid Stop-Limit quantity%' THEN RAISE; END IF;
+    END;
+  END LOOP;
+  BEGIN
+    PERFORM public.place_stop_limit_order(
+      'BTCUSDT','buy',0.1,10.0000000000000000001,11
+    );
+    RAISE EXCEPTION 'Expected >18-place Stop-Limit trigger to be rejected';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Expected >18-place Stop-Limit trigger to be rejected' THEN RAISE; END IF;
+  END;
+  BEGIN
+    PERFORM public.place_stop_limit_order(
+      'BTCUSDT','buy',0.1,10,11.0000000000000000001
+    );
+    RAISE EXCEPTION 'Expected >18-place Stop-Limit limit price to be rejected';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Expected >18-place Stop-Limit limit price to be rejected' THEN RAISE; END IF;
+  END;
+
+  -- Reject invalid TP/SL quantities and >18-place/negative trigger prices.
+  FOREACH v_amount IN ARRAY ARRAY[0::numeric, -0.1::numeric] LOOP
+    BEGIN
+      PERFORM public.place_conditional_exit_order('BTCUSDT','take_profit',v_amount,12);
+      RAISE EXCEPTION 'Expected invalid TP/SL quantity to be rejected: %',v_amount;
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'Expected invalid TP/SL quantity%' THEN RAISE; END IF;
+    END;
+  END LOOP;
+  BEGIN
+    PERFORM public.place_conditional_exit_order(
+      'BTCUSDT','take_profit',0.1,12.0000000000000000001
+    );
+    RAISE EXCEPTION 'Expected >18-place TP/SL trigger to be rejected';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Expected >18-place TP/SL trigger to be rejected' THEN RAISE; END IF;
+  END;
+  BEGIN
+    PERFORM public.place_conditional_exit_order(
+      'BTCUSDT','take_profit',0.1,-12
+    );
+    RAISE EXCEPTION 'Expected negative TP/SL trigger to be rejected';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Expected negative TP/SL trigger to be rejected' THEN RAISE; END IF;
+  END;
+
   RAISE NOTICE 'Stop-Limit and TP/SL placement entrypoint integration: PASS';
 END
 $test$;
