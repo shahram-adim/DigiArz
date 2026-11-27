@@ -1679,3 +1679,15 @@
 - [!] دقت مهم: تابع اصلی خودش back-pressure دارد؛ پس آزمون باید ترتیب دقیق پردازش پاسخ، پاک‌کردن tracking، بررسی صف‌ها و enqueue مجدد 515 شناسه را شبیه‌سازی کند. فرض سادهٔ «تابع اصلی هر دقیقه بدون شرط درخواست جدید می‌سازد» نادرست است.
 - [ ] گام بعد: ساخت PostgreSQL 17 disposable harness با stubهای شبکه/صف و اجرای تابع‌های ثبت‌شده؛ آزمون فعلی و candidate scheduler باید جدا باشند. سپس نتایج و پوشش تست به PR #67 افزوده شوند.
 - [x] همهٔ عملیات Supabase فقط SELECT بودند. هیچ تابع Production اجرا نشد و هیچ صف، قیمت، جفت‌ارز، Cron، schema، grant، RLS، worker، سفارش، موجودی یا دادهٔ کاربر تغییر نکرد. هیچ migration/db push، merge، deploy، release یا هزینه‌ای انجام نشد.
+
+
+## Shahram 176 — disposable source-snapshot scheduler regression added (2026-11-27)
+- [x] قبل از تغییر، وضعیت شاخه‌ها با compare زنده بررسی شد: PR #66 برابر 69 جلو و 0 عقب؛ PR #67 برابر 20 جلو و 0 عقب از `main`. هر دو PR در مسیر Draft باقی می‌مانند.
+- [x] فایل `supabase/tests/market_price_scheduler_production_snapshot.sql` اضافه شد. این تست دو تابع را با بدنهٔ ثبت‌شدهٔ Production در fixture مرحلهٔ 175 اجرا می‌کند؛ fingerprintهای منبع در header تست درج شده‌اند.
+- [x] وابستگی `net.http_get` به stub محلی تبدیل شده و هیچ درخواست اینترنتی ارسال نمی‌شود. تست 516 شناسهٔ فعال می‌سازد، مرز 515/516 را بررسی می‌کند، تکمیل سه درخواست provider را شبیه‌سازی می‌کند، سپس ترتیب «پردازش پاسخ‌ها → حذف tracking → enqueue مجدد batch اصلی → اجرای Overflow» را بازسازی می‌کند.
+- [x] آزمون انتظار دارد Overflow در interleaving بازسازی‌شده به‌علت وجود درخواست‌های primary مسدود بماند؛ سپس با حذف صف/درخواست‌های معلق، کنترل می‌کند که Overflow به‌تنهایی شناسهٔ 516 را در batch بعدی قرار می‌دهد. بنابراین تست فرق بین مشکل guard/interleaving و خطای مرتب‌سازی IDها را مشخص می‌کند.
+- [x] workflow موجود PostgreSQL 17 یک گام مستقل اضافه کرد که دیتابیس تازهٔ `digiarz_market_scheduler_test` می‌سازد و فایل تست را با `psql -v ON_ERROR_STOP=1` اجرا می‌کند. فایل workflow فقط روی شاخهٔ این PR تغییر کرده؛ `main` دست‌نخورده است.
+- [!] اجرای محلی PostgreSQL در محیط فعلی در دسترس نبود؛ بنابراین نتیجهٔ تست هنوز PASS اعلام نمی‌شود. نتیجهٔ معتبر باید از GitHub Actions روی HEAD دقیق این تغییرات گرفته و job/step آن بررسی شود.
+- [!] این تست یک interleaving کنترل‌شده را اثبات می‌کند، نه اینکه به‌تنهایی علت تاریخی پنج قیمت stale را ثابت کند و نه اینکه starvation در تمام ترتیب‌های هم‌زمانی قطعی باشد. طراحی scheduler عادلانه و تست مستقل candidate هنوز انجام نشده است.
+- [ ] گام بعد: بررسی نتیجهٔ CI روی HEAD دقیق؛ رفع هر خطای SQL/هارنس؛ سپس افزودن candidate scheduler آزمایشی با cursor پایدار، ثبت requested-ID/response coverage و retry عادلانه، با آزمون‌های جداگانه.
+- [x] هیچ Supabase/Production تابعی اجرا نشد؛ هیچ قیمت، جفت‌ارز، صف، Cron، schema، grant، RLS، worker، سفارش، موجودی یا دادهٔ کاربر تغییر نکرد. هیچ migration/db push، merge، deploy، release یا هزینه‌ای انجام نشد.
