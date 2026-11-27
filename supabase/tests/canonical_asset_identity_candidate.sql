@@ -502,15 +502,8 @@ BEGIN
                  WHERE order_id=v_limit_stale AND asset_id=v_dot_a) THEN
     RAISE EXCEPTION 'stale limit order lost its canonical base reservation';
   END IF;
-  UPDATE canonical_asset_candidate.prices
-  SET price=20,observed_at=clock_timestamp()
-  WHERE pair_id=v_pair_a;
-  v_processed := canonical_asset_candidate.process_limit_orders();
-  IF v_processed<>1 OR (SELECT status FROM canonical_asset_candidate.orders WHERE order_id=v_limit_stale)<>'filled' THEN
-    RAISE EXCEPTION 'fresh canonical price did not trigger pending limit order';
-  END IF;
 
-  -- Reservation ownership is enforced by a composite FK, not just worker convention.
+  -- Verify ownership while the pending order still has its reservation.
   BEGIN
     UPDATE canonical_asset_candidate.reservations
     SET user_id='10000000-0000-0000-0000-000000000099'
@@ -519,6 +512,13 @@ BEGIN
   EXCEPTION WHEN foreign_key_violation THEN
     NULL;
   END;
+  UPDATE canonical_asset_candidate.prices
+  SET price=20,observed_at=clock_timestamp()
+  WHERE pair_id=v_pair_a;
+  v_processed := canonical_asset_candidate.process_limit_orders();
+  IF v_processed<>1 OR (SELECT status FROM canonical_asset_candidate.orders WHERE order_id=v_limit_stale)<>'filled' THEN
+    RAISE EXCEPTION 'fresh canonical price did not trigger pending limit order';
+  END IF;
 
   -- A malformed reservation asset must fail closed; the order and reservation remain retryable.
   v_limit_bad_reservation := canonical_asset_candidate.place_limit_order(v_user,v_pair_a,'sell',0.05,19);
