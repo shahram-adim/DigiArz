@@ -7,7 +7,7 @@ const css = fs.readFileSync('src/digiarz-independent-ui.css', 'utf8');
 const sw = fs.readFileSync('sw.js', 'utf8');
 
 test('independent stylesheet loads after all inline styles and before the document closes', () => {
-  const link = '<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=8">';
+  const link = '<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=9">';
   assert.ok(html.includes(link));
   assert.ok(html.lastIndexOf(link) > html.lastIndexOf('</style>'));
   assert.ok(html.indexOf(link) < html.lastIndexOf('</body>'));
@@ -1483,4 +1483,16 @@ test('icon labels remain readable across themes and compact mobile navigation',(
   assert.match(rules,/white-space:normal!important/,'mobile labels may wrap instead of disappearing');
   assert.match(rules,/text-overflow:clip!important/,'mobile labels are not ellipsized');
   assert.match(rules,/@media\(max-width:600px\)/,'compact layout receives a dedicated mobile pass');
+});
+
+test('mobile navigation keeps Persian labels unbroken and high contrast in every theme',()=>{
+  const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
+  const final=css.slice(css.lastIndexOf('Final mobile navigation legibility'));
+  for(const token of ['white-space:nowrap!important','word-break:keep-all!important',
+    'body.dark-theme #appView .mobile-bottom-nav button:not(.active) span',
+    'body.light-theme #appView .mobile-bottom-nav button:not(.active) span',
+    'body.luxury-theme #appView .mobile-bottom-nav button:not(.active) span',
+    'color:#172d70!important','@media(max-width:360px)']){
+    assert.ok(final.includes(token),'mobile navigation readability includes '+token);
+  }
 });
