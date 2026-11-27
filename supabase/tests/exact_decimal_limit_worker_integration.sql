@@ -781,4 +781,216 @@ BEGIN
 END
 $repeat_execution_idempotency$;
 
-SELECT 'exact-decimal Limit worker integration, fee boundary, buy/sell partial reserves, dust remainder, account guards, and repeat-execution idempotency: PASS' AS result;
+-- Sell fee threshold just below the half-quantum: gross 0.00000499
+-- yields fee 0.00000000 at 8-place USDT precision (not one satoshi).
+INSERT INTO auth.users (id)
+VALUES ('62000000-0000-0000-0000-000000000062');
+INSERT INTO public.profiles (id, is_active)
+VALUES ('62000000-0000-0000-0000-000000000062', true);
+INSERT INTO public.wallets (user_id, balance_usdt)
+VALUES ('62000000-0000-0000-0000-000000000062', 0);
+INSERT INTO public.asset_balances (user_id, asset, balance)
+VALUES ('62000000-0000-0000-0000-000000000062', 'BTC', 4);
+UPDATE public.market_prices SET price=0.00000499, updated_at=now()
+WHERE symbol='BTCUSDT';
+INSERT INTO public.orders (
+  id, user_id, symbol, side, order_type, amount, price,
+  filled_amount, remaining_amount, status
+) VALUES (
+  '62000000-0000-0000-0000-000000000162',
+  '62000000-0000-0000-0000-000000000062',
+  'BTCUSDT', 'sell', 'limit', 4, 0.00000499,
+  0, 4, 'pending'
+);
+INSERT INTO public.order_reservations (
+  id, order_id, user_id, asset, reserved_amount,
+  consumed_amount, released_amount, status
+) VALUES (
+  '62000000-0000-0000-0000-000000000662',
+  '62000000-0000-0000-0000-000000000162',
+  '62000000-0000-0000-0000-000000000062',
+  'BTC', 4, 0, 0, 'reserved'
+);
+DO $sell_fee_below_half_quantum$
+DECLARE
+  v_cycle integer;
+  v_value numeric;
+BEGIN
+  FOR v_cycle IN 1..4 LOOP
+    PERFORM public.process_limit_orders();
+
+    SELECT balance_usdt INTO v_value
+    FROM public.wallets
+    WHERE user_id='62000000-0000-0000-0000-000000000062';
+    IF v_value <> (v_cycle * 0.00000499)::numeric THEN
+      RAISE EXCEPTION 'Below-half-quantum sell proceeds mismatch at cycle %: %',
+        v_cycle, v_value;
+    END IF;
+
+    SELECT consumed_amount INTO v_value
+    FROM public.order_reservations
+    WHERE order_id='62000000-0000-0000-0000-000000000162';
+    IF v_value <> v_cycle::numeric THEN
+      RAISE EXCEPTION 'Below-half-quantum sell reservation mismatch at cycle %: %',
+        v_cycle, v_value;
+    END IF;
+  END LOOP;
+
+  IF (SELECT status FROM public.orders
+      WHERE id='62000000-0000-0000-0000-000000000162') <> 'filled' THEN
+    RAISE EXCEPTION 'Below-half-quantum sell did not complete';
+  END IF;
+  IF (SELECT balance FROM public.asset_balances
+      WHERE user_id='62000000-0000-0000-0000-000000000062' AND asset='BTC') <> 0 THEN
+    RAISE EXCEPTION 'Below-half-quantum sell inventory mismatch';
+  END IF;
+  SELECT sum(amount) INTO v_value
+  FROM public.transactions
+  WHERE user_id='62000000-0000-0000-0000-000000000062'
+    AND currency='USDT' AND transaction_type='limit_sell';
+  IF v_value <> 0.00001996::numeric THEN
+    RAISE EXCEPTION 'Below-half-quantum sell transaction mismatch: %', v_value;
+  END IF;
+END
+$sell_fee_below_half_quantum$;
+
+-- Minimum representable positive USDT gross: one 8-place unit per fill.
+-- The 0.1% fee rounds to zero; each fill must credit exactly 0.00000001.
+INSERT INTO auth.users (id)
+VALUES ('63000000-0000-0000-0000-000000000063');
+INSERT INTO public.profiles (id, is_active)
+VALUES ('63000000-0000-0000-0000-000000000063', true);
+INSERT INTO public.wallets (user_id, balance_usdt)
+VALUES ('63000000-0000-0000-0000-000000000063', 0);
+INSERT INTO public.asset_balances (user_id, asset, balance)
+VALUES ('63000000-0000-0000-0000-000000000063', 'BTC', 4);
+UPDATE public.market_prices SET price=0.00000001, updated_at=now()
+WHERE symbol='BTCUSDT';
+INSERT INTO public.orders (
+  id, user_id, symbol, side, order_type, amount, price,
+  filled_amount, remaining_amount, status
+) VALUES (
+  '63000000-0000-0000-0000-000000000163',
+  '63000000-0000-0000-0000-000000000063',
+  'BTCUSDT', 'sell', 'limit', 4, 0.00000001,
+  0, 4, 'pending'
+);
+INSERT INTO public.order_reservations (
+  id, order_id, user_id, asset, reserved_amount,
+  consumed_amount, released_amount, status
+) VALUES (
+  '63000000-0000-0000-0000-000000000663',
+  '63000000-0000-0000-0000-000000000163',
+  '63000000-0000-0000-0000-000000000063',
+  'BTC', 4, 0, 0, 'reserved'
+);
+DO $sell_minimum_positive_gross$
+DECLARE
+  v_cycle integer;
+  v_value numeric;
+BEGIN
+  FOR v_cycle IN 1..4 LOOP
+    PERFORM public.process_limit_orders();
+
+    SELECT balance_usdt INTO v_value
+    FROM public.wallets
+    WHERE user_id='63000000-0000-0000-0000-000000000063';
+    IF v_value <> (v_cycle * 0.00000001)::numeric THEN
+      RAISE EXCEPTION 'Minimum-positive-gross wallet mismatch at cycle %: %',
+        v_cycle, v_value;
+    END IF;
+
+    SELECT consumed_amount INTO v_value
+    FROM public.order_reservations
+    WHERE order_id='63000000-0000-0000-0000-000000000163';
+    IF v_value <> v_cycle::numeric THEN
+      RAISE EXCEPTION 'Minimum-positive-gross reservation mismatch at cycle %: %',
+        v_cycle, v_value;
+    END IF;
+  END LOOP;
+
+  IF (SELECT status FROM public.orders
+      WHERE id='63000000-0000-0000-0000-000000000163') <> 'filled' THEN
+    RAISE EXCEPTION 'Minimum-positive-gross sell did not complete';
+  END IF;
+  IF (SELECT balance FROM public.asset_balances
+      WHERE user_id='63000000-0000-0000-0000-000000000063' AND asset='BTC') <> 0 THEN
+    RAISE EXCEPTION 'Minimum-positive-gross sell inventory mismatch';
+  END IF;
+  SELECT sum(amount) INTO v_value
+  FROM public.transactions
+  WHERE user_id='63000000-0000-0000-0000-000000000063'
+    AND currency='USDT' AND transaction_type='limit_sell';
+  IF v_value <> 0.00000004::numeric THEN
+    RAISE EXCEPTION 'Minimum-positive-gross transaction mismatch: %', v_value;
+  END IF;
+END
+$sell_minimum_positive_gross$;
+
+-- A gross below one USDT ledger quantum rounds to zero and must be skipped
+-- without changing the order, wallet, base inventory, trades, or reservation.
+INSERT INTO auth.users (id)
+VALUES ('64000000-0000-0000-0000-000000000064');
+INSERT INTO public.profiles (id, is_active)
+VALUES ('64000000-0000-0000-0000-000000000064', true);
+INSERT INTO public.wallets (user_id, balance_usdt)
+VALUES ('64000000-0000-0000-0000-000000000064', 0);
+INSERT INTO public.asset_balances (user_id, asset, balance)
+VALUES ('64000000-0000-0000-0000-000000000064', 'BTC', 4);
+UPDATE public.market_prices SET price=0.000000004, updated_at=now()
+WHERE symbol='BTCUSDT';
+INSERT INTO public.orders (
+  id, user_id, symbol, side, order_type, amount, price,
+  filled_amount, remaining_amount, status
+) VALUES (
+  '64000000-0000-0000-0000-000000000164',
+  '64000000-0000-0000-0000-000000000064',
+  'BTCUSDT', 'sell', 'limit', 4, 0.000000004,
+  0, 4, 'pending'
+);
+INSERT INTO public.order_reservations (
+  id, order_id, user_id, asset, reserved_amount,
+  consumed_amount, released_amount, status
+) VALUES (
+  '64000000-0000-0000-0000-000000000664',
+  '64000000-0000-0000-0000-000000000164',
+  '64000000-0000-0000-0000-000000000064',
+  'BTC', 4, 0, 0, 'reserved'
+);
+DO $sell_sub_quantum_gross_rejected$
+DECLARE
+  v_value numeric;
+BEGIN
+  PERFORM public.process_limit_orders();
+
+  IF (SELECT status FROM public.orders
+      WHERE id='64000000-0000-0000-0000-000000000164') <> 'pending' THEN
+    RAISE EXCEPTION 'Sub-quantum sell order should remain pending';
+  END IF;
+  IF EXISTS (SELECT 1 FROM public.trades
+             WHERE order_id='64000000-0000-0000-0000-000000000164') THEN
+    RAISE EXCEPTION 'Sub-quantum sell unexpectedly created a trade';
+  END IF;
+  SELECT balance_usdt INTO v_value
+  FROM public.wallets
+  WHERE user_id='64000000-0000-0000-0000-000000000064';
+  IF v_value <> 0 THEN
+    RAISE EXCEPTION 'Sub-quantum sell changed the quote wallet: %', v_value;
+  END IF;
+  SELECT balance INTO v_value
+  FROM public.asset_balances
+  WHERE user_id='64000000-0000-0000-0000-000000000064' AND asset='BTC';
+  IF v_value <> 4 THEN
+    RAISE EXCEPTION 'Sub-quantum sell changed base inventory: %', v_value;
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.order_reservations
+    WHERE order_id='64000000-0000-0000-0000-000000000164'
+      AND (consumed_amount <> 0 OR released_amount <> 0 OR status <> 'reserved')
+  ) THEN
+    RAISE EXCEPTION 'Sub-quantum sell changed reservation accounting';
+  END IF;
+END
+$sell_sub_quantum_gross_rejected$;
+
+SELECT 'exact-decimal Limit worker integration, fee threshold, minimum positive gross, sub-quantum rejection, partial reserves, dust remainder, account guards, and idempotency: PASS' AS result;
