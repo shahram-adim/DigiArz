@@ -221,6 +221,7 @@ async function resetPageScroll(page) {
             const marketRows=page.locator('#marketList');
             const lastMarketRow=marketRows.locator(':scope > .coin').last();
             await lastMarketRow.evaluate(el=>el.scrollIntoView({block:'end',behavior:'instant'}));
+            await page.evaluate(()=>window.scrollTo(0,Math.max(document.documentElement.scrollHeight,document.body.scrollHeight)));
             const endVisibility=await page.evaluate(()=>{
               const last=document.querySelector('#marketList > .coin:last-child');
               const nav=document.querySelector('.mobile-bottom-nav');
