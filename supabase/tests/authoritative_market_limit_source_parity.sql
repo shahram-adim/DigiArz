@@ -19,6 +19,28 @@ BEGIN
   INSERT INTO public.wallets(user_id,balance_usdt) VALUES(v_user,1000),(v_inactive,1000);
   INSERT INTO public.asset_balances(user_id,asset,balance) VALUES(v_user,'DOT',10);
   INSERT INTO public.demo_trading_pairs(pair_symbol,quote_asset,is_enabled) VALUES('DOTUSDT','USDT',true);
+
+  -- Exact captured Production helpers: fee configuration and active-account lookup.
+  IF public.get_demo_trading_fee_rate('USDT','maker')<>0.001
+     OR public.get_demo_trading_fee_rate('USDT','taker')<>0.001 THEN
+    RAISE EXCEPTION 'captured fee helper did not return configured maker/taker rates';
+  END IF;
+  BEGIN
+    PERFORM public.get_demo_trading_fee_rate('MISSING','taker');
+    RAISE EXCEPTION 'fee helper accepted an unconfigured quote asset';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM='fee helper accepted an unconfigured quote asset' THEN RAISE; END IF;
+    IF SQLERRM NOT LIKE '%Trading fee is not configured%' THEN RAISE; END IF;
+  END;
+  UPDATE public.demo_trading_fees SET is_enabled=false WHERE quote_asset='USDT';
+  BEGIN
+    PERFORM public.get_demo_trading_fee_rate('USDT','maker');
+    RAISE EXCEPTION 'fee helper accepted a disabled fee configuration';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM='fee helper accepted a disabled fee configuration' THEN RAISE; END IF;
+    IF SQLERRM NOT LIKE '%Trading fee is not configured%' THEN RAISE; END IF;
+  END;
+  UPDATE public.demo_trading_fees SET is_enabled=true WHERE quote_asset='USDT';
   INSERT INTO public.market_prices(symbol,price,updated_at) VALUES('DOTUSDT',10,clock_timestamp());
   PERFORM set_config('request.jwt.claim.sub',v_user::text,true);
 
