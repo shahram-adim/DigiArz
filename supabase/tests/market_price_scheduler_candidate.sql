@@ -108,7 +108,7 @@ BEGIN
     WHERE a.is_enabled AND r.next_attempt_at <= clock_timestamp()
       AND NOT EXISTS (SELECT 1 FROM scheduler_candidate.priority_queue p WHERE p.coingecko_id=a.coingecko_id)
     UNION ALL
-    SELECT a.coingecko_id, 2, clock_timestamp()
+    SELECT a.coingecko_id, 2, transaction_timestamp()
     FROM scheduler_candidate.assets a
     WHERE a.is_enabled
       AND NOT EXISTS (SELECT 1 FROM scheduler_candidate.priority_queue p WHERE p.coingecko_id=a.coingecko_id)
