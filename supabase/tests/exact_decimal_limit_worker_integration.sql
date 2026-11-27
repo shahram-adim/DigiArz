@@ -536,4 +536,91 @@ BEGIN
 END
 $dust_remainder$;
 
-SELECT 'exact-decimal Limit worker integration, fee boundary, partial-reserve lifecycle, dust remainder, and account guards: PASS' AS result;
+-- Sell-side repeated partial fills must reconcile base reservation, base
+-- inventory, USDT proceeds, trades, and fee-net transaction ledger per cycle.
+INSERT INTO auth.users (id)
+VALUES ('99000000-0000-0000-0000-000000000009');
+INSERT INTO public.profiles (id, is_active)
+VALUES ('99000000-0000-0000-0000-000000000009', true);
+INSERT INTO public.wallets (user_id, balance_usdt)
+VALUES ('99000000-0000-0000-0000-000000000009', 0);
+INSERT INTO public.asset_balances (user_id, asset, balance)
+VALUES ('99000000-0000-0000-0000-000000000009', 'BTC', 4);
+UPDATE public.market_prices SET price=1, updated_at=now()
+WHERE symbol='BTCUSDT';
+INSERT INTO public.orders (
+  id, user_id, symbol, side, order_type, amount, price,
+  filled_amount, remaining_amount, status
+) VALUES (
+  '99000000-0000-0000-0000-000000000099',
+  '99000000-0000-0000-0000-000000000009',
+  'BTCUSDT', 'sell', 'limit', 4, 1, 0, 4, 'pending'
+);
+INSERT INTO public.order_reservations (
+  id, order_id, user_id, asset, reserved_amount,
+  consumed_amount, released_amount, status
+) VALUES (
+  '99000000-0000-0000-0000-000000000999',
+  '99000000-0000-0000-0000-000000000099',
+  '99000000-0000-0000-0000-000000000009',
+  'BTC', 4, 0, 0, 'reserved'
+);
+
+DO $sell_partial_reconcile$
+DECLARE
+  v_cycle integer;
+  v_consumed numeric;
+  v_released numeric;
+  v_expected numeric[] := ARRAY[1, 2, 3, 4]::numeric[];
+BEGIN
+  FOR v_cycle IN 1..4 LOOP
+    PERFORM public.process_limit_orders();
+
+    SELECT consumed_amount, released_amount
+    INTO v_consumed, v_released
+    FROM public.order_reservations
+    WHERE order_id='99000000-0000-0000-0000-000000000099';
+
+    IF v_consumed <> v_expected[v_cycle] OR v_released <> 0 THEN
+      RAISE EXCEPTION
+        'Sell reserve mismatch at cycle %: consumed %, released %',
+        v_cycle, v_consumed, v_released;
+    END IF;
+
+    IF v_cycle < 4 AND (
+      SELECT status FROM public.order_reservations
+      WHERE order_id='99000000-0000-0000-0000-000000000099'
+    ) <> 'reserved' THEN
+      RAISE EXCEPTION 'Sell reservation left reserved state before final fill at cycle %', v_cycle;
+    END IF;
+  END LOOP;
+
+  IF (SELECT status FROM public.orders
+      WHERE id='99000000-0000-0000-0000-000000000099') <> 'filled' THEN
+    RAISE EXCEPTION 'Repeated partial sell did not complete';
+  END IF;
+  IF (SELECT status FROM public.order_reservations
+      WHERE order_id='99000000-0000-0000-0000-000000000099') <> 'consumed' THEN
+    RAISE EXCEPTION 'Fully consumed sell reservation has wrong terminal status';
+  END IF;
+  IF (SELECT balance FROM public.asset_balances
+      WHERE user_id='99000000-0000-0000-0000-000000000009' AND asset='BTC') <> 0 THEN
+    RAISE EXCEPTION 'Sell base inventory did not reconcile to zero';
+  END IF;
+  IF (SELECT balance_usdt FROM public.wallets
+      WHERE user_id='99000000-0000-0000-0000-000000000009') <> 3.996 THEN
+    RAISE EXCEPTION 'Sell net wallet proceeds mismatch';
+  END IF;
+  IF (SELECT sum(amount) FROM public.trades
+      WHERE order_id='99000000-0000-0000-0000-000000000099') <> 4 THEN
+    RAISE EXCEPTION 'Sell trade quantity sum mismatch';
+  END IF;
+  IF (SELECT sum(amount) FROM public.transactions
+      WHERE user_id='99000000-0000-0000-0000-000000000009'
+        AND currency='USDT' AND transaction_type='limit_sell') <> 3.996 THEN
+    RAISE EXCEPTION 'Sell fee-net transaction ledger mismatch';
+  END IF;
+END
+$sell_partial_reconcile$;
+
+SELECT 'exact-decimal Limit worker integration, fee boundary, buy/sell partial reserves, dust remainder, and account guards: PASS' AS result;
