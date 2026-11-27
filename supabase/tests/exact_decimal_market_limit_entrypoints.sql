@@ -7,6 +7,8 @@ DECLARE
   v_result jsonb;
   v_wallet numeric;
   v_asset numeric;
+  v_wallet_before numeric;
+  v_asset_before numeric;
   v_order_id uuid;
   v_amount numeric;
   v_reserved numeric;
@@ -173,7 +175,10 @@ BEGIN
   END;
 
   -- Reject a Market sell whose proceeds would overflow the locked wallet.
+  -- Capture the actual baseline: the earlier oversized Limit-sell preflight deliberately set BTC to 10.
   UPDATE public.wallets SET balance_usdt=9999999999999999.99999999::numeric WHERE user_id=v_uid;
+  SELECT balance_usdt INTO v_wallet_before FROM public.wallets WHERE user_id=v_uid;
+  SELECT balance INTO v_asset_before FROM public.asset_balances WHERE user_id=v_uid AND asset='BTC';
   BEGIN
     PERFORM public.execute_demo_trade('BTCUSDT','sell',0.01,0);
     RAISE EXCEPTION 'Expected Market sell wallet-capacity overflow to be rejected';
@@ -183,8 +188,9 @@ BEGIN
   END;
   SELECT balance_usdt INTO v_wallet FROM public.wallets WHERE user_id=v_uid;
   SELECT balance INTO v_asset FROM public.asset_balances WHERE user_id=v_uid AND asset='BTC';
-  IF v_wallet <> 9999999999999999.99999999::numeric OR v_asset <> 0.750000000000000000 THEN
-    RAISE EXCEPTION 'Rejected Market sell overflow changed wallet or base inventory';
+  IF v_wallet <> v_wallet_before OR v_asset <> v_asset_before THEN
+    RAISE EXCEPTION 'Rejected Market sell overflow changed wallet or base inventory: wallet % -> %, BTC % -> %',
+      v_wallet_before,v_wallet,v_asset_before,v_asset;
   END IF;
 
   RAISE NOTICE 'Market execution and Limit placement integration: PASS';
