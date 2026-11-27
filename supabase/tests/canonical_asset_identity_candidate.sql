@@ -25,7 +25,8 @@ CREATE TABLE canonical_asset_candidate.pairs (
   quote_asset_id uuid NOT NULL REFERENCES canonical_asset_candidate.assets(asset_id),
   display_pair text NOT NULL,
   is_enabled boolean NOT NULL DEFAULT true,
-  UNIQUE(base_asset_id,quote_asset_id)
+  UNIQUE(base_asset_id,quote_asset_id),
+  UNIQUE(pair_id,base_asset_id,quote_asset_id)
 );
 
 CREATE TABLE canonical_asset_candidate.prices (
@@ -56,7 +57,12 @@ CREATE TABLE canonical_asset_candidate.orders (
   limit_price numeric,
   filled_amount numeric NOT NULL DEFAULT 0,
   remaining_amount numeric NOT NULL DEFAULT 0,
-  status text NOT NULL CHECK(status IN ('pending','filled','cancelled'))
+  status text NOT NULL CHECK(status IN ('pending','filled','cancelled')),
+  UNIQUE(order_id,user_id),
+  UNIQUE(order_id,user_id,pair_id,base_asset_id,quote_asset_id),
+  FOREIGN KEY(pair_id,base_asset_id,quote_asset_id)
+    REFERENCES canonical_asset_candidate.pairs(pair_id,base_asset_id,quote_asset_id),
+  CHECK(filled_amount>=0 AND remaining_amount>=0 AND filled_amount+remaining_amount=amount)
 );
 
 CREATE TABLE canonical_asset_candidate.trades (
@@ -69,7 +75,9 @@ CREATE TABLE canonical_asset_candidate.trades (
   side text NOT NULL CHECK(side IN ('buy','sell')),
   amount numeric NOT NULL CHECK(amount>0),
   price numeric NOT NULL CHECK(price>0),
-  fee_quote numeric NOT NULL CHECK(fee_quote>=0)
+  fee_quote numeric NOT NULL CHECK(fee_quote>=0),
+  FOREIGN KEY(order_id,user_id,pair_id,base_asset_id,quote_asset_id)
+    REFERENCES canonical_asset_candidate.orders(order_id,user_id,pair_id,base_asset_id,quote_asset_id)
 );
 
 CREATE TABLE canonical_asset_candidate.reservations (
@@ -77,7 +85,10 @@ CREATE TABLE canonical_asset_candidate.reservations (
   order_id uuid NOT NULL REFERENCES canonical_asset_candidate.orders(order_id),
   user_id uuid NOT NULL,
   asset_id uuid NOT NULL REFERENCES canonical_asset_candidate.assets(asset_id),
-  amount numeric NOT NULL CHECK(amount>0)
+  amount numeric NOT NULL CHECK(amount>0),
+  UNIQUE(order_id),
+  FOREIGN KEY(order_id,user_id)
+    REFERENCES canonical_asset_candidate.orders(order_id,user_id)
 );
 
 CREATE OR REPLACE FUNCTION canonical_asset_candidate.execute_market_trade(
@@ -283,6 +294,10 @@ BEGIN
     SELECT * INTO v_pair FROM canonical_asset_candidate.pairs
     WHERE pair_id=v_order.pair_id AND is_enabled FOR UPDATE;
     IF NOT FOUND THEN CONTINUE; END IF;
+    IF v_order.base_asset_id<>v_pair.base_asset_id
+       OR v_order.quote_asset_id<>v_pair.quote_asset_id THEN
+      CONTINUE;
+    END IF;
     IF NOT EXISTS (SELECT 1 FROM canonical_asset_candidate.assets WHERE asset_id=v_pair.base_asset_id AND is_active)
        OR NOT EXISTS (SELECT 1 FROM canonical_asset_candidate.assets WHERE asset_id=v_pair.quote_asset_id AND is_active AND display_symbol='USDT') THEN
       CONTINUE;
@@ -301,7 +316,9 @@ BEGIN
 
     SELECT * INTO v_reservation FROM canonical_asset_candidate.reservations
     WHERE order_id=v_order.order_id FOR UPDATE;
-    IF NOT FOUND THEN RAISE EXCEPTION 'limit reservation missing' USING ERRCODE='23514'; END IF;
+    IF NOT FOUND OR v_reservation.user_id<>v_order.user_id THEN
+      RAISE EXCEPTION 'limit reservation missing or owner mismatch' USING ERRCODE='23514';
+    END IF;
 
     PERFORM 1 FROM canonical_asset_candidate.balances
     WHERE user_id=v_order.user_id AND asset_id IN (v_order.base_asset_id,v_order.quote_asset_id)
@@ -358,6 +375,7 @@ DECLARE
   v_limit_buy uuid;
   v_limit_sell uuid;
   v_limit_stale uuid;
+  v_limit_bad_reservation uuid;
   v_processed integer;
   v_a numeric;
   v_b numeric;
@@ -381,6 +399,19 @@ BEGIN
     (v_pair_b,20,'CoinGecko',clock_timestamp());
   INSERT INTO canonical_asset_candidate.balances(user_id,asset_id,balance) VALUES
     (v_user,v_usdt,10000);
+
+  -- Database constraints prevent an order from combining one pair ID with another asset ID.
+  BEGIN
+    INSERT INTO canonical_asset_candidate.orders(
+      order_id,user_id,pair_id,base_asset_id,quote_asset_id,side,order_type,
+      amount,price,filled_amount,remaining_amount,status
+    ) VALUES (
+      gen_random_uuid(),v_user,v_pair_a,v_dot_b,v_usdt,'buy','market',1,10,0,1,'pending'
+    );
+    RAISE EXCEPTION 'mismatched pair/base identity was accepted';
+  EXCEPTION WHEN foreign_key_violation THEN
+    NULL;
+  END;
 
   IF (SELECT count(*) FROM canonical_asset_candidate.pairs WHERE display_pair='DOT/USDT')<>2 THEN
     RAISE EXCEPTION 'duplicate display tickers were not represented as separate pairs';
@@ -478,6 +509,41 @@ BEGIN
   IF v_processed<>1 OR (SELECT status FROM canonical_asset_candidate.orders WHERE order_id=v_limit_stale)<>'filled' THEN
     RAISE EXCEPTION 'fresh canonical price did not trigger pending limit order';
   END IF;
+
+  -- Reservation ownership is enforced by a composite FK, not just worker convention.
+  BEGIN
+    UPDATE canonical_asset_candidate.reservations
+    SET user_id='10000000-0000-0000-0000-000000000099'
+    WHERE order_id=v_limit_stale;
+    RAISE EXCEPTION 'reservation owner mismatch was accepted';
+  EXCEPTION WHEN foreign_key_violation THEN
+    NULL;
+  END;
+
+  -- A malformed reservation asset must fail closed; the order and reservation remain retryable.
+  v_limit_bad_reservation := canonical_asset_candidate.place_limit_order(v_user,v_pair_a,'sell',0.05,19);
+  UPDATE canonical_asset_candidate.reservations
+  SET asset_id=v_dot_b
+  WHERE order_id=v_limit_bad_reservation;
+  BEGIN
+    PERFORM canonical_asset_candidate.process_limit_orders();
+    RAISE EXCEPTION 'worker accepted reservation for the other same-ticker asset';
+  EXCEPTION WHEN check_violation THEN
+    NULL;
+  END;
+  IF (SELECT status FROM canonical_asset_candidate.orders WHERE order_id=v_limit_bad_reservation)<>'pending'
+     OR NOT EXISTS (SELECT 1 FROM canonical_asset_candidate.reservations
+                    WHERE order_id=v_limit_bad_reservation AND asset_id=v_dot_b) THEN
+    RAISE EXCEPTION 'invalid reservation was not preserved for safe retry';
+  END IF;
+  UPDATE canonical_asset_candidate.reservations
+  SET asset_id=v_dot_a
+  WHERE order_id=v_limit_bad_reservation;
+  v_processed := canonical_asset_candidate.process_limit_orders();
+  IF v_processed<>1 OR (SELECT status FROM canonical_asset_candidate.orders WHERE order_id=v_limit_bad_reservation)<>'filled' THEN
+    RAISE EXCEPTION 'corrected canonical reservation did not retry successfully';
+  END IF;
+
   SELECT balance INTO v_a FROM canonical_asset_candidate.balances
   WHERE user_id=v_user AND asset_id=v_dot_a;
   SELECT balance INTO v_usdt_balance FROM canonical_asset_candidate.balances
