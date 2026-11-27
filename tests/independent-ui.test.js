@@ -1390,6 +1390,6 @@ test('mobile market list reserves scroll clearance above the fixed bottom naviga
   const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
   const fix=css.slice(css.lastIndexOf('Mobile market list: reserve a clear viewport lane'));
   assert.match(fix,/@media\\(max-width:700px\\)/);
-  assert.match(fix,/#tab-markets #marketList\\{\\s*padding-bottom:112px!important;/);
-  assert.match(fix,/#tab-markets #marketList>\\.coin:last-child\\{\\s*scroll-margin-bottom:112px!important;/);
+  assert.match(fix,/#tab-markets #marketList\\{\\s*padding-bottom:160px!important;/);
+  assert.match(fix,/#tab-markets #marketList>\\.coin:last-child\\{\\s*scroll-margin-bottom:160px!important;/);
 });
