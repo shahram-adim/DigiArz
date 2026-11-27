@@ -1137,7 +1137,9 @@ test('bright indigo market hero actions and mobile navigation retain readable li
 test('visual review captures authentication plus dashboard and market rows across themes',()=>{
   const harness=fs.readFileSync('tests/ui-visual-screenshots.cjs','utf8');
   assert.match(harness,/marketPreview\.scrollIntoViewIfNeeded\(\)/);
-  assert.match(harness,/marketRows\.scrollIntoViewIfNeeded\(\)/);
+  assert.match(harness,/lastMarketRow\.evaluate\(el=>el\.scrollIntoView\(\{block:'end',behavior:'instant'\}\)\)/);
+  assert.match(harness,/Last market asset row is obscured by bottom navigation/);
+  assert.match(harness,/First market asset row is obscured by sticky header/);
   assert.match(harness,/dashboard-marketrows/);
   assert.match(harness,/markets-assetrows/);
   assert.match(harness,/viewport\.name,theme,'login'/);
