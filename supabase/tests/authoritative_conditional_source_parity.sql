@@ -53,6 +53,29 @@ BEGIN
   -- Each real conditional worker clears its temporary JWT claims.
   PERFORM set_config('request.jwt.claim.sub',v_user::text,true);
 
+  -- Stale TP/SL market observation must fail closed and keep its reservation.
+  PERFORM set_config('request.jwt.claim.sub',v_user::text,true);
+  v_tp:=public.place_conditional_exit_order('DOTUSDT','take_profit',0.5,12);
+  v_order_id:=(v_tp->>'order_id')::uuid;
+  v_cond_id:=(v_tp->>'conditional_order_id')::uuid;
+  UPDATE public.market_prices SET updated_at=clock_timestamp()-interval '3 minutes'
+  WHERE symbol='DOTUSDT';
+  v_result:=public.process_conditional_orders();
+  IF COALESCE((v_result->>'triggered')::integer,0)<>0
+     OR (SELECT status FROM public.conditional_orders WHERE id=v_cond_id)<>'pending'
+     OR (SELECT status FROM public.order_reservations WHERE order_id=v_order_id)<>'reserved' THEN
+    RAISE EXCEPTION 'stale TP/SL price did not fail closed with reservation preserved: %',v_result;
+  END IF;
+  UPDATE public.market_prices SET updated_at=clock_timestamp() WHERE symbol='DOTUSDT';
+  v_result:=public.process_conditional_orders();
+  IF COALESCE((v_result->>'triggered')::integer,0)<>1
+     OR (SELECT status FROM public.conditional_orders WHERE id=v_cond_id)<>'filled' THEN
+    RAISE EXCEPTION 'fresh TP/SL price did not resume pending conditional order: %',v_result;
+  END IF;
+
+  -- A malformed Stop-Limit reservation must not create a child order. After
+  -- repair in this disposable fixture, the same pending parent can be retried.
+  PERFORM set_config('request.jwt.claim.sub',v_user::text,true);
   -- Stop-Limit buy: the exact migration places a parent, triggers it, and
   -- links the child returned by the isolated Limit-engine adapter.
   INSERT INTO public.market_prices(symbol,price,updated_at)
@@ -71,6 +94,48 @@ BEGIN
   IF v_cond_status<>'triggered' OR v_parent_status<>'triggered' OR v_child_id IS NULL THEN
     RAISE EXCEPTION 'Stop-Limit parent/child linkage failed: conditional %, parent %, child %',
       v_cond_status,v_parent_status,v_child_id;
+  END IF;
+
+  -- Stop-Limit stale quote: do not trigger and do not release the reserved quote.
+  PERFORM set_config('request.jwt.claim.sub',v_user::text,true);
+  INSERT INTO public.market_prices(symbol,price,updated_at)
+  VALUES('DOTUSDT',10,clock_timestamp()-interval '3 minutes')
+  ON CONFLICT(symbol) DO UPDATE SET price=EXCLUDED.price,updated_at=EXCLUDED.updated_at;
+  v_result:=public.place_stop_limit_order('DOTUSDT','buy',0.25,10,11);
+  v_order_id:=(v_result->>'order_id')::uuid;
+  v_cond_id:=(v_result->>'conditional_order_id')::uuid;
+  v_result:=public.process_stop_limit_orders();
+  IF COALESCE((v_result->>'triggered')::integer,0)<>0
+     OR (SELECT status FROM public.conditional_orders WHERE id=v_cond_id)<>'pending'
+     OR (SELECT status FROM public.order_reservations WHERE order_id=v_order_id)<>'reserved' THEN
+    RAISE EXCEPTION 'stale Stop-Limit quote did not fail closed: %',v_result;
+  END IF;
+  UPDATE public.market_prices SET price=10,updated_at=clock_timestamp() WHERE symbol='DOTUSDT';
+  v_result:=public.process_stop_limit_orders();
+  IF COALESCE((v_result->>'triggered')::integer,0)<>1
+     OR (SELECT status FROM public.conditional_orders WHERE id=v_cond_id)<>'triggered' THEN
+    RAISE EXCEPTION 'fresh Stop-Limit quote did not trigger pending order: %',v_result;
+  END IF;
+
+  -- Invalid reservation asset must be rejected before the Limit adapter is called.
+  PERFORM set_config('request.jwt.claim.sub',v_user::text,true);
+  v_result:=public.place_stop_limit_order('DOTUSDT','buy',0.2,10,11);
+  v_order_id:=(v_result->>'order_id')::uuid;
+  v_cond_id:=(v_result->>'conditional_order_id')::uuid;
+  UPDATE public.order_reservations SET asset='DOT' WHERE order_id=v_order_id;
+  v_result:=public.process_stop_limit_orders();
+  IF COALESCE((v_result->>'triggered')::integer,0)<>0
+     OR (SELECT status FROM public.conditional_orders WHERE id=v_cond_id)<>'pending'
+     OR (SELECT attempt_count FROM public.conditional_orders WHERE id=v_cond_id)<>1
+     OR EXISTS (SELECT 1 FROM public.orders WHERE user_id=v_user AND order_type='limit'
+                AND id=(SELECT execution_order_id FROM public.conditional_orders WHERE id=v_cond_id)) THEN
+    RAISE EXCEPTION 'malformed Stop-Limit reservation was not rejected safely: %',v_result;
+  END IF;
+  UPDATE public.order_reservations SET asset='USDT' WHERE order_id=v_order_id;
+  v_result:=public.process_stop_limit_orders();
+  IF COALESCE((v_result->>'triggered')::integer,0)<>1
+     OR (SELECT status FROM public.conditional_orders WHERE id=v_cond_id)<>'triggered' THEN
+    RAISE EXCEPTION 'repaired Stop-Limit reservation did not retry safely: %',v_result;
   END IF;
 
   -- The actual migration ACLs must keep worker entrypoints service_role-only.
