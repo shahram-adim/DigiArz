@@ -72,6 +72,87 @@ BEGIN
   ) THEN
     RAISE EXCEPTION 'conditional_orders contains values outside numeric(34,18) contract';
   END IF;
+
+  -- Reject active Limit orders whose current reservation cannot support the
+  -- candidate worker's remaining sell quantity or whose asset/status is wrong.
+  IF EXISTS (
+    SELECT 1
+    FROM public.orders o
+    LEFT JOIN public.order_reservations r
+      ON r.order_id=o.id AND r.user_id=o.user_id
+    WHERE o.order_type='limit'
+      AND o.status IN ('pending','partially_filled')
+      AND (
+        r.id IS NULL
+        OR r.status <> 'reserved'
+        OR r.asset IS DISTINCT FROM
+          CASE WHEN o.side='buy' THEN 'USDT'
+               ELSE left(o.symbol,length(o.symbol)-4) END
+        OR r.reserved_amount-r.consumed_amount-r.released_amount <= 0
+        OR (o.side='sell'
+            AND r.reserved_amount-r.consumed_amount-r.released_amount
+                < o.remaining_amount)
+      )
+  ) THEN
+    RAISE EXCEPTION 'active Limit orders contain missing, invalid, wrong-asset, or underfunded reservations';
+  END IF;
+
+  -- The unchanged TP/SL worker consumes the entire conditional reservation
+  -- after executing c.amount. Require exact one-to-one quantity accounting.
+  -- Stop-Limit parents must retain a valid same-asset reservation until their
+  -- worker atomically replaces it with the child Limit reservation.
+  IF EXISTS (
+    SELECT 1
+    FROM public.conditional_orders c
+    LEFT JOIN public.orders o
+      ON o.id=c.order_id AND o.user_id=c.user_id
+    LEFT JOIN public.order_reservations r
+      ON r.order_id=c.order_id AND r.user_id=c.user_id
+    WHERE c.status='pending'
+      AND (
+        o.id IS NULL
+        OR o.status <> 'pending'
+        OR o.order_type <> 'conditional'
+        OR o.side IS DISTINCT FROM c.side
+        OR o.symbol IS DISTINCT FROM c.symbol
+        OR o.amount IS DISTINCT FROM c.amount
+        OR (c.order_kind='stop_limit'
+            AND o.price IS DISTINCT FROM c.limit_price)
+        OR (c.order_kind IN ('take_profit','stop_loss')
+            AND o.price IS DISTINCT FROM c.trigger_price)
+        OR r.id IS NULL
+        OR r.status <> 'reserved'
+        OR r.asset IS DISTINCT FROM
+          CASE WHEN c.side='buy' THEN 'USDT'
+               ELSE left(c.symbol,length(c.symbol)-4) END
+        OR r.consumed_amount < 0
+        OR r.released_amount < 0
+        OR r.consumed_amount+r.released_amount > r.reserved_amount
+        OR (c.order_kind IN ('take_profit','stop_loss')
+            AND (
+              c.side <> 'sell'
+              OR r.reserved_amount <> c.amount
+              OR r.consumed_amount <> 0
+              OR r.released_amount <> 0
+            ))
+        OR (c.order_kind='stop_limit' AND c.side='sell'
+            AND r.reserved_amount-r.consumed_amount-r.released_amount < c.amount)
+      )
+  ) THEN
+    RAISE EXCEPTION 'pending conditional orders contain parent/reservation inconsistencies';
+  END IF;
+
+  -- A reserved amount attached to a terminal/triggered parent is stale;
+  -- triggered Stop-Limit parents must have released the parent reservation.
+  IF EXISTS (
+    SELECT 1
+    FROM public.order_reservations r
+    JOIN public.orders o ON o.id=r.order_id AND o.user_id=r.user_id
+    WHERE r.status='reserved'
+      AND o.status IN ('filled','cancelled','rejected','triggered')
+  ) THEN
+    RAISE EXCEPTION 'terminal or triggered orders retain active reservations';
+  END IF;
 END
 $preflight$;
 
@@ -266,8 +347,9 @@ BEGIN
         END IF;
 
         v_total := v_gross - v_fee;
-        IF v_total <= 0 OR v_total > 9999999999999999.99999999::numeric THEN
-            RAISE EXCEPTION 'Sell settlement is outside numeric(24,8) USDT capacity';
+        IF v_total <= 0 OR v_total > 9999999999999999.99999999::numeric
+           OR v_balance > 9999999999999999.99999999::numeric - v_total THEN
+            RAISE EXCEPTION 'Sell settlement would exceed numeric(24,8) USDT wallet capacity';
         END IF;
 
         UPDATE public.asset_balances
@@ -338,6 +420,9 @@ DECLARE
     v_required_amount numeric := 0;
     v_order_id uuid;
     v_fee_rate numeric;
+    v_gross numeric;
+    v_fee numeric;
+    v_net numeric;
 BEGIN
     v_uid := auth.uid();
 
@@ -403,6 +488,13 @@ BEGIN
     END IF;
 
     v_fee_rate := public.get_demo_trading_fee_rate('USDT', 'maker');
+    v_gross := round(p_amount * p_limit_price, 8);
+    v_fee := round(v_gross * v_fee_rate, 8);
+    v_net := v_gross - v_fee;
+    IF v_side = 'sell'
+       AND (v_net <= 0 OR v_net > 9999999999999999.99999999::numeric) THEN
+        RAISE EXCEPTION 'Sell order settlement exceeds numeric(24,8) USDT capacity';
+    END IF;
     IF v_side = 'buy' THEN
         v_asset := 'USDT';
         v_required_amount := round(p_amount * p_limit_price, 8)
@@ -523,6 +615,9 @@ DECLARE
   v_reserved numeric := 0;
   v_required numeric := 0;
   v_fee_rate numeric := 0;
+  v_gross numeric;
+  v_fee numeric;
+  v_net numeric;
   v_reserve_asset text;
   v_order_id uuid;
   v_conditional_id uuid;
@@ -570,6 +665,13 @@ BEGIN
   IF NOT FOUND THEN RAISE EXCEPTION 'User wallet not found'; END IF;
 
   v_fee_rate := public.get_demo_trading_fee_rate('USDT','maker');
+  v_gross := round(p_amount * p_limit_price, 8);
+  v_fee := round(v_gross * v_fee_rate, 8);
+  v_net := v_gross - v_fee;
+  IF v_side='sell'
+     AND (v_net <= 0 OR v_net > 9999999999999999.99999999::numeric) THEN
+    RAISE EXCEPTION 'Stop-Limit sell settlement exceeds numeric(24,8) USDT capacity';
+  END IF;
   IF v_side='buy' THEN
     v_reserve_asset := 'USDT';
     v_required := round(p_amount*p_limit_price,8)
@@ -641,6 +743,10 @@ DECLARE
   v_wallet numeric;
   v_balance numeric;
   v_reserved numeric := 0;
+  v_fee_rate numeric;
+  v_gross numeric;
+  v_fee numeric;
+  v_net numeric;
   v_order_id uuid;
   v_conditional_id uuid;
 BEGIN
@@ -661,6 +767,13 @@ BEGIN
   END IF;
   IF round(p_amount * p_trigger_price, 8) <= 0 THEN
     RAISE EXCEPTION 'Conditional exit notional rounds to zero USDT';
+  END IF;
+  v_fee_rate := public.get_demo_trading_fee_rate('USDT', 'taker');
+  v_gross := round(p_amount * p_trigger_price, 8);
+  v_fee := round(v_gross * v_fee_rate, 8);
+  v_net := v_gross - v_fee;
+  IF v_net <= 0 OR v_net > 9999999999999999.99999999::numeric THEN
+    RAISE EXCEPTION 'Conditional exit settlement exceeds numeric(24,8) USDT capacity';
   END IF;
   v_base := left(v_symbol,length(v_symbol)-4);
   IF v_base IS NULL OR v_base='' OR v_base='USDT' THEN RAISE EXCEPTION 'Invalid base asset'; END IF;
@@ -745,6 +858,7 @@ DECLARE
     v_consumed numeric;
     v_released numeric;
     v_target_remaining_reserve numeric;
+    v_wallet_balance numeric;
     v_base_asset text;
     v_processed integer := 0;
     v_partial integer := 0;
@@ -870,12 +984,12 @@ BEGIN
         -- Lock order here is order row -> reservation row -> wallet row.
         -- cancel_limit_order locks order row -> reservation row, so the
         -- shared prefix prevents worker/cancel lock-order inversion.
-        PERFORM 1
+        SELECT w.balance_usdt INTO v_wallet_balance
         FROM public.wallets AS w
         WHERE w.user_id = v_order.user_id
         FOR UPDATE;
 
-        IF NOT FOUND THEN
+        IF NOT FOUND OR v_wallet_balance IS NULL OR v_wallet_balance < 0 THEN
             v_skipped := v_skipped + 1;
             CONTINUE;
         END IF;
@@ -955,7 +1069,8 @@ BEGIN
             IF v_reservation.asset <> v_base_asset
                OR v_reservation.consumed_amount
                   + v_reservation.released_amount + v_qty
-                  > v_reservation.reserved_amount THEN
+                  > v_reservation.reserved_amount
+               OR v_wallet_balance > 9999999999999999.99999999::numeric - v_net THEN
                 v_skipped := v_skipped + 1;
                 CONTINUE;
             END IF;
@@ -1344,6 +1459,86 @@ BEGIN
  END LOOP;
 END
 $postflight$;
+
+-- Verify the candidate API boundary after CREATE OR REPLACE and explicit grants.
+-- Existing conditional/cancel consumers are checked when present; this draft
+-- intentionally does not replace process_conditional_orders().
+DO $postflight_acl$
+DECLARE
+  r record;
+  v_oid oid;
+  v_owner text;
+  v_definer boolean;
+  v_settings text[];
+BEGIN
+  FOR r IN
+    SELECT * FROM (VALUES
+      ('public.execute_demo_trade(text,text,numeric,numeric)', true),
+      ('public.place_limit_order(text,text,numeric,numeric)', true),
+      ('public.place_stop_limit_order(text,text,numeric,numeric,numeric)', true),
+      ('public.place_conditional_exit_order(text,text,numeric,numeric)', true),
+      ('public.process_limit_orders()', false),
+      ('public.process_stop_limit_orders()', false)
+    ) AS expected(signature, authenticated_exec)
+  LOOP
+    v_oid := pg_catalog.to_regprocedure(r.signature);
+    IF v_oid IS NULL THEN
+      RAISE EXCEPTION 'postflight routine missing: %', r.signature;
+    END IF;
+
+    SELECT pg_catalog.pg_get_userbyid(p.proowner), p.prosecdef, p.proconfig
+    INTO v_owner, v_definer, v_settings
+    FROM pg_catalog.pg_proc p
+    WHERE p.oid = v_oid;
+
+    IF v_owner <> 'postgres'
+       OR v_definer IS NOT TRUE
+       OR NOT (COALESCE(v_settings, ARRAY[]::text[]) @> ARRAY['search_path=""']::text[]) THEN
+      RAISE EXCEPTION 'postflight routine security metadata mismatch: % owner %, definer %, settings %',
+        r.signature, v_owner, v_definer, v_settings;
+    END IF;
+
+    IF pg_catalog.has_function_privilege('anon', v_oid, 'EXECUTE')
+       OR pg_catalog.has_function_privilege('authenticated', v_oid, 'EXECUTE')
+            IS DISTINCT FROM r.authenticated_exec
+       OR pg_catalog.has_function_privilege('service_role', v_oid, 'EXECUTE') IS NOT TRUE THEN
+      RAISE EXCEPTION 'postflight routine EXECUTE ACL mismatch: %', r.signature;
+    END IF;
+  END LOOP;
+
+  -- These are not replaced by this candidate. If present, preserve the live
+  -- Production service-only worker boundary and authenticated owner RPCs.
+  FOR r IN
+    SELECT * FROM (VALUES
+      ('public.process_conditional_orders()', false),
+      ('public.cancel_limit_order(uuid)', true),
+      ('public.cancel_conditional_exit_order(uuid)', true),
+      ('public.cancel_stop_limit_order(uuid)', true)
+    ) AS expected(signature, authenticated_exec)
+  LOOP
+    v_oid := pg_catalog.to_regprocedure(r.signature);
+    IF v_oid IS NOT NULL THEN
+      SELECT pg_catalog.pg_get_userbyid(p.proowner), p.prosecdef, p.proconfig
+      INTO v_owner, v_definer, v_settings
+      FROM pg_catalog.pg_proc p
+      WHERE p.oid = v_oid;
+
+      IF v_owner <> 'postgres'
+         OR v_definer IS NOT TRUE
+         OR NOT (COALESCE(v_settings, ARRAY[]::text[]) @> ARRAY['search_path=""']::text[]) THEN
+        RAISE EXCEPTION 'postflight unchanged routine security metadata mismatch: %', r.signature;
+      END IF;
+
+      IF pg_catalog.has_function_privilege('anon', v_oid, 'EXECUTE')
+         OR pg_catalog.has_function_privilege('authenticated', v_oid, 'EXECUTE')
+              IS DISTINCT FROM r.authenticated_exec
+         OR pg_catalog.has_function_privilege('service_role', v_oid, 'EXECUTE') IS NOT TRUE THEN
+        RAISE EXCEPTION 'postflight unchanged routine EXECUTE ACL mismatch: %', r.signature;
+      END IF;
+    END IF;
+  END LOOP;
+END
+$postflight_acl$;
 
 
 COMMIT;

@@ -7,6 +7,8 @@ DECLARE
   v_result jsonb;
   v_wallet numeric;
   v_asset numeric;
+  v_wallet_before numeric;
+  v_asset_before numeric;
   v_order_id uuid;
   v_amount numeric;
   v_reserved numeric;
@@ -73,6 +75,16 @@ BEGIN
     RAISE EXCEPTION 'Limit sell reservation precision mismatch: %',v_reserved;
   END IF;
 
+  -- Sell orders above the 8-place USDT transaction ledger capacity must fail before persistence.
+  UPDATE public.asset_balances SET balance=10 WHERE user_id=v_uid AND asset='BTC';
+  BEGIN
+    PERFORM public.place_limit_order('BTCUSDT','sell',2,9999999999999999);
+    RAISE EXCEPTION 'Expected oversized Limit sell settlement to be rejected';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Expected oversized Limit sell settlement to be rejected' THEN RAISE; END IF;
+    IF SQLERRM NOT LIKE '%Sell order settlement exceeds numeric(24,8) USDT capacity%' THEN RAISE; END IF;
+  END;
+
   -- Reject more than 18 fractional digits rather than silently rounding.
   BEGIN
     PERFORM public.place_limit_order(
@@ -112,6 +124,73 @@ BEGIN
   WHERE user_id=v_uid AND order_type='limit';
   IF v_count <> 2 THEN
     RAISE EXCEPTION 'Rejected oversized Limit order was persisted';
+  END IF;
+
+
+  -- Reject zero, negative, and >18-place Market quantities before ledger writes.
+  FOREACH v_amount IN ARRAY ARRAY[0::numeric, -0.1::numeric, 0.0000000000000000001::numeric] LOOP
+    BEGIN
+      PERFORM public.execute_demo_trade('BTCUSDT','buy',v_amount,0);
+      RAISE EXCEPTION 'Expected invalid Market quantity to be rejected: %',v_amount;
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'Expected invalid Market quantity%' THEN RAISE; END IF;
+    END;
+  END LOOP;
+
+  -- A positive quantity whose quote notional rounds to zero must be rejected.
+  UPDATE public.market_prices SET price=10,updated_at=now() WHERE symbol='BTCUSDT';
+  BEGIN
+    PERFORM public.execute_demo_trade('BTCUSDT','buy',0.000000000000000001,0);
+    RAISE EXCEPTION 'Expected zero-notional Market trade to be rejected';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Expected zero-notional Market trade to be rejected' THEN RAISE; END IF;
+  END;
+
+  -- Reject zero/negative Limit quantities and a >18-place limit price.
+  FOREACH v_amount IN ARRAY ARRAY[0::numeric, -0.1::numeric] LOOP
+    BEGIN
+      PERFORM public.place_limit_order('BTCUSDT','buy',v_amount,8);
+      RAISE EXCEPTION 'Expected invalid Limit quantity to be rejected: %',v_amount;
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'Expected invalid Limit quantity%' THEN RAISE; END IF;
+    END;
+  END LOOP;
+  BEGIN
+    PERFORM public.place_limit_order(
+      'BTCUSDT','buy',0.1,8.0000000000000000001
+    );
+    RAISE EXCEPTION 'Expected >18-place Limit price to be rejected';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Expected >18-place Limit price to be rejected' THEN RAISE; END IF;
+  END;
+
+  -- Tiny Limit notional must not create a zero-value reservation/order.
+  BEGIN
+    PERFORM public.place_limit_order(
+      'BTCUSDT','buy',0.000000000000000001,1
+    );
+    RAISE EXCEPTION 'Expected zero-notional Limit order to be rejected';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Expected zero-notional Limit order to be rejected' THEN RAISE; END IF;
+  END;
+
+  -- Reject a Market sell whose proceeds would overflow the locked wallet.
+  -- Capture the actual baseline: the earlier oversized Limit-sell preflight deliberately set BTC to 10.
+  UPDATE public.wallets SET balance_usdt=9999999999999999.99999999::numeric WHERE user_id=v_uid;
+  SELECT balance_usdt INTO v_wallet_before FROM public.wallets WHERE user_id=v_uid;
+  SELECT balance INTO v_asset_before FROM public.asset_balances WHERE user_id=v_uid AND asset='BTC';
+  BEGIN
+    PERFORM public.execute_demo_trade('BTCUSDT','sell',0.01,0);
+    RAISE EXCEPTION 'Expected Market sell wallet-capacity overflow to be rejected';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Expected Market sell wallet-capacity overflow to be rejected' THEN RAISE; END IF;
+    IF SQLERRM NOT LIKE '%wallet capacity%' THEN RAISE; END IF;
+  END;
+  SELECT balance_usdt INTO v_wallet FROM public.wallets WHERE user_id=v_uid;
+  SELECT balance INTO v_asset FROM public.asset_balances WHERE user_id=v_uid AND asset='BTC';
+  IF v_wallet <> v_wallet_before OR v_asset <> v_asset_before THEN
+    RAISE EXCEPTION 'Rejected Market sell overflow changed wallet or base inventory: wallet % -> %, BTC % -> %',
+      v_wallet_before,v_wallet,v_asset_before,v_asset;
   END IF;
 
   RAISE NOTICE 'Market execution and Limit placement integration: PASS';

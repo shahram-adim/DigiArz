@@ -11,6 +11,7 @@ DECLARE
   v_limit numeric;
   v_reserved numeric;
   v_asset text;
+  v_count integer;
 BEGIN
   INSERT INTO public.profiles(id,is_active) VALUES(v_uid,true);
   INSERT INTO public.demo_trading_pairs(pair_symbol,quote_asset,is_enabled)
@@ -83,6 +84,31 @@ BEGIN
     RAISE EXCEPTION 'TP/SL reservation mismatch: asset %, amount %',v_asset,v_reserved;
   END IF;
 
+  -- Over-cap sell notionals must be rejected before creating parent/reservation rows.
+  UPDATE public.asset_balances SET balance=10 WHERE user_id=v_uid AND asset='BTC';
+  BEGIN
+    PERFORM public.place_stop_limit_order(
+      'BTCUSDT','sell',2,9999999999999999,9999999999999998
+    );
+    RAISE EXCEPTION 'Expected oversized Stop-Limit sell settlement to be rejected';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Expected oversized Stop-Limit sell settlement to be rejected' THEN RAISE; END IF;
+    IF SQLERRM NOT LIKE '%Stop-Limit sell settlement exceeds numeric(24,8) USDT capacity%' THEN RAISE; END IF;
+  END;
+  BEGIN
+    PERFORM public.place_conditional_exit_order(
+      'BTCUSDT','take_profit',2,9999999999999999
+    );
+    RAISE EXCEPTION 'Expected oversized TP/SL sell settlement to be rejected';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Expected oversized TP/SL sell settlement to be rejected' THEN RAISE; END IF;
+    IF SQLERRM NOT LIKE '%Conditional exit settlement exceeds numeric(24,8) USDT capacity%' THEN RAISE; END IF;
+  END;
+  SELECT count(*) INTO v_count FROM public.orders WHERE user_id=v_uid;
+  IF v_count <> 3 THEN
+    RAISE EXCEPTION 'Rejected over-cap sell entrypoint persisted an order: %',v_count;
+  END IF;
+
   -- Reject quantities that would settle to zero USDT.
   BEGIN
     PERFORM public.place_stop_limit_order(
@@ -117,6 +143,59 @@ BEGIN
     RAISE EXCEPTION 'Expected >18-place TP/SL amount to be rejected';
   EXCEPTION WHEN OTHERS THEN
     IF SQLERRM = 'Expected >18-place TP/SL amount to be rejected' THEN RAISE; END IF;
+  END;
+
+
+  -- Reject zero/negative Stop-Limit quantities and >18-place trigger/limit prices.
+  FOREACH v_amount IN ARRAY ARRAY[0::numeric, -0.1::numeric] LOOP
+    BEGIN
+      PERFORM public.place_stop_limit_order('BTCUSDT','buy',v_amount,10,11);
+      RAISE EXCEPTION 'Expected invalid Stop-Limit quantity to be rejected: %',v_amount;
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'Expected invalid Stop-Limit quantity%' THEN RAISE; END IF;
+    END;
+  END LOOP;
+  BEGIN
+    PERFORM public.place_stop_limit_order(
+      'BTCUSDT','buy',0.1,10.0000000000000000001,11
+    );
+    RAISE EXCEPTION 'Expected >18-place Stop-Limit trigger to be rejected';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Expected >18-place Stop-Limit trigger to be rejected' THEN RAISE; END IF;
+  END;
+  BEGIN
+    PERFORM public.place_stop_limit_order(
+      'BTCUSDT','buy',0.1,10,11.0000000000000000001
+    );
+    RAISE EXCEPTION 'Expected >18-place Stop-Limit limit price to be rejected';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Expected >18-place Stop-Limit limit price to be rejected' THEN RAISE; END IF;
+  END;
+
+  -- Reject invalid TP/SL quantities and >18-place/negative trigger prices.
+  FOREACH v_amount IN ARRAY ARRAY[0::numeric, -0.1::numeric] LOOP
+    BEGIN
+      PERFORM public.place_conditional_exit_order('BTCUSDT','take_profit',v_amount,12);
+      RAISE EXCEPTION 'Expected invalid TP/SL quantity to be rejected: %',v_amount;
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'Expected invalid TP/SL quantity%' THEN RAISE; END IF;
+    END;
+  END LOOP;
+  BEGIN
+    PERFORM public.place_conditional_exit_order(
+      'BTCUSDT','take_profit',0.1,12.0000000000000000001
+    );
+    RAISE EXCEPTION 'Expected >18-place TP/SL trigger to be rejected';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Expected >18-place TP/SL trigger to be rejected' THEN RAISE; END IF;
+  END;
+  BEGIN
+    PERFORM public.place_conditional_exit_order(
+      'BTCUSDT','take_profit',0.1,-12
+    );
+    RAISE EXCEPTION 'Expected negative TP/SL trigger to be rejected';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Expected negative TP/SL trigger to be rejected' THEN RAISE; END IF;
   END;
 
   RAISE NOTICE 'Stop-Limit and TP/SL placement entrypoint integration: PASS';

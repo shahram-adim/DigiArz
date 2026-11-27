@@ -84,6 +84,12 @@ test('entrypoint candidates enforce exact scale and quote-ledger rounding', () =
   assert.match(entrypoints, /Limit order notional rounds to zero USDT/);
   assert.match(entrypoints, /Stop-Limit order notional rounds to zero USDT/);
   assert.match(entrypoints, /Conditional exit notional rounds to zero USDT/);
+  assert.ok(entrypoints.includes('Sell order settlement exceeds numeric(24,8) USDT capacity'));
+  assert.ok(entrypoints.includes('Stop-Limit sell settlement exceeds numeric(24,8) USDT capacity'));
+  assert.ok(entrypoints.includes('Conditional exit settlement exceeds numeric(24,8) USDT capacity'));
+  assert.ok(rollout.includes('Sell order settlement exceeds numeric(24,8) USDT capacity'));
+  assert.ok(rollout.includes('Stop-Limit sell settlement exceeds numeric(24,8) USDT capacity'));
+  assert.ok(rollout.includes('Conditional exit settlement exceeds numeric(24,8) USDT capacity'));
 });
 
 test('schema candidate widens base precision but retains 8-place quote ledgers', () => {

@@ -6,9 +6,12 @@ UPDATE public.market_prices
 SET price = 10.000000000000000001, updated_at = now()
 WHERE symbol = 'BTCUSDT';
 
+INSERT INTO auth.users (id) VALUES
+('71000000-0000-0000-0000-000000000001'),
+('72000000-0000-0000-0000-000000000002');
 INSERT INTO public.profiles (id,is_active) VALUES
 ('71000000-0000-0000-0000-000000000001',true),
-('72000000-0000-0000-0000-000000000002',false);
+('72000000-0000-0000-0000-000000000002',true);
 INSERT INTO public.wallets (user_id,balance_usdt) VALUES
 ('71000000-0000-0000-0000-000000000001',100),
 ('72000000-0000-0000-0000-000000000002',100);
@@ -22,6 +25,12 @@ INSERT INTO public.orders (
  'BTCUSDT','buy','limit',1,10.000000000000000001,0,1,'pending'),
 ('72000000-0000-0000-0000-000000000022','72000000-0000-0000-0000-000000000002',
  'BTCUSDT','buy','limit',1,10.000000000000000001,0,1,'pending');
+
+-- Simulate an account deactivated after its pending order was created.
+-- Production's INSERT guard correctly requires the account to be active at creation time.
+UPDATE public.profiles
+SET is_active=false
+WHERE id='72000000-0000-0000-0000-000000000002';
 INSERT INTO public.order_reservations (
  id,order_id,user_id,asset,reserved_amount,consumed_amount,released_amount,status
 ) VALUES

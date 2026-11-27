@@ -3,11 +3,11 @@ DO $test$
 DECLARE
   v_type text;
 BEGIN
-  IF (SELECT amount FROM public.orders WHERE price IS NOT NULL) IS DISTINCT FROM 1.25::numeric
-     OR (SELECT price FROM public.orders WHERE price IS NOT NULL) IS DISTINCT FROM 10.5::numeric
-     OR (SELECT count(*) FROM public.orders WHERE price IS NULL) IS DISTINCT FROM 1
+  IF (SELECT amount FROM public.orders WHERE id='10000000-0000-4000-8000-000000000001') IS DISTINCT FROM 1.25::numeric
+     OR (SELECT price FROM public.orders WHERE id='10000000-0000-4000-8000-000000000001') IS DISTINCT FROM 10.5::numeric
+     OR (SELECT count(*) FROM public.orders WHERE price IS NULL) IS DISTINCT FROM 0
      OR (SELECT balance FROM public.asset_balances) IS DISTINCT FROM 1.25::numeric
-     OR (SELECT reserved_amount FROM public.order_reservations) IS DISTINCT FROM 10.5::numeric
+     OR (SELECT reserved_amount FROM public.order_reservations WHERE order_id='10000000-0000-4000-8000-000000000001') IS DISTINCT FROM 10.5::numeric
      OR (SELECT amount FROM public.conditional_orders) IS DISTINCT FROM 0.5::numeric THEN
     RAISE EXCEPTION 'type widening changed existing financial values';
   END IF;
@@ -18,8 +18,8 @@ BEGIN
   SELECT format_type(a.atttypid, a.atttypmod) INTO v_type
   FROM pg_attribute a WHERE a.attrelid='public.orders'::regclass AND a.attname='price';
   IF v_type <> 'numeric(34,18)' THEN RAISE EXCEPTION 'orders.price type: %',v_type; END IF;
-  IF EXISTS (SELECT 1 FROM public.orders WHERE amount=0.5 AND price IS NOT NULL) THEN
-    RAISE EXCEPTION 'nullable market order price was not preserved';
+  IF NOT EXISTS (SELECT 1 FROM public.orders o JOIN public.conditional_orders c ON c.order_id=o.id WHERE o.id='10000000-0000-4000-8000-000000000002' AND o.price IS NOT DISTINCT FROM c.trigger_price) THEN
+    RAISE EXCEPTION 'TP-SL parent trigger price was not preserved';
   END IF;
   SELECT format_type(a.atttypid, a.atttypmod) INTO v_type
   FROM pg_attribute a WHERE a.attrelid='public.trades'::regclass AND a.attname='price';

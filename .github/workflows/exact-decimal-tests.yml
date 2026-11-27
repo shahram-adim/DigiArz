@@ -64,6 +64,85 @@ jobs:
           fi
           psql -h localhost -U postgres -d digiarz_type_widening_negative_test -v ON_ERROR_STOP=1 \
             -c "DO \$\$ BEGIN IF (SELECT format_type(a.atttypid,a.atttypmod) FROM pg_attribute a WHERE a.attrelid='public.orders'::regclass AND a.attname='amount') <> 'numeric(24,8)' THEN RAISE EXCEPTION 'failed preflight changed schema'; END IF; END \$\$;"
+      - name: Verify combined rollout rejects invalid cross-ledger reservations atomically
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_bad_sell_reservation_test;"
+          psql -h localhost -U postgres -d digiarz_bad_sell_reservation_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_setup.sql \
+            -f supabase/tests/exact_decimal_rollout_bad_sell_reservation.sql
+          if psql -h localhost -U postgres -d digiarz_bad_sell_reservation_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql; then
+            echo "Expected under-reserved active sell order to fail rollout preflight."
+            exit 1
+          fi
+          psql -h localhost -U postgres -d digiarz_bad_sell_reservation_test -v ON_ERROR_STOP=1 -c "DO \$verify\$ BEGIN
+            IF (SELECT format_type(a.atttypid,a.atttypmod) FROM pg_attribute a WHERE a.attrelid='public.orders'::regclass AND a.attname='amount') <> 'numeric(24,8)' THEN RAISE EXCEPTION 'failed sell-reservation preflight changed schema'; END IF;
+            IF NOT EXISTS (SELECT 1 FROM public.orders o JOIN public.order_reservations r ON r.order_id=o.id AND r.user_id=o.user_id WHERE o.id='10000000-0000-4000-8000-000000000003' AND r.reserved_amount-r.consumed_amount-r.released_amount < o.remaining_amount) THEN RAISE EXCEPTION 'negative sell-reservation fixture changed unexpectedly'; END IF;
+          END \$verify\$;"
+
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_bad_conditional_reservation_test;"
+          psql -h localhost -U postgres -d digiarz_bad_conditional_reservation_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_setup.sql \
+            -f supabase/tests/exact_decimal_rollout_bad_conditional_reservation.sql
+          if psql -h localhost -U postgres -d digiarz_bad_conditional_reservation_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql; then
+            echo "Expected mismatched TP/SL reservation to fail rollout preflight."
+            exit 1
+          fi
+          psql -h localhost -U postgres -d digiarz_bad_conditional_reservation_test -v ON_ERROR_STOP=1 -c "DO \$verify\$ BEGIN
+            IF (SELECT format_type(a.atttypid,a.atttypmod) FROM pg_attribute a WHERE a.attrelid='public.conditional_orders'::regclass AND a.attname='amount') <> 'numeric' THEN RAISE EXCEPTION 'failed conditional-reservation preflight changed schema'; END IF;
+            IF NOT EXISTS (SELECT 1 FROM public.conditional_orders c JOIN public.order_reservations r ON r.order_id=c.order_id AND r.user_id=c.user_id WHERE c.order_id='10000000-0000-4000-8000-000000000002' AND r.reserved_amount <> c.amount) THEN RAISE EXCEPTION 'negative conditional-reservation fixture changed unexpectedly'; END IF;
+          END \$verify\$;"
+      - name: Verify conditional parent symbol and Stop-Limit price mismatches atomically
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_bad_conditional_symbol_test;"
+          psql -h localhost -U postgres -d digiarz_bad_conditional_symbol_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_setup.sql \
+            -f supabase/tests/exact_decimal_rollout_bad_conditional_symbol.sql
+          if psql -h localhost -U postgres -d digiarz_bad_conditional_symbol_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql; then
+            echo "Expected conditional parent-symbol mismatch to fail rollout preflight."
+            exit 1
+          fi
+          psql -h localhost -U postgres -d digiarz_bad_conditional_symbol_test -v ON_ERROR_STOP=1 \
+            -c "DO \$verify\$ BEGIN
+              IF (SELECT format_type(a.atttypid,a.atttypmod) FROM pg_attribute a WHERE a.attrelid='public.orders'::regclass AND a.attname='amount') <> 'numeric(24,8)' THEN RAISE EXCEPTION 'failed symbol preflight changed schema'; END IF;
+            END \$verify\$;"
+
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_bad_stop_limit_price_test;"
+          psql -h localhost -U postgres -d digiarz_bad_stop_limit_price_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_setup.sql \
+            -f supabase/tests/exact_decimal_rollout_bad_stop_limit_price.sql
+          if psql -h localhost -U postgres -d digiarz_bad_stop_limit_price_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql; then
+            echo "Expected Stop-Limit parent-price mismatch to fail rollout preflight."
+            exit 1
+          fi
+          psql -h localhost -U postgres -d digiarz_bad_stop_limit_price_test -v ON_ERROR_STOP=1 \
+            -c "DO \$verify\$ BEGIN
+              IF (SELECT format_type(a.atttypid,a.atttypmod) FROM pg_attribute a WHERE a.attrelid='public.orders'::regclass AND a.attname='amount') <> 'numeric(24,8)' THEN RAISE EXCEPTION 'failed Stop-Limit price preflight changed schema'; END IF;
+            END \$verify\$;"
+      - name: Verify TP-SL parent trigger-price mismatch fails atomically
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_bad_tp_sl_parent_price_test;"
+          psql -h localhost -U postgres -d digiarz_bad_tp_sl_parent_price_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_setup.sql \
+            -f supabase/tests/exact_decimal_rollout_bad_tp_sl_parent_price.sql
+          if psql -h localhost -U postgres -d digiarz_bad_tp_sl_parent_price_test -v ON_ERROR_STOP=1 \
+            -f supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql; then
+            echo "Expected TP-SL parent trigger-price mismatch to fail rollout preflight."
+            exit 1
+          fi
+          psql -h localhost -U postgres -d digiarz_bad_tp_sl_parent_price_test -v ON_ERROR_STOP=1 \
+            -c "DO \$verify\$ BEGIN
+              IF (SELECT format_type(a.atttypid,a.atttypmod) FROM pg_attribute a WHERE a.attrelid='public.orders'::regclass AND a.attname='amount') <> 'numeric(24,8)' THEN RAISE EXCEPTION 'failed TP-SL price preflight changed schema'; END IF;
+            END \$verify\$;"
       - name: Verify widening migration honors lock timeout atomically
         env:
           PGPASSWORD: postgres
@@ -150,6 +229,12 @@ jobs:
             -f supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql \
             -f supabase/tests/exact_decimal_limit_rounding_buffer.sql
 
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_rollout_full_schema_test;"
+          psql -h localhost -U postgres -d digiarz_rollout_full_schema_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_type_widening_setup.sql \
+            -f supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql \
+            -f supabase/tests/exact_decimal_type_widening_schema_verify.sql
+
           psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_rollout_stop_race_test;"
           psql -h localhost -U postgres -d digiarz_rollout_stop_race_test -v ON_ERROR_STOP=1 \
             -f supabase/tests/exact_decimal_stop_limit_setup.sql \
@@ -160,8 +245,8 @@ jobs:
           psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_rollout_conditional_race_test;"
           psql -h localhost -U postgres -d digiarz_rollout_conditional_race_test -v ON_ERROR_STOP=1 \
             -f supabase/tests/exact_decimal_conditional_exit_setup.sql \
-            -f supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql \
             -f supabase/tests/exact_decimal_conditional_exit_worker.sql \
+            -f supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql \
             -f supabase/tests/exact_decimal_conditional_cancel_race_setup.sql
           DB_NAME=digiarz_rollout_conditional_race_test bash supabase/tests/exact_decimal_conditional_cancel_race.sh
       - name: Verify cumulative per-fill USDT rounding reserves
@@ -216,6 +301,58 @@ jobs:
             -f supabase/tests/exact_decimal_conditional_exit_worker.sql \
             -f supabase/tests/exact_decimal_conditional_cancel_race_setup.sql
           bash supabase/tests/exact_decimal_conditional_cancel_race.sh
+      - name: Run real two-session conditional worker versus same-user sell placement race
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_conditional_placement_race_test;"
+          psql -h localhost -U postgres -d digiarz_conditional_placement_race_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_conditional_exit_setup.sql \
+            -f supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql \
+            -f supabase/tests/exact_decimal_conditional_exit_worker.sql \
+            -f supabase/tests/exact_decimal_conditional_placement_race_setup.sql
+          DB_NAME=digiarz_conditional_placement_race_test bash supabase/tests/exact_decimal_conditional_placement_race.sh
+      - name: Run real two-session Stop-Limit parent cancellation versus child cancellation race
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_stop_limit_parent_child_cancel_race_test;"
+          psql -h localhost -U postgres -d digiarz_stop_limit_parent_child_cancel_race_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_stop_limit_setup.sql \
+            -f supabase/tests/exact_decimal_stop_limit_cancel_race_setup.sql \
+            -f supabase/tests/exact_decimal_stop_limit_parent_child_cancel_race_setup.sql
+          DB_NAME=digiarz_stop_limit_parent_child_cancel_race_test bash supabase/tests/exact_decimal_stop_limit_parent_child_cancel_race.sh
+      - name: Run real two-session Limit worker versus new sell placement race
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_limit_placement_race_test;"
+          psql -h localhost -U postgres -d digiarz_limit_placement_race_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_limit_worker_setup.sql \
+            -f supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql \
+            -f supabase/drafts/2026-11-15_exact_decimal_process_limit_orders.sql \
+            -f supabase/tests/exact_decimal_limit_placement_race_setup.sql
+          DB_NAME=digiarz_limit_placement_race_test bash supabase/tests/exact_decimal_limit_placement_race.sh
+      - name: Run real two-session concurrent same-user buy placement race
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_buy_placement_race_test;"
+          psql -h localhost -U postgres -d digiarz_buy_placement_race_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_limit_worker_setup.sql \
+            -f supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql \
+            -f supabase/tests/exact_decimal_buy_placement_race_setup.sql
+          DB_NAME=digiarz_buy_placement_race_test bash supabase/tests/exact_decimal_buy_placement_race.sh
+      - name: Run real two-session concurrent same-user same-asset sell placement race
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_same_asset_sell_race_test;"
+          psql -h localhost -U postgres -d digiarz_same_asset_sell_race_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_limit_worker_setup.sql \
+            -f supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql \
+            -f supabase/tests/exact_decimal_same_asset_sell_race_setup.sql
+          DB_NAME=digiarz_same_asset_sell_race_test bash supabase/tests/exact_decimal_same_asset_sell_race.sh
       - name: Run real two-session Stop-Limit child execution and cancellation races
         env:
           PGPASSWORD: postgres
