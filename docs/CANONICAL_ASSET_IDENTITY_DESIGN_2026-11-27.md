@@ -369,3 +369,27 @@ Three additional live Production definitions were captured as test-only snapshot
 - public.get_my_order_reservations(uuid[]) (97189e59fbf37bb5f85b215dadd13dfd) is owner-scoped and limits the request to 1–100 order IDs, but returns only text asset plus reservation arithmetic/status. The UI/API contract must be extended to include canonical asset/pair identifiers without weakening user scoping.
 - public.current_account_is_active() (d932cd1d0da21bb96bdc0a381f7dcbc3) reads the active profile for auth.uid(); the write guard trigger independently reads NEW.user_id and locks the profile row FOR SHARE.
 - public.get_demo_trading_fee_rate(text,text) (546d80d7105228ed97da26c5ed0c7b7f) selects enabled maker/taker fee by quote asset. Preserve this quote-level fee behavior while moving pair identity to pair_id.
+
+
+## Supabase Security Advisor review — 2026-11-27 17:58 UTC (read-only)
+
+The current Security Advisor returned these findings:
+
+1. WARN — two anon-executable SECURITY DEFINER functions:
+   - public.get_admin_market_listings(): returns curated catalog metadata and indicative USD prices, joining crypto_assets/admin_market_listings/market_prices by ticker. It does not check auth.uid() or super-admin status.
+   - public.get_exchange_discovered_market_assets(): returns recent pending/ambiguous/unmatched exchange-discovery symbols, asset names, exchange source names/counts, observation time and ticker-keyed market price. It does not return source_payload or user data and does not check auth.uid().
+   Both have search_path empty, but that does not itself make their public data exposure intentional. Confirm whether anonymous discovery/catalog access is desired; if either is intended to be admin-only, it should be restricted to the appropriate authenticated administrator. No EXECUTE grants were changed.
+   Remediation reference: https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable
+
+2. WARN — 23 authenticated-executable SECURITY DEFINER functions. This set includes user-facing trade placement/cancellation, owner-scoped reservation reads, fee lookup, account status and admin functions. Do not blanket-revoke this set: each RPC needs individual authorization review. Admin mutations must retain private.is_super_admin() checks; user financial RPCs must retain auth.uid(), active-account validation, row locks, ownership and accounting guards.
+   Remediation reference: https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable
+
+3. WARN — leaked password protection is disabled. This is an Auth security setting, not a schema fix. It was not changed.
+   Remediation reference: https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection
+
+4. INFO — 15 tables have RLS enabled but no policies. Most are private worker/control tables; public exchange discovery/fee/sync tables are also included. With RLS enabled and no policy, direct role access is denied unless a privileged owner/function bypasses it. Review each table's intended access path; do not add blanket policies.
+   Remediation reference: https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy
+
+The separate list_tables Advisor also reported two private pg_net backup tables with RLS disabled. Direct table grants to anon/authenticated/service_role were false in the follow-up metadata check (only postgres grants appeared); public Data API exposure was not established. Treat this as a defense-in-depth issue, not as confirmed anonymous data access.
+
+No Advisor remediation was applied. All findings require a deliberate security decision and, where applicable, explicit owner approval.
