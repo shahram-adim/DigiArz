@@ -1386,6 +1386,27 @@ test('detail quick-trade input preserves the original decimal string',()=>{
 });
 
 
+test('all demo order forms preserve exact decimal strings and enforce the active production scale',()=>{
+  const html=fs.readFileSync('index.html','utf8');
+  const parser=html.slice(html.indexOf('function readExactInput'),html.indexOf('function safeText'));
+  assert.ok(parser.includes("DigiDecimal.parseDecimal(raw,{maxFractionDigits:ORDER_INPUT_MAX_FRACTION_DIGITS,maxIntegerDigits:16})"));
+  assert.ok(parser.includes("DigiDecimal.toString(parsed)"));
+  assert.ok(!parser.includes('Number(')&&!parser.includes('parseFloat('));
+  for(const [name,next] of [
+    ['async function trade(side)','let orderBookTimer'],
+    ['async function placeLimitOrder()','async function placeConditionalExitOrder()'],
+    ['async function placeConditionalExitOrder()','async function loadConditionalOrders()'],
+    ['async function placeStopLimitOrder()','async function loadStopLimitOrders()']
+  ]){
+    const start=html.indexOf(name),end=html.indexOf(next,start+name.length);
+    assert.ok(start>=0&&end>start,name+' handler exists');
+    const handler=html.slice(start,end);
+    assert.ok(handler.includes('readExactInput('),name+' uses shared exact decimal parser');
+    assert.ok(!handler.includes('parseFloat(')&&!handler.includes('toFixed('),name+' avoids float parsing/formatting');
+  }
+  assert.match(html,/const ORDER_INPUT_MAX_FRACTION_DIGITS=8;/);
+});
+
 test('mobile market list reserves scroll clearance above the fixed bottom navigation',()=>{
   const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
   const fix=css.slice(css.lastIndexOf('Mobile market list: reserve a clear viewport lane'));
