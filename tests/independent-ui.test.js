@@ -1426,3 +1426,15 @@ test('admin wallet adjustments preserve decimal strings and enforce wallet stora
   assert.ok(handler.includes('p_amount:amount'),'RPC receives the validated decimal string');
   assert.ok(!handler.includes('Number(')&&!handler.includes('parseFloat('),'admin wallet amount avoids binary floating-point conversion');
 });
+
+
+test('login hero presents ten distinct cryptocurrency marks around the globe and phone',()=>{
+  const marks=[...html.matchAll(/data-top-coin="([A-Z0-9]+)"/g)].map(match=>match[1]);
+  const unique=[...new Set(marks)].sort();
+  assert.deepEqual(unique,['ADA','BNB','BTC','DOGE','ETH','SOL','TON','TRX','USDT','XRP']);
+  for(const token of ['ref-orbit-xrp','ref-orbit-ada','ref-orbit-doge','ref-orbit-trx','ref-orbit-ton']){
+    assert.ok(html.includes(token),'login hero includes '+token);
+  }
+  assert.ok(css.includes('#authView .ref-orbit-coin{'),'orbit marks have dedicated responsive styling');
+  assert.ok(html.includes('icons/bnb@2x.png'),'BNB orbit uses the correct BNB logo asset');
+});

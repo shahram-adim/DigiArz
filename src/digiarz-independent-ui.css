@@ -6475,3 +6475,29 @@ body.luxury-theme #tab-markets .market-board-unit{
     scroll-margin-bottom:160px!important;
   }
 }
+
+
+/* Login hero: five additional distinct market marks complete the ten-asset orbit. */
+#authView .ref-orbit-coin{
+  position:absolute;z-index:6;display:grid;place-items:center;
+  width:44px;height:44px;padding:7px;border-radius:50%;
+  border:1px solid rgba(255,232,177,.78);
+  background:radial-gradient(circle at 30% 24%,#fff8e6 0%,#d9e4ff 34%,#596fae 100%);
+  box-shadow:0 9px 22px rgba(0,0,0,.34),inset 0 0 0 2px rgba(255,255,255,.34);
+  animation:daCoinHover 6.2s ease-in-out infinite;
+}
+#authView .ref-orbit-coin img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(0,0,0,.28))}
+#authView .ref-orbit-xrp{left:3%;top:31%;animation-delay:-.8s}
+#authView .ref-orbit-ada{left:43%;top:1%;animation-delay:-1.6s}
+#authView .ref-orbit-doge{right:1%;top:21%;animation-delay:-2.4s}
+#authView .ref-orbit-trx{right:8%;bottom:1%;animation-delay:-3.2s}
+#authView .ref-orbit-ton{left:31%;bottom:1%;animation-delay:-4s}
+@media(max-width:760px){
+  #authView .ref-orbit-coin{width:32px;height:32px;padding:5px}
+  #authView .ref-orbit-xrp{left:1%;top:34%}
+  #authView .ref-orbit-ada{left:42%;top:0}
+  #authView .ref-orbit-doge{right:0;top:20%}
+  #authView .ref-orbit-trx{right:5%;bottom:0}
+  #authView .ref-orbit-ton{left:30%;bottom:0}
+}
+@media(prefers-reduced-motion:reduce){#authView .ref-orbit-coin{animation:none!important}}
