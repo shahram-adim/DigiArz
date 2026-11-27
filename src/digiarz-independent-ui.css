@@ -6324,3 +6324,64 @@ body.luxury-theme #authView .auth-form .auth-security{color:#465a84!important}
 body.luxury-theme #authView .auth-form input::placeholder{color:#66779e!important}
 body.luxury-theme .mobile-bottom-nav button.active{color:#fff!important}
 body.luxury-theme :focus-visible{outline:3px solid #4052c7!important;outline-offset:2px!important}
+
+
+/* Indigo-glass contrast pass — asset detail, chart, review and advanced-order panels. */
+body.luxury-theme .detail-section,
+body.luxury-theme .detail-description,
+body.luxury-theme .review-form,
+body.luxury-theme .review-row,
+body.luxury-theme .news-item,
+body.luxury-theme .history-card,
+body.luxury-theme .dashboard-panel,
+body.luxury-theme .dashboard-activity-row,
+body.luxury-theme .setting-row,
+body.luxury-theme .orders-center-v36,
+body.luxury-theme .advanced-order-form-v36,
+body.luxury-theme .advanced-order-list-v36,
+body.luxury-theme .dashboard-account-alert-panel,
+body.luxury-theme .trade-entry-grid-v35 .trade-box:first-child,
+body.luxury-theme .trade-entry-grid-v35 .trade-box:last-child{
+  background:linear-gradient(145deg,rgba(255,255,255,.97),rgba(231,236,255,.96))!important;
+  border-color:#aebbea!important;color:#1b2b61!important;
+  box-shadow:0 10px 28px rgba(48,65,145,.11),inset 0 1px rgba(255,255,255,.98)!important;
+}
+body.luxury-theme .asset-detail-head{
+  background:linear-gradient(125deg,#dce4ff,#b8c6f6)!important;
+  border:1px solid #9eafe9!important;color:#1b2b61!important;
+}
+body.luxury-theme .asset-detail-head .detail-price,
+body.luxury-theme .asset-detail-head .asset-detail-title,
+body.luxury-theme .detail-section h3,
+body.luxury-theme .detail-section h4,
+body.luxury-theme .detail-section label,
+body.luxury-theme .orders-center-v36 h2,
+body.luxury-theme .orders-center-v36 h3,
+body.luxury-theme .advanced-order-form-v36 h3,
+body.luxury-theme .advanced-order-list-v36 h3,
+body.luxury-theme .setting-row strong{
+  color:#1b2b61!important;
+}
+body.luxury-theme .detail-section p,
+body.luxury-theme .detail-section small,
+body.luxury-theme .review-row small,
+body.luxury-theme .news-item small,
+body.luxury-theme .detail-description,
+body.luxury-theme .orders-center-v36 p,
+body.luxury-theme .advanced-order-form-v36 .muted,
+body.luxury-theme .advanced-order-list-v36 .muted,
+body.luxury-theme .setting-row small{
+  color:#465a84!important;
+}
+body.luxury-theme .detail-section input,
+body.luxury-theme .detail-section select,
+body.luxury-theme .detail-section textarea,
+body.luxury-theme .advanced-order-form-v36 input,
+body.luxury-theme .advanced-order-form-v36 select,
+body.luxury-theme .advanced-order-form-v36 textarea{
+  background:#fff!important;color:#1b2b61!important;border-color:#aab8e8!important;
+}
+body.luxury-theme .asset-detail-head .asset-logo,
+body.luxury-theme .asset-detail-head .asset-logo img{
+  background:transparent!important;border:0!important;box-shadow:none!important;
+}
