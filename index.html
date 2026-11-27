@@ -2642,7 +2642,9 @@ function renderCoinLogoFallback(holder,symbol){
 }
 function handleCoinLogoError(img){
  const symbol=cleanCoinSymbol(img.dataset.symbol||''),holder=img.parentElement,index=Number(img.dataset.fallbackIndex||0);
- const fallbacks=[logoUrl(symbol),`https://assets.coincap.io/assets/icons/${symbol.toLowerCase()}@2x.png`];
+ const hasCustomImage=img.dataset.customImageUrl==='1';
+ const publicFallback=`https://assets.coincap.io/assets/icons/${symbol.toLowerCase()}@2x.png`;
+ const fallbacks=hasCustomImage?[logoUrl(symbol),publicFallback]:[publicFallback];
  if(index<fallbacks.length){img.dataset.fallbackIndex=String(index+1);img.src=fallbacks[index];return}
  if(img.classList.contains('asset-logo')&&holder?.classList.contains('asset-detail-head')){const fallback=document.createElement('span');fallback.className='asset-logo';renderCoinLogoFallback(fallback,symbol);img.replaceWith(fallback);return}
  if(holder)renderCoinLogoFallback(holder,symbol);else img.style.display='none';
