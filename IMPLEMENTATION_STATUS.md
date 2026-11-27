@@ -2164,3 +2164,15 @@
 - [!] This adds exact helper function bodies, not the complete authoritative table schema, fee table constraints/data, trigger/RLS/grants or full Production catalog parity. Historical/live metadata snapshots still require a separately captured, reconciled schema and ACL inventory.
 - [ ] Next: confirm CI for `f7a8ae868623c10955595003b42accc48553b552`; then recover authoritative base ledger DDL/constraints/indexes and reservation/financial table metadata, and test actual helper behavior with source-faithful schema.
 - [x] No Production database query/write in this step; no Production migration, schema/function/ACL/RLS/trigger/Cron/worker/Auth change; no db push, merge, deploy, APK/Pages publication or cost.
+
+
+## Shahram 188 — direct helper assertions expanded (2026-11-27)
+
+- [x] Rechecked live PR #67: open, Draft, unmerged; HEAD at start of this step `762dd36db1a23ec18314287a844e0b2f91c42785`; 201 commits ahead / 0 behind main. The transient `mergeable=false` from the prior check has since returned to `mergeable=true` before this step.
+- [x] CI run #2400 / `46049313969` was in progress on the prior HEAD. At the latest poll, 16/31 steps had completed, with two-session Limit worker/cancel race tests running; no failed steps reported. This run does NOT include the subsequent helper assertion commit.
+- [x] Expanded the disposable Market/Limit parity test to directly assert captured Production `current_account_is_active()` returns true for an active authenticated profile and false for an inactive one.
+- [x] Added direct rejection assertion for unsupported fee liquidity type `provider`, alongside existing maker/taker, missing quote configuration and disabled configuration checks.
+- [x] Commit: `95da33ca8d5c793562125ea9733e34edce623747`. The next CI run must validate this latest test revision.
+- [!] Still not full Production schema parity: fixture tables, indexes, constraints, triggers, RLS and grants remain partially scaffolded; exact function-body snapshots are not equivalent to a complete source-of-truth schema capture.
+- [ ] Next: poll CI #2400; then run the new commit's CI; continue recovery of base ledger DDL and all constraints/indexes/trigger/RLS/grants from a permitted metadata-only source before canonical financial migration design.
+- [x] No Production database read/write performed in this step; no Production migration, schema/function/ACL/RLS/trigger/Cron/worker/Auth change; no db push, merge, deploy, APK/Pages publication or cost.
