@@ -29,6 +29,7 @@ test('invalid and negative balances are never counted as positive holdings', () 
 test('malformed market values are rejected instead of contaminating portfolio totals', () => {
   assert.equal(P.value('1.25', 'invalid'), null);
   assert.throws(() => P.sum(['1', 'bad']), /Invalid portfolio amount/);
+  assert.throws(() => P.sum(['1', '-0.1']), /Negative portfolio amount/);
 });
 
 test('portfolio valuation retains 18-place precision', () => {
