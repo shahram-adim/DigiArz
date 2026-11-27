@@ -98,3 +98,11 @@ test('two-session Limit race fixture seeds auth users before Production-linked p
   assert.ok(authSeed >= 0 && profileSeed > authSeed,
     'race fixture must satisfy profiles_id_fkey before inserting profiles');
 });
+
+test('Limit worker integration covers the minimum fee half-quantum boundary', () => {
+  assert.ok(integration.includes('gross=0.00000500 USDT'));
+  assert.ok(integration.includes('0.000000005'));
+  assert.ok(integration.includes('Half-quantum fee ledger mismatch'));
+  assert.ok(integration.includes('Half-quantum fee reservation mismatch'));
+  assert.ok(integration.includes("SET status='cancelled'"));
+});
