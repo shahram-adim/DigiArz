@@ -2137,3 +2137,16 @@
 - [ ] Next: create a canonical Market/Limit candidate that retains the authoritative source semantics while replacing ticker identity with pair_id/base_asset_id/quote_asset_id. Apply only after exact authoritative migration in disposable PG17 and test same-ticker pair A/B, four partial fills, exact reserve consumption/release, stale/missing/future prices, disabled pair, inactive account, auth, and two-session races.
 - [x] CI #2391 / run `46048133466` completed SUCCESS on pre-review head `a411a73df6a47dc77b4b83950b59b6a19ee22b95`; step 28 authoritative Market/Limit migration baseline passed.
 - [x] PR #67 remains open Draft and unmerged; branch head now advances with documentation commits; no Production writes, migration/db push, history repair, merge, deploy, APK/Pages publication, or cost.
+
+
+## Shahram 186 — canonical ledger source recovery gate (2026-11-27)
+
+- [x] Rechecked current PR #67 and latest CI; PR remains open Draft, unmerged, mergeable. CI run `46048469045` for prior documentation head completed SUCCESS.
+- [x] Cross-checked the Market/Limit migration bodies against the disposable schema fixture, existing source recovery plan, and 2026-11-26 Production function snapshots.
+- [x] Added `docs/CANONICAL_TRADING_LEDGER_SOURCE_RECOVERY_GATE_2026-11-27.md`, commit `1f4fcf9d25622fdca4fd74ba608ba2c3921876b2`.
+- [!] Clarification to Shahram 184: CI step 28 genuinely applies and executes the exact three checked-in Market/Limit function bodies, but its minimal bootstrap is not a full authoritative Production schema/helper/trigger/RLS/grant reconstruction. Treat it as exact-function-body regression against a compatible disposable scaffold, not complete Production-schema parity.
+- [!] The current production financial key `asset_balances(user_id, asset text)` and `order_reservations.asset text` cannot isolate same-ticker canonical assets. A pair_id-only patch to orders/prices would be incomplete; balance, reservation, trades, conditional lifecycle, cancellation, deactivation, readers and ingestion need coordinated identity propagation.
+- [!] Fee helper source is not fully recovered by the fixture: the test bootstrap uses a constant 0.1% implementation. Do not claim authoritative fee-helper parity until the exact live helper/source and metadata are recovered.
+- [!] Existing Market/Limit code enforces `market_prices.updated_at` within one minute. Keep this local receive/update-time execution gate explicit; provider-observed time is a separate field and cannot be substituted without a defined contract.
+- [ ] Next: recover exact source for base financial schema, active-account helper/guard trigger, fee helper, relevant policies/grants and all ticker-based dependent functions; reconcile ambiguous legacy asset balances before implementing canonical ledger changes.
+- [x] No Production query/write, migration, function, grant, RLS, trigger, cron, worker, account or financial-row change; no db push, merge, deploy, APK/Pages publication or cost.
