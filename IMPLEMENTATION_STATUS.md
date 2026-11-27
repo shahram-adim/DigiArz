@@ -1610,3 +1610,15 @@
 - Updated `docs/PRODUCTION_CATALOG_SOURCE_AUDIT_2026-11-27.md` with pipeline source, scope, and risks.
 - No Production writes, function executions, queue changes, Cron/worker changes, pair changes, or refresh operations. No migration/db push/merge/deploy/release/cost.
 - Remaining: investigate why the five stale prices are not being refreshed, complete all writers/triggers/callers for catalog and pair tables, then design the admission/provisioning mechanism and source-faithful disposable PostgreSQL tests.
+
+
+## Shahram 170 — stale price root-cause evidence (2026-11-27)
+- Live-checked PR #67 and PR #66 before work; both remain open, Draft, unmerged, and mergeable. PR #67 is 7 commits ahead and 0 behind Main.
+- Inspected retained HTTP responses read-only: 1,283 responses in the last ten days, all HTTP 200, not timed out, and with non-empty bodies. This is response-level status only, not a guarantee of complete asset coverage.
+- All five stale pair assets still have positive, recently updated `crypto_assets.current_price_usd` values, but those belong to the separate catalog ingestion path.
+- Exact JSON-key checks against the latest CoinGecko simple-price response show that none of the five stale CoinGecko IDs was returned. Substring hits were discarded as unreliable. Historical exact-key evidence for River/Toncoin is also absent; three Ondo/Nebius IDs have no retained exact-ID response match.
+- Current `refresh_market_prices()` only upserts when the response contains the exact provider ID and a positive USD value. It does not fall back to `crypto_assets.current_price_usd`, so missing provider keys leave old pair prices untouched.
+- Root cause narrowed to missing exact CoinGecko ID keys in simple-price responses; why those IDs are omitted (request batch membership vs endpoint coverage/provider listing) remains unproven because processed request URL metadata is not retained after tracking rows are deleted.
+- Added the evidence and safe conclusion to the Production audit document. Do not copy catalog USD prices into executable USDT pairs without a validated quote/source path.
+- No Production writes, function calls, queue changes, price refresh, pair mutation, Cron/worker change, migration/db push, merge/deploy/release, or paid infrastructure action.
+- Remaining: determine first-515 vs overflow membership for the five IDs, inspect exact market coverage in Gate.io/KuCoin and their provider price policy, then finish all catalog and pair writers/callers inventory.
