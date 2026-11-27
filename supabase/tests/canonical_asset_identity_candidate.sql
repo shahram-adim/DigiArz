@@ -281,8 +281,12 @@ BEGIN
     FOR UPDATE SKIP LOCKED
   LOOP
     SELECT * INTO v_pair FROM canonical_asset_candidate.pairs
-    WHERE pair_id=v_order.pair_id AND is_enabled;
+    WHERE pair_id=v_order.pair_id AND is_enabled FOR UPDATE;
     IF NOT FOUND THEN CONTINUE; END IF;
+    IF NOT EXISTS (SELECT 1 FROM canonical_asset_candidate.assets WHERE asset_id=v_pair.base_asset_id AND is_active)
+       OR NOT EXISTS (SELECT 1 FROM canonical_asset_candidate.assets WHERE asset_id=v_pair.quote_asset_id AND is_active AND display_symbol='USDT') THEN
+      CONTINUE;
+    END IF;
 
     SELECT price INTO v_price FROM canonical_asset_candidate.prices
     WHERE pair_id=v_order.pair_id
@@ -353,6 +357,7 @@ DECLARE
   v_order uuid;
   v_limit_buy uuid;
   v_limit_sell uuid;
+  v_limit_stale uuid;
   v_processed integer;
   v_a numeric;
   v_b numeric;
@@ -451,6 +456,34 @@ BEGIN
         AND ((order_id=v_limit_buy AND base_asset_id=v_dot_a)
           OR (order_id=v_limit_sell AND base_asset_id=v_dot_b)))<>2 THEN
     RAISE EXCEPTION 'limit order worker lost canonical pair identity';
+  END IF;
+
+  -- A stale market observation cannot trigger a pending limit order.
+  v_limit_stale := canonical_asset_candidate.place_limit_order(v_user,v_pair_a,'sell',0.1,19);
+  UPDATE canonical_asset_candidate.prices
+  SET price=20,observed_at=clock_timestamp()-interval '3 minutes'
+  WHERE pair_id=v_pair_a;
+  v_processed := canonical_asset_candidate.process_limit_orders();
+  IF v_processed<>0 OR (SELECT status FROM canonical_asset_candidate.orders WHERE order_id=v_limit_stale)<>'pending' THEN
+    RAISE EXCEPTION 'stale provider price triggered a limit fill';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM canonical_asset_candidate.reservations
+                 WHERE order_id=v_limit_stale AND asset_id=v_dot_a) THEN
+    RAISE EXCEPTION 'stale limit order lost its canonical base reservation';
+  END IF;
+  UPDATE canonical_asset_candidate.prices
+  SET price=20,observed_at=clock_timestamp()
+  WHERE pair_id=v_pair_a;
+  v_processed := canonical_asset_candidate.process_limit_orders();
+  IF v_processed<>1 OR (SELECT status FROM canonical_asset_candidate.orders WHERE order_id=v_limit_stale)<>'filled' THEN
+    RAISE EXCEPTION 'fresh canonical price did not trigger pending limit order';
+  END IF;
+  SELECT balance INTO v_a FROM canonical_asset_candidate.balances
+  WHERE user_id=v_user AND asset_id=v_dot_a;
+  SELECT balance INTO v_usdt_balance FROM canonical_asset_candidate.balances
+  WHERE user_id=v_user AND asset_id=v_usdt;
+  IF v_a<>1.4 OR v_usdt_balance<>9974.4495 THEN
+    RAISE EXCEPTION 'stale/fresh limit worker changed wrong balance: A %, USDT %',v_a,v_usdt_balance;
   END IF;
 
   -- A stale quote fails closed; local receive time cannot refresh it.
