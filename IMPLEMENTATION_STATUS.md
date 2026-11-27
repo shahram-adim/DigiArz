@@ -1631,3 +1631,14 @@
 - The evidence narrows the issue to overflow coverage/response inclusion plus no exchange ticker fallback for these symbols. Historical request URLs/batch membership are not retained, so it remains unknown whether the overflow scheduler requested the IDs and CoinGecko omitted them, or the request set failed to include them.
 - No Production action taken; no jobs invoked, queues altered, prices refreshed, pairs modified, migrations or releases.
 - Updated the Production audit document and implementation status. Next: review the overflow request scheduler and provider response lifecycle/source-parity in a disposable environment, and design persistent request metadata/coverage reporting as part of the future migration plan.
+
+
+## Shahram 172 — Overflow starvation risk identified (2026-11-27)
+- Rechecked PR #66 and #67 before work: both open, Draft, unmerged, mergeable. PR #67 now 11 commits ahead, 0 behind Main.
+- Recovered exact Production source for `private.request_market_price_overflow()` (read-only). It refuses to enqueue overflow while any tracked market-price request exists or any CoinGecko request remains in the HTTP queue.
+- Primary `refresh_market_prices()` job runs every minute and enqueues the next first-515 CoinGecko batch after processing completed requests. Overflow job runs at minute offsets 5,15,25,35,45,55.
+- Current live snapshot: tracked primary CoinGecko response had exactly 515 top-level keys; three tracked provider requests were pending/processing; no overflow request batch was present.
+- Strong design-level diagnosis: the primary minute-by-minute re-enqueue and overflow's requirement for an entirely empty tracked-request table create a likely starvation/race condition. This explains why all five stale pairs beyond ordinal 515 remain without prices. Not marked fully proven because Cron records don't expose the function return integer and historical requested ID batches are not retained.
+- Recorded the diagnosis and safe redesign direction in the Production audit document. Future solution: durable batch cursor / single sequenced scheduler, plus durable requested-ID and response coverage metadata, retries and fairness.
+- No Production function invocation, no queue or Cron changes, no pair/price writes, no migration/db push, no merge/deploy/release, no paid infrastructure action.
+- Next: build disposable PostgreSQL source-parity regression for the starvation sequence and inspect all catalog/pair writer call paths before proposing any schema/function migration.
