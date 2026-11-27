@@ -993,4 +993,86 @@ BEGIN
 END
 $sell_sub_quantum_gross_rejected$;
 
+-- Re-running after the new Sell rounding boundaries must be idempotent.
+-- Completed below-half and minimum-quantum orders must not settle twice;
+-- the pending sub-quantum order must remain untouched on repeated retries.
+DO $sell_rounding_boundary_idempotency$
+DECLARE
+  v_before jsonb;
+  v_after jsonb;
+BEGIN
+  SELECT jsonb_agg(to_jsonb(s) ORDER BY s.order_id)
+  INTO v_before
+  FROM (
+    SELECT
+      o.id AS order_id,
+      o.status AS order_status,
+      o.filled_amount,
+      o.remaining_amount,
+      w.balance_usdt,
+      ab.balance AS btc_balance,
+      r.reserved_amount,
+      r.consumed_amount,
+      r.released_amount,
+      r.status AS reservation_status,
+      (SELECT count(*) FROM public.trades t WHERE t.order_id=o.id) AS trade_count,
+      (SELECT count(*) FROM public.transactions x
+       WHERE x.user_id=o.user_id AND x.currency='USDT'
+         AND x.transaction_type='limit_sell') AS sell_transaction_count,
+      (SELECT COALESCE(sum(x.amount),0) FROM public.transactions x
+       WHERE x.user_id=o.user_id AND x.currency='USDT'
+         AND x.transaction_type='limit_sell') AS sell_transaction_total
+    FROM public.orders o
+    JOIN public.wallets w ON w.user_id=o.user_id
+    JOIN public.asset_balances ab ON ab.user_id=o.user_id AND ab.asset='BTC'
+    JOIN public.order_reservations r ON r.order_id=o.id
+    WHERE o.id IN (
+      '62000000-0000-0000-0000-000000000162',
+      '63000000-0000-0000-0000-000000000163',
+      '64000000-0000-0000-0000-000000000164'
+    )
+  ) s;
+
+  PERFORM public.process_limit_orders();
+  PERFORM public.process_limit_orders();
+
+  SELECT jsonb_agg(to_jsonb(s) ORDER BY s.order_id)
+  INTO v_after
+  FROM (
+    SELECT
+      o.id AS order_id,
+      o.status AS order_status,
+      o.filled_amount,
+      o.remaining_amount,
+      w.balance_usdt,
+      ab.balance AS btc_balance,
+      r.reserved_amount,
+      r.consumed_amount,
+      r.released_amount,
+      r.status AS reservation_status,
+      (SELECT count(*) FROM public.trades t WHERE t.order_id=o.id) AS trade_count,
+      (SELECT count(*) FROM public.transactions x
+       WHERE x.user_id=o.user_id AND x.currency='USDT'
+         AND x.transaction_type='limit_sell') AS sell_transaction_count,
+      (SELECT COALESCE(sum(x.amount),0) FROM public.transactions x
+       WHERE x.user_id=o.user_id AND x.currency='USDT'
+         AND x.transaction_type='limit_sell') AS sell_transaction_total
+    FROM public.orders o
+    JOIN public.wallets w ON w.user_id=o.user_id
+    JOIN public.asset_balances ab ON ab.user_id=o.user_id AND ab.asset='BTC'
+    JOIN public.order_reservations r ON r.order_id=o.id
+    WHERE o.id IN (
+      '62000000-0000-0000-0000-000000000162',
+      '63000000-0000-0000-0000-000000000163',
+      '64000000-0000-0000-0000-000000000164'
+    )
+  ) s;
+
+  IF v_before IS DISTINCT FROM v_after THEN
+    RAISE EXCEPTION 'Sell rounding-boundary retry changed settled or pending accounting: before %, after %',
+      v_before, v_after;
+  END IF;
+END
+$sell_rounding_boundary_idempotency$;
+
 SELECT 'exact-decimal Limit worker integration, fee threshold, minimum positive gross, sub-quantum rejection, partial reserves, dust remainder, account guards, and idempotency: PASS' AS result;
