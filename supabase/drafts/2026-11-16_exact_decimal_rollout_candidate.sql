@@ -1345,5 +1345,85 @@ BEGIN
 END
 $postflight$;
 
+-- Verify the candidate API boundary after CREATE OR REPLACE and explicit grants.
+-- Existing conditional/cancel consumers are checked when present; this draft
+-- intentionally does not replace process_conditional_orders().
+DO $postflight_acl$
+DECLARE
+  r record;
+  v_oid oid;
+  v_owner text;
+  v_definer boolean;
+  v_settings text[];
+BEGIN
+  FOR r IN
+    SELECT * FROM (VALUES
+      ('public.execute_demo_trade(text,text,numeric,numeric)', true),
+      ('public.place_limit_order(text,text,numeric,numeric)', true),
+      ('public.place_stop_limit_order(text,text,numeric,numeric,numeric)', true),
+      ('public.place_conditional_exit_order(text,text,numeric,numeric)', true),
+      ('public.process_limit_orders()', false),
+      ('public.process_stop_limit_orders()', false)
+    ) AS expected(signature, authenticated_exec)
+  LOOP
+    v_oid := pg_catalog.to_regprocedure(r.signature);
+    IF v_oid IS NULL THEN
+      RAISE EXCEPTION 'postflight routine missing: %', r.signature;
+    END IF;
+
+    SELECT pg_catalog.pg_get_userbyid(p.proowner), p.prosecdef, p.proconfig
+    INTO v_owner, v_definer, v_settings
+    FROM pg_catalog.pg_proc p
+    WHERE p.oid = v_oid;
+
+    IF v_owner <> 'postgres'
+       OR v_definer IS NOT TRUE
+       OR NOT (COALESCE(v_settings, ARRAY[]::text[]) @> ARRAY['search_path=""']::text[]) THEN
+      RAISE EXCEPTION 'postflight routine security metadata mismatch: % owner %, definer %, settings %',
+        r.signature, v_owner, v_definer, v_settings;
+    END IF;
+
+    IF pg_catalog.has_function_privilege('anon', v_oid, 'EXECUTE')
+       OR pg_catalog.has_function_privilege('authenticated', v_oid, 'EXECUTE')
+            IS DISTINCT FROM r.authenticated_exec
+       OR pg_catalog.has_function_privilege('service_role', v_oid, 'EXECUTE') IS NOT TRUE THEN
+      RAISE EXCEPTION 'postflight routine EXECUTE ACL mismatch: %', r.signature;
+    END IF;
+  END LOOP;
+
+  -- These are not replaced by this candidate. If present, preserve the live
+  -- Production service-only worker boundary and authenticated owner RPCs.
+  FOR r IN
+    SELECT * FROM (VALUES
+      ('public.process_conditional_orders()', false),
+      ('public.cancel_limit_order(uuid)', true),
+      ('public.cancel_conditional_exit_order(uuid)', true),
+      ('public.cancel_stop_limit_order(uuid)', true)
+    ) AS expected(signature, authenticated_exec)
+  LOOP
+    v_oid := pg_catalog.to_regprocedure(r.signature);
+    IF v_oid IS NOT NULL THEN
+      SELECT pg_catalog.pg_get_userbyid(p.proowner), p.prosecdef, p.proconfig
+      INTO v_owner, v_definer, v_settings
+      FROM pg_catalog.pg_proc p
+      WHERE p.oid = v_oid;
+
+      IF v_owner <> 'postgres'
+         OR v_definer IS NOT TRUE
+         OR NOT (COALESCE(v_settings, ARRAY[]::text[]) @> ARRAY['search_path=""']::text[]) THEN
+        RAISE EXCEPTION 'postflight unchanged routine security metadata mismatch: %', r.signature;
+      END IF;
+
+      IF pg_catalog.has_function_privilege('anon', v_oid, 'EXECUTE')
+         OR pg_catalog.has_function_privilege('authenticated', v_oid, 'EXECUTE')
+              IS DISTINCT FROM r.authenticated_exec
+         OR pg_catalog.has_function_privilege('service_role', v_oid, 'EXECUTE') IS NOT TRUE THEN
+        RAISE EXCEPTION 'postflight unchanged routine EXECUTE ACL mismatch: %', r.signature;
+      END IF;
+    END IF;
+  END LOOP;
+END
+$postflight_acl$;
+
 
 COMMIT;
