@@ -1597,3 +1597,16 @@
 - Important qualification: a matching observation is not automatically proof of a unique ticker mapping; retain provider ID and exact exchange evidence. Existing pair-row presence is not proof of price freshness.
 - No Production data or configuration changed; no refresh function executed; no pairs/prices/orders/balances/workers/Cron touched. No migration/db push/merge/deploy/release/cost.
 - Remaining: map all price-refresh jobs/functions and their source precedence, determine why five existing prices are stale, complete all catalog/table writer and trigger caller inventory, then implement only in isolated disposable PostgreSQL with exact source-parity tests.
+
+
+## Shahram 169 — price-refresh pipeline source inventory (2026-11-27)
+- Read-only inspected Production Cron: job 3 `digiarz-market-price-refresh` runs every minute; job 17 `digiarz-market-price-overflow` runs every ten minutes at minute offsets 5–55. Both active; sampled recent runs reported succeeded. Neither job was modified or invoked manually.
+- Recovered exact source of `public.refresh_market_prices()` and `private.request_market_price_overflow()`.
+- Primary price refresh maps CoinGecko IDs from enabled pairs plus curated active catalog rows; first 515 IDs are requested by the primary function, overflow schedules the remainder in batches of 500. KuCoin/Gate.io refresh only enabled pair symbols.
+- The refresh universe is enabled pairs + curated rows, not every raw provider catalog row. Therefore the future canonical admission path must create/attach the pair before price refresh coverage is guaranteed.
+- CoinGecko, KuCoin, and Gate.io can all write the same `market_prices` symbol; source precedence depends on response processing order. A deterministic per-pair trusted-source policy remains to be designed.
+- Column default confirms overflow requests inherit provider `CoinGecko`; three in-flight requests (CoinGecko/Gate.io/KuCoin) were present at snapshot time.
+- The five stale rows remain unexplained; the audit records provider coverage and queue/response history as next read-only investigation targets.
+- Updated `docs/PRODUCTION_CATALOG_SOURCE_AUDIT_2026-11-27.md` with pipeline source, scope, and risks.
+- No Production writes, function executions, queue changes, Cron/worker changes, pair changes, or refresh operations. No migration/db push/merge/deploy/release/cost.
+- Remaining: investigate why the five stale prices are not being refreshed, complete all writers/triggers/callers for catalog and pair tables, then design the admission/provisioning mechanism and source-faithful disposable PostgreSQL tests.
