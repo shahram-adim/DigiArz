@@ -1466,3 +1466,20 @@ test('premium market header omits source and freshness labels without changing m
   assert.match(html, /id="marketList"/);
   assert.match(html, /id="marketAvgChange"/);
 });
+
+
+test('icon labels remain readable across themes and compact mobile navigation',()=>{
+  const marker='/* 2026-11-27 — icon-label readability pass across all three themes.';
+  const rules=css.slice(css.lastIndexOf(marker));
+  assert.ok(rules.length>0,'final icon-label readability pass exists');
+  for(const selector of ['#appView .category-btn .category-label','#appView .da-v2-quick-grid button b',
+    '#appView .mobile-bottom-nav button span','body.light-theme #appView .category-btn .category-label',
+    'body.luxury-theme #appView .category-btn .category-label']){
+    assert.ok(rules.includes(selector),'icon label contrast/size is explicitly covered: '+selector);
+  }
+  assert.match(rules,/font-size:12px!important/,'category labels have a readable desktop baseline');
+  assert.match(rules,/font-weight:850!important/,'icon labels use strong readable weight');
+  assert.match(rules,/white-space:normal!important/,'mobile labels may wrap instead of disappearing');
+  assert.match(rules,/text-overflow:clip!important/,'mobile labels are not ellipsized');
+  assert.match(rules,/@media\(max-width:600px\)/,'compact layout receives a dedicated mobile pass');
+});
