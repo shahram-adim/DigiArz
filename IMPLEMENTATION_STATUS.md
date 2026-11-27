@@ -1998,3 +1998,9 @@
 - [!] CI run 46043559923 for commit b8f08f9322dda517443f443ab189260086ef93b9 was in progress when the conditional fixture extension was added. The new head 5116ecb896a9c216ebd18e5c16d845670e103f29 needs its own CI result; no pass is claimed.
 - [ ] Next: verify current CI and step 26 for the corrected base fixture; then execute the new parent/child identity tests in disposable PostgreSQL. Build a source-faithful wrapper around actual conditional/Stop-Limit migration definitions, retaining actual reservation/worker/cancellation code, before advancing to OCO.
 - [x] No Production/Supabase data/schema/function/ACL/RLS/Cron/worker changes, no merge/db push/deploy/release/publication, and no new costs.
+## Shahram 172 — stabilize fresh-price precondition in pair-disable fixture (2026-11-27)
+- [x] Inspected run 46043559923: the corrected SQL quoting and balance/owner assertions progressed, but the disposable test later failed because pair A's observation was no longer within the fixture's two-minute freshness window when the pair-disable lifecycle began.
+- [x] Added an explicit refresh of both disposable pair observations immediately before creating the conditional parent/child and cancellation test orders. This is test-only setup; it does not weaken the stale-price negative test, which still runs earlier.
+- [!] The current code head e30f4022d927a8a665287d0d34f06d6abbb8ce0b and status update require fresh CI. No green claim yet.
+- [ ] Verify step 26, then verify parent/child canonical FK isolation and pair-scoped disable behavior. Do not copy fixture helpers into Production.
+- [x] No Production/Supabase changes, merge, migration/db push, deploy/release, publication, worker/Cron/grant/RLS changes or costs.
