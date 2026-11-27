@@ -7,7 +7,7 @@ BEGIN
      OR (SELECT price FROM public.orders WHERE price IS NOT NULL) IS DISTINCT FROM 10.5::numeric
      OR (SELECT count(*) FROM public.orders WHERE price IS NULL) IS DISTINCT FROM 1
      OR (SELECT balance FROM public.asset_balances) IS DISTINCT FROM 1.25::numeric
-     OR (SELECT reserved_amount FROM public.order_reservations) IS DISTINCT FROM 10.5::numeric
+     OR (SELECT reserved_amount FROM public.order_reservations WHERE order_id='10000000-0000-4000-8000-000000000001') IS DISTINCT FROM 10.5::numeric
      OR (SELECT amount FROM public.conditional_orders) IS DISTINCT FROM 0.5::numeric THEN
     RAISE EXCEPTION 'type widening changed existing financial values';
   END IF;
