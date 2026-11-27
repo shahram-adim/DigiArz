@@ -114,6 +114,54 @@ BEGIN
     RAISE EXCEPTION 'Rejected oversized Limit order was persisted';
   END IF;
 
+
+  -- Reject zero, negative, and >18-place Market quantities before ledger writes.
+  FOREACH v_amount IN ARRAY ARRAY[0::numeric, -0.1::numeric, 0.0000000000000000001::numeric] LOOP
+    BEGIN
+      PERFORM public.execute_demo_trade('BTCUSDT','buy',v_amount,0);
+      RAISE EXCEPTION 'Expected invalid Market quantity to be rejected: %',v_amount;
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'Expected invalid Market quantity%' THEN RAISE; END IF;
+    END;
+  END LOOP;
+
+  -- A positive quantity whose quote notional rounds to zero must be rejected.
+  UPDATE public.market_prices SET price=10,updated_at=now() WHERE symbol='BTCUSDT';
+  BEGIN
+    PERFORM public.execute_demo_trade('BTCUSDT','buy',0.000000000000000001,0);
+    RAISE EXCEPTION 'Expected zero-notional Market trade to be rejected';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Expected zero-notional Market trade to be rejected' THEN RAISE; END IF;
+  END;
+
+  -- Reject zero/negative Limit quantities and a >18-place limit price.
+  FOREACH v_amount IN ARRAY ARRAY[0::numeric, -0.1::numeric] LOOP
+    BEGIN
+      PERFORM public.place_limit_order('BTCUSDT','buy',v_amount,8);
+      RAISE EXCEPTION 'Expected invalid Limit quantity to be rejected: %',v_amount;
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'Expected invalid Limit quantity%' THEN RAISE; END IF;
+    END;
+  END LOOP;
+  BEGIN
+    PERFORM public.place_limit_order(
+      'BTCUSDT','buy',0.1,8.0000000000000000001
+    );
+    RAISE EXCEPTION 'Expected >18-place Limit price to be rejected';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Expected >18-place Limit price to be rejected' THEN RAISE; END IF;
+  END;
+
+  -- Tiny Limit notional must not create a zero-value reservation/order.
+  BEGIN
+    PERFORM public.place_limit_order(
+      'BTCUSDT','buy',0.000000000000000001,1
+    );
+    RAISE EXCEPTION 'Expected zero-notional Limit order to be rejected';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Expected zero-notional Limit order to be rejected' THEN RAISE; END IF;
+  END;
+
   RAISE NOTICE 'Market execution and Limit placement integration: PASS';
 END
 $test$;
