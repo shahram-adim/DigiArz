@@ -41,7 +41,7 @@ jobs:
       - name: Install isolated Playwright runner
         run: npm install --no-save --no-package-lock playwright@1.55.0
       - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
       - name: Capture all themes and application sections
         run: node tests/ui-visual-screenshots.cjs
       - name: Upload visual review screenshots
