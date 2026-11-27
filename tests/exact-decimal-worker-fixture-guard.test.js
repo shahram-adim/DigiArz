@@ -91,3 +91,10 @@ test('candidate Limit worker owner, security mode, search_path, and EXECUTE ACL 
   assert.ok(integration.includes('pg_get_userbyid(p.proowner)'));
   assert.ok(integration.includes('has_function_privilege'));
 });
+
+test('two-session Limit race fixture seeds auth users before Production-linked profiles', () => {
+  const authSeed = raceSetup.indexOf('INSERT INTO auth.users');
+  const profileSeed = raceSetup.indexOf('INSERT INTO public.profiles');
+  assert.ok(authSeed >= 0 && profileSeed > authSeed,
+    'race fixture must satisfy profiles_id_fkey before inserting profiles');
+});
