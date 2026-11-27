@@ -2385,8 +2385,8 @@
 - [x] کد اصلاحی و تست‌های persistence از قبل در GitHub main وجود دارند؛ تغییر لازم برای رفع این علت، استقرار کنترل‌شدهٔ همان کد اصلاحی موجود پس از بررسی کامل و تأیید مالک است، نه Migration یا تغییر schema.
 - [!] Production دست‌نخورده باقی ماند: هیچ Edge Function deploy، refresh دستی، DELETE، upsert، Cron change یا DB write انجام نشد. استقرار تا تأیید صریح مالک متوقف است.
 - [x] UI visual workflow run 45963746304 روی کد 87aa23b3acc7511b488f2716cea22e14152bdb87 با نتیجه success پایان یافت؛ source-level tests و capture تصویری موفق شدند.
-- [ ] APK workflow run 45963723457 هنوز باید از نظر build، provenance و artifact نهایی بررسی شود.
-- [!] PR #64 همچنان Draft، باز، ادغام‌نشده و mergeable=false است؛ وضعیت compare با main فعلی: ۲۶۸ جلو و ۳ عقب. هیچ merge/rebase انجام نشد.
+- [x] APK workflow run 45963723457 بررسی شد؛ build، provenance، SHA-256 و artifact معتبرند؛ جزئیات در بخش «تکمیل CI تصویری و APK آزمایشی» ثبت شده است.
+- [!] PR #64 همچنان Draft، باز، ادغام‌نشده و mergeable=false است؛ وضعیت compare زنده: ۲۷۲ جلو و ۳ عقب. تعارض mergeability هنوز حل نشده و هیچ merge/rebase انجام نشده است.
 ## تکمیل CI تصویری و APK آزمایشی — ۲۷ نوامبر ۲۰۲۶
 - [x] UI visual workflow run 45963746304 روی کد 87aa23b3acc7511b488f2716cea22e14152bdb87 با success پایان یافت: ۱۵۴/۱۵۴ تست منبعی موفق و ۷۲ screenshot واقعی در سه تم/بخش‌های رابط ساخته و بارگذاری شد.
 - [x] UI artifact ID 15182226925، حجم 29,927,835 bytes، SHA-256 زیپ b414e2def0bcb7dd4e3eec2ff059fbee9261322375bcfe9048db1ebb63e822c6؛ لینک: https://github.com/shahram-adim/DigiArz/actions/runs/45963746304/artifacts/15182226925
@@ -2396,3 +2396,15 @@
 - [!] APK یک debug candidate است؛ هنوز روی گوشی واقعی نصب/اجرا و ورود/بیومتریک/بازار/کیف پول آزمایش نشده است.
 - [!] وضعیت Production market feed همچنان بدون تغییر است. علت ۱۲/۱۲ پاسخ 502 با duplicate insert تأیید شده، اما رفع آن نیازمند استقرار نسخه اصلاح‌شده موجود در GitHub main است و تا تأیید صریح مالک انجام نمی‌شود.
 - [!] PR #64 باز، Draft، ادغام‌نشده و mergeable=false باقی مانده است.
+
+## ادامهٔ ممیزی و ثبت وضعیت زنده — ۲۷ نوامبر ۲۰۲۶، شهرام ۱۵۱
+- [x] PR #65 بر اساس Main فعلی `df0a9927451f3b8092997b6d573e62fda235b84d` بازبینی شد؛ شاخه ۴۴ commit جلو و صفر commit عقب است؛ وضعیت GitHub: Draft، open، mergeable=true و clean.
+- [x] CI نهایی PR #65، run `45976122442` روی HEAD `6a1699fa5695fc91a8d2c91ba5e3c475983cd970` با success تمام شد؛ تمام مراحل شامل direct RPC entrypoints، arithmetic، schema rehearsal، accounting، worker retry و دو-session races موفق‌اند.
+- [x] UI visual run `45963746304` روی کد UI مربوطه success شد؛ ۱۵۴/۱۵۴ source regression tests و ۷۲ screenshot در سه تم/صفحات ثبت شدند. نسبت به HEAD فعلی PR #64 فقط `IMPLEMENTATION_STATUS.md` جلوتر است؛ بنابراین نتیجهٔ بصری همچنان مربوط به همان کد UI است.
+- [x] APK debug artifact run `45963723457` تأیید شد؛ APK SHA-256: `5fc177428715cf59ebbb004c8a2e53e21562f4a098edaa8bd13a26b346ed88df`. APK همچنان نیازمند نصب و آزمون فیزیکی روی دستگاه است.
+- [!] PR #64 در HEAD فعلی `9b131b07e2cf52507bb2ea6bddc9270f85ab48d5` باز و Draft است؛ ۲۷۲ commit جلو و ۳ عقب Main و `mergeable_state=dirty`. اختلاف فایل‌های Main از base قدیمی در چهار فایل است: `IMPLEMENTATION_STATUS.md`, `docs/STOP_LIMIT_QA_MATRIX.md`, `supabase/tests/stop_limit_production_process_limit_orders_snapshot.sql`, `tests/stop-limit-production-limit-worker-source.test.js`. فقط `IMPLEMENTATION_STATUS.md` با PR #64 هم‌پوشانی دارد؛ سه فایل دیگر فقط در Main جدید شده‌اند. مستندات هر دو سمت حفظ شده‌اند، اما همگام‌سازی شاخه برای پاک شدن dirty هنوز انجام نشده است.
+- [x] Supabase Production فقط read-only بررسی شد: project ACTIVE_HEALTHY؛ `market_toman_prices` برابر ۳۷۳ ردیف، صفر ردیف تازه در ۵ دقیقه، آخرین `fetched_at` برابر `2026-11-17 22:04:26.622+00`. جداول orders/trades/asset_balances/order_reservations/conditional_orders/transactions همگی صفر ردیف‌اند.
+- [x] Cronهای ۸، ۹ و ۱۲ فعال و روی schedule هر دقیقه باقی‌اند؛ هیچ تغییری داده نشد.
+- [!] اصلاح dedupe/upsert بازار تومان در Main وجود دارد اما در Production deploy نشده؛ 502های قبلاً نمونه‌برداری‌شده با duplicate-key 23505 تطبیق داده شده‌اند. Deploy فقط پس از تأیید صریح مالک.
+- [!] هیچ PR merge، Migration، Deploy، DB write، Cron change، Worker/Auth/security change یا Production action انجام نشده است.
+- [ ] گام بعدی: تکمیل بررسی منبع واقعی Worker و تطبیق رزرو/دفترکل با Production؛ سپس آماده‌سازی روش همگام‌سازی PR #64 بدون ادغام آن به Main؛ و آزمون APK روی دستگاه واقعی.
