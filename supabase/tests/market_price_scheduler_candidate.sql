@@ -142,10 +142,10 @@ CREATE OR REPLACE FUNCTION scheduler_candidate.accept_price(
   p_pair text, p_price numeric, p_source text,
   p_priority integer, p_observed_at timestamptz
 ) RETURNS boolean LANGUAGE plpgsql AS $$
-DECLARE v_changed boolean;
+DECLARE v_rows integer;
 BEGIN
-  IF p_price IS NULL OR p_price<=0 OR p_observed_at IS NULL
-     OR p_source IS NULL OR p_priority<1 THEN
+  IF p_price IS NULL OR p_price<=0 OR p_price::text IN ('NaN','Infinity','-Infinity')
+     OR p_observed_at IS NULL OR p_source IS NULL OR p_priority IS NULL OR p_priority<1 THEN
     RETURN false;
   END IF;
   INSERT INTO scheduler_candidate.prices(pair_symbol,price,source,source_priority,observed_at)
@@ -157,8 +157,8 @@ BEGIN
     WHERE EXCLUDED.source_priority > scheduler_candidate.prices.source_priority
        OR (EXCLUDED.source_priority = scheduler_candidate.prices.source_priority
            AND EXCLUDED.observed_at > scheduler_candidate.prices.observed_at);
-  GET DIAGNOSTICS v_changed = ROW_COUNT;
-  RETURN v_changed;
+  GET DIAGNOSTICS v_rows = ROW_COUNT;
+  RETURN v_rows > 0;
 END $$;
 
 CREATE OR REPLACE FUNCTION scheduler_candidate.complete_batch(
@@ -188,6 +188,7 @@ BEGIN
   IF p_status=200 AND jsonb_typeof(p_response)='object' THEN
     FOREACH v_id IN ARRAY v_ids LOOP
       v_price := NULL;
+      v_symbol := NULL;
       BEGIN
         v_price := NULLIF(p_response->v_id->>'usd','')::numeric;
       EXCEPTION WHEN OTHERS THEN
@@ -195,7 +196,7 @@ BEGIN
       END;
       SELECT pair_symbol INTO v_symbol FROM scheduler_candidate.assets
       WHERE coingecko_id=v_id AND is_enabled;
-      IF v_price>0 AND v_symbol IS NOT NULL THEN
+      IF v_price>0 AND v_price::text NOT IN ('NaN','Infinity','-Infinity') AND v_symbol IS NOT NULL THEN
         PERFORM scheduler_candidate.accept_price(v_symbol,v_price,'CoinGecko',100,v_now);
         v_returned := array_append(v_returned,v_id);
         DELETE FROM scheduler_candidate.retry_queue WHERE coingecko_id=v_id;
@@ -263,16 +264,16 @@ BEGIN
     IF v_batch IS NULL THEN RAISE EXCEPTION 'scheduler returned no batch at page %',page; END IF;
     SELECT requested_ids INTO v_ids FROM scheduler_candidate.batches WHERE batch_id=v_batch;
     IF cardinality(v_ids)<>100 THEN RAISE EXCEPTION 'expected 100 IDs, got %',cardinality(v_ids); END IF;
-    SELECT count(*) INTO v_count FROM unnest(v_ids) x
+    SELECT count(*) INTO v_count FROM unnest(v_ids) AS u(id)
       WHERE EXISTS (SELECT 1 FROM scheduler_candidate.batches b
-        WHERE b.batch_id<>v_batch AND b.state='processed' AND x=ANY(b.requested_ids));
+        WHERE b.batch_id<>v_batch AND b.state='processed' AND u.id=ANY(b.requested_ids));
     IF v_count<>0 THEN RAISE EXCEPTION 'duplicate scheduling detected'; END IF;
-    SELECT jsonb_object_agg(id,jsonb_build_object('usd',1.25)) INTO STRICT v_ids_json
-    FROM unnest(v_ids) id;
+    SELECT jsonb_object_agg(u.id,jsonb_build_object('usd',1.25)) INTO STRICT v_ids_json
+    FROM unnest(v_ids) AS u(id);
     PERFORM scheduler_candidate.complete_batch(v_batch,200,v_ids_json);
   END LOOP;
-  SELECT count(DISTINCT id) INTO v_count
-  FROM scheduler_candidate.batches b CROSS JOIN LATERAL unnest(b.returned_ids) id
+  SELECT count(DISTINCT u.id) INTO v_count
+  FROM scheduler_candidate.batches b CROSS JOIN LATERAL unnest(b.returned_ids) AS u(id)
   WHERE b.state='processed';
   IF v_count<>1200 THEN RAISE EXCEPTION 'fair cycle covered % of 1200 assets',v_count; END IF;
 
