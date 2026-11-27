@@ -6573,47 +6573,52 @@ body.light-theme .hero{box-shadow:0 12px 30px rgba(40,104,215,.07)!important}
 /* 2026-11-27 — icon-label readability pass across all three themes.
    Keep icon marks crisp, give Persian labels enough size/weight/contrast,
    and prevent mobile navigation/category captions from being ellipsized. */
-#appView .category-btn{
+.category-btn{
   display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;
   gap:7px!important;min-height:82px!important;padding:10px 7px!important;
   color:#f6e8bd!important;font-size:12px!important;font-weight:800!important;line-height:1.55!important;
 }
-#appView .category-btn .category-icon{display:grid!important;place-items:center;min-height:26px}
-#appView .category-btn .category-icon svg{width:25px!important;height:25px!important;stroke-width:2.25!important;opacity:1!important}
-#appView .category-btn .category-label{display:block!important;max-width:100%;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;text-align:center!important;overflow-wrap:anywhere;font-size:12px!important;font-weight:850!important;line-height:1.5!important}
-#appView .da-v2-quick-grid button{gap:9px!important;font-size:12px!important;line-height:1.55!important}
-#appView .da-v2-quick-grid button b{display:block;color:inherit!important;font-size:12px!important;font-weight:850!important;line-height:1.55!important;text-align:center;white-space:normal!important;overflow-wrap:anywhere}
-#appView .da-v2-quick-grid button svg{width:26px!important;height:26px!important;stroke-width:2.2!important;opacity:1!important}
-#appView .quick .icon-tab{display:inline-flex!important;align-items:center;justify-content:center;gap:8px;font-size:13px!important;font-weight:850!important;line-height:1.5!important}
-#appView .quick .icon-tab svg{width:19px!important;height:19px!important;stroke-width:2.3!important;flex:0 0 auto;opacity:1!important}
-#appView .mobile-bottom-nav button{min-width:0!important;min-height:56px!important;padding:7px 3px!important;gap:5px!important;font-size:11px!important;font-weight:800!important;line-height:1.45!important}
-#appView .mobile-bottom-nav button svg{width:21px!important;height:21px!important;flex:0 0 21px!important;stroke-width:2.25!important;opacity:1!important}
-#appView .mobile-bottom-nav button span{display:block!important;max-width:100%!important;overflow:visible!important;text-overflow:clip!important;white-space:normal!important;font-size:11px!important;font-weight:850!important;line-height:1.4!important}
-body:not(.light-theme):not(.luxury-theme) #appView .category-btn,
-body:not(.light-theme):not(.luxury-theme) #appView .mobile-bottom-nav button:not(.active){color:#f3e7c7!important}
-body:not(.light-theme):not(.luxury-theme) #appView .category-btn .category-label{color:#fff1c8!important;text-shadow:0 1px 2px rgba(0,0,0,.65)}
-body.light-theme #appView .category-btn{color:#193d68!important;background:linear-gradient(145deg,#fff,#edf6ff)!important;border-color:#c5def5!important}
-body.light-theme #appView .category-btn .category-label,
-body.light-theme #appView .mobile-bottom-nav button:not(.active){color:#294968!important}
-body.light-theme #appView .category-btn svg,
-body.light-theme #appView .da-v2-quick-grid button svg{color:#175fb8!important;stroke:#175fb8!important}
-body.light-theme #appView .mobile-bottom-nav button.active{color:#124f9e!important}
-body.luxury-theme #appView .category-btn{color:#243a83!important;background:linear-gradient(145deg,#f8faff,#dfe8ff)!important;border-color:#9eafe8!important}
-body.luxury-theme #appView .category-btn .category-label,
-body.luxury-theme #appView .mobile-bottom-nav button:not(.active){color:#293f83!important}
-body.luxury-theme #appView .category-btn svg,
-body.luxury-theme #appView .da-v2-quick-grid button svg{color:#304fc0!important;stroke:#304fc0!important}
-body.luxury-theme #appView .mobile-bottom-nav button.active{color:#fff!important}
+.category-btn .category-icon{display:grid!important;place-items:center;min-height:26px}
+.category-btn .category-icon svg{width:25px!important;height:25px!important;stroke-width:2.25!important;opacity:1!important}
+.category-btn .category-label{display:block!important;max-width:100%;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;text-align:center!important;overflow-wrap:anywhere;font-size:12px!important;font-weight:850!important;line-height:1.5!important}
+.da-v2-quick-grid button{gap:9px!important;font-size:12px!important;line-height:1.55!important}
+.da-v2-quick-grid button b{display:block;color:inherit!important;font-size:12px!important;font-weight:850!important;line-height:1.55!important;text-align:center;white-space:normal!important;overflow-wrap:anywhere}
+.da-v2-quick-grid button svg{width:26px!important;height:26px!important;stroke-width:2.2!important;opacity:1!important}
+.quick .icon-tab{display:inline-flex!important;align-items:center;justify-content:center;gap:8px;font-size:13px!important;font-weight:850!important;line-height:1.5!important}
+.quick .icon-tab svg{width:19px!important;height:19px!important;stroke-width:2.3!important;flex:0 0 auto;opacity:1!important}
+.mobile-bottom-nav{min-height:70px!important;padding:8px 4px calc(8px + env(safe-area-inset-bottom))!important;gap:3px!important}.mobile-bottom-nav button{min-width:0!important;min-height:62px!important;padding:7px 2px!important;gap:6px!important;font-size:12px!important;font-weight:900!important;line-height:1.45!important}
+.mobile-bottom-nav button svg{width:21px!important;height:21px!important;flex:0 0 21px!important;stroke-width:2.25!important;opacity:1!important}
+.mobile-bottom-nav button span{display:block!important;max-width:100%!important;overflow:visible!important;text-overflow:clip!important;white-space:normal!important;overflow-wrap:anywhere!important;font-size:12px!important;font-weight:900!important;line-height:1.45!important;text-align:center!important}
+body:not(.light-theme):not(.luxury-theme) .category-btn,
+body:not(.light-theme):not(.luxury-theme) .mobile-bottom-nav button:not(.active){color:#f3e7c7!important}
+body:not(.light-theme):not(.luxury-theme) .category-btn .category-label{color:#fff1c8!important;text-shadow:0 1px 2px rgba(0,0,0,.65)}
+body.light-theme .category-btn{color:#193d68!important;background:linear-gradient(145deg,#fff,#edf6ff)!important;border-color:#c5def5!important}
+body.light-theme .category-btn .category-label,
+body.light-theme .mobile-bottom-nav button:not(.active){color:#294968!important}
+body.light-theme .category-btn svg,
+body.light-theme .da-v2-quick-grid button svg{color:#175fb8!important;stroke:#175fb8!important}
+body.light-theme .mobile-bottom-nav button.active{color:#124f9e!important}
+body.luxury-theme .category-btn{color:#243a83!important;background:linear-gradient(145deg,#f8faff,#dfe8ff)!important;border-color:#9eafe8!important}
+body.luxury-theme .category-btn .category-label,
+body.luxury-theme .mobile-bottom-nav button:not(.active){color:#293f83!important}
+body.luxury-theme .category-btn svg,
+body.luxury-theme .da-v2-quick-grid button svg{color:#304fc0!important;stroke:#304fc0!important}
+body.luxury-theme .mobile-bottom-nav button.active{color:#fff!important}
 @media(max-width:600px){
-  #appView .category-btn{min-height:78px!important;padding:9px 5px!important;gap:6px!important}
-  #appView .category-btn .category-label{font-size:11.5px!important;line-height:1.5!important}
-  #appView .da-v2-quick-grid button{min-height:82px!important;padding:10px 5px!important}
-  #appView .da-v2-quick-grid button b{font-size:11.5px!important}
-  #appView .mobile-bottom-nav button{min-height:60px!important;font-size:10.5px!important}
-  #appView .mobile-bottom-nav button span{font-size:10.5px!important;line-height:1.45!important}
+  .category-btn{min-height:78px!important;padding:9px 5px!important;gap:6px!important}
+  .category-btn .category-label{font-size:12px!important;line-height:1.5!important}
+  .da-v2-quick-grid button{min-height:82px!important;padding:10px 5px!important}
+  .da-v2-quick-grid button b{font-size:12px!important}
+  .mobile-bottom-nav button{min-height:60px!important;font-size:11px!important}
+  .mobile-bottom-nav button span{font-size:11px!important;line-height:1.45!important}
 }
 @media(max-width:360px){
-  #appView .mobile-bottom-nav button span{font-size:9.5px!important}
-  #appView .mobile-bottom-nav button svg{width:19px!important;height:19px!important;flex-basis:19px!important}
-  #appView .category-btn .category-label{font-size:10.5px!important}
+  .mobile-bottom-nav button span{font-size:10.5px!important}
+  .mobile-bottom-nav button svg{width:19px!important;height:19px!important;flex-basis:19px!important}
+  .category-btn .category-label{font-size:11px!important}
 }
+
+/* Ensure the rules apply to the real document structure (no #appView wrapper exists). */
+body .mobile-bottom-nav button span{letter-spacing:0!important;text-shadow:0 0 .01px currentColor}
+@media(max-width:600px){body .mobile-bottom-nav{min-height:72px!important}body .mobile-bottom-nav button{min-height:64px!important}body .mobile-bottom-nav button span{font-size:11.5px!important}}
+@media(max-width:360px){body .mobile-bottom-nav button span{font-size:10.5px!important}}
