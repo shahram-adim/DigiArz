@@ -6622,3 +6622,23 @@ body.luxury-theme #appView .mobile-bottom-nav button.active{color:#fff!important
 body #appView .mobile-bottom-nav button span{letter-spacing:0!important;text-shadow:0 0 .01px currentColor}
 @media(max-width:600px){body #appView .mobile-bottom-nav{min-height:72px!important}body #appView .mobile-bottom-nav button{min-height:64px!important}body #appView .mobile-bottom-nav button span{font-size:11.5px!important}}
 @media(max-width:360px){body #appView .mobile-bottom-nav button span{font-size:10.5px!important}}
+
+
+/* Final mobile navigation legibility: keep Persian captions intact and high-contrast. */
+#appView .mobile-bottom-nav button span{
+  white-space:nowrap!important;overflow-wrap:normal!important;word-break:keep-all!important;
+  font-size:10.5px!important;line-height:1.35!important;font-weight:900!important;
+}
+body.dark-theme #appView .mobile-bottom-nav button:not(.active),
+body.dark-theme #appView .mobile-bottom-nav button:not(.active) span{color:#f3e7c7!important;opacity:1!important}
+body.light-theme #appView .mobile-bottom-nav button:not(.active),
+body.light-theme #appView .mobile-bottom-nav button:not(.active) span{color:#19395d!important;opacity:1!important}
+body.luxury-theme #appView .mobile-bottom-nav button:not(.active),
+body.luxury-theme #appView .mobile-bottom-nav button:not(.active) span{color:#172d70!important;opacity:1!important}
+@media(max-width:600px){
+  #appView .mobile-bottom-nav button{padding-left:1px!important;padding-right:1px!important;gap:5px!important}
+  #appView .mobile-bottom-nav button span{font-size:10px!important}
+}
+@media(max-width:360px){
+  #appView .mobile-bottom-nav button span{font-size:9px!important}
+}
