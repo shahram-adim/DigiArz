@@ -1,6 +1,16 @@
 -- Disposable two-session race: two concurrent same-user buy placements.
 -- Runs only in the dedicated GitHub Actions PostgreSQL database.
 
+-- The shared worker fixture intentionally stubs auth.uid() to NULL.
+-- Restore the session-claim implementation used by authenticated RPC tests.
+CREATE OR REPLACE FUNCTION auth.uid()
+RETURNS uuid
+LANGUAGE sql
+STABLE
+AS $uid$
+  SELECT NULLIF(current_setting('request.jwt.claim.sub', true), '')::uuid
+$uid$;
+
 INSERT INTO auth.users(id) VALUES ('82000000-0000-0000-0000-000000000001');
 INSERT INTO public.profiles(id,is_active) VALUES ('82000000-0000-0000-0000-000000000001',true);
 INSERT INTO public.crypto_assets(coingecko_id) VALUES ('bitcoin');
