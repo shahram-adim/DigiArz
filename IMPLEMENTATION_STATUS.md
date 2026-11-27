@@ -2252,3 +2252,16 @@
 - [!] The 17 applied migrations with no matching local SQL source and 20 same-name timestamp mismatches remain unresolved. Do not reconstruct their SQL from names, live catalog state or neighboring migration bodies. Do not repair migration history or run db push.
 - [ ] Next: recover missing SQL bodies from a trusted deployment artifact/backup or historical Git object; inspect all 20 timestamp variants against authoritative deployment records; reconcile live/local price-refresh and catalog auto-activation writer source; extend disposable source-parity harness. Keep PR #67 Draft and non-deployable.
 - [x] No Production writes, business-row reads, migration replay/repair, function/ACL/RLS/trigger/Cron/worker/Auth change, db push, merge, deploy, APK/Pages publication or cost.
+
+
+## Shahram 193 — CI 2413 green; all 20 timestamp variants inspected (2026-11-27)
+
+- [x] Rechecked PR #67: open, Draft, unmerged, mergeable=true; HEAD `43766d7c205dd5e934a185f34acfd59719897e79`.
+- [x] CI #2413 / run `46052212399` succeeded on the exact current HEAD. The `exact-decimal` job passed all 28 substantive steps, including authoritative TP/SL/Stop-Limit and Market/Limit migration harnesses on disposable PostgreSQL 17, race/concurrency tests, canonical duplicate-ticker isolation and schema fingerprint.
+- [x] Checked workflow artifact inventories for runs #2411, #2406 and #2413; none published artifacts that could serve as migration-source backups.
+- [x] Individually inspected all 20 local SQL files corresponding by name to Production timestamp-mismatch entries. Categorized the conditional reservation worker/index, stale CoinGecko recovery, curated listing/pair activation/admin controls, market price parser/refresh/display, Kifpool exchange-sync/matcher alias revisions, and cron scheduling migration. This verifies local candidate contents only, not deployed-source identity.
+- [!] Material discrepancy: local `20261117130000_stagger_market_price_overflow_and_refresh_exchange_discovery.sql` changes cron job 14 to every minute, while the latest metadata-only Production capture records job 14 as `1,31 * * * *`. Do not replay this local migration based on its name or timestamp.
+- [!] Local pair-activation SQL still enforces volume >= $1M and rank <= 2000 and uses ticker-keyed pair/price/order paths. This conflicts with approved no-fixed-volume/rank catalog scope and canonical identity; redesign is required, not replay.
+- [!] Four exact GitHub commit searches for representative missing applied migration names returned no commits. This is bounded evidence only; 17 missing SQL sources and all 20 deployment timestamp mappings remain unresolved.
+- [ ] Next: obtain exact applied SQL/checksum evidence from a trusted deployment artifact or backup. If unavailable, preserve the unresolved blocker; continue source-parity inventory for catalog/market writers. No inferred SQL.
+- [x] No Production writes/queries in this step; no migration replay/repair, db push, merge, deployment, Cron/worker/ACL/RLS change, APK/Pages publication or cost.
