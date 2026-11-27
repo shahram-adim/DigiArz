@@ -106,21 +106,36 @@ const server = http.createServer((req, res) => {
 async function renderOfflineLogoFallbacks(page) {
   await page.evaluate(() => {
     const images = [...document.querySelectorAll('img[data-symbol], #detailLogo')];
+    const colors = {BTC:'#f7931a',ETH:'#627eea',SOL:'#14b8a6',BNB:'#f3ba2f',XRP:'#23292f',DOGE:'#c2a633',ADA:'#0033ad',AAVE:'#b6509e',TRX:'#eb0029',LINK:'#2a5ada',LTC:'#345d9d',DOT:'#e6007a',TON:'#0098ea',AVAX:'#e84142',SHIB:'#f00500',USDC:'#2775ca'};
     for (const image of images) {
-      const holder = image.parentElement;
       const rawSymbol = image.dataset.symbol || document.getElementById('chartSymbol')?.textContent || image.alt || '';
-      const symbol = typeof cleanCoinSymbol === 'function'
-        ? cleanCoinSymbol(rawSymbol)
-        : String(rawSymbol).replace(/USDT$/i,'').replace(/[^a-z0-9]/gi,'').toUpperCase();
-      if (!holder || typeof renderCoinLogoFallback !== 'function' || !symbol) continue;
-      if (image.id === 'detailLogo' && holder.classList.contains('asset-detail-head')) {
-        const fallback = document.createElement('span');
-        fallback.className = 'asset-logo';
-        renderCoinLogoFallback(fallback, symbol);
+      const symbol = String(rawSymbol).replace(/USDT$/i,'').replace(/[^a-z0-9]/gi,'').toUpperCase();
+      if (!symbol) continue;
+      const label = symbol.length > 4 ? symbol.slice(0,3) : symbol;
+      const ns = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(ns,'svg');
+      svg.setAttribute('viewBox','0 0 48 48');
+      svg.setAttribute('width','100%');
+      svg.setAttribute('height','100%');
+      svg.setAttribute('aria-hidden','true');
+      const circle = document.createElementNS(ns,'circle');
+      circle.setAttribute('cx','24');circle.setAttribute('cy','24');circle.setAttribute('r','22');
+      circle.setAttribute('fill',colors[symbol]||'#526ee8');
+      const text = document.createElementNS(ns,'text');
+      text.setAttribute('x','24');text.setAttribute('y','25');text.setAttribute('text-anchor','middle');
+      text.setAttribute('dominant-baseline','middle');text.setAttribute('fill','#fff');
+      text.setAttribute('font-family','Arial,sans-serif');text.setAttribute('font-size',label.length>3?'11':'15');
+      text.setAttribute('font-weight','800');text.textContent=label;
+      svg.append(circle,text);
+      if (image.id === 'detailLogo') {
+        const fallback=document.createElement('span');
+        fallback.className='asset-logo coin-logo-fallback';
+        fallback.setAttribute('role','img');
+        fallback.setAttribute('aria-label','نماد تصویری جایگزین '+symbol);
+        fallback.append(svg);
         image.replaceWith(fallback);
       } else {
-        renderCoinLogoFallback(holder, symbol);
-        image.remove();
+        image.replaceWith(svg);
       }
     }
   });
