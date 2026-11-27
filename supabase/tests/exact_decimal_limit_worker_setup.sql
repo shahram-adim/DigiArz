@@ -4,6 +4,29 @@ CREATE TABLE public.profiles (
   id uuid PRIMARY KEY,
   is_active boolean NOT NULL
 );
+
+CREATE SCHEMA private;
+CREATE FUNCTION private.guard_active_account_writes()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO ''
+AS $function$
+DECLARE
+  v_active boolean;
+BEGIN
+  SELECT p.is_active INTO v_active
+  FROM public.profiles p
+  WHERE p.id = NEW.user_id
+  FOR SHARE;
+
+  IF COALESCE(v_active, false) IS NOT TRUE THEN
+    RAISE EXCEPTION 'Account is inactive; reactivate the account before trading';
+  END IF;
+
+  RETURN NEW;
+END;
+$function$;
 CREATE TABLE public.orders (
   id uuid PRIMARY KEY,
   user_id uuid NOT NULL,
@@ -74,3 +97,16 @@ SET search_path TO ''
 AS $fee$
   SELECT 0.001::numeric
 $fee$;
+
+-- Match Production's active-account INSERT guards on all three ledger tables.
+CREATE TRIGGER guard_active_account_orders
+BEFORE INSERT ON public.orders
+FOR EACH ROW EXECUTE FUNCTION private.guard_active_account_writes();
+
+CREATE TRIGGER guard_active_account_trades
+BEFORE INSERT ON public.trades
+FOR EACH ROW EXECUTE FUNCTION private.guard_active_account_writes();
+
+CREATE TRIGGER guard_active_account_transactions
+BEFORE INSERT ON public.transactions
+FOR EACH ROW EXECUTE FUNCTION private.guard_active_account_writes();
