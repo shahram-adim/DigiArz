@@ -6555,3 +6555,7 @@ body.light-theme .market-page{
   background-color:#ffffff!important;
   background-image:none!important;
 }
+
+
+/* Light glass theme: keep the hero elevation chromatic, not a gray/black halo. */
+body.light-theme .hero{box-shadow:0 12px 30px rgba(40,104,215,.07)!important}
