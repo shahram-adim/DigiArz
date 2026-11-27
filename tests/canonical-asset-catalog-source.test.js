@@ -97,15 +97,14 @@ test('automatic pair activation keeps curation, volume, rank and ticker-price ga
   assert.match(adminEnable, /market_prices/i);
 });
 
-test('market read API derives trade_enabled from ticker-keyed pair and price relations', () => {
+test('market read API derives trade_enabled from a fresh ticker-keyed price alone, not enabled pair identity', () => {
   const market = definitions.public_get_crypto_market.definition;
-  assert.match(market, /demo_trading_pairs/i);
   assert.match(market, /market_prices/i);
-  assert.match(market, /pair_symbol/i);
-  assert.match(market, /mp\.symbol/i);
+  assert.match(market, /mp\.symbol\s*=\s*ca\.symbol\s*\|\|\s*'USDT'/i);
+  assert.match(market, /mp\.updated_at\s*>=\s*NOW\(\)\s*-\s*INTERVAL '1 minute'/i);
   assert.match(market, /trade_enabled/i);
+  assert.doesNotMatch(market, /demo_trading_pairs|pair_id|base_asset_id|quote_asset_id/i);
 });
-
 test('exchange discovery/matching remains a separate staged process with ambiguous status', () => {
   const sync = definitions.public_process_iran_exchange_asset_sync.definition;
   const discovered = definitions.public_get_exchange_discovered_market_assets.definition;
