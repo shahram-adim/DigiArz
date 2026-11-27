@@ -98,3 +98,36 @@
 - در ۲۴ ساعت منتهی به `2026-11-22 23:14 UTC`، ۲۱ POST با HTTP 502 و ۲۱ OPTIONS با HTTP 200 ثبت شد. این قید یکتا و POST ساده یک علت قطعی و بازتولیدپذیر برای شکست تکرار batch است؛ خطاهای provider مستقل نیز ممکن است هم‌زمان وجود داشته باشند.
 - کد GitHub اکنون upsert با conflict target دقیق، dedupe درون batch، و logging ساختاریافته بدون داده حساس دارد. آزمون‌های Node و fixture PostgreSQL 17 با transaction/rollback به CI اضافه شدند.
 - Production همچنان Edge Function نسخه ۳ را اجرا می‌کند. هیچ deploy، refresh واقعی یا تغییر داده‌ای انجام نشد؛ استقرار تا تأیید صریح کاربر متوقف است.
+
+
+## اثبات مستقیم علت خطای 502 — ۲۷ نوامبر ۲۰۲۶
+
+### شواهد Production (فقط‌خواندنی)
+- HEAD شاخه `main` در شروع این بررسی: `df0a9927451f3b8092997b6d573e62fda235b84d`.
+- Edge Function مستقر `refresh-toman-market-prices` همچنان نسخه ۳ است؛ SHA-256 فایل مستقر `bd85141a8dbe59329235b5266ee391c6953865e97e91253f3e3e3946b155b391`.
+- ایندکس یکتای زنده جدول `public.market_toman_prices` دقیقاً روی `(exchange, asset_symbol, quote_currency)` است و نام آن `market_toman_prices_exchange_asset_symbol_quote_currency_key` است.
+- منبع مستقر نسخه ۳ برای درج قیمت‌ها POST ساده می‌فرستد؛ پارامتر `on_conflict` و ترجیح `resolution=merge-duplicates` ندارد. پس از درج نیز مسیر DELETE برای پاک‌سازی ردیف‌های قدیمی دارد.
+- در لاگ‌های ۲۴ ساعت قابل‌دسترسی برای همین Function، ۹ درخواست POST با HTTP 502 و ۹ درخواست OPTIONS با HTTP 200 ثبت شد.
+- در همان بازه، ۹ خطای PostgreSQL با SQLSTATE `23505` و پیام `duplicate key value violates unique constraint` برای همان ایندکس ثبت شد. نمونه کلید تکراری: `(nobitex, BTC, TOMAN)`.
+- نمونه زمانی هم‌خوان: خطای PostgreSQL در `2026-11-26 19:17:15.959 UTC` و پاسخ POST 502 در `2026-11-26 19:17:16.012 UTC`.
+- متن SQL ثبت‌شده در PostgREST یک `INSERT` معمولی و بدون `ON CONFLICT` است.
+
+**نتیجه:** علت 502های مشاهده‌شده در این بازه مستقیماً تأیید شد: درج مجدد همان کلید یکتا توسط نسخه ۳ مستقر، خطای PostgreSQL `23505` ایجاد می‌کند و درخواست تابع با 502 پایان می‌یابد. این نتیجه به همین خطاهای ثبت‌شده محدود است؛ خطاهای مستقل provider یا شبکه در آینده همچنان ممکن‌اند.
+
+### وضعیت اصلاح در main
+- منبع فعلی main از `dedupeTomanPriceRows()` و `buildTomanPriceUpsertRequest()` استفاده می‌کند.
+- conflict target در PostgREST برابر `exchange,asset_symbol,quote_currency` است و `Prefer: resolution=merge-duplicates,return=minimal` ارسال می‌شود.
+- مسیر DELETE از تابع main حذف شده تا پاسخ ناقص یک provider باعث حذف قیمت‌های معتبر provider دیگر نشود.
+- آزمون PostgreSQL موجود گسترش یافت: ابتدا شکست درج ساده با SQLSTATE `23505` را روی جدول موقت بازتولید می‌کند، سپس upsert را اجرا و idempotency را بررسی می‌کند. این فایل در workflow موجود `exact-decimal` اجرا می‌شود.
+- آزمون Node نیز تطابق نام قید یکتا، SQLSTATE، conflict target و ROLLBACK را کنترل می‌کند.
+
+### وضعیت فعلی داده و مانع انتشار
+- جدول قیمت جاری: Nobitex برابر ۲۲۱ و Wallex برابر ۱۵۲ ردیف؛ آخرین `fetched_at` برای هر دو `2026-11-17 22:04:26.622 UTC` و تعداد ردیف تازه در پنج دقیقه صفر است.
+- Production هنوز نسخه ۳ را اجرا می‌کند؛ اصلاح main مستقر نشده است.
+- نسخه مستقر هنوز فقط Nobitex، Wallex و Bitpin را دارد؛ Bit24 و Kifpool هنوز به مسیر قیمت تومانی متصل نیستند.
+- هیچ Deploy یا refresh دستی انجام نشد. استقرار Function و هر تغییر زنده همچنان نیازمند تأیید صریح مالک است.
+
+### ایمنی
+- فقط catalog/index metadata، Function source و logs خوانده شدند.
+- هیچ جدول مالی یا ردیف کاربر خوانده/تغییر داده نشد؛ هیچ Worker/RPC مالی اجرا نشد.
+- آزمون جدید فقط از TEMP TABLE و تراکنش ROLLBACK‌شونده در PostgreSQL دورریختنی CI استفاده می‌کند.
