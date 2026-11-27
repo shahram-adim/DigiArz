@@ -1691,3 +1691,13 @@
 - [!] این تست یک interleaving کنترل‌شده را اثبات می‌کند، نه اینکه به‌تنهایی علت تاریخی پنج قیمت stale را ثابت کند و نه اینکه starvation در تمام ترتیب‌های هم‌زمانی قطعی باشد. طراحی scheduler عادلانه و تست مستقل candidate هنوز انجام نشده است.
 - [ ] گام بعد: بررسی نتیجهٔ CI روی HEAD دقیق؛ رفع هر خطای SQL/هارنس؛ سپس افزودن candidate scheduler آزمایشی با cursor پایدار، ثبت requested-ID/response coverage و retry عادلانه، با آزمون‌های جداگانه.
 - [x] هیچ Supabase/Production تابعی اجرا نشد؛ هیچ قیمت، جفت‌ارز، صف، Cron، schema، grant، RLS، worker، سفارش، موجودی یا دادهٔ کاربر تغییر نکرد. هیچ migration/db push، merge، deploy، release یا هزینه‌ای انجام نشد.
+
+
+### Shahram 176 — exact-head PostgreSQL 17 CI result (2026-11-27)
+- [x] GitHub Actions run **46029198859** (run #2248) روی commit دقیق `511ec081ec6fa7a700067b91f10fab19beadc56a` با نتیجهٔ **SUCCESS** تمام شد.
+- [x] تمام 23 مرحلهٔ workflow موفق شدند؛ از جمله مرحلهٔ 23 با عنوان `Reproduce captured Production market scheduler interleaving in disposable PostgreSQL`. PostgreSQL 17 disposable database ساخته شد و اسکریپت source-snapshot با `ON_ERROR_STOP=1` بدون خطا اجرا شد.
+- [x] تست، مرز 515/516، جلوگیری Overflow هنگام وجود tracking/queue، پردازش پاسخ‌های سه provider، enqueue مجدد batch اصلی و امکان enqueue شدن asset 516 در حالت بدون درخواست معلق را با موفقیت بررسی کرد.
+- [!] این نتیجه فقط رفتار interleaving آزمایش‌شده را ثابت می‌کند؛ اثبات علت قطعی پنج قیمت stale تاریخی یا پوشش تمام interleavingهای هم‌زمانی نیست. candidate scheduler عادلانه هنوز نوشته/آزموده نشده است.
+- [x] PR #67 در آخرین compare برابر 24 commit جلو و صفر عقب از `main` بود؛ PR #66 برابر 69 جلو و صفر عقب. هر دو باز، Draft و ادغام‌نشده‌اند.
+- [ ] مرحلهٔ بعد: candidate طراحی‌شده با cursor پایدار و batch/response ledger را جدا از بدنهٔ Production در disposable PostgreSQL پیاده و آزمون کنیم؛ سپس inventory تمام مسیرهای نوشتن کاتالوگ/جفت‌ارز را کامل کنیم.
+- [x] هیچ تغییر Production/Supabase، Cron، صف، قیمت، جفت‌ارز، Worker، Migration، db push، merge، deploy، release یا هزینه‌ای انجام نشد.
