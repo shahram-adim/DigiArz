@@ -325,6 +325,13 @@ VALUES ('60000000-0000-0000-0000-000000000006', 1);
 INSERT INTO public.asset_balances (user_id, asset, balance)
 VALUES ('60000000-0000-0000-0000-000000000006', 'BTC', 0);
 
+UPDATE public.orders
+SET status='cancelled'
+WHERE id IN (
+  '64000000-0000-0000-0000-000000000064',
+  '65000000-0000-0000-0000-000000000065'
+);
+
 UPDATE public.market_prices
 SET price = 0.000005, updated_at = now()
 WHERE symbol = 'BTCUSDT';
