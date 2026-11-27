@@ -1777,3 +1777,14 @@
 - [x] پس از commit تست 7ce، commitهای بعدی فقط مستندات/status بودند؛ CI روی آخرین commit مستنداتی fef1031a... در زمان ثبت این checkpoint هنوز در حال اجرا بود.
 - [ ] گام بعد: تأیید آخرین docs-only CI؛ سپس اضافه‌کردن timestamp واقعی provider observation و تست‌های canonical catalog admission/identity collision در disposable PostgreSQL. بعد از آن inventory مصرف‌کنندگان بیرونی service_role را کامل کنیم.
 - [x] هیچ Production/Supabase write، SQL/Edge Function invocation، تغییر Cron/queue/price/pair, Worker, grant/RLS، migration/db push، merge، deploy، release یا هزینه‌ای انجام نشد.
+
+
+## Shahram 184 — provider-observed timestamp regression passed; duplicate-ticker ledger blocker mapped (2026-11-27)
+- [x] Candidate price response now requires CoinGecko `last_updated_at` Unix seconds; converts it to timestamptz and passes provider-observed time—not local receive time—to freshness validation. Missing/invalid timestamp is omitted and enters retry; received time remains separate.
+- [x] Test payloads were updated to carry source timestamps; a negative case verifies a positive price without `last_updated_at` is not accepted and is retried.
+- [x] Official CoinGecko documentation confirms `/simple/price` supports `include_last_updated_at=true` and returns a Unix update timestamp. The captured current Production request does not request this field; current market_prices.updated_at is written at response processing time and cannot independently prove provider-observed freshness.
+- [x] GitHub Actions run 46033134206 on exact HEAD `b9f7a2c31d2f9605f417ed2e39e055680a1c3944` completed SUCCESS; all 24 workflow steps passed, including candidate PostgreSQL 17 and concurrency tests. Later commits 4e897626... and 0fc43cef... only extend documentation.
+- [x] Duplicate ticker architecture was mapped against live schema: orders/trades/conditional_orders.symbol, asset_balances.asset and order_reservations.asset are text; current RPC/workers derive base asset from pair symbol. A synthetic alias alone would leak into ledger/portfolio; canonical immutable asset identity must be propagated end-to-end.
+- [!] Candidate success remains disposable-fixture evidence only. No Production code was changed; current production source does not yet request provider-observed timestamp and duplicate-ticker ledger identity remains a blocking architecture item for the owner's all-assets-tradable requirement.
+- [ ] Next: design canonical internal asset identity across pairs/orders/trades/reservations/balances/UI and add disposable lifecycle tests for distinct canonical IDs sharing a display ticker. Then verify the latest docs-only CI and continue external service_role caller inventory.
+- [x] No Production/Supabase write, SQL/Edge Function invocation, schema/pair/price/queue/Cron/worker/grant/RLS change, migration/db push, merge, deploy, release or cost was made.
