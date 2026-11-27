@@ -2176,3 +2176,17 @@
 - [!] Still not full Production schema parity: fixture tables, indexes, constraints, triggers, RLS and grants remain partially scaffolded; exact function-body snapshots are not equivalent to a complete source-of-truth schema capture.
 - [ ] Next: poll CI #2400; then run the new commit's CI; continue recovery of base ledger DDL and all constraints/indexes/trigger/RLS/grants from a permitted metadata-only source before canonical financial migration design.
 - [x] No Production database read/write performed in this step; no Production migration, schema/function/ACL/RLS/trigger/Cron/worker/Auth change; no db push, merge, deploy, APK/Pages publication or cost.
+
+
+## Shahram 189 — schema recovery evidence gate clarified (2026-11-27)
+
+- [x] Rechecked live PR #67: open, Draft, unmerged; latest head before this documentation step `8c9127307ee55ce852a313ba694af79c23ccbd85`. PR is now reported mergeable=true; no merge was attempted.
+- [x] CI #2400 / run `46049313969` completed SUCCESS: all 28 substantive steps passed, including authoritative checked-in Market/Limit migration function bodies on disposable PostgreSQL, conditional/Stop-Limit migration lifecycle, duplicate-ticker canonical fixture, scheduler exercise, and schema fingerprint SQL.
+- [x] CI #2401 / run `46049463567` completed SUCCESS: the new direct assertions for captured Production fee and active-account helpers passed.
+- [x] CI #2402 / run `46049488286` completed SUCCESS on the status-update head `8c912730...`; all 28 substantive steps passed.
+- [x] Re-examined the exact-decimal disposable fixture and Market/Limit migration source. Confirmed fixture table definitions are partial scaffolding, not authoritative base DDL. Current Market/Limit bodies still use ticker-keyed `asset_balances.asset`, `order_reservations.asset`, pair_symbol and market_prices.symbol.
+- [x] Recovered the precise limitation in the 2026-11-21 Recovery-Test record: metadata snapshot had 32 tables / 239 columns / 116 constraints / 63 indexes / 5 non-system triggers / 21 policies, but Production read-only queries timed out; restore used `--no-owner --no-acl`, so its ACL evidence is not Production grant evidence. Recovery-Test also contains backup data and is not an approved financial test harness.
+- [x] Added `docs/TRADING_LEDGER_SCHEMA_RECOVERY_EVIDENCE_2026-11-27.md`, commit `c8356964267cc2639177159eb22b46c4207b40f1`, documenting exact evidence, limits, canonical-identity consequences, and the next metadata-only recovery gate.
+- [!] No authoritative base-table creation DDL for the financial ledger was recovered in the bounded current-source search; this is not proof it does not exist in full Git history or Production. Do not infer it from test fixtures.
+- [ ] Next: obtain an authorized metadata-only Production fingerprint for financial tables, constraints/indexes/triggers/RLS/policies/grants and relevant helper ACLs; compare with Recovery-Test/source evidence. No business/user rows. Reconcile migration ledger separately before any deployable canonical migration.
+- [x] No Production SQL/query/write in this step; no Production migration, schema/function/ACL/RLS/trigger/Cron/worker/Auth change; no db push, merge, deploy, APK/Pages publication or cost.
