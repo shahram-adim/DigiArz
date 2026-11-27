@@ -12,9 +12,12 @@ CREATE FUNCTION auth.uid() RETURNS uuid
 LANGUAGE sql STABLE SET search_path TO ''
 AS $f$ SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $f$;
 CREATE TABLE public.profiles(id uuid PRIMARY KEY,is_active boolean NOT NULL);
-CREATE FUNCTION public.current_account_is_active() RETURNS boolean
-LANGUAGE sql STABLE SET search_path TO ''
-AS $f$ SELECT EXISTS(SELECT 1 FROM public.profiles WHERE id=auth.uid() AND is_active IS TRUE) $f$;
+CREATE TABLE public.demo_trading_fees(
+ quote_asset text PRIMARY KEY,maker_fee_rate numeric NOT NULL,taker_fee_rate numeric NOT NULL,
+ is_enabled boolean NOT NULL DEFAULT true
+);
+INSERT INTO public.demo_trading_fees(quote_asset,maker_fee_rate,taker_fee_rate,is_enabled)
+VALUES('USDT',0.001,0.001,true);
 CREATE TABLE public.orders(
  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),user_id uuid NOT NULL,
  symbol text NOT NULL,side text NOT NULL,order_type text NOT NULL,
@@ -44,6 +47,3 @@ CREATE TABLE public.transactions(
  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,user_id uuid NOT NULL,currency text NOT NULL,
  amount numeric(24,8) NOT NULL,transaction_type text NOT NULL,description text NOT NULL
 );
-CREATE FUNCTION public.get_demo_trading_fee_rate(p_quote text,p_kind text) RETURNS numeric
-LANGUAGE sql IMMUTABLE SET search_path TO ''
-AS $f$ SELECT 0.001::numeric $f$;
