@@ -276,6 +276,26 @@ BEGIN
   ) THEN
     RAISE EXCEPTION 'Oversized settlement changed reservation accounting';
   END IF;
+  -- A valid-sized sell credit must be skipped if the locked wallet is already at capacity.
+  INSERT INTO auth.users (id) VALUES ('70000000-0000-0000-0000-000000000007');
+  INSERT INTO public.profiles (id, is_active) VALUES ('70000000-0000-0000-0000-000000000007', true);
+  INSERT INTO public.wallets (user_id, balance_usdt) VALUES ('70000000-0000-0000-0000-000000000007', 9999999999999999.99999999::numeric);
+  INSERT INTO public.asset_balances (user_id, asset, balance) VALUES ('70000000-0000-0000-0000-000000000007', 'BTC', 1);
+  UPDATE public.market_prices SET price=10, updated_at=now() WHERE symbol='BTCUSDT';
+  INSERT INTO public.orders (id,user_id,symbol,side,order_type,amount,price,filled_amount,remaining_amount,status)
+  VALUES ('70000000-0000-0000-0000-000000000070','70000000-0000-0000-0000-000000000007','BTCUSDT','sell','limit',1,10,0,1,'pending');
+  INSERT INTO public.order_reservations (id,order_id,user_id,asset,reserved_amount,consumed_amount,released_amount,status)
+  VALUES ('70000000-0000-0000-0000-000000000077','70000000-0000-0000-0000-000000000070','70000000-0000-0000-0000-000000000007','BTC',1,0,0,'reserved');
+  PERFORM public.process_limit_orders();
+  IF (SELECT status FROM public.orders WHERE id='70000000-0000-0000-0000-000000000070') <> 'pending'
+     OR (SELECT balance_usdt FROM public.wallets WHERE user_id='70000000-0000-0000-0000-000000000007') <> 9999999999999999.99999999::numeric
+     OR (SELECT balance FROM public.asset_balances WHERE user_id='70000000-0000-0000-0000-000000000007' AND asset='BTC') <> 1
+     OR EXISTS (SELECT 1 FROM public.trades WHERE order_id='70000000-0000-0000-0000-000000000070')
+     OR EXISTS (SELECT 1 FROM public.transactions WHERE user_id='70000000-0000-0000-0000-000000000007')
+     OR EXISTS (SELECT 1 FROM public.order_reservations WHERE order_id='70000000-0000-0000-0000-000000000070' AND (consumed_amount<>0 OR released_amount<>0)) THEN
+    RAISE EXCEPTION 'Wallet-capacity overflow changed Limit sell financial state';
+  END IF;
+
 END
 $test$;
 
