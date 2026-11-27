@@ -2114,3 +2114,15 @@
 - [!] This is an authoritative ticker-based baseline, not canonical-ID implementation. It deliberately establishes the real Market/Limit source behavior before a future canonical candidate is integrated. It does not yet test duplicate ticker isolation through these real functions.
 - [ ] Next: obtain a fresh CI result, correct any disposable harness failures, then design the canonical Market/Limit candidate as a coordinated schema + RPC + worker unit and prove duplicate ticker separation with the real lifecycle.
 - [x] No Production writes/schema/function/ACL/RLS/Cron/worker/Auth changes; no merge/db push/migration replay/history repair, deployment/release, APK/Pages publication, or cost.
+
+
+## Shahram 184 — authoritative Market/Limit source-parity baseline passed (2026-11-27)
+
+- [x] CI run `46048133466` / workflow run #2391 completed SUCCESS on commit `a411a73df6a47dc77b4b83950b59b6a19ee22b95`.
+- [x] All substantive test steps passed, including real two-session Limit, TP/SL and Stop-Limit races; fair scheduler disposable PG17 exercise; authoritative TP/SL + Stop-Limit migration application; duplicate-ticker canonical fixture; and read-only canonical schema fingerprint.
+- [x] New step 28, `Apply authoritative Market and Limit migration in disposable PostgreSQL`, completed SUCCESS. It bootstrapped disposable PostgreSQL 17, applied the exact checked-in `20261113161641_enforce_active_accounts_in_demo_trade_and_limit_engine.sql` body, then ran Market buy/sell settlement, stale-price and inactive-account rejection, Limit buy/sell placement, four 25% fills, exact reserve consumption/release, stale worker quote preservation, and unauthenticated placement rejection assertions.
+- [!] This proves the current authoritative ticker-based Market/Limit baseline executes under the disposable harness. It does NOT prove canonical asset_id/pair_id is propagated into those production-source functions, nor resolve duplicate ticker execution through the actual Market/Limit path.
+- [!] The test setup supplies minimal Supabase auth/profile/table scaffolding only; the financial Market/Limit functions are loaded from the exact checked-in migration, not replaced by miniature lookalikes.
+- [ ] Next: create a canonical Market/Limit candidate migration in a separate disposable schema/branch artifact that preserves exact behavior while adding pair_id/asset_id and duplicate-ticker isolation; run full source-parity tests before extending TP/SL/Stop-Limit. Do not prepare a Production rollout until migration ledger reconciliation and source fingerprints are resolved.
+- [x] PR #67 remains open, Draft, unmerged, mergeable; latest head at checkpoint `a411a73df6a47dc77b4b83950b59b6a19ee22b95`, 191 commits ahead and 0 behind main.
+- [x] No Production writes/schema/function/ACL/RLS/Cron/worker/Auth changes; no merge/db push/migration replay/history repair, deployment/release, APK/Pages publication, or cost.
