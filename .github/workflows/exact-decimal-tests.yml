@@ -260,4 +260,12 @@ jobs:
             -f supabase/tests/exact_decimal_conditional_exit_worker.sql \
             -f supabase/tests/exact_decimal_conditional_exit_integration.sql
 
+      - name: Reproduce captured Production market scheduler interleaving in disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_market_scheduler_test;"
+          psql -h localhost -U postgres -d digiarz_market_scheduler_test -v ON_ERROR_STOP=1 \\
+            -f supabase/tests/market_price_scheduler_production_snapshot.sql
+
 # TP/SL conditional worker diagnostics are enabled in the isolated CI fixture.
