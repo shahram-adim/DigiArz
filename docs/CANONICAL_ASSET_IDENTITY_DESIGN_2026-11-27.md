@@ -109,3 +109,13 @@ This document is an architecture proposal only. It creates no SQL migration and 
 - The disposable fixture now also models limit-order placement, quote/base reservations by canonical `asset_id`, pair-keyed worker execution, fee-aware release of unused quote reservation, and stale-price retry without releasing the wrong asset.
 - It tests one buy Limit and one sell Limit on two same-ticker assets and confirms each reservation and fill remains attached to the correct canonical ID. It also checks that a stale quote leaves the order pending and reserved until a fresh observation arrives.
 - This extension is awaiting the current PostgreSQL 17 CI run; it is not yet a passed regression and is not Production code.
+
+### Authoritative TP/SL and Stop-Limit source audit (2026-11-27)
+
+The current migration bodies were fetched from this candidate branch, rather than inferred from the miniature canonical fixture:
+
+- 20261113162051_add_demo_take_profit_stop_loss_engine.sql defines conditional_orders with symbol, and the placement RPC derives v_base by removing the USDT suffix. It checks demo_trading_pairs.pair_symbol, reserves order_reservations.asset, and reads/updates asset_balances.asset using text tickers. process_conditional_orders() reads the price by symbol and delegates execution to the existing ticker-based Market engine.
+- 20261113181827_add_stop_limit_order_engine.sql extends the same conditional table. place_stop_limit_order() derives the base ticker, checks pair_symbol, and creates a text-asset reservation. process_stop_limit_orders() finds market_prices by symbol and delegates triggered children to ticker-based place_limit_order(). Parent/child linkage is by order UUID, but neither side carries canonical base/quote asset IDs or a canonical pair ID.
+- These authoritative functions therefore remain incompatible with duplicate-ticker canonical ledger identity even though the separate Market/Limit disposable prototype passes. The real TP/SL and Stop-Limit call chains must be upgraded together; simply adding asset_id to a parent row or changing display symbols is insufficient.
+- The current order_kind check includes take_profit, stop_loss, and stop_limit only. There is no OCO order kind or linked TP/SL sibling lifecycle in these migrations; OCO must be designed/tested separately, not assumed covered by TP/SL.
+- Required next source-parity work: carry pair_id, base_asset_id, and quote_asset_id through conditional parent/child orders, reservations, trades and worker calls; key price lookup by pair; retain service-role-only worker ACLs, RLS, account-active guards, advisory/row locks, retry/fail-closed behavior, and existing one-minute worker cadence. Do not edit Production or run migrations as part of this design/test stage.
