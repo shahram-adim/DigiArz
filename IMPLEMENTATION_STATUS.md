@@ -1881,3 +1881,12 @@
 - [x] بنابراین تست Stop-Loss افزوده‌شده در commit `81f6476` اکنون در CI روی HEAD نهایی تأیید شده است. این نتیجه صرفاً برای PostgreSQL disposable است و هیچ ادعایی درباره اجرای Production ندارد.
 - [ ] گام بعد: طراحی source-parity canonical identity برای TP/SL و Stop-Limit؛ انتقال `pair_id`، `base_asset_id` و `quote_asset_id` از ورودی تا parent/child، reservation و worker؛ lookup قیمت pair-keyed؛ سپس duplicate ticker، stale price، invalid reservation و cancellation/worker race tests. Market/Limit adapters باید با بدنه واقعی موتورهای authoritative جایگزین شوند.
 - [x] هیچ تغییر Production، Migration/db push، SQL روی Supabase، merge، deploy/release، انتشار APK/Pages یا هزینه‌ای انجام نشد.
+
+
+## گسترش تست source-parity برای قیمت stale و رزرو نامعتبر — ۲۷ نوامبر ۲۰۲۶
+- [x] در `supabase/tests/authoritative_conditional_source_parity.sql` تست stale-price برای TP/SL اضافه شد: worker نباید سفارش را trigger کند و reservation باید reserved بماند؛ پس از ثبت مشاهده تازه، همان سفارش باید قابل اجرا شود.
+- [x] تست stale-price برای Stop-Limit اضافه شد: سفارش والد pending و رزرو USDT محفوظ می‌ماند؛ پس از تازه‌شدن قیمت، worker باید parent/child را trigger کند.
+- [x] تست reservation نامعتبر Stop-Limit اضافه شد: دارایی رزرو عمداً به شناسه/نماد نادرست تغییر می‌کند؛ worker نباید child order بسازد، باید attempt_count را افزایش دهد و parent را pending نگه دارد. پس از اصلاح fixture، retry باید موفق شود.
+- [!] کد تست در commit `966a7ce00e560b200fb7fc3ab3c4cc8976047935` ثبت شد. CI run `46038710233` برای همین commit آغاز شده و در زمان این ثبت هنوز در حال اجراست؛ تا نتیجه نهایی، این سه regression را تأییدشده تلقی نکنید.
+- [ ] پس از CI: بررسی لاگ step 25 و رفع هر خطا؛ سپس ثبت نتیجه نهایی و ادامه طراحی canonical IDs برای TP/SL و Stop-Limit. این harness همچنان Market/Limit adapters جداشده دارد و هنوز canonical identity را به migrationهای authoritative منتقل نمی‌کند.
+- [x] فقط فایل تست و مستندات شاخه تغییر کرده‌اند؛ هیچ Production DB، migration اجرایی، Supabase SQL، cron/worker، merge، deploy/release یا هزینه‌ای تغییر نکرده است.
