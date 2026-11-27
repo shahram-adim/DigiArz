@@ -1,0 +1,37 @@
+'use strict';
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const D = require('../src/decimal.js');
+globalThis.DigiDecimal = D;
+const P = require('../src/portfolio-valuation.js');
+
+test('portfolio market value multiplies precise quantity and price without binary float drift', () => {
+  assert.equal(P.value('0.12345678', '12345.678901234567890123'), '1524.157764060357776406');
+  assert.equal(P.value('0.00000001', '0.00000001'), '0.0000000000000001');
+});
+
+test('portfolio total sums wallet and asset values without float drift', () => {
+  assert.equal(P.sum(['0.1', '0.2', '0.00000001', '999999999999.12345678']), '999999999999.42345679');
+});
+
+test('values and totals support the full 24-digit database integer range', () => {
+  assert.equal(P.value('1', '123456789012345678901234'), '123456789012345678901234');
+  assert.equal(P.sum(['9999999999999999', '1']), '10000000000000000');
+  assert.equal(P.compare('12345678901234567890.1', '12345678901234567890.0'), 1);
+});
+
+test('invalid and negative balances are never counted as positive holdings', () => {
+  assert.equal(P.positiveOrZero('-12.5'), '0');
+  assert.equal(P.positiveOrZero('NaN'), '0');
+  assert.equal(P.positiveOrZero('0.00000001'), '0.00000001');
+});
+
+test('malformed market values are rejected instead of contaminating portfolio totals', () => {
+  assert.equal(P.value('1.25', 'invalid'), null);
+  assert.throws(() => P.sum(['1', 'bad']), /Invalid portfolio amount/);
+  assert.throws(() => P.sum(['1', '-0.1']), /Negative portfolio amount/);
+});
+
+test('portfolio valuation retains 18-place precision', () => {
+  assert.equal(P.value('1.23456789', '2.00000001'), '2.4691357923456789');
+});

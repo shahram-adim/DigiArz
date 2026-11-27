@@ -1,0 +1,87 @@
+'use strict';
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+
+const java = fs.readFileSync('android-native/BiometricCredentialPlugin.java', 'utf8');
+const html = fs.readFileSync('index.html', 'utf8');
+const nativeSetup = fs.readFileSync('scripts/prepare-android-native.sh', 'utf8');
+
+test('native credential vault uses Android Keystore AES-GCM and requires per-use authentication', () => {
+  assert.match(java, /KeyStore\.getInstance\("AndroidKeyStore"\)/);
+  assert.match(java, /Cipher\.getInstance\("AES\/GCM\/NoPadding"\)/);
+  assert.match(java, /\.setUserAuthenticationRequired\(true\)/);
+  assert.match(java, /\.setUserAuthenticationValidityDurationSeconds\(-1\)/);
+  assert.match(java, /\.setInvalidatedByBiometricEnrollment\(true\)/);
+  assert.match(java, /BIOMETRIC_STRONG/);
+});
+
+test('explicit re-enrollment recovers from an invalidated Android Keystore key', () => {
+  assert.match(java, /KeyPermanentlyInvalidatedException/);
+  assert.match(java, /UnrecoverableKeyException/);
+  assert.match(java, /probe\.init\(Cipher\.ENCRYPT_MODE, existing\)/);
+  assert.match(java, /UserNotAuthenticatedException authenticationRequired/);
+  assert.match(java, /previous ciphertext cannot be recovered with an invalidated key/);
+  assert.match(java, /getSharedPreferences\(PREFS, Context\.MODE_PRIVATE\)\.edit\(\)\.clear\(\)\.apply\(\)/);
+  assert.match(java, /keyStore\.deleteEntry\(KEY_ALIAS\)/);
+});
+
+test('persistent preferences contain ciphertext and IV, not plaintext credential fields', () => {
+  assert.match(java, /putString\(CIPHERTEXT, Base64\.encodeToString\(encrypted/);
+  assert.match(java, /putString\(IV, Base64\.encodeToString\(authenticatedCipher\.getIV\(\)/);
+  assert.doesNotMatch(java, /putString\(["'](?:email|password)["']/);
+  assert.match(java, /authenticatedCipher\.doFinal\(ciphertext\)/);
+});
+
+test('user can explicitly clear encrypted credentials and the Android Keystore alias', () => {
+  assert.match(java, /getSharedPreferences\(PREFS, Context\.MODE_PRIVATE\)\.edit\(\)\.clear\(\)\.apply\(\)/);
+  assert.match(java, /keyStore\.deleteEntry\(KEY_ALIAS\)/);
+  assert.match(html, /clearBiometricCredentialsBtn/);
+  assert.match(html, /vault\.clearCredentials\(\)/);
+});
+
+test('biometric enrollment is opt-in and biometric login revalidates with Supabase', () => {
+  assert.match(html, /saveCredentialsForBiometric/);
+  assert.match(html, /if\(\$\('saveCredentialsForBiometric'\)\?\.checked\)/);
+  assert.match(html, /vault\.saveCredentials\(\{email,password\}\)/);
+  assert.match(html, /vault\.getCredentials\(\)/);
+  assert.match(html, /supabaseClient\.auth\.signInWithPassword\(\{email:credentials\.email,password:credentials\.password\}\)/);
+});
+
+test('Capacitor native setup registers the biometric plugin and adds AndroidX Biometric', () => {
+  assert.match(nativeSetup, /registerPlugin\(BiometricCredentialPlugin\.class\)/);
+  assert.match(nativeSetup, /androidx\.biometric:biometric:1\.1\.0/);
+});
+
+test('password recovery clears the obsolete biometric credential vault after a successful password update', () => {
+  const recovery = html.slice(html.indexOf('async function saveNewPassword()'), html.indexOf('async function showApp('));
+  assert.match(recovery, /auth\.updateUser\(\{password\}\)/);
+  assert.match(recovery, /await biometricVault\.clearCredentials\(\)/);
+  assert.match(recovery, /biometricLoginBtn.*classList\.add\('hidden'\)/);
+  assert.match(recovery, /پاک‌سازی اطلاعات بیومتریک ناموفق بود/);
+});
+
+test('invalid saved password is cleared after Supabase rejects biometric login', () => {
+  const login = html.slice(html.indexOf('async function loginWithBiometrics()'), html.indexOf('async function start()'));
+  assert.match(login, /error\?\.code==='invalid_credentials'/);
+  assert.match(login, /await vault\.clearCredentials\(\)/);
+  assert.match(login, /با رمز جدید وارد شوید/);
+});
+
+test('saved biometric credentials remain removable when strong biometrics are unavailable', () => {
+  const setup = html.slice(html.indexOf('async function setupBiometricControls()'), html.indexOf('async function clearBiometricCredentials()'));
+  assert.ok(setup.indexOf('state?.hasCredentials') < setup.indexOf('if(!state?.available)'), 'saved-credential state must be handled before the unavailable-device return');
+  assert.match(setup, /clearButton\?\.classList\.remove\('hidden'\)/);
+  assert.match(setup, /if\(optInLabel\)optInLabel\.classList\.add\('hidden'\);return/);
+});
+
+
+test('biometric UI accurately describes strong device biometrics, including secure face recognition', () => {
+  assert.match(html, /اثر انگشت یا تشخیص چهرهٔ امن دستگاه/);
+  assert.match(html, /ورود با بیومتریک امن دستگاه/);
+  assert.match(java, /BIOMETRIC_STRONG/);
+  assert.doesNotMatch(java, /BIOMETRIC_WEAK/);
+  assert.match(java, /بیومتریک قوی دستگاه را تأیید کنید/);
+  assert.doesNotMatch(java, /اثر انگشت را تأیید کنید/);
+  assert.doesNotMatch(java, /اثر انگشت دستگاه تغییر کرده باشد/);
+});
