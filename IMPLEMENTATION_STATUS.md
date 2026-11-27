@@ -1,5 +1,5 @@
 # DigiArz — وضعیت اجرای پروژه
-آخرین به‌روزرسانی: 2026-11-26
+آخرین به‌روزرسانی: 2026-11-28
 شاخه: `main`
 مخزن: https://github.com/shahram-adim/DigiArz
 
@@ -1573,3 +1573,41 @@
 - [x] همه بررسی‌های Supabase فقط‌خواندنی بودند؛ هیچ ردیف مالی یا داده کاربر برای تست خوانده یا تغییر داده نشد.
 - [x] هیچ Worker/RPC مالی اجرا نشد.
 - [x] هیچ Migration، Grant، Policy، Cron، Edge Function Deploy، refresh دستی، حذف داده یا انتشار APK انجام نشد.
+
+
+## ممیزی رقابت هم‌زمان ثبت تاریخچه قیمت تومانی — 2026-11-28
+
+### وضعیت تازه مخزن و سرویس‌ها
+- HEAD زنده `main`: `fbfb5e974e754088a32c9fdcd76fc2ca9ab0f98b`؛ چهار commit بعد از checkpoint قبلی `df0a992` ثبت شده‌اند: بازتولید خطای 23505، guard تست Node، گزارش علت خطا و ثبت وضعیت نهایی.
+- فایل وضعیت پیش از این ثبت با blob SHA برابر `43f105aa574ac08f9086e9ee5090dfcca9f0e880` از `main` خوانده شد.
+- Supabase `gfoaubfilhttnwjykaox` در وضعیت `ACTIVE_HEALTHY` و PostgreSQL `17.11.0.018` است؛ ۵۵ migration تا `20261121050216` ثبت شده و Development Branch وجود ندارد.
+- Edge Function زنده `refresh-toman-market-prices` هنوز نسخه ۳ با SHA-256 برابر `bd85141a8dbe59329235b5266ee391c6953865e97e91253f3e3e3946b155b391` است.
+- منبع `main` از helper مشترک برای dedupe و PostgREST upsert با conflict target `exchange,asset_symbol,quote_currency` استفاده می‌کند و مسیر DELETE خودکار را حذف کرده است؛ نسخه مستقر v3 هنوز INSERT ساده و cleanup قدیمی دارد. بنابراین اصلاح 23505 در GitHub موجود است ولی در Production فعال نشده است.
+- جدول قیمت جاری: ۳۷۳ ردیف (Nobitex=221، Wallex=152)، آخرین `fetched_at` برابر `2026-11-17 22:04:26.622 UTC` و صفر ردیف تازه در پنج دقیقه. جدول تاریخچه نیز ۳۷۳ ردیف دارد و آخرین snapshot همین زمان است.
+
+### شکاف تازه: race در ثبت تاریخچه قیمت
+- تعریف زنده `public.market_toman_price_history` فقط Primary Key روی `id` دارد؛ ایندکس `market_toman_history_lookup_idx` روی `(exchange, asset_symbol, recorded_at DESC)` غیر یکتا است. هیچ Unique Constraint/Index برای کلید منطقی snapshot وجود ندارد.
+- کد فعلی Edge Function در `main` ابتدا تاریخچه شش ساعت اخیر را SELECT می‌کند، در حافظه مجموعه `exchange:asset_symbol` می‌سازد و سپس ردیف‌های دیده‌نشده را با INSERT جداگانه می‌نویسد؛ بین SELECT و INSERT قفل یا قید یکتای پایگاه داده وجود ندارد.
+- در دو فراخوانی هم‌زمان، هر دو درخواست می‌توانند پیش از درج دیگری همان کلید را «ندیده» تشخیص دهند و snapshot تکراری بسازند. این یک race قابل استنتاج از کد و DDL است، نه رخداد مشاهده‌شده.
+- بررسی داده موجود فقط‌خواندنی بود: ۳۷۳ ردیف، ۳۷۳ کلید دقیق `(exchange,asset_symbol,recorded_at)` متمایز و صفر تکرار در bucketهای شش‌ساعته. پس فعلاً تکرار مشاهده نشده است؛ ریسک مربوط به هم‌زمانی آینده است.
+- در مقابل، جدول جاری `market_toman_prices` قید یکتای `(exchange,asset_symbol,quote_currency)` دارد و upsert شاخه main برای آن idempotent است.
+
+### اقدام این نوبت
+- [x] بررسی فقط‌خواندنی DDL، ایندکس‌ها، constraints و aggregateهای جدول تاریخچه انجام شد؛ هیچ ردیف شخصی/مالی خوانده نشد.
+- [x] نسخه و SHA دقیق Edge Function مستقر با فایل شاخه main مقایسه شد.
+- [x] نبودن قید یکتای تاریخچه و مسیر read-before-write به‌عنوان ریسک هم‌زمانی ثبت شد.
+- [x] هیچ کد runtime، schema، مجوز، داده یا Function مستقر تغییر نکرد؛ این مورد برای اصلاح امن به طراحی atomicity در سطح دیتابیس نیاز دارد.
+- [!] برای HEAD فعلی `fbfb5e9`، Combined Status خالی بود و ابزار workflow فقط runهای PR-triggered را برمی‌گرداند؛ اجرای CI روی این SHA از اتصال فعلی قابل تأیید نشد.
+
+### دستور اجرایی دقیق بعدی
+1. در محیط PostgreSQL 17 دورریختنی، یک Candidate فقط در `supabase/drafts` طراحی شود که ثبت snapshot را اتمیک کند؛ گزینه ترجیحی، RPC محدود به `service_role` با قفل تراکنشی و شرط «حداکثر یک snapshot برای هر exchange/asset در پنجره شش‌ساعته» است. از تغییر مستقیم Production یا افزودن قید بدون preflight خودداری شود.
+2. آزمون دو نشست هم‌زمان اضافه شود: هر دو نشست باید هم‌زمان تلاش کنند برای یک exchange/asset snapshot ثبت کنند؛ پس از commit فقط یک snapshot باید باقی بماند و هر دو پاسخ باید رفتار موفق/قابل‌پیش‌بینی داشته باشند.
+3. آزمون‌های rollback، تکرار درخواست، شکست میانی، دسترسی anon/authenticated/service_role و search_path خالی برای RPC Candidate اجرا شوند؛ مجوزهای حساس فقط در محیط ایزوله بررسی شوند.
+4. پس از تأیید parity و بازبینی انسانی، Migration و Edge Function به‌صورت دو تغییر مستقل برای تأیید مالک آماده شوند. استقرار Function فعلی نیز تا تأیید صریح مالک متوقف بماند؛ فرمان استقرار پس از تأیید و preflight:
+   `supabase functions deploy refresh-toman-market-prices --project-ref gfoaubfilhttnwjykaox`
+5. پس از استقرار مجاز، فقط health/metrics و timestampهای aggregate قیمت بازار بررسی شوند؛ هیچ Worker یا RPC مالی اجرا نشود.
+
+### ایمنی
+- [x] تمام queryهای Supabase در این نوبت فقط‌خواندنی و محدود به metadata یا aggregate بازار بودند.
+- [x] هیچ سفارش، معامله، رزرو، موجودی، کیف پول یا سابقه مالی کاربر خوانده یا تغییر داده نشد.
+- [x] هیچ Worker/RPC مالی، Migration، Grant، Policy، Cron، Edge Function Deploy، refresh دستی، حذف داده یا انتشار APK اجرا نشد.
