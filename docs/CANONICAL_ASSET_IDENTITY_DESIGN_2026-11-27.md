@@ -119,3 +119,14 @@ The current migration bodies were fetched from this candidate branch, rather tha
 - These authoritative functions therefore remain incompatible with duplicate-ticker canonical ledger identity even though the separate Market/Limit disposable prototype passes. The real TP/SL and Stop-Limit call chains must be upgraded together; simply adding asset_id to a parent row or changing display symbols is insufficient.
 - The current order_kind check includes take_profit, stop_loss, and stop_limit only. There is no OCO order kind or linked TP/SL sibling lifecycle in these migrations; OCO must be designed/tested separately, not assumed covered by TP/SL.
 - Required next source-parity work: carry pair_id, base_asset_id, and quote_asset_id through conditional parent/child orders, reservations, trades and worker calls; key price lookup by pair; retain service-role-only worker ACLs, RLS, account-active guards, advisory/row locks, retry/fail-closed behavior, and existing one-minute worker cadence. Do not edit Production or run migrations as part of this design/test stage.
+
+
+### CI source-parity boundary (2026-11-27)
+
+Inspection of .github/workflows/exact-decimal-tests.yml shows an important limit on the passing CI claim:
+
+- The canonical identity step creates a fresh database and executes only supabase/tests/canonical_asset_identity_candidate.sql. That file creates its own isolated canonical_asset_candidate schema and miniature functions; it does not apply the authoritative production migrations.
+- Existing TP/SL and Stop-Limit integration steps load supabase/tests/exact_decimal_stop_limit_setup.sql plus supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql and related draft worker SQL. They validate the exact-decimal candidate, not the current 2026-11-13 authoritative TP/SL and Stop-Limit migration bodies.
+- Therefore run 46036165275 proves that the canonical prototype fixture compiles and passes in PostgreSQL 17, but it does not prove canonical identity is integrated with actual TP/SL/Stop-Limit SQL, nor that the production migrations themselves are compatible with duplicate ticker IDs.
+- A dedicated source-parity harness is required: bootstrap the real schema dependencies, apply or extract the exact authoritative migration definitions in a disposable database, then apply the canonical-ID candidate and exercise the real RPC/worker call graph. Where migrations cannot be applied verbatim because of Supabase-only dependencies, the harness must document and assert each dependency substitution rather than silently replacing financial functions with miniature lookalikes.
+- Until that harness exists and passes, mark canonical identity as prototype-only and all-catalog trading as not implemented end-to-end.
