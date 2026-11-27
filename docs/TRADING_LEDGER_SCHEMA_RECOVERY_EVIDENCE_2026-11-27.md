@@ -95,3 +95,99 @@ A second bounded repository search found older read-only Production inspection r
 - Historical RLS summary: user/account-scoped policies on the four reviewed tables; policies did not reference numeric columns. The wider Recovery-Test snapshot later counted 21 policies overall.
 
 **Evidence limits:** these are dated, human-authored audit summaries, not raw catalog export or base-table CREATE DDL. They do not prove the schema stayed unchanged after 2026-11-15, do not provide exact constraint/index/policy names or expressions, and do not close the Production-vs-Recovery-Test comparison. The exact original CREATE TABLE statements, all column defaults/nullability, complete index definitions, policy expressions, table ACLs and current migration ledger remain outstanding. Use these records to guide the metadata fingerprint comparison, never as a substitute for it.
+
+
+## Current Production metadata-only catalog fingerprint and migration-ledger reconciliation — 2026-11-27
+
+**Capture provenance and safety boundary**
+- Captured against Supabase project `gfoaubfilhttnwjykaox` (PostgreSQL 17.11.0.018, status ACTIVE_HEALTHY) on 2026-11-27 at approximately 18:39–18:40 UTC.
+- Sources: Supabase management `list_tables(verbose=true)`, `list_migrations`, and read-only SELECTs limited to `pg_catalog`, `information_schema`, `pg_policies`, `pg_indexes`, `pg_proc`, `pg_trigger`, `pg_constraint`, `cron.job`, and privilege predicates. No business/user row contents were selected, and no schema/data/function/ACL/RLS/trigger/Cron state was changed.
+- Scope: 12 public tables — wallets, transactions, orders, trades, asset_balances, order_reservations, market_prices, market_fx_rates, crypto_assets, demo_trading_pairs, conditional_orders, demo_trading_fees.
+- Catalog totals: 12 tables, 100 columns, 65 constraints, 30 indexes, 3 non-system triggers, 12 policies. RLS is enabled on all 12; FORCE ROW LEVEL SECURITY is enabled on none. This is a current metadata snapshot, not a byte-for-byte original CREATE TABLE migration export.
+
+**Current numeric types, nullability and defaults (selected ledger/market columns)**
+- `market_prices.price numeric(38,18) NOT NULL`.
+- `orders.amount numeric(24,8) NOT NULL`; `orders.price numeric(24,8) NULL`; `filled_amount numeric NOT NULL DEFAULT 0`; `remaining_amount numeric NOT NULL`.
+- `trades.amount` and `trades.price numeric(24,8) NOT NULL`.
+- `asset_balances.balance numeric(28,8) NOT NULL DEFAULT 0`.
+- `wallets.balance_usdt numeric(24,8) NOT NULL DEFAULT 200`; `wallets.balance_irr numeric(24,0) NOT NULL DEFAULT 1000000000`.
+- `transactions.amount numeric(24,8) NOT NULL`.
+- `order_reservations.reserved_amount`, `consumed_amount`, `released_amount` are unconstrained `numeric`, all NOT NULL; consumed/released default to 0.
+- `conditional_orders.trigger_price`, `amount`, `executed_price`, `limit_price` are unconstrained `numeric`; nullable only for executed_price and limit_price.
+- `crypto_assets.current_price_usd numeric(30,12)`, `price_toman numeric(30,2)`, `price_change_percentage_24h numeric(20,8)`, market_cap/volume `numeric(30,2)`; fee rates are `numeric(10,8)`.
+- Important follow-up: current Production wallet default `balance_irr=1,000,000,000` differs from the currently approved product default remembered as 50,000,000 Toman. Do not silently change or infer the intended conversion; verify unit semantics and initialization path in a separate product/accounting audit before any future change.
+
+**Current identity and accounting structure**
+- `crypto_assets` primary key is `coingecko_id`; `symbol` is non-unique.
+- `demo_trading_pairs` primary key is `pair_symbol`, with unique `base_coingecko_id`; quote is constrained to USDT.
+- `market_prices` primary key is display `symbol`.
+- `orders.symbol`, `trades.symbol`, `conditional_orders.symbol`, `asset_balances.asset`, and `order_reservations.asset` are text, not canonical IDs. `asset_balances` has unique `(user_id, asset)`; reservations have unique `order_id`. Therefore the live ledger still cannot distinguish same-ticker canonical assets.
+- Current validated accounting constraints include:
+  - orders: `filled_amount + remaining_amount = amount`; filled and remaining ranges; positive amount/price; Limit requires price.
+  - asset balances: nonnegative balance and uppercase asset.
+  - reservations: `consumed_amount >= 0 AND consumed_amount + released_amount <= reserved_amount`; `released_amount <= reserved_amount`; positive reserve; order/user composite FK.
+  - trades: positive amount and price; trade order FK uses ON DELETE SET NULL.
+  - wallets: nonnegative USDT/IRR balances; one wallet per user.
+- Current 30-index inventory includes the expected primary/unique keys; `asset_balances(user_id,asset)`; `order_reservations(order_id)` and `(user_id,status)`; conditional pending/parent/execution/user-status indexes; orders composite identity and pending Limit index; `trades(order_id,created_at)`. Exact index definitions were read from `pg_indexes`.
+
+**Current triggers, RLS policies and privileges**
+- Three enabled non-system account-guard triggers: BEFORE INSERT on `orders`, `trades`, and `transactions`, all invoking `private.guard_active_account_writes()`. No trigger was recorded on `asset_balances` or `order_reservations`.
+- 12 policies were captured. Core ledger reads are user/account scoped: wallets, orders, trades and transactions use `auth.uid() = user_id` plus `current_account_is_active()`; asset balances use the same user/account guard; reservations are authenticated owner-only; conditional orders are authenticated owner-only; catalog/pairs/prices/FX have public read policies. RLS is enabled, but table owners do not have FORCE RLS.
+- Effective table privilege predicates show authenticated has SELECT only on wallets, orders, trades, transactions and asset_balances; no direct authenticated write grants. `order_reservations` has no authenticated direct table privilege and is accessed through its RPC path. service_role has broad table privileges as expected. The `conditional_orders` table has an anon SELECT grant but no anon SELECT policy; RLS therefore still filters anonymous rows.
+- Relevant SECURITY DEFINER functions are owned by postgres and have empty search_path. Authenticated can EXECUTE placement/cancellation/fee/account helper RPCs; anon cannot. The three worker functions `process_limit_orders()`, `process_conditional_orders()`, and `process_stop_limit_orders()` are executable by service_role and not authenticated/anon.
+- Active pg_cron metadata: job 3 `digiarz-market-price-refresh` every minute; job 8 `digiarz-limit-orders` every minute; job 9 `digiarz-conditional-orders` every minute; job 12 `digiarz-stop-limit-orders` every minute; job 17 `digiarz-market-price-overflow` every 10 minutes (schedule `5-59/10 * * * *`). All five were active at capture. Preserve these schedules; no cron changes were made.
+
+**Production migration ledger vs repository source — exact reconciliation**
+- Current Production ledger reports **55 applied migrations**. Both `main` and `plan/all-catalog-assets-tradable-2026-11-27` contain **40 local SQL migration files** at capture.
+- Matching by normalized migration name (not timestamp) yields **18 exact version/name matches, 20 same-name timestamp mismatches, 17 applied migrations with no matching local source file, and 2 local-only migrations absent from the applied ledger**. This reproduces the previously reported 17/20/2 discrepancy and clarifies that the 20 timestamp cases are name matches with differing version prefixes, not unrelated migration names.
+- 20 same-name timestamp mismatches (Production applied version → local filename version):
+  - `20261113162154 → 20261113162202` record_conditional_reservation_consumption
+  - `20261113162233 → 20261113162244` index_conditional_execution_order_reference
+  - `20261113163743 → 20261113170000` recover_stalled_crypto_asset_sync
+  - `20261113163947 → 20261113171000` add_admin_curated_market_assets
+  - `20261113164521 → 20261113172000` harden_admin_market_listing_access
+  - `20261113165725 → 20261113180000` add_admin_pair_activation_engine
+  - `20261113165747 → 20261113180500` fix_market_price_decimal_parser
+  - `20261113165806 → 20261113181000` show_live_prices_for_curated_assets
+  - `20261113170056 → 20261113182000` rate_limit_manual_market_refresh
+  - `20261113170216 → 20261113183000` index_market_pair_admin_audit
+  - `20261113170328 → 20261113184000` prevent_curated_ticker_collisions
+  - `20261113173506 → 20261113190000` admin_on_demand_crypto_asset_refresh
+  - `20261115134357 → 20261115134500` add_kifpool_to_scheduled_exchange_asset_sync
+  - `20261115134855 → 20261115134600` avoid_relisting_unchanged_exchange_asset_matches
+  - `20261115142521 → 20261115143000` allow_verified_kifpool_cfg_jup_exact_id_aliases
+  - `20261115142620 → 20261115143200` prioritize_exact_name_matches_for_kifpool_assets
+  - `20261115143015 → 20261115145000` allow_verified_kifpool_rebrand_aliases
+  - `20261115143050 → 20261115145500` allow_verified_kifpool_additional_name_aliases
+  - `20261115143223 → 20261115150000` allow_verified_kifpool_exact_id_name_aliases_batch
+  - `20261116205451 → 20261117130000` stagger_market_price_overflow_and_refresh_exchange_discovery
+- 17 applied ledger entries without a matching local migration name:
+  - `20261113153808 approved_wallet_defaults_fees_and_coin_reviews`
+  - `20261113154323 assign_confirmed_super_admin`
+  - `20261113154736 secure_admin_wallet_management`
+  - `20261113154750 add_admin_role_probe`
+  - `20261113154844 use_toman_units_in_admin_credit_ui`
+  - `20261113154926 move_admin_privilege_logic_to_private_schema`
+  - `20261115101709 create_exchange_asset_observations`
+  - `20261115102729 schedule_iran_exchange_asset_sync`
+  - `20261115102927 fix_exchange_sync_response_json_cast`
+  - `20261115103227 auto_list_verified_exchange_assets`
+  - `20261115103507 schedule_bit24_exchange_asset_sync`
+  - `20261115105721 admin_exchange_asset_sync_monitoring`
+  - `20261115105956 restrict_exchange_sync_worker_execution`
+  - `20261116201639 auto_activate_verified_exchange_pairs`
+  - `20261121045434 digiarz_backpressure_and_exchange_sync_bloat_guards`
+  - `20261121045531 snapshot_pg_net_unlogged_queue_before_recovery`
+  - `20261121050216 temporarily_throttle_exchange_asset_processors_20261121`
+- Two local-only migrations, not recorded as applied in Production:
+  - `20261116203000_add_kucoin_to_scheduled_market_price_refresh.sql`
+  - `20261116203100_add_gateio_to_scheduled_market_price_refresh.sql`
+- Do not replay, repair, rename, delete, or mark migrations applied based on this comparison. Recover each missing applied source from trusted Git history/backup and inspect timestamp variants individually. Local-only migrations remain unapplied; they must not be pushed as a side effect of reconciliation.
+
+**What this resolves and what remains open**
+- [x] Current Production table columns/types/defaults/nullability, 65 constraints, 30 indexes, 3 triggers, 12 RLS policies, selected table grants, relevant function ACL/SECURITY DEFINER metadata, and active order/market cron schedule metadata have now been captured using catalog-only reads.
+- [x] Current Production applied migration ledger was retrieved and reconciled against both main and the active PR branch by migration name and timestamp.
+- [!] This is a live catalog metadata fingerprint, not original CREATE TABLE migration source. It does not by itself recover historical DDL sequencing, dropped objects, all grants outside the scoped roles/tables, every external writer, or full function bodies for every dependent routine.
+- [!] The 17 missing applied migration source files and 20 timestamp mismatches remain unresolved source-of-truth issues. Do not infer their SQL from current catalog state or neighboring migration files.
+- [ ] Next: recover the 17 missing migration bodies from trusted historical Git objects/backups and inspect all 20 timestamp-different source variants; fingerprint relevant writers/readers/Edge Functions against this live catalog; then construct a full source-parity disposable harness. Only after these steps may a coordinated canonical-ID migration be drafted for review. OCO remains a separate missing lifecycle.
+- [x] No Production writes, business-row reads, migration replay/repair, schema/function/ACL/RLS/trigger/Cron/worker/Auth change, db push, merge, deploy, APK/Pages publication or cost.
