@@ -1384,3 +1384,12 @@ test('detail quick-trade input preserves the original decimal string',()=>{
   assert.ok(trade.includes('p_amount:amount,p_price:price'),'server RPC receives the exact decimal strings');
   assert.ok(trade.includes("readExactInput(buy?'buyAmount':'sellAmount'"),'the shared order input parser validates the exact decimal');
 });
+
+
+test('mobile market list reserves scroll clearance above the fixed bottom navigation',()=>{
+  const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
+  const fix=css.slice(css.lastIndexOf('Mobile market list: reserve a clear viewport lane'));
+  assert.match(fix,/@media\\(max-width:700px\\)/);
+  assert.match(fix,/#tab-markets #marketList\\{\\s*padding-bottom:112px!important;/);
+  assert.match(fix,/#tab-markets #marketList>\\.coin:last-child\\{\\s*scroll-margin-bottom:112px!important;/);
+});
