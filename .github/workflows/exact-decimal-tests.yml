@@ -312,9 +312,9 @@ jobs:
           PGPASSWORD: postgres
         run: |
           psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_authoritative_market_limit_test;"
-          psql -h localhost -U postgres -d digiarz_authoritative_market_limit_test -v ON_ERROR_STOP=1 \\
-            -f supabase/tests/authoritative_market_limit_source_parity_setup.sql \\
-            -f supabase/migrations/20261113161641_enforce_active_accounts_in_demo_trade_and_limit_engine.sql \\
+          psql -h localhost -U postgres -d digiarz_authoritative_market_limit_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/authoritative_market_limit_source_parity_setup.sql \
+            -f supabase/migrations/20261113161641_enforce_active_accounts_in_demo_trade_and_limit_engine.sql \
             -f supabase/tests/authoritative_market_limit_source_parity.sql
 
 # TP/SL conditional worker diagnostics are enabled in the isolated CI fixture.
