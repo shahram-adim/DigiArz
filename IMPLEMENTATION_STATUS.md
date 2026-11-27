@@ -2297,3 +2297,12 @@
 - [x] UI visual workflow run 45963746304 روی کد 87aa23b3acc7511b488f2716cea22e14152bdb87 با نتیجه success پایان یافت؛ source-level tests و capture تصویری موفق شدند.
 - [ ] APK workflow run 45963723457 هنوز باید از نظر build، provenance و artifact نهایی بررسی شود.
 - [!] PR #64 همچنان Draft، باز، ادغام‌نشده و mergeable=false است؛ وضعیت compare با main فعلی: ۲۶۸ جلو و ۳ عقب. هیچ merge/rebase انجام نشد.
+## تکمیل CI تصویری و APK آزمایشی — ۲۷ نوامبر ۲۰۲۶
+- [x] UI visual workflow run 45963746304 روی کد 87aa23b3acc7511b488f2716cea22e14152bdb87 با success پایان یافت: ۱۵۴/۱۵۴ تست منبعی موفق و ۷۲ screenshot واقعی در سه تم/بخش‌های رابط ساخته و بارگذاری شد.
+- [x] UI artifact ID 15182226925، حجم 29,927,835 bytes، SHA-256 زیپ b414e2def0bcb7dd4e3eec2ff059fbee9261322375bcfe9048db1ebb63e822c6؛ لینک: https://github.com/shahram-adim/DigiArz/actions/runs/45963746304/artifacts/15182226925
+- [x] Android debug APK workflow run 45963723457 با success پایان یافت؛ build، verify provenance و upload همگی موفق‌اند.
+- [x] APK از commit اجرایی 91d85d9a6fb18061452ce435590514e1be13114d ساخته شد؛ package version 1.0.0، built_at 2026-11-27T08:13:01Z، APK SHA-256 برابر 5fc177428715cf59ebbb004c8a2e53e21562f4a098edaa8bd13a26b346ed88df.
+- [x] APK artifact ID 15182426479، حجم ZIP برابر 3,700,264 bytes، ZIP SHA-256 برابر 3669a9d29d170adfe6b35553e20863cdf09ecf04765877bc8934eb115b47e284؛ شامل app-debug.apk و BUILD-INFO.txt؛ لینک: https://github.com/shahram-adim/DigiArz/actions/runs/45963723457/artifacts/15182426479
+- [!] APK یک debug candidate است؛ هنوز روی گوشی واقعی نصب/اجرا و ورود/بیومتریک/بازار/کیف پول آزمایش نشده است.
+- [!] وضعیت Production market feed همچنان بدون تغییر است. علت ۱۲/۱۲ پاسخ 502 با duplicate insert تأیید شده، اما رفع آن نیازمند استقرار نسخه اصلاح‌شده موجود در GitHub main است و تا تأیید صریح مالک انجام نمی‌شود.
+- [!] PR #64 باز، Draft، ادغام‌نشده و mergeable=false باقی مانده است.
