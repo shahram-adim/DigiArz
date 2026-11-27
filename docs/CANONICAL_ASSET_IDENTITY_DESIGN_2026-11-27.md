@@ -94,3 +94,11 @@ The earlier Production snapshot showed zero orders, trades, reservations and con
 ## 8. Release gates and non-actions
 
 This document is an architecture proposal only. It creates no SQL migration and authorizes no Production write. No schema, RPC, worker, Edge Function, Cron, pair, price, balance, order, reservation, grant, RLS policy, infrastructure, deployment or release was changed. No `db push`, merge, APK/Pages release or paid service change is authorized. Any implementation or Production rollout requires separate owner approval after the disposable end-to-end tests and a reviewed migration plan.
+
+
+## Disposable proof-of-concept status (2026-11-27)
+
+- First isolated SQL proof: `supabase/tests/canonical_asset_identity_candidate.sql`.
+- It models two canonical assets with the same DOT display ticker and same DOT/USDT display pair, but different immutable asset IDs, provider IDs, pair IDs, price rows and balances. Market buy/sell uses pair_id and stores canonical IDs on orders/trades; stale price and duplicate provider ID are rejected.
+- GitHub Actions run 46033780380 on commit `c74bdb268c09c97b86c0dfd3131e830b8a836f13` passed all 25 workflow steps, including this fixture and the separate fair-scheduler concurrency test.
+- Scope limitation: this proof covers Market buy/sell only. Limit reservations, TP/SL, OCO, Stop-Limit, worker authorization, RLS, catalog admission concurrency, portfolio/UI mapping and a safe Production backfill are not yet implemented or tested. This remains a disposable prototype, not a Production migration.
