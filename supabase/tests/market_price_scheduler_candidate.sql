@@ -343,6 +343,13 @@ BEGIN
   PERFORM scheduler_candidate.schedule_next_batch(10,3);
   PERFORM scheduler_candidate.schedule_next_batch(10,3);
   PERFORM scheduler_candidate.schedule_next_batch(10,3);
+  IF (SELECT count(DISTINCT u.id) FROM scheduler_candidate.batches b
+      CROSS JOIN LATERAL unnest(b.requested_ids) AS u(id)
+      WHERE b.state='in_flight')
+     <> (SELECT COALESCE(sum(cardinality(requested_ids)),0)
+         FROM scheduler_candidate.batches WHERE state='in_flight') THEN
+    RAISE EXCEPTION 'in-flight batches contain duplicate canonical IDs';
+  END IF;
   IF scheduler_candidate.schedule_next_batch(10,3) IS NOT NULL THEN
     RAISE EXCEPTION 'scheduler exceeded configured in-flight batch cap';
   END IF;
