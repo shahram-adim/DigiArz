@@ -130,3 +130,22 @@ The exact `private.request_market_price_overflow()` source was retrieved:
 
 ### Current queue snapshot
 At inspection time, three tracked price requests existed (one each for CoinGecko, Gate.io, and KuCoin). This is a point-in-time in-flight snapshot only.
+
+
+## Investigation of the five stale enabled prices (read-only, 2026-11-27)
+### Response-level evidence
+- The five stale pair rows all still have active `crypto_assets` records with positive `current_price_usd` and `last_updated` timestamps on 2026-11-27. Those catalog prices are refreshed by a separate market-page ingestion path and are not automatically copied into `market_prices` by the price refresh function.
+- Recent `net._http_response` inventory (last 10 days) contained 1,283 responses, all HTTP 200, not timed out, with non-empty bodies. This only describes retained responses; it is not proof every provider symbol/asset was returned.
+- At the latest CoinGecko simple-price response inspected (2026-11-27 15:39:03 UTC), none of the five exact provider IDs appeared as a JSON top-level key. An exact-key check avoids false positives from substring searches (for example, the word `river` can appear inside unrelated response text).
+- The same exact-key check against the latest retained response containing the literal ID found no JSON key/value for River or Toncoin either. Three other IDs (the two Ondo tokenized stock IDs and Nebius Group tokenized) had no retained response whose body contained their exact ID at all.
+- Therefore the evidence supports this immediate mechanism: the pair refresh loop does not write a price when the provider payload omits that exact CoinGecko ID; it intentionally skips the row because `v_price` is NULL. The separate `crypto_assets.current_price_usd` value being current does not fix this, because the two pipelines write different tables and the pair price function does not fall back to that field.
+- This is not yet a definitive explanation of why CoinGecko omits those IDs. Possible causes (unsupported simple-price ID, provider listing/endpoint coverage, ID not in the requested batch, or pagination/overflow request mismatch) remain unproven because the historical request URL-to-response mapping is not retained after queue processing and the tracking rows are deleted.
+
+### Safety conclusion
+Do not copy `crypto_assets.current_price_usd` into `market_prices` as an ad-hoc fix and do not reactivate stale prices. A future design must explicitly validate whether the catalog page price is suitable for the executable USDT pair, or provide an independently trusted exchange quote with deterministic source policy and strict freshness. For these five pairs, the system should fail closed until a valid pair-level quote is available.
+
+### Remaining read-only investigation
+- Verify whether these IDs are present in the primary first-515 CoinGecko request universe or only in the overflow set.
+- Inspect the overflow scheduler's exact ID set and the current request batching without invoking it.
+- Determine whether Gate.io/KuCoin have exact market symbols for the tokenized assets and whether those quotes are currently excluded due to missing exchange listings.
+- Consider adding durable request metadata (provider, requested IDs, batch number, response outcome) in a future migration proposal; do not change Production now.
