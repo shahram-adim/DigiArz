@@ -1642,3 +1642,14 @@
 - Recorded the diagnosis and safe redesign direction in the Production audit document. Future solution: durable batch cursor / single sequenced scheduler, plus durable requested-ID and response coverage metadata, retries and fairness.
 - No Production function invocation, no queue or Cron changes, no pair/price writes, no migration/db push, no merge/deploy/release, no paid infrastructure action.
 - Next: build disposable PostgreSQL source-parity regression for the starvation sequence and inspect all catalog/pair writer call paths before proposing any schema/function migration.
+
+
+## Shahram 173 — source-parity blocker for Overflow regression (2026-11-27)
+- Rechecked live GitHub: PR #67 remains open Draft and unmerged; its branch is 13 commits ahead and 0 behind current `main` (base/merge-base `fbfb5e974e754088a32c9fdcd76fc2ca9ab0f98b`). PR #66 was also found open Draft and unmerged in the repository PR search; no UI branch or Main changes were made.
+- Reviewed the checked-in migration `20261115130430_fetch_coin_gecko_market_price_overflow_ids.sql` and the existing PostgreSQL 17 CI harness.
+- Found a critical test-parity mismatch: the checked-in migration version of `private.request_market_price_overflow()` lacks the outstanding-request guards present in the separately recovered live Production body, and its embedded Cron schedule is every minute rather than Production's recorded offsets 5,15,25,35,45,55.
+- Therefore executing the migration in disposable PostgreSQL would not reproduce the live starvation condition. Deliberately did not add a misleading lookalike or label a simplified timing test as source-parity.
+- Added the exact source/schedule mismatch, confidence boundary, and evidence needed for a valid test fixture to `docs/PRODUCTION_CATALOG_SOURCE_AUDIT_2026-11-27.md`.
+- Continued writer-inventory qualification: `refresh_crypto_assets()` remains absent as a full body from checked-in migrations but is recovered from Production; it mutates `crypto_assets.symbol`. Exchange-sync search hits largely target `exchange_asset_observations` or read catalog metadata, not necessarily catalog writes. No global unique active-symbol constraint exists.
+- Next: preserve the exact read-only Production function definition and schedule as a provenance-labelled fixture; stub network queue dependencies in PostgreSQL 17; prove the starvation interleaving and a fair candidate scheduler; then continue exact INSERT/UPDATE target inventory for catalog/listing/pair/price tables.
+- No Production function invocation or write; no Cron/queue/worker/pair/price/financial-row changes; no schema, grant, RLS, migration, db push, merge, deploy, APK/Pages release, or paid infrastructure action.
