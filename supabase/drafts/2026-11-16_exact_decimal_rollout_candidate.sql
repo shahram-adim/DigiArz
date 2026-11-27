@@ -114,7 +114,10 @@ BEGIN
         OR o.status <> 'pending'
         OR o.order_type <> 'conditional'
         OR o.side IS DISTINCT FROM c.side
+        OR o.symbol IS DISTINCT FROM c.symbol
         OR o.amount IS DISTINCT FROM c.amount
+        OR (c.order_kind='stop_limit'
+            AND o.price IS DISTINCT FROM c.limit_price)
         OR r.id IS NULL
         OR r.status <> 'reserved'
         OR r.asset IS DISTINCT FROM
