@@ -358,3 +358,6 @@ This is unchanged from the last recorded reconciliation. It remains a hard stop 
 ### Additional display/API correctness issue confirmed
 
 The live public.get_crypto_market(...) function computes trade_enabled from a positive market_prices row for ca.symbol || 'USDT' updated within one minute. It does not join demo_trading_pairs and does not check is_enabled. Thus the UI's trade_enabled flag is currently a ticker-price freshness indicator, not proof that a supported pair is enabled. The canonical read API must derive tradability from the same active pair_id + supported quote + fresh pair-price relation used by order entry; do not rely on the current flag.
+
+
+The live private.guard_active_account_writes() implementation does not call current_account_is_active(). It directly reads public.profiles.is_active for NEW.user_id with FOR SHARE, rejects missing/inactive profiles, and returns NEW only for an active account. The source-contract test now asserts this exact row-locking behavior rather than assuming a helper call.
