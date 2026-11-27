@@ -37,7 +37,7 @@ jobs:
         with:
           node-version: "20"
       - name: Run source-level regression tests
-        run: node --test tests/independent-ui.test.js tests/index-syntax.test.js tests/service-worker.test.js tests/biometric-credential.test.js
+        run: node --test tests/independent-ui.test.js tests/index-syntax.test.js tests/service-worker.test.js tests/biometric-credential.test.js tests/portfolio-valuation.test.js
       - name: Install isolated Playwright runner
         run: npm install --no-save --no-package-lock playwright@1.55.0
       - name: Install Chromium
