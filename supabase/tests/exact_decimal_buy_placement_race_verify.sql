@@ -29,14 +29,14 @@ BEGIN
   IF v_wallet<>10::numeric THEN
     RAISE EXCEPTION 'Placement race changed wallet balance: %',v_wallet;
   END IF;
-  IF v_reserved<>6.006::numeric THEN
-    RAISE EXCEPTION 'Expected exactly one 6.006 USDT reservation, got %',v_reserved;
+  IF v_reserved<>6.0060001::numeric THEN
+    RAISE EXCEPTION 'Expected exactly one 6.0060001 USDT reservation including the documented rounding buffer, got %',v_reserved;
   END IF;
   IF v_orders<>1 OR v_pending<>1 OR v_reservations<>1 THEN
     RAISE EXCEPTION 'Duplicate/partial placement state: orders %, pending %, reservations %',
       v_orders,v_pending,v_reservations;
   END IF;
-  IF v_wallet-v_reserved<0 OR v_wallet-v_reserved<>3.994::numeric THEN
+  IF v_wallet-v_reserved<0 OR v_wallet-v_reserved<>3.9939999::numeric THEN
     RAISE EXCEPTION 'Available USDT after race is inconsistent: %',v_wallet-v_reserved;
   END IF;
 END
