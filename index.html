@@ -2800,8 +2800,8 @@ function getFreshMarketTicker(item){
 function getMarketChange24h(item){
  const ticker=getFreshMarketTicker(item),liveRaw=ticker?.change;
  if(liveRaw!==null&&liveRaw!==undefined&&liveRaw!==''&&Number.isFinite(Number(liveRaw)))return Number(liveRaw);
- const storedRaw=item?.change;
- if(isMarketTimestampFresh(item?.change_updated_at??item?.updated_at)&&storedRaw!==null&&storedRaw!==undefined&&storedRaw!==''&&Number.isFinite(Number(storedRaw)))return Number(storedRaw);
+ const storedRaw=item?.change,changeTimestamp=item?.change_updated_at!==undefined?item.change_updated_at:item?.updated_at;
+ if(isMarketTimestampFresh(changeTimestamp)&&storedRaw!==null&&storedRaw!==undefined&&storedRaw!==''&&Number.isFinite(Number(storedRaw)))return Number(storedRaw);
  return null;
 }
 function compareMarketChange(a,b,direction='desc'){
