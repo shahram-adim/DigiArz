@@ -219,7 +219,30 @@ async function resetPageScroll(page) {
           }
           if (viewport.name==='mobile' && tab==='markets') {
             const marketRows=page.locator('#marketList');
-            await marketRows.scrollIntoViewIfNeeded();
+            const lastMarketRow=marketRows.locator(':scope > .coin').last();
+            await lastMarketRow.evaluate(el=>el.scrollIntoView({block:'end',behavior:'instant'}));
+            const endVisibility=await page.evaluate(()=>{
+              const last=document.querySelector('#marketList > .coin:last-child');
+              const nav=document.querySelector('.mobile-bottom-nav');
+              if(!last||!nav)return {ok:false,reason:'market last row or fixed navigation is missing'};
+              const rowRect=last.getBoundingClientRect(),navRect=nav.getBoundingClientRect();
+              return {ok:rowRect.bottom<=navRect.top-4,rowBottom:rowRect.bottom,navTop:navRect.top};
+            });
+            if(!endVisibility.ok)throw new Error('Last market asset row is obscured by bottom navigation: '+JSON.stringify(endVisibility));
+            const firstMarketRow=marketRows.locator(':scope > .coin').first();
+            await firstMarketRow.evaluate(el=>el.scrollIntoView({block:'start',behavior:'instant'}));
+            await page.evaluate(()=>{
+              const header=document.querySelector('.top');
+              const offset=(header?.getBoundingClientRect().height||80)+8;
+              window.scrollBy(0,-offset);
+            });
+            const startVisibility=await page.evaluate(()=>{
+              const first=document.querySelector('#marketList > .coin:first-child');
+              const header=document.querySelector('.top');
+              if(!first||!header)return {ok:false,reason:'market first row or sticky header is missing'};
+              return {ok:first.getBoundingClientRect().top>=header.getBoundingClientRect().bottom+4};
+            });
+            if(!startVisibility.ok)throw new Error('First market asset row is obscured by sticky header');
             await page.waitForTimeout(100);
             await page.screenshot({path:path.join(output,['mobile',theme,'markets-assetrows'].join('-')+'.png'),fullPage:false,animations:'disabled'});
           }
