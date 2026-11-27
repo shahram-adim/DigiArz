@@ -277,3 +277,11 @@ No test fixture, SQL migration, workflow, or executable source was changed in th
 - `admin_market_listings` has a primary key on `coingecko_id`; its ticker collision guard is trigger-based, not a global catalog uniqueness constraint.
 - `demo_trading_pairs` has a primary key on `pair_symbol` and unique index `demo_trading_pairs_unique_base` on `base_coingecko_id`; this guarantees one pair per canonical ID and one canonical ID per pair symbol, but does not guarantee `crypto_assets.symbol` remains synchronized with the pair's `pair_symbol`.
 - `market_prices` has a primary key on `symbol` only. No canonical asset foreign key was observed in the index inventory.
+
+
+### Provider observation time versus local write time (read-only, 2026-11-27)
+
+- The captured Production `public.refresh_market_prices()` builds CoinGecko simple-price requests with `ids` and `vs_currencies=usd` only; it does not request `include_last_updated_at=true`.
+- The current handler stamps `market_prices.updated_at=now()` when the HTTP response is processed. This is a local write/receive timestamp, not proof of when the upstream price observation itself was last updated.
+- CoinGecko documents `include_last_updated_at=true` as the way to receive the price update timestamp (Unix seconds) from `/simple/price`: https://support.coingecko.com/articles/7785031254-how-can-i-determine-if-the-pricing-data-for-the-coin-is-outdated-or-stale.
+- Therefore current two-minute freshness checks based only on `market_prices.updated_at` can establish recent local processing, but cannot independently establish provider-observed freshness. A future candidate must store/validate provider observation time separately from received/processed time; no Production request or schema was changed.
