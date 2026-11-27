@@ -497,5 +497,5 @@ BEGIN
     NULL;
   END;
 
-  RAISE NOTICE 'Canonical asset identity / duplicate ticker market buy-sell isolation: PASS';
+  RAISE NOTICE 'Canonical asset identity / duplicate ticker Market and Limit lifecycle: PASS';
 END $$;
