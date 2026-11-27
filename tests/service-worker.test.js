@@ -12,7 +12,7 @@ function createHarness(fetchImpl = async () => ({ ok: true, clone() { return thi
   const stored = new Map();
   const added = [];
   const deleted = [];
-  const cacheNames = ['digiarz-shell-v53', 'digiarz-shell-v54', 'digiarz-shell-v55', 'digiarz-shell-v56', 'digiarz-shell-v57', 'digiarz-shell-v62'];
+  const cacheNames = ['digiarz-shell-v53', 'digiarz-shell-v54', 'digiarz-shell-v55', 'digiarz-shell-v56', 'digiarz-shell-v57', 'digiarz-shell-v62', 'digiarz-shell-v65'];
   const workerUrl = 'https://app.example/DigiArz/sw.js';
   const resolveKey = request => typeof request === 'string'
     ? new URL(request, workerUrl).href
@@ -73,7 +73,7 @@ test('install precaches the complete offline shell, including Android manifest i
   assert.ok(harness.added.includes('https://app.example/DigiArz/src/market-holdings.js'));
   assert.ok(harness.added.includes('https://app.example/DigiArz/src/daily-ads.js'));
   assert.ok(harness.added.includes('https://app.example/DigiArz/src/pwa-install.js'));
-  assert.ok(harness.added.includes('https://app.example/DigiArz/src/digiarz-independent-ui.css?v=6'));
+  assert.ok(harness.added.includes('https://app.example/DigiArz/src/digiarz-independent-ui.css?v=7'));
   assert.equal(harness.skipped, true);
 });
 
@@ -115,4 +115,12 @@ test('activation removes old shell caches and claims clients', async () => {
   await activatePromise;
   assert.deepEqual(harness.deleted, ['digiarz-shell-v53', 'digiarz-shell-v54', 'digiarz-shell-v55', 'digiarz-shell-v56', 'digiarz-shell-v57', 'digiarz-shell-v62']);
   assert.equal(harness.claimed, true);
+});
+
+
+test('service worker and document request the current icon-label stylesheet version',()=>{
+  const html=fs.readFileSync('index.html','utf8');
+  assert.match(workerSource,/digiarz-shell-v66/);
+  assert.match(workerSource,/digiarz-independent-ui\.css\?v=7/);
+  assert.match(html,/digiarz-independent-ui\.css\?v=7/);
 });
