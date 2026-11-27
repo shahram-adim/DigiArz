@@ -1668,3 +1668,14 @@
 1. بازیابی مجدد بدنهٔ دقیق تابع Overflow و cron job 17 از Production به‌صورت read-only؛ ثبت timestamp و fingerprint.
 2. ساخت fixture provenance-labelled و stubs شبکه در PostgreSQL 17؛ آزمون مستقل interleaving فعلی و candidate عادلانه.
 3. ادامهٔ inventory دقیق INSERT/UPDATE/DELETE برای catalog، listings، pairs و prices؛ سپس طراحی migration فقط در شاخهٔ تست.
+
+
+## Shahram 175 — exact Production market scheduler capture (2026-11-27)
+- [x] قبل از کار، PR #66 و #67 و شاخهٔ فعال از GitHub دوباره بررسی شدند؛ هر دو PR باز، Draft و ادغام‌نشده باقی مانده‌اند.
+- [x] بدنهٔ واقعی `private.request_market_price_overflow()` مجدداً از Supabase Production با SELECT و `pg_get_functiondef` بازیابی شد؛ MD5: `e6ed136175b0d340c9a86e51f7917a76`.
+- [x] بدنهٔ واقعی `public.refresh_market_prices()` نیز بازیابی شد؛ MD5: `3788666d57957a66bf59031f54ceff03`.
+- [x] زمان‌بندی زنده تأیید شد: job 3 هر دقیقه و job 17 در دقیقه‌های 5،15،25،35،45،55؛ هر دو active.
+- [x] هر دو بدنهٔ کامل، fingerprintها، Cron metadata و محدودیت تفسیر در `docs/fixtures/PRODUCTION_MARKET_PRICE_FUNCTIONS_2026-11-27.md` حفظ شدند؛ commit `c8f3b8cf99966fea65cf3e87f65924f89df50388`. سند ممیزی نیز با commit `d37a677426da554392854920d32f5d27f34c9306` تکمیل شد.
+- [!] دقت مهم: تابع اصلی خودش back-pressure دارد؛ پس آزمون باید ترتیب دقیق پردازش پاسخ، پاک‌کردن tracking، بررسی صف‌ها و enqueue مجدد 515 شناسه را شبیه‌سازی کند. فرض سادهٔ «تابع اصلی هر دقیقه بدون شرط درخواست جدید می‌سازد» نادرست است.
+- [ ] گام بعد: ساخت PostgreSQL 17 disposable harness با stubهای شبکه/صف و اجرای تابع‌های ثبت‌شده؛ آزمون فعلی و candidate scheduler باید جدا باشند. سپس نتایج و پوشش تست به PR #67 افزوده شوند.
+- [x] همهٔ عملیات Supabase فقط SELECT بودند. هیچ تابع Production اجرا نشد و هیچ صف، قیمت، جفت‌ارز، Cron، schema، grant، RLS، worker، سفارش، موجودی یا دادهٔ کاربر تغییر نکرد. هیچ migration/db push، merge، deploy، release یا هزینه‌ای انجام نشد.
