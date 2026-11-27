@@ -1,5 +1,5 @@
 # DigiArz — وضعیت اجرای پروژه
-آخرین به‌روزرسانی: 2026-11-19
+آخرین به‌روزرسانی: 2026-11-26
 شاخه: `main`
 مخزن: https://github.com/shahram-adim/DigiArz
 
@@ -2306,3 +2306,92 @@
 - [!] APK یک debug candidate است؛ هنوز روی گوشی واقعی نصب/اجرا و ورود/بیومتریک/بازار/کیف پول آزمایش نشده است.
 - [!] وضعیت Production market feed همچنان بدون تغییر است. علت ۱۲/۱۲ پاسخ 502 با duplicate insert تأیید شده، اما رفع آن نیازمند استقرار نسخه اصلاح‌شده موجود در GitHub main است و تا تأیید صریح مالک انجام نمی‌شود.
 - [!] PR #64 باز، Draft، ادغام‌نشده و mergeable=false باقی مانده است.
+
+## تکمیل منبع‌وفاداری Worker سفارش Limit برای QA Stop-Limit — ۲۰۲۶-۱۱-۲۶
+
+### وضعیت مبنا و اقدام
+- HEAD شاخه `main` پیش از این اقدام: `9855d6ea6cd188a5621c4e2c28c55e4cfb4d2587`.
+- Supabase `gfoaubfilhttnwjykaox` در وضعیت `ACTIVE_HEALTHY` و PostgreSQL `17.11.0.018`؛ ledger برابر ۵۵ Migration و آخرین نسخه `20261121050216`.
+- تعریف زنده `public.process_limit_orders()` فقط از کاتالوگ PostgreSQL خوانده شد؛ fingerprint برابر `00ab429596fb99392666632967cde9c0`.
+- مالک `postgres`، `SECURITY DEFINER`، `search_path=""` و ACL تأیید شد: `anon=false`، `authenticated=false`، `service_role=true`.
+- [x] snapshot صرفاً آزمایشی در `supabase/tests/stop_limit_production_process_limit_orders_snapshot.sql` ثبت شد.
+- [x] آزمون source-contract در `tests/stop-limit-production-limit-worker-source.test.js` اضافه شد: fingerprint، قفل advisory و ردیف سفارش، حساب فعال، جفت فعال، تازگی قیمت، اعتبار رزرو، قفل کیف پول، fill حداکثر ۲۵٪، و ثبت order/reservation/trade/transaction را بررسی می‌کند.
+- [x] آزمون عمداً شکاف فعلی quantization تسویه USDT را نیز ثبت می‌کند: `v_gross` و `v_fee` بدون round صریح هشت‌رقمی محاسبه می‌شوند. این مورد هنوز اصلاح نشده و باید پیش از rollout مالی بازبینی شود.
+- [x] Exact-decimal Run #2062 (`45717025545`) روی HEAD قبلی `9855d6e` موفق بود؛ نتیجه آن به commit جدید تعمیم داده نمی‌شود.
+
+### محدودیت و ایمنی
+- این snapshot برای QA است، migration نیست و روی Production اجرا نشده است.
+- هیچ worker/RPC مالی اجرا نشد و هیچ سفارش، معامله، رزرو، موجودی، کیف پول یا سابقه مالی خوانده/تغییر داده نشد.
+- هیچ schema، migration، grant، RLS، cron، Edge Function یا تنظیم Auth تغییر نکرد.
+- هنوز ۱۷ منبع SQL از ۵۵ Migration اعمال‌شده در مخزن موجود نیست و ۲۰ اختلاف timestamp باز است؛ Development Branch ایزوله نیز در پروژه فعلی موجود نیست. ساخت محیط کامل source-faithful همچنان مسدود به بازیابی DDL معتبر است.
+
+### نتیجه و گام بعد
+- نتیجه CI برای آزمون تازه پس از push باید جداگانه بررسی شود.
+- سپس DDL پایه جداول مالی و trigger/constraintهای وابسته از منبع معتبر بازیابی و harness PostgreSQL 17 دورریختنی ساخته شود.
+- اجرای جزئی/کامل، لغو، idempotency و raceهای parent-child فقط در همان محیط ایزوله انجام شود.
+- پیش از هر انتشار، محاسبه و quantization هشت‌رقمی USDT در worker بازبینی و با آزمون حسابداری مستقل اثبات شود.
+
+
+### نتیجه CI و بازبینی داده بازار — ۲۰۲۶-۱۱-۲۶
+- [x] Exact-decimal Run #2111 (`45811382494`) روی commit `882591331c8d303c4d4eeb95ebc7f99e2efeb731` با نتیجه `success` پایان یافت. مرحله Node/browser و تمام ۲۲ مرحله اصلی PostgreSQL 17، شامل Limit worker، لغو، raceهای دو نشست، Stop-Limit parent/child، regression شاخه invalid-reservation و TP/SL موفق شدند؛ cleanup نیز موفق بود.
+- [x] آزمون source-contract تازهٔ `process_limit_orders()` در مرحله Node/browser اجرا شد؛ این آزمون فقط snapshot منبع را بررسی می‌کند و Worker زنده را اجرا نمی‌کند.
+- [!] همهٔ سناریوهای چرخه کامل در PostgreSQL دورریختنی GitHub Actions اجرا شده‌اند؛ این نتیجه جایگزین محیط Supabase ایزوله با schema/ACL دقیق Production نیست.
+- [!] شکاف quantization تسویه USDT در تابع زنده `process_limit_orders()` همچنان باز است: gross و fee بدون round صریح ۸ رقمی محاسبه می‌شوند. هیچ اصلاحی روی Production انجام نشده است.
+- [x] بازبینی فقط‌خواندنی بازار تومانی: `market_toman_prices` شامل ۳۷۳ ردیف است (نوبیتکس ۲۲۱، والکس ۱۵۲)؛ آخرین `fetched_at` برابر `2026-11-17 22:04:26 UTC` و تعداد ردیف تازه در ۵ دقیقه صفر است.
+- [x] لاگ ۲۴ ساعت اخیر تابع Production `refresh-toman-market-prices` نسخه ۳: تعداد ۱۵ درخواست POST با 502 و ۱۶ درخواست OPTIONS با 200. پاسخ OPTIONS موفقیت دریافت/ذخیره قیمت را ثابت نمی‌کند.
+- [!] تابع Production هنوز سه provider نوبیتکس/والکس/بیت‌پین و مسیر DELETE دارد؛ نسخه main از upsert بدون prune استفاده می‌کند، اما هنوز بیت‌۲۴ و کیف پول من در این تابع متصل نشده‌اند. هیچ Deploy یا refresh دستی انجام نشد.
+
+### گام بعد
+1. بازیابی DDL معتبر جداول مالی و trigger/constraintهای پایه؛ سپس ساخت harness PostgreSQL 17 با تطبیق schema/ACL.
+2. بررسی و طراحی اصلاح quantization تسویه USDT برای Worker واقعی، با آزمون‌های مرزی gross/fee/net و رزرو؛ بدون تغییر Production.
+3. پس از دروازه Stop-Limit، بازگشت به اتصال چهار منبع قیمت تومانی و اصلاح مسیر UI؛ داده کهنه نباید زنده نمایش داده شود.
+
+
+## ممیزی حسابداری تسویه Limit و وضعیت زنده بازار — ۲۰۲۶-۱۱-۲۷
+
+### مبنای تازه
+- [x] HEAD شاخه `main` هنگام بررسی: `6916b940f63877f0f2589ad1652791b85e01d823`؛ آخرین تغییر قبل از این ممیزی ثبت نتیجه CI برای Worker بود.
+- [x] Supabase `gfoaubfilhttnwjykaox` در وضعیت `ACTIVE_HEALTHY` و PostgreSQL `17.11.0.018` است؛ ledger زنده ۵۵ Migration دارد و آخرین نسخه `20261121050216` است.
+- [x] منبع زنده `public.process_limit_orders()` دوباره با `pg_get_functiondef` خوانده شد؛ MD5 همچنان `00ab429596fb99392666632967cde9c0` است. مالک `postgres`، `SECURITY DEFINER`، `search_path=""` و ACL برابر `anon=false`، `authenticated=false`، `service_role=true` تأیید شد.
+- [x] نوع ستون‌ها از `information_schema.columns` فقط‌خواندنی بررسی شد: `wallets.balance_usdt numeric(24,8)`، `transactions.amount numeric(24,8)`؛ سه ستون `order_reservations.reserved_amount/consumed_amount/released_amount` از نوع `numeric` بدون typmod هستند.
+- [x] یک محاسبهٔ فقط‌خواندنی با ثابت‌های ساختگی و بدون خواندن هیچ ردیف کاربر اجرا شد. با موجودی شروع `100.00000000` و fill برابر `0.000000005`، ذخیرهٔ موجودی پس از تفریق و cast به `numeric(24,8)` برابر `100.00000000` باقی می‌ماند (کاهش ثبت‌شده صفر)، مقدار تراکنش cast‌شده `0.00000001` می‌شود و رزرو می‌تواند مقدار دقیق `0.000000005` را مصرف‌شده ثبت کند. این مثال اختلاف مقیاس ذخیره‌سازی را اثبات می‌کند؛ وقوع آن در معاملات واقعی یا وجود چنین سفارش‌هایی ادعا نمی‌شود.
+- [!] در Worker زنده، `v_gross := v_qty * v_market_price` و `v_fee := v_gross * v_fee_rate` بدون quantization صریح هشت‌رقمی هستند؛ سپس مقدار مصرف رزرو با دقت نامحدود محاسبه می‌شود، درحالی‌که موجودی و دفتر تراکنش فقط هشت رقم اعشار ذخیره می‌کنند. این یک دروازهٔ صحت حسابداری پیش از rollout است، نه مجوز تغییر Worker زنده.
+- [x] Candidate آزمایشی `supabase/drafts/2026-11-15_exact_decimal_process_limit_orders.sql` هر fill را به ۸ رقم USDT گرد می‌کند، gross صفرشده را رد می‌کند و رزرو باقی‌مانده را بر مبنای همان مقیاس محاسبه می‌کند. Candidate همچنان Draft است.
+- [x] GitHub Actions Exact-decimal Run #2111 (`45811382494`) با نتیجه `success` و ۲۲ مرحله اصلی PostgreSQL 17/Node و cleanup موفق روی commit `882591331c8d303c4d4eeb95ebc7f99e2efeb731` اجرا شده است؛ تست چرخهٔ چهار fill و تطبیق wallet/reservation/transaction روی Candidate موفق بود. این اجرا به HEAD مستندات بعدی تعمیم داده نمی‌شود؛ Combined Status برای HEAD فعلی `6916b94` خالی است.
+- [x] وضعیت قیمت تومانی با query فقط‌خواندنی تازه شد: ۳۷۳ ردیف جاری (Nobitex=221، Wallex=152)، آخرین دریافت `2026-11-17 22:04:26.622 UTC` و صفر ردیف تازه در پنج دقیقه. تاریخچه نیز ۳۷۳ ردیف دارد و جدیدترین زمان آن همان timestamp است.
+- [x] لاگ‌های ۲۴ ساعت اخیر Edge Function زنده `refresh-toman-market-prices` نسخه ۳: تعداد ۲۲ درخواست POST با 502 و ۲۳ درخواست OPTIONS با 200؛ بازهٔ درخواست‌های ثبت‌شده `2026-11-26 06:43:19 UTC` تا `2026-11-26 19:17:16 UTC`. پاسخ OPTIONS موفقیت refresh را ثابت نمی‌کند. نسخهٔ زنده instrumentation مرحله‌ای نسخهٔ main را ندارد؛ علت دقیق 502 از لاگ‌های فعلی قابل اثبات نشد.
+- [x] نسخهٔ main تابع Toman از helperهای dedupe/upsert و بدون DELETE استفاده می‌کند؛ Production هنوز نسخهٔ ۳ قدیمی با مسیر DELETE است. هیچ deploy یا refresh دستی انجام نشد.
+
+### تصمیم QA و گام اجرایی بعد
+1. Candidate Worker را فقط در PostgreSQL 17 دورریختنی با schema/constraints/triggers/ACL منطبق با منبع معتبر اجرا کن؛ DDL مفقود Production هنوز باید از backup یا artifact معتبر بازیابی شود.
+2. آزمون‌های Buy و Sell را با چند fill، مقدار gross/fee کمتر از ۸ رقم، rounding مرزی، notional صفرشده، dust remainder، overflow و رقابت Worker/Cancellation اجرا کن. برای هر fill باید کاهش واقعی wallet، مقدار transaction و افزایش consumed reservation دقیقاً از یک مبلغ quantize‌شدهٔ مشترک پیروی کنند؛ جمع ledger و رزرو در پایان باید reconcile شود.
+3. fingerprint و ACL تابع Candidate را با تابع زنده مقایسه کن و تفاوت‌ها را مستند کن. تا تکمیل این دروازه، هیچ Migration، RPC/Worker Production یا انتشار مالی تغییر نکند.
+4. برای Toman، خطاهای 502 را پس از استقرار مجاز نسخهٔ دارای stage logging در محیط تأییدشده ریشه‌یابی کن؛ اتصال Bit24/Kifpool و حذف prune از Production تنها در برنامهٔ انتشار جداگانه و با تأیید مالک انجام شود.
+
+### ایمنی این ممیزی
+- [x] هیچ ردیف سفارش، معامله، رزرو، موجودی، کیف پول یا تراکنش کاربر برای تست خوانده یا تغییر داده نشد.
+- [x] هیچ Worker یا RPC مالی اجرا نشد؛ SQL محاسباتی فقط روی ثابت‌های ساختگی بود.
+- [x] هیچ Migration، Grant، Policy، Cron، Edge Function یا تنظیم Auth تغییر نکرد؛ هیچ داده‌ای حذف نشد و هیچ نسخه‌ای منتشر نشد.
+
+
+## Limit settlement precision audit and live market status — 2026-11-27
+
+- [x] Fresh main HEAD at review: `6916b940f63877f0f2589ad1652791b85e01d823`.
+- [x] Supabase remains `ACTIVE_HEALTHY`, PostgreSQL `17.11.0.018`, 55 migrations, latest `20261121050216`.
+- [x] Re-read live `public.process_limit_orders()`: MD5 `00ab429596fb99392666632967cde9c0`; owner postgres, SECURITY DEFINER, empty search_path, EXECUTE denied to anon/authenticated and granted to service_role.
+- [x] Read-only column metadata: wallet balance and transaction amount are `numeric(24,8)`; reservation amounts are unconstrained `numeric`.
+- [x] A constant-only arithmetic probe (no user rows) demonstrated the scale mismatch: starting wallet 100.00000000 minus a 0.000000005 fill persists as 100.00000000 (zero wallet delta), while a transaction cast to numeric(24,8) is 0.00000001 and the reservation may record 0.000000005 consumed. This demonstrates a possible accounting divergence, not evidence that a real user's order experienced it.
+- [!] The live worker computes gross and fee without explicit eight-place quantization before writing to differently scaled wallet, transaction, and reservation columns. Treat this as a financial release gate.
+- [x] The draft candidate `supabase/drafts/2026-11-15_exact_decimal_process_limit_orders.sql` rounds each fill's USDT gross/fee and remaining reserve to eight places. Exact-decimal Run #2111 (`45811382494`) passed all 22 substantive PostgreSQL 17/Node steps and cleanup on source commit `882591331c8d303c4d4eeb95ebc7f99e2efeb731`; the four-fill wallet/reservation/transaction reconciliation passed in disposable PostgreSQL. It is not Production evidence.
+- [x] Current-price table: 373 rows (Nobitex 221, Wallex 152), newest fetched_at `2026-11-17 22:04:26.622 UTC`, zero fresh within five minutes; history also has 373 rows.
+- [x] Production Toman function v3 had 22 POST/502 and 23 OPTIONS/200 in the available 24-hour log window. OPTIONS is not a successful refresh. Exact 502 root cause remains unproven because the deployed v3 lacks the staged diagnostics in main.
+- [!] Main Toman source has safe upsert/deduplication and no DELETE; Production v3 still has the old DELETE path. No deploy or manual refresh was attempted.
+
+### Next actions
+1. Recover authoritative base DDL and run the draft Limit worker in a disposable PostgreSQL 17 harness with schema/constraint/trigger/ACL parity.
+2. Cover Buy/Sell multi-fill, sub-eight-place gross/fee, rounding boundaries, zero-notional, dust, overflow, and worker/cancellation races; assert wallet delta, transaction amount, and consumed reservation all use the same quantized per-fill amount.
+3. Compare candidate fingerprint and grants with live metadata. Do not alter Production until the financial gate and explicit owner approval are satisfied.
+4. Diagnose Toman 502s using staged logs only after an approved deployment; keep provider expansion and the old Production prune path behind a separate release approval.
+
+- [x] No user financial rows were read or changed for testing; no financial worker/RPC was executed. Only catalog metadata and constant-only arithmetic were queried.
+- [x] No migration, grant, policy, cron, Edge Function, Auth setting, deletion, or release was performed.
