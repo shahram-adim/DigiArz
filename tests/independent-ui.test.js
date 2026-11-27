@@ -1348,3 +1348,26 @@ test('third theme keeps asset and category icons softly visible on glass surface
   assert.ok(css.includes('body.luxury-theme #appView .favorite-btn'));
   assert.ok(css.includes('stroke:#6277c8!important;'));
 });
+
+
+test('quick-trade sizing and estimates preserve exact decimal strings under the current 8-place order schema',()=>{
+  const html=fs.readFileSync('index.html','utf8');
+  const decimal=require('../src/decimal.js');
+  const exactPrice=html.slice(html.indexOf('function getTrustedMarketPriceExact'),html.indexOf('let marketSparklineObserver'));
+  const tickerRefresh=html.slice(html.indexOf('async function refreshMarketTickersUnlocked'),html.indexOf('function currentBase'));
+  const estimate=html.slice(html.indexOf('function updateQuickTradeEstimate'),html.indexOf('function setQuickTradePercent'));
+  const percent=html.slice(html.indexOf('function setQuickTradePercent'),html.indexOf('function updateTradeAssetPreview'));
+  assert.ok(exactPrice.includes('parseQuickTradeDecimal(ticker?.last,18,16)'),'trusted live prices are parsed from their original decimal text');
+  assert.ok(tickerRefresh.includes("last:String(x.lastPrice??'')"),'ticker ingestion does not eagerly coerce last price to binary floating point');
+  assert.ok(estimate.includes("DigiDecimal.multiplyDecimal(amount,price,8,'down')"),'quote estimate uses exact decimal multiplication');
+  assert.ok(!/Number\\(\\$\\(side\\+'Amount'\\)/.test(estimate)&&!estimate.includes('amount*price'),'estimate does not multiply Number-coerced amount and price');
+  assert.ok(percent.includes("DigiDecimal.divideDecimal(pct,'100',8,'down')"),'percentage sizing computes its fraction with decimal arithmetic');
+  assert.ok(percent.includes("DigiDecimal.divideDecimal(DigiDecimal.multiplyDecimal(available,fraction,18,'down'),price,8,'down')"),'buy sizing divides exact quote budget by exact market price');
+  assert.ok(percent.includes("DigiDecimal.multiplyDecimal(available,fraction,8,'down')"),'sell sizing rounds down to the active 8-place order input scale');
+  assert.ok(!percent.includes('toPrecision')&&!percent.includes('Number('),'percentage sizing avoids floating-point conversion and precision formatting');
+  assert.match(html,/const ORDER_INPUT_MAX_FRACTION_DIGITS=8;/,'UI order precision remains compatible with the current production schema');
+  const buyBudget=decimal.multiplyDecimal('100.00000001','0.25',18,'down');
+  assert.equal(buyBudget,'25.0000000025');
+  assert.equal(decimal.divideDecimal(buyBudget,'0.00000003',8,'down'),'833333333.41666673');
+  assert.equal(decimal.multiplyDecimal('0.123456789012345678','0.25',8,'down'),'0.03086419');
+});
