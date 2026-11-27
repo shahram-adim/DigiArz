@@ -21,6 +21,15 @@ BEGIN
   INSERT INTO public.demo_trading_pairs(pair_symbol,quote_asset,is_enabled) VALUES('DOTUSDT','USDT',true);
 
   -- Exact captured Production helpers: fee configuration and active-account lookup.
+  PERFORM set_config('request.jwt.claim.sub',v_user::text,true);
+  IF public.current_account_is_active() IS NOT TRUE THEN
+    RAISE EXCEPTION 'active-account helper rejected an active user';
+  END IF;
+  PERFORM set_config('request.jwt.claim.sub',v_inactive::text,true);
+  IF public.current_account_is_active() IS NOT FALSE THEN
+    RAISE EXCEPTION 'active-account helper accepted an inactive user';
+  END IF;
+  PERFORM set_config('request.jwt.claim.sub',v_user::text,true);
   IF public.get_demo_trading_fee_rate('USDT','maker')<>0.001
      OR public.get_demo_trading_fee_rate('USDT','taker')<>0.001 THEN
     RAISE EXCEPTION 'captured fee helper did not return configured maker/taker rates';
@@ -31,6 +40,13 @@ BEGIN
   EXCEPTION WHEN OTHERS THEN
     IF SQLERRM='fee helper accepted an unconfigured quote asset' THEN RAISE; END IF;
     IF SQLERRM NOT LIKE '%Trading fee is not configured%' THEN RAISE; END IF;
+  END;
+  BEGIN
+    PERFORM public.get_demo_trading_fee_rate('USDT','provider');
+    RAISE EXCEPTION 'fee helper accepted an invalid liquidity type';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM='fee helper accepted an invalid liquidity type' THEN RAISE; END IF;
+    IF SQLERRM NOT LIKE '%Invalid liquidity type%' THEN RAISE; END IF;
   END;
   UPDATE public.demo_trading_fees SET is_enabled=false WHERE quote_asset='USDT';
   BEGIN
