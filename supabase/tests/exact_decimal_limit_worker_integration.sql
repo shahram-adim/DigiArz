@@ -312,4 +312,78 @@ BEGIN
 END
 $guard_test$;
 
-SELECT 'exact-decimal Limit worker integration and Production account guards: PASS' AS result;
+
+
+-- Minimum fee half-quantum boundary: gross=0.00000500 USDT makes
+-- the 0.1% fee exactly 0.000000005, which must round to one 8-place unit.
+INSERT INTO auth.users (id)
+VALUES ('60000000-0000-0000-0000-000000000006');
+INSERT INTO public.profiles (id, is_active)
+VALUES ('60000000-0000-0000-0000-000000000006', true);
+INSERT INTO public.wallets (user_id, balance_usdt)
+VALUES ('60000000-0000-0000-0000-000000000006', 1);
+INSERT INTO public.asset_balances (user_id, asset, balance)
+VALUES ('60000000-0000-0000-0000-000000000006', 'BTC', 0);
+
+UPDATE public.market_prices
+SET price = 0.000005, updated_at = now()
+WHERE symbol = 'BTCUSDT';
+
+INSERT INTO public.orders (
+  id, user_id, symbol, side, order_type, amount, price,
+  filled_amount, remaining_amount, status
+) VALUES (
+  '66000000-0000-0000-0000-000000000066',
+  '60000000-0000-0000-0000-000000000006',
+  'BTCUSDT', 'buy', 'limit', 4, 0.000005,
+  0, 4, 'pending'
+);
+
+INSERT INTO public.order_reservations (
+  id, order_id, user_id, asset, reserved_amount,
+  consumed_amount, released_amount, status
+) VALUES (
+  '66000000-0000-0000-0000-000000000666',
+  '66000000-0000-0000-0000-000000000006',
+  '60000000-0000-0000-0000-000000000006',
+  'USDT', 0.00002020, 0, 0, 'reserved'
+);
+
+DO $fee_boundary$
+DECLARE
+  v_value numeric;
+BEGIN
+  PERFORM public.process_limit_orders();
+
+  SELECT balance_usdt INTO v_value
+  FROM public.wallets
+  WHERE user_id='60000000-0000-0000-0000-000000000006';
+  IF v_value <> 0.99999499::numeric THEN
+    RAISE EXCEPTION 'Half-quantum fee was not rounded consistently in wallet: %', v_value;
+  END IF;
+
+  SELECT sum(amount) INTO v_value
+  FROM public.transactions
+  WHERE user_id='60000000-0000-0000-0000-000000000006'
+    AND currency='USDT' AND transaction_type='limit_buy';
+  IF v_value <> 0.00000501::numeric THEN
+    RAISE EXCEPTION 'Half-quantum fee ledger mismatch: %', v_value;
+  END IF;
+
+  SELECT consumed_amount INTO v_value
+  FROM public.order_reservations
+  WHERE order_id='66000000-0000-0000-0000-000000000066';
+  IF v_value <> 0.00000501::numeric THEN
+    RAISE EXCEPTION 'Half-quantum fee reservation mismatch: %', v_value;
+  END IF;
+
+  SELECT amount INTO v_value
+  FROM public.trades
+  WHERE order_id='66000000-0000-0000-0000-000000000066';
+  IF v_value <> 1::numeric THEN
+    RAISE EXCEPTION 'Half-quantum fee boundary fill quantity mismatch: %', v_value;
+  END IF;
+END
+$fee_boundary$;
+
+SELECT 'exact-decimal Limit worker integration and fee-boundary and Production account guards: PASS' AS result;
