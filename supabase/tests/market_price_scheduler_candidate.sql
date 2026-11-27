@@ -418,6 +418,6 @@ BEGIN
   IF scheduler_candidate.schedule_next_batch(10,3) IS NOT NULL THEN
     RAISE EXCEPTION 'scheduler exceeded configured in-flight batch cap';
   END IF;
-END $;
+END $$;
 
 SELECT 'PASS: candidate fairness, retry, idempotency, priority admission and source precedence' AS result;
