@@ -6142,10 +6142,10 @@ body.luxury-theme #appView .category-btn svg{
    Keep the requested ice-blue/indigo glass identity; increase text, control,
    card and chart contrast without changing the dark or pure-white themes. */
 body.luxury-theme{
-  --da-bg:#e9edff;--da-bg2:rgba(239,242,255,.96);
+  --da-bg:#dce4ff!important;--da-bg2:rgba(239,242,255,.96);
   --da-surface:rgba(255,255,255,.94);--da-surface2:#e8edff;
   --da-line:#aab8eb;--da-text:#1b2b61;--da-muted:#465a84;
-  --da-accent:#4052c7;--da-accent-soft:rgba(64,82,199,.13);
+  --da-accent:#344fc5!important;--da-accent-soft:rgba(64,82,199,.13);
   --da-blue:#355fca;--da-green:#08745e;--da-red:#b52c4d;--da-purple:#6545b7;
   color-scheme:light!important;
   background:
