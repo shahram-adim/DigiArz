@@ -242,4 +242,35 @@ BEGIN
 END
 $test$;
 
-SELECT 'exact-decimal Limit worker integration: PASS' AS result;
+
+-- Production also guards INSERTs into orders, trades, and transactions.
+-- Prove the disposable worker fixture rejects a ledger write for an inactive account.
+INSERT INTO public.profiles (id, is_active)
+VALUES ('90000000-0000-0000-0000-000000000009', false);
+
+DO $guard_test$
+DECLARE
+  v_rejected boolean := false;
+BEGIN
+  BEGIN
+    INSERT INTO public.transactions (
+      user_id, currency, amount, transaction_type, description
+    ) VALUES (
+      '90000000-0000-0000-0000-000000000009',
+      'USDT', 0.01, 'limit_buy', 'inactive-account trigger regression'
+    );
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Account is inactive; reactivate the account before trading' THEN
+      v_rejected := true;
+    ELSE
+      RAISE;
+    END IF;
+  END;
+
+  IF NOT v_rejected THEN
+    RAISE EXCEPTION 'Production active-account trigger accepted an inactive transaction';
+  END IF;
+END
+$guard_test$;
+
+SELECT 'exact-decimal Limit worker integration and Production account guards: PASS' AS result;
