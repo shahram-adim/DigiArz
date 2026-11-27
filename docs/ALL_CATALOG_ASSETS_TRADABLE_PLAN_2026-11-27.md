@@ -147,3 +147,10 @@ Before implementing provisioning, Phase A must also reconcile these Production w
 ### Canonical identity design artifact
 
 The proposed end-to-end internal asset identity model, duplicate-ticker handling, ledger migration sequence and required disposable tests are documented in [CANONICAL_ASSET_IDENTITY_DESIGN_2026-11-27.md](CANONICAL_ASSET_IDENTITY_DESIGN_2026-11-27.md). It is design-only and does not authorize or implement a Production migration.
+
+### TP/SL and Stop-Limit source-parity audit (2026-11-27)
+
+- Read the actual TP/SL and Stop-Limit migration bodies on the candidate branch after canonical Market/Limit prototype CI passed.
+- Confirmed the real conditional order and worker chain is still ticker-based (symbol → strip USDT → text asset reservation/balance; market-price lookup by ticker; child execution through ticker-based Market/Limit RPCs). Canonical asset_id/pair_id is not yet propagated.
+- Current conditional order kinds are take_profit, stop_loss, and stop_limit; no OCO sibling/link lifecycle exists in these migrations. OCO remains unimplemented/unverified.
+- This source audit supersedes any implication that the disposable canonical Market/Limit fixture proves all order types. All-catalog trading remains blocked until source-parity implementation covers TP/SL, Stop-Limit parent/child, OCO, workers, balances, reservations, history and UI.
