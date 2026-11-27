@@ -1846,3 +1846,12 @@
 - [!] New CI workflow step was added to apply both exact migration files in a fresh PostgreSQL 17 database. At checkpoint creation, GitHub connector returned no workflow run and no commit status for the latest head; the harness is NOT yet CI-verified.
 - [ ] Next: obtain CI execution and fix compile/runtime issues; then create canonical-ID candidate versions of these exact migration functions, propagate pair_id/base_asset_id/quote_asset_id through reservations, parent/child orders and workers, and test duplicate tickers/stale prices/invalid reservations/cancel races. OCO remains a separate linked-order lifecycle.
 - [x] No Production/Supabase write, SQL/Edge Function invocation, migration/db push, pair/price/wallet/order/trade/reservation/Cron/worker/grant/RLS change, merge, deploy, release, APK/Pages publication or cost was made.
+
+
+## Shahram 192 — first authoritative harness CI failure diagnosed and corrected (2026-11-27)
+- [x] CI run 46037457971 reached the new authoritative migration harness after earlier 23 steps succeeded; step 25 failed during the Stop-Limit placement call.
+- [x] Root cause was in the test harness sequence, not the migration: the real TP/SL worker deliberately clears its temporary JWT subject claim after processing; the next authenticated test RPC therefore correctly rejected the caller as unauthenticated.
+- [x] The disposable test now restores the test user's JWT subject before invoking Stop-Limit placement. This preserves the production worker's claim-clearing behavior rather than weakening the migration or worker.
+- [!] The correction is on commit 776802892afc80b164e8b7907333df775e8b1e8a; a new CI run is required. No pass is claimed yet.
+- [ ] Next: verify the rerun through step 25, fix any additional source/harness issues, then extend the actual migration-derived candidate to canonical pair/asset IDs and duplicate-ticker-safe pricing/reservations. OCO remains separate.
+- [x] No Production/Supabase write, SQL/Edge Function invocation, migration/db push, pair/price/wallet/order/trade/reservation/Cron/worker/grant/RLS change, merge, deploy, release, APK/Pages publication or cost was made.
