@@ -130,3 +130,8 @@ BEGIN
     'triggered',v_triggered,'rejected',v_rejected,'skipped',v_skipped);
 END;
 $function$;
+
+-- Mirror the live Production worker ACL; the function body above is pinned
+-- from the read-only Production definition.
+REVOKE ALL ON FUNCTION public.process_conditional_orders() FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.process_conditional_orders() TO service_role;
