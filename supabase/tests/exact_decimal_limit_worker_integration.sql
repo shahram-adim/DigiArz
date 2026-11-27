@@ -623,4 +623,84 @@ BEGIN
 END
 $sell_partial_reconcile$;
 
-SELECT 'exact-decimal Limit worker integration, fee boundary, buy/sell partial reserves, dust remainder, and account guards: PASS' AS result;
+
+
+-- Re-running the worker after settlement must be idempotent: completed orders
+-- must not emit duplicate trades/transactions or alter balances/reservations.
+DO $repeat_execution_idempotency$
+DECLARE
+  v_trade_count bigint;
+  v_transaction_count bigint;
+BEGIN
+  SELECT count(*) INTO v_trade_count
+  FROM public.trades
+  WHERE order_id IN (
+    '77000000-0000-0000-0000-000000000077',
+    '88000000-0000-0000-0000-000000000088',
+    '99000000-0000-0000-0000-000000000099'
+  );
+  SELECT count(*) INTO v_transaction_count
+  FROM public.transactions
+  WHERE user_id IN (
+    '77000000-0000-0000-0000-000000000007',
+    '88000000-0000-0000-0000-000000000008',
+    '99000000-0000-0000-0000-000000000009'
+  )
+    AND transaction_type IN ('limit_buy','limit_sell');
+
+  PERFORM public.process_limit_orders();
+  PERFORM public.process_limit_orders();
+
+  IF (SELECT count(*) FROM public.trades
+      WHERE order_id IN (
+        '77000000-0000-0000-0000-000000000077',
+        '88000000-0000-0000-0000-000000000088',
+        '99000000-0000-0000-0000-000000000099'
+      )) <> v_trade_count THEN
+    RAISE EXCEPTION 'Repeated worker execution created duplicate trades';
+  END IF;
+  IF (SELECT count(*) FROM public.transactions
+      WHERE user_id IN (
+        '77000000-0000-0000-0000-000000000007',
+        '88000000-0000-0000-0000-000000000008',
+        '99000000-0000-0000-0000-000000000009'
+      )
+        AND transaction_type IN ('limit_buy','limit_sell')) <> v_transaction_count THEN
+    RAISE EXCEPTION 'Repeated worker execution created duplicate settlement transactions';
+  END IF;
+
+  IF (SELECT balance_usdt FROM public.wallets
+      WHERE user_id='77000000-0000-0000-0000-000000000007') <> 5.996
+     OR (SELECT balance_usdt FROM public.wallets
+         WHERE user_id='88000000-0000-0000-0000-000000000008') <> 0.99999999
+     OR (SELECT balance_usdt FROM public.wallets
+         WHERE user_id='99000000-0000-0000-0000-000000000009') <> 3.996 THEN
+    RAISE EXCEPTION 'Repeated worker execution changed a settled USDT wallet';
+  END IF;
+
+  IF (SELECT consumed_amount FROM public.order_reservations
+      WHERE order_id='77000000-0000-0000-0000-000000000077') <> 4.004
+     OR (SELECT released_amount FROM public.order_reservations
+         WHERE order_id='77000000-0000-0000-0000-000000000077') <> 0.0000001
+     OR (SELECT consumed_amount FROM public.order_reservations
+         WHERE order_id='99000000-0000-0000-0000-000000000099') <> 4
+     OR (SELECT released_amount FROM public.order_reservations
+         WHERE order_id='99000000-0000-0000-0000-000000000099') <> 0 THEN
+    RAISE EXCEPTION 'Repeated worker execution changed terminal reservation accounting';
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM public.orders
+    WHERE id IN (
+      '77000000-0000-0000-0000-000000000077',
+      '88000000-0000-0000-0000-000000000088',
+      '99000000-0000-0000-0000-000000000099'
+    )
+      AND status <> 'filled'
+  ) THEN
+    RAISE EXCEPTION 'A settled order changed status on repeated worker execution';
+  END IF;
+END
+$repeat_execution_idempotency$;
+
+SELECT 'exact-decimal Limit worker integration, fee boundary, buy/sell partial reserves, dust remainder, account guards, and repeat-execution idempotency: PASS' AS result;
