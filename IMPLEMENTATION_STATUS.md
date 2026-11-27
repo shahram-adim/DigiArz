@@ -2004,3 +2004,12 @@
 - [!] The current code head e30f4022d927a8a665287d0d34f06d6abbb8ce0b and status update require fresh CI. No green claim yet.
 - [ ] Verify step 26, then verify parent/child canonical FK isolation and pair-scoped disable behavior. Do not copy fixture helpers into Production.
 - [x] No Production/Supabase changes, merge, migration/db push, deploy/release, publication, worker/Cron/grant/RLS changes or costs.
+## Shahram 173 — authoritative TP/SL and Stop-Limit source-chain design review (2026-11-27)
+- [x] Reviewed the exact mainline TP/SL migration blob 3360c21a69b7fae83a7f2494428367d1b7658e81 and Stop-Limit migration blob 3f421c6380630d74b846cd66dc7b121786237c0f.
+- [x] Recorded the full symbol-based source call chains for conditional placement/worker/cancel and Stop-Limit placement/trigger/child Limit/sync/cancel in docs/CANONICAL_ASSET_IDENTITY_DESIGN_2026-11-27.md.
+- [x] Explicitly recorded that Stop-Limit sync locks conditional row and parent but not child (FOR UPDATE OF c,parent SKIP LOCKED); candidate must preserve/test source semantics unless separately reviewed.
+- [x] Defined canonical tuple invariants for parent/conditional/child/reservation/trade, pair-keyed price lookup, pair-scoped cancellation, source-faithful grants/RLS/SECURITY DEFINER/locking/retries and quarantine of ambiguous symbol-only backfill.
+- [x] Marked OCO as a distinct unimplemented linked-order state machine; no authoritative OCO table/RPC/worker found in source search.
+- [!] The current SQL candidate is still a disposable invariant fixture, not an actual port of the authoritative TP/SL/Stop-Limit function bodies. Full source-faithful PostgreSQL harness remains outstanding.
+- [ ] Await current CI run 46043897871 (code head e30f4022d927a8a665287d0d34f06d6abbb8ce0b) and 46043920340 (status/docs head 2f894c991781fca63145f46a337efd83ffe1f9bd), then verify newest branch head after this design update.
+- [x] No Production/Supabase function/schema/ACL/RLS/cron/worker changes, merge, migration/db push, deploy/release, APK/Pages publication or cost.
