@@ -301,6 +301,17 @@ jobs:
             -f supabase/tests/exact_decimal_conditional_exit_worker.sql \
             -f supabase/tests/exact_decimal_conditional_cancel_race_setup.sql
           bash supabase/tests/exact_decimal_conditional_cancel_race.sh
+      - name: Run real two-session conditional worker versus same-user sell placement race
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_conditional_placement_race_test;"
+          psql -h localhost -U postgres -d digiarz_conditional_placement_race_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/exact_decimal_conditional_exit_setup.sql \
+            -f supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql \
+            -f supabase/tests/exact_decimal_conditional_exit_worker.sql \
+            -f supabase/tests/exact_decimal_conditional_placement_race_setup.sql
+          DB_NAME=digiarz_conditional_placement_race_test bash supabase/tests/exact_decimal_conditional_placement_race.sh
       - name: Run real two-session Limit worker versus new sell placement race
         env:
           PGPASSWORD: postgres
