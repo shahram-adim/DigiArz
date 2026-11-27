@@ -1360,7 +1360,7 @@ test('quick-trade sizing and estimates preserve exact decimal strings under the 
   assert.ok(exactPrice.includes('parseQuickTradeDecimal(ticker?.last,18,16)'),'trusted live prices are parsed from their original decimal text');
   assert.ok(tickerRefresh.includes("last:String(x.lastPrice??'')"),'ticker ingestion does not eagerly coerce last price to binary floating point');
   assert.ok(estimate.includes("DigiDecimal.multiplyDecimal(amount,price,8,'down')"),'quote estimate uses exact decimal multiplication');
-  assert.ok(!/Number\\(\\$\\(side\\+'Amount'\\)/.test(estimate)&&!estimate.includes('amount*price'),'estimate does not multiply Number-coerced amount and price');
+  assert.ok(!estimate.includes('amount=Number(')&&!estimate.includes('amount*price'),'estimate does not multiply Number-coerced amount and price');
   assert.ok(percent.includes("DigiDecimal.divideDecimal(pct,'100',8,'down')"),'percentage sizing computes its fraction with decimal arithmetic');
   assert.ok(percent.includes("DigiDecimal.divideDecimal(DigiDecimal.multiplyDecimal(available,fraction,18,'down'),price,8,'down')"),'buy sizing divides exact quote budget by exact market price');
   assert.ok(percent.includes("DigiDecimal.multiplyDecimal(available,fraction,8,'down')"),'sell sizing rounds down to the active 8-place order input scale');
