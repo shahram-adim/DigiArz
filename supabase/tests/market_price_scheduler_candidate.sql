@@ -43,7 +43,7 @@ CREATE TABLE scheduler_candidate.retry_queue (
   updated_at timestamptz NOT NULL DEFAULT clock_timestamp()
 );
 CREATE TABLE scheduler_candidate.prices (
-  pair_symbol text PRIMARY KEY,
+  pair_symbol text PRIMARY KEY REFERENCES scheduler_candidate.assets(pair_symbol),
   price numeric NOT NULL CHECK (price > 0),
   source text NOT NULL,
   source_priority integer NOT NULL,
@@ -145,7 +145,9 @@ CREATE OR REPLACE FUNCTION scheduler_candidate.accept_price(
 DECLARE v_rows integer;
 BEGIN
   IF p_price IS NULL OR p_price<=0 OR p_price::text IN ('NaN','Infinity','-Infinity')
-     OR p_observed_at IS NULL OR p_source IS NULL OR p_priority IS NULL OR p_priority<1 THEN
+     OR p_observed_at IS NULL OR p_observed_at < clock_timestamp()-interval '2 minutes'
+     OR p_observed_at > clock_timestamp()+interval '30 seconds'
+     OR p_source IS NULL OR p_priority IS NULL OR p_priority<1 THEN
     RETURN false;
   END IF;
   INSERT INTO scheduler_candidate.prices(pair_symbol,price,source,source_priority,observed_at)
@@ -211,12 +213,14 @@ BEGIN
 
   INSERT INTO scheduler_candidate.retry_queue(coingecko_id,attempts,next_attempt_at,last_error,updated_at)
   SELECT id,1,v_now + interval '30 seconds',COALESCE(p_error,'provider omitted/invalid price'),v_now
-  FROM unnest(v_omitted) id
+  FROM unnest(v_omitted) AS u(id)
   ON CONFLICT(coingecko_id) DO UPDATE
     SET attempts=scheduler_candidate.retry_queue.attempts+1,
         next_attempt_at=v_now + LEAST(interval '30 minutes',
           interval '30 seconds' * power(2,LEAST(scheduler_candidate.retry_queue.attempts,6))),
         last_error=EXCLUDED.last_error,updated_at=v_now;
+
+  DELETE FROM scheduler_candidate.priority_queue WHERE coingecko_id=ANY(v_ids);
 
   UPDATE scheduler_candidate.batches
   SET state=CASE WHEN p_status=200 THEN 'processed' ELSE 'failed' END,
@@ -306,6 +310,12 @@ BEGIN
   END IF;
   IF scheduler_candidate.accept_price('NEWUSDT',4,'Gate.io',50,clock_timestamp()) THEN
     RAISE EXCEPTION 'lower-priority source overwrote preferred quote';
+  END IF;
+  IF scheduler_candidate.accept_price('NEWUSDT',4,'CoinGecko',100,clock_timestamp()-interval '5 minutes') THEN
+    RAISE EXCEPTION 'stale source observation was accepted';
+  END IF;
+  IF scheduler_candidate.accept_price('NEWUSDT','NaN'::numeric,'CoinGecko',100,clock_timestamp()) THEN
+    RAISE EXCEPTION 'NaN price was accepted';
   END IF;
   IF NOT scheduler_candidate.accept_price('NEWUSDT',5,'ManualVerified',200,clock_timestamp()) THEN
     RAISE EXCEPTION 'higher-priority source was rejected';
