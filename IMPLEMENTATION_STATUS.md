@@ -1585,3 +1585,15 @@
 - Key blocker: do not bulk-provision all active catalog rows by ticker. Canonical ID must remain authoritative; duplicate tickers require a collision-resolution or supported alternative market-symbol policy before any asset is marked tradable.
 - No Production function was executed; no Production data/schema/pairs/prices/grants/RLS/Cron/workers changed. No migration, db push, merge, deploy, release, or paid infrastructure action.
 - Remaining: complete writer/caller and price-refresh coverage inventory, generate a compact read-only duplicate-ticker reconciliation, then build source-faithful disposable PostgreSQL tests and a reviewed migration proposal.
+
+
+## Shahram 168 — duplicate-ticker reconciliation and price coverage (2026-11-27)
+- Re-ran read-only PR #67 / PR #66 checks before work: both remain open, Draft, unmerged, mergeable.
+- Built corrected duplicate-ticker aggregates using independent correlated subqueries to avoid over-counting caused by one-to-many joins.
+- Confirmed examples of same ticker with distinct assets: DOT maps separately to `polkadot` (Polkadot; corroborated by five Iranian exchange feeds) and `dot` (Dot; corroborated by Exir and Tabdeal). This is a legitimate identity distinction, not a reason to map either by ticker alone.
+- Confirmed high-collision groups include BTC (10 active IDs), PEPE (21), DOGE (6), and DOT (3). Existing enabled pair is associated with only one canonical asset ID per ticker pair.
+- Audited enabled pair prices: 420/420 rows exist and are positive, but only 415/420 are fresher than two minutes. Five stale rows: NBISONUSDT, TSMONUSDT, RIVERUSDT, TQQQONUSDT, TONUSDT; last update 2026-11-19 22:56 UTC. 390 pair prices currently identify Gate.io as source; 14 CoinGecko; three distinct sources overall.
+- Added the row-level interpretation, corrected collision counts, and stale-price findings to `docs/PRODUCTION_CATALOG_SOURCE_AUDIT_2026-11-27.md`.
+- Important qualification: a matching observation is not automatically proof of a unique ticker mapping; retain provider ID and exact exchange evidence. Existing pair-row presence is not proof of price freshness.
+- No Production data or configuration changed; no refresh function executed; no pairs/prices/orders/balances/workers/Cron touched. No migration/db push/merge/deploy/release/cost.
+- Remaining: map all price-refresh jobs/functions and their source precedence, determine why five existing prices are stale, complete all catalog/table writer and trigger caller inventory, then implement only in isolated disposable PostgreSQL with exact source-parity tests.
