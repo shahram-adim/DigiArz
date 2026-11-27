@@ -6385,3 +6385,47 @@ body.luxury-theme .asset-detail-head .asset-logo,
 body.luxury-theme .asset-detail-head .asset-logo img{
   background:transparent!important;border:0!important;box-shadow:none!important;
 }
+
+
+/* Highest-specificity indigo theme correction for the legacy asset-detail page. */
+body.luxury-theme #tab-chart .asset-detail-head,
+body.luxury-theme #tab-chart .detail-section,
+body.luxury-theme #tab-chart .detail-trade .trade-box,
+body.luxury-theme #tab-chart .review-row,
+body.luxury-theme #tab-chart .news-item,
+body.luxury-theme #tab-chart .review-form{
+  background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(231,236,255,.97))!important;
+  border-color:#aebbea!important;color:#1b2b61!important;
+  box-shadow:0 10px 28px rgba(48,65,145,.11),inset 0 1px rgba(255,255,255,.98)!important;
+}
+body.luxury-theme #tab-chart .asset-detail-head .asset-detail-title,
+body.luxury-theme #tab-chart .asset-detail-head .detail-price,
+body.luxury-theme #tab-chart .detail-section h2,
+body.luxury-theme #tab-chart .detail-section h3,
+body.luxury-theme #tab-chart .detail-section h4,
+body.luxury-theme #tab-chart .detail-section label,
+body.luxury-theme #tab-chart .detail-trade .trade-box h3,
+body.luxury-theme #tab-chart .review-row strong,
+body.luxury-theme #tab-chart .news-item strong{
+  color:#1b2b61!important;
+}
+body.luxury-theme #tab-chart .detail-section p,
+body.luxury-theme #tab-chart .detail-section small,
+body.luxury-theme #tab-chart .detail-section .muted,
+body.luxury-theme #tab-chart .review-meta,
+body.luxury-theme #tab-chart .news-meta,
+body.luxury-theme #tab-chart .review-row p,
+body.luxury-theme #tab-chart .news-item p{
+  color:#465a84!important;
+}
+body.luxury-theme #tab-chart .review-form input,
+body.luxury-theme #tab-chart .review-form select,
+body.luxury-theme #tab-chart .review-form textarea,
+body.luxury-theme #tab-chart .detail-trade .trade-box input,
+body.luxury-theme #tab-chart .detail-trade .trade-box select{
+  background:#fff!important;border:1px solid #aab8e8!important;color:#1b2b61!important;
+}
+body.luxury-theme #tab-chart .detail-trade .trade-box .field label,
+body.luxury-theme #tab-chart .detail-trade .trade-box .muted{
+  color:#465a84!important;
+}
