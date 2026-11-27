@@ -449,3 +449,47 @@ See \`docs/superpowers/reports/2026-11-15-exact-decimal-implementation-checkpoin
 - Node.js v22.16.0 syntax check passed; `node --test` ran the focused test file with 5/5 passing and no failures.
 - A fresh read-only Production query returned the same `pg_get_functiondef` text and MD5 fingerprints for both Limit entrypoints.
 - The GitHub combined status for the latest push commit was empty; push-triggered CI is not reported as passed. The earlier Run #1974 passed on the previous worker-test commit only.
+
+
+## Production Limit worker source snapshot — 2026-11-26
+
+### Fresh read-only Production evidence
+- [x] Captured `public.process_limit_orders()` with `pg_get_functiondef`; no orders, trades, reservations, wallets, balances, or transaction rows were read.
+- [x] Fingerprint: `00ab429596fb99392666632967cde9c0`.
+- [x] Metadata: owner `postgres`; `SECURITY DEFINER`; empty `search_path`; EXECUTE is denied to `anon` and `authenticated`, and allowed only to `service_role`.
+- [x] The worker takes advisory lock `739201126`, selects pending/partially-filled orders with `FOR UPDATE SKIP LOCKED`, requires an active account, enabled USDT pair, and market price updated within one minute.
+- [x] It locks and validates the reservation, locks the wallet before asset-balance mutation, fills at most 25% of the original order amount per cycle, and updates order, reservation, trade, and transaction records in one function transaction.
+
+### Added source-parity guard
+- [x] Added `supabase/tests/stop_limit_production_process_limit_orders_snapshot.sql` as a read-only captured source fixture; it is not a migration and is not executed against Production.
+- [x] Added `tests/stop-limit-production-limit-worker-source.test.js`; it pins the live fingerprint and checks the worker's lock, eligibility, reservation, partial-fill, and ledger-write contracts.
+- [!] The captured function calculates `v_gross := v_qty * v_market_price` and `v_fee := v_gross * v_fee_rate` without an explicit eight-decimal quantization assignment before wallet/reservation/transaction accounting. This remains a known accounting-review gate; the snapshot test deliberately makes the current behavior visible and must be updated when an approved fix changes the source.
+- [!] This is static source-contract evidence only. It does not execute the live worker, reproduce the missing base DDL, or prove the complete Stop-Limit lifecycle against Production schema/ACL in an isolated database.
+
+### CI evidence at the start of this update
+- [x] Exact-decimal Run #2062 (`45717025545`) completed with `success` on main HEAD `9855d6ea6cd188a5621c4e2c28c55e4cfb4d2587`; all 22 substantive PostgreSQL/Node steps and cleanup succeeded.
+- [ ] The push-triggered run for the new snapshot test must be checked separately after this commit.
+
+### Safety and next steps
+- [x] Production was queried only through PostgreSQL catalogs/function metadata; no financial RPC or worker was invoked.
+- [x] No migration, function, grant, policy, cron schedule, Edge Function, or financial row was changed.
+1. Verify the new push-triggered source-contract test in GitHub Actions.
+2. Recover authoritative base DDL for the financial tables and dependent constraints/triggers from a trusted backup or migration artifact.
+3. Build a disposable PostgreSQL 17 schema/ACL parity harness and run the exact captured Limit worker plus Stop-Limit parent/child lifecycle there.
+4. Resolve the eight-decimal USDT settlement quantization review before any Production rollout.
+
+
+## CI verification and fresh Toman market snapshot — 2026-11-26
+
+- [x] Exact-decimal Run #2111 (`45811382494`) completed with `success` on commit `882591331c8d303c4d4eeb95ebc7f99e2efeb731`. Node/browser and all 22 substantive PostgreSQL 17 steps passed, including Limit worker/cancel, two-session races, Stop-Limit parent/child lifecycle, captured Production invalid-reservation regression, and TP/SL; cleanup passed.
+- [x] The new `process_limit_orders()` source-contract test ran in the Node/browser step. It checks the captured function only; it does not invoke the live worker.
+- [!] All lifecycle tests still run against disposable GitHub Actions PostgreSQL, not an isolated Supabase database with exact Production schema/ACL parity.
+- [!] The live Limit worker's gross/fee USDT settlement remains without explicit eight-decimal quantization; this is recorded as an unresolved accounting gate.
+- [x] Read-only Production market snapshot: `market_toman_prices` has 373 rows (Nobitex 221, Wallex 152); newest `fetched_at` is `2026-11-17 22:04:26 UTC`; zero rows are fresh within five minutes.
+- [x] Last-24-hour logs for Production `refresh-toman-market-prices` v3 show 15 POST/502 and 16 OPTIONS/200. OPTIONS success is not evidence of a successful price refresh.
+- [!] The live v3 function still uses Nobitex, Wallex, and Bitpin and contains a DELETE path. The current main source uses upsert without pruning but still does not connect Bit24 or Kifpool. No deploy or manual refresh was attempted.
+
+### Next steps
+1. Recover authoritative base DDL and build a disposable PostgreSQL 17 schema/ACL parity harness.
+2. Design and test the eight-decimal USDT settlement fix for the actual Limit worker, including gross/fee/net and reservation edge cases; do not modify Production.
+3. After the Stop-Limit gate, complete the four approved Toman providers and stale-data UI handling.
