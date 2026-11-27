@@ -7,7 +7,7 @@ const css = fs.readFileSync('src/digiarz-independent-ui.css', 'utf8');
 const sw = fs.readFileSync('sw.js', 'utf8');
 
 test('independent stylesheet loads after all inline styles and before the document closes', () => {
-  const link = '<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=5">';
+  const link = '<link rel="stylesheet" href="./src/digiarz-independent-ui.css?v=6">';
   assert.ok(html.includes(link));
   assert.ok(html.lastIndexOf(link) > html.lastIndexOf('</style>'));
   assert.ok(html.indexOf(link) < html.lastIndexOf('</body>'));
@@ -96,7 +96,7 @@ test('Android screenshot correction uses a two-row mobile market layout and comp
 });
 
 test('service worker precaches the new stylesheet under a fresh shell cache', () => {
-  assert.match(sw, /digiarz-independent-ui\.css\?v=5/);
+  assert.match(sw, /digiarz-independent-ui\.css\?v=6/);
 });
 
 test('mobile layouts and reduced-motion accessibility rules are present', () => {
