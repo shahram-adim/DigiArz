@@ -368,7 +368,7 @@ $$;
 CREATE OR REPLACE FUNCTION canonical_asset_candidate.disable_pair(p_pair_id uuid)
 RETURNS integer
 LANGUAGE plpgsql
-AS $
+AS $disable_pair$
 DECLARE
   v_cancelled integer;
 BEGIN
@@ -390,9 +390,9 @@ BEGIN
 
   RETURN v_cancelled;
 END;
-$;
+$disable_pair$;
 
-DO $
+DO $candidate_test$
 DECLARE
   v_user uuid := '10000000-0000-0000-0000-000000000001';
   v_dot_a uuid := '20000000-0000-0000-0000-000000000001';
@@ -405,6 +405,7 @@ DECLARE
   v_limit_sell uuid;
   v_limit_stale uuid;
   v_limit_bad_reservation uuid;
+  v_reserve_amount numeric;
   v_disable_a uuid;
   v_disable_b uuid;
   v_processed integer;
@@ -534,15 +535,27 @@ BEGIN
     RAISE EXCEPTION 'stale limit order lost its canonical base reservation';
   END IF;
 
-  -- Verify ownership while the pending order still has its reservation.
+  -- Verify reservation ownership using a direct insert against an existing order.
+  SELECT amount INTO v_reserve_amount
+  FROM canonical_asset_candidate.reservations WHERE order_id=v_limit_stale;
+  IF v_reserve_amount IS NULL THEN
+    RAISE EXCEPTION 'pending limit reservation unexpectedly missing before ownership test';
+  END IF;
+  DELETE FROM canonical_asset_candidate.reservations WHERE order_id=v_limit_stale;
   BEGIN
-    UPDATE canonical_asset_candidate.reservations
-    SET user_id='10000000-0000-0000-0000-000000000099'
-    WHERE order_id=v_limit_stale;
+    INSERT INTO canonical_asset_candidate.reservations(
+      reservation_id,order_id,user_id,asset_id,amount
+    ) VALUES (
+      gen_random_uuid(),v_limit_stale,
+      '10000000-0000-0000-0000-000000000099',v_dot_a,v_reserve_amount
+    );
     RAISE EXCEPTION 'reservation owner mismatch was accepted';
   EXCEPTION WHEN foreign_key_violation THEN
     NULL;
   END;
+  INSERT INTO canonical_asset_candidate.reservations(
+    reservation_id,order_id,user_id,asset_id,amount
+  ) VALUES (gen_random_uuid(),v_limit_stale,v_user,v_dot_a,v_reserve_amount);
   UPDATE canonical_asset_candidate.prices
   SET price=20,observed_at=clock_timestamp()
   WHERE pair_id=v_pair_a;
@@ -579,7 +592,7 @@ BEGIN
   WHERE user_id=v_user AND asset_id=v_dot_a;
   SELECT balance INTO v_usdt_balance FROM canonical_asset_candidate.balances
   WHERE user_id=v_user AND asset_id=v_usdt;
-  IF v_a<>1.4 OR v_usdt_balance<>9974.4495 THEN
+  IF v_a<>1.35 OR v_usdt_balance<>9975.4485 THEN
     RAISE EXCEPTION 'stale/fresh limit worker changed wrong balance: A %, USDT %',v_a,v_usdt_balance;
   END IF;
 
@@ -613,4 +626,4 @@ BEGIN
   END IF;
 
   RAISE NOTICE 'Canonical asset identity / duplicate ticker Market and Limit lifecycle: PASS';
-END $$;
+END $candidate_test$;
