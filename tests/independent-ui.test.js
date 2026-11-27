@@ -989,12 +989,12 @@ test('market and dashboard logo identity buttons do not inherit primary-button g
 test('layout correction hides inactive dashboard and market tabs despite their explicit display rules',()=>{
   const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
   const final=css.slice(css.lastIndexOf('DigiArz layout correction + luminous indigo glass theme'));
-  assert.ok(final.includes('#appView [id^="tab-"].hidden{'));
+  assert.ok(final.includes('[id^="tab-"].hidden{'));
   assert.ok(final.includes('display:none!important;'));
-  assert.ok(final.includes('#appView #tab-dashboard.hidden'));
-  assert.ok(final.includes('#appView #tab-markets.hidden'));
-  assert.ok(final.includes('#appView #tab-dashboard:not(.hidden){display:flex!important}'));
-  assert.ok(final.includes('#appView #tab-markets:not(.hidden){display:block!important}'));
+  assert.ok(final.includes('#tab-dashboard.hidden'));
+  assert.ok(final.includes('#tab-markets.hidden'));
+  assert.ok(final.includes('#tab-dashboard:not(.hidden){display:flex!important}'));
+  assert.ok(final.includes('#tab-markets:not(.hidden){display:block!important}'));
 });
 
 test('market row grid uses five matching columns and named areas at desktop and mobile widths',()=>{
@@ -1009,7 +1009,7 @@ test('market row grid uses five matching columns and named areas at desktop and 
 test('market asset rows remain frameless across all themes while retaining a subtle hover state',()=>{
   const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
   const final=css.slice(css.lastIndexOf('Market asset rows: preserve spacing and hover feedback without card frames.'));
-  assert.ok(final.includes('#appView #tab-markets #marketList>.coin:not(.tether-pinned)'));
+  assert.ok(final.includes('#tab-markets #marketList>.coin:not(.tether-pinned)'));
   assert.ok(final.includes('border:0!important;'));
   assert.ok(final.includes('outline:0!important;'));
   assert.ok(final.includes('box-shadow:none!important;'));
@@ -1149,10 +1149,10 @@ test('visual review captures authentication plus dashboard and market rows acros
 test('third theme market price text and bottom navigation use high-contrast light surfaces',()=>{
  const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
  const final=css.slice(css.lastIndexOf('High-specificity visual-review correction'));
- for(const token of ['#appView #tab-markets #marketList>.coin .price-stack .price-usd strong',
+ for(const token of ['#tab-markets #marketList>.coin .price-stack .price-usd strong',
   'color:#1c2b50!important;opacity:1!important',
-  '#appView .mobile-bottom-nav','background:rgba(255,255,255,.98)!important',
-  '#appView .mobile-bottom-nav button.active'])
+  '.mobile-bottom-nav','background:rgba(255,255,255,.98)!important',
+  '.mobile-bottom-nav button.active'])
   assert.ok(final.includes(token),'third-theme contrast correction includes '+token);
 });
 
@@ -1233,13 +1233,13 @@ test('final icy-indigo override neutralizes legacy dark asset, history, settings
   const final=css.slice(css.lastIndexOf('Final icy-indigo surfaces: remove legacy dark/sky-blue overrides'));
   assert.ok(final.length>0,'final icy-indigo correction layer exists');
   for(const token of [
-    'body.luxury-theme #appView #tab-assets #assetSummary .stat',
-    'body.luxury-theme #appView #tab-settings .setting-row',
-    'body.luxury-theme #appView #tab-history .table-wrap',
+    'body.luxury-theme #tab-assets #assetSummary .stat',
+    'body.luxury-theme #tab-settings .setting-row',
+    'body.luxury-theme #tab-history .table-wrap',
     'background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(235,241,255,.96))!important;',
-    'body.luxury-theme #appView #tab-history .table-wrap th',
-    'body.luxury-theme #appView #tab-settings .theme-choice-group button[aria-pressed=true]',
-    'body.luxury-theme #appView .da-v2-hero',
+    'body.luxury-theme #tab-history .table-wrap th',
+    'body.luxury-theme #tab-settings .theme-choice-group button[aria-pressed=true]',
+    'body.luxury-theme .da-v2-hero',
     'linear-gradient(125deg,#f8faff 0%,#e6edff 55%,#dceaff 100%)',
     'body.luxury-theme #authView .auth-reference-visual',
     'body.luxury-theme #authView .auth-form input'
@@ -1257,8 +1257,8 @@ test('icy-indigo trading theme also neutralizes nested order-book headers and ro
   const css=fs.readFileSync('src/digiarz-independent-ui.css','utf8');
   const final=css.slice(css.lastIndexOf('Order-book header/rows: finish the icy-indigo treatment'));
   for(const token of [
-    'body.luxury-theme #appView #tab-trade .orderbook-head',
-    'body.luxury-theme #appView #tab-trade .orderbook-row',
+    'body.luxury-theme #tab-trade .orderbook-head',
+    'body.luxury-theme #tab-trade .orderbook-row',
     'background:rgba(255,255,255,.88)!important;',
     'color:#52618b!important;'
   ]) assert.ok(final.includes(token),'icy-indigo order-book correction includes '+token);
@@ -1280,7 +1280,7 @@ test('offline icon fallback renders vector artwork and exposes a clear active na
   assert.ok(html.includes("b.setAttribute('aria-current','page')"),'tab changes announce the selected page');
   assert.ok(html.includes("b.removeAttribute('aria-current')"),'inactive tabs clear current-page semantics');
   const final=css.slice(css.lastIndexOf('Final icon finish: quieter inactive glyphs'));
-  for(const token of ['stroke-width:2.35','button.active:after','body.dark-theme #appView .mobile-bottom-nav button.active','body.light-theme #appView .mobile-bottom-nav button.active','body.luxury-theme #appView .mobile-bottom-nav button.active']) {
+  for(const token of ['stroke-width:2.35','button.active:after','body.dark-theme .mobile-bottom-nav button.active','body.light-theme .mobile-bottom-nav button.active','body.luxury-theme .mobile-bottom-nav button.active']) {
     assert.ok(final.includes(token),'active icon treatment includes '+token);
   }
 });
@@ -1317,9 +1317,9 @@ test('icy-indigo premium identity is visibly distinct from white while remaining
     'linear-gradient(145deg,#eef1ff 0%,#e3e9ff 48%,#e7f0ff 100%)',
     'body.luxury-theme .top',
     'linear-gradient(115deg,rgba(231,237,255,.94),rgba(215,226,255,.86))',
-    'body.luxury-theme #appView .hero',
+    'body.luxury-theme .hero',
     'linear-gradient(125deg,#dce5ff 0%,#cbd8ff 48%,#e4edff 100%)',
-    'body.luxury-theme #appView .mobile-bottom-nav button.active',
+    'body.luxury-theme .mobile-bottom-nav button.active',
     'color:#fff!important;'
   ]) assert.ok(final.includes(token),'premium icy-indigo layer includes '+token);
   assert.ok(final.includes('color-scheme:light!important;'),'third theme retains a light color scheme');
@@ -1335,7 +1335,7 @@ test('icy-indigo refinement v2 strengthens cool-blue glass identity while retain
     'linear-gradient(145deg,#e8edff 0%,#d8e1ff 48%,#e1edff 100%)',
     'linear-gradient(145deg,rgba(245,247,255,.98),rgba(222,231,255,.96))',
     'linear-gradient(125deg,#d0dcff 0%,#c3d2ff 48%,#dce8ff 100%)',
-    'body.luxury-theme #appView .mobile-bottom-nav button.active',
+    'body.luxury-theme .mobile-bottom-nav button.active',
     'color:#fff!important;'
   ]) assert.ok(final.includes(token),'icy-indigo refinement includes '+token);
   assert.ok(final.includes('color-scheme:light!important;')===false || css.includes('color-scheme:light!important;'));
@@ -1344,9 +1344,9 @@ test('icy-indigo refinement v2 strengthens cool-blue glass identity while retain
 
 test('third theme keeps asset and category icons softly visible on glass surfaces', () => {
   const css = fs.readFileSync('src/digiarz-independent-ui.css', 'utf8');
-  assert.ok(css.includes('body.luxury-theme #appView .coin-icon'));
+  assert.ok(css.includes('body.luxury-theme .coin-icon'));
   assert.ok(css.includes('opacity:.94!important;'));
-  assert.ok(css.includes('body.luxury-theme #appView .favorite-btn'));
+  assert.ok(css.includes('body.luxury-theme .favorite-btn'));
   assert.ok(css.includes('stroke:#6277c8!important;'));
 });
 
@@ -1472,9 +1472,10 @@ test('icon labels remain readable across themes and compact mobile navigation',(
   const marker='/* 2026-11-27 — icon-label readability pass across all three themes.';
   const rules=css.slice(css.lastIndexOf(marker));
   assert.ok(rules.length>0,'final icon-label readability pass exists');
-  for(const selector of ['#appView .category-btn .category-label','#appView .da-v2-quick-grid button b',
-    '#appView .mobile-bottom-nav button span','body.light-theme #appView .category-btn .category-label',
-    'body.luxury-theme #appView .category-btn .category-label']){
+  assert.ok(!rules.includes('#appView'),'readability rules do not depend on a missing wrapper');
+  for(const selector of ['.category-btn .category-label','.da-v2-quick-grid button b',
+    '.mobile-bottom-nav button span','body.light-theme .category-btn .category-label',
+    'body.luxury-theme .category-btn .category-label']){
     assert.ok(rules.includes(selector),'icon label contrast/size is explicitly covered: '+selector);
   }
   assert.match(rules,/font-size:12px!important/,'category labels have a readable desktop baseline');
