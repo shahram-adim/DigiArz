@@ -1451,3 +1451,18 @@ test('white theme page canvas removes neutral-gray background from every outer a
   assert.match(final,/background-color:#ffffff!important/);
   assert.match(final,/background-image:none!important/);
 });
+
+
+test('premium market header omits source and freshness labels without changing market data', () => {
+  const marker = '/* Final market-header cleanup: keep source/freshness diagnostics out of the premium asset list. */';
+  const finalRules = css.slice(css.lastIndexOf(marker));
+  assert.ok(finalRules.length > 0, 'final market-header cleanup exists');
+  for (const selector of [
+    '#tab-markets>.section-title .row>.live',
+    '#tab-markets .market-board-unit',
+    '#tab-markets .market-live-indicator'
+  ]) assert.ok(finalRules.includes(selector), 'market metadata selector is covered: ' + selector);
+  assert.match(finalRules, /display:none!important/);
+  assert.match(html, /id="marketList"/);
+  assert.match(html, /id="marketAvgChange"/);
+});
