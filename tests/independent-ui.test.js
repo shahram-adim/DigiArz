@@ -1368,6 +1368,6 @@ test('quick-trade sizing and estimates preserve exact decimal strings under the 
   assert.match(html,/const ORDER_INPUT_MAX_FRACTION_DIGITS=8;/,'UI order precision remains compatible with the current production schema');
   const buyBudget=decimal.multiplyDecimal('100.00000001','0.25',18,'down');
   assert.equal(buyBudget,'25.0000000025');
-  assert.equal(decimal.divideDecimal(buyBudget,'0.00000003',8,'down'),'833333333.41666673');
+  assert.equal(decimal.divideDecimal(buyBudget,'0.00000003',8,'down'),'833333333.41666666');
   assert.equal(decimal.multiplyDecimal('0.123456789012345678','0.25',8,'down'),'0.03086419');
 });
