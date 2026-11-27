@@ -106,3 +106,56 @@ test('Limit worker integration covers the minimum fee half-quantum boundary', ()
   assert.ok(integration.includes('Half-quantum fee reservation mismatch'));
   assert.ok(integration.includes("SET status='cancelled'"));
 });
+
+const rolloutCandidate = fs.readFileSync(
+  path.join(__dirname, '..', 'supabase/drafts/2026-11-16_exact_decimal_rollout_candidate.sql'),
+  'utf8'
+);
+
+function candidateFunction(name) {
+  const start = rolloutCandidate.indexOf('CREATE OR REPLACE FUNCTION ' + name);
+  assert.ok(start >= 0, 'missing rollout candidate function: ' + name);
+  const end = rolloutCandidate.indexOf('$function$;', start);
+  assert.ok(end > start, 'unterminated rollout candidate function: ' + name);
+  return rolloutCandidate.slice(start, end);
+}
+
+test('rollout candidate validates direct Market and Limit RPC precision before financial writes', () => {
+  const limit = candidateFunction('public.place_limit_order');
+  const market = candidateFunction('public.execute_demo_trade');
+
+  for (const fragment of [
+    'pg_catalog.scale(p_amount) > 18',
+    'pg_catalog.scale(p_limit_price) > 18',
+    'round(p_amount * p_limit_price, 8) <= 0',
+    'round(p_amount * p_limit_price, 8)',
+    'round(round(p_amount * p_limit_price, 8) * v_fee_rate, 8)'
+  ]) {
+    assert.ok(limit.includes(fragment), 'Limit RPC is missing precision/settlement guard: ' + fragment);
+  }
+
+  for (const fragment of [
+    'pg_catalog.scale(p_amount) > 18',
+    'pg_catalog.scale(v_price) > 18',
+    'v_gross := round(p_amount * v_price, 8)',
+    'IF v_gross <= 0 THEN',
+    'v_fee := round(v_gross * v_fee_rate, 8)'
+  ]) {
+    assert.ok(market.includes(fragment), 'Market RPC is missing precision/settlement guard: ' + fragment);
+  }
+});
+
+test('rollout candidate quantizes Limit worker USDT settlement and reservation arithmetic to 8 places', () => {
+  const worker = candidateFunction('public.process_limit_orders');
+
+  for (const fragment of [
+    'v_gross := round(v_qty * v_market_price, 8)',
+    'v_fee := round(v_gross * v_fee_rate, 8)',
+    'v_total := v_gross + v_fee',
+    'v_net := v_gross - v_fee',
+    'round(v_new_remaining * v_order.price, 8)',
+    'round(round(v_new_remaining * v_order.price, 8) * v_fee_rate, 8)'
+  ]) {
+    assert.ok(worker.includes(fragment), 'Limit worker is missing settlement quantization: ' + fragment);
+  }
+});
