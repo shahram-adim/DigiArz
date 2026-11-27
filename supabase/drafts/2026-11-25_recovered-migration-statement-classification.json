@@ -1,0 +1,1183 @@
+{
+  "title": "Static statement classification manifest for recovered Production migration sources",
+  "date": "2026-11-25",
+  "status": "REVIEW_ONLY_NOT_EXECUTABLE",
+  "source_count": 17,
+  "source_provenance": "Bodies previously verified byte-exact against Production migration ledger after removing exactly nine provenance-header lines.",
+  "splitter": "Lexical semicolon splitter respecting SQL single/double quotes, line/block comments and PostgreSQL dollar-quoted bodies.",
+  "digest": "SHA-256 of exact UTF-8 statement bytes including the terminating semicolon where present.",
+  "rules": [
+    "No SQL text is stored or executed by this manifest.",
+    "Unknown/manual-review statements block replay.",
+    "HTTP, pg_net, Cron, privileged identity seed and financial writes are excluded or synthetic-only.",
+    "GRANT/REVOKE entries are assertions only, not instructions to apply persistent ACL changes."
+  ],
+  "files": [
+    {
+      "version": "20261113153808",
+      "source_file": "recovered_20261113153808_approved_wallet_defaults_fees_and_coin_reviews.sql",
+      "source_blob_sha": "e2061544d4b5bec479c51af2a3edd7b928519c3b",
+      "body_sha256": "481c0f271d6150af42de5710921ed755518671ed82b335b698debd42a7023b2a",
+      "body_utf8_bytes": 7527,
+      "statement_count": 31,
+      "statements": [
+        {
+          "ordinal": 1,
+          "sha256": "492384dbc8e0e502c2519effc733157d3b024789571cadd56f8f4ad085d36ae2",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.wallets",
+          "preview": "-- DigiArz: approved demo wallet defaults, configurable fees, and instant coin reviews. ALTER TABLE public.wallets ALTER COLUMN balance_usdt SET DEFAU"
+        },
+        {
+          "ordinal": 2,
+          "sha256": "76981f3f7e5e22302061ad5076b617b2d1d63473792685283b1af237f7e9d07d",
+          "classification": "synthetic_financial_data_only",
+          "target": "public.new_user_setup",
+          "preview": "CREATE OR REPLACE FUNCTION public.new_user_setup() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $function$ BEGIN INSERT "
+        },
+        {
+          "ordinal": 3,
+          "sha256": "d7127790519b019b5dc740748850bdcaa084121017648ac8cda0233e69cf9dc5",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.demo_trading_fees",
+          "preview": "CREATE TABLE IF NOT EXISTS public.demo_trading_fees ( quote_asset text PRIMARY KEY, maker_fee_rate numeric(10,8) NOT NULL CHECK (maker_fee_rate >= 0 A"
+        },
+        {
+          "ordinal": 4,
+          "sha256": "6b59dfbff500686ff56882e492ad205b1ec91afe7f1a845a35ea8cb3d948d566",
+          "classification": "synthetic_data_only_rollback",
+          "target": "public.demo_trading_fees",
+          "preview": "INSERT INTO public.demo_trading_fees (quote_asset, maker_fee_rate, taker_fee_rate) VALUES ('USDT', 0.001, 0.0013), ('IRR', 0.0025, 0.0025) ON CONFLICT"
+        },
+        {
+          "ordinal": 5,
+          "sha256": "9cf663195aa26e1f8bfcd161cfc3d8a220d56cca42818dc4dff093506c37e48e",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.demo_trading_fees",
+          "preview": "ALTER TABLE public.demo_trading_fees ENABLE ROW LEVEL SECURITY;"
+        },
+        {
+          "ordinal": 6,
+          "sha256": "5c67c9969117fff56f0889d9bc3e2c4b175b406e6d74541ae7d48c2c40c50bd8",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.demo_trading_fees",
+          "preview": "REVOKE ALL ON public.demo_trading_fees FROM PUBLIC, anon, authenticated;"
+        },
+        {
+          "ordinal": 7,
+          "sha256": "b6d0b97a0b335bc6cb8219ec10d536d0db6aed729c560b670de98b8a34cd12ff",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.get_demo_trading_fee_rate",
+          "preview": "CREATE OR REPLACE FUNCTION public.get_demo_trading_fee_rate(p_quote_asset text, p_liquidity_type text) RETURNS numeric LANGUAGE plpgsql STABLE SECURIT"
+        },
+        {
+          "ordinal": 8,
+          "sha256": "f968aa537f85151aa1a25d065700a1a69f0e92d2e1a9df4886a4b1c491013650",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.get_demo_trading_fee_rate",
+          "preview": "REVOKE ALL ON FUNCTION public.get_demo_trading_fee_rate(text,text) FROM PUBLIC, anon, authenticated;"
+        },
+        {
+          "ordinal": 9,
+          "sha256": "4ef6771ff7af14a230eef338e01659901c33130170f06df5ecf45c44c8eb84dc",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.get_demo_trading_fee_rate",
+          "preview": "GRANT EXECUTE ON FUNCTION public.get_demo_trading_fee_rate(text,text) TO authenticated;"
+        },
+        {
+          "ordinal": 10,
+          "sha256": "298d3e9678ceafddc0c41b9a188faa1a5cec7ea89035f3d8bf7404f55a9da89b",
+          "classification": "manual_review_dynamic_function_rewrite_blocked",
+          "target": "public.execute_demo_trade(text,text,numeric,numeric)",
+          "preview": "-- Market orders are taker orders. DO $migration$ DECLARE v_def text; BEGIN v_def := pg_get_functiondef('public.execute_demo_trade(text,text,numeric,n"
+        },
+        {
+          "ordinal": 11,
+          "sha256": "0eb76aadb1a342eaef3b14698bb085dedf8fc90e54ca8c342146df9a20039483",
+          "classification": "manual_review_dynamic_function_rewrite_blocked",
+          "target": "public.place_limit_order(text,text,numeric,numeric)",
+          "preview": "-- Limit orders reserve maker fees; their fills are processed as maker liquidity. DO $migration$ DECLARE v_def text; BEGIN v_def := pg_get_functiondef"
+        },
+        {
+          "ordinal": 12,
+          "sha256": "6a8073ea8c66228e9927e8587f2ec092bd6150c74d3f834df528d73958fa6a3d",
+          "classification": "manual_review_dynamic_function_rewrite_blocked",
+          "target": "public.process_limit_orders()",
+          "preview": "-- Limit-order matching applies the maker fee consistently to fills and remaining reservations. DO $migration$ DECLARE v_def text; BEGIN v_def := pg_g"
+        },
+        {
+          "ordinal": 13,
+          "sha256": "dc0efe53358591e21d7413158d845e5111c2c7ce29e064164fa53c5dc5f163d7",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.coin_reviews",
+          "preview": "CREATE TABLE IF NOT EXISTS public.coin_reviews ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid NOT NULL REFERENCES auth.users(id) ON DEL"
+        },
+        {
+          "ordinal": 14,
+          "sha256": "47d5ab9eb95988d14ee6c11a596e43a383443fbbd5115eb4cfa7449de6ed39ee",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.coin_reviews",
+          "preview": "CREATE INDEX IF NOT EXISTS coin_reviews_symbol_created_idx ON public.coin_reviews(symbol, created_at DESC);"
+        },
+        {
+          "ordinal": 15,
+          "sha256": "c90348689445e16a21b30ab48018dd940739721991165b036018e932e9e27ee8",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.coin_reviews",
+          "preview": "ALTER TABLE public.coin_reviews ENABLE ROW LEVEL SECURITY;"
+        },
+        {
+          "ordinal": 16,
+          "sha256": "2af7ebe3b1d20cf48c2c0452e0886e24d2b9d67d44d59b78ce20fdc75f4cea03",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.coin_reviews",
+          "preview": "DROP POLICY IF EXISTS \"Public can read coin reviews\" ON public.coin_reviews;"
+        },
+        {
+          "ordinal": 17,
+          "sha256": "5a9ad8fd26f68bc76590d506415773e938d660477557fc6608cf0b32e39d6463",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.coin_reviews",
+          "preview": "CREATE POLICY \"Public can read coin reviews\" ON public.coin_reviews FOR SELECT TO anon, authenticated USING (true);"
+        },
+        {
+          "ordinal": 18,
+          "sha256": "1ec177f6a916a28a74346c0f512ad3d71818ad5a85a23ac4d733ea2a712fff8e",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.coin_reviews",
+          "preview": "DROP POLICY IF EXISTS \"Users can create own coin reviews\" ON public.coin_reviews;"
+        },
+        {
+          "ordinal": 19,
+          "sha256": "c297972e9a1e73df4cbc52f7df9b2bc65b337e22045821f479e035441bb8bc87",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.coin_reviews",
+          "preview": "CREATE POLICY \"Users can create own coin reviews\" ON public.coin_reviews FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id AND public.curre"
+        },
+        {
+          "ordinal": 20,
+          "sha256": "89a25997dc906dc7222a86f746b05b7c379fe134fff47c619fb2a834739c34db",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "own",
+          "preview": "DROP POLICY IF EXISTS \"Users can update own coin reviews\" ON public.coin_reviews;"
+        },
+        {
+          "ordinal": 21,
+          "sha256": "5a54b030ed500c3d7a06801bd6c966a259723fec1f5fafa05641304c5783f0e2",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "own",
+          "preview": "CREATE POLICY \"Users can update own coin reviews\" ON public.coin_reviews FOR UPDATE TO authenticated USING (auth.uid() = user_id AND public.current_ac"
+        },
+        {
+          "ordinal": 22,
+          "sha256": "de31677417e947d6955a44479be65c25c0eec6c6a703d298e648607b5b92d702",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.coin_reviews",
+          "preview": "DROP POLICY IF EXISTS \"Users can delete own coin reviews\" ON public.coin_reviews;"
+        },
+        {
+          "ordinal": 23,
+          "sha256": "130814eff2cb842ee6f19e9661a9190d7d722c463ed23025af57b45d78613862",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.coin_reviews",
+          "preview": "CREATE POLICY \"Users can delete own coin reviews\" ON public.coin_reviews FOR DELETE TO authenticated USING (auth.uid() = user_id);"
+        },
+        {
+          "ordinal": 24,
+          "sha256": "b607c4ef6000989c495b2e433c08fccbf9c9c99797180d7574f95e951e9c7ee7",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.coin_review_reports",
+          "preview": "CREATE TABLE IF NOT EXISTS public.coin_review_reports ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), review_id uuid NOT NULL REFERENCES public.coin_"
+        },
+        {
+          "ordinal": 25,
+          "sha256": "503f7df4e6d8926a39f6b1cf527b965781a119a2e5d0dc7e9f0d40cfac8dca49",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.coin_review_reports",
+          "preview": "ALTER TABLE public.coin_review_reports ENABLE ROW LEVEL SECURITY;"
+        },
+        {
+          "ordinal": 26,
+          "sha256": "9946ac13581dc69a1b39565588b27070d3eb7c1a33ad8ac3514a977e49156bee",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.coin_review_reports",
+          "preview": "DROP POLICY IF EXISTS \"Users can report coin reviews\" ON public.coin_review_reports;"
+        },
+        {
+          "ordinal": 27,
+          "sha256": "8208c9608916e408c33fb4719594a941f52a091b343cce22232d10ce2c0ff84f",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.coin_review_reports",
+          "preview": "CREATE POLICY \"Users can report coin reviews\" ON public.coin_review_reports FOR INSERT TO authenticated WITH CHECK (auth.uid() = reporter_user_id AND "
+        },
+        {
+          "ordinal": 28,
+          "sha256": "3cc4b32b46f861547a4501e849aeca2ca60e588bfbf8eb270ba72e672e74b909",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.coin_review_reports",
+          "preview": "REVOKE ALL ON public.coin_review_reports FROM PUBLIC, anon;"
+        },
+        {
+          "ordinal": 29,
+          "sha256": "d0efbe0d48a36619662de6640c118df69bee29ed751492460582db5e15e77904",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.coin_reviews",
+          "preview": "GRANT SELECT, INSERT, UPDATE, DELETE ON public.coin_reviews TO authenticated;"
+        },
+        {
+          "ordinal": 30,
+          "sha256": "ba9fa4395d5f34a1f80e8b56d6ff84fd124e30ac884285c4e9cf850063bc9de1",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.coin_reviews",
+          "preview": "GRANT SELECT ON public.coin_reviews TO anon;"
+        },
+        {
+          "ordinal": 31,
+          "sha256": "8192372fa0bddcb171bc45c635edb5616fe3616983fbe5b401719d237794a438",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.coin_review_reports",
+          "preview": "GRANT INSERT ON public.coin_review_reports TO authenticated;"
+        }
+      ]
+    },
+    {
+      "version": "20261113154323",
+      "source_file": "recovered_20261113154323_assign_confirmed_super_admin.sql",
+      "source_blob_sha": "504c2ffeab1f1beb28e53f44714c91492a114b94",
+      "body_sha256": "8700b07ab24316a23f6713a4b4555621035d91e60febd2c9f72fae60ec2565b7",
+      "body_utf8_bytes": 1197,
+      "statement_count": 10,
+      "statements": [
+        {
+          "ordinal": 1,
+          "sha256": "edd65695b320db381bb184e32a5dfcc16b4d4c822f560f090224bb840c63958b",
+          "classification": "transaction_wrapper_strip_before_fixture",
+          "target": "transaction boundary",
+          "preview": "begin;"
+        },
+        {
+          "ordinal": 2,
+          "sha256": "a17822df0a5ae7cf77f75fa06703c79a235e31a600df2e230e26643ffa4c3f99",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "private",
+          "preview": "create schema if not exists private;"
+        },
+        {
+          "ordinal": 3,
+          "sha256": "12da4d43af58d61e358dbcea97cded2a9722c9f745069a7977b746cc643023f9",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "private",
+          "preview": "revoke all on schema private from public, anon, authenticated;"
+        },
+        {
+          "ordinal": 4,
+          "sha256": "20747d29ee1cd82d565cc4f57b3ef4233f1b72c828e7e7df73e60e2a401b1e35",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "private.admin_users",
+          "preview": "create table if not exists private.admin_users ( user_id uuid primary key references auth.users(id) on delete restrict, role text not null check (role"
+        },
+        {
+          "ordinal": 5,
+          "sha256": "70cdfca9c9079205941d63d4ba2de59b1d2f183e39c66426c2d0044c11366cfc",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "private.admin_users",
+          "preview": "alter table private.admin_users enable row level security;"
+        },
+        {
+          "ordinal": 6,
+          "sha256": "d6e3ad6354312ef6325cb43fd64b43a67c4b4e741ebac27744048b09f7508617",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "private.admin_users",
+          "preview": "revoke all on table private.admin_users from public, anon, authenticated;"
+        },
+        {
+          "ordinal": 7,
+          "sha256": "440879dbbd7f9992897a73ea4d038c8fc37a2e393214c1b16a18d155e432e8da",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "private.is_super_admin",
+          "preview": "create or replace function private.is_super_admin() returns boolean language sql stable security definer set search_path = '' as $$ select exists ( se"
+        },
+        {
+          "ordinal": 8,
+          "sha256": "84b2d27b9bd1d211ac624daa7c2f6d343aadef74a970e93c37ea72717509cd8b",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "private.is_super_admin",
+          "preview": "revoke all on function private.is_super_admin() from public, anon, authenticated;"
+        },
+        {
+          "ordinal": 9,
+          "sha256": "7d4874eeb09bd3ff5bcae9ad89457d901103f8015f23fdd2873d3913d8365e3a",
+          "classification": "excluded_privileged_identity_seed",
+          "target": "private.admin_users",
+          "preview": "insert into private.admin_users (user_id, role, granted_by) select p.id, 'super_admin', p.id from public.profiles p where p.id = 'a9daf990-bd7f-4af8-a"
+        },
+        {
+          "ordinal": 10,
+          "sha256": "364647c86405c505850634a548a540e7738f7690d7e5f7d744edf0ba1dbbc575",
+          "classification": "transaction_wrapper_strip_before_fixture",
+          "target": "transaction boundary",
+          "preview": "commit;"
+        }
+      ]
+    },
+    {
+      "version": "20261113154736",
+      "source_file": "recovered_20261113154736_secure_admin_wallet_management.sql",
+      "source_blob_sha": "047e260d6199a10523ab31ce6d6330f722ec59ce",
+      "body_sha256": "5cd5da3bd1f106186e808fbcded2d530fe745ef4b87e4a12878675680961aa2d",
+      "body_utf8_bytes": 4957,
+      "statement_count": 11,
+      "statements": [
+        {
+          "ordinal": 1,
+          "sha256": "edd65695b320db381bb184e32a5dfcc16b4d4c822f560f090224bb840c63958b",
+          "classification": "transaction_wrapper_strip_before_fixture",
+          "target": "transaction boundary",
+          "preview": "begin;"
+        },
+        {
+          "ordinal": 2,
+          "sha256": "1b33d741e98473c02c6a5f84c439bd40cf94e7686408e7a0a4150adc577b6ca0",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "private.admin_wallet_adjustments",
+          "preview": "create table if not exists private.admin_wallet_adjustments ( id uuid primary key default gen_random_uuid(), admin_user_id uuid not null references au"
+        },
+        {
+          "ordinal": 3,
+          "sha256": "7536d6cdb20af9062b714aa69e38a1c92a35b7ed353815c4f3ec80a52eeb8f14",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "private.admin_wallet_adjustments",
+          "preview": "alter table private.admin_wallet_adjustments enable row level security;"
+        },
+        {
+          "ordinal": 4,
+          "sha256": "e8dc0f9ec449330d26795932dd3dc847982fa03b3a30e3e66ebf08c8edba4a17",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "private.admin_wallet_adjustments",
+          "preview": "revoke all on table private.admin_wallet_adjustments from public, anon, authenticated;"
+        },
+        {
+          "ordinal": 5,
+          "sha256": "b32c986834fd4e1d544d7afd288ba21ce2f43474811beaa186011d18274b85e0",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.admin_list_users",
+          "preview": "create or replace function public.admin_list_users() returns table ( user_id uuid, email text, is_active boolean, created_at timestamptz, balance_usdt"
+        },
+        {
+          "ordinal": 6,
+          "sha256": "e7d0d2c941bc9a652ea466acf6cfc9d46260753a3d222325a9fbc3c9c4e7ced0",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.admin_list_users",
+          "preview": "revoke all on function public.admin_list_users() from public, anon;"
+        },
+        {
+          "ordinal": 7,
+          "sha256": "287debc4f57f822a92f308955dcddb0b6b132abd2e9b0f9050c104fe7c177c46",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.admin_list_users",
+          "preview": "grant execute on function public.admin_list_users() to authenticated;"
+        },
+        {
+          "ordinal": 8,
+          "sha256": "ad35f5f68dfa747b5792578e6d8a99e45f5bd086a8af9fd0979280619c1c2cc2",
+          "classification": "synthetic_financial_data_only",
+          "target": "public.admin_adjust_wallet",
+          "preview": "create or replace function public.admin_adjust_wallet( p_user_id uuid, p_currency text, p_direction text, p_amount numeric, p_reason text ) returns js"
+        },
+        {
+          "ordinal": 9,
+          "sha256": "bcd11b66225e158fe96fe2f734c13752025012e0a160d16c2df6c818af777c0a",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.admin_adjust_wallet",
+          "preview": "revoke all on function public.admin_adjust_wallet(uuid,text,text,numeric,text) from public, anon;"
+        },
+        {
+          "ordinal": 10,
+          "sha256": "cc938e504d7c072574a00de65c1dd2ea06e3687c958d1b86ec8c0b49298e2466",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.admin_adjust_wallet",
+          "preview": "grant execute on function public.admin_adjust_wallet(uuid,text,text,numeric,text) to authenticated;"
+        },
+        {
+          "ordinal": 11,
+          "sha256": "364647c86405c505850634a548a540e7738f7690d7e5f7d744edf0ba1dbbc575",
+          "classification": "transaction_wrapper_strip_before_fixture",
+          "target": "transaction boundary",
+          "preview": "commit;"
+        }
+      ]
+    },
+    {
+      "version": "20261113154750",
+      "source_file": "recovered_20261113154750_add_admin_role_probe.sql",
+      "source_blob_sha": "9dc669d0afdc58f319481296b29b9050099c05de",
+      "body_sha256": "f96f5da371c2745b35f197cd21c8ff15f35301dd20181472eb2d649ebc530351",
+      "body_utf8_bytes": 378,
+      "statement_count": 3,
+      "statements": [
+        {
+          "ordinal": 1,
+          "sha256": "2ddae6cab2f1fb497f5062441214a56be5be5446020d987fb5a10ced24a7d809",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.is_current_user_super_admin",
+          "preview": "create or replace function public.is_current_user_super_admin() returns boolean language sql stable security definer set search_path = '' as $$ select"
+        },
+        {
+          "ordinal": 2,
+          "sha256": "08a7dc0a4f5114696f1d181ea687c45af7233e4b545c793daeeedb332001888a",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.is_current_user_super_admin",
+          "preview": "revoke all on function public.is_current_user_super_admin() from public, anon;"
+        },
+        {
+          "ordinal": 3,
+          "sha256": "bdceed868b29c043d8bf795bbc8315238a310c8875b7f8c9db7b497c0bf167c3",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.is_current_user_super_admin",
+          "preview": "grant execute on function public.is_current_user_super_admin() to authenticated;"
+        }
+      ]
+    },
+    {
+      "version": "20261113154844",
+      "source_file": "recovered_20261113154844_use_toman_units_in_admin_credit_ui.sql",
+      "source_blob_sha": "2a74e3e6e5a7233fe938b4f2e97cddafda994b26",
+      "body_sha256": "154cc47945b9b3d6f8d706f51e2ed8037485a50fbdaaa5501a12473c170ebc1b",
+      "body_utf8_bytes": 3746,
+      "statement_count": 7,
+      "statements": [
+        {
+          "ordinal": 1,
+          "sha256": "edd65695b320db381bb184e32a5dfcc16b4d4c822f560f090224bb840c63958b",
+          "classification": "transaction_wrapper_strip_before_fixture",
+          "target": "transaction boundary",
+          "preview": "begin;"
+        },
+        {
+          "ordinal": 2,
+          "sha256": "398878478b004cdff76b0941a1071998bb2d69da56596d8e284f0a1c666a47f0",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "private.admin_wallet_adjustments",
+          "preview": "alter table private.admin_wallet_adjustments drop constraint if exists admin_wallet_adjustments_currency_check;"
+        },
+        {
+          "ordinal": 3,
+          "sha256": "91cdb9db030db4086314ef31f45bc2b0c0584dc038f151e0a25fe0b259452954",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "private.admin_wallet_adjustments",
+          "preview": "alter table private.admin_wallet_adjustments add constraint admin_wallet_adjustments_currency_check check (currency in ('USDT','TOMAN'));"
+        },
+        {
+          "ordinal": 4,
+          "sha256": "746e7cf3bf8244df007be75bb521cc9cd5fa0cdc652c36e2f7b7c4e464e53494",
+          "classification": "synthetic_financial_data_only",
+          "target": "public.admin_adjust_wallet",
+          "preview": "create or replace function public.admin_adjust_wallet( p_user_id uuid, p_currency text, p_direction text, p_amount numeric, p_reason text ) returns js"
+        },
+        {
+          "ordinal": 5,
+          "sha256": "bcd11b66225e158fe96fe2f734c13752025012e0a160d16c2df6c818af777c0a",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.admin_adjust_wallet",
+          "preview": "revoke all on function public.admin_adjust_wallet(uuid,text,text,numeric,text) from public, anon;"
+        },
+        {
+          "ordinal": 6,
+          "sha256": "cc938e504d7c072574a00de65c1dd2ea06e3687c958d1b86ec8c0b49298e2466",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.admin_adjust_wallet",
+          "preview": "grant execute on function public.admin_adjust_wallet(uuid,text,text,numeric,text) to authenticated;"
+        },
+        {
+          "ordinal": 7,
+          "sha256": "364647c86405c505850634a548a540e7738f7690d7e5f7d744edf0ba1dbbc575",
+          "classification": "transaction_wrapper_strip_before_fixture",
+          "target": "transaction boundary",
+          "preview": "commit;"
+        }
+      ]
+    },
+    {
+      "version": "20261113154926",
+      "source_file": "recovered_20261113154926_move_admin_privilege_logic_to_private_schema.sql",
+      "source_blob_sha": "7bced612a0333e60198d55a87ac07c5644a0966d",
+      "body_sha256": "76770cbaa5a9e6461df0903eb7a008c9dda97532d54a37450503003383416867",
+      "body_utf8_bytes": 6003,
+      "statement_count": 21,
+      "statements": [
+        {
+          "ordinal": 1,
+          "sha256": "edd65695b320db381bb184e32a5dfcc16b4d4c822f560f090224bb840c63958b",
+          "classification": "transaction_wrapper_strip_before_fixture",
+          "target": "transaction boundary",
+          "preview": "begin;"
+        },
+        {
+          "ordinal": 2,
+          "sha256": "d59d4b2aaebf18fafa18dbb0c7ecb506ef4728e723be4fc81f9da5894557f328",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "private",
+          "preview": "grant usage on schema private to authenticated;"
+        },
+        {
+          "ordinal": 3,
+          "sha256": "f2c5d24268a824de3d50db665ae1e55d2df49c2dfa1e1c215c8b4a3c77b259e9",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "private.is_current_user_super_admin",
+          "preview": "create or replace function private.is_current_user_super_admin() returns boolean language sql stable security definer set search_path = '' as $$ selec"
+        },
+        {
+          "ordinal": 4,
+          "sha256": "8339c8140ef40a2b58213541e403a41fac8f00c715bb403219488ac584d92b1c",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "private.is_current_user_super_admin",
+          "preview": "revoke all on function private.is_current_user_super_admin() from public, anon;"
+        },
+        {
+          "ordinal": 5,
+          "sha256": "0257b88c38a7104d6d181cd4c5af5aab982ecdd4efde2716ff539264a0381bc1",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "private.is_current_user_super_admin",
+          "preview": "grant execute on function private.is_current_user_super_admin() to authenticated;"
+        },
+        {
+          "ordinal": 6,
+          "sha256": "a156e12ce9c070a292c5bce6d754c3a11a8eec12a6b120e2ff4017a758695610",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "private.admin_list_users",
+          "preview": "create or replace function private.admin_list_users() returns table ( user_id uuid, email text, is_active boolean, created_at timestamptz, balance_usd"
+        },
+        {
+          "ordinal": 7,
+          "sha256": "74755ff8bbb04ec6a4ba86200ed4f88b64a53eee5fe3ca5db870be26973edafd",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "private.admin_list_users",
+          "preview": "revoke all on function private.admin_list_users() from public, anon;"
+        },
+        {
+          "ordinal": 8,
+          "sha256": "55e44831090f9ceda90550c9ba13c5edfde6ae109a3e5c8123bb2635431e42cf",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "private.admin_list_users",
+          "preview": "grant execute on function private.admin_list_users() to authenticated;"
+        },
+        {
+          "ordinal": 9,
+          "sha256": "b1ce56ce623c77eb613a9113c2c45d8f0e5e19d062ebac3d3272cf75d7949737",
+          "classification": "synthetic_financial_data_only",
+          "target": "private.admin_adjust_wallet",
+          "preview": "create or replace function private.admin_adjust_wallet( p_user_id uuid, p_currency text, p_direction text, p_amount numeric, p_reason text ) returns j"
+        },
+        {
+          "ordinal": 10,
+          "sha256": "a576688077beff8fbd48c421ff48aca6fe36777bbd651f6380a658c2df8cff12",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "private.admin_adjust_wallet",
+          "preview": "revoke all on function private.admin_adjust_wallet(uuid,text,text,numeric,text) from public, anon;"
+        },
+        {
+          "ordinal": 11,
+          "sha256": "b45e86484c3947a4bc96d2a77b158b82f10e33182915af3232ae014773fb3f6f",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "private.admin_adjust_wallet",
+          "preview": "grant execute on function private.admin_adjust_wallet(uuid,text,text,numeric,text) to authenticated;"
+        },
+        {
+          "ordinal": 12,
+          "sha256": "caea6d3fac8cf4d971737007592a54c0b6a3399780341a9914e2fded4d99bed6",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.admin_list_users",
+          "preview": "create or replace function public.admin_list_users() returns table (user_id uuid,email text,is_active boolean,created_at timestamptz,balance_usdt nume"
+        },
+        {
+          "ordinal": 13,
+          "sha256": "e7d0d2c941bc9a652ea466acf6cfc9d46260753a3d222325a9fbc3c9c4e7ced0",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.admin_list_users",
+          "preview": "revoke all on function public.admin_list_users() from public, anon;"
+        },
+        {
+          "ordinal": 14,
+          "sha256": "287debc4f57f822a92f308955dcddb0b6b132abd2e9b0f9050c104fe7c177c46",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.admin_list_users",
+          "preview": "grant execute on function public.admin_list_users() to authenticated;"
+        },
+        {
+          "ordinal": 15,
+          "sha256": "a534c8292c60e7dfbf53cd16c4ee94415c4b57a6e5dcbc21ea92c743bd371e3d",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.admin_adjust_wallet",
+          "preview": "create or replace function public.admin_adjust_wallet(p_user_id uuid,p_currency text,p_direction text,p_amount numeric,p_reason text) returns jsonb la"
+        },
+        {
+          "ordinal": 16,
+          "sha256": "bcd11b66225e158fe96fe2f734c13752025012e0a160d16c2df6c818af777c0a",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.admin_adjust_wallet",
+          "preview": "revoke all on function public.admin_adjust_wallet(uuid,text,text,numeric,text) from public, anon;"
+        },
+        {
+          "ordinal": 17,
+          "sha256": "cc938e504d7c072574a00de65c1dd2ea06e3687c958d1b86ec8c0b49298e2466",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.admin_adjust_wallet",
+          "preview": "grant execute on function public.admin_adjust_wallet(uuid,text,text,numeric,text) to authenticated;"
+        },
+        {
+          "ordinal": 18,
+          "sha256": "d4458099c49d71ba78606a20ff9ce07f45a77e539960fa9365645bd24eefc7d6",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.is_current_user_super_admin",
+          "preview": "create or replace function public.is_current_user_super_admin() returns boolean language sql stable security invoker set search_path = '' as $$ select"
+        },
+        {
+          "ordinal": 19,
+          "sha256": "08a7dc0a4f5114696f1d181ea687c45af7233e4b545c793daeeedb332001888a",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.is_current_user_super_admin",
+          "preview": "revoke all on function public.is_current_user_super_admin() from public, anon;"
+        },
+        {
+          "ordinal": 20,
+          "sha256": "bdceed868b29c043d8bf795bbc8315238a310c8875b7f8c9db7b497c0bf167c3",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.is_current_user_super_admin",
+          "preview": "grant execute on function public.is_current_user_super_admin() to authenticated;"
+        },
+        {
+          "ordinal": 21,
+          "sha256": "364647c86405c505850634a548a540e7738f7690d7e5f7d744edf0ba1dbbc575",
+          "classification": "transaction_wrapper_strip_before_fixture",
+          "target": "transaction boundary",
+          "preview": "commit;"
+        }
+      ]
+    },
+    {
+      "version": "20261115101709",
+      "source_file": "recovered_20261115101709_create_exchange_asset_observations.sql",
+      "source_blob_sha": "9a0c2e2151b31ce8889147cf986218fe345f60c0",
+      "body_sha256": "1d53e4326e435e8a1226be3f951fd06032c0f9c1fe427c7eefed2a9ca8ab8914",
+      "body_utf8_bytes": 1505,
+      "statement_count": 7,
+      "statements": [
+        {
+          "ordinal": 1,
+          "sha256": "1b6564f198c8774868460efab23c5c7ba6bf7fede02de812e633a4b7914f6835",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.exchange_asset_observations",
+          "preview": "create table if not exists public.exchange_asset_observations ( id bigint generated always as identity primary key, exchange text not null check (exch"
+        },
+        {
+          "ordinal": 2,
+          "sha256": "91fbc6e4518f90e75fc5f1ca2cdfd2f72494f2fec51f6979ce0d585cce1d81d6",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.exchange_asset_observations",
+          "preview": "create index if not exists exchange_asset_observations_symbol_idx on public.exchange_asset_observations (upper(base_symbol));"
+        },
+        {
+          "ordinal": 3,
+          "sha256": "8ca831f50472b62409bfa7323d90fd21ea91d7e5284a045ac35b0fbf5934fc2a",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.exchange_asset_observations",
+          "preview": "create index if not exists exchange_asset_observations_match_idx on public.exchange_asset_observations (match_status, last_seen_at desc);"
+        },
+        {
+          "ordinal": 4,
+          "sha256": "e107a889900bcf03dd4dd11c5d4bebf46eda51609b0d9de9efc305691d7f75b0",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.exchange_asset_observations",
+          "preview": "alter table public.exchange_asset_observations enable row level security;"
+        },
+        {
+          "ordinal": 5,
+          "sha256": "fe66b58b720661e4ab680d30a5e79b5852780faba0ea7f90fd29119f96b5fd9d",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.exchange_asset_observations",
+          "preview": "revoke all on public.exchange_asset_observations from anon, authenticated;"
+        },
+        {
+          "ordinal": 6,
+          "sha256": "f2cc7aee603c87f28162717a9b5064f03e5f7aba603c2be38c11fa35a2fc13fd",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.exchange_asset_observations",
+          "preview": "grant all on public.exchange_asset_observations to service_role;"
+        },
+        {
+          "ordinal": 7,
+          "sha256": "bcc49db8fa0d341a619c7696d8c4c798d11354003db376bf2caec6aead8ab131",
+          "classification": "schema_metadata_comment_candidate",
+          "target": "public.exchange_asset_observations",
+          "preview": "comment on table public.exchange_asset_observations is 'Read-only exchange listing evidence. Never enables demo trading pairs; unmatched/ambiguous ass"
+        }
+      ]
+    },
+    {
+      "version": "20261115102729",
+      "source_file": "recovered_20261115102729_schedule_iran_exchange_asset_sync.sql",
+      "source_blob_sha": "c52d16f7b3fae314d051115c5951e77b11fc0aae",
+      "body_sha256": "df6d7cf632cb1b817eddb226d0a19b029303477a110f86279d82c9b5dde70cbc",
+      "body_utf8_bytes": 7493,
+      "statement_count": 10,
+      "statements": [
+        {
+          "ordinal": 1,
+          "sha256": "72e71c108ffe657d37f9f81332c1ccfcbede0beac4bc18a7dfcd9aaa39fc691a",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.exchange_asset_sync_requests",
+          "preview": "create table if not exists public.exchange_asset_sync_requests ( request_id bigint primary key, exchange text not null check (exchange in ('nobitex','"
+        },
+        {
+          "ordinal": 2,
+          "sha256": "e8abe0e2b8810045858355509a435bd7e5e9ea58d414aef300966fe2a720ac66",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.exchange_asset_sync_requests",
+          "preview": "alter table public.exchange_asset_sync_requests enable row level security;"
+        },
+        {
+          "ordinal": 3,
+          "sha256": "94a1337bafbad0e1936b99a138773b4550cf130d6608b3b1327c8bfe4e6315b5",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.exchange_asset_sync_requests",
+          "preview": "revoke all on public.exchange_asset_sync_requests from anon, authenticated;"
+        },
+        {
+          "ordinal": 4,
+          "sha256": "95f155ed8f795b4d4a741c81d43c41d459edb22d25d00c3770065ba3682d440a",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.exchange_asset_sync_requests",
+          "preview": "grant all on public.exchange_asset_sync_requests to service_role;"
+        },
+        {
+          "ordinal": 5,
+          "sha256": "0e7679881e55ee000d44ccd2c371b8ca24a60349519019a7f5a5887dc38b5d8f",
+          "classification": "excluded_external_http_or_queue",
+          "target": "public.request_iran_exchange_asset_sync",
+          "preview": "create or replace function public.request_iran_exchange_asset_sync() returns integer language plpgsql security definer set search_path = '' as $$ decl"
+        },
+        {
+          "ordinal": 6,
+          "sha256": "6cebd1351a89db7eaababa2361310024c0cfb34732eb6a5a6e01c70ed2c0d197",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.request_iran_exchange_asset_sync",
+          "preview": "revoke all on function public.request_iran_exchange_asset_sync() from public, anon, authenticated;"
+        },
+        {
+          "ordinal": 7,
+          "sha256": "6adf4500d3d1360db1c86050e534ed4c5b5d2734d82e351846d0625e8a0835dd",
+          "classification": "excluded_external_http_or_queue",
+          "target": "public.process_iran_exchange_asset_sync",
+          "preview": "create or replace function public.process_iran_exchange_asset_sync() returns jsonb language plpgsql security definer set search_path = '' as $$ declar"
+        },
+        {
+          "ordinal": 8,
+          "sha256": "4ca23e4be9dc7e3c490c0c74603c751c1c66a7e91628cabe116c52510d4493f6",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.process_iran_exchange_asset_sync",
+          "preview": "revoke all on function public.process_iran_exchange_asset_sync() from public, anon, authenticated;"
+        },
+        {
+          "ordinal": 9,
+          "sha256": "0a35fd3fd9266e9e9a80c2966ee0730937a6a29c0e557e69f557d201649eef37",
+          "classification": "excluded_cron_side_effect",
+          "target": "pg_cron job",
+          "preview": "select cron.schedule('digiarz-iran-exchange-request','*/30 * * * *','select public.request_iran_exchange_asset_sync();');"
+        },
+        {
+          "ordinal": 10,
+          "sha256": "d9f68526659fd66e82a9ca922a4e5a8d3914a827bf94a43bb323bbf0d1450294",
+          "classification": "excluded_cron_side_effect",
+          "target": "pg_cron job",
+          "preview": "select cron.schedule('digiarz-iran-exchange-process','*/2 * * * *','select public.process_iran_exchange_asset_sync();');"
+        }
+      ]
+    },
+    {
+      "version": "20261115102927",
+      "source_file": "recovered_20261115102927_fix_exchange_sync_response_json_cast.sql",
+      "source_blob_sha": "5b0950dbda5fd2e8a6041b95ddc95bc33cad6dd4",
+      "body_sha256": "c81e25b56110d30098b0ed0731d9ee081b771e38d31968a457fca24c0c05b5b6",
+      "body_utf8_bytes": 4934,
+      "statement_count": 2,
+      "statements": [
+        {
+          "ordinal": 1,
+          "sha256": "78e4b737fed3a1798f84767a10eb732f022b07203962e7b7bc79d6d463144fcd",
+          "classification": "excluded_external_http_or_queue",
+          "target": "public.process_iran_exchange_asset_sync",
+          "preview": "create or replace function public.process_iran_exchange_asset_sync() returns jsonb language plpgsql security definer set search_path='' as $$ declare "
+        },
+        {
+          "ordinal": 2,
+          "sha256": "9af310453791842a1178e4f9bbe99b1f4ae38525448d5d6afb06964edb32ad71",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.process_iran_exchange_asset_sync",
+          "preview": "revoke all on function public.process_iran_exchange_asset_sync() from public,anon,authenticated;"
+        }
+      ]
+    },
+    {
+      "version": "20261115103227",
+      "source_file": "recovered_20261115103227_auto_list_verified_exchange_assets.sql",
+      "source_blob_sha": "58dc0a55c63f5e2afa4cdd3c13d462ae33d9ab95",
+      "body_sha256": "df198a9ac4655850549c265d359457d70d6c05416d75a34c8d2a913e0c57384d",
+      "body_utf8_bytes": 2339,
+      "statement_count": 5,
+      "statements": [
+        {
+          "ordinal": 1,
+          "sha256": "10d37775b0cd9c7263aa0d234b818ffef27faf711d8b58efcce84f6dcb5aad83",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "private.auto_list_verified_exchange_asset",
+          "preview": "create or replace function private.auto_list_verified_exchange_asset() returns trigger language plpgsql security definer set search_path='' as $$ begi"
+        },
+        {
+          "ordinal": 2,
+          "sha256": "39ae73c715d46baed6c3fa18e7c9f8de2aae3acc72375c768508a25060aeb7ec",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "private.auto_list_verified_exchange_asset",
+          "preview": "revoke all on function private.auto_list_verified_exchange_asset() from public,anon,authenticated;"
+        },
+        {
+          "ordinal": 3,
+          "sha256": "943adc7297981f56a9b8af32fc189a32f02618030c42acd05311aca8f571f05e",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "if",
+          "preview": "drop trigger if exists trg_auto_list_verified_exchange_asset on public.exchange_asset_observations;"
+        },
+        {
+          "ordinal": 4,
+          "sha256": "2054066803d610a51b93a7941ad9c3a57437ece883f8a7096be82304529b6beb",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "trg_auto_list_verified_exchange_asset",
+          "preview": "create trigger trg_auto_list_verified_exchange_asset after insert or update of match_status,coingecko_id,is_active on public.exchange_asset_observatio"
+        },
+        {
+          "ordinal": 5,
+          "sha256": "06b1f24feb07d824849fbcea1f96ef446327a2697e23f36478bd3b4f8b46a4df",
+          "classification": "synthetic_data_only_rollback",
+          "target": "public.admin_market_listings",
+          "preview": "insert into public.admin_market_listings(coingecko_id,added_by) select distinct ca.coingecko_id,null::uuid from public.exchange_asset_observations o j"
+        }
+      ]
+    },
+    {
+      "version": "20261115103507",
+      "source_file": "recovered_20261115103507_schedule_bit24_exchange_asset_sync.sql",
+      "source_blob_sha": "c6e5e86782c4de77e4631cff1b5cf7b32339b2fb",
+      "body_sha256": "792174b86011040cbeeb7f31f491d6229282ccd24f4c6c1a2120f52b8448638e",
+      "body_utf8_bytes": 4536,
+      "statement_count": 10,
+      "statements": [
+        {
+          "ordinal": 1,
+          "sha256": "cbdff5de0b524d9b919c621cb6a1afd54800aae642ba3966ac1d56b386b4fa71",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.bit24_exchange_sync_requests",
+          "preview": "create table if not exists public.bit24_exchange_sync_requests( request_id bigint primary key, requested_at timestamptz not null default now(), proces"
+        },
+        {
+          "ordinal": 2,
+          "sha256": "958db1ffea95f16f8a71b019941dc475753b4cdde22d92f75068f138ab299bbb",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.bit24_exchange_sync_requests",
+          "preview": "alter table public.bit24_exchange_sync_requests enable row level security;"
+        },
+        {
+          "ordinal": 3,
+          "sha256": "f24b81da26b8cde3513c201d9cc5e10724d72c4a0e3940a3f8e7397c71388f64",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.bit24_exchange_sync_requests",
+          "preview": "revoke all on public.bit24_exchange_sync_requests from anon,authenticated;"
+        },
+        {
+          "ordinal": 4,
+          "sha256": "afd3bf80f1ff3ce7773e104ccc9b76c5b7e731705c176cea4d3b50b7b601f50e",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.bit24_exchange_sync_requests",
+          "preview": "grant all on public.bit24_exchange_sync_requests to service_role;"
+        },
+        {
+          "ordinal": 5,
+          "sha256": "2674f81bb4ae702ed9ceac1519a59792b2acd5a9f172d8e80f90835dd90fb691",
+          "classification": "excluded_external_http_or_queue",
+          "target": "public.request_bit24_exchange_sync",
+          "preview": "create or replace function public.request_bit24_exchange_sync() returns integer language plpgsql security definer set search_path='' as $$ declare p i"
+        },
+        {
+          "ordinal": 6,
+          "sha256": "a277fe7aa29eb418ef7a5398b88c83115d5d7fa0e33398845c670c52cf0245f3",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.request_bit24_exchange_sync",
+          "preview": "revoke all on function public.request_bit24_exchange_sync() from public,anon,authenticated;"
+        },
+        {
+          "ordinal": 7,
+          "sha256": "772f96020803217936d4771748c38362cf887f329c32ccafbe4d9bad66e4c9bf",
+          "classification": "excluded_external_http_or_queue",
+          "target": "public.process_bit24_exchange_sync",
+          "preview": "create or replace function public.process_bit24_exchange_sync() returns jsonb language plpgsql security definer set search_path='' as $$ declare n int"
+        },
+        {
+          "ordinal": 8,
+          "sha256": "ef55d983c8d771de6dfac2e7c7e30123a64dee489a46e72c18c31c12835c3e8f",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.process_bit24_exchange_sync",
+          "preview": "revoke all on function public.process_bit24_exchange_sync() from public,anon,authenticated;"
+        },
+        {
+          "ordinal": 9,
+          "sha256": "ad1424d096065bd83f5ed65166407146df0c0212bf185d431cd37742f74e00c7",
+          "classification": "excluded_cron_side_effect",
+          "target": "pg_cron job",
+          "preview": "select cron.schedule('digiarz-bit24-request','*/30 * * * *','select public.request_bit24_exchange_sync();');"
+        },
+        {
+          "ordinal": 10,
+          "sha256": "a001e5531d1b32d8e13d3b15e00f43744c812f052c0609be64984869c35f40ee",
+          "classification": "excluded_cron_side_effect",
+          "target": "pg_cron job",
+          "preview": "select cron.schedule('digiarz-bit24-process','*/2 * * * *','select public.process_bit24_exchange_sync();');"
+        }
+      ]
+    },
+    {
+      "version": "20261115105721",
+      "source_file": "recovered_20261115105721_admin_exchange_asset_sync_monitoring.sql",
+      "source_blob_sha": "e75bd61e5b4e69f15944119ce935ca5f54853271",
+      "body_sha256": "6746f14a0a3771faddb5c8b47587ec160e39020cd7f7d263b6a85026ef427bde",
+      "body_utf8_bytes": 4082,
+      "statement_count": 6,
+      "statements": [
+        {
+          "ordinal": 1,
+          "sha256": "8946c969159d66bd652ea98867f5e0f31fa8a02273235eb10566b68710bfb195",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.admin_exchange_asset_sync_report",
+          "preview": "create or replace function public.admin_exchange_asset_sync_report() returns jsonb language plpgsql security definer set search_path = '' as $$ declar"
+        },
+        {
+          "ordinal": 2,
+          "sha256": "30507461777dcb4fd01f0b8609ea598c5c157366fe986ea76f2ef93b1d32aba3",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.admin_request_exchange_asset_sync",
+          "preview": "create or replace function public.admin_request_exchange_asset_sync() returns jsonb language plpgsql security definer set search_path = '' as $$ decla"
+        },
+        {
+          "ordinal": 3,
+          "sha256": "87891c06851a9eb20d7ed60a6d374dbebdbffbc096bf08b9099eeed645fb22da",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.admin_exchange_asset_sync_report",
+          "preview": "revoke all on function public.admin_exchange_asset_sync_report() from public, anon;"
+        },
+        {
+          "ordinal": 4,
+          "sha256": "9ac0d50afb4564786410f39c3b037ce45e0e183c78283a8ce1da0ff02b05e152",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.admin_request_exchange_asset_sync",
+          "preview": "revoke all on function public.admin_request_exchange_asset_sync() from public, anon;"
+        },
+        {
+          "ordinal": 5,
+          "sha256": "636c3bb9fa91ee9b7bd2f5da290af48c10ab1d24e0fea1e7088085bcdf4bb898",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.admin_exchange_asset_sync_report",
+          "preview": "grant execute on function public.admin_exchange_asset_sync_report() to authenticated;"
+        },
+        {
+          "ordinal": 6,
+          "sha256": "60ceccd81f58044b6c38c87c7f9f09f893797f74e3ef757a506474fcc51f8d88",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.admin_request_exchange_asset_sync",
+          "preview": "grant execute on function public.admin_request_exchange_asset_sync() to authenticated;"
+        }
+      ]
+    },
+    {
+      "version": "20261115105956",
+      "source_file": "recovered_20261115105956_restrict_exchange_sync_worker_execution.sql",
+      "source_blob_sha": "0ee2a4083d441fadf00e5bb77d5357337f14c6ae",
+      "body_sha256": "5cfc6100f5f21a77981adf10f8a44df5a1cf9e9b4348fb05174cee6c7f7424c2",
+      "body_utf8_bytes": 387,
+      "statement_count": 4,
+      "statements": [
+        {
+          "ordinal": 1,
+          "sha256": "6cebd1351a89db7eaababa2361310024c0cfb34732eb6a5a6e01c70ed2c0d197",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.request_iran_exchange_asset_sync",
+          "preview": "revoke all on function public.request_iran_exchange_asset_sync() from public, anon, authenticated;"
+        },
+        {
+          "ordinal": 2,
+          "sha256": "7f17ec5a4cb039fd472fdd0997d56b44ad61344044996aeb0aabbdb89f20aad1",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.request_bit24_exchange_sync",
+          "preview": "revoke all on function public.request_bit24_exchange_sync() from public, anon, authenticated;"
+        },
+        {
+          "ordinal": 3,
+          "sha256": "4ca23e4be9dc7e3c490c0c74603c751c1c66a7e91628cabe116c52510d4493f6",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.process_iran_exchange_asset_sync",
+          "preview": "revoke all on function public.process_iran_exchange_asset_sync() from public, anon, authenticated;"
+        },
+        {
+          "ordinal": 4,
+          "sha256": "fd09a012be38b47ba53f1e8f68283bdad8a9d7a19aa1aed689178bd480a84329",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "public.process_bit24_exchange_sync",
+          "preview": "revoke all on function public.process_bit24_exchange_sync() from public, anon, authenticated;"
+        }
+      ]
+    },
+    {
+      "version": "20261116201639",
+      "source_file": "recovered_20261116201639_auto_activate_verified_exchange_pairs.sql",
+      "source_blob_sha": "7059252ede1c66edea9fce6e470e1542ba993e56",
+      "body_sha256": "dc1335eab18c2c42748e784ead424f1392710dc0f3bc982031c23f6b2cc7e364",
+      "body_utf8_bytes": 2510,
+      "statement_count": 3,
+      "statements": [
+        {
+          "ordinal": 1,
+          "sha256": "7d310fe095bfef814143ee906559b3eea315a36bc07cee52362c399a8eade1dd",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "private.auto_activate_verified_exchange_pairs",
+          "preview": "CREATE OR REPLACE FUNCTION private.auto_activate_verified_exchange_pairs() RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $f"
+        },
+        {
+          "ordinal": 2,
+          "sha256": "27c86226d62ddfbabbac3149cef2d8a360e4d7ca82c2a81d4a1abc437ae7a72d",
+          "classification": "acl_assertion_only_no_persistent_replay",
+          "target": "private.auto_activate_verified_exchange_pairs",
+          "preview": "REVOKE ALL ON FUNCTION private.auto_activate_verified_exchange_pairs() FROM PUBLIC, anon, authenticated;"
+        },
+        {
+          "ordinal": 3,
+          "sha256": "30259e9e9d94ac8eb45da3ac26da7e45097a73e4a1551bd0576e0a05edcc1189",
+          "classification": "excluded_cron_side_effect",
+          "target": "pg_cron job",
+          "preview": "SELECT cron.schedule( 'digiarz-auto-activate-verified-exchange-pairs', '* * * * *', 'SELECT private.auto_activate_verified_exchange_pairs();' );"
+        }
+      ]
+    },
+    {
+      "version": "20261121045434",
+      "source_file": "recovered_20261121045434_digiarz_backpressure_and_exchange_sync_bloat_guards.sql",
+      "source_blob_sha": "9f138058c0788f2dd434b8127f0961795e42284b",
+      "body_sha256": "cc6ccf364243282317119d649347bd31827c7b55d6d2dc3732a94c16eb2d3ecb",
+      "body_utf8_bytes": 12721,
+      "statement_count": 2,
+      "statements": [
+        {
+          "ordinal": 1,
+          "sha256": "6108c68f0644b8b87e8d78f4853d493fa5cedd678c5c3b2917efce940d17c552",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "public.crypto_assets",
+          "preview": "CREATE INDEX IF NOT EXISTS crypto_assets_upper_symbol_active_idx ON public.crypto_assets (upper(symbol)) WHERE is_active IS TRUE;"
+        },
+        {
+          "ordinal": 2,
+          "sha256": "f6322627c4367ae24e25c41b0324da3b3ddfe584c7a04bca016a85045b60ea71",
+          "classification": "excluded_external_http_or_queue",
+          "target": "private.market_price_sync_requests",
+          "preview": "DO $patch$ DECLARE v_def text; v_old text; v_new text; BEGIN -- Market prices: keep request IDs until response/queue is truly gone; -- apply back-pres"
+        }
+      ]
+    },
+    {
+      "version": "20261121045531",
+      "source_file": "recovered_20261121045531_snapshot_pg_net_unlogged_queue_before_recovery.sql",
+      "source_blob_sha": "77fde0455b445c2f302c7ed1054de85f1c9cbc51",
+      "body_sha256": "9065735d566f7ce05c9f1c9ae66b831cafe1930672f06e8c06154ea3740d894b",
+      "body_utf8_bytes": 275,
+      "statement_count": 2,
+      "statements": [
+        {
+          "ordinal": 1,
+          "sha256": "941141796a83c287289de2c19a1a404a4294dc9abf3004344195433a6671c808",
+          "classification": "schema_or_function_candidate_dependency_gated",
+          "target": "private.digiarz_pg_net_queue_backup_20261121",
+          "preview": "CREATE TABLE private.digiarz_pg_net_queue_backup_20261121 AS SELECT clock_timestamp() AS captured_at, q.* FROM net.http_request_queue q;"
+        },
+        {
+          "ordinal": 2,
+          "sha256": "37bbf7323c801f329c449e124bb56e8dd7b74a52d8cd88242fc369281b28cf13",
+          "classification": "excluded_external_http_or_queue",
+          "target": "private.digiarz_pg_net_response_backup_20261121",
+          "preview": "CREATE TABLE private.digiarz_pg_net_response_backup_20261121 AS SELECT clock_timestamp() AS captured_at, r.* FROM net._http_response r;"
+        }
+      ]
+    },
+    {
+      "version": "20261121050216",
+      "source_file": "recovered_20261121050216_temporarily_throttle_exchange_asset_processors.sql",
+      "source_blob_sha": "a43af5820aed6814457f501485b1e94a1f75a0cd",
+      "body_sha256": "1b2c26d4d35b650ce40d6a59a95ab66bf1d2fc57d77a95cdc3b0429791d5b61c",
+      "body_utf8_bytes": 110,
+      "statement_count": 2,
+      "statements": [
+        {
+          "ordinal": 1,
+          "sha256": "8d94de301bfb5fc3cb4bf2055321e5285c10b5e3e4d27375212db12f650f2e4e",
+          "classification": "excluded_cron_side_effect",
+          "target": "pg_cron job",
+          "preview": "select cron.alter_job(14, schedule := '1,31 * * * *');"
+        },
+        {
+          "ordinal": 2,
+          "sha256": "20d9696cb53573cc68fbd5d955012b22a03574fe7db4476904b570e38108ac7c",
+          "classification": "excluded_cron_side_effect",
+          "target": "pg_cron job",
+          "preview": "select cron.alter_job(16, schedule := '16,46 * * * *');"
+        }
+      ]
+    }
+  ],
+  "classification_notes": {
+    "transaction_wrapper_strip_before_fixture": "BEGIN/COMMIT wrappers are not replayed as standalone statements; any candidate unit must be re-authored into an explicit test transaction.",
+    "manual_review_dynamic_function_rewrite_blocked": "DO blocks that inspect and rewrite existing trading function bodies are blocked until exact before/after definitions, preconditions and rollback behavior are independently reviewed. They are not executed by this manifest.",
+    "schema_or_function_candidate_dependency_gated": "Candidate only; exact dependencies, owner, grants, RLS and synthetic prerequisites still require review before any disposable fixture use.",
+    "schema_metadata_comment_candidate": "COMMENT metadata only; may be asserted in a fixture after object existence is established.",
+    "acl_assertion_only_no_persistent_replay": "Record expected effective privileges in a fixture contract; do not apply GRANT/REVOKE to any persistent database.",
+    "excluded_external_http_or_queue": "No pg_net HTTP invocation, queue read/write, queue snapshot or payload replay is allowed.",
+    "excluded_cron_side_effect": "No pg_cron schedule creation, alteration, execution or removal is allowed.",
+    "excluded_privileged_identity_seed": "Never replay a privileged identity assignment; use only a deterministic synthetic identity.",
+    "synthetic_financial_data_only": "Only synthetic fixtures and rollback-scoped tests are allowed; no persistent balance/order/trade/reservation/transaction changes.",
+    "synthetic_data_only_rollback": "Synthetic-only fixture DML, transaction-scoped and rolled back.",
+    "manual_review_unknown_fail_closed": "Unknown statements block replay until individually classified."
+  },
+  "manual_review_blockers": [
+    {
+      "version": "20261113153808",
+      "ordinal": 10,
+      "target": "public.execute_demo_trade(text,text,numeric,numeric)",
+      "reason": "Dynamic pg_get_functiondef/replace/EXECUTE rewrite of a trading function."
+    },
+    {
+      "version": "20261113153808",
+      "ordinal": 11,
+      "target": "public.place_limit_order(text,text,numeric,numeric)",
+      "reason": "Dynamic pg_get_functiondef/replace/EXECUTE rewrite of a financial order-placement function."
+    },
+    {
+      "version": "20261113153808",
+      "ordinal": 12,
+      "target": "public.process_limit_orders()",
+      "reason": "Dynamic pg_get_functiondef/replace/EXECUTE rewrite of the live limit-order worker."
+    }
+  ],
+  "summary": {
+    "total_statements": 136,
+    "manual_review_blockers": 3,
+    "unclassified_unknown": 0,
+    "excluded_cron": 7,
+    "excluded_external_http_or_queue": 7,
+    "transaction_wrappers": 8,
+    "target_locators_resolved": 136,
+    "unresolved_targets": 0
+  },
+  "target_extraction_note": "Targets are best-effort object locators extracted from statement previews; full-body/manual review remains mandatory. A resolved target is not a dependency proof."
+}

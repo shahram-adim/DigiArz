@@ -1,0 +1,84 @@
+-- DIGIARZ — REVIEW DRAFT ONLY / NOT EXECUTABLE
+-- Comments-only proposal. No SQL statement is active.
+-- Do NOT remove comment prefixes or run this file as a migration.
+--
+-- SECURITY FINDINGS (verified against Supabase documentation):
+-- 1) PostgreSQL grants EXECUTE on new functions to PUBLIC by global default.
+--    Revoking EXECUTE from anon/authenticated only IN SCHEMA public does not
+--    remove that inherited PUBLIC grant.
+-- 2) The Supabase-managed supabase_admin default ACL in public is not
+--    user-editable through ALTER DEFAULT PRIVILEGES; Supabase documents that
+--    attempts can fail with SQLSTATE 42501. Do not include such a statement
+--    in a production migration.
+-- 3) Supabase default ACLs for postgres-created public functions may also
+--    directly grant anon, authenticated and service_role.
+--
+-- PROPOSED HARDENING SCOPE — postgres-created functions only:
+--
+-- A. Remove the global PUBLIC EXECUTE default for functions created by
+--    postgres. This is global (not schema-scoped), because PostgreSQL's
+--    PUBLIC default is global:
+--
+--    ALTER DEFAULT PRIVILEGES FOR ROLE postgres
+--      REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
+--
+-- B. Remove schema-specific additive EXECUTE defaults for PUBLIC and direct
+--    EXECUTE defaults for API roles (anon, authenticated, service_role) on
+--    future public functions. This schema-level PUBLIC revoke cannot replace
+--    step A; it only removes an additive schema-specific grant.
+--
+--    The live caller trace found one current Edge Function invoking a
+--    service-role RPC: `admin-refresh-crypto-asset` calls the exact
+--    `public.claim_admin_asset_refresh(text, uuid)` signature using its
+--    server-side service-role client. That function already has an explicit
+--    function-level EXECUTE grant to service_role in its migration/ACL; it
+--    does not depend on a blanket default grant. Other reviewed Edge Function
+--    paths use service-role PostgREST table operations, while cron jobs run
+--    as postgres and Auth setup is trigger-driven.
+--    This evidence does not justify blanket EXECUTE for service_role on every
+--    newly created public function. Preserve the explicit grant for
+--    `claim_admin_asset_refresh`; grant any other required RPC by exact
+--    signature only after caller and body review.
+--
+--    ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
+--      REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC, anon, authenticated, service_role;
+--
+-- C. Explicitly grant EXECUTE on each new function only to the roles that
+--    need it. This must be done per exact signature, not by blanket grants.
+--    The reviewed allowlists in tests/rpc-security-catalog.sql are a starting
+--    point, but every function's purpose, caller and overload signature must
+--    be checked before producing executable SQL.
+--
+-- D. Migration ownership must be verified. These defaults apply to objects
+--    created by postgres, not objects created by another owner. CI must fail
+--    or require review if a migration creates SECURITY DEFINER functions
+--    under an unexpected owner.
+--
+-- SUPABASE-MANAGED supabase_admin EXCEPTION:
+-- - Do not attempt ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin.
+-- - Do not claim this proposal hardens objects created by supabase_admin.
+-- - Any supabase_admin-created public function remains a separate platform
+--   exposure exception and must be inventoried and reviewed.
+-- - If Supabase changes this restriction in future, verify the current
+--   documentation and project permissions before proposing a separate step.
+--
+-- EXISTING FUNCTIONS:
+-- ALTER DEFAULT PRIVILEGES affects future objects only. Existing function
+-- ACLs are unchanged. Any change to existing RPC ACLs requires a separate
+-- exact-signature inventory, regression tests and explicit owner approval.
+--
+-- REQUIRED PRE-IMPLEMENTATION CHECKS:
+-- 1) Confirm the actual migration execution role is postgres.
+-- 2) Enumerate all function signatures and owners in public/private.
+-- 3) Map each function to its required callers (anon, authenticated,
+--    service_role, postgres/worker) and inspect SECURITY DEFINER bodies.
+-- 4) Add exact EXECUTE grants for approved functions only; do not assume
+--    service_role needs blanket access merely because Edge Functions use its
+--    key for table-level PostgREST operations.
+-- 5) Test new function creation and inherited ACLs in a disposable clone.
+-- 6) Run RPC negative tests (anon, ordinary authenticated) and positive
+--    tests (approved authenticated, service_role, admin) using test identities.
+-- 7) Run Supabase security advisors and inspect PostgREST/worker call paths.
+--
+-- This file remains documentation-only. No migration has been created or
+-- applied, and no database privileges have been changed.

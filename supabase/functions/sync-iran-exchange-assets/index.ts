@@ -1,4 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { extractPersianNameCandidate } from "../../../src/persian-asset-names.mjs";
+import { collectBitpinMarketPages, isSuperAdminRpcAuthorized } from "../../../src/sync-safety.mjs";
 
 const KIFPOOL_BODY = {
   operationName: "headerCoins",
@@ -14,7 +16,7 @@ const KIFPOOL_BODY = {
 const EXCHANGES = [
   { id: "nobitex", url: "https://apiv2.nobitex.ir/v2/options", kind: "nobitex" },
   { id: "wallex", url: "https://api.wallex.ir/v1/markets", kind: "markets" },
-  { id: "bitpin", url: "https://api.bitpin.ir/api/v1/mkt/tickers/", kind: "markets" },
+  { id: "bitpin", url: "https://api.bitpin.ir/api/v1/mkt/markets/", kind: "markets" },
   { id: "ramzinex", url: "https://api.ramzinex.ir/exchange/api/v1.0/exchange/pairs", kind: "markets" },
   { id: "tabdeal", url: "https://api-web.tabdeal.org/r/plots/currencies/dynamic-info/", kind: "markets" },
   { id: "ompfinex", url: "https://api.ompfinex.com/v2/market", kind: "markets" },
@@ -48,7 +50,7 @@ function records(root: unknown): Record<string, unknown>[] {
     }
     const o = v as Record<string, unknown>;
     const keys = Object.keys(o);
-    if (keys.some(k => ["symbol","market","pair","baseAsset","base_currency","baseCurrency","currency","coin"].includes(k))) out.push(o);
+    if (keys.some(k => ["symbol","market","pair","baseAsset","base_currency","baseCurrency","currency","coin","currency1"].includes(k))) out.push(o);
     for (const [k, x] of Object.entries(o)) {
       if (["message","description","html"].includes(k)) continue;
       walk(x, depth + 1);
@@ -60,9 +62,17 @@ function records(root: unknown): Record<string, unknown>[] {
 function extract(exchange: typeof EXCHANGES[number], payload: unknown) {
   const out = new Map<string, Record<string, unknown>>();
   for (const o of records(payload)) {
-    const baseRaw = get(o, ["baseAsset","base_asset","baseCurrency","base_currency","base","currency","coin","asset","code"]);
-    const quoteRaw = get(o, ["quoteAsset","quote_asset","quoteCurrency","quote_currency","quote"]);
-    const marketRaw = get(o, ["symbol","market","pair","marketSymbol","market_symbol","name"]);
+    const bitpinBase = exchange.id === "bitpin" ? get(o, ["currency1"]) : null;
+    const baseRaw = bitpinBase && typeof bitpinBase === "object"
+      ? get(bitpinBase as Record<string, unknown>, ["code"])
+      : get(o, ["baseAsset","base_asset","baseCurrency","base_currency","base","currency","coin","asset","code"]);
+    const bitpinQuote = exchange.id === "bitpin" ? get(o, ["currency2"]) : null;
+    const quoteRaw = bitpinQuote && typeof bitpinQuote === "object"
+      ? get(bitpinQuote as Record<string, unknown>, ["code"])
+      : get(o, ["quoteAsset","quote_asset","quoteCurrency","quote_currency","quote"]);
+    const marketRaw = exchange.id === "bitpin"
+      ? get(o, ["code"])
+      : get(o, ["symbol","market","pair","marketSymbol","market_symbol","name"]);
     let base = norm(baseRaw);
     let quote = norm(quoteRaw);
     let market = typeof marketRaw === "string" ? marketRaw.trim().toUpperCase().replace(/[\s_]/g, "") : null;
@@ -98,7 +108,7 @@ function extract(exchange: typeof EXCHANGES[number], payload: unknown) {
     out.set(market, {
       exchange: exchange.id, market_symbol: market, base_symbol: base,
       quote_symbol: quote, asset_name: typeof name === "string" ? name.slice(0,120) : null,
-      source_url: exchange.url, source_payload: o, is_active: !inactive,
+      source_url: exchange.url, source_payload: { ...o, _digiarz_persian_name_candidate: extractPersianNameCandidate(exchange.id, o) }, is_active: !inactive,
     });
   }
   return [...out.values()];
@@ -117,7 +127,15 @@ Deno.serve(async (req: Request) => {
     headers: { apikey: anonKey, Authorization: auth, "Content-Type": "application/json" },
     body: JSON.stringify({}),
   });
-  if (!adminCheck.ok) return Response.json({ error: "Super administrator access required" }, { status: 403 });
+  let adminCheckBody: unknown = null;
+  try {
+    adminCheckBody = await adminCheck.json();
+  } catch {
+    return Response.json({ error: "Super administrator access required" }, { status: 403 });
+  }
+  if (!isSuperAdminRpcAuthorized(adminCheck.ok, adminCheckBody)) {
+    return Response.json({ error: "Super administrator access required" }, { status: 403 });
+  }
 
   const results: Record<string, unknown>[] = [];
   for (const ex of EXCHANGES) {
@@ -138,9 +156,21 @@ Deno.serve(async (req: Request) => {
         : await fetch(ex.url, {
             headers: { accept: "application/json", "user-agent": "DigiArz-market-catalog/1.0" },
             signal: AbortSignal.timeout(12000),
+            ...(ex.id === "bitpin" ? { redirect: "error" as RequestRedirect } : {}),
           });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const payload = await response.json();
+      let payload = await response.json();
+      if (ex.id === "bitpin") {
+        payload = await collectBitpinMarketPages({
+          firstPayload: payload,
+          catalogUrl: ex.url,
+          fetchPage: (url: string, init?: RequestInit) => fetch(url, {
+            ...init,
+            headers: { accept: "application/json", "user-agent": "DigiArz-market-catalog/1.0" },
+            signal: AbortSignal.timeout(12000),
+          }),
+        });
+      }
       if (ex.kind === "kifpool" && (!payload?.data?.coinList?.coins || payload?.errors?.length)) {
         throw new Error("Kifpool persisted GraphQL market query failed");
       }

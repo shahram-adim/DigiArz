@@ -1,0 +1,295 @@
+name: DigiArz Persian asset-name candidate tests
+
+on:
+  push:
+    branches:
+      - feature/persian-asset-name-candidates-2026
+  pull_request:
+    branches: [redesign/ui-clean-rebuild-2026]
+    paths:
+      - "src/persian-asset-names.mjs"
+      - "src/sync-safety.mjs"
+      - "tests/persian-asset-names.test.mjs"
+      - "tests/sync-safety.test.mjs"
+      - "tests/rpc-security.integration.sql"
+      - "tests/rpc-security-claim-admin-refresh.integration.sql"
+      - "tests/rpc-security-market-listings.integration.sql"
+      - "tests/rpc-security-market-listing-trigger.integration.sql"
+      - "tests/rpc-security-auto-list-trigger.integration.sql"
+      - "tests/rpc-security-demo-fee-rate.integration.sql"
+      - "tests/demo-trading-fee-rate-null-regression.pg17.sql"
+      - "tests/demo-limit-fill-storage-rounding.pg17.sql"
+      - "tests/rpc-security-order-reservations.integration.sql"
+      - "tests/rpc-security-admin-search.integration.sql"
+      - "tests/rpc-security-admin-add-listing.integration.sql"
+      - "tests/rpc-security-admin-enable-pair.integration.sql"
+      - "tests/fixtures/rpc-security-postgres17-bootstrap.sql"
+      - "tests/fixtures/rpc-security-postgres17-catalog-stubs.sql"
+      - "tests/rpc-security-postgres17-contract.sql"
+      - "tests/rpc-security-catalog.sql"
+      - "tests/exchange-asset-observations-catalog.sql"
+      - "supabase/functions/sync-iran-exchange-assets/index.ts"
+      - ".github/workflows/persian-asset-name-tests.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Test Persian asset-name candidate extraction
+        run: node --test tests/persian-asset-names.test.mjs tests/sync-safety.test.mjs
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Type-check the isolated exchange-sync Edge Function
+        run: deno check --no-lock --node-modules-dir=auto supabase/functions/sync-iran-exchange-assets/index.ts
+
+  rpc-security-integration:
+    # Enable only after the repository secret points to the dedicated test project.
+    if: ${{ vars.DIGIARZ_ENABLE_RPC_SECURITY_TESTS == 'true' }}
+    runs-on: ubuntu-24.04
+    env:
+      DIGIARZ_TEST_DB_URL: ${{ secrets.DIGIARZ_TEST_DB_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Refuse any database other than the dedicated DigiArz test project
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${DIGIARZ_TEST_DB_URL}" ]]; then
+            echo "DIGIARZ_TEST_DB_URL secret is required when RPC integration tests are enabled."
+            exit 1
+          fi
+          if [[ "${DIGIARZ_TEST_DB_URL}" != *"zrriqwyolcjhbappocuw"* ]]; then
+            echo "Refusing to connect: the configured database URL is not the dedicated test project."
+            exit 1
+          fi
+      - name: Verify SECURITY DEFINER inventory and RPC ACL allowlists
+        run: psql "${DIGIARZ_TEST_DB_URL}" -v ON_ERROR_STOP=1 -f tests/rpc-security-catalog.sql
+      - name: Verify exchange asset observations schema and ACL parity
+        run: psql "${DIGIARZ_TEST_DB_URL}" -v ON_ERROR_STOP=1 -f tests/exchange-asset-observations-catalog.sql
+      - name: Run transaction-scoped RPC authorization tests
+        run: psql "${DIGIARZ_TEST_DB_URL}" -v ON_ERROR_STOP=1 -f tests/rpc-security.integration.sql
+
+  postgres17-rpc-smoke:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: local-ci-only
+          POSTGRES_DB: digiarz_security_test
+        options: >-
+          --health-cmd "pg_isready -U postgres -d digiarz_security_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify PostgreSQL major version
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          version="$(docker exec "$pg_container" psql -U postgres -d digiarz_security_test -Atc 'SHOW server_version_num')"
+          if [[ "$version" != 17* ]]; then
+            echo "Expected PostgreSQL 17, got server_version_num=$version"
+            exit 1
+          fi
+          docker exec "$pg_container" psql -U postgres -d digiarz_security_test -c 'SELECT version();'
+
+      - name: Bootstrap synthetic roles, schemas, and read-only RPC fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/fixtures/rpc-security-postgres17-bootstrap.sql
+
+      - name: Prepare synthetic exchange-discovery dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/fixtures/rpc-security-exchange-discovery-dependencies.sql
+
+      - name: Load exact 46-signature ACL fixture (34 inert metadata stubs + 12 real/source-backed bodies; before exchange-discovery migration replacement)
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/fixtures/rpc-security-postgres17-catalog-stubs.sql
+
+      - name: Install exact exchange-discovery migration body and model observed service-role ACL
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 -c "DROP FUNCTION public.get_exchange_discovered_market_assets();"
+          docker cp supabase/migrations/20261116200009_auto_list_unmatched_iran_exchange_assets.sql "$pg_container:/tmp/get_exchange_discovered_market_assets.sql"
+          docker exec "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 -f /tmp/get_exchange_discovered_market_assets.sql
+          docker exec "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 -c "GRANT EXECUTE ON FUNCTION public.get_exchange_discovered_market_assets() TO service_role;"
+
+      - name: Assert representative function SECURITY DEFINER, search_path, and ACLs
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security-postgres17-contract.sql
+
+      - name: Verify all 46 exact SECURITY DEFINER signatures and current API-role ACLs
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security-catalog.sql
+
+      - name: Test anon, ordinary authenticated, and synthetic super-admin behavior
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security.integration.sql
+
+      - name: Test verified service-role admin refresh claim body and 30-second cooldown
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security-claim-admin-refresh.integration.sql
+
+      - name: Test source-faithful read-only public market listings RPC
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security-market-listings.integration.sql
+
+      - name: Reproduce exchange discovery directly from its migration in a fresh database
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec "$pg_container" createdb -U postgres digiarz_discovery_standalone
+          docker cp supabase/migrations/20261116200009_auto_list_unmatched_iran_exchange_assets.sql "$pg_container:/tmp/get_exchange_discovered_market_assets.sql"
+          docker cp tests/rpc-security-exchange-discovery-standalone.sql "$pg_container:/tmp/rpc-security-exchange-discovery-standalone.sql"
+          docker exec "$pg_container" psql -U postgres -d digiarz_discovery_standalone -v ON_ERROR_STOP=1 -f /tmp/rpc-security-exchange-discovery-standalone.sql
+
+      - name: Test source-backed exchange discovery RPC behavior and rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security-exchange-discovery.integration.sql
+
+      - name: Test historical admin-search migration 20261113172000 in a fresh PostgreSQL 17 database
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec "$pg_container" createdb -U postgres digiarz_admin_search_standalone
+          docker cp supabase/migrations/20261113172000_harden_admin_market_listing_access.sql "$pg_container:/tmp/harden_admin_market_listing_access.sql"
+          docker cp tests/rpc-security-admin-market-search-standalone.sql "$pg_container:/tmp/rpc-security-admin-market-search-standalone.sql"
+          docker exec "$pg_container" psql -U postgres -d digiarz_admin_search_standalone -v ON_ERROR_STOP=1 -f /tmp/rpc-security-admin-market-search-standalone.sql
+
+      - name: Test exact Production admin-enable-pair body, eligibility, audit, and rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security-admin-enable-pair.integration.sql
+
+      - name: Test exact Production admin-add-listing body, ticker guard, and rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security-admin-add-listing.integration.sql
+
+      - name: Test exact live Production admin-search body with synthetic rows and rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security-admin-search.integration.sql
+
+      - name: Test exact Production ticker-guard trigger body with synthetic market rows
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security-market-listing-trigger.integration.sql
+
+      - name: Test exact Production auto-list trigger with synthetic observations
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security-auto-list-trigger.integration.sql
+
+      - name: Test source-backed demo fee-rate RPC with synthetic fee rows
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security-demo-fee-rate.integration.sql
+
+      - name: Reproduce and verify NULL liquidity-type fee-rate fix in disposable PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/demo-trading-fee-rate-null-regression.pg17.sql
+
+      - name: Characterize 8-place Limit partial-fill storage rounding in disposable PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/demo-limit-fill-storage-rounding.pg17.sql
+
+      - name: Test source-backed owner-scoped reservation lookup with synthetic rows
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec -i "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 < tests/rpc-security-order-reservations.integration.sql
+
+      - name: Confirm test fixture contains only the synthetic admin identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_container="$(docker ps -q --filter 'ancestor=postgres:17' | head -n1)"
+          test -n "$pg_container"
+          docker exec "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 -c "SELECT count(*) = 1 AS only_one_synthetic_admin FROM private.admin_users;"
+          docker exec "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 -c "SELECT count(*) = 0 AS no_persistent_synthetic_claims FROM private.admin_asset_refresh_limits;"
+          docker exec "$pg_container" psql -U postgres -d digiarz_security_test -v ON_ERROR_STOP=1 -c "SELECT (SELECT count(*) FROM public.crypto_assets) = 0 AND (SELECT count(*) FROM public.market_prices) = 0 AND (SELECT count(*) FROM public.admin_market_listings) = 0 AND (SELECT count(*) FROM public.exchange_asset_observations) = 0 AND (SELECT count(*) FROM public.demo_trading_pairs) = 0 AS no_persistent_synthetic_market_rows;"

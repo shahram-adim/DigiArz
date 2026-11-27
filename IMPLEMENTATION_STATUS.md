@@ -1305,3 +1305,194 @@
 - هیچ سفارش، معامله، reservation، wallet، balance، transaction یا سابقهٔ مالی Production ایجاد یا تغییر نکرد.
 - هیچ worker یا RPC مالی روی کاربر واقعی اجرا نشد.
 - هیچ migration، deploy، cron، grant، policy، Auth setting یا انتشار APK انجام نشد.
+
+## Checkpoint 2026-11-25 — disposable PostgreSQL 17 RPC security smoke
+
+- [x] پیش از ادامه، وضعیت واقعی PR #62 و شاخه `feature/persian-asset-name-candidates-2026` بررسی شد؛ PR همچنان Draft، باز و ادغام‌نشده است.
+- [x] یک harness موقت PostgreSQL 17 در GitHub Actions اضافه شد؛ نسخهٔ واقعی runner برابر PostgreSQL 17.12 بود. هیچ Supabase project/branch جدیدی ایجاد نشد و Recovery-Test استفاده نشد.
+- [x] fixture فقط نقش‌های مصنوعی `anon`، `authenticated`، `service_role`، یک super-admin ساختگی و جداول خالی لازم برای RPC گزارش مدیران را ایجاد می‌کند. shim مربوط به `auth.uid()` فقط برای تست است و JWT واقعی را اعتبارسنجی نمی‌کند.
+- [x] تست ACL تابع `public.admin_exchange_asset_sync_report()` موفق: امضای دقیق بدون آرگومان، SECURITY DEFINER، search_path خالی، عدم EXECUTE برای anon، وجود EXECUTE برای authenticated و service_role، و نبود EXECUTE مستقیم برای PUBLIC.
+- [x] ماتریس کاتالوگ تمام ۴۶ امضای دقیق SECURITY DEFINER در PostgreSQL 17 موفق: ACL مؤثر anon/authenticated/service_role، search_path محدود، نبود EXECUTE مستقیم PUBLIC و شش مقدار schema USAGE مطابق snapshot فعلی Production. ۴۳ تابع صرفاً stub بی‌اثر برای آزمون metadata هستند و اجرا نشده‌اند.
+- [x] آزمون بدنه تابع موفق: anon و authenticated عادی با SQLSTATE 42501 رد شدند؛ super-admin مصنوعی گزارش JSON دریافت کرد؛ تراکنش ROLLBACK شد و post-check وجود فقط یک هویت مصنوعی را تأیید کرد.
+- [x] هر دو اجرای CI روی commit `2ccd668038adddf7cdee0944f02089dacad34f5d`، jobهای `postgres17-rpc-smoke` و `unit-tests` را با موفقیت گذراندند. job قدیمی `rpc-security-integration` همچنان skipped باقی ماند.
+- [x] اجرای توسعه‌یافتهٔ CI شماره `45598493186` روی commit `50fa0c57c5ce673c0fd12c825849eafa7d8b66bc` موفق شد: تمام ۴۶ امضای دقیق و ACLهای فعلی، تست بدنه برای سه هویت، و unit-tests موفق بودند؛ remote `rpc-security-integration` همچنان skipped ماند.
+- [!] این موفقیت شامل آزمون metadata/ACL هر ۴۶ امضا و آزمون رفتاری بدنهٔ فقط یک RPC در PostgreSQL 17 است؛ نه اثبات parity کامل Supabase/Production. default ACLها، تمام RLS و table grants، Auth trigger، pg_cron و بدنه/dependencyهای ۴۳ تابع stubشده هنوز در scope کامل بررسی نشده‌اند.
+- [x] شواهد قبلی دربارهٔ نبود caller برای `claim_admin_asset_refresh(text,uuid)` اصلاح شد: Edge Function فعال `admin-refresh-crypto-asset` نسخه ۲ این RPC را با service_role فراخوانی می‌کند. مجوز دقیق آن باید حفظ شود، مگر اینکه caller عمداً بازطراحی و بازبینی شود. لاگ ۲۴ ساعت اخیر invocation ثبت نکرد؛ این موضوع caller مستقر را نفی نمی‌کند.
+- [ ] گام بعد: توسعهٔ fixture برای توابع بعدی بر اساس امضای دقیق، تعریف زنده و dependencyهای synthetic؛ ساخت manifest کامل Production-to-test؛ بازیابی ۱۷ منبع Migration مفقود و حل اختلاف timestamp/content پیش از replay کامل.
+- [ ] اختلاف سیاست default EXECUTE برای service_role همچنان نیازمند تصمیم صریح مالک است. تا آن زمان هیچ GRANT/REVOKE یا ALTER DEFAULT PRIVILEGES اجرا نشود.
+- [x] هیچ Production/Recovery-Test DDL، ACL، داده، Auth، Cron، Edge Function یا رکورد مالی تغییر نکرد؛ هیچ Merge یا Deploy انجام نشد و هیچ زیرساخت Supabase هزینه‌دار ساخته نشد.
+
+**آخرین commit کد/تست این checkpoint:** `50fa0c57c5ce673c0fd12c825849eafa7d8b66bc`؛ commitهای بعدی تا `82e66240369bc22f4de664b9d6d340adab509dd4` فقط مستندات/ثبت وضعیت را به‌روزرسانی کردند.
+
+
+## Checkpoint 2026-11-25 — source-faithful admin refresh claim RPC
+
+- [x] منبع معتبر تابع `public.claim_admin_asset_refresh(text, uuid)` از Migration `20261113190000_admin_on_demand_crypto_asset_refresh.sql` بازیابی و با caller مستقر تطبیق شد.
+- [x] اختلاف fixture اصلاح شد: تابع اکنون با بدنه واقعی و `RETURNS boolean` نصب می‌شود؛ جدول وابسته `private.admin_asset_refresh_limits` فقط با داده مصنوعی و RLS فعال در PostgreSQL 17 دورریختنی ساخته می‌شود.
+- [x] این تابع از مجموعه stubها خارج شد؛ اکنون ۴ تابع بدنه واقعی دارند و ۴۲ تابع فقط stub بی‌اثر metadata هستند.
+- [x] قرارداد دقیق claim نوع خروجی boolean، SECURITY DEFINER، search_path خالی و ACL مختص تابع را بررسی می‌کند: فقط service_role از میان API roles مجاز است؛ anon و authenticated مجاز نیستند.
+- [x] آزمون مثبت service_role برای super-admin مصنوعی موفق؛ آزمون منفی شناسه غیرمدیر با SQLSTATE `42501`، ورودی نامعتبر با `22023` و claim تکراری در بازه ۳۰ثانیه با `55000` موفق.
+- [x] تمام گام‌های `postgres17-rpc-smoke` و `unit-tests` در CI run `45600501368` (run #275) موفق؛ remote `rpc-security-integration` عمداً skipped ماند. لینک: https://github.com/shahram-adim/DigiArz/actions/runs/45600501368
+- [x] اجرای تأییدی پس از افزودن post-check صریح rollback در CI run `45600722397` (run #277) نیز موفق شد؛ jobهای `postgres17-rpc-smoke` و `unit-tests` سبز و remote `rpc-security-integration` همچنان skipped بود. لینک: https://github.com/shahram-adim/DigiArz/actions/runs/45600722397
+- [x] آزمون در تراکنش Rollback می‌شود؛ workflow خالی بودن جدول claim را پس از Rollback نیز بررسی می‌کند.
+- [!] این آزمون بدنه و dependency محدود همین تابع را پوشش می‌دهد؛ caller واقعی Edge Function از نظر source/ACL تأیید شده، اما خود Edge Function در harness اجرا نمی‌شود. این نتیجه full Production/Supabase parity نیست.
+- [ ] ۴۲ تابع stub دیگر باید فقط پس از بازیابی منبع معتبر و dependency map به بدنه واقعی تبدیل شوند؛ return type و owner هر ۴۶ تابع نیز باید در manifest جداگانه تطبیق داده شود.
+- [ ] ۱۷ منبع Migration مفقود و اختلاف timestamp/content همچنان مانع replay کامل هستند.
+- [ ] تصمیم مالک درباره default EXECUTE برای service_role هنوز باز است؛ هیچ GRANT/REVOKE یا ALTER DEFAULT PRIVILEGES برای تغییر سیاست پیش‌فرض انجام نشود.
+- [x] هیچ Production/Recovery-Test database، ACL، Auth، Cron، Edge Function، داده کاربر یا داده مالی تغییر نکرد؛ هیچ Migration، db push، Deploy، Merge، پروژه/زیرساخت Supabase یا هزینه جدیدی ایجاد نشد.
+
+**آخرین commit کد/تست این گام:** `5a17d3744fc9a2982045008f84693f6df4eac384`؛ CI run #277 پس از post-check rollback موفق است. آخرین commit مستندات ممیزی در این ادامه: `bce49bd4912265019cec7329d2f968d4a9f05493`.
+
+
+## Checkpoint 2026-11-25 — 46-function Production/PG17 parity register
+
+- [x] وضعیت واقعی PR #62 و شاخه دوباره بررسی شد: PR باز، Draft، ادغام‌نشده؛ HEAD هنگام ثبت این checkpoint `18a262d2161b50fd8afd984e622bfd90c64ad018` بود.
+- [x] فایل `supabase/drafts/2026-11-25_production-postgres17-rpc-parity-manifest.md` ساخته شد و ۴۶ امضای دقیق را از قرارداد کاتالوگ موجود ثبت می‌کند؛ برای هر امضا ACL مؤثر anon/authenticated/service_role، وضعیت body fixture، وضعیت مالک، search_path، return type، dependency و RLS به‌صورت تفکیک‌شده ثبت شده است.
+- [x] manifest به‌صراحت ثبت می‌کند که ۴۲ مقدار `RETURNS void` فقط stubهای تستی‌اند و هیچ اعتباری به‌عنوان نوع خروجی Production ندارند.
+- [x] چهار بدنهٔ واقعی fixture و نوع خروجی منبع‌دار آن‌ها ثبت شد: دو helper با `boolean`، گزارش مدیران با `jsonb` و `claim_admin_asset_refresh` با `boolean`.
+- [!] manifest فعلاً **ثبت پایهٔ ۴۶ تابع است، نه parity کامل**: نوع خروجی/مالک دقیق/تعریف/وابستگی/جدول/RLS برای ۴۲ تابع باقی‌مانده هنوز از منبع معتبر به‌صورت per-signature استخراج نشده؛ owner برای ۳۶ تابع service_role در snapshot قبلی `postgres` ثبت شده، اما owner ده مورد دیگر و مقدار دقیق per-function search_path باید مستند شود.
+- [x] اختلاف شمار migrationها روشن شد: inventory مورخ 2026-11-17 شامل ۱۴ منبع مفقود بود؛ سه Migration اعمال‌شدهٔ 2026-11-21 به آن اضافه شده‌اند، بنابراین checkpoint مورخ 2026-11-22/25 تعداد پیگیری‌شده را ۱۷ می‌داند. ۲۰ timestamp mismatch گزارش قدیمی باید با ledger تازه دوباره سنجیده شود. manifest فهرست هر ۱۷ نسخه را ثبت می‌کند.
+- [!] هیچ stub جدیدی در این گام با بدنهٔ واقعی جایگزین نشد؛ انتخاب تابع بعدی باید پس از تأیید منبع و dependency map انجام شود. هیچ تابع مالی/worker روی Production یا با دادهٔ مالی اجرا نشده است.
+- [ ] گام بعد: استخراج per-signature catalog facts و source definitions، سپس dependency/RLS map؛ اولویت با توابع read-only و کم‌خطر دارای migration معتبر است. برای هر تابع پیچیدهٔ مالی/worker ابتدا fixture کامل synthetic و side-effect review لازم است.
+- [ ] default EXECUTE برای service_role همچنان تصمیم باز مالک است؛ هیچ GRANT/REVOKE/ALTER DEFAULT PRIVILEGES انجام نشود.
+- [x] هیچ Production/Recovery-Test DB، migration ledger، Auth، Cron، Edge Function، دادهٔ مالی، یا schedule تغییر نکرد؛ هیچ merge/deploy/db push یا هزینهٔ جدید ایجاد نشد.
+
+**Commitهای مستندات این گام:** manifest پایه `e75c69ad3f4a8ca0d0477124780ec40ced6e70f3`؛ reconciliation منابع مفقود `18a262d2161b50fd8afd984e622bfd90c64ad018`.
+
+
+## Checkpoint 2026-11-25 — fifth source-backed RPC body and CI #313
+
+- [x] `public.get_admin_market_listings()` با بدنهٔ Migration معتبر `20261113181000_show_live_prices_for_curated_assets.sql` جایگزین stub شد.
+- [x] وابستگی‌های synthetic و غیرمالی `admin_market_listings`, `crypto_assets`, `market_prices` برای fixture تعریف شدند؛ RLS فعال شد؛ policy خواندن عمومی فهرست curated و عدم دسترسی مستقیم anon به جداول پایه در تست کنترل شد.
+- [x] نوع خروجی دقیق TABLE با ۱۱ ستون، `STABLE`, `SECURITY DEFINER`, `search_path=''` و ACL مؤثر فعلی در contract assertion کنترل می‌شود.
+- [x] آزمون anon، authenticated و service_role؛ فیلتر دارایی غیرفعال؛ نمایش قیمت مثبت CoinGecko تازه؛ پنهان‌سازی قیمت کهنه؛ و rollback تمام داده‌های مصنوعی موفق شدند.
+- [x] CI run #313 / ID `45603853118` موفق شد: `unit-tests` و `postgres17-rpc-smoke` سبز؛ remote `rpc-security-integration` عمداً skipped. لینک: https://github.com/shahram-adim/DigiArz/actions/runs/45603853118
+- [x] fixture اکنون ۵ بدنهٔ واقعی و ۴۱ stub صرفاً metadata دارد؛ ۴۱ نوع خروجی واقعی هنوز از stub `void` قابل استنتاج نیست.
+- [!] RLS/grants کامل Production برای جداول `crypto_assets` و `market_prices` هنوز در این fixture اثبات نشده؛ این مدل حداقلی و synthetic است. بنابراین فقط بدنه و منطق این RPC در محدودهٔ مشخص تست شده، نه full schema parity.
+- [ ] ادامه: استخراج منبع معتبر و dependency/RLS برای توابع بعدی؛ اولویت با read-only market metadata، نه توابع مالی/worker.
+- [ ] default EXECUTE برای service_role همچنان تصمیم باز مالک است؛ هیچ تغییر پیش‌فرض یا grant/revoke در Production انجام نشود.
+- [x] هیچ داده مالی، سفارش، معامله، رزرو، کیف پول، balance، Migration ledger، Cron، Auth، Edge Function یا schedule تغییر نکرد؛ هیچ Merge/Deploy/db push یا هزینه‌ای ایجاد نشد.
+
+
+**آخرین وضعیت شاخه پس از ثبت مستندات:** PR #62 HEAD برابر `7f3fb3f06ebea612401aad56a6e0e78a391182a3`؛ PR باز، Draft، ادغام‌نشده. آخرین commit کد/تست مربوط به harness برابر `8e993a3904db07b5a9862073e85f4c461792f155` است که CI run #313 موفق را اجرا کرد؛ commitهای پس از آن فقط ثبت شواهد/مستندات بودند و برای آن‌ها اجرای CI جدید در پاسخ API مشاهده نشد.
+
+
+## Checkpoint 2026-11-25 — sixth source-backed PostgreSQL 17 RPC body
+
+- [x] PR #62 قبل از تغییر بررسی شد: باز، Draft و ادغام‌نشده؛ branch برابر `feature/persian-asset-name-candidates-2026` و HEAD اولیه `1a229da48f0343b66a9867529136b9a2d57ef15` بود. CI روی همین HEAD در runهای #322 (`45604280334`) و #323 (`45604288608`) موفق بود.
+- [x] منبع معتبر `public.get_exchange_discovered_market_assets()` در Migration `20261116200009_auto_list_unmatched_iran_exchange_assets.sql` بازیابی شد؛ blob SHA برابر `901f6e3004a1fd51995ea159d840ce5b5b39dbeb`.
+- [x] بدنه SQL read-only و نوع خروجی دقیق ۸ ستونی، `STABLE`, `SECURITY DEFINER`, `search_path=''` در fixture دورریختنی PostgreSQL 17 نصب شد؛ وابستگی‌ها: `exchange_asset_observations`, `admin_market_listings`, `crypto_assets`, `demo_trading_pairs`, `market_prices`.
+- [x] RLS روی پنج جدول synthetic فعال شد؛ هیچ grant مستقیم SELECT برای anon روی جداول وابسته داده نشد. تست‌ها فقط داده‌های مصنوعی metadata بازار را درج می‌کنند و تراکنش را ROLLBACK می‌کنند.
+- [x] تست‌های جدید برای anon/authenticated/service_role، تجمیع چند صرافی، حفظ وضعیت ambiguous، پنجره ۴۸ساعته، حذف stock/tokenized، حذف دارایی فهرست‌شده و جفت فعال، قیمت تازه/کهنه، عدم دسترسی مستقیم anon و rollback نوشته شدند.
+- [x] contract assertion نوع خروجی، SQL/STABLE/SECURITY DEFINER، مسیر خالی، owner fixture، ACL مؤثر نقش‌ها، نبود EXECUTE برای PUBLIC و فعال بودن RLS در وابستگی‌های synthetic را کنترل می‌کند.
+- [x] Harness اکنون ۶ بدنه واقعی و ۴۰ stub صرفاً metadata دارد؛ fixture `RETURNS void` برای ۴۰ مورد همچنان منبع نوع خروجی Production نیست.
+- [!] اختلاف ACL برای پیگیری ثبت شد: Migration صریحاً anon/authenticated را grant می‌کند، اما ACL snapshot فعلی برای service_role نیز EXECUTE=true ثبت کرده است. منشأ این بیت service_role در منبع فعلی روشن نیست؛ ممکن است از grant/default ACL جداگانه ناشی شده باشد، اما بدون شواهد قطعی هیچ نتیجه‌ای نمی‌گیریم. fixture فقط برای بازنمایی snapshot، grant تستی مختص تابع دارد. هیچ default privilege یا ACL در Production تغییر نکرد.
+- [ ] CI برای commitهای جدید کد/تست باید بررسی شود؛ remote RPC integration عمداً مستقل و skipped باقی می‌ماند.
+- [ ] owner دقیق per-signature، ACL/default ACL منبع‌دار، و RLS/grants کامل پنج جدول Production هنوز برای parity کامل لازم‌اند.
+- [ ] ۱۷ Migration مفقود و timestamp/content drift همچنان قبل از هر replay نیازمند reconciliation تازه‌اند؛ هیچ Migration replay نشده است.
+- [ ] تصمیم مالک درباره default EXECUTE برای service_role همچنان باز است؛ هیچ `GRANT`, `REVOKE` یا `ALTER DEFAULT PRIVILEGES` روی Production انجام نشد.
+- [x] هیچ Production/Recovery-Test DB، داده مالی، سفارش، معامله، رزرو، کیف پول، موجودی، Auth، Cron، Edge Function یا Migration ledger تغییر نکرد؛ هیچ Merge، Deploy، db push، زیرساخت جدید یا هزینه‌ای ایجاد نشد.
+
+**CI قبل از این گام:** run #323 / `45604288608` روی HEAD اولیه موفق بود. **CI جدید این گام:** در انتظار نتیجه پس از push تغییرات fixture/test.
+
+
+## Checkpoint 2026-11-25 — exchange discovery RPC source mapping and safe rollback
+
+- [x] PR #62 دوباره بررسی شد: open، Draft، unmerged؛ base=`redesign/ui-clean-rebuild-2026`؛ HEAD هنگام ثبت این یادداشت `f25096b78fb5b50fc6a79e82cf272fad47885c46`.
+- [x] Migration منبع تابع `public.get_exchange_discovered_market_assets()` بازیابی شد: `20261116200009_auto_list_unmatched_iran_exchange_assets.sql`، blob SHA `901f6e3004a1fd51995ea159d840ce5b5b39dbeb`.
+- [x] نوع خروجی ۸ ستونی، SQL/STABLE/SECURITY DEFINER، `search_path=''`، پنج وابستگی read-only و فیلترهای تابع به‌صورت static review در manifest ثبت شدند. هیچ DML، HTTP، Cron یا اثر مالی در بدنهٔ تابع مشاهده نشد.
+- [!] تلاش برای افزودن بدنه و تست رفتاری به harness PostgreSQL 17 به خطاهای parser در اجرای ایزوله منجر شد. علت ریشه‌ای هنوز به‌طور قطعی مشخص نشده؛ بنابراین body، test و workflow changes این تلاش revert شدند. هیچ ادعای موفقیت behavioral test برای این تابع نداریم.
+- [x] وضعیت پایدار قبلی بازیابی شد: fixture همچنان ۵ بدنه واقعی + ۴۱ stub metadata-only دارد؛ تابع discovery در fixture همچنان stub است و فقط source-mapped candidate.
+- [x] پس از بازگردانی، CI run #359 (`45606099116`) و run #360 (`45606110974`) موفق شدند؛ `postgres17-rpc-smoke` و `unit-tests` سبز، remote `rpc-security-integration` عمداً skipped. Run #361 (`45606154307`) روی commit مستندات نیز success شد.
+- [!] ACL discrepancy ثبت شد: source migration فقط anon/authenticated را grant می‌کند، در حالی که catalog snapshot برای service_role نیز EXECUTE=true ثبت کرده است. منشأ آن unresolved است؛ هیچ default ACL، GRANT یا REVOKE روی Production تغییر نکرد.
+- [ ] گام بعدی امن: بازتولید parser failure در یک اسکریپت مستقل و حداقلی PostgreSQL 17، بدون دست‌زدن به shared harness؛ فقط پس از موفقیت standalone و role/rollback tests، تصمیم دربارهٔ افزودن دوبارهٔ بدنه گرفته شود.
+- [ ] برای parity کامل هنوز owner/ACL/proconfig دقیق per-signature و RLS/grants تمام پنج جدول Production باید از catalog evidence مستقیم تکمیل شوند.
+- [ ] ۱۷ Migration source مفقود و timestamp/content drift هنوز پیش از هر replay نیازمند inventory تازه و منبع معتبرند. هیچ Migration replay نشد.
+- [ ] تصمیم مالک درباره default EXECUTE برای service_role باز است؛ هیچ تغییر پیش‌فرضی انجام نشد.
+- [x] هیچ Production/Recovery-Test DB، داده مالی، سفارش، معامله، رزرو، کیف پول، balance، Auth، Cron، Edge Function یا Migration ledger تغییر نکرد؛ Merge، Deploy، db push، پروژه/زیرساخت جدید و هزینه‌ای ایجاد نشد.
+
+
+## Checkpoint 2026-11-25 — successful isolated PostgreSQL 17 source-migration test
+
+- [x] PR #62 و وضعیت واقعی branch قبل از این مرحله بررسی شد: PR باز، Draft و ادغام‌نشده؛ base=`redesign/ui-clean-rebuild-2026`.
+- [x] تست مستقل `tests/rpc-security-exchange-discovery-standalone.sql` اضافه شد. این تست در دیتابیس disposable جداگانه اجرا می‌شود و Migration اصلی را مستقیماً با `psql \\ir /tmp/get_exchange_discovered_market_assets.sql` بارگذاری می‌کند؛ بدنه تابع دستی کپی یا بازنویسی نمی‌شود.
+- [x] CI کپی دقیق فایل Migration `20261116200009_auto_list_unmatched_iran_exchange_assets.sql` به کانتینر PostgreSQL 17 و اجرای تست در دیتابیس تازه `digiarz_discovery_standalone` را انجام می‌دهد.
+- [x] تست منبع اصلی موفق شد: `CREATE FUNCTION`, تست anon، تست authenticated، تجمیع دو صرافی و وضعیت ambiguous، قیمت تازه 65000، حذف قیمت کهنه، فیلتر 48 ساعته و stock/matched/curated/enabled-pair، نبود SELECT مستقیم anon، مجوزهای anon/authenticated، نبود EXECUTE برای PUBLIC و نبود مجوز service_role در خود Migration؛ در پایان `ROLLBACK` موفق.
+- [x] CI run #372 (`45607071619`) روی commit `19d5d8e4d6375c6d660a06cf84bbd0bb57eee630` موفق شد؛ `postgres17-rpc-smoke` و `unit-tests` سبز، `rpc-security-integration` عمداً skipped.
+- [!] ریشهٔ دقیق parser failure قبلی در تلاش shared fixture هنوز قطعی نشده است. تست مستقل ثابت می‌کند Migration اصلی به‌تنهایی در PostgreSQL 17 parse و اجرا می‌شود؛ علت failure قبلی را به‌طور قطعی به انتقال یا fixture نسبت نمی‌دهیم.
+- [ ] تابع هنوز در shared 46-signature fixture به body واقعی ارتقا نیافته؛ آن fixture همچنان ۵ بدنه واقعی + ۴۱ stub metadata-only دارد. گام بعدی: افزودن dependency tables مصنوعی به bootstrap، حذف صرفاً stub هم‌امضا، اجرای Migration اصلی از فایل در همان کانتینر، و سپس grant تستی مختص service_role برای بازنمایی ACL snapshot؛ سپس contract و integration tests نقش‌ها/rollback.
+- [!] اختلاف ACL همچنان unresolved: Migration اصلی فقط anon/authenticated را grant می‌کند، اما catalog snapshot Production برای service_role نیز EXECUTE=true ثبت کرده است. این تست standalone مجوز source-level را دقیقاً بازتاب می‌دهد و نشان می‌دهد service_role از خود Migration مجوز نمی‌گیرد. هیچ default privilege یا ACL در Production تغییر نکرد.
+- [ ] owner دقیق per-signature، ACL/default ACL منبع‌دار و RLS/grants کامل جداول Production هنوز برای parity کامل لازم‌اند.
+- [ ] ۱۷ Migration source مفقود و timestamp/content drift پیش از هر replay نیازمند reconciliation تازه‌اند؛ هیچ Migration replay نشده است.
+- [ ] تصمیم مالک درباره default EXECUTE برای service_role همچنان باز است.
+- [x] هیچ Production/Recovery-Test DB، داده مالی، سفارش، معامله، رزرو، کیف پول، balance، Auth، Cron، Edge Function یا Migration ledger تغییر نکرد؛ هیچ Merge، Deploy، db push، پروژه/زیرساخت جدید یا هزینه‌ای ایجاد نشد.
+
+
+## Checkpoint 2026-11-25 — sixth RPC promoted into shared PostgreSQL 17 fixture
+
+- [x] وضعیت PR #62 مجدداً بررسی شد: open، Draft، unmerged؛ base=`redesign/ui-clean-rebuild-2026`. HEAD در زمان این یادداشت `88d0a9fbb6fd9d67be2fdfc19ee3e682f1df0a87`.
+- [x] تابع `public.get_exchange_discovered_market_assets()` با روش اجرای فایل Migration اصلی، بدون کپی/بازنویسی بدنه، در shared PostgreSQL 17 fixture نصب شد. ابتدا فقط stub هم‌امضا حذف شد، سپس Migration `20261116200009_auto_list_unmatched_iran_exchange_assets.sql` اجرا شد.
+- [x] Dependency fixture: جدول `exchange_asset_observations` موجود در bootstrap به‌همراه `admin_market_listings`, `crypto_assets`, `market_prices` و جدول synthetic `demo_trading_pairs`; RLS روی هر پنج وابستگی فعال است. anon روی جداول محافظت‌شده SELECT مستقیم ندارد.
+- [x] Fixture اکنون ۶ بدنه واقعی + ۴۰ stub metadata-only دارد؛ ۴۰ stub هنوز هیچ ادعایی دربارهٔ return type/body واقعی Production ندارند.
+- [x] contract assertion برای TABLE result دقیق ۸ ستونی، STABLE، SECURITY DEFINER، search_path خالی، owner postgres در fixture، ACL نقش‌ها، نبود PUBLIC EXECUTE و RLS dependencies اضافه شد.
+- [x] integration tests برای anon، authenticated و service_role، تجمیع دو صرافی، ambiguous، قیمت تازه/کهنه، بازه ۴۸ ساعت، حذف stock/tokenized، حذف curated listing و enabled pair، عدم SELECT مستقیم anon و rollback اضافه شد.
+- [x] CI run #386 (`45607713609`) روی commit `a0b173aaf37c67ae05f3f076b5edeb99344f428d` موفق شد؛ `postgres17-rpc-smoke` و `unit-tests` سبز و remote `rpc-security-integration` عمداً skipped. لاگ PostgreSQL 17 تأیید می‌کند migration `CREATE FUNCTION`، contract، تست‌های سه نقش و `ROLLBACK` بدون خطا اجرا شده‌اند. Runs #387/#388 نیز روی commit مستندات `10c05e...` موفق بودند.
+- [!] Migration اصلی فقط anon/authenticated را grant می‌کند. برای بازنمایی ACL snapshot فعلی که service_role را نیز مجاز نشان می‌دهد، shared fixture بعد از Migration یک GRANT صریح و مختص همین تابع به service_role اعمال می‌کند. این grant صرفاً تستی است؛ منشأ Production privilege همچنان unresolved است. هیچ default privilege یا ACL Production تغییر نکرد.
+- [!] علت ریشه‌ای parser failure تلاش قبلی هنوز نامشخص است؛ اکنون اجرای Migration اصلی در standalone و shared harness هر دو موفق‌اند، اما علت قبلی را حدس نمی‌زنیم.
+- [ ] گام بعدی: انتخاب یک تابع read-only دیگر از ۴۰ stub با منبع Migration معتبر؛ ابتدا بررسی دقیق بدنه، return type، owner/search_path، ACL، dependencies/RLS و اثرات جانبی، سپس فقط در صورت امکان تست synthetic metadata و rollback.
+- [ ] ۱۷ Migration مفقود و timestamp/content drift هنوز نیازمند reconciliation تازه‌اند؛ هیچ replay انجام نشده است.
+- [ ] owner/ACL/default ACL و RLS/grants دقیق Production برای هر تابع و جدول وابسته همچنان نیازمند مستندات مستقیم catalog هستند. تصمیم مالک درباره default EXECUTE برای service_role باز است.
+- [x] هیچ Production/Recovery-Test DB، داده مالی، سفارش، معامله، رزرو، کیف پول، balance، Auth، Cron، Edge Function یا Migration ledger تغییر نکرد؛ Merge، Deploy، db push، پروژه/زیرساخت جدید و هزینه‌ای ایجاد نشد.
+
+
+## Checkpoint 2026-11-25 — admin market search RPC source mapping and standalone test
+
+- [x] تابع بعدی `public.admin_search_market_assets(text, integer)` از Migration معتبر `20261113172000_harden_admin_market_listing_access.sql` بازیابی شد؛ blob SHA=`31adf046df44f04976d926280c062228db38c30e`.
+- [x] source review: PL/pgSQL, STABLE, SECURITY DEFINER, `search_path=''`, خروجی TABLE هفت‌ستونی؛ فقط `crypto_assets` و helperهای `auth.uid()` و `private.is_super_admin()` را می‌خواند؛ هیچ DML/HTTP/Cron یا اثر مالی ندارد.
+- [x] فیلترها و منطق: فقط super-admin واردشده؛ حداقل دو حرف؛ دارایی فعال با قیمت USD مثبت و تازه‌تر از ۲۴ ساعت؛ جست‌وجوی symbol/name/CoinGecko ID؛ محدودیت خروجی clamp شده بین ۱ تا ۵۰.
+- [x] تست مستقل `tests/rpc-security-admin-market-search-standalone.sql` اضافه شد و Migration اصلی مستقیماً از فایل اجرا شد. تست anon execute denial، authenticated ordinary denial، super-admin synthetic success، freshness/active/positive-price filters، حداقل طول query، limit clamp، نبود direct SELECT روی admin_market_listings و عدم grant به service_role در خود Migration را بررسی کرد؛ داده‌های مصنوعی rollback شدند.
+- [x] CI run #399 (`45608422378`) و #400 (`45608433695`) روی commit `77ad7035419e3bef7bb0b2de19659541673c71cf` موفق شدند؛ PostgreSQL 17 و unit tests سبز، remote RPC integration عمداً skipped.
+- [!] این تابع هنوز در shared 46-signature fixture به body واقعی ارتقا نیافته است. Migration 20261113172000 علاوه بر admin_search، تابع `get_admin_market_listings()` را با projection قدیمی مبتنی بر `crypto_assets.current_price_usd/last_updated` جایگزین می‌کند و دسترسی مستقیم جدول admin_market_listings را revoke می‌کند. Migration بعدی `20261113181000_show_live_prices_for_curated_assets.sql` projection فعلی مبتنی بر `market_prices` را دوباره نصب می‌کند. قبل از promotion باید هر دو منبع به ترتیب اجرا شوند و ستون‌های synthetic لازم افزوده شوند؛ سپس ACL service_role فقط با grant تستی مختص تابع برای بازنمایی snapshot مدل شود.
+- [!] ACL source discrepancy: Migration به authenticated مجوز می‌دهد و anon/PUBLIC را منع می‌کند، اما snapshot فعلی service_role=true دارد؛ منشأ آن unresolved است. هیچ Production ACL یا default privilege تغییر نکرد.
+- [ ] گام بعدی: طراحی promotion ایمن در shared fixture با اجرای دو Migration به ترتیب، تست بازگشت `get_admin_market_listings()` به بدنهٔ فعلی، آزمون دسترسی admin_search و تأیید عدم دسترسی مستقیم به جدول؛ فقط synthetic market metadata و rollback.
+- [ ] ۱۷ Migration مفقود و timestamp/content drift همچنان پیش از هر replay نیازمند reconciliation تازه‌اند؛ هیچ replay انجام نشده است.
+- [x] هیچ Production/Recovery-Test DB، داده مالی، سفارش، معامله، رزرو، کیف پول، balance، Auth، Cron، Edge Function یا Migration ledger تغییر نکرد؛ Merge، Deploy، db push، پروژه/زیرساخت جدید و هزینه‌ای ایجاد نشد.
+
+
+## Checkpoint 2026-11-25 15:20–15:26 — 46-function Production catalog and trigger-body promotion
+
+- [x] وضعیت واقعی Supabase فقط‌خواندنی بررسی شد: پروژه `gfoaubfilhttnwjykaox` برابر `ACTIVE_HEALTHY`، PostgreSQL `17.11`، region `us-west-2`.
+- [x] وضعیت واقعی PR #62 بررسی شد: Open، Draft، merged=false؛ head branch برابر `feature/persian-asset-name-candidates-2026` و base برابر `redesign/ui-clean-rebuild-2026`. تمام تغییرات این checkpoint فقط روی شاخهٔ PR انجام شده‌اند.
+- [x] کاتالوگ زندهٔ Production برای هر ۴۶ تابع SECURITY DEFINER با SELECT از `pg_proc` ثبت شد: exact identity arguments، return type، owner، language، volatility، `proconfig/search_path`، stored ACL و EXECUTE مؤثر anon/authenticated/service_role. هر ۴۶ تابع owner=`postgres` دارند و search_path آن‌ها `""` یا `pg_catalog` است. این داده‌ها در `supabase/drafts/2026-11-25_production-postgres17-rpc-parity-manifest.md` اضافه شدند.
+- [x] تابع `private.enforce_unique_admin_market_listing_symbol()` با بدنهٔ دقیق Production جایگزین stub شد؛ `pg_get_functiondef` با Migration `20261113184000` تطبیق دارد. وابستگی‌ها، trigger binding، RLS و table ACLها فقط‌خواندنی بررسی شدند.
+- [x] تست PostgreSQL 17 برای ticker guard اضافه شد: insert معتبر، duplicate symbol، pair collision، missing asset، update و rollback. CI run #? روی commit `e4e2dbfc2dbbf73abc46704317065e613a34d129` موفق شد: unit-tests و postgres17-rpc-smoke سبز؛ remote rpc-security-integration عمداً skipped.
+- [x] تابع `private.auto_list_verified_exchange_asset()` نیز با بدنهٔ زندهٔ Production و منبع اعمال‌شدهٔ Migration `20261115134855` جایگزین stub شد. منبع از `supabase_migrations.schema_migrations.statements` بازیابی و با `pg_get_functiondef` تطبیق داده شد.
+- [!] فایل مخزن `20261115134600_avoid_relisting_unchanged_exchange_asset_matches.sql` با timestamp اعمال‌شدهٔ Production یعنی `20261115134855` اختلاف دارد؛ این فایل به‌عنوان منبع Migration اعمال‌شده تلقی نشد، rename/replay هم انجام نشد. این mismatch باید در reconciliation جداگانه باقی بماند.
+- [x] fixture برای ستون‌های `current_price_usd/last_updated`، RLS و grants جداول synthetic بازار تکمیل شد. assertionهای قدیمی که به‌اشتباه SELECT مستقیم anon روی `crypto_assets/market_prices` را منع می‌کردند، با ACL واقعی Production هم‌تراز شدند.
+- [x] تست جدید `tests/rpc-security-auto-list-trigger.integration.sql` با ردیف‌های کاملاً synthetic اضافه شد: asset تازه و یکتا پذیرفته می‌شود؛ asset کهنه، نماد تکراری و تداخل جفت رد می‌شوند؛ انتقال pending به matched نیز trigger را اجرا می‌کند؛ تمام DDL/DML داخل transaction و در پایان rollback می‌شود.
+- [x] Harness اکنون ۷ بدنهٔ واقعی/source-backed و ۳۹ stub صرفاً metadata دارد. مقدار `RETURNS void` در ۳۹ stub همچنان fixture-only است و نباید به‌عنوان نوع خروجی Production استفاده شود.
+- [ ] CI آخرین تغییرات auto-list روی HEAD `6cc1bae87c4f6575888e13b315ea16aa318d6fef` در حال اجراست؛ تا دریافت نتیجهٔ کامل، موفقیت این تست جدید اعلام نمی‌شود.
+- [!] remote `rpc-security-integration` همچنان به دلیل gate محیط ایزوله skipped است. تست‌های نقش anon/authenticated/synthetic-super-admin در PostgreSQL 17 smoke اجرا می‌شوند، اما این معادل Production-parity end-to-end نیست.
+- [ ] گام بعد: نتیجهٔ CI آخرین HEAD را ثبت کن؛ سپس برای هر یک از ۳۹ stub باقی‌مانده، تعریف زنده، source provenance، dependency، table/sequence grants، RLS و caller را جداگانه بررسی کن و فقط تابعی را جایگزین کن که source و تست synthetic امن دارد.
+- [ ] سیاست Default ACL برای service_role هنوز تصمیم مالک می‌خواهد؛ هیچ GRANT/REVOKE/ALTER DEFAULT PRIVILEGES اجرا نشود.
+- [x] هیچ Production/Recovery-Test DB، schema، data، ACL، Auth، Cron، Edge Function، Migration ledger، secret یا schedule تغییر نکرد؛ هیچ Migration/db push، Deploy، Merge، هزینه یا ارتقای زیرساخت انجام نشد.
+
+
+### CI completion update — 2026-11-25 15:26
+
+- [x] CI PR run #425 / ID `45609779655` روی code/test HEAD `6cc1bae87c4f6575888e13b315ea16aa318d6fef` موفق شد: `unit-tests` و `postgres17-rpc-smoke` هر دو success؛ تست `private.auto_list_verified_exchange_asset()` نیز success؛ remote `rpc-security-integration` به‌علت gate محیط ایزوله skipped باقی ماند.
+- [x] PR #62 همچنان open، Draft، unmerged و base آن `redesign/ui-clean-rebuild-2026` است. HEAD فعلی پس از commit مستندات وضعیت `4fe00ef6fd76269497afb2ee8cdf1c016d2973a4` است؛ این commit فقط وضعیت را ثبت می‌کند و فایل‌های اجرایی/test تغییر نکرده‌اند.
+- [x] Supabase دوباره فقط‌خواندنی بررسی شد: `ACTIVE_HEALTHY`، PostgreSQL `17.11.0.018`؛ migration ledger تعداد 55 رکورد دارد و هیچ migration جدیدی در این مرحله اعمال نشده است.
+- [x] نتیجهٔ نهایی این checkpoint: ۴۶ امضای دقیق + metadata زندهٔ کامل؛ ۷ بدنهٔ واقعی/source-backed در harness؛ ۳۹ stub metadata-only باقی‌مانده.
+- [ ] ادامهٔ بعدی: بررسی تابع بعدی فقط پس از تطبیق مستقیم Production definition با migration اعمال‌شده؛ timestamp mismatch فایل auto-list همچنان در reconciliation باقی است.
+
+
+### Follow-on checkpoint — fee-rate RPC, default ACL evidence, and CI result (2026-11-25)
+
+- [x] `public.get_demo_trading_fee_rate(text,text)` was promoted from metadata stub to the exact current Production body. Live `pg_get_functiondef` matches the function statement recovered from applied migration ledger version `20261113153808`; the full migration file is absent from this branch. The isolated test verifies maker/taker rates, normalization, invalid liquidity, disabled/missing quote assets, anon denial, authenticated/service_role access, and no direct anon/authenticated fee-table SELECT.
+- [x] Read-only `pg_default_acl` inspection resolved the previously unexplained service_role EXECUTE bit: for functions created by `postgres` in `public`, default ACL is `{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}`. This also grants anon/authenticated by default unless explicitly revoked. The fee migration revokes PUBLIC/anon/authenticated but omits service_role, so the live service_role bit is inherited. No default ACL or function ACL was changed; owner approval is still required for any policy change.
+- [x] CI run #441 / ID `45610442154` on code/test commit `dedea8590707791fcb3d88250f6900b2282becd1` completed successfully: unit-tests and postgres17-rpc-smoke success, including all three new source-backed tests (ticker guard, auto-list trigger, fee-rate RPC). `rpc-security-integration` remains skipped by the isolated-environment gate.
+- [x] Final smoke-fixture count after the workflow replaces the exchange-discovery stub: 9 real/source-backed bodies and 37 metadata-only stubs (the raw catalog-stubs file initially declares 38 stubs before the migration replacement step).
+- [x] PR #62 remains Open, Draft, unmerged; base `redesign/ui-clean-rebuild-2026`; latest HEAD at this status update is `043df8ceb8874be55dc2cae1221151eda1baa8c1` (documentation-only after the successful CI code/test commit).
+- [ ] Next: continue the 37 remaining stubs one at a time, starting with a low-risk function whose live definition and applied migration source can both be proven; map every dependency, table/sequence ACL, RLS policy, and caller before promotion.
+- [x] No Production DDL/DML, ACL/default ACL, migration ledger, cron, auth, edge function, deploy, db push, merge, cost, or infrastructure change was performed.
