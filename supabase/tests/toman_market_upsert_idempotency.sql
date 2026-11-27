@@ -1,17 +1,42 @@
 BEGIN;
 
+-- Mirror the live unique key on public.market_toman_prices.
+-- The deployed v3 function used a plain POST, which maps to INSERT without ON CONFLICT.
 CREATE TEMP TABLE toman_price_upsert_fixture (
   exchange text NOT NULL,
   asset_symbol text NOT NULL,
   quote_currency text NOT NULL,
   price_toman numeric(38,18) NOT NULL,
   fetched_at timestamptz NOT NULL,
-  CONSTRAINT toman_price_upsert_fixture_key UNIQUE (exchange, asset_symbol, quote_currency)
+  CONSTRAINT market_toman_prices_exchange_asset_symbol_quote_currency_key
+    UNIQUE (exchange, asset_symbol, quote_currency)
 );
 
 INSERT INTO toman_price_upsert_fixture (exchange, asset_symbol, quote_currency, price_toman, fetched_at)
 VALUES ('nobitex', 'BTC', 'TOMAN', 123.450000000000000001, '2026-11-23T00:00:00Z');
 
+-- Reproduce the production-v3 failure without touching the production table.
+DO $$
+DECLARE
+  v_sqlstate text;
+  v_constraint text;
+BEGIN
+  BEGIN
+    INSERT INTO toman_price_upsert_fixture (exchange, asset_symbol, quote_currency, price_toman, fetched_at)
+    VALUES ('nobitex', 'BTC', 'TOMAN', 124.560000000000000002, '2026-11-23T00:01:00Z');
+    RAISE EXCEPTION 'legacy plain insert unexpectedly succeeded';
+  EXCEPTION WHEN unique_violation THEN
+    GET STACKED DIAGNOSTICS
+      v_sqlstate = RETURNED_SQLSTATE,
+      v_constraint = CONSTRAINT_NAME;
+    IF v_sqlstate <> '23505'
+       OR v_constraint <> 'market_toman_prices_exchange_asset_symbol_quote_currency_key' THEN
+      RAISE EXCEPTION 'unexpected duplicate-key result: SQLSTATE %, constraint %', v_sqlstate, v_constraint;
+    END IF;
+  END;
+END $$;
+
+-- The current main-branch PostgREST upsert strategy is idempotent for the same key.
 INSERT INTO toman_price_upsert_fixture (exchange, asset_symbol, quote_currency, price_toman, fetched_at)
 VALUES ('nobitex', 'BTC', 'TOMAN', 124.560000000000000002, '2026-11-23T00:01:00Z')
 ON CONFLICT (exchange, asset_symbol, quote_currency)
