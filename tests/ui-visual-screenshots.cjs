@@ -103,6 +103,21 @@ const server = http.createServer((req, res) => {
   });
 });
 
+async function renderOfflineLogoFallbacks(page) {
+  await page.evaluate(() => {
+    const images = [...document.querySelectorAll('img[data-symbol]')];
+    for (const image of images) {
+      const holder = image.parentElement;
+      const symbol = typeof cleanCoinSymbol === 'function'
+        ? cleanCoinSymbol(image.dataset.symbol || '')
+        : String(image.dataset.symbol || '').replace(/USDT$/i,'').replace(/[^a-z0-9]/gi,'').toUpperCase();
+      if (!holder || typeof renderCoinLogoFallback !== 'function' || !symbol) continue;
+      renderCoinLogoFallback(holder, symbol);
+      image.remove();
+    }
+  });
+}
+
 async function resetPageScroll(page) {
   await page.evaluate(() => {
     window.scrollTo(0, 0);
@@ -167,6 +182,8 @@ async function resetPageScroll(page) {
           }, tab);
           if (!rendered) throw new Error('Section did not render visibly: tab-'+tab);
           await seedVisualFixtures(page);
+          // Supabase is intentionally blocked in this harness; render the app's local branded SVG fallback instead of capturing a pending remote logo request.
+          await renderOfflineLogoFallbacks(page);
           await resetPageScroll(page);
           await page.waitForTimeout(60);
           const filename=[viewport.name,theme,tab].join('-')+'.png';
@@ -209,7 +226,7 @@ async function resetPageScroll(page) {
     }
     const files=fs.readdirSync(output).filter(name=>name.endsWith('.png'));
     if (files.length!==72) throw new Error('Expected 72 screenshots, got '+files.length);
-    fs.writeFileSync(path.join(output,'README.txt'),'DigiArz UI visual review screenshots\n72 captures: 2 viewports x 3 themes x 10 app sections, 6 authentication screens, plus mobile dashboard/market row close-ups.\nSupabase API requests were blocked; no production data was changed.\nMarket, dashboard, asset and top-volume rows are synthetic DOM-only fixtures. Authentication captures use the local UI shell only; no credentials are submitted. Mobile row close-ups scroll to the actual rendered asset lists.\n');
+    fs.writeFileSync(path.join(output,'README.txt'),'DigiArz UI visual review screenshots\n72 captures: 2 viewports x 3 themes x 10 app sections, 6 authentication screens, plus mobile dashboard/market row close-ups.\nSupabase API and logo-proxy requests were blocked; local branded SVG logo fallbacks are used in the visual harness. No production data was changed.\nMarket, dashboard, asset and top-volume rows are synthetic DOM-only fixtures. Authentication captures use the local UI shell only; no credentials are submitted. Mobile row close-ups scroll to the actual rendered asset lists.\n');
     console.log('Created '+files.length+' screenshots in '+output);
   } finally {
     await browser.close();
