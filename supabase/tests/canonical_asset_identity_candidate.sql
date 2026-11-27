@@ -259,7 +259,7 @@ BEGIN
 
   RETURN v_order;
 END;
-$;
+$$;
 
 CREATE OR REPLACE FUNCTION canonical_asset_candidate.process_limit_orders()
 RETURNS integer
@@ -344,7 +344,7 @@ BEGIN
   END LOOP;
   RETURN v_processed;
 END;
-$;
+$$;
 
 DO $
 DECLARE
