@@ -118,6 +118,8 @@ BEGIN
         OR o.amount IS DISTINCT FROM c.amount
         OR (c.order_kind='stop_limit'
             AND o.price IS DISTINCT FROM c.limit_price)
+        OR (c.order_kind IN ('take_profit','stop_loss')
+            AND o.price IS DISTINCT FROM c.trigger_price)
         OR r.id IS NULL
         OR r.status <> 'reserved'
         OR r.asset IS DISTINCT FROM
