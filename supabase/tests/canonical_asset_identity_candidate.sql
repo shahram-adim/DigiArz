@@ -30,7 +30,7 @@ CREATE TABLE canonical_asset_candidate.pairs (
 
 CREATE TABLE canonical_asset_candidate.prices (
   pair_id uuid PRIMARY KEY REFERENCES canonical_asset_candidate.pairs(pair_id),
-  price numeric NOT NULL CHECK(price>0),
+  price numeric NOT NULL CHECK(price>0 AND price::text NOT IN ('NaN','Infinity','-Infinity')),
   source text NOT NULL,
   observed_at timestamptz NOT NULL,
   received_at timestamptz NOT NULL DEFAULT clock_timestamp()
@@ -39,7 +39,7 @@ CREATE TABLE canonical_asset_candidate.prices (
 CREATE TABLE canonical_asset_candidate.balances (
   user_id uuid NOT NULL,
   asset_id uuid NOT NULL REFERENCES canonical_asset_candidate.assets(asset_id),
-  balance numeric NOT NULL DEFAULT 0 CHECK(balance>=0),
+  balance numeric NOT NULL DEFAULT 0 CHECK(balance>=0 AND balance::text NOT IN ('NaN','Infinity','-Infinity')),
   PRIMARY KEY(user_id,asset_id)
 );
 
@@ -94,7 +94,9 @@ DECLARE
   v_order_id uuid := gen_random_uuid();
   v_trade_id uuid := gen_random_uuid();
 BEGIN
-  IF p_user_id IS NULL OR p_amount IS NULL OR p_amount<=0 OR p_side NOT IN ('buy','sell') THEN
+  IF p_user_id IS NULL OR p_amount IS NULL OR p_amount<=0
+     OR p_amount::text IN ('NaN','Infinity','-Infinity')
+     OR p_side IS NULL OR p_side NOT IN ('buy','sell') THEN
     RAISE EXCEPTION 'invalid trade request' USING ERRCODE='22023';
   END IF;
 
@@ -114,6 +116,10 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM canonical_asset_candidate.assets WHERE asset_id=v_pair.base_asset_id AND is_active)
      OR NOT EXISTS (SELECT 1 FROM canonical_asset_candidate.assets WHERE asset_id=v_pair.quote_asset_id AND is_active) THEN
     RAISE EXCEPTION 'asset inactive' USING ERRCODE='23514';
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM canonical_asset_candidate.assets WHERE asset_id=v_pair.quote_asset_id AND display_symbol='USDT') THEN
+    RAISE EXCEPTION 'unsupported quote asset' USING ERRCODE='23514';
   END IF;
 
   INSERT INTO canonical_asset_candidate.balances(user_id,asset_id,balance)
