@@ -6,7 +6,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (D) {
   'use strict';
   if (!D) throw new Error('DigiDecimal is required for portfolio valuation');
-  const SCALE = 8;
+  const SCALE = 18;
 
   function canonical(value) {
     try {
