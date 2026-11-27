@@ -73,7 +73,7 @@ test('install precaches the complete offline shell, including Android manifest i
   assert.ok(harness.added.includes('https://app.example/DigiArz/src/market-holdings.js'));
   assert.ok(harness.added.includes('https://app.example/DigiArz/src/daily-ads.js'));
   assert.ok(harness.added.includes('https://app.example/DigiArz/src/pwa-install.js'));
-  assert.ok(harness.added.includes('https://app.example/DigiArz/src/digiarz-independent-ui.css?v=7'));
+  assert.ok(harness.added.includes('https://app.example/DigiArz/src/digiarz-independent-ui.css?v=8'));
   assert.equal(harness.skipped, true);
 });
 
@@ -120,7 +120,7 @@ test('activation removes old shell caches and claims clients', async () => {
 
 test('service worker and document request the current icon-label stylesheet version',()=>{
   const html=fs.readFileSync('index.html','utf8');
-  assert.match(workerSource,/digiarz-shell-v66/);
+  assert.match(workerSource,/digiarz-shell-v67/);
   assert.match(workerSource,/digiarz-independent-ui\.css\?v=7/);
   assert.match(html,/digiarz-independent-ui\.css\?v=7/);
 });
