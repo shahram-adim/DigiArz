@@ -636,6 +636,11 @@ BEGIN
     NULL;
   END;
 
+  -- Refresh both disposable pair observations before the subsequent placement/cancel assertions.
+  UPDATE canonical_asset_candidate.prices
+  SET observed_at=clock_timestamp()
+  WHERE pair_id IN (v_pair_a,v_pair_b);
+
   -- Conditional parent and execution child must retain the exact same canonical pair.
   v_cond_parent_a := gen_random_uuid();
   v_cond_parent_b := gen_random_uuid();
