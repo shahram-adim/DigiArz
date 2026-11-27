@@ -191,3 +191,30 @@ A second bounded repository search found older read-only Production inspection r
 - [!] The 17 missing applied migration source files and 20 timestamp mismatches remain unresolved source-of-truth issues. Do not infer their SQL from current catalog state or neighboring migration files.
 - [ ] Next: recover the 17 missing migration bodies from trusted historical Git objects/backups and inspect all 20 timestamp-different source variants; fingerprint relevant writers/readers/Edge Functions against this live catalog; then construct a full source-parity disposable harness. Only after these steps may a coordinated canonical-ID migration be drafted for review. OCO remains a separate missing lifecycle.
 - [x] No Production writes, business-row reads, migration replay/repair, schema/function/ACL/RLS/trigger/Cron/worker/Auth change, db push, merge, deploy, APK/Pages publication or cost.
+
+
+## Correction/addendum — complete current cron inventory and auto-activation source (2026-11-27)
+
+A second metadata-only read broadened the cron filter to include exchange-sync and catalog jobs. This corrects the earlier scoped five-job summary above, which omitted jobs outside the order/market/conditional name filter. The complete relevant active inventory at 2026-11-27 18:41 UTC is:
+
+| Job ID | Job | Active schedule |
+|---:|---|---|
+| 3 | digiarz-market-price-refresh | `* * * * *` |
+| 4 | refresh-crypto-assets | `6-59/10 * * * *` |
+| 5 | refresh-crypto-assets-toman | `7-59/10 * * * *` |
+| 8 | digiarz-limit-orders | `* * * * *` |
+| 9 | digiarz-conditional-orders | `* * * * *` |
+| 11 | digiarz-crypto-assets-stale-request-recovery | `3-59/5 * * * *` |
+| 12 | digiarz-stop-limit-orders | `* * * * *` |
+| 13 | digiarz-iran-exchange-request | `*/10 * * * *` |
+| 14 | digiarz-iran-exchange-process | `1,31 * * * *` |
+| 17 | digiarz-market-price-overflow | `5-59/10 * * * *` |
+| 18 | digiarz-auto-activate-verified-exchange-pairs | `9-59/10 * * * *` |
+
+All 11 were active at capture. In particular, preserve job 8 (Limit), job 9 (conditional) and job 12 (Stop-Limit) at every minute. No job was invoked, paused, edited or rescheduled.
+
+The exact current function snapshot `supabase/tests/canonical_identity_live_private_auto_activate_verified_exchange_pairs_snapshot.sql` has fingerprint `fd177baeee1a5bdd927458413f69bfb6`. It is a read-only captured source artifact, not a migration. It confirms the job's `private.auto_activate_verified_exchange_pairs()` function is postgres-owned, SECURITY DEFINER, empty search_path, and not executable by anon/authenticated/service_role; the cron job is the scheduled execution path. Its current logic still imposes `total_volume_usd >= 1000000`, market-cap rank NULL or <= 2000, recent market data, a CoinGecko market-price row, verified exchange observation, and unique active ticker. It builds `pair_symbol = upper(symbol)||'USDT'` and joins `market_prices.symbol`; therefore this writer remains ticker-keyed and applies product filters that conflict with the owner-approved no-fixed-rank/no-fixed-volume-cap catalog objective. These restrictions must be redesigned in the canonical provisioning plan, while keeping identity, verified mapping, price freshness and account/security guards.
+
+The current live job 14 cadence is `1,31 * * * *` (twice hourly), consistent with the later 2026-11-22 historical reconciliation note, not the older 2026-11-20 `1-59/10` observation. The local timestamp-mismatched migration `20261117130000_stagger_market_price_overflow_and_refresh_exchange_discovery.sql` is not authoritative for this live cadence. Do not replay it or edit cron.
+
+The two local-only migrations `20261116203000_add_kucoin_to_scheduled_market_price_refresh.sql` and `20261116203100_add_gateio_to_scheduled_market_price_refresh.sql` are additionally documented in `supabase/MIGRATION_RECONCILIATION.md` as older `refresh_market_prices()` replacements that omit the later 515-ID CoinGecko cap (the second also omits the later combined state). They are unsafe to apply as-is and must remain excluded from any push/replay until source reconciliation is complete.
