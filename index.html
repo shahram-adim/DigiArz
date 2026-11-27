@@ -2812,9 +2812,9 @@ function parseQuickTradeDecimal(value,maxFractionDigits=18,maxIntegerDigits=24){
  try{return DigiDecimal.toString(DigiDecimal.parseDecimal(String(value??'0'),{maxFractionDigits,maxIntegerDigits}))}catch(_){return null}
 }
 function getTrustedMarketPriceExact(item){
- const ticker=getFreshMarketTicker(item),live=parseQuickTradeDecimal(ticker?.last,18,16);
+ const ticker=getFreshMarketTicker(item),live=parseQuickTradeDecimal(ticker?.last,18,20);
  if(live!==null&&DigiDecimal.compareDecimal(live,'0')>0)return live;
- const stored=isMarketTimestampFresh(item?.updated_at)?parseQuickTradeDecimal(item?.price,18,16):null;
+ const stored=isMarketTimestampFresh(item?.updated_at)?parseQuickTradeDecimal(item?.price,18,20):null;
  return stored!==null&&DigiDecimal.compareDecimal(stored,'0')>0?stored:null;
 }
 function getTrustedMarketPrice(item){
