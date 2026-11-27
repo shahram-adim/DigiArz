@@ -1573,3 +1573,695 @@
 - [x] همه بررسی‌های Supabase فقط‌خواندنی بودند؛ هیچ ردیف مالی یا داده کاربر برای تست خوانده یا تغییر داده نشد.
 - [x] هیچ Worker/RPC مالی اجرا نشد.
 - [x] هیچ Migration، Grant، Policy، Cron، Edge Function Deploy، refresh دستی، حذف داده یا انتشار APK انجام نشد.
+
+
+## Shahram 167 — read-only Production catalog source and collision audit (2026-11-27)
+- Recovered the exact applied `public.refresh_crypto_assets()` definition from Production via `pg_get_functiondef`; it is SECURITY DEFINER with empty search_path, service_role-only EXECUTE, and upserts CoinGecko catalog rows by canonical `coingecko_id`, replacing `symbol` with the uppercased provider ticker and setting `is_active=true`. It does not provision trading pairs.
+- The function processes paginated CoinGecko responses under a transaction advisory lock; it validates non-empty ID/symbol/name and positive price but does not enforce ticker uniqueness or pair-symbol format before catalog upsert.
+- Read-only schema inventory: `crypto_assets` has no unique symbol constraint; `demo_trading_pairs` has unique `pair_symbol` and unique `base_coingecko_id`, FK to crypto_assets, and USDT-only quote constraint. `admin_market_listings` has a before insert/update uniqueness trigger; no triggers were returned for `crypto_assets` or `demo_trading_pairs` in the inspected catalog.
+- Live read-only counts: 19,012 active catalog assets; 2,365 duplicate active ticker groups containing 6,662 rows; 420 enabled pairs; 0 enabled pairs missing a market_prices row.
+- Recovered current activation bodies: automatic and manual paths still impose curated-list, $1m volume, rank <= 2,000, recent exchange-observation, ticker-uniqueness, and fresh CoinGecko price conditions.
+- Added `docs/PRODUCTION_CATALOG_SOURCE_AUDIT_2026-11-27.md` to PR #67 with the source/schema findings and design consequences.
+- Key blocker: do not bulk-provision all active catalog rows by ticker. Canonical ID must remain authoritative; duplicate tickers require a collision-resolution or supported alternative market-symbol policy before any asset is marked tradable.
+- No Production function was executed; no Production data/schema/pairs/prices/grants/RLS/Cron/workers changed. No migration, db push, merge, deploy, release, or paid infrastructure action.
+- Remaining: complete writer/caller and price-refresh coverage inventory, generate a compact read-only duplicate-ticker reconciliation, then build source-faithful disposable PostgreSQL tests and a reviewed migration proposal.
+
+
+## Shahram 168 — duplicate-ticker reconciliation and price coverage (2026-11-27)
+- Re-ran read-only PR #67 / PR #66 checks before work: both remain open, Draft, unmerged, mergeable.
+- Built corrected duplicate-ticker aggregates using independent correlated subqueries to avoid over-counting caused by one-to-many joins.
+- Confirmed examples of same ticker with distinct assets: DOT maps separately to `polkadot` (Polkadot; corroborated by five Iranian exchange feeds) and `dot` (Dot; corroborated by Exir and Tabdeal). This is a legitimate identity distinction, not a reason to map either by ticker alone.
+- Confirmed high-collision groups include BTC (10 active IDs), PEPE (21), DOGE (6), and DOT (3). Existing enabled pair is associated with only one canonical asset ID per ticker pair.
+- Audited enabled pair prices: 420/420 rows exist and are positive, but only 415/420 are fresher than two minutes. Five stale rows: NBISONUSDT, TSMONUSDT, RIVERUSDT, TQQQONUSDT, TONUSDT; last update 2026-11-19 22:56 UTC. 390 pair prices currently identify Gate.io as source; 14 CoinGecko; three distinct sources overall.
+- Added the row-level interpretation, corrected collision counts, and stale-price findings to `docs/PRODUCTION_CATALOG_SOURCE_AUDIT_2026-11-27.md`.
+- Important qualification: a matching observation is not automatically proof of a unique ticker mapping; retain provider ID and exact exchange evidence. Existing pair-row presence is not proof of price freshness.
+- No Production data or configuration changed; no refresh function executed; no pairs/prices/orders/balances/workers/Cron touched. No migration/db push/merge/deploy/release/cost.
+- Remaining: map all price-refresh jobs/functions and their source precedence, determine why five existing prices are stale, complete all catalog/table writer and trigger caller inventory, then implement only in isolated disposable PostgreSQL with exact source-parity tests.
+
+
+## Shahram 169 — price-refresh pipeline source inventory (2026-11-27)
+- Read-only inspected Production Cron: job 3 `digiarz-market-price-refresh` runs every minute; job 17 `digiarz-market-price-overflow` runs every ten minutes at minute offsets 5–55. Both active; sampled recent runs reported succeeded. Neither job was modified or invoked manually.
+- Recovered exact source of `public.refresh_market_prices()` and `private.request_market_price_overflow()`.
+- Primary price refresh maps CoinGecko IDs from enabled pairs plus curated active catalog rows; first 515 IDs are requested by the primary function, overflow schedules the remainder in batches of 500. KuCoin/Gate.io refresh only enabled pair symbols.
+- The refresh universe is enabled pairs + curated rows, not every raw provider catalog row. Therefore the future canonical admission path must create/attach the pair before price refresh coverage is guaranteed.
+- CoinGecko, KuCoin, and Gate.io can all write the same `market_prices` symbol; source precedence depends on response processing order. A deterministic per-pair trusted-source policy remains to be designed.
+- Column default confirms overflow requests inherit provider `CoinGecko`; three in-flight requests (CoinGecko/Gate.io/KuCoin) were present at snapshot time.
+- The five stale rows remain unexplained; the audit records provider coverage and queue/response history as next read-only investigation targets.
+- Updated `docs/PRODUCTION_CATALOG_SOURCE_AUDIT_2026-11-27.md` with pipeline source, scope, and risks.
+- No Production writes, function executions, queue changes, Cron/worker changes, pair changes, or refresh operations. No migration/db push/merge/deploy/release/cost.
+- Remaining: investigate why the five stale prices are not being refreshed, complete all writers/triggers/callers for catalog and pair tables, then design the admission/provisioning mechanism and source-faithful disposable PostgreSQL tests.
+
+
+## Shahram 170 — stale price root-cause evidence (2026-11-27)
+- Live-checked PR #67 and PR #66 before work; both remain open, Draft, unmerged, and mergeable. PR #67 is 7 commits ahead and 0 behind Main.
+- Inspected retained HTTP responses read-only: 1,283 responses in the last ten days, all HTTP 200, not timed out, and with non-empty bodies. This is response-level status only, not a guarantee of complete asset coverage.
+- All five stale pair assets still have positive, recently updated `crypto_assets.current_price_usd` values, but those belong to the separate catalog ingestion path.
+- Exact JSON-key checks against the latest CoinGecko simple-price response show that none of the five stale CoinGecko IDs was returned. Substring hits were discarded as unreliable. Historical exact-key evidence for River/Toncoin is also absent; three Ondo/Nebius IDs have no retained exact-ID response match.
+- Current `refresh_market_prices()` only upserts when the response contains the exact provider ID and a positive USD value. It does not fall back to `crypto_assets.current_price_usd`, so missing provider keys leave old pair prices untouched.
+- Root cause narrowed to missing exact CoinGecko ID keys in simple-price responses; why those IDs are omitted (request batch membership vs endpoint coverage/provider listing) remains unproven because processed request URL metadata is not retained after tracking rows are deleted.
+- Added the evidence and safe conclusion to the Production audit document. Do not copy catalog USD prices into executable USDT pairs without a validated quote/source path.
+- No Production writes, function calls, queue changes, price refresh, pair mutation, Cron/worker change, migration/db push, merge/deploy/release, or paid infrastructure action.
+- Remaining: determine first-515 vs overflow membership for the five IDs, inspect exact market coverage in Gate.io/KuCoin and their provider price policy, then finish all catalog and pair writers/callers inventory.
+
+
+## Shahram 171 — stale pair provider coverage pinpointed (2026-11-27)
+- Reconstructed the live price-refresh ID universe read-only: 898 unique provider IDs from enabled pairs + active curated listings.
+- All five stale pairs rank after position 515 (523, 629, 677, 773, 789), so they rely on overflow rather than the primary CoinGecko batch.
+- Latest retained Gate.io and KuCoin ticker payloads do not contain any of the five exact pair symbols. Latest CoinGecko payload likewise omitted their exact provider IDs.
+- The evidence narrows the issue to overflow coverage/response inclusion plus no exchange ticker fallback for these symbols. Historical request URLs/batch membership are not retained, so it remains unknown whether the overflow scheduler requested the IDs and CoinGecko omitted them, or the request set failed to include them.
+- No Production action taken; no jobs invoked, queues altered, prices refreshed, pairs modified, migrations or releases.
+- Updated the Production audit document and implementation status. Next: review the overflow request scheduler and provider response lifecycle/source-parity in a disposable environment, and design persistent request metadata/coverage reporting as part of the future migration plan.
+
+
+## Shahram 172 — Overflow starvation risk identified (2026-11-27)
+- Rechecked PR #66 and #67 before work: both open, Draft, unmerged, mergeable. PR #67 now 11 commits ahead, 0 behind Main.
+- Recovered exact Production source for `private.request_market_price_overflow()` (read-only). It refuses to enqueue overflow while any tracked market-price request exists or any CoinGecko request remains in the HTTP queue.
+- Primary `refresh_market_prices()` job runs every minute and enqueues the next first-515 CoinGecko batch after processing completed requests. Overflow job runs at minute offsets 5,15,25,35,45,55.
+- Current live snapshot: tracked primary CoinGecko response had exactly 515 top-level keys; three tracked provider requests were pending/processing; no overflow request batch was present.
+- Strong design-level diagnosis: the primary minute-by-minute re-enqueue and overflow's requirement for an entirely empty tracked-request table create a likely starvation/race condition. This explains why all five stale pairs beyond ordinal 515 remain without prices. Not marked fully proven because Cron records don't expose the function return integer and historical requested ID batches are not retained.
+- Recorded the diagnosis and safe redesign direction in the Production audit document. Future solution: durable batch cursor / single sequenced scheduler, plus durable requested-ID and response coverage metadata, retries and fairness.
+- No Production function invocation, no queue or Cron changes, no pair/price writes, no migration/db push, no merge/deploy/release, no paid infrastructure action.
+- Next: build disposable PostgreSQL source-parity regression for the starvation sequence and inspect all catalog/pair writer call paths before proposing any schema/function migration.
+
+
+## Shahram 173 — source-parity blocker for Overflow regression (2026-11-27)
+- Rechecked live GitHub: PR #67 remains open Draft and unmerged; its branch is 13 commits ahead and 0 behind current `main` (base/merge-base `fbfb5e974e754088a32c9fdcd76fc2ca9ab0f98b`). PR #66 was also found open Draft and unmerged in the repository PR search; no UI branch or Main changes were made.
+- Reviewed the checked-in migration `20261115130430_fetch_coin_gecko_market_price_overflow_ids.sql` and the existing PostgreSQL 17 CI harness.
+- Found a critical test-parity mismatch: the checked-in migration version of `private.request_market_price_overflow()` lacks the outstanding-request guards present in the separately recovered live Production body, and its embedded Cron schedule is every minute rather than Production's recorded offsets 5,15,25,35,45,55.
+- Therefore executing the migration in disposable PostgreSQL would not reproduce the live starvation condition. Deliberately did not add a misleading lookalike or label a simplified timing test as source-parity.
+- Added the exact source/schedule mismatch, confidence boundary, and evidence needed for a valid test fixture to `docs/PRODUCTION_CATALOG_SOURCE_AUDIT_2026-11-27.md`.
+- Continued writer-inventory qualification: `refresh_crypto_assets()` remains absent as a full body from checked-in migrations but is recovered from Production; it mutates `crypto_assets.symbol`. Exchange-sync search hits largely target `exchange_asset_observations` or read catalog metadata, not necessarily catalog writes. No global unique active-symbol constraint exists.
+- Next: preserve the exact read-only Production function definition and schedule as a provenance-labelled fixture; stub network queue dependencies in PostgreSQL 17; prove the starvation interleaving and a fair candidate scheduler; then continue exact INSERT/UPDATE target inventory for catalog/listing/pair/price tables.
+- No Production function invocation or write; no Cron/queue/worker/pair/price/financial-row changes; no schema, grant, RLS, migration, db push, merge, deploy, APK/Pages release, or paid infrastructure action.
+
+
+## Shahram 174 — PostgreSQL 17 test-harness and source-parity review (2026-11-27)
+- [x] قبل از ادامه، وضعیت زندهٔ PRها و branch compare کنترل شد: PR #67 باز، Draft و ادغام‌نشده؛ HEAD شاخه `e058fffab27d5093a236a1a2bc4c1bcbb78d6c08`، برابر **۱۵ commit جلو و صفر عقب** از main با base `fbfb5e974e754088a32c9fdcd76fc2ca9ab0f98b`. PR #66 نیز باز، Draft و ادغام‌نشده است؛ compare زندهٔ آن 69 جلو و 0 عقب است.
+- [x] workflow واقعی `.github/workflows/exact-decimal-tests.yml` بررسی شد: CI یک PostgreSQL 17 disposable اجرا می‌کند و SQL fixtureها را با `psql -v ON_ERROR_STOP=1` اجرا می‌کند. تست‌های Node مستقیماً با `node --test tests/*.test.js` اجرا می‌شوند؛ `package.json` اسکریپت `npm test` ندارد.
+- [x] فایل migration قدیمی Overflow و تست‌هارنس واقعی کنار هم بررسی شدند. migration قدیمی نه guard انتظار برای خالی بودن درخواست‌های درحال‌اجرا را دارد و نه schedule زندهٔ job 17 را ثبت می‌کند؛ بنابراین منبع قابل‌استفاده برای بازتولید Production نیست.
+- [x] سند `docs/PRODUCTION_CATALOG_SOURCE_AUDIT_2026-11-27.md` در commit `e058fffab27d5093a236a1a2bc4c1bcbb78d6c08` با یافته‌های هارنس، تفاوت migration/Production، و شروط fixture معتبر به‌روزرسانی شد.
+- [!] در این مرحله هنوز هیچ تست source-parity جدیدی اضافه یا اجرا نشد؛ بدنهٔ دقیق Production و schedule باید دوباره از منبع read-only با timestamp و fingerprint بازیابی و در fixture مستقل ثبت شوند. سپس dependencyهای `net.http_get` و صف‌ها در PostgreSQL 17 stub می‌شوند؛ آزمون Production و candidate scheduler باید جدا باشند.
+- [!] تصحیح شمارش: گزارش قبلی Stage 173 تعداد ۱۳ commit جلو را نوشته بود؛ compare زندهٔ فعلی ۱۵ جلو و صفر عقب است. این مقدار فقط وضعیت فعلی شاخه است.
+- [x] هیچ SQL، workflow، migration یا کد اجرایی تغییر نکرد. هیچ تابع Production اجرا نشد و هیچ صف، Cron، جفت‌ارز، قیمت، schema، grant، policy، worker، سفارش، موجودی یا دادهٔ کاربر تغییر نکرد. هیچ db push، merge، deploy، release یا هزینه‌ای انجام نشد.
+
+### گام بعد
+1. بازیابی مجدد بدنهٔ دقیق تابع Overflow و cron job 17 از Production به‌صورت read-only؛ ثبت timestamp و fingerprint.
+2. ساخت fixture provenance-labelled و stubs شبکه در PostgreSQL 17؛ آزمون مستقل interleaving فعلی و candidate عادلانه.
+3. ادامهٔ inventory دقیق INSERT/UPDATE/DELETE برای catalog، listings، pairs و prices؛ سپس طراحی migration فقط در شاخهٔ تست.
+
+
+## Shahram 175 — exact Production market scheduler capture (2026-11-27)
+- [x] قبل از کار، PR #66 و #67 و شاخهٔ فعال از GitHub دوباره بررسی شدند؛ هر دو PR باز، Draft و ادغام‌نشده باقی مانده‌اند.
+- [x] بدنهٔ واقعی `private.request_market_price_overflow()` مجدداً از Supabase Production با SELECT و `pg_get_functiondef` بازیابی شد؛ MD5: `e6ed136175b0d340c9a86e51f7917a76`.
+- [x] بدنهٔ واقعی `public.refresh_market_prices()` نیز بازیابی شد؛ MD5: `3788666d57957a66bf59031f54ceff03`.
+- [x] زمان‌بندی زنده تأیید شد: job 3 هر دقیقه و job 17 در دقیقه‌های 5،15،25،35،45،55؛ هر دو active.
+- [x] هر دو بدنهٔ کامل، fingerprintها، Cron metadata و محدودیت تفسیر در `docs/fixtures/PRODUCTION_MARKET_PRICE_FUNCTIONS_2026-11-27.md` حفظ شدند؛ commit `c8f3b8cf99966fea65cf3e87f65924f89df50388`. سند ممیزی نیز با commit `d37a677426da554392854920d32f5d27f34c9306` تکمیل شد.
+- [!] دقت مهم: تابع اصلی خودش back-pressure دارد؛ پس آزمون باید ترتیب دقیق پردازش پاسخ، پاک‌کردن tracking، بررسی صف‌ها و enqueue مجدد 515 شناسه را شبیه‌سازی کند. فرض سادهٔ «تابع اصلی هر دقیقه بدون شرط درخواست جدید می‌سازد» نادرست است.
+- [ ] گام بعد: ساخت PostgreSQL 17 disposable harness با stubهای شبکه/صف و اجرای تابع‌های ثبت‌شده؛ آزمون فعلی و candidate scheduler باید جدا باشند. سپس نتایج و پوشش تست به PR #67 افزوده شوند.
+- [x] همهٔ عملیات Supabase فقط SELECT بودند. هیچ تابع Production اجرا نشد و هیچ صف، قیمت، جفت‌ارز، Cron، schema، grant، RLS، worker، سفارش، موجودی یا دادهٔ کاربر تغییر نکرد. هیچ migration/db push، merge، deploy، release یا هزینه‌ای انجام نشد.
+
+
+## Shahram 176 — disposable source-snapshot scheduler regression added (2026-11-27)
+- [x] قبل از تغییر، وضعیت شاخه‌ها با compare زنده بررسی شد: PR #66 برابر 69 جلو و 0 عقب؛ PR #67 برابر 20 جلو و 0 عقب از `main`. هر دو PR در مسیر Draft باقی می‌مانند.
+- [x] فایل `supabase/tests/market_price_scheduler_production_snapshot.sql` اضافه شد. این تست دو تابع را با بدنهٔ ثبت‌شدهٔ Production در fixture مرحلهٔ 175 اجرا می‌کند؛ fingerprintهای منبع در header تست درج شده‌اند.
+- [x] وابستگی `net.http_get` به stub محلی تبدیل شده و هیچ درخواست اینترنتی ارسال نمی‌شود. تست 516 شناسهٔ فعال می‌سازد، مرز 515/516 را بررسی می‌کند، تکمیل سه درخواست provider را شبیه‌سازی می‌کند، سپس ترتیب «پردازش پاسخ‌ها → حذف tracking → enqueue مجدد batch اصلی → اجرای Overflow» را بازسازی می‌کند.
+- [x] آزمون انتظار دارد Overflow در interleaving بازسازی‌شده به‌علت وجود درخواست‌های primary مسدود بماند؛ سپس با حذف صف/درخواست‌های معلق، کنترل می‌کند که Overflow به‌تنهایی شناسهٔ 516 را در batch بعدی قرار می‌دهد. بنابراین تست فرق بین مشکل guard/interleaving و خطای مرتب‌سازی IDها را مشخص می‌کند.
+- [x] workflow موجود PostgreSQL 17 یک گام مستقل اضافه کرد که دیتابیس تازهٔ `digiarz_market_scheduler_test` می‌سازد و فایل تست را با `psql -v ON_ERROR_STOP=1` اجرا می‌کند. فایل workflow فقط روی شاخهٔ این PR تغییر کرده؛ `main` دست‌نخورده است.
+- [!] اجرای محلی PostgreSQL در محیط فعلی در دسترس نبود؛ بنابراین نتیجهٔ تست هنوز PASS اعلام نمی‌شود. نتیجهٔ معتبر باید از GitHub Actions روی HEAD دقیق این تغییرات گرفته و job/step آن بررسی شود.
+- [!] این تست یک interleaving کنترل‌شده را اثبات می‌کند، نه اینکه به‌تنهایی علت تاریخی پنج قیمت stale را ثابت کند و نه اینکه starvation در تمام ترتیب‌های هم‌زمانی قطعی باشد. طراحی scheduler عادلانه و تست مستقل candidate هنوز انجام نشده است.
+- [ ] گام بعد: بررسی نتیجهٔ CI روی HEAD دقیق؛ رفع هر خطای SQL/هارنس؛ سپس افزودن candidate scheduler آزمایشی با cursor پایدار، ثبت requested-ID/response coverage و retry عادلانه، با آزمون‌های جداگانه.
+- [x] هیچ Supabase/Production تابعی اجرا نشد؛ هیچ قیمت، جفت‌ارز، صف، Cron، schema، grant، RLS، worker، سفارش، موجودی یا دادهٔ کاربر تغییر نکرد. هیچ migration/db push، merge، deploy، release یا هزینه‌ای انجام نشد.
+
+
+### Shahram 176 — exact-head PostgreSQL 17 CI result (2026-11-27)
+- [x] GitHub Actions run **46029198859** (run #2248) روی commit دقیق `511ec081ec6fa7a700067b91f10fab19beadc56a` با نتیجهٔ **SUCCESS** تمام شد.
+- [x] تمام 23 مرحلهٔ workflow موفق شدند؛ از جمله مرحلهٔ 23 با عنوان `Reproduce captured Production market scheduler interleaving in disposable PostgreSQL`. PostgreSQL 17 disposable database ساخته شد و اسکریپت source-snapshot با `ON_ERROR_STOP=1` بدون خطا اجرا شد.
+- [x] تست، مرز 515/516، جلوگیری Overflow هنگام وجود tracking/queue، پردازش پاسخ‌های سه provider، enqueue مجدد batch اصلی و امکان enqueue شدن asset 516 در حالت بدون درخواست معلق را با موفقیت بررسی کرد.
+- [!] این نتیجه فقط رفتار interleaving آزمایش‌شده را ثابت می‌کند؛ اثبات علت قطعی پنج قیمت stale تاریخی یا پوشش تمام interleavingهای هم‌زمانی نیست. candidate scheduler عادلانه هنوز نوشته/آزموده نشده است.
+- [x] PR #67 در آخرین compare برابر 24 commit جلو و صفر عقب از `main` بود؛ PR #66 برابر 69 جلو و صفر عقب. هر دو باز، Draft و ادغام‌نشده‌اند.
+- [ ] مرحلهٔ بعد: candidate طراحی‌شده با cursor پایدار و batch/response ledger را جدا از بدنهٔ Production در disposable PostgreSQL پیاده و آزمون کنیم؛ سپس inventory تمام مسیرهای نوشتن کاتالوگ/جفت‌ارز را کامل کنیم.
+- [x] هیچ تغییر Production/Supabase، Cron، صف، قیمت، جفت‌ارز، Worker، Migration، db push، merge، deploy، release یا هزینه‌ای انجام نشد.
+
+
+## Shahram 177 — fair scheduler candidate design (2026-11-27)
+- [x] پس از موفقیت تست exact-source مرحلهٔ 176، طراحی candidate مستقل در `docs/MARKET_PRICE_SCHEDULER_FAIRNESS_DESIGN_2026-11-27.md` ثبت شد.
+- [x] طرح شامل cursor لغوی پایدار و wrap-around، ledger ماندگار هر batch با requested/returned/omitted IDs، صف اولویت برای دارایی‌های تازه‌پذیرفته‌شده، retry/backoff برای IDهای حذف‌شده از پاسخ، سقف in-flight کنترل‌شده، و سیاست قطعی تقدم منبع قیمت است.
+- [x] وابستگی‌های بین scheduler و نیاز «همهٔ ارزهای کاتالوگ قابل معامله باشند» مشخص شد: provisioning جفت‌ارز و enqueue اولویت قیمت باید در یک تراکنش اتمیک انجام شوند؛ معامله فقط با قیمت معتبر، تازه و نگاشت canonical یکتا مجاز است.
+- [!] این مرحله فقط طراحی است؛ هیچ جدول، تابع، migration، Cron، queue یا worker جدیدی ساخته/اجرا نشده است. اندازهٔ batch، تعداد درخواست هم‌زمان، retry delays و منبع قیمت مجاز باید با تست و محدودیت providerها تعیین شوند.
+- [ ] گام بعد: پیاده‌سازی candidate scheduler فقط در disposable PostgreSQL 17، با آزمون‌های fairness، retry، idempotency، concurrency و source-priority؛ سپس تکمیل inventory writerهای کاتالوگ و اتصال آن به provisioning candidate.
+- [x] هیچ Production/Supabase write، migration/db push، Cron/worker change، merge، deploy، release یا هزینه‌ای انجام نشد.
+
+
+## Shahram 178 — fair scheduler candidate added to disposable PostgreSQL tests (2026-11-27)
+- [x] وضعیت زنده پیش از تغییر بررسی شد: PR #66 برابر 69 جلو/0 عقب و PR #67 برابر 27 جلو/0 عقب از `main`؛ هر دو باز و Draft هستند.
+- [x] candidate scheduler آزمایشی در `supabase/tests/market_price_scheduler_candidate.sql` و فقط در schema جداگانهٔ `scheduler_candidate` اضافه شد؛ این migration Production نیست.
+- [x] منطق candidate شامل صف اولویت برای پذیرش دارایی جدید، cursor چرخشی روی canonical ID، ledger درخواست با requested/returned/omitted IDs، جلوگیری از درخواست تکراری در batchهای in-flight، retry با backoff، تکمیل idempotent و سیاست تقدم قطعی منبع قیمت است.
+- [x] آزمون‌ها پوشش 1200 دارایی در 12 batch، نبود تکرار در یک چرخه، اولویت دارایی تازه، ثبت پاسخ ناقص و retry، idempotency تحویل مجدد پاسخ، رد قیمت stale/NaN و جلوگیری از overwrite منبع با اولویت پایین‌تر را دارند.
+- [x] آزمون هم‌زمانی دو session در `supabase/tests/market_price_scheduler_candidate_concurrency.sh` اضافه شد؛ session اول advisory transaction lock را نگه می‌دارد و invocation دوم باید بدون ایجاد batch خارج شود.
+- [x] workflow PostgreSQL 17 یک دیتابیس مستقل برای candidate test می‌سازد و هر دو تست را اجرا می‌کند.
+- [!] نتیجهٔ candidate هنوز تأیید نشده است؛ باید GitHub Actions روی HEAD دقیق اجرا و تمام مراحل بررسی شوند. اجرای محلی PostgreSQL در این محیط در دسترس نیست.
+- [!] این candidate هنوز prototype آزمایشی است؛ سیاست واقعی provider، زمان مشاهدهٔ قیمت، نرخ درخواست، RLS/grants، schema نهایی و اتصال atomic به catalog admission نیازمند ممیزی و تست بیشتر است. هیچ‌یک برای Production آماده یا مجاز اعلام نشده است.
+- [ ] گام بعد: نتیجهٔ CI را بررسی و خطاها را اصلاح کنیم؛ سپس آزمون‌های retry failure، cycle wrap، duplicate canonical symbol و مسیرهای امنیتی را اضافه کنیم.
+- [x] هیچ Supabase/Production write، Cron/worker/Edge Function، price/pair/order/balance change، migration/db push، merge، deploy، release یا هزینه‌ای انجام نشد.
+
+
+## Shahram 179 — candidate scheduler CI, cursor correction, and bounded concurrency (2026-11-27)
+- [x] اولین اجرای کامل candidate scheduler در GitHub Actions، run #2259، روی commit `55366d23745573bae79aaf6a522447229931ca5f` با نتیجهٔ SUCCESS انجام شد؛ هر دو گام بازسازی منبع Production و اجرای candidate در PostgreSQL 17 موفق بودند.
+- [x] در بازبینی مستقل منطق، ایراد مهم cursor پیدا شد: اگر یک batch پاسخ ناقص می‌گرفت، cursor قبلی جلو نمی‌رفت و دارایی‌های قبلاً موفق ممکن بود دوباره انتخاب شوند. cursor اکنون فقط بر مبنای آخرین canonical ID انتخاب‌شده از lane عادی پیش می‌رود؛ IDهای omitted جداگانه در retry باقی می‌مانند.
+- [x] مرتب‌سازی lane عادی از `transaction_timestamp()` استفاده می‌کند تا ترتیب IDها با تغییر لحظه‌ای timestamp هر ردیف ناپایدار نشود.
+- [x] آزمون wrap-around پس از پوشش 1200 دارایی اضافه شد؛ انتظار دارد پس از آخرین ID، چرخهٔ بعدی از `asset-0001` آغاز شود.
+- [x] سقف configurable برای تعداد batchهای in-flight (پیش‌فرض 3، محدودهٔ candidate برابر 1 تا 10) اضافه شد؛ تست، سقف و عدم هم‌پوشانی IDهای batchهای معلق را کنترل می‌کند.
+- [!] اجرای #2259 مربوط به نسخهٔ قبل از اصلاح cursor و سقف هم‌زمانی است؛ اجرای نسخه‌های اصلاح‌شده هنوز در حال انجام است و PASS نهایی برای HEAD فعلی اعلام نمی‌شود.
+- [ ] گام بعد: نتیجهٔ CI روی آخرین commit شامل wrap-around و in-flight cap را بررسی کنیم؛ در صورت شکست، فقط fixture/test را اصلاح و دوباره اجرا کنیم. سپس آزمون fairness در برابر هجوم پیوستهٔ admission و آزمون retry خطای HTTP را اضافه کنیم.
+- [x] هیچ Production/Supabase write، تغییر Cron/صف/قیمت/جفت‌ارز، Worker/Edge Function، Migration/db push، merge، deploy، release یا هزینه‌ای انجام نشد.
+
+
+## Shahram 180 — provider failure retry and canonical pair collision tests (2026-11-27)
+- [x] آزمون پاسخ HTTP ناموفق (503) اضافه شد: batch باید در ledger با وضعیت failure ثبت شود، شناسه به retry برود و پس از پاسخ موفق بعدی قیمت معتبر دریافت کند.
+- [x] آزمون برخورد نماد اضافه شد: پذیرش canonical ID دوم با همان pair symbol باید با unique constraint رد شود؛ هیچ نگاشت ticker مبهمی ساخته نمی‌شود.
+- [x] آزمون‌های مرحلهٔ candidate اکنون شامل 1200 دارایی، 12 batch، wrap-around، priority admission، omission و retry، HTTP failure و recovery، duplicate delivery، stale/NaN rejection، source priority، in-flight cap و عدم هم‌پوشانی شناسه‌ها هستند.
+- [x] اجرای CI روی commit `8f70a67c7fdd0209e2cef7822fcac881b6d4fe57`، run #2261، با نتیجهٔ SUCCESS تکمیل شد؛ تست بازسازی Production و candidate شامل اصلاح cursor/wrap-around موفق بودند.
+- [!] اجرای نسخهٔ کامل‌تر با in-flight cap و تست‌های HTTP 503/canonical collision روی HEAD جدید هنوز در GitHub Actions در حال اجراست؛ تا نتیجهٔ دقیق آن PASS نهایی اعلام نمی‌شود.
+- [ ] گام بعد: تأیید CI روی آخرین HEAD؛ سپس بررسی fairness در برابر ورود پیوستهٔ دارایی‌های جدید، سقف retry، source observation timestamps و inventory کامل writerهای catalog. Candidate هنوز صرفاً fixture آزمایشی است و برای Production آماده نیست.
+- [x] هیچ تغییر Production/Supabase، Cron/queue/price/pair، Worker/Edge Function، Migration/db push، merge، deploy، release یا هزینه‌ای انجام نشد.
+
+
+## Shahram 181 — CI failure diagnosis and scheduler fairness hardening (2026-11-27)
+- [x] وضعیت زندهٔ PR #66 و #67 و Actions بررسی شد؛ هر دو PR همچنان باز، Draft و ادغام‌نشده‌اند. PR #67 روی HEAD ab6ba198... دارای CI failure بود؛ تمام مراحل قبلی workflow موفق و مرحلهٔ candidate scheduler ناموفق بود.
+- [x] بازبینی SQL نشان داد انتهای بلوک DO به‌اشتباه END $; نوشته شده بود؛ terminator به END $$; اصلاح شد. GitHub Actions log text از wrapper قابل دریافت نبود، بنابراین علت شکست با جزئیات log ادعا نمی‌شود؛ این خطای نحوی مستقل و قطعی در فایل بود.
+- [x] بازبینی fairness نشان داد مرتب‌سازی laneها به‌صورت priority → retry → normal می‌توانست در صورت ورود پیوستهٔ دارایی‌های جدید، lane عادی را گرسنه نگه دارد.
+- [x] انتخاب batch به سهمیهٔ وزنی تغییر کرد: در batchهای حداقل ۳تایی، حداقل ۲۰٪ برای priority، ۲۰٪ برای retryهای سررسیدشده و ۶۰٪ برای چرخش عادی؛ سهمیهٔ خالی بین laneهای باقی‌مانده پر می‌شود. برای batchهای کوچک‌تر، مسیر عادی سهمیهٔ اصلی را حفظ می‌کند.
+- [x] آزمون admission storm اضافه شد: در پنج دور، هر بار ده دارایی تازه وارد صف priority می‌شوند و تست باید حداقل شش دارایی عادی را در هر batch حفظ کند.
+- [!] این اصلاحات هنوز CI دقیق HEAD جدید را نگذرانده‌اند؛ تا اجرای تازهٔ PostgreSQL 17 و concurrency test موفق نشود، candidate را PASS یا Production-ready نمی‌دانیم.
+- [ ] گام بعد: نتیجهٔ CI جدید را بررسی کنیم؛ اگر شکست ماند، جزئیات مرحله و SQL را جداگانه عیب‌یابی کنیم. سپس timestamp مشاهده‌شده توسط provider، سقف retry/backoff و inventory کامل تمام write-pathهای catalog را تکمیل کنیم.
+- [x] فقط فایل تست candidate و این سند روی شاخهٔ Draft تغییر کردند؛ هیچ Production/Supabase write، migration/db push، Cron/queue/price/pair، Worker/Edge Function، grant/RLS، merge، deploy، release یا هزینه‌ای انجام نشد.
+
+
+## Shahram 182 — weighted scheduler backfill correction and Production writer inventory (2026-11-27)
+- [x] دریافت log دقیق CI نشان داد پس از اصلاح terminator، آزمون admission storm به‌درستی یک نقص دیگر را آشکار کرد: وقتی lane retry خالی بود، fill با ترتیب priority-first سهمیهٔ استفاده‌نشده را دوباره به priority می‌داد و در batch ده‌تایی چهار دارایی تازه را وارد می‌کرد؛ lane عادی همچنان شش جایگاه داشت، اما سقف ۲۰٪ priority رعایت نمی‌شد.
+- [x] ترتیب backfill اصلاح شد: سهمیهٔ خالی ابتدا به normal، سپس retry و در آخر priority اختصاص می‌یابد. آزمون storm همچنان حداکثر دو priority و حداقل شش normal را در هر batch ده‌تایی مطالبه می‌کند.
+- [x] ممیزی read-only Production تکمیل‌تر شد: توابع SQL، triggerها، RLS/policies و table grants بررسی شدند؛ Edge Functionهای فعال نیز فهرست و sourceهای مرتبط بازیابی شدند.
+- [x] دو writer اضافی برای crypto_assets/market_prices پیدا شد: Edge Function admin-refresh-crypto-asset نماد کاتالوگ را با service_role به‌روزرسانی می‌کند، و Edge Functionهای index-ts و refresh-market-prices می‌توانند قیمت مجموعهٔ محدود و hard-coded را در market_prices upsert کنند.
+- [x] نتیجهٔ مهم امنیت/یکپارچگی: anon و authenticated روی چهار جدول فقط SELECT دارند، اما service_role دسترسی مستقیم DML دارد؛ trigger یکتایی فقط admin_market_listings را پوشش می‌دهد و روی crypto_assets/demo_trading_pairs/market_prices triggerی در inventory مشاهده نشد. بنابراین همهٔ service-role writerها باید در طراحی واحد در نظر گرفته شوند.
+- [x] یافته‌ها در docs/PRODUCTION_CATALOG_SOURCE_AUDIT_2026-11-27.md و docs/ALL_CATALOG_ASSETS_TRADABLE_PLAN_2026-11-27.md ثبت شدند.
+- [!] اجرای CI پس از اصلاح backfill هنوز در انتظار است؛ candidate تا عبور از PostgreSQL 17 و concurrency test آماده یا تأییدشده محسوب نمی‌شود.
+- [ ] گام بعد: نتیجهٔ CI روی HEAD جدید؛ سپس افزودن آزمون timestamp واقعی مشاهده‌شده توسط provider و تکمیل بررسی تمام مصرف‌کنندگان بیرونی service_role. پس از آن می‌توان طرح catalog admission/provisioning را در disposable PostgreSQL مدل کرد.
+- [x] تمام کوئری‌های Supabase این مرحله SELECT-only بودند؛ هیچ Edge Function یا SQL function اجرا/تغییر نکرد، هیچ جدول/قیمت/جفت‌ارز/صف/Cron/worker/دادهٔ Production تغییر نکرد. هیچ migration/db push، merge، deploy، release یا هزینه‌ای انجام نشد.
+
+
+## Shahram 183 — fair scheduler candidate PostgreSQL 17 CI passed (2026-11-27)
+- [x] GitHub Actions run 46032712435 روی commit دقیق 7cefac11d5af25d845cdd101f4629564895a7b15 با نتیجهٔ SUCCESS تمام شد.
+- [x] تمام 24 مرحلهٔ workflow موفق شدند؛ مرحلهٔ candidate scheduler در PostgreSQL 17 و concurrency shell test هر دو موفق بودند. این اجرا شامل اصلاح DO terminator، سهمیه‌بندی weighted lanes و backfill normal-first بود.
+- [x] آزمون‌ها 1200 دارایی در 12 batch، پوشش کامل چرخه و wrap-around، priority admission، retry omission و HTTP 503، idempotent completion، رد قیمت stale/NaN، تقدم منبع، برخورد canonical pair symbol، admission storm با حداقل 60٪ سهمیهٔ normal، سقف سه batch هم‌زمان و رد invocation دوم هنگام advisory lock را پوشش دادند.
+- [!] PASS فقط برای fixture candidate در PostgreSQL 17 disposable است؛ این نه اثبات رفتار Production است و نه مجوز migration/rollout. منطق provider-observed timestamp، source mapping واقعی و اتصال atomic catalog-admission هنوز باید تکمیل شود.
+- [x] پس از commit تست 7ce، commitهای بعدی فقط مستندات/status بودند؛ CI روی آخرین commit مستنداتی fef1031a... در زمان ثبت این checkpoint هنوز در حال اجرا بود.
+- [ ] گام بعد: تأیید آخرین docs-only CI؛ سپس اضافه‌کردن timestamp واقعی provider observation و تست‌های canonical catalog admission/identity collision در disposable PostgreSQL. بعد از آن inventory مصرف‌کنندگان بیرونی service_role را کامل کنیم.
+- [x] هیچ Production/Supabase write، SQL/Edge Function invocation، تغییر Cron/queue/price/pair, Worker, grant/RLS، migration/db push، merge، deploy، release یا هزینه‌ای انجام نشد.
+
+
+## Shahram 184 — provider-observed timestamp regression passed; duplicate-ticker ledger blocker mapped (2026-11-27)
+- [x] Candidate price response now requires CoinGecko `last_updated_at` Unix seconds; converts it to timestamptz and passes provider-observed time—not local receive time—to freshness validation. Missing/invalid timestamp is omitted and enters retry; received time remains separate.
+- [x] Test payloads were updated to carry source timestamps; a negative case verifies a positive price without `last_updated_at` is not accepted and is retried.
+- [x] Official CoinGecko documentation confirms `/simple/price` supports `include_last_updated_at=true` and returns a Unix update timestamp. The captured current Production request does not request this field; current market_prices.updated_at is written at response processing time and cannot independently prove provider-observed freshness.
+- [x] GitHub Actions run 46033134206 on exact HEAD `b9f7a2c31d2f9605f417ed2e39e055680a1c3944` completed SUCCESS; all 24 workflow steps passed, including candidate PostgreSQL 17 and concurrency tests. Later commits 4e897626... and 0fc43cef... only extend documentation.
+- [x] Duplicate ticker architecture was mapped against live schema: orders/trades/conditional_orders.symbol, asset_balances.asset and order_reservations.asset are text; current RPC/workers derive base asset from pair symbol. A synthetic alias alone would leak into ledger/portfolio; canonical immutable asset identity must be propagated end-to-end.
+- [!] Candidate success remains disposable-fixture evidence only. No Production code was changed; current production source does not yet request provider-observed timestamp and duplicate-ticker ledger identity remains a blocking architecture item for the owner's all-assets-tradable requirement.
+- [ ] Next: design canonical internal asset identity across pairs/orders/trades/reservations/balances/UI and add disposable lifecycle tests for distinct canonical IDs sharing a display ticker. Then verify the latest docs-only CI and continue external service_role caller inventory.
+- [x] No Production/Supabase write, SQL/Edge Function invocation, schema/pair/price/queue/Cron/worker/grant/RLS change, migration/db push, merge, deploy, release or cost was made.
+
+
+## Shahram 185 — timestamp rounding fix passed; canonical-ID market-trade prototype added (2026-11-27)
+- [x] A flaky timestamp regression was traced to PostgreSQL numeric-to-bigint cast rounding Unix seconds forward. Test fixtures now use floor(epoch) before conversion; receive-time is no longer accidentally newer/older due to rounding.
+- [x] GitHub Actions run 46033468800 on exact candidate commit cf71096f493b8c7db2a6b562b1c282aca748bbb8 completed SUCCESS; the full workflow, fair scheduler PostgreSQL 17 fixture and concurrency test passed.
+- [x] Added design-only architecture document docs/CANONICAL_ASSET_IDENTITY_DESIGN_2026-11-27.md: immutable internal asset UUID, provider-ID mapping, pair_id, prices keyed by pair, ledger balances/reservations/orders/trades by canonical asset IDs, and migration/backfill safety.
+- [x] Added isolated SQL prototype supabase/tests/canonical_asset_identity_candidate.sql and wired it into CI. It models two distinct canonical assets with the same DOT display ticker and same visible DOT/USDT label, but distinct pair IDs, provider IDs, prices and balances; Market buy/sell uses pair_id and verifies no cross-asset balance contamination, fee arithmetic, provider-ID uniqueness and stale-price rejection.
+- [!] The new canonical-identity SQL test is wired but not yet CI-verified on the latest branch commit; current proof is design/prototype only and covers Market buy/sell, not yet Limit, TP/SL, OCO or Stop-Limit worker lifecycle.
+- [ ] Next: confirm CI on current HEAD including the new canonical identity fixture; then extend the fixture to reservations and Limit/TP-SL/Stop-Limit worker lifecycle, concurrency, unauthorized caller and UI/portfolio mapping tests.
+- [x] No Production/Supabase write, SQL/Edge Function invocation, schema/pair/price/queue/Cron/worker/grant/RLS change, migration/db push, merge, deploy, release or cost was made.
+
+
+## Shahram 186 — canonical duplicate-ticker Market trade prototype CI passed (2026-11-27)
+- [x] GitHub Actions run 46033780380 روی commit c74bdb268c09c97b86c0dfd3131e830b8a836f13 با نتیجهٔ SUCCESS تمام شد؛ تمام 25 مرحلهٔ workflow موفق شدند.
+- [x] مرحلهٔ 24 زمان‌بند عادلانه و concurrency fixture در PostgreSQL 17 موفق شد؛ مرحلهٔ 25 نیز canonical asset identity candidate را اجرا کرد و موفق شد.
+- [x] آزمون canonical identity دو دارایی متفاوت با نماد نمایشی یکسان DOT و جفت نمایشی یکسان DOT/USDT را با pair_id جداگانه معامله کرد؛ خرید و فروش یکی روی موجودی دیگری اثر نگذاشت. کارمزد 0.1٪، نگاشت یکتای provider ID و رد قیمت stale هم تأیید شد.
+- [!] این فقط نمونهٔ Market buy/sell در schema جداشدهٔ disposable است؛ هنوز به معنی پیاده‌سازی در Production نیست و Limit، reservations واقعی، TP/SL، OCO، Stop-Limit، worker lifecycle، RLS/authorization و UI/portfolio باید به همان شناسهٔ canonical منتقل و جداگانه تست شوند.
+- [ ] گام بعد: گسترش prototype به reservation و چرخهٔ Limit/TP-SL/Stop-Limit، سپس تست concurrency/admission و UI read-pathها. هم‌زمان آخرین docs-only CI و PR status را تأیید کنیم.
+- [x] هیچ Production/Supabase write، migration/db push، SQL/Edge Function invocation، تغییر schema/pair/price/queue/Cron/worker/grant/RLS، merge، deploy، release یا هزینه‌ای انجام نشد.
+
+
+## Shahram 187 — canonical Limit reservations and worker lifecycle added (2026-11-27)
+- [x] Disposable canonical identity fixture expanded: orders now retain order_type, pair_id, base_asset_id and quote_asset_id; limit reservations point to the exact canonical base/quote asset; worker resolves the pair and price by pair_id and never parses ticker suffixes.
+- [x] Added buy-limit and sell-limit placement with fee-aware reservation, canonical asset balance locking, and worker fill/release behavior. Added stale-price worker test: pending limit order keeps its canonical reservation while stale, then fills only after a fresh provider observation.
+- [x] Test expected balances include the 0.1% fee and verify that two assets sharing DOT do not contaminate each other's balances/reservations/trades.
+- [!] Latest GitHub Actions run 46034202824 on commit 8761aa5320e99c9cfc8bec115e1a23138b02921d was still running at step 6 when this checkpoint was recorded; Limit lifecycle is not yet CI-confirmed. The earlier Market-only canonical identity test passed in run 46033780380.
+- [ ] Next: await run 46034202824; fix any SQL or arithmetic failures, then extend canonical identity through TP/SL, OCO and Stop-Limit child worker paths and concurrency/authorization tests.
+- [x] All work remains isolated to the disposable test schema and documentation. No Production/Supabase write, migration/db push, pair/price/queue/Cron/worker/grant/RLS change, merge, deploy, release or cost was made.
+
+
+## Shahram 188 — Limit prototype dollar-quote CI syntax fix (2026-11-27)
+- [x] CI on the Limit prototype exposed a syntax error in the two new PL/pgSQL function bodies: their opening delimiter had been written as AS $ instead of AS $$, while the closing delimiter was correct. The fixture was corrected to use proper dollar-quoted bodies for both place_limit_order and process_limit_orders.
+- [!] The corrected exact file is now on commit f62acfe1c1fc2633478113edc3f95678d354d57c; GitHub Actions run 46034498934 was still in progress at Initialize containers when recorded. No PASS is claimed for Limit yet.
+- [ ] Next: verify run 46034498934 through candidate PostgreSQL step 25; fix any further SQL/runtime issue, then extend canonical identity to TP/SL, OCO and Stop-Limit.
+- [x] All changes remain isolated to the disposable test fixture and documentation. No Production/Supabase write, migration/db push, pair/price/queue/Cron/worker/grant/RLS change, merge, deploy, release or cost was made.
+
+## Shahram 189 — canonical Market + Limit duplicate-ticker CI passed; TP/SL and Stop-Limit source audit (2026-11-27)
+- [x] GitHub Actions run 46036165275 on exact candidate commit e04901bbeaca047742baeff677517934bb9123cc completed SUCCESS; all 29 job steps succeeded, including disposable PostgreSQL 17 canonical duplicate-ticker Market/Limit lifecycle and fair-scheduler concurrency.
+- [x] Corrected the canonical fixture's malformed anonymous DO block delimiter (DO $ → DO $$); CI then compiled and ran the test successfully. Branch head is now 83 commits ahead, 0 behind main; PR #67 remains open, Draft, unmerged and mergeable.
+- [x] Read the authoritative TP/SL migration 20261113162051_add_demo_take_profit_stop_loss_engine.sql and Stop-Limit migration 20261113181827_add_stop_limit_order_engine.sql on the candidate branch. Confirmed both still use ticker-string identity: conditional_orders.symbol, orders.symbol, order_reservations.asset, and asset_balances.asset; TP/SL and Stop-Limit placement derive the base asset by stripping USDT; workers locate market_prices by symbol and delegate to ticker-based Market/Limit entrypoints. No canonical pair_id/asset_id is propagated through those real paths yet.
+- [!] Therefore the passing disposable canonical fixture is still a model-only proof, not source parity or end-to-end implementation. Extending only the miniature fixture would risk overstating coverage; next work must build a source-parity candidate from the authoritative migration bodies and schema, then add canonical IDs to TP/SL, Stop-Limit parent/child, reservations and worker paths. Current migration's order_kind supports TP/SL and Stop-Limit but has no OCO lifecycle; OCO remains a separate feature gap.
+- [ ] Next: design the coordinated canonical-ID RPC/worker contract for TP/SL and Stop-Limit using the actual migrations; add OCO only as an explicit additional lifecycle after identity, cancellation, reservation and worker invariants are defined. Then test duplicate-ticker, stale price, invalid reservation, retry, cancellation-vs-worker races, RLS and service_role-only worker ACLs in disposable PostgreSQL.
+- [x] No Production/Supabase write, SQL/Edge Function invocation, migration/db push, pair/price/queue/Cron/worker/grant/RLS change, merge, deploy, release, APK/Pages publication or cost was made.
+
+## Shahram 190 — CI source-parity boundary clarified (2026-11-27)
+- [x] Inspected the exact-decimal GitHub Actions workflow and confirmed the canonical identity CI step runs only the standalone miniature SQL fixture in a fresh database; it does not apply the authoritative Production migrations.
+- [x] Confirmed existing TP/SL and Stop-Limit CI lifecycle steps load the generic setup plus 2026-11-15 draft exact-decimal entrypoint/worker candidates, not the current 2026-11-13 authoritative migration bodies.
+- [!] Run 46036165275 remains a valid PostgreSQL 17 pass for the isolated canonical prototype, but is not source-parity proof for the real financial RPC/worker call graph. The source audit from Shahram 189 remains a blocker.
+- [ ] Next: create a dedicated disposable source-parity harness based on the authoritative migration bodies and schema dependencies. Apply canonical-ID changes to the real TP/SL and Stop-Limit entrypoints/workers, preserve security/locking/reservation invariants, and then add OCO as a separately tested linked-order lifecycle. Do not rely on the current miniature fixture as evidence of production-function integration.
+- [x] No Production/Supabase write, SQL/Edge Function invocation, migration/db push, pair/price/queue/Cron/worker/grant/RLS change, merge, deploy, release, APK/Pages publication or cost was made.
+
+## Shahram 191 — authoritative TP/SL and Stop-Limit migration harness added (2026-11-27)
+- [x] Added a disposable PostgreSQL harness that loads the exact checked-in authoritative migrations `20261113162051_add_demo_take_profit_stop_loss_engine.sql` and `20261113181827_add_stop_limit_order_engine.sql`, rather than the older draft entrypoint candidates.
+- [x] The harness exercises the real migration-defined TP/SL placement + worker lifecycle and Stop-Limit parent/child trigger lifecycle; it also checks the actual migration ACL boundary (worker functions service_role-only) and conditional_orders RLS/read-only client grants.
+- [!] The separate downstream Market and Limit engines are explicit test adapters in the disposable setup; therefore this is authoritative conditional-RPC/worker source coverage, not end-to-end source parity for the complete trade engine. It intentionally does not claim canonical asset identity support: the authoritative functions remain ticker-based and the schema still keys market_prices/demo_trading_pairs by display ticker.
+- [!] New CI workflow step was added to apply both exact migration files in a fresh PostgreSQL 17 database. At checkpoint creation, GitHub connector returned no workflow run and no commit status for the latest head; the harness is NOT yet CI-verified.
+- [ ] Next: obtain CI execution and fix compile/runtime issues; then create canonical-ID candidate versions of these exact migration functions, propagate pair_id/base_asset_id/quote_asset_id through reservations, parent/child orders and workers, and test duplicate tickers/stale prices/invalid reservations/cancel races. OCO remains a separate linked-order lifecycle.
+- [x] No Production/Supabase write, SQL/Edge Function invocation, migration/db push, pair/price/wallet/order/trade/reservation/Cron/worker/grant/RLS change, merge, deploy, release, APK/Pages publication or cost was made.
+
+
+## Shahram 192 — first authoritative harness CI failure diagnosed and corrected (2026-11-27)
+- [x] CI run 46037457971 reached the new authoritative migration harness after earlier 23 steps succeeded; step 25 failed during the Stop-Limit placement call.
+- [x] Root cause was in the test harness sequence, not the migration: the real TP/SL worker deliberately clears its temporary JWT subject claim after processing; the next authenticated test RPC therefore correctly rejected the caller as unauthenticated.
+- [x] The disposable test now restores the test user's JWT subject before invoking Stop-Limit placement. This preserves the production worker's claim-clearing behavior rather than weakening the migration or worker.
+- [!] The correction is on commit 776802892afc80b164e8b7907333df775e8b1e8a; a new CI run is required. No pass is claimed yet.
+- [ ] Next: verify the rerun through step 25, fix any additional source/harness issues, then extend the actual migration-derived candidate to canonical pair/asset IDs and duplicate-ticker-safe pricing/reservations. OCO remains separate.
+- [x] No Production/Supabase write, SQL/Edge Function invocation, migration/db push, pair/price/wallet/order/trade/reservation/Cron/worker/grant/RLS change, merge, deploy, release, APK/Pages publication or cost was made.
+
+
+## Shahram 193 — authoritative TP/SL + Stop-Limit migration harness CI passed (2026-11-27)
+- [x] GitHub Actions run 46037695694 completed SUCCESS on the corrected source-parity harness commit 776802892afc80b164e8b7907333df775e8b1e8a.
+- [x] The new workflow step 25 applied the exact checked-in authoritative migrations 20261113162051_add_demo_take_profit_stop_loss_engine.sql and 20261113181827_add_stop_limit_order_engine.sql to a fresh PostgreSQL 17 database, then exercised the migration-defined TP conditional execution and Stop-Limit parent/child trigger lifecycle.
+- [x] The harness verified conditional_orders RLS/read-only authenticated table grants and that process_conditional_orders/process_stop_limit_orders are executable by service_role but not authenticated. The canonical identity fixture (step 26) also passed in the same run.
+- [!] This is source coverage of the real conditional/Stop-Limit migration bodies with explicit isolated adapters for the separate Market/Limit matching engines. It is not complete trade-engine source parity and does not establish canonical pair/asset IDs: the authoritative migrations still use ticker strings for pair lookup, price lookup and reservations. The harness currently exercises take_profit (not a separate stop_loss case); stop_loss branch coverage remains to be added.
+- [ ] Next: create a canonical-ID candidate from these verified authoritative function bodies; carry pair_id/base_asset_id/quote_asset_id through conditional parent/child orders, reservations and execution workers; replace ticker-based price lookup with pair-keyed lookup; add stop_loss, stale price, malformed reservation, retry and cancellation race tests. OCO remains a separate linked-order lifecycle.
+- [x] No Production/Supabase write, SQL/Edge Function invocation, migration/db push, pair/price/wallet/order/trade/reservation/Cron/worker/grant/RLS change, merge, deploy, release, APK/Pages publication or cost was made.
+
+
+## Shahram 194 — authoritative Stop-Loss branch coverage added (2026-11-27)
+- [x] Extended `supabase/tests/authoritative_conditional_source_parity.sql` to execute the real migration-defined `stop_loss` branch separately from `take_profit`: with observed DOTUSDT price 13 and stop-loss trigger 14, the worker must trigger and both conditional and parent order must reach filled.
+- [x] Preserved the authoritative worker's JWT-claim clearing; the harness explicitly restores the test user's claim before the next authenticated RPC.
+- [!] Commit: `81f64761a572338f0f348f3350ff713d3f737bb0`. At checkpoint, GitHub's PR-run/status lookup has not surfaced a new CI run for this head; Stop-Loss coverage is added but NOT yet CI-verified.
+- [ ] Next: confirm CI executes the updated harness; then extend source-parity candidate with canonical `pair_id`, `base_asset_id`, `quote_asset_id` across TP/SL and Stop-Limit parent/child, reservations and execution calls. Market/Limit adapters must eventually be replaced with actual authoritative matching-engine bodies. Add stale-price, malformed-reservation and cancellation/worker race coverage for conditional paths.
+- [x] No Production/Supabase write, SQL/Edge Function invocation, migration/db push, pair/price/wallet/order/trade/reservation/Cron/worker/grant/RLS change, merge, deploy, release, APK/Pages publication or cost was made.
+
+
+## تأیید CI تست Stop-Loss در PR #67 — ۲۷ نوامبر ۲۰۲۶
+- [x] وضعیت زنده PR #67 بازبینی شد: باز، Draft، ادغام‌نشده و mergeable؛ HEAD برابر `e7e33a1b1fea07f8d40a136e148225eb8777e7ae`، شاخه ۹۹ commit جلوتر از main و بدون commit عقب‌تر.
+- [x] اجرای GitHub Actions با شناسه `46038127085` برای همین HEAD پیدا و jobها بررسی شد؛ job اصلی و هر ۲۶ مرحله موفق هستند.
+- [x] مرحله ۲۵ (`Apply authoritative TP-SL and Stop-Limit migrations in disposable PostgreSQL`) موفق است. فایل `supabase/tests/authoritative_conditional_source_parity.sql` در همین HEAD مسیرهای take_profit و stop_loss را جداگانه اجرا می‌کند؛ برای Stop-Loss، trigger count=1 و وضعیت هر دو `conditional_orders` و سفارش والد `orders` برابر `filled` را assert می‌کند.
+- [x] بنابراین تست Stop-Loss افزوده‌شده در commit `81f6476` اکنون در CI روی HEAD نهایی تأیید شده است. این نتیجه صرفاً برای PostgreSQL disposable است و هیچ ادعایی درباره اجرای Production ندارد.
+- [ ] گام بعد: طراحی source-parity canonical identity برای TP/SL و Stop-Limit؛ انتقال `pair_id`، `base_asset_id` و `quote_asset_id` از ورودی تا parent/child، reservation و worker؛ lookup قیمت pair-keyed؛ سپس duplicate ticker، stale price، invalid reservation و cancellation/worker race tests. Market/Limit adapters باید با بدنه واقعی موتورهای authoritative جایگزین شوند.
+- [x] هیچ تغییر Production، Migration/db push، SQL روی Supabase، merge، deploy/release، انتشار APK/Pages یا هزینه‌ای انجام نشد.
+
+
+## گسترش تست source-parity برای قیمت stale و رزرو نامعتبر — ۲۷ نوامبر ۲۰۲۶
+- [x] در `supabase/tests/authoritative_conditional_source_parity.sql` تست stale-price برای TP/SL اضافه شد: worker نباید سفارش را trigger کند و reservation باید reserved بماند؛ پس از ثبت مشاهده تازه، همان سفارش باید قابل اجرا شود.
+- [x] تست stale-price برای Stop-Limit اضافه شد: سفارش والد pending و رزرو USDT محفوظ می‌ماند؛ پس از تازه‌شدن قیمت، worker باید parent/child را trigger کند.
+- [x] تست reservation نامعتبر Stop-Limit اضافه شد: دارایی رزرو عمداً به شناسه/نماد نادرست تغییر می‌کند؛ worker نباید child order بسازد، باید attempt_count را افزایش دهد و parent را pending نگه دارد. پس از اصلاح fixture، retry باید موفق شود.
+- [!] کد تست در commit `966a7ce00e560b200fb7fc3ab3c4cc8976047935` ثبت شد. CI run `46038710233` برای همین commit آغاز شده و در زمان این ثبت هنوز در حال اجراست؛ تا نتیجه نهایی، این سه regression را تأییدشده تلقی نکنید.
+- [ ] پس از CI: بررسی لاگ step 25 و رفع هر خطا؛ سپس ثبت نتیجه نهایی و ادامه طراحی canonical IDs برای TP/SL و Stop-Limit. این harness همچنان Market/Limit adapters جداشده دارد و هنوز canonical identity را به migrationهای authoritative منتقل نمی‌کند.
+- [x] فقط فایل تست و مستندات شاخه تغییر کرده‌اند؛ هیچ Production DB، migration اجرایی، Supabase SQL، cron/worker، merge، deploy/release یا هزینه‌ای تغییر نکرده است.
+
+
+
+## Shahram 165 — authoritative conditional regressions green; canonical call-chain mapped (2026-11-27)
+- [x] Rechecked live PR #67: open, Draft, unmerged, mergeable; HEAD at start of checkpoint was `ce83b53610e7daea12fbc927b7d1ca214486696d`.
+- [x] CI run `46038710233` for test commit `966a7ce00e560b200fb7fc3ab3c4cc8976047935` completed SUCCESS.
+- [x] CI run `46038816951` for latest code commit `ce83b53610e7daea12fbc927b7d1ca214486696d` completed SUCCESS. Both runs passed steps 17–22 (including two-session cancellation/worker races), step 25 (exact authoritative TP/SL and Stop-Limit migrations in disposable PostgreSQL), and step 26 (duplicate-ticker canonical fixture).
+- [x] Therefore the added TP/SL stale-price, Stop-Limit stale-price and malformed-reservation/retry cases in `authoritative_conditional_source_parity.sql` are CI-verified on the successful runs. The harness still uses explicit Market/Limit adapters; it does not prove canonical-ID integration with those engines.
+- [x] Re-read exact source bodies for `execute_demo_trade`, `place_limit_order`, `process_limit_orders`, `place_conditional_exit_order`, `cancel_conditional_exit_order`, `process_conditional_orders`, `place_stop_limit_order`, `cancel_stop_limit_order` and `process_stop_limit_orders`. Added a source-to-target call-chain matrix and structural constraints to `docs/CANONICAL_ASSET_IDENTITY_DESIGN_2026-11-27.md`.
+- [!] Confirmed the next change cannot be a few nullable columns: pair resolution, price source, reservation asset, Market/Limit execution and parent/child lifecycle must move together to immutable pair/base/quote IDs. Display ticker must remain non-authoritative; ambiguous legacy symbol-only calls must fail closed.
+- [ ] Next: inventory base schema and all writers/readers for `crypto_assets`, `demo_trading_pairs`, `market_prices`, balances, orders and reservations; then prepare a disposable-only coordinated canonical migration candidate and test actual Market/Limit/TP-SL/Stop-Limit bodies. OCO remains separate.
+- [x] No Production/Supabase write, SQL invocation, migration/db push, pair/price/wallet/order/trade/reservation/Cron/worker/grant/RLS change, merge, deploy, release, APK/Pages publication or cost was made.
+
+
+
+## تکمیل مرجع ساختار جدول‌ها از Recovery-Test — ۲۷ نوامبر ۲۰۲۶
+- [x] وضعیت پروژهٔ موجود `DigiArz-Recovery-Test` با ref `zrriqwyolcjhbappocuw` بررسی شد: ACTIVE_HEALTHY، PostgreSQL 17.11.0.019. هیچ پروژه/branch جدید و هیچ هزینه‌ای ایجاد نشد.
+- [x] فقط metadata با `list_tables(verbose=true)` در schemaهای public/private خوانده شد؛ هیچ SELECT از ردیف‌های کاربران/مالی یا اجرای تابعی انجام نشد و این پروژه برای تست استفاده نشد.
+- [x] snapshot تاریخی نشان می‌دهد `crypto_assets` با `coingecko_id` کلید اصلی دارد و `symbol` کلید یکتا نیست؛ `demo_trading_pairs` با `pair_symbol` کلید اصلی و `base_coingecko_id` یکتا است؛ `market_prices` با `symbol` کلید اصلی است. این ساختار duplicate display ticker را در مسیر pair/price فعلی پشتیبانی نمی‌کند.
+- [x] `orders.symbol`، `trades.symbol`، `conditional_orders.symbol`، `order_reservations.asset` و `asset_balances.asset` همگی متن هستند و شناسه canonical در آن‌ها وجود ندارد. جدول‌های مالی/بازار اصلی در این snapshot RLS-enabled گزارش شدند.
+- [!] این snapshot بازیابی‌شده تاریخی است و برابری آن با Production امروز ثابت نشده؛ ACLهای Recovery-Test نیز در restore حذف شده‌اند. از این پروژه برای آزمون مالی استفاده نمی‌شود و grants/owners آن مبنای طراحی نیست.
+- [ ] گام بعد: ساخت inventory دقیق از کلیدها، unique indexes، FKها، triggers، policies و writerها در یک snapshot مجاز و جاری؛ سپس طراحی migration candidate یکپارچه. هیچ Production query/write، migration، db push یا تغییر هزینه‌ای در این مرحله انجام نشد.
+
+
+
+## تکمیل fingerprint کاتالوگ Recovery-Test برای قیود و ایندکس‌ها — ۲۷ نوامبر ۲۰۲۶
+- [x] یک query صرفاً `pg_catalog` روی پروژهٔ تاریخی Recovery-Test اجرا شد؛ فقط indexes، constraints، triggers، RLS و policies جدول‌های هدف را خواند. هیچ جدول مالی/کاربری scan نشد و هیچ داده یا schema تغییر نکرد.
+- [x] کلیدهای یکتا/قیود مهم snapshot مشخص شدند: `demo_trading_pairs(pair_symbol)` و `demo_trading_pairs(base_coingecko_id)`؛ `market_prices(symbol)`؛ `crypto_assets(coingecko_id)` با ایندکس غیر یکتای lower(symbol)؛ `asset_balances(user_id,asset)`؛ `order_reservations(order_id)` و FK مرکب order/user؛ `orders(id,user_id)`؛ `conditional_orders(order_id)`.
+- [x] سه trigger account guard در snapshot روی INSERTهای orders، trades و transactions هستند. قیدهای حسابداری سفارش و رزرو نیز در design doc ثبت شدند تا در migration canonical حذف یا تضعیف نشوند.
+- [!] این snapshot همچنان Recovery-Test تاریخی است و برابری Production امروز ثابت نشده؛ ACLهای restore حذف شده‌اند. هیچ grant یا owner از این snapshot کپی نمی‌شود.
+- [ ] مرحله بعد: تولید manifest ساختاری canonical برای disposable PostgreSQL از همین DDL مستندشده و افزودن parity assertions؛ پیش از هر candidate migration باید schema source gaps و writerهای catalog تکمیل شوند.
+
+
+
+### ابزار آماده‌سازی fingerprint جاری کاتالوگ و موتور مالی — ۲۷ نوامبر ۲۰۲۶
+- [x] فایل فقط‌خواندنی `supabase/audit/canonical_asset_identity_schema_fingerprint.sql` اضافه شد. فقط metadata کاتالوگ PostgreSQL، information_schema، تعریف توابع/ACL، RLS/policies، indexes/constraints/triggers و jobهای pg_cron را جمع می‌کند؛ هیچ ردیف تجاری/کاربری را نمی‌خواند و هیچ تغییری اعمال نمی‌کند.
+- [x] تست Node `tests/canonical-asset-identity-audit.test.js` اضافه شد تا query واحد، read-only بودن، عدم scan مستقیم جداول مالی/کاتالوگ و پوشش objectهای هویتی و workerها را enforce کند.
+- [!] این SQL در این مرحله روی Production اجرا نشده است؛ فقط به‌عنوان ابزار آماده برای snapshot مجاز و زمان مناسب ثبت شده. اجرای آن بدون مجوز جداگانه و بررسی وضعیت DB انجام نخواهد شد.
+- [ ] CI جدید باید تست Node را اجرا کند. پس از سبزشدن، در زمان پایداری سرویس و مجوز مالک، snapshot metadata جاری Production با Recovery-Test تاریخی و migration source مقایسه شود؛ تا آن زمان از Recovery-Test فقط به‌عنوان مرجع تاریخی استفاده می‌شود.
+
+
+
+### اصلاح تست fingerprint و افزودن اجرای SQL در PostgreSQL موقت — ۲۷ نوامبر ۲۰۲۶
+- [x] اجرای CI شماره `46040194262` روی commit اولیه تست fingerprint به‌دلیل خطای syntax در regex فایل Node متوقف شد؛ ۸۳ تست دیگر موفق بودند. علت دقیق از log استخراج و regexها اصلاح شدند؛ این شکست مربوط به تست جدید بود، نه موتور سفارش یا migrationها.
+- [x] اجرای مجدد `46040236103` روی commit `6f705ca` مرحله Node را با موفقیت گذراند و مراحل PostgreSQL ۱ تا ۱۱ نیز سبز شدند؛ در زمان ثبت هنوز workflow در مرحلهٔ rollout rounding بود.
+- [x] برای اینکه فقط regex کافی نباشد، setup کاملاً مصنوعی `canonical_asset_identity_fingerprint_setup.sql` و step جدید CI اضافه شد تا خود SQL fingerprint روی PostgreSQL موقت اجرا و syntax آن تأیید شود. setup فقط roleهای آزمایشی و جدول خالی `cron.job` می‌سازد.
+- [!] اجرای کامل CI روی commit workflow جدید `780312d` هنوز باید بررسی شود؛ تا موفقیت step جدید، اجرای SQL fingerprint را تأییدشده اعلام نکنید.
+- [x] هیچ query از این fingerprint روی Production اجرا نشده؛ هیچ Production/Supabase write یا migration/db push، merge، deploy/release یا هزینه‌ای انجام نشده است.
+
+
+
+### ممیزی تکمیلی writerهای کاتالوگ و مدیریت pair — Recovery-Test تاریخی
+- [x] از pg_proc فقط تعریف و fingerprint توابع مرتبط در snapshot تاریخی خوانده شد؛ هیچ ردیف تجاری/کاربری خوانده نشد. `refresh_crypto_assets()` در snapshot ۸٬۸۸۵ بایت است و `symbol` را همراه upsert بر اساس `coingecko_id` به‌روزرسانی می‌کند؛ این snapshot trigger/قید یکتای سراسری برای `crypto_assets.symbol` نشان نداد.
+- [x] trigger function `private.auto_list_verified_exchange_asset()`، `admin_enable_market_pair()` و `admin_disable_market_pair()` بررسی شدند. فعال‌سازی به curated list/volume/rank محدود است؛ غیرفعال‌سازی با وجود یافتن pair بر اساس CoinGecko ID، سفارش‌ها و رزروها را با `symbol` فیلتر می‌کند.
+- [!] غیرفعال‌سازی symbol-based در مدل duplicate ticker یک خطر cross-asset است؛ اصلاح باید همراه pair_id و asset_id و در همان تغییر هماهنگ Market/Limit/TP-SL/Stop-Limit انجام شود، نه به‌صورت patch مستقل روی Production.
+- [x] یافته‌ها و fingerprintهای تاریخی در design doc ثبت شدند. تابع `refresh_market_prices()` در Recovery-Test قدیمی‌تر از migration محدودیت ۵۱۵ شناسه است و برای تعریف جاری Production به آن استناد نمی‌شود.
+- [ ] گام بعد: آماده‌سازی manifest از writerها و lifecycle مدیریت pair و طراحی candidate canonical provisioning/disable در PostgreSQL موقت. هیچ Production query/write، migration، db push، تغییر cron یا هزینه‌ای انجام نشد.
+
+
+
+## Shahram 166 — canonical fingerprint query verified in disposable PostgreSQL (2026-11-27)
+- [x] Corrected the Node test regex syntax after CI run `46040194262` exposed the initial test-file parse error. The rerun `46040236103` passed the Node test stage and all PostgreSQL steps through step 11; run `46040272364` later completed SUCCESS on the full workflow before the fingerprint execution step was added.
+- [x] Added disposable bootstrap `supabase/tests/canonical_asset_identity_fingerprint_setup.sql` and workflow step 27 to execute the exact read-only query `supabase/audit/canonical_asset_identity_schema_fingerprint.sql` in a fresh PostgreSQL 17 database.
+- [x] GitHub Actions run `46040451729` on commit `780312d3fdc69e21581c405afffee322e3bdc119` completed SUCCESS. Step 27 (read-only canonical schema fingerprint) passed; all 27 main steps succeeded.
+- [x] The fingerprint SQL was tested only in disposable PostgreSQL. It has not been run on Production. It reads catalogs/information_schema/pg_cron metadata only and does not scan business rows or write data.
+- [x] Current PR #67 remains open, Draft, unmerged; branch remains based on main with no behind commits at the last comparison. The PR body now records the catalog-admin source findings and the new audit tooling.
+- [ ] Next: check the latest docs-only head's CI, then use the verified fingerprint only when an authorized, stable current Production snapshot is appropriate. After source/schema reconciliation, prepare canonical pair/asset migration candidate and end-to-end disposable Market/Limit/TP-SL/Stop-Limit tests. OCO remains a separate state machine.
+- [x] No Production/Supabase write, migration/db push, financial data change, cron/worker/grant/RLS change, merge, deploy/release, APK/Pages publication or cost was made.
+
+## Shahram 167 — strengthen canonical pair/ledger consistency fixture (2026-11-27)
+- [x] Rechecked live PR #67: open, Draft, unmerged, mergeable; branch is 118 commits ahead and 0 behind main at base fbfb5e974e754088a32c9fdcd76fc2ca9ab0f98b.
+- [x] Latest CI before this change: run 46040715926 on head 593e66d709bf3894451c56574004050265022088 completed SUCCESS; all 27 main steps passed, including real two-session Limit/TP-SL/Stop-Limit race steps 17–19, authoritative conditional migrations step 25, duplicate-ticker candidate step 26 and read-only fingerprint step 27.
+- [x] Reviewed the canonical fixture and found its original proof did not enforce database-level consistency between a pair ID and the base/quote IDs copied onto orders/trades, nor did it bind a reservation to the same user/order at the schema level.
+- [x] Strengthened only the disposable fixture supabase/tests/canonical_asset_identity_candidate.sql: pair composite uniqueness/FK; order-to-pair composite FK; trade-to-order composite FK; one reservation per order and composite same-user FK; order filled/remaining accounting check.
+- [x] Added worker fail-closed checks for mismatched order/pair identity and reservation owner; added regression assertions for pair/base mismatch rejection and malformed same-ticker reservation preservation followed by successful retry.
+- [!] The new candidate-fixture CI is pending. This remains a miniature disposable Market/Limit proof, not an authoritative Production migration or proof of real Market/Limit/TP-SL/Stop-Limit canonical source parity.
+- [ ] Next after CI: inspect exact step logs; if green, continue building a coordinated canonical-ID source-parity harness and catalog provisioning/disable candidate. Do not copy fixture logic into Production or treat this as rollout-ready.
+- [x] No Production query/write, migration/db push, pair/price/wallet/order/trade/reservation/Cron/worker/Edge Function/grant/RLS change, merge, deploy/release, APK/Pages publication or cost was made.
+
+## Shahram 168 — fix reservation-owner regression assertion (2026-11-27)
+- [x] Rechecked CI for the previous canonical fixture change. Runs 46042843291 and 46042889895 both failed at step 26; steps 1–25 passed. The failure was in the new test assertion, not a production migration: the test attempted to mutate a reservation after its order had already filled and the worker had correctly deleted the reservation, so zero rows changed and the test's own sentinel exception fired.
+- [x] Moved the owner-mismatch mutation assertion to the pending-order phase, immediately after verifying the reservation exists and before the fresh-price fill. This makes the composite same-user FK assertion exercise an actual row.
+- [!] New head 742d2263b1bb23420230882166bbfed69e6ccb7b is awaiting CI. Do not mark the canonical candidate step green until step 26 and full workflow complete successfully.
+- [ ] After CI, extend candidate coverage from the miniature Market/Limit harness to canonical identity through the authoritative conditional-order parent/child lifecycle and pair-scoped cancellation; then build the OCO linked-order state machine tests.
+- [x] No Production/Supabase changes, merge, migration/db push, deploy/release, publication, Cron/worker/grant/RLS changes or costs.
+## Shahram 169 — pair-scoped disable isolation candidate (2026-11-27)
+- [x] Added a disposable pair-administration function to the canonical fixture. It disables a single pair by pair_id, cancels only that pair's pending orders, and releases only those reservations; it never filters by display ticker.
+- [x] Added a duplicate-display-pair regression: two separate DOT/USDT pairs each have a pending Limit sell; disabling pair A must cancel/release A only, while pair B remains enabled, pending and reserved.
+- [x] Preserved the order accounting invariant on cancellation: status changes to cancelled while filled_amount + remaining_amount continues to equal amount.
+- [x] Corrected the reservation-owner test after CI runs 46042843291 and 46042889895 exposed that the prior assertion ran after fill had deleted the reservation. The assertion now runs while the pending reservation exists; prior failures were test assertion placement, not production behavior.
+- [!] CI runs 46043153310 (owner assertion correction), 46043173872 (status update) and 46043222735 (pair-disable candidate) were still in progress at the time of this entry. No pass is claimed yet.
+- [ ] Await CI; if pair-disable fixture passes, extend canonical pair identity through authoritative TP/SL and Stop-Limit parent/child plus pair-scoped cancellation races. OCO remains a distinct not-yet-built state machine.
+- [x] This work changes only disposable tests/docs in the Draft branch. No Production/Supabase data/schema/function/ACL/RLS/Cron/worker changes, merge, deploy/release, APK/Pages publication or cost.
+## Shahram 170 — correct candidate fixture assertions and SQL delimiters (2026-11-27)
+- [x] Inspected completed CI failures for runs 46043153310, 46043173872, 46043222735, 46043237020 and 46043298257. Candidate step 26 exposed three test-fixture defects: (1) the expected balances after the second valid sell fill were understated; observed correct accounting was base A 1.35 and quote 9975.4485; (2) the ownership mutation assertion did not reliably prove a violating insert against an existing order, so it was replaced with a direct invalid reservation INSERT followed by restoration of the valid reservation; (3) the newly added pair-disable function and DO block had malformed dollar-quote delimiters.
+- [x] Corrected the expected balances, replaced the reservation ownership assertion with a direct FK-negative INSERT test, and used named dollar-quote delimiters $disable_pair$ and $candidate_test$.
+- [x] Verified the corrected source around the new function and DO block via GitHub file read. These corrections are test-only.
+- [!] The corrected head commit b8f08f9322dda517443f443ab189260086ef93b9 is awaiting a new CI run; no success is claimed.
+- [ ] Next: inspect the new run's step 26 and full workflow; if green, move to source-faithful canonical identity for real conditional-order and Stop-Limit parent/child paths. OCO remains separate.
+- [x] No Production/Supabase data or schema changes, no merge, db push, deploy/release, APK/Pages publication, Cron/worker/grant/RLS changes or costs.
+## Shahram 171 — canonical conditional parent/child identity proof (2026-11-27)
+- [x] Extended only the disposable canonical candidate fixture with a conditional_orders relation carrying pair_id/base_asset_id/quote_asset_id and composite FKs for both parent order and execution child.
+- [x] Added a negative regression: a child order for a different canonical pair with the same display label cannot attach to the parent; the correct same-pair child is accepted.
+- [x] Extended pair-scoped disable candidate to cancel conditional parent/child rows and release the parent's reservation only for the disabled pair. The paired duplicate-label scenario asserts pair B's triggered parent, child, reservation and state remain intact when pair A is disabled.
+- [!] This is a candidate invariant fixture, not a rewrite or execution of the authoritative Production TP/SL/Stop-Limit RPC bodies. It does not yet cover the full production worker retry/cancellation race or OCO.
+- [!] CI run 46043559923 for commit b8f08f9322dda517443f443ab189260086ef93b9 was in progress when the conditional fixture extension was added. The new head 5116ecb896a9c216ebd18e5c16d845670e103f29 needs its own CI result; no pass is claimed.
+- [ ] Next: verify current CI and step 26 for the corrected base fixture; then execute the new parent/child identity tests in disposable PostgreSQL. Build a source-faithful wrapper around actual conditional/Stop-Limit migration definitions, retaining actual reservation/worker/cancellation code, before advancing to OCO.
+- [x] No Production/Supabase data/schema/function/ACL/RLS/Cron/worker changes, no merge/db push/deploy/release/publication, and no new costs.
+## Shahram 172 — stabilize fresh-price precondition in pair-disable fixture (2026-11-27)
+- [x] Inspected run 46043559923: the corrected SQL quoting and balance/owner assertions progressed, but the disposable test later failed because pair A's observation was no longer within the fixture's two-minute freshness window when the pair-disable lifecycle began.
+- [x] Added an explicit refresh of both disposable pair observations immediately before creating the conditional parent/child and cancellation test orders. This is test-only setup; it does not weaken the stale-price negative test, which still runs earlier.
+- [!] The current code head e30f4022d927a8a665287d0d34f06d6abbb8ce0b and status update require fresh CI. No green claim yet.
+- [ ] Verify step 26, then verify parent/child canonical FK isolation and pair-scoped disable behavior. Do not copy fixture helpers into Production.
+- [x] No Production/Supabase changes, merge, migration/db push, deploy/release, publication, worker/Cron/grant/RLS changes or costs.
+## Shahram 173 — authoritative TP/SL and Stop-Limit source-chain design review (2026-11-27)
+- [x] Reviewed the exact mainline TP/SL migration blob 3360c21a69b7fae83a7f2494428367d1b7658e81 and Stop-Limit migration blob 3f421c6380630d74b846cd66dc7b121786237c0f.
+- [x] Recorded the full symbol-based source call chains for conditional placement/worker/cancel and Stop-Limit placement/trigger/child Limit/sync/cancel in docs/CANONICAL_ASSET_IDENTITY_DESIGN_2026-11-27.md.
+- [x] Explicitly recorded that Stop-Limit sync locks conditional row and parent but not child (FOR UPDATE OF c,parent SKIP LOCKED); candidate must preserve/test source semantics unless separately reviewed.
+- [x] Defined canonical tuple invariants for parent/conditional/child/reservation/trade, pair-keyed price lookup, pair-scoped cancellation, source-faithful grants/RLS/SECURITY DEFINER/locking/retries and quarantine of ambiguous symbol-only backfill.
+- [x] Marked OCO as a distinct unimplemented linked-order state machine; no authoritative OCO table/RPC/worker found in source search.
+- [!] The current SQL candidate is still a disposable invariant fixture, not an actual port of the authoritative TP/SL/Stop-Limit function bodies. Full source-faithful PostgreSQL harness remains outstanding.
+- [ ] Await current CI run 46043897871 (code head e30f4022d927a8a665287d0d34f06d6abbb8ce0b) and 46043920340 (status/docs head 2f894c991781fca63145f46a337efd83ffe1f9bd), then verify newest branch head after this design update.
+- [x] No Production/Supabase function/schema/ACL/RLS/cron/worker changes, merge, migration/db push, deploy/release, APK/Pages publication or cost.
+## Shahram 174 — canonical duplicate-ticker + conditional parent/child fixture CI passed (2026-11-27)
+- [x] Exact-decimal workflow run 46043897871 (Run #2345) on code commit e30f4022d927a8a665287d0d34f06d6abbb8ce0b completed SUCCESS. The job log explicitly reports `Canonical asset identity / duplicate ticker Market and Limit lifecycle: PASS` from canonical_asset_identity_candidate.sql:712.
+- [x] The same successful run also passed the real two-session TP/SL conditional execution/cancellation race, real two-session Stop-Limit child execution/cancellation race, Stop-Limit parent/child integration, captured Production invalid-reservation retry, TP/SL exact-decimal integration, scheduler interleaving/fairness/idempotency and authoritative conditional source-parity harness.
+- [x] Step 26 in the successful run includes the expanded disposable candidate checks: pair/base/quote composite FK; direct reservation owner-FK negative insert; malformed reservation fail-closed and retry; stale price rejection; duplicate ticker asset/balance isolation; conditional parent/child same-pair FK; cross-pair child rejection; and pair-scoped disable preserving the other same-label pair's conditional parent/child/reservation.
+- [!] Run 2345 is a disposable PostgreSQL 17 CI run and does not make the candidate Production-ready. It proves fixture behavior, not a full migration/rollout or Production schema/ACL parity.
+- [!] The current latest branch head is docs-only commit c879cc0a63b4c0b33b90f8460b3d6f6a06cbb4c5. Runs 46044024709 and 46044050255 on the later design/status commits were still in progress at the time of this note; do not claim those docs heads green until complete.
+- [ ] Next: await docs-head CI; then build the source-faithful canonical migration candidate from actual authoritative RPC bodies and current DDL/ACL snapshots. Preserve Stop-Limit parent-only child lock semantics pending explicit concurrency review. OCO remains a separate unimplemented state machine.
+- [x] No Production/Supabase changes, merge, migration/db push, deploy/release, APK/Pages publication, cron/worker/grant/RLS changes or costs.
+
+## Shahram 175 — live Production schema/function baseline captured; source parity suite added (2026-11-27)
+
+- [x] Rechecked live PR #67: open, Draft, unmerged, mergeable; latest checked head before this update was eaf140e70e6ced5e901c7f4cd834217cf3cd36de, 134 commits ahead / 0 behind main. CI run 2349 on that head completed SUCCESS; runs 2347 and 2348 also completed SUCCESS.
+- [x] Re-read Supabase project metadata: gfoaubfilhttnwjykaox ACTIVE_HEALTHY, PostgreSQL 17.11.0.018, us-west-2.
+- [x] Captured current Production table columns, primary/unique keys, foreign keys, checks, RLS state and policies for crypto_assets, demo_trading_pairs, market_prices, orders, trades, conditional_orders, order_reservations, asset_balances and wallets using metadata-only catalog queries. No business/user rows were selected.
+- [x] Confirmed current live schema still uses mutable ticker text as the trade identity: crypto_assets PK coingecko_id but symbol is mutable; demo_trading_pairs PK pair_symbol and UNIQUE base_coingecko_id; market_prices PK symbol; orders/trades/conditional_orders use symbol; reservations and asset_balances use text asset. No pair_id/base_asset_id/quote_asset_id exists on the financial lifecycle relations.
+- [x] Captured eight additional exact live Production function definitions as TEST FIXTURE ONLY files: execute_demo_trade, TP/SL place/cancel/worker, Stop-Limit place/cancel, admin_disable_market_pair and refresh_market_prices. Fingerprints and live ACL metadata are documented in docs/CANONICAL_ASSET_IDENTITY_DESIGN_2026-11-27.md.
+- [x] Added tests/canonical-asset-production-source.test.js to pin the eight live md5 fingerprints and assert the current ticker-keyed entrypoint, conditional worker, Stop-Limit, pair-disable and market-price-refresh call chains. Existing snapshots/tests continue to cover live place/cancel Limit and both workers.
+- [x] Confirmed live function execution boundary: all reviewed functions are postgres-owned SECURITY DEFINER; authenticated may execute user-facing placement/cancel/admin RPCs, while process workers are service_role-only; anon is denied. refresh_market_prices is postgres-only and uses pg_catalog search_path. Do not broaden grants.
+- [!] Separate Advisor finding: two private pg_net backup tables have RLS disabled. A follow-up metadata-only check found no direct anon/authenticated/service_role table grants (only postgres grants); authenticated has private schema USAGE, anon does not, and pgrst.db_schemas was unset. Public Data API exposure was not established. RLS-disabled remains a defense-in-depth warning; no change was applied and it needs separate owner-approved review.
+- [!] The current source shows live symbol-wide pair-disable cleanup and symbol-keyed market price upserts. These must be migrated to pair_id; do not treat the passing candidate fixture as proof the live RPCs are fixed.
+- [!] The 17 missing applied migration SQL sources and timestamp mismatches remain unresolved, so no complete migration replay/deployment candidate can be certified yet.
+- [ ] Next: run CI on the newly added live-source snapshots and Node source-contract suite. If green, create a dependency/DDL reconciliation matrix for the absent baseline table migrations and capture any missing function/trigger/ACL dependencies before drafting the canonical migration. No speculative DDL until the full current source set is accounted for.
+- [x] All Production queries in this step were metadata/function-definition reads only; no business/user rows or financial records were selected. No Production change, merge, db push, migration, deploy/release, cron/worker/grant/RLS change, APK/Pages publication or cost.
+
+
+## Shahram 176 — catalog/discovery dependency chain captured from live Production (2026-11-27)
+
+- [x] Expanded the read-only pg_catalog inventory to 33 public/private functions referencing catalog, exchange matching, pair, market-price, order, reservation, balance or conditional-order relations; captured relevant live catalog/discovery definitions as 18 test-only snapshots.
+- [x] Added tests/canonical-asset-catalog-source.test.js to pin exact live fingerprints and assert the current provider-symbol mutation, exchange auto-listing collision gates, curated/volume/rank pair activation gates, ticker-keyed market trade_enabled calculation, and ambiguous exchange matching behavior.
+- [x] Captured private.guard_active_account_writes() live source (md5 29b8e23c1de8eb4762a8cf1a9c9343ce) and verified its three active BEFORE INSERT triggers on public.orders, public.trades and public.transactions. Added snapshot and CI assertions; canonical changes must preserve all three.
+- [x] Confirmed catalog-side blockers: refresh_crypto_assets mutates ticker text on CoinGecko upsert; auto-listing and listing uniqueness reject ticker collisions; auto-activation requires curated listing, >=USD 1m volume, rank <=2,000, recent matched exchange evidence and ticker-keyed CoinGecko price; admin activation applies the same product-selection gates; get_crypto_market derives trade_enabled from ticker-keyed pair/price relations.
+- [x] Rechecked current live migration ledger against GitHub main: 55 applied entries, 40 local SQL files, 17 applied sources missing locally, 20 timestamp mismatches, and 2 local-only migrations. Counts match the latest reconciliation record; no migration history was edited.
+- [!] The new catalog snapshots/tests are documentation and regression fixtures only. They do not remove product gates or change any Production function. Every catalog asset becomes tradable only after a later canonical lifecycle migration is source-faithfully designed and approved.
+- [ ] Next: verify CI for the new 18-function catalog source suite and active-account guard snapshot. Then prepare the staged additive canonical schema/function migration candidate in drafts, with explicit ambiguity quarantine and rollback/rehearsal plan. First resolve all missing/mismatched migration sources before any replay or db push.
+- [x] All Supabase calls in this step were SELECT/catalog/function-definition reads only; no business/user rows were selected and no Production state was changed. No merge, db push, migration, deploy/release, cron/worker/grant/RLS change, APK/Pages publication or cost.
+
+
+## Shahram 177 — correct market-read source contract and pin catalog pipeline (2026-11-27)
+
+- [x] Reviewed CI run 46045360757 / Run #2366: all 18 catalog function fingerprint tests and the provider/listing/activation/matching contracts passed; one market-read assertion failed because it incorrectly expected get_crypto_market() to join demo_trading_pairs.
+- [x] Re-read the exact live snapshot. Actual behavior is narrower and weaker: trade_enabled is true when a positive market_prices row exists for ca.symbol || 'USDT' within one minute; the function does not join demo_trading_pairs or check is_enabled.
+- [x] Corrected tests/canonical-asset-catalog-source.test.js to assert the actual live contract and explicitly reject any assumption that the API verifies enabled pair identity. Recorded the functional gap in docs/CANONICAL_ASSET_IDENTITY_DESIGN_2026-11-27.md.
+- [!] Runs 2366–2370 are expected failures from the pre-correction commit(s); the corrected test commit 415d66784f27906bd60aa2270b8123e4d091c758 and later docs/status heads require fresh CI. No green claim is made for the corrected suite yet.
+- [ ] Next: verify CI for corrected market-read contract and active-account guard snapshot; then capture the full current DDL/index/trigger/policy dependency matrix and draft an isolated additive canonical migration only after the missing migration sources are accounted for.
+- [x] No Production changes, no merge/db push/migration/deploy/release, no cron/worker/grant/RLS changes, no publication and no new costs.
+
+
+## Shahram 178 — active-account guard source contract corrected (2026-11-27)
+
+- [x] Inspected CI run 46045575608 / Run #2371. The corrected market-read contract passed; the remaining failure was a mistaken test assumption that private.guard_active_account_writes() calls current_account_is_active().
+- [x] Verified exact live guard body: it SELECTs profiles.is_active for NEW.user_id FOR SHARE, rejects missing/inactive profiles and returns NEW only for an active account. It intentionally performs the active-account check directly inside the trigger.
+- [x] Updated tests/canonical-asset-catalog-source.test.js to assert the exact SELECT/FOR SHARE/coalesce guard contract; clarified the implementation in the canonical design doc.
+- [!] The corrected test commit 6119376bc08d2abf9f262681f0c20d4c9836ecca and later docs/status heads require fresh CI. No green claim yet for the complete 19-function catalog/guard suite.
+- [ ] Next: verify latest CI and then capture get_my_order_reservations plus any remaining user-facing reservation/fee helper dependencies before freezing the canonical migration dependency manifest.
+- [x] No Production changes, merge, migration/db push, deploy/release, cron/worker/grant/RLS changes, publication or costs.
+
+
+## Shahram 179 — live catalog source suite and reservation API pinned; CI passed (2026-11-27)
+
+- [x] Run 2379 (46045817184) completed SUCCESS on commit 30f1fbaa361c4ee3b26d48a8266781820cc1945d. Node/browser integration output: 131 tests, 131 pass, 0 fail.
+- [x] The successful suite includes all 18 catalog/discovery function fingerprint snapshots, active-account guard fingerprint/trigger behavior, current market-read ticker-price contract, provider symbol mutation, curated/volume/rank gates, exchange ambiguity staging, and reservation read API source contract.
+- [x] Captured additional live Production snapshots for current_account_is_active(), get_demo_trading_fee_rate(text,text), and get_my_order_reservations(uuid[]). Reservation API is owner-scoped and bounded to 1–100 order IDs, but currently returns ticker text asset only; canonical ID fields are required in the future API.
+- [x] Security Advisor read-only review at 2026-11-27 17:58 UTC: 2 anon-executable SECURITY DEFINER functions (get_admin_market_listings and get_exchange_discovered_market_assets), 23 authenticated-executable SECURITY DEFINER functions, 15 RLS-enabled tables without policies, and leaked-password protection disabled. Function bodies show the two anon functions return curated market metadata / recent unmatched or ambiguous public exchange discovery fields, not user rows. Intentionality still needs owner confirmation.
+- [x] The separate table listing also flags two private pg_net backup tables with RLS disabled; follow-up metadata check found no direct anon/authenticated/service_role table grants, only postgres grants, so public exposure was not established.
+- [!] No grants, policies, RLS state or Auth settings were changed. Do not blanket-revoke authenticated user RPCs; inspect individual authorization checks. Do not auto-enable RLS on worker tables without an access design.
+- [!] Current head docs update 784b6ee257d843eb160a459e0c60073e4b87fdac and status update require fresh CI. Run 2379 is the successful code/test head; no green claim yet for the newest docs head.
+- [ ] Next: await docs-head CI; then freeze the canonical dependency manifest and build a non-executable draft of the additive canonical schema/function migration. Migration replay remains blocked by 17 missing applied SQL sources, 20 timestamp mismatches and 2 local-only migrations.
+- [x] No Production data/schema/function/ACL/RLS/Cron/worker/Auth change, no merge/db push/deploy/release, no APK/Pages publication or cost.
+
+
+## Shahram 181 — OCO gap documented; canonical rollout remains blocked (2026-11-27)
+
+- [x] Rechecked PR #67 live: open, Draft, unmerged, mergeable; branch `plan/all-catalog-assets-tradable-2026-11-27`, reviewed head before this documentation change `4507cf38cbb385f53ecd2a8416126e70c3116b37`.
+- [x] Latest exact-decimal workflow associated with that head: run `46046043108`, completed SUCCESS. Its job contains 27 substantive steps, including authoritative TP/SL and Stop-Limit migration lifecycle tests (with explicitly isolated Market/Limit adapters), and the independent canonical identity fixture. This does not prove canonical IDs are propagated through the authoritative trading call graph.
+- [x] Confirmed authoritative checked-in migration paths expose TP/SL and Stop-Limit, but no OCO group/sibling lifecycle exists. Added `docs/OCO_LINKED_ORDER_DESIGN_2026-11-27.md` as a design-only specification covering shared reservation, atomic winner claim, cancellation races, partial-fill policy, canonical IDs, security boundaries, and disposable test matrix.
+- [!] OCO is still NOT implemented. The new design document commit is `2658c9d472f4589c60e7c6c2bf8732dc577780cf`; it has not yet received a fresh CI run. Do not claim CI success for the updated documentation head.
+- [!] No canonical schema/function migration has been drafted or applied. Market/Limit engine parity, end-to-end canonical IDs through TP/SL and Stop-Limit, OCO implementation, provider-observed freshness, full catalog price coverage, and migration-ledger reconciliation remain blockers.
+- [x] No Production data/schema/function/ACL/RLS/Cron/worker/Auth change; no merge, db push, deploy/release, APK/Pages publication, or cost.
+
+
+## Shahram 182 — canonical dependency manifest frozen (2026-11-27)
+
+- [x] Rechecked live PR #67 before work: open, Draft, unmerged, mergeable; latest pre-step head `c2cdad0fa979e97ec3b49f499ca9cfa591fe72f8`.
+- [x] Re-read the canonical identity design, Production catalog/price source audit, authoritative conditional harness setup and CI workflow. Confirmed the authoritative conditional harness executes the checked-in TP/SL and Stop-Limit migration bodies, but deliberately substitutes downstream Market/Limit entrypoints with test adapters. It is not full financial source parity.
+- [x] Added `docs/CANONICAL_IDENTITY_DEPENDENCY_MANIFEST_2026-11-27.md`, commit `22dcd84e07234694e93e1dfa12d469e4af8ab0bc`. It freezes catalog admission/writers, pair/price schedulers, read APIs, Market/Limit/TP-SL/Stop-Limit RPCs and workers, reservations, account guards/deactivation, OCO, security invariants, evidence boundaries, and migration blockers.
+- [!] Manifest is an audit/design artifact, not an implementation or proof that every external privileged writer is enumerated. Production-only recovered functions and Edge Function code still need fresh source fingerprints before any executable migration proposal.
+- [!] No canonical migration draft created yet. Reason: migration ledger remains unreconciled (17 applied sources missing locally, 20 timestamp mismatches, 2 local-only migrations); duplicate ticker reconciliation and source-parity for actual Market/Limit remain open.
+- [ ] Next: construct a dependency-complete disposable PostgreSQL 17 harness for the exact authoritative Market/Limit migration bodies, then connect canonical-ID candidate schema and test full settlement/partial-fill/reservation/account-deactivation races. Do not use miniature financial adapters as parity evidence.
+- [x] No Production writes/schema/function/ACL/RLS/Cron/worker/Auth changes; no merge/db push/migration replay/history repair, deployment/release, APK/Pages publication, or cost.
+
+
+## Shahram 183 — authoritative Market/Limit migration harness added (2026-11-27)
+
+- [x] Rechecked PR #67: open, Draft, unmerged, mergeable; branch remains 190 commits ahead and 0 behind main at the latest comparison.
+- [x] Added disposable PostgreSQL 17 bootstrap `supabase/tests/authoritative_market_limit_source_parity_setup.sql`.
+- [x] Added `supabase/tests/authoritative_market_limit_source_parity.sql`, which exercises the exact checked-in authoritative Market/Limit migration functions: Market buy/sell settlement, caller-price non-authority, stale-price rejection, inactive-account rejection, Limit buy/sell placement, four-cycle 25% partial-fill settlement, reservation consumed/released accounting, stale worker quote preservation, and unauthenticated placement rejection.
+- [x] Wired the harness into `.github/workflows/exact-decimal-tests.yml` to apply the actual `20261113161641_enforce_active_accounts_in_demo_trade_and_limit_engine.sql` migration in a fresh disposable database. No copied/miniature Market or Limit financial functions are used in this new step.
+- [!] New harness is not yet CI-verified: latest head `f99969a80643d4734949838e8950579bfb9e87d6` has no associated workflow run/status at the time of this checkpoint. Do not claim these SQL assertions passed until a fresh run completes successfully.
+- [!] This is an authoritative ticker-based baseline, not canonical-ID implementation. It deliberately establishes the real Market/Limit source behavior before a future canonical candidate is integrated. It does not yet test duplicate ticker isolation through these real functions.
+- [ ] Next: obtain a fresh CI result, correct any disposable harness failures, then design the canonical Market/Limit candidate as a coordinated schema + RPC + worker unit and prove duplicate ticker separation with the real lifecycle.
+- [x] No Production writes/schema/function/ACL/RLS/Cron/worker/Auth changes; no merge/db push/migration replay/history repair, deployment/release, APK/Pages publication, or cost.
+
+
+## Shahram 184 — authoritative Market/Limit source-parity baseline passed (2026-11-27)
+
+- [x] CI run `46048133466` / workflow run #2391 completed SUCCESS on commit `a411a73df6a47dc77b4b83950b59b6a19ee22b95`.
+- [x] All substantive test steps passed, including real two-session Limit, TP/SL and Stop-Limit races; fair scheduler disposable PG17 exercise; authoritative TP/SL + Stop-Limit migration application; duplicate-ticker canonical fixture; and read-only canonical schema fingerprint.
+- [x] New step 28, `Apply authoritative Market and Limit migration in disposable PostgreSQL`, completed SUCCESS. It bootstrapped disposable PostgreSQL 17, applied the exact checked-in `20261113161641_enforce_active_accounts_in_demo_trade_and_limit_engine.sql` body, then ran Market buy/sell settlement, stale-price and inactive-account rejection, Limit buy/sell placement, four 25% fills, exact reserve consumption/release, stale worker quote preservation, and unauthenticated placement rejection assertions.
+- [!] This proves the current authoritative ticker-based Market/Limit baseline executes under the disposable harness. It does NOT prove canonical asset_id/pair_id is propagated into those production-source functions, nor resolve duplicate ticker execution through the actual Market/Limit path.
+- [!] The test setup supplies minimal Supabase auth/profile/table scaffolding only; the financial Market/Limit functions are loaded from the exact checked-in migration, not replaced by miniature lookalikes.
+- [ ] Next: create a canonical Market/Limit candidate migration in a separate disposable schema/branch artifact that preserves exact behavior while adding pair_id/asset_id and duplicate-ticker isolation; run full source-parity tests before extending TP/SL/Stop-Limit. Do not prepare a Production rollout until migration ledger reconciliation and source fingerprints are resolved.
+- [x] PR #67 remains open, Draft, unmerged, mergeable; latest head at checkpoint `a411a73df6a47dc77b4b83950b59b6a19ee22b95`, 191 commits ahead and 0 behind main.
+- [x] No Production writes/schema/function/ACL/RLS/Cron/worker/Auth changes; no merge/db push/migration replay/history repair, deployment/release, APK/Pages publication, or cost.
+
+
+## Shahram 185 — canonical Market/Limit parity gap review (2026-11-27)
+
+- [x] Reviewed exact authoritative Market/Limit migration source against the existing canonical duplicate-ticker fixture after CI #2391 passed.
+- [x] Added `docs/CANONICAL_MARKET_LIMIT_PARITY_GAP_REVIEW_2026-11-27.md`, commit `05ab1df2295269b78878bc1bda9e0de4593762a2`.
+- [x] Identified material semantic gaps that prohibit copying the prototype into a migration: production uses separate USDT wallet and base-asset ledger; fee helper + 8-decimal rounding; one-minute receive-time freshness; 25%-of-original Limit partial fills; consumed/released reservation ledger; global advisory lock + SKIP LOCKED + wallet-first lock order; active-account and auth.uid() guards; transaction ledger writes. Prototype uses a unified balance table, hardcoded fee, 2-minute observed-time freshness, one-shot fills, and deletes simplified reservations.
+- [!] Existing canonical prototype proves duplicate ticker isolation only in a simplified model. It is not authoritative Market/Limit parity and must not be used as a financial migration.
+- [ ] Next: create a canonical Market/Limit candidate that retains the authoritative source semantics while replacing ticker identity with pair_id/base_asset_id/quote_asset_id. Apply only after exact authoritative migration in disposable PG17 and test same-ticker pair A/B, four partial fills, exact reserve consumption/release, stale/missing/future prices, disabled pair, inactive account, auth, and two-session races.
+- [x] CI #2391 / run `46048133466` completed SUCCESS on pre-review head `a411a73df6a47dc77b4b83950b59b6a19ee22b95`; step 28 authoritative Market/Limit migration baseline passed.
+- [x] PR #67 remains open Draft and unmerged; branch head now advances with documentation commits; no Production writes, migration/db push, history repair, merge, deploy, APK/Pages publication, or cost.
+
+
+## Shahram 186 — canonical ledger source recovery gate (2026-11-27)
+
+- [x] Rechecked current PR #67 and latest CI; PR remains open Draft, unmerged, mergeable. CI run `46048469045` for prior documentation head completed SUCCESS.
+- [x] Cross-checked the Market/Limit migration bodies against the disposable schema fixture, existing source recovery plan, and 2026-11-26 Production function snapshots.
+- [x] Added `docs/CANONICAL_TRADING_LEDGER_SOURCE_RECOVERY_GATE_2026-11-27.md`, commit `1f4fcf9d25622fdca4fd74ba608ba2c3921876b2`.
+- [!] Clarification to Shahram 184: CI step 28 genuinely applies and executes the exact three checked-in Market/Limit function bodies, but its minimal bootstrap is not a full authoritative Production schema/helper/trigger/RLS/grant reconstruction. Treat it as exact-function-body regression against a compatible disposable scaffold, not complete Production-schema parity.
+- [!] The current production financial key `asset_balances(user_id, asset text)` and `order_reservations.asset text` cannot isolate same-ticker canonical assets. A pair_id-only patch to orders/prices would be incomplete; balance, reservation, trades, conditional lifecycle, cancellation, deactivation, readers and ingestion need coordinated identity propagation.
+- [!] Fee helper source is not fully recovered by the fixture: the test bootstrap uses a constant 0.1% implementation. Do not claim authoritative fee-helper parity until the exact live helper/source and metadata are recovered.
+- [!] Existing Market/Limit code enforces `market_prices.updated_at` within one minute. Keep this local receive/update-time execution gate explicit; provider-observed time is a separate field and cannot be substituted without a defined contract.
+- [ ] Next: recover exact source for base financial schema, active-account helper/guard trigger, fee helper, relevant policies/grants and all ticker-based dependent functions; reconcile ambiguous legacy asset balances before implementing canonical ledger changes.
+- [x] No Production query/write, migration, function, grant, RLS, trigger, cron, worker, account or financial-row change; no db push, merge, deploy, APK/Pages publication or cost.
+
+
+## Shahram 187 — authoritative fee and active-account helpers added to Market/Limit harness (2026-11-27)
+
+- [x] Rechecked live PR #67: open, Draft, unmerged; latest branch head before this step was `ba06f93519ad097a193d38b571b57d584b48eb47`, 196 commits ahead and 0 behind main.
+- [x] CI run `46049038024` / workflow #2396 completed SUCCESS on the pre-helper-snapshot head `ba06f93519ad097a193d38b571b57d584b48eb47`.
+- [x] Confirmed fresh read-only Production snapshots now exist for `get_demo_trading_fee_rate(text,text)` and `current_account_is_active()`, including SECURITY DEFINER/search_path/owner/EXECUTE metadata. Fee helper reads enabled maker/taker rates from `demo_trading_fees`; it rejects invalid liquidity types and missing/disabled quote-asset configuration.
+- [x] Improved the disposable authoritative Market/Limit harness: removed its hardcoded constant fee helper and simplified active-account helper; added a fee table/configuration fixture and now loads the exact captured Production function bodies before applying the authoritative Market/Limit migration.
+- [x] Added regression assertions for configured maker/taker fee lookup, missing quote configuration rejection, and disabled fee configuration rejection. Market/Limit financial functions remain the exact checked-in migration bodies.
+- [x] Corrected and verified shell continuations in the CI workflow SQL command after the first edit; all five SQL files now execute in one psql invocation in the intended order.
+- [!] Latest commit `f7a8ae868623c10955595003b42accc48553b552` has not yet returned a new CI run at checkpoint time. Do not claim the helper-snapshot harness passed until its new run completes.
+- [!] This adds exact helper function bodies, not the complete authoritative table schema, fee table constraints/data, trigger/RLS/grants or full Production catalog parity. Historical/live metadata snapshots still require a separately captured, reconciled schema and ACL inventory.
+- [ ] Next: confirm CI for `f7a8ae868623c10955595003b42accc48553b552`; then recover authoritative base ledger DDL/constraints/indexes and reservation/financial table metadata, and test actual helper behavior with source-faithful schema.
+- [x] No Production database query/write in this step; no Production migration, schema/function/ACL/RLS/trigger/Cron/worker/Auth change; no db push, merge, deploy, APK/Pages publication or cost.
+
+
+## Shahram 188 — direct helper assertions expanded (2026-11-27)
+
+- [x] Rechecked live PR #67: open, Draft, unmerged; HEAD at start of this step `762dd36db1a23ec18314287a844e0b2f91c42785`; 201 commits ahead / 0 behind main. The transient `mergeable=false` from the prior check has since returned to `mergeable=true` before this step.
+- [x] CI run #2400 / `46049313969` was in progress on the prior HEAD. At the latest poll, 16/31 steps had completed, with two-session Limit worker/cancel race tests running; no failed steps reported. This run does NOT include the subsequent helper assertion commit.
+- [x] Expanded the disposable Market/Limit parity test to directly assert captured Production `current_account_is_active()` returns true for an active authenticated profile and false for an inactive one.
+- [x] Added direct rejection assertion for unsupported fee liquidity type `provider`, alongside existing maker/taker, missing quote configuration and disabled configuration checks.
+- [x] Commit: `95da33ca8d5c793562125ea9733e34edce623747`. The next CI run must validate this latest test revision.
+- [!] Still not full Production schema parity: fixture tables, indexes, constraints, triggers, RLS and grants remain partially scaffolded; exact function-body snapshots are not equivalent to a complete source-of-truth schema capture.
+- [ ] Next: poll CI #2400; then run the new commit's CI; continue recovery of base ledger DDL and all constraints/indexes/trigger/RLS/grants from a permitted metadata-only source before canonical financial migration design.
+- [x] No Production database read/write performed in this step; no Production migration, schema/function/ACL/RLS/trigger/Cron/worker/Auth change; no db push, merge, deploy, APK/Pages publication or cost.
+
+
+## Shahram 189 — schema recovery evidence gate clarified (2026-11-27)
+
+- [x] Rechecked live PR #67: open, Draft, unmerged; latest head before this documentation step `8c9127307ee55ce852a313ba694af79c23ccbd85`. PR is now reported mergeable=true; no merge was attempted.
+- [x] CI #2400 / run `46049313969` completed SUCCESS: all 28 substantive steps passed, including authoritative checked-in Market/Limit migration function bodies on disposable PostgreSQL, conditional/Stop-Limit migration lifecycle, duplicate-ticker canonical fixture, scheduler exercise, and schema fingerprint SQL.
+- [x] CI #2401 / run `46049463567` completed SUCCESS: the new direct assertions for captured Production fee and active-account helpers passed.
+- [x] CI #2402 / run `46049488286` completed SUCCESS on the status-update head `8c912730...`; all 28 substantive steps passed.
+- [x] Re-examined the exact-decimal disposable fixture and Market/Limit migration source. Confirmed fixture table definitions are partial scaffolding, not authoritative base DDL. Current Market/Limit bodies still use ticker-keyed `asset_balances.asset`, `order_reservations.asset`, pair_symbol and market_prices.symbol.
+- [x] Recovered the precise limitation in the 2026-11-21 Recovery-Test record: metadata snapshot had 32 tables / 239 columns / 116 constraints / 63 indexes / 5 non-system triggers / 21 policies, but Production read-only queries timed out; restore used `--no-owner --no-acl`, so its ACL evidence is not Production grant evidence. Recovery-Test also contains backup data and is not an approved financial test harness.
+- [x] Added `docs/TRADING_LEDGER_SCHEMA_RECOVERY_EVIDENCE_2026-11-27.md`, commit `c8356964267cc2639177159eb22b46c4207b40f1`, documenting exact evidence, limits, canonical-identity consequences, and the next metadata-only recovery gate.
+- [!] No authoritative base-table creation DDL for the financial ledger was recovered in the bounded current-source search; this is not proof it does not exist in full Git history or Production. Do not infer it from test fixtures.
+- [ ] Next: obtain an authorized metadata-only Production fingerprint for financial tables, constraints/indexes/triggers/RLS/policies/grants and relevant helper ACLs; compare with Recovery-Test/source evidence. No business/user rows. Reconcile migration ledger separately before any deployable canonical migration.
+- [x] No Production SQL/query/write in this step; no Production migration, schema/function/ACL/RLS/trigger/Cron/worker/Auth change; no db push, merge, deploy, APK/Pages publication or cost.
+
+
+## Shahram 190 — historical ledger evidence recovered; CI 2404 green (2026-11-27)
+
+- [x] Rechecked PR #67 and branch: open, Draft, unmerged, mergeable=true; 205 commits ahead / 0 behind main at the start of this step. No merge/rebase attempted.
+- [x] CI run #2404 / `46049917020` completed SUCCESS on the then-current head `a7f4a8268c4e15617f974fdadb1b8d17c13d72c2`; all 28 substantive steps passed, including fair scheduler candidate, authoritative TP/SL and Stop-Limit migrations, duplicate-ticker canonical isolation, schema fingerprint, and authoritative Market/Limit migration on disposable PostgreSQL 17.
+- [x] Expanded the schema recovery search across historical repository audit records. `docs/STOP_LIMIT_QA_MATRIX.md` and `docs/superpowers/reports/2026-11-15-exact-decimal-backend-rpc-review.md` preserve dated, read-only Production observations from 2026-11-15: historical typmods, accounting checks, FK relationships, index coverage summary, account-guard trigger placement, and RLS scope.
+- [x] Added those historical observations and explicit age/source limitations to `docs/TRADING_LEDGER_SCHEMA_RECOVERY_EVIDENCE_2026-11-27.md`, commit `d717d6fd4724147ab58caccaeebe4d1cf0a3d494`.
+- [!] The newly recovered material is human-authored historical audit evidence, not raw catalog DDL/export. It does not prove current Production state, provide every exact constraint/index/policy expression, or supply full defaults/nullability/ACLs. The 2026-11-21 Recovery-Test snapshot remains unverified against Production; ACL evidence there remains unusable because restore omitted owner/ACL.
+- [ ] Next: continue searching version history/source records for authoritative base CREATE TABLE migrations and exact schema export; if unavailable, keep the metadata-only Production fingerprint as a hard blocker. No business/user rows. Reconcile migration ledger separately.
+- [x] No Production SQL/query/write in this step; no Production migration, schema/function/ACL/RLS/trigger/Cron/worker/Auth change; no db push, merge, deploy, APK/Pages publication or cost.
+
+
+## Shahram 191 — follow-up: latest CI verified; authoritative ledger DDL search remains blocked (2026-11-27)
+
+- [x] Rechecked live PR #67: open, Draft, unmerged, mergeable=true; HEAD `f53bb310b4002046fbcf79bb640f18a1f3abedef`; 207 commits ahead / 0 behind main. No merge/rebase attempted.
+- [x] CI run #2406 / `46050279429` completed SUCCESS on the exact current HEAD. All 28 substantive steps passed, including exact-decimal/browser integration, disposable PostgreSQL arithmetic and widening rehearsals, Market/Limit entrypoints, real two-session cancellation/worker races, TP/SL and Stop-Limit lifecycle tests, fair scheduler candidate, authoritative TP/SL and Stop-Limit migrations, duplicate-ticker canonical isolation, schema fingerprint, and authoritative Market/Limit migration.
+- [x] Inspected the latest CI job step report directly; all 28 substantive steps and setup/teardown steps report success.
+- [x] Re-read the current ledger recovery evidence, source-recovery gate, and canonical dependency manifest. They consistently distinguish exact checked-in function-body tests from complete Production schema parity; no fixture was promoted to authoritative base DDL.
+- [!] A further bounded GitHub commit search for exact base-table DDL terms (`CREATE TABLE asset_balances`, `CREATE TABLE order_reservations`, wallets/transactions, and ledger schema migration) returned no matching commits. GitHub commit search is not an exhaustive Git-history or database search; this does not prove that the DDL is absent.
+- [!] The current hard blocker remains: no authoritative base CREATE TABLE source or complete current Production metadata export for financial table defaults/nullability, exact constraints/indexes/triggers/RLS/policies/grants, and current migration ledger has been recovered. Historical 2026-11-15 audit summaries and the 2026-11-21 Recovery-Test snapshot are not substitutes.
+- [ ] Next: pursue a source-of-truth metadata-only export through an explicitly permitted route, limited to schema/catalog metadata (no business/user rows); compare it with historical audit evidence and reconcile the migration ledger independently. If that source is unavailable, document the blocker and keep canonical financial migration design non-deployable. Do not infer DDL from disposable fixtures.
+- [x] No Production SQL/query/write was performed in this step; no Production migration, schema/function/ACL/RLS/trigger/Cron/worker/Auth change; no db push, merge, deploy, APK/Pages publication or cost.
+
+
+## Shahram 192 — current Production ledger fingerprint and migration reconciliation recovered (2026-11-27)
+
+- [x] Rechecked project health: Supabase Production `gfoaubfilhttnwjykaox` reports ACTIVE_HEALTHY on PostgreSQL 17.11.0.018. Rechecked PR #67 before work: open, Draft, unmerged, mergeable; latest head before this documentation step `49912a6599c54659dd798848afc1e22f5705cd4c`.
+- [x] Used only Supabase metadata interfaces and read-only catalog queries against `pg_catalog`, `information_schema`, `pg_policies`, `pg_indexes`, `pg_proc`, `pg_trigger`, `pg_constraint`, `cron.job`, and privilege predicates. No business/user row contents were selected; no Production state was changed.
+- [x] Captured current metadata for 12 target public tables: 100 columns, 65 constraints, 30 indexes, 3 non-system triggers and 12 policies. RLS is enabled on all 12; FORCE RLS on none. Exact column typmods/defaults/nullability and the full scoped constraint/index/trigger/policy definitions are recorded in `docs/TRADING_LEDGER_SCHEMA_RECOVERY_EVIDENCE_2026-11-27.md`.
+- [x] Confirmed current canonical-identity blocker directly from Production: asset_balances.asset and order_reservations.asset remain text; orders.symbol, trades.symbol, conditional_orders.symbol and market_prices.symbol are also ticker text/keys. asset_balances unique(user_id,asset); order_reservations unique(order_id); demo_trading_pairs keyed by pair_symbol with unique base_coingecko_id. A coordinated ID migration remains mandatory.
+- [x] Captured live accounting constraints: orders filled+remaining=amount and range checks; asset balance nonnegative; reservation consumed+released <= reserved and released <= reserved; positive trade amount/price; nonnegative wallet balances. Captured 3 active account guard triggers on orders/trades/transactions, with none on asset_balances/order_reservations.
+- [x] Captured scoped RLS/grants and function ACLs. Authenticated direct table privileges are read-only for the user-facing ledger; reservation table access is service_role-only; relevant placement/cancel/helper SECURITY DEFINER RPCs are authenticated-executable and not anon-executable; process_limit_orders/process_conditional_orders/process_stop_limit_orders are service_role-only. All reviewed functions are postgres-owned with empty search_path.
+- [x] Captured active cron metadata without altering it: job 3 market refresh, job 8 Limit worker, job 9 conditional worker and job 12 Stop-Limit worker run every minute; job 17 price overflow every 10 minutes. All five were active. No schedule change.
+- [x] Reconciled the current Production migration ledger against migration filenames on both main and this PR branch: 55 applied ledger entries vs 40 local SQL files; 18 exact version/name matches, 20 same-name timestamp mismatches, 17 applied migrations with no matching local source filename, and 2 local-only migrations (KuCoin and Gate.io price refresh). The exact mapping and all missing/local-only names are recorded in the evidence document. This reproduces the 17/20/2 discrepancy from prior audits.
+- [!] Current Production `wallets.balance_irr` is numeric(24,0) DEFAULT 1,000,000,000. This differs from the currently approved 50,000,000 Toman product starting balance; unit semantics and wallet initialization path need a separate accounting/product audit. No correction was made.
+- [!] This is a current catalog fingerprint, not original migration DDL/history. The 17 missing applied migration bodies and 20 timestamp variants remain unresolved; do not infer/replay/repair migration history from catalog state. External writer/source parity and OCO remain open.
+- [ ] Next: recover missing applied SQL bodies from trusted historical Git objects/backups, inspect the 20 timestamp variants individually, inventory all external writers/readers/Edge Functions against this catalog, then extend the disposable source-parity harness. Only then draft coordinated canonical-ID migration for review.
+- [x] No Production writes, business-row reads, migration replay/repair, schema/function/ACL/RLS/trigger/Cron/worker/Auth change, db push, merge, deploy, APK/Pages publication or cost.
+
+
+### Shahram 192 addendum — cron scope corrected; catalog auto-activation writer audited (2026-11-27)
+
+- [x] CI run #2409 / `46051536464` completed SUCCESS on status/documentation head `fbfe52ee39b7371ed3026486d5b64ba314378cc2`; the main exact-decimal job completed with success. This is the docs/status checkpoint CI, not a new canonical migration test.
+- [x] Re-read `supabase/MIGRATION_RECONCILIATION.md` and the live `private.auto_activate_verified_exchange_pairs()` snapshot. The snapshot is source evidence only, not executable migration SQL. The function remains ticker-keyed, joins `market_prices.symbol`, constructs `pair_symbol` from ticker, and still enforces volume >= $1M, market-cap rank <= 2000, freshness and unique active ticker. It is not callable by anon/authenticated/service_role; scheduled execution is through its cron job.
+- [x] Corrected the earlier incomplete cron summary by querying the full relevant name set. 11 active jobs were found: IDs 3,4,5,8,9,11,12,13,14,17,18. Job 14 is currently `1,31 * * * *` (twice hourly), and job 18 auto-activates verified pairs at `9-59/10 * * * *`. The exact full inventory is in the ledger evidence document. Order workers 8/9/12 remain every minute and were not changed.
+- [!] The current auto-activation writer's fixed volume/rank gates conflict with the approved no-fixed-rank/no-fixed-volume-cap catalog objective; canonical identity and fresh verified price/mapping safeguards must remain. This is a source/design finding only; no function or cron changes.
+- [x] Bounded historical branch sweep across eight relevant branches found no exact SQL filenames for the sampled missing migrations. This is not exhaustive proof of absence across all Git objects, backups or deployment artifacts.
+- [!] Confirmed local-only KuCoin/Gate.io migration files are documented as older `refresh_market_prices()` replacements that omit the later 515-ID CoinGecko cap; do not apply or push them as-is.
+- [x] Evidence and status docs updated only. No Production writes, business-row reads, migration replay/repair, function/ACL/RLS/trigger/Cron/worker/Auth change, db push, merge, deploy, APK/Pages publication or cost.
+- [ ] Next: recover missing applied SQL bodies and trusted deployment artifacts; inspect timestamp variants and reconcile the live/local price-refresh implementation; then extend source-parity coverage for catalog auto-activation and every external writer. Keep PR #67 Draft and non-deployable.
+
+
+### Shahram 192 follow-up — missing migration source sweep and CI 2411 verified (2026-11-27)
+
+- [x] Rechecked live PR #67: open, Draft, unmerged, mergeable=true; current HEAD before this documentation commit was `e0e810102d7410bacfc7e03ccf029daf8bffad48`.
+- [x] CI run #2411 / `46051903125` completed SUCCESS on that exact HEAD. All 28 substantive steps passed, including authoritative TP/SL and Stop-Limit migration harness, authoritative Market/Limit migration harness, exact-decimal and concurrency checks, duplicate-ticker canonical isolation, and schema fingerprint.
+- [x] Performed another bounded recovery attempt for the 17 missing applied migration SQL sources: GitHub code search for four representative names returned only `supabase/MIGRATION_RECONCILIATION.md`; recursive trees of eight relevant historical branches contained none of the sampled exact missing filenames. This is not exhaustive proof of absence across all Git objects, backups, deployment artifacts or other branches.
+- [x] Updated `docs/TRADING_LEDGER_SCHEMA_RECOVERY_EVIDENCE_2026-11-27.md` with the branch/code-search scope, exact CI run and remaining source-of-truth boundary.
+- [!] The 17 applied migrations with no matching local SQL source and 20 same-name timestamp mismatches remain unresolved. Do not reconstruct their SQL from names, live catalog state or neighboring migration bodies. Do not repair migration history or run db push.
+- [ ] Next: recover missing SQL bodies from a trusted deployment artifact/backup or historical Git object; inspect all 20 timestamp variants against authoritative deployment records; reconcile live/local price-refresh and catalog auto-activation writer source; extend disposable source-parity harness. Keep PR #67 Draft and non-deployable.
+- [x] No Production writes, business-row reads, migration replay/repair, function/ACL/RLS/trigger/Cron/worker/Auth change, db push, merge, deploy, APK/Pages publication or cost.
+
+
+## Shahram 193 — CI 2413 green; all 20 timestamp variants inspected (2026-11-27)
+
+- [x] Rechecked PR #67: open, Draft, unmerged, mergeable=true; HEAD `43766d7c205dd5e934a185f34acfd59719897e79`.
+- [x] CI #2413 / run `46052212399` succeeded on the exact current HEAD. The `exact-decimal` job passed all 28 substantive steps, including authoritative TP/SL/Stop-Limit and Market/Limit migration harnesses on disposable PostgreSQL 17, race/concurrency tests, canonical duplicate-ticker isolation and schema fingerprint.
+- [x] Checked workflow artifact inventories for runs #2411, #2406 and #2413; none published artifacts that could serve as migration-source backups.
+- [x] Individually inspected all 20 local SQL files corresponding by name to Production timestamp-mismatch entries. Categorized the conditional reservation worker/index, stale CoinGecko recovery, curated listing/pair activation/admin controls, market price parser/refresh/display, Kifpool exchange-sync/matcher alias revisions, and cron scheduling migration. This verifies local candidate contents only, not deployed-source identity.
+- [!] Material discrepancy: local `20261117130000_stagger_market_price_overflow_and_refresh_exchange_discovery.sql` changes cron job 14 to every minute, while the latest metadata-only Production capture records job 14 as `1,31 * * * *`. Do not replay this local migration based on its name or timestamp.
+- [!] Local pair-activation SQL still enforces volume >= $1M and rank <= 2000 and uses ticker-keyed pair/price/order paths. This conflicts with approved no-fixed-volume/rank catalog scope and canonical identity; redesign is required, not replay.
+- [!] Four exact GitHub commit searches for representative missing applied migration names returned no commits. This is bounded evidence only; 17 missing SQL sources and all 20 deployment timestamp mappings remain unresolved.
+- [ ] Next: obtain exact applied SQL/checksum evidence from a trusted deployment artifact or backup. If unavailable, preserve the unresolved blocker; continue source-parity inventory for catalog/market writers. No inferred SQL.
+- [x] No Production writes/queries in this step; no migration replay/repair, db push, merge, deployment, Cron/worker/ACL/RLS change, APK/Pages publication or cost.

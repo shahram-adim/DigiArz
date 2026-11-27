@@ -260,4 +260,63 @@ jobs:
             -f supabase/tests/exact_decimal_conditional_exit_worker.sql \
             -f supabase/tests/exact_decimal_conditional_exit_integration.sql
 
+      - name: Reproduce captured Production market scheduler interleaving in disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_market_scheduler_test;"
+          psql -h localhost -U postgres -d digiarz_market_scheduler_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/market_price_scheduler_production_snapshot.sql
+
+      - name: Exercise fair scheduler candidate in disposable PostgreSQL 17
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_market_scheduler_candidate_test;"
+          psql -h localhost -U postgres -d digiarz_market_scheduler_candidate_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/market_price_scheduler_candidate.sql
+          bash supabase/tests/market_price_scheduler_candidate_concurrency.sh
+
+
+      - name: Apply authoritative TP-SL and Stop-Limit migrations in disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_authoritative_conditional_test;"
+          psql -h localhost -U postgres -d digiarz_authoritative_conditional_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/authoritative_conditional_source_parity_setup.sql \
+            -f supabase/migrations/20261113162051_add_demo_take_profit_stop_loss_engine.sql \
+            -f supabase/migrations/20261113181827_add_stop_limit_order_engine.sql \
+            -f supabase/tests/authoritative_conditional_source_parity.sql
+
+      - name: Prove canonical asset identity isolates duplicate-ticker demo trades
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_canonical_asset_candidate_test;"
+          psql -h localhost -U postgres -d digiarz_canonical_asset_candidate_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/canonical_asset_identity_candidate.sql
+
+      - name: Verify read-only canonical asset identity schema fingerprint
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_canonical_asset_fingerprint_test;"
+          psql -h localhost -U postgres -d digiarz_canonical_asset_fingerprint_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/canonical_asset_identity_fingerprint_setup.sql \
+            -f supabase/audit/canonical_asset_identity_schema_fingerprint.sql
+
+
+      - name: Apply authoritative Market and Limit migration in disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_authoritative_market_limit_test;"
+          psql -h localhost -U postgres -d digiarz_authoritative_market_limit_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/authoritative_market_limit_source_parity_setup.sql \
+            -f supabase/tests/canonical_identity_live_public_current_account_is_active_snapshot.sql \
+            -f supabase/tests/canonical_identity_live_public_get_demo_trading_fee_rate_snapshot.sql \
+            -f supabase/migrations/20261113161641_enforce_active_accounts_in_demo_trade_and_limit_engine.sql \
+            -f supabase/tests/authoritative_market_limit_source_parity.sql
+
 # TP/SL conditional worker diagnostics are enabled in the isolated CI fixture.
