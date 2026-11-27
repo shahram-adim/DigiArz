@@ -1238,7 +1238,7 @@ test('final icy-indigo override neutralizes legacy dark asset, history, settings
     'body.luxury-theme #appView #tab-history .table-wrap',
     'background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(235,241,255,.96))!important;',
     'body.luxury-theme #appView #tab-history .table-wrap th',
-    'body.luxury-theme #tab-settings .theme-choice-group button[aria-pressed=true]',
+    'body.luxury-theme #appView #tab-settings .theme-choice-group button[aria-pressed=true]',
     'body.luxury-theme .da-v2-hero',
     'linear-gradient(125deg,#f8faff 0%,#e6edff 55%,#dceaff 100%)',
     'body.luxury-theme #authView .auth-reference-visual',
@@ -1346,7 +1346,7 @@ test('third theme keeps asset and category icons softly visible on glass surface
   const css = fs.readFileSync('src/digiarz-independent-ui.css', 'utf8');
   assert.ok(css.includes('body.luxury-theme .coin-icon'));
   assert.ok(css.includes('opacity:.94!important;'));
-  assert.ok(css.includes('body.luxury-theme .favorite-btn'));
+  assert.ok(css.includes('body.luxury-theme #appView .favorite-btn'));
   assert.ok(css.includes('stroke:#6277c8!important;'));
 });
 
