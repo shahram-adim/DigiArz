@@ -2102,3 +2102,15 @@
 - [!] No canonical migration draft created yet. Reason: migration ledger remains unreconciled (17 applied sources missing locally, 20 timestamp mismatches, 2 local-only migrations); duplicate ticker reconciliation and source-parity for actual Market/Limit remain open.
 - [ ] Next: construct a dependency-complete disposable PostgreSQL 17 harness for the exact authoritative Market/Limit migration bodies, then connect canonical-ID candidate schema and test full settlement/partial-fill/reservation/account-deactivation races. Do not use miniature financial adapters as parity evidence.
 - [x] No Production writes/schema/function/ACL/RLS/Cron/worker/Auth changes; no merge/db push/migration replay/history repair, deployment/release, APK/Pages publication, or cost.
+
+
+## Shahram 183 — authoritative Market/Limit migration harness added (2026-11-27)
+
+- [x] Rechecked PR #67: open, Draft, unmerged, mergeable; branch remains 190 commits ahead and 0 behind main at the latest comparison.
+- [x] Added disposable PostgreSQL 17 bootstrap `supabase/tests/authoritative_market_limit_source_parity_setup.sql`.
+- [x] Added `supabase/tests/authoritative_market_limit_source_parity.sql`, which exercises the exact checked-in authoritative Market/Limit migration functions: Market buy/sell settlement, caller-price non-authority, stale-price rejection, inactive-account rejection, Limit buy/sell placement, four-cycle 25% partial-fill settlement, reservation consumed/released accounting, stale worker quote preservation, and unauthenticated placement rejection.
+- [x] Wired the harness into `.github/workflows/exact-decimal-tests.yml` to apply the actual `20261113161641_enforce_active_accounts_in_demo_trade_and_limit_engine.sql` migration in a fresh disposable database. No copied/miniature Market or Limit financial functions are used in this new step.
+- [!] New harness is not yet CI-verified: latest head `f99969a80643d4734949838e8950579bfb9e87d6` has no associated workflow run/status at the time of this checkpoint. Do not claim these SQL assertions passed until a fresh run completes successfully.
+- [!] This is an authoritative ticker-based baseline, not canonical-ID implementation. It deliberately establishes the real Market/Limit source behavior before a future canonical candidate is integrated. It does not yet test duplicate ticker isolation through these real functions.
+- [ ] Next: obtain a fresh CI result, correct any disposable harness failures, then design the canonical Market/Limit candidate as a coordinated schema + RPC + worker unit and prove duplicate ticker separation with the real lifecycle.
+- [x] No Production writes/schema/function/ACL/RLS/Cron/worker/Auth changes; no merge/db push/migration replay/history repair, deployment/release, APK/Pages publication, or cost.
