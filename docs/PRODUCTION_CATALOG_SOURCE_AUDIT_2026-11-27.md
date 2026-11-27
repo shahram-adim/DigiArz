@@ -169,3 +169,27 @@ Do not copy `crypto_assets.current_price_usd` into `market_prices` as an ad-hoc 
 - This is a highly plausible root cause, not a fully proven execution trace: retained Cron rows do not expose the function's returned integer, and the current request metadata does not record batch identity/IDs. The strongest verification would be a test-only simulation/source-level regression that models primary job cadence + overflow guard; do not invoke the Production function to test it.
 - A future design should remove the cross-job starvation dependency: use a durable cursor/batch state or a single scheduler that sequences primary and overflow batches after each response; record provider, batch ordinal, requested canonical IDs, response ID, returned-key count, omitted IDs, status, and retry state. Ensure back-pressure and retries are explicit and fair.
 - Do not change the live Cron schedule, invoke the overflow function manually, or modify request queues without explicit approval.
+
+
+## Migration-source parity check for Overflow scheduler (read-only, 2026-11-27)
+
+A repository-level check was performed before writing a disposable PostgreSQL regression. It found an important source-parity blocker:
+
+- The checked-in migration `20261115130430_fetch_coin_gecko_market_price_overflow_ids.sql` defines `private.request_market_price_overflow()` without the live Production early-return checks for outstanding rows in `private.market_price_sync_requests` and `net.http_request_queue` that were recovered from Production in the previous stage.
+- That migration also schedules the function as `* * * * *` (every minute), while the read-only Production Cron snapshot recorded job 17 as `5-59/10 * * * *` (minute offsets 5,15,25,35,45,55).
+- The migration file is therefore not an exact replay of the current Production function/schedule. Running it in disposable PostgreSQL would test a historical migration body, not the live guard/cadence that the starvation hypothesis depends on.
+- The existing CI harness uses PostgreSQL 17 service containers and psql scripts, so the infrastructure to add a disposable regression exists. However, the exact Production function body and its actual schedule need to be preserved as a reviewed, provenance-labelled fixture before a test can honestly be called source-parity.
+- A small abstract timing model could demonstrate that a permanent outstanding-request guard starves when a primary request is continuously re-enqueued, but it would not prove the live PL/pgSQL function follows that exact trace. No such synthetic test was added or labelled as Production-equivalent.
+
+### Updated confidence and next evidence required
+The starvation diagnosis remains a strong, evidence-consistent risk, not a proven execution trace. The next safe step is to capture the exact read-only Production function definition and Cron schedule into a clearly marked audit fixture (including retrieval timestamp and function fingerprint), compare it against the checked-in migration and current primary refresh body, then execute that captured definition only in disposable PostgreSQL with stubbed `net.http_get`/queue dependencies. The test should assert both the observed starvation interleaving and a candidate fair scheduler without invoking or modifying Production.
+
+No Production function was invoked. No queue, Cron, pair, price, schema, grant, policy, worker, or user data was changed. No migration/db push, merge, deployment, release, or paid infrastructure action occurred.
+
+## Catalog/pair writer inventory — repository evidence boundary (read-only, 2026-11-27)
+
+- Repository search confirms the complete `refresh_crypto_assets()` body is not present in the searched checked-in migration history; the stale-request recovery migration only references it. Its applied Production body was recovered separately in the earlier read-only audit.
+- The recovered Production catalog refresh is the confirmed application path that mutates `crypto_assets.symbol` from the provider response. The repository's exchange-sync migrations primarily upsert `exchange_asset_observations`; matcher/auto-list paths may write `admin_market_listings`, but those are not writers of `crypto_assets.symbol`.
+- The current migration source for Overflow is not equivalent to Production as described above; do not use migration history alone as the canonical source for either its guard or Cron schedule.
+- Search results include catalog reads and exchange-observation writes that mention `crypto_assets`; a text search hit is not evidence that the referenced function writes the catalog table. Remaining writer enumeration must distinguish SQL read references from actual INSERT/UPDATE/DELETE targets and include privileged direct SQL outside repository-controlled functions as an explicit unknown.
+- No complete database-wide write-path guarantee is claimed. In particular, no unique active-symbol invariant exists on `crypto_assets`, and the existing curated-list trigger does not make ticker uniqueness permanent when the provider refresh mutates a catalog symbol.
