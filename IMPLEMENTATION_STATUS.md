@@ -1929,3 +1929,12 @@
 - [x] تست Node `tests/canonical-asset-identity-audit.test.js` اضافه شد تا query واحد، read-only بودن، عدم scan مستقیم جداول مالی/کاتالوگ و پوشش objectهای هویتی و workerها را enforce کند.
 - [!] این SQL در این مرحله روی Production اجرا نشده است؛ فقط به‌عنوان ابزار آماده برای snapshot مجاز و زمان مناسب ثبت شده. اجرای آن بدون مجوز جداگانه و بررسی وضعیت DB انجام نخواهد شد.
 - [ ] CI جدید باید تست Node را اجرا کند. پس از سبزشدن، در زمان پایداری سرویس و مجوز مالک، snapshot metadata جاری Production با Recovery-Test تاریخی و migration source مقایسه شود؛ تا آن زمان از Recovery-Test فقط به‌عنوان مرجع تاریخی استفاده می‌شود.
+
+
+
+### اصلاح تست fingerprint و افزودن اجرای SQL در PostgreSQL موقت — ۲۷ نوامبر ۲۰۲۶
+- [x] اجرای CI شماره `46040194262` روی commit اولیه تست fingerprint به‌دلیل خطای syntax در regex فایل Node متوقف شد؛ ۸۳ تست دیگر موفق بودند. علت دقیق از log استخراج و regexها اصلاح شدند؛ این شکست مربوط به تست جدید بود، نه موتور سفارش یا migrationها.
+- [x] اجرای مجدد `46040236103` روی commit `6f705ca` مرحله Node را با موفقیت گذراند و مراحل PostgreSQL ۱ تا ۱۱ نیز سبز شدند؛ در زمان ثبت هنوز workflow در مرحلهٔ rollout rounding بود.
+- [x] برای اینکه فقط regex کافی نباشد، setup کاملاً مصنوعی `canonical_asset_identity_fingerprint_setup.sql` و step جدید CI اضافه شد تا خود SQL fingerprint روی PostgreSQL موقت اجرا و syntax آن تأیید شود. setup فقط roleهای آزمایشی و جدول خالی `cron.job` می‌سازد.
+- [!] اجرای کامل CI روی commit workflow جدید `780312d` هنوز باید بررسی شود؛ تا موفقیت step جدید، اجرای SQL fingerprint را تأییدشده اعلام نکنید.
+- [x] هیچ query از این fingerprint روی Production اجرا نشده؛ هیچ Production/Supabase write یا migration/db push، merge، deploy/release یا هزینه‌ای انجام نشده است.
