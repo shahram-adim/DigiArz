@@ -247,3 +247,66 @@ Reviewed the exact mainline migration sources:
 No authoritative OCO table, placement/cancellation RPC or worker was found in the reviewed source search. OCO must be designed as a separate linked-order state machine (one parent group, two mutually exclusive legs, atomic winner/loser transition, reservation ownership and race/idempotency guarantees). It is not implemented by the TP/SL or Stop-Limit candidate above and must not be claimed as complete.
 
 This is source-review/design evidence only. No migration or Production function was changed or executed.
+
+
+## Current Production metadata-only baseline — 2026-11-27
+
+Project gfoaubfilhttnwjykaox was read as ACTIVE_HEALTHY, PostgreSQL 17.11.0.018, region us-west-2. The following was captured through list_tables and pg_catalog metadata queries only. No order, trade, reservation, balance, wallet or user rows were selected.
+
+### Live canonical-identity schema facts
+
+| Relation | Live identity / key shape | Consequence |
+|---|---|---|
+| public.crypto_assets | PK coingecko_id; mutable symbol text | CoinGecko ID is the stable provider key, but it is not yet a first-class internal UUID. Never use symbol as asset identity. |
+| public.demo_trading_pairs | PK pair_symbol; UNIQUE base_coingecko_id; quote constrained to USDT | Pair identity is still display ticker; this key cannot represent two distinct assets with the same pair label. |
+| public.market_prices | PK symbol | Two canonical pairs with the same display symbol cannot hold separate price observations. |
+| public.orders | symbol text; unique (id,user_id); check filled_amount+remaining_amount=amount | No pair_id/base_asset_id/quote_asset_id; order-to-pair identity is not referentially enforced. |
+| public.trades | symbol text; FK order_id to orders(id) | Trade history has no canonical pair/asset references. |
+| public.conditional_orders | symbol text; unique order_id; execution_order_id FK to orders | Parent/child linkage exists, but does not enforce same user/pair/base/quote tuple. |
+| public.order_reservations | text asset; FK (order_id,user_id) to orders(id,user_id); accounting checks | Owner linkage is enforced, but reservation asset is ticker text, not canonical asset ID. |
+| public.asset_balances | text asset; UNIQUE (user_id,asset) | Duplicate tickers cannot be represented as distinct balance rows for the same user. |
+| public.wallets | unique user_id; USDT and IRR balances | Quote-wallet remains separate from base-asset balance identity. |
+
+The target financial tables above have RLS enabled but not FORCE RLS. Existing policies are SELECT-only owner/public-market reads as appropriate; no canonical columns or pair-composite foreign keys are present in this live metadata snapshot.
+
+### Current Production function fingerprints and execution boundary
+
+Read-only pg_get_functiondef + pg_proc metadata was captured for these exact live definitions. Each new snapshot under supabase/tests/canonical_identity_live_*_snapshot.sql is test-only and explicitly not a migration.
+
+| Function | Live md5 | EXECUTE anon | authenticated | service_role |
+|---|---|---:|---:|---:|
+| execute_demo_trade(text,text,numeric,numeric) | 4289e358b0c7293fc33f86c2511486d7 | no | yes | yes |
+| place_conditional_exit_order(text,text,numeric,numeric) | e4de4667d89e6663f04d92d47ac4d5cf | no | yes | yes |
+| cancel_conditional_exit_order(uuid) | efa4c8a200d299f76b0d2cbe2d0b49e9 | no | yes | yes |
+| process_conditional_orders() | 5cfbf0e2e73474ae64e42643b3feb28a | no | no | yes |
+| place_stop_limit_order(text,text,numeric,numeric,numeric) | d6f4ff7478b83fbabbab519c7c711bcd | no | yes | yes |
+| cancel_stop_limit_order(uuid) | 82cedc2c442b0c826a8684044aed5f8d | no | yes | yes |
+| admin_disable_market_pair(text,text) | 07ff2862b133f6dbeb3c0cf5d33c5878 | no | yes | yes |
+| refresh_market_prices() | 3788666d57957a66bf59031f54ceff03 | no | no | no (postgres only) |
+| place_limit_order(text,text,numeric,numeric) | 3eab167c47bf8ff2e1705b9f243380ec | no | yes | yes |
+| cancel_limit_order(uuid) | 69360684173b6aabebc5ff4e4de2eed9 | no | yes | yes |
+| process_limit_orders() | 00ab429596fb99392666632967cde9c0 | no | no | yes |
+| process_stop_limit_orders() | 66357ab4a2247019f22a8b6ab6eac6fe | no | no | yes |
+
+All listed functions are owned by postgres, SECURITY DEFINER and use an empty search_path, except refresh_market_prices(), which uses search_path=pg_catalog. This is the ACL/owner baseline to preserve; do not broaden worker execution to authenticated or anon. A Node source-contract test now pins the eight newly captured fingerprints and asserts the known ticker-keyed call chains so any silent source drift fails CI.
+
+### Live implementation blockers confirmed by the captured source
+
+- Market entrypoint derives base from the trailing USDT ticker, validates demo_trading_pairs.pair_symbol, and reads market_prices.symbol.
+- TP/SL placement and worker still store/read symbol; the worker calls execute_demo_trade(v_cond.symbol,...).
+- Stop-Limit placement still validates by pair_symbol; cancellation follows the child by execution_order_id and calls cancel_limit_order(child_id), but does not verify a canonical pair tuple.
+- Pair disable cancels conditional/order/reservation rows using orders.symbol = v_pair.pair_symbol; this is the live symbol-wide cleanup hazard for same-label pairs.
+- Market price refresh maps pair_symbol to CoinGecko IDs and upserts market_prices with ON CONFLICT(symbol). KuCoin/Gate.io observations are also admitted by symbol.
+
+The newly added tests/canonical-asset-production-source.test.js validates exact md5 fingerprints and explicitly asserts these legacy paths. This test documents the current behavior to be replaced; it does not mark the behavior as acceptable or claim canonical support is already deployed.
+
+### Separate Supabase Advisor finding — backup-table RLS
+
+The metadata listing returned a CRITICAL Advisor warning because private.digiarz_pg_net_queue_backup_20261121 and private.digiarz_pg_net_response_backup_20261121 have RLS disabled. A follow-up metadata-only privilege check found:
+- both tables have no direct SELECT/INSERT/UPDATE grants to anon, authenticated or service_role; the only table grants returned were to postgres;
+- authenticated has USAGE on schema private, while anon does not;
+- pgrst.db_schemas was unset in the queried setting.
+
+Therefore the Advisor's broad exposure warning is not corroborated by the current direct table grants; public Data API reachability was not established. RLS-disabled remains a defense-in-depth finding and should be reviewed separately. No RLS change was applied: enabling RLS without an access design could block intended recovery access, and any remediation requires explicit owner approval.
+
+This live capture supersedes the older Recovery-Test schema snapshot for the relations/functions listed above. It does not resolve the missing applied Migration SQL inventory (17 absent source files and timestamp mismatches remain a separate deployment blocker).
