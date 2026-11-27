@@ -1653,3 +1653,18 @@
 - Continued writer-inventory qualification: `refresh_crypto_assets()` remains absent as a full body from checked-in migrations but is recovered from Production; it mutates `crypto_assets.symbol`. Exchange-sync search hits largely target `exchange_asset_observations` or read catalog metadata, not necessarily catalog writes. No global unique active-symbol constraint exists.
 - Next: preserve the exact read-only Production function definition and schedule as a provenance-labelled fixture; stub network queue dependencies in PostgreSQL 17; prove the starvation interleaving and a fair candidate scheduler; then continue exact INSERT/UPDATE target inventory for catalog/listing/pair/price tables.
 - No Production function invocation or write; no Cron/queue/worker/pair/price/financial-row changes; no schema, grant, RLS, migration, db push, merge, deploy, APK/Pages release, or paid infrastructure action.
+
+
+## Shahram 174 — PostgreSQL 17 test-harness and source-parity review (2026-11-27)
+- [x] قبل از ادامه، وضعیت زندهٔ PRها و branch compare کنترل شد: PR #67 باز، Draft و ادغام‌نشده؛ HEAD شاخه `e058fffab27d5093a236a1a2bc4c1bcbb78d6c08`، برابر **۱۵ commit جلو و صفر عقب** از main با base `fbfb5e974e754088a32c9fdcd76fc2ca9ab0f98b`. PR #66 نیز باز، Draft و ادغام‌نشده است؛ compare زندهٔ آن 69 جلو و 0 عقب است.
+- [x] workflow واقعی `.github/workflows/exact-decimal-tests.yml` بررسی شد: CI یک PostgreSQL 17 disposable اجرا می‌کند و SQL fixtureها را با `psql -v ON_ERROR_STOP=1` اجرا می‌کند. تست‌های Node مستقیماً با `node --test tests/*.test.js` اجرا می‌شوند؛ `package.json` اسکریپت `npm test` ندارد.
+- [x] فایل migration قدیمی Overflow و تست‌هارنس واقعی کنار هم بررسی شدند. migration قدیمی نه guard انتظار برای خالی بودن درخواست‌های درحال‌اجرا را دارد و نه schedule زندهٔ job 17 را ثبت می‌کند؛ بنابراین منبع قابل‌استفاده برای بازتولید Production نیست.
+- [x] سند `docs/PRODUCTION_CATALOG_SOURCE_AUDIT_2026-11-27.md` در commit `e058fffab27d5093a236a1a2bc4c1bcbb78d6c08` با یافته‌های هارنس، تفاوت migration/Production، و شروط fixture معتبر به‌روزرسانی شد.
+- [!] در این مرحله هنوز هیچ تست source-parity جدیدی اضافه یا اجرا نشد؛ بدنهٔ دقیق Production و schedule باید دوباره از منبع read-only با timestamp و fingerprint بازیابی و در fixture مستقل ثبت شوند. سپس dependencyهای `net.http_get` و صف‌ها در PostgreSQL 17 stub می‌شوند؛ آزمون Production و candidate scheduler باید جدا باشند.
+- [!] تصحیح شمارش: گزارش قبلی Stage 173 تعداد ۱۳ commit جلو را نوشته بود؛ compare زندهٔ فعلی ۱۵ جلو و صفر عقب است. این مقدار فقط وضعیت فعلی شاخه است.
+- [x] هیچ SQL، workflow، migration یا کد اجرایی تغییر نکرد. هیچ تابع Production اجرا نشد و هیچ صف، Cron، جفت‌ارز، قیمت، schema، grant، policy، worker، سفارش، موجودی یا دادهٔ کاربر تغییر نکرد. هیچ db push، merge، deploy، release یا هزینه‌ای انجام نشد.
+
+### گام بعد
+1. بازیابی مجدد بدنهٔ دقیق تابع Overflow و cron job 17 از Production به‌صورت read-only؛ ثبت timestamp و fingerprint.
+2. ساخت fixture provenance-labelled و stubs شبکه در PostgreSQL 17؛ آزمون مستقل interleaving فعلی و candidate عادلانه.
+3. ادامهٔ inventory دقیق INSERT/UPDATE/DELETE برای catalog، listings، pairs و prices؛ سپس طراحی migration فقط در شاخهٔ تست.
