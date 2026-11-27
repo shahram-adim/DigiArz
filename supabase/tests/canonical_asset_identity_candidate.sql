@@ -380,7 +380,7 @@ BEGIN
   END IF;
 
   UPDATE canonical_asset_candidate.orders
-  SET status='cancelled',remaining_amount=0
+  SET status='cancelled'
   WHERE pair_id=p_pair_id AND status='pending';
   GET DIAGNOSTICS v_cancelled = ROW_COUNT;
 
