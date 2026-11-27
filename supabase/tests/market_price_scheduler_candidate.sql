@@ -339,6 +339,31 @@ BEGIN
     RAISE EXCEPTION 'source priority result is not deterministic';
   END IF;
 
+  -- A provider HTTP failure is durable and retried; it does not become a quote.
+  PERFORM scheduler_candidate.admit_asset('http-error-asset','ERRUSDT');
+  v_batch := scheduler_candidate.schedule_next_batch(5);
+  PERFORM scheduler_candidate.complete_batch(v_batch,503,NULL,'provider unavailable');
+  IF NOT EXISTS (
+    SELECT 1 FROM scheduler_candidate.retry_queue
+    WHERE coingecko_id='http-error-asset' AND last_error='provider unavailable'
+  ) THEN RAISE EXCEPTION 'HTTP failure was not recorded for retry'; END IF;
+  UPDATE scheduler_candidate.retry_queue
+  SET next_attempt_at=clock_timestamp()-interval '1 second'
+  WHERE coingecko_id='http-error-asset';
+  v_batch := scheduler_candidate.schedule_next_batch(5);
+  PERFORM scheduler_candidate.complete_batch(v_batch,200,'{"http-error-asset":{"usd":7.5}}'::jsonb);
+  IF (SELECT price FROM scheduler_candidate.prices WHERE pair_symbol='ERRUSDT')<>7.5 THEN
+    RAISE EXCEPTION 'HTTP-failed asset did not recover on retry';
+  END IF;
+
+  -- Ticker collision is rejected instead of binding a second canonical ID.
+  BEGIN
+    PERFORM scheduler_candidate.admit_asset('same-ticker-different-id','NEWUSDT');
+    RAISE EXCEPTION 'duplicate pair symbol was unexpectedly admitted';
+  EXCEPTION WHEN unique_violation THEN
+    NULL;
+  END;
+
   -- Bound the number of outstanding provider batches.
   PERFORM scheduler_candidate.schedule_next_batch(10,3);
   PERFORM scheduler_candidate.schedule_next_batch(10,3);
