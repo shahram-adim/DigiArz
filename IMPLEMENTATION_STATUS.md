@@ -2091,3 +2091,14 @@
 - [!] OCO is still NOT implemented. The new design document commit is `2658c9d472f4589c60e7c6c2bf8732dc577780cf`; it has not yet received a fresh CI run. Do not claim CI success for the updated documentation head.
 - [!] No canonical schema/function migration has been drafted or applied. Market/Limit engine parity, end-to-end canonical IDs through TP/SL and Stop-Limit, OCO implementation, provider-observed freshness, full catalog price coverage, and migration-ledger reconciliation remain blockers.
 - [x] No Production data/schema/function/ACL/RLS/Cron/worker/Auth change; no merge, db push, deploy/release, APK/Pages publication, or cost.
+
+
+## Shahram 182 — canonical dependency manifest frozen (2026-11-27)
+
+- [x] Rechecked live PR #67 before work: open, Draft, unmerged, mergeable; latest pre-step head `c2cdad0fa979e97ec3b49f499ca9cfa591fe72f8`.
+- [x] Re-read the canonical identity design, Production catalog/price source audit, authoritative conditional harness setup and CI workflow. Confirmed the authoritative conditional harness executes the checked-in TP/SL and Stop-Limit migration bodies, but deliberately substitutes downstream Market/Limit entrypoints with test adapters. It is not full financial source parity.
+- [x] Added `docs/CANONICAL_IDENTITY_DEPENDENCY_MANIFEST_2026-11-27.md`, commit `22dcd84e07234694e93e1dfa12d469e4af8ab0bc`. It freezes catalog admission/writers, pair/price schedulers, read APIs, Market/Limit/TP-SL/Stop-Limit RPCs and workers, reservations, account guards/deactivation, OCO, security invariants, evidence boundaries, and migration blockers.
+- [!] Manifest is an audit/design artifact, not an implementation or proof that every external privileged writer is enumerated. Production-only recovered functions and Edge Function code still need fresh source fingerprints before any executable migration proposal.
+- [!] No canonical migration draft created yet. Reason: migration ledger remains unreconciled (17 applied sources missing locally, 20 timestamp mismatches, 2 local-only migrations); duplicate ticker reconciliation and source-parity for actual Market/Limit remain open.
+- [ ] Next: construct a dependency-complete disposable PostgreSQL 17 harness for the exact authoritative Market/Limit migration bodies, then connect canonical-ID candidate schema and test full settlement/partial-fill/reservation/account-deactivation races. Do not use miniature financial adapters as parity evidence.
+- [x] No Production writes/schema/function/ACL/RLS/Cron/worker/Auth changes; no merge/db push/migration replay/history repair, deployment/release, APK/Pages publication, or cost.
