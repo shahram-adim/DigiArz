@@ -172,6 +172,21 @@ BEGIN
     IF SQLERRM = 'Expected zero-notional Limit order to be rejected' THEN RAISE; END IF;
   END;
 
+  -- Reject a Market sell whose proceeds would overflow the locked wallet.
+  UPDATE public.wallets SET balance_usdt=9999999999999999.99999999::numeric WHERE user_id=v_uid;
+  BEGIN
+    PERFORM public.execute_demo_trade('BTCUSDT','sell',0.01,0);
+    RAISE EXCEPTION 'Expected Market sell wallet-capacity overflow to be rejected';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM = 'Expected Market sell wallet-capacity overflow to be rejected' THEN RAISE; END IF;
+    IF SQLERRM NOT LIKE '%wallet capacity%' THEN RAISE; END IF;
+  END;
+  SELECT balance_usdt INTO v_wallet FROM public.wallets WHERE user_id=v_uid;
+  SELECT balance INTO v_asset FROM public.asset_balances WHERE user_id=v_uid AND asset='BTC';
+  IF v_wallet <> 9999999999999999.99999999::numeric OR v_asset <> 0.750000000000000000 THEN
+    RAISE EXCEPTION 'Rejected Market sell overflow changed wallet or base inventory';
+  END IF;
+
   RAISE NOTICE 'Market execution and Limit placement integration: PASS';
 END
 $test$;
