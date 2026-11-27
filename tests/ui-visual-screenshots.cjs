@@ -32,11 +32,11 @@ async function seedVisualFixtures(page) {
       const label=row.base.length>4?row.base.slice(0,3):row.base;
       return '<span class="'+cls+' coin-logo-fallback" role="img" aria-label="لوگوی '+row.en+'"><svg viewBox="0 0 48 48" width="100%" height="100%" aria-hidden="true" focusable="false"><circle cx="24" cy="24" r="22" fill="'+(colors[row.base]||'#526ee8')+'"/><text x="24" y="25" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-family="Arial,sans-serif" font-size="'+(label.length>3?11:15)+'" font-weight="800">'+label+'</text></svg></span>';
     };
-    const sparkline = row => {
+    const sparkline = (row, cls='coin-sparkline') => {
       const values=[13,16,12,18,11,14,8,12,6,10,5,9,4,7,3,8,5,10,6,9,4,7,2,5];
       const points=values.map((value,index)=>(2+index*60/(values.length-1)).toFixed(1)+','+(value+(row.change<0?index*.12:0)).toFixed(1)).join(' ');
       const stroke=row.change>=0?'#0ecb81':'#f6465d';
-      return '<span class="coin-sparkline" role="img" aria-label="نمودار نمونه تغییرات قیمت ۲۴ ساعت گذشته"><svg viewBox="0 0 64 24" width="100%" height="100%" aria-hidden="true" focusable="false"><polyline points="'+points+'" fill="none" stroke="'+stroke+'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+      return '<span class="'+cls+'" role="img" aria-label="نمودار نمونه تغییرات قیمت ۲۴ ساعت گذشته"><svg viewBox="0 0 64 24" width="100%" height="100%" aria-hidden="true" focusable="false"><polyline points="'+points+'" fill="none" stroke="'+stroke+'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
     };
     const tetherRow = '<div class="coin tether-pinned" data-symbol="USDT" role="group" aria-label="تتر USDT · ارز پایدار و دارایی مبنا">'+
       '<button class="favorite-btn" type="button" aria-label="افزودن تتر به علاقه‌مندی‌ها">☆</button>'+
@@ -44,41 +44,40 @@ async function seedVisualFixtures(page) {
       '<span class="coin-sparkline tether-peg-indicator" aria-label="ارزش هدف یک دلار آمریکا">≈ $1</span>'+
       '<div class="coin-change-wrap tether-meta"><small class="coin-change-label">استیبل‌کوین دلاری</small><span class="coin-change pos">ثبات قیمت</span><small class="coin-volume">دارایی مبنا برای بازارهای USDT</small></div>'+
       '<div class="price-stack"><div class="price-usd"><strong>$ 1.00</strong></div><div class="price-toman"><strong>۵۸۴٬۲۰۰ تومان</strong></div></div></div>';
-  if (market) market.innerHTML = tetherRow + rows.map(row => {
-      const changeClass = row.change >= 0 ? 'pos' : 'neg';
-      const arrow = row.change >= 0 ? '▲ +' : '▼ ';
+    if (market) market.innerHTML = tetherRow + rows.map(row => {
+      const changeClass=row.change>=0?'pos':'neg', arrow=row.change>=0?'▲ +':'▼ ';
       return '<div class="coin" data-symbol="'+row.symbol+'">'+
         '<button class="favorite-btn" type="button" aria-label="افزودن به علاقه‌مندی‌ها">☆</button>'+
-        '<button class="coin-identity market-coin-open" type="button">'+logo(row)+'+
+        '<button class="coin-identity market-coin-open" type="button">'+logo(row)+
         '<span class="coin-name-stack"><b class="coin-name-fa">'+row.fa+'</b><small class="coin-symbol-en" dir="ltr">'+row.base+'</small><small class="coin-english-name" dir="ltr">'+row.en+'</small></span></button>'+
-         sparkline(row)+'+
+        sparkline(row)+
         '<div class="coin-change-wrap"><small class="coin-change-label">تغییر ۲۴س</small><span class="coin-change '+changeClass+'">'+arrow+number(Math.abs(row.change))+'٪</span><small class="coin-volume">حجم ۲۴س: '+number(row.volume)+' USDT</small></div>'+
         '<div class="price-stack"><div class="price-usd"><strong>$ '+number(row.price)+'</strong></div><div class="price-toman"><strong>'+toman(row.price)+'</strong></div></div></div>';
     }).join('');
     if (dashboard) dashboard.innerHTML = rows.map(row => {
-      const changeClass = row.change >= 0 ? 'pos' : 'neg';
-      const arrow = row.change >= 0 ? '▲ +' : '▼ ';
+      const changeClass=row.change>=0?'pos':'neg', arrow=row.change>=0?'▲ +':'▼ ';
       return '<article class="dashboard-market-coin da-market-coin-card"><div class="da-market-card-top">'+
         '<button class="da-market-favorite" type="button" aria-label="افزودن به علاقه‌مندی‌ها">☆</button>'+
         '<button class="da-market-identity" type="button"><span class="da-market-logo">'+logo(row,'da-market-logo-inner')+'</span>'+
         '<span class="da-market-name-wrap"><b>'+row.fa+'</b><small class="da-market-name-en" dir="ltr">'+row.en+'</small><small dir="ltr">'+row.base+'/USDT</small></span></button></div>'+
-         sparkline(row).replace('class="coin-sparkline"','class="coin-sparkline da-market-sparkline")+'<strong class="da-market-price">
-        '<small class="da-market-toman">'+toman(row.price)+'</small><div class="da-market-card-foot"><span class="da-market-change '+changeClass+'">'+arrow+number(Math.abs(row.change))+'٪</span></div></article>';
+        sparkline(row,'coin-sparkline da-market-sparkline')+
+        '<strong class="da-market-price">$'+number(row.price)+'</strong><small class="da-market-toman">'+toman(row.price)+'</small>'+
+        '<div class="da-market-card-foot"><span class="da-market-change '+changeClass+'">'+arrow+number(Math.abs(row.change))+'٪</span></div></article>';
     }).join('');
-    if (assets) assets.innerHTML = rows.filter(row => Number(row.qty)>0).map(row =>
-      '<div class="asset-row"><div class="asset-symbol asset-row-main">'+logo(row,'asset-logo')+'+
+    if (assets) assets.innerHTML = rows.filter(row=>Number(row.qty)>0).map(row =>
+      '<div class="asset-row"><div class="asset-symbol asset-row-main">'+logo(row,'asset-logo')+
       '<span><b>'+row.fa+'</b><small class="asset-name-en" dir="ltr">'+row.en+'</small><small>'+row.base+'</small></span></div>'+
       '<div class="price-stack"><div class="price-usd">موجودی: '+row.qty+'</div><div class="price-usd">قیمت واحد: '+number(row.price)+' USDT</div>'+
       '<div class="price-toman">ارزش: '+number(Number(row.qty)*row.price)+' USDT</div><div class="price-toman">'+toman(Number(row.qty)*row.price)+'</div></div>'+
       '<button class="secondary" type="button">مشاهده بازار</button></div>'
     ).join('');
     if (top) top.innerHTML = rows.slice(0,4).map(row =>
-      '<button class="top-asset-card" type="button">'+logo(row)+'+
+      '<button class="top-asset-card" type="button">'+logo(row)+
       '<b class="top-asset-name-fa">'+row.fa+'</b><small class="top-asset-name-en" dir="ltr">'+row.en+'</small>'+
       '<small class="top-asset-symbol" dir="ltr">'+row.base+'</small><span class="top-usd">$'+number(row.price)+'</span>'+
       '<span class="top-toman">'+toman(row.price)+'</span><strong class="top-change '+(row.change>=0?'pos':'neg')+'">'+(row.change>0?'+':'')+number(row.change)+'٪</strong></button>'
     ).join('');
-    const set = (id,value) => {const el=document.getElementById(id);if(el)el.textContent=value};
+    const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value};
     set('dashboardMarketCount','۸');
     set('dashboardFxRate','۵۸۴٬۲۰۰ تومان');
     set('dashboardPriceCount','۸');
