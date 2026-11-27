@@ -154,3 +154,14 @@ The proposed end-to-end internal asset identity model, duplicate-ticker handling
 - Confirmed the real conditional order and worker chain is still ticker-based (symbol → strip USDT → text asset reservation/balance; market-price lookup by ticker; child execution through ticker-based Market/Limit RPCs). Canonical asset_id/pair_id is not yet propagated.
 - Current conditional order kinds are take_profit, stop_loss, and stop_limit; no OCO sibling/link lifecycle exists in these migrations. OCO remains unimplemented/unverified.
 - This source audit supersedes any implication that the disposable canonical Market/Limit fixture proves all order types. All-catalog trading remains blocked until source-parity implementation covers TP/SL, Stop-Limit parent/child, OCO, workers, balances, reservations, history and UI.
+
+
+### CI source-parity boundary (2026-11-27)
+
+Inspection of .github/workflows/exact-decimal-tests.yml shows an important limit on the passing CI claim:
+
+- The canonical identity step creates a fresh database and executes only supabase/tests/canonical_asset_identity_candidate.sql. That file creates its own isolated canonical_asset_candidate schema and miniature functions; it does not apply the authoritative production migrations.
+- Existing TP/SL and Stop-Limit integration steps load supabase/tests/exact_decimal_stop_limit_setup.sql plus supabase/drafts/2026-11-15_exact_decimal_entrypoint_candidates.sql and related draft worker SQL. They validate the exact-decimal candidate, not the current 2026-11-13 authoritative TP/SL and Stop-Limit migration bodies.
+- Therefore run 46036165275 proves that the canonical prototype fixture compiles and passes in PostgreSQL 17, but it does not prove canonical identity is integrated with actual TP/SL/Stop-Limit SQL, nor that the production migrations themselves are compatible with duplicate ticker IDs.
+- A dedicated source-parity harness is required: bootstrap the real schema dependencies, apply or extract the exact authoritative migration definitions in a disposable database, then apply the canonical-ID candidate and exercise the real RPC/worker call graph. Where migrations cannot be applied verbatim because of Supabase-only dependencies, the harness must document and assert each dependency substitution rather than silently replacing financial functions with miniature lookalikes.
+- Until that harness exists and passes, mark canonical identity as prototype-only and all-catalog trading as not implemented end-to-end.
