@@ -353,3 +353,8 @@ The current live Supabase migration ledger and GitHub main tree were re-compared
 - 20 local filenames have timestamp prefixes that differ from their applied ledger versions.
 - 2 local-only migrations remain unrecorded remotely (the KuCoin and Gate.io intermediate market-price replacements).
 This is unchanged from the last recorded reconciliation. It remains a hard stop for any db push/replay. Do not repair migration history or replay the local-only market-price files.
+
+
+### Additional display/API correctness issue confirmed
+
+The live public.get_crypto_market(...) function computes trade_enabled from a positive market_prices row for ca.symbol || 'USDT' updated within one minute. It does not join demo_trading_pairs and does not check is_enabled. Thus the UI's trade_enabled flag is currently a ticker-price freshness indicator, not proof that a supported pair is enabled. The canonical read API must derive tradability from the same active pair_id + supported quote + fresh pair-price relation used by order entry; do not rely on the current flag.
