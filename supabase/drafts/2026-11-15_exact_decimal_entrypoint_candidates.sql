@@ -165,8 +165,9 @@ BEGIN
         END IF;
 
         v_total := v_gross - v_fee;
-        IF v_total <= 0 OR v_total > 9999999999999999.99999999::numeric THEN
-            RAISE EXCEPTION 'Sell settlement is outside numeric(24,8) USDT capacity';
+        IF v_total <= 0 OR v_total > 9999999999999999.99999999::numeric
+           OR v_balance > 9999999999999999.99999999::numeric - v_total THEN
+            RAISE EXCEPTION 'Sell settlement would exceed numeric(24,8) USDT wallet capacity';
         END IF;
 
         UPDATE public.asset_balances
