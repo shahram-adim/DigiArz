@@ -1921,3 +1921,11 @@
 - [x] سه trigger account guard در snapshot روی INSERTهای orders، trades و transactions هستند. قیدهای حسابداری سفارش و رزرو نیز در design doc ثبت شدند تا در migration canonical حذف یا تضعیف نشوند.
 - [!] این snapshot همچنان Recovery-Test تاریخی است و برابری Production امروز ثابت نشده؛ ACLهای restore حذف شده‌اند. هیچ grant یا owner از این snapshot کپی نمی‌شود.
 - [ ] مرحله بعد: تولید manifest ساختاری canonical برای disposable PostgreSQL از همین DDL مستندشده و افزودن parity assertions؛ پیش از هر candidate migration باید schema source gaps و writerهای catalog تکمیل شوند.
+
+
+
+### ابزار آماده‌سازی fingerprint جاری کاتالوگ و موتور مالی — ۲۷ نوامبر ۲۰۲۶
+- [x] فایل فقط‌خواندنی `supabase/audit/canonical_asset_identity_schema_fingerprint.sql` اضافه شد. فقط metadata کاتالوگ PostgreSQL، information_schema، تعریف توابع/ACL، RLS/policies، indexes/constraints/triggers و jobهای pg_cron را جمع می‌کند؛ هیچ ردیف تجاری/کاربری را نمی‌خواند و هیچ تغییری اعمال نمی‌کند.
+- [x] تست Node `tests/canonical-asset-identity-audit.test.js` اضافه شد تا query واحد، read-only بودن، عدم scan مستقیم جداول مالی/کاتالوگ و پوشش objectهای هویتی و workerها را enforce کند.
+- [!] این SQL در این مرحله روی Production اجرا نشده است؛ فقط به‌عنوان ابزار آماده برای snapshot مجاز و زمان مناسب ثبت شده. اجرای آن بدون مجوز جداگانه و بررسی وضعیت DB انجام نخواهد شد.
+- [ ] CI جدید باید تست Node را اجرا کند. پس از سبزشدن، در زمان پایداری سرویس و مجوز مالک، snapshot metadata جاری Production با Recovery-Test تاریخی و migration source مقایسه شود؛ تا آن زمان از Recovery-Test فقط به‌عنوان مرجع تاریخی استفاده می‌شود.
