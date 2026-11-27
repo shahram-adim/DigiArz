@@ -368,7 +368,7 @@ body.dark-theme #authView .auth-form #forgotBtn,body.light-theme #authView .auth
 body.dark-theme #tab-dashboard,body.light-theme #tab-dashboard,body.luxury-theme #tab-dashboard{
   padding:clamp(14px,2.6vw,28px)!important;border-radius:26px!important;
   background:var(--da-surface)!important;border:1px solid var(--da-line)!important;
-  box-shadow:0 18px 50px rgba(0,0,0,.10)!important;overflow:hidden!important
+  box-shadow:0 12px 30px rgba(23,111,193,.055)!important;overflow:hidden!important
 }
 body.dark-theme .da-v2-topline,body.light-theme .da-v2-topline,body.luxury-theme .da-v2-topline{padding-bottom:15px!important;border-color:var(--da-line)!important}
 body.dark-theme .da-v2-brand,body.light-theme .da-v2-brand,body.luxury-theme .da-v2-brand{color:var(--da-text)!important}
