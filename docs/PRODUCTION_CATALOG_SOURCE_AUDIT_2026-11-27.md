@@ -261,3 +261,11 @@ No test fixture, SQL migration, workflow, or executable source was changed in th
 2. Price scheduler/source precedence must account for two additional active Edge Function writers that can overwrite `market_prices` for a limited hard-coded symbol universe. They are not a substitute for full-catalog coverage and must be reconciled or explicitly excluded in a future approved design.
 3. Service-role credentials are a privileged write boundary. A complete deployment inventory must cover all active Edge Functions and any external service-role callers; do not infer safety solely from anon/authenticated grants or SECURITY DEFINER RPC grants.
 4. No table privileges, policies, triggers, Edge Functions, SQL functions, Cron jobs, or Production data were changed. All database operations in this inventory were SELECT-only; Edge Function source retrieval was read-only.
+
+
+### Function EXECUTE grants for reviewed writer entrypoints
+
+- `public.refresh_crypto_assets()` and `public.refresh_crypto_assets_toman()` are executable by `service_role` and `postgres` in the inspected ACL snapshot.
+- `public.refresh_market_prices()` and the private scheduler/activation/trigger functions in this inventory are executable by `postgres` only in the inspected ACL snapshot.
+- `public.admin_add_market_listing(text)`, `public.admin_remove_market_listing(text)`, `public.admin_enable_market_pair(text)`, and `public.admin_disable_market_pair(text,text)` are executable by `authenticated`, `service_role`, and `postgres`; their function bodies perform super-admin checks. EXECUTE grant alone is not authorization proof; the body-level checks remain required.
+- These are point-in-time effective ACL observations. Any implementation must re-check grants, function owner, SECURITY DEFINER search_path, and body-level authorization on the exact candidate migration and live Production before release.
