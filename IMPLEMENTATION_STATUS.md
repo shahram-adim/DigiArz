@@ -1767,3 +1767,13 @@
 - [!] اجرای CI پس از اصلاح backfill هنوز در انتظار است؛ candidate تا عبور از PostgreSQL 17 و concurrency test آماده یا تأییدشده محسوب نمی‌شود.
 - [ ] گام بعد: نتیجهٔ CI روی HEAD جدید؛ سپس افزودن آزمون timestamp واقعی مشاهده‌شده توسط provider و تکمیل بررسی تمام مصرف‌کنندگان بیرونی service_role. پس از آن می‌توان طرح catalog admission/provisioning را در disposable PostgreSQL مدل کرد.
 - [x] تمام کوئری‌های Supabase این مرحله SELECT-only بودند؛ هیچ Edge Function یا SQL function اجرا/تغییر نکرد، هیچ جدول/قیمت/جفت‌ارز/صف/Cron/worker/دادهٔ Production تغییر نکرد. هیچ migration/db push، merge، deploy، release یا هزینه‌ای انجام نشد.
+
+
+## Shahram 183 — fair scheduler candidate PostgreSQL 17 CI passed (2026-11-27)
+- [x] GitHub Actions run 46032712435 روی commit دقیق 7cefac11d5af25d845cdd101f4629564895a7b15 با نتیجهٔ SUCCESS تمام شد.
+- [x] تمام 24 مرحلهٔ workflow موفق شدند؛ مرحلهٔ candidate scheduler در PostgreSQL 17 و concurrency shell test هر دو موفق بودند. این اجرا شامل اصلاح DO terminator، سهمیه‌بندی weighted lanes و backfill normal-first بود.
+- [x] آزمون‌ها 1200 دارایی در 12 batch، پوشش کامل چرخه و wrap-around، priority admission، retry omission و HTTP 503، idempotent completion، رد قیمت stale/NaN، تقدم منبع، برخورد canonical pair symbol، admission storm با حداقل 60٪ سهمیهٔ normal، سقف سه batch هم‌زمان و رد invocation دوم هنگام advisory lock را پوشش دادند.
+- [!] PASS فقط برای fixture candidate در PostgreSQL 17 disposable است؛ این نه اثبات رفتار Production است و نه مجوز migration/rollout. منطق provider-observed timestamp، source mapping واقعی و اتصال atomic catalog-admission هنوز باید تکمیل شود.
+- [x] پس از commit تست 7ce، commitهای بعدی فقط مستندات/status بودند؛ CI روی آخرین commit مستنداتی fef1031a... در زمان ثبت این checkpoint هنوز در حال اجرا بود.
+- [ ] گام بعد: تأیید آخرین docs-only CI؛ سپس اضافه‌کردن timestamp واقعی provider observation و تست‌های canonical catalog admission/identity collision در disposable PostgreSQL. بعد از آن inventory مصرف‌کنندگان بیرونی service_role را کامل کنیم.
+- [x] هیچ Production/Supabase write، SQL/Edge Function invocation، تغییر Cron/queue/price/pair, Worker, grant/RLS، migration/db push، merge، deploy، release یا هزینه‌ای انجام نشد.
