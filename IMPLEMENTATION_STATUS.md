@@ -2530,3 +2530,13 @@ UI بازطراحی سه‌تم — انتقال امن به Main جاری — �
 - [!] آزمون‌های PostgreSQL این workflow فقط روی محیط disposable هستند؛ هیچ Production proof یا Production write محسوب نمی‌شوند. تست دستگاه Android واقعی، login/biometric end-to-end، live price و لوگوی واقعی هنوز انجام نشده‌اند.
 - [!] هیچ merge، deployment، انتشار Pages/APK، migration، db push، Production/Supabase write، Cron/worker/Edge Function، تغییر امنیتی یا هزینه/ارتقای پلن انجام نشد. PR #66 باز و Draft باقی ماند.
 - [ ] گام بعدی امن: ادامهٔ source review و بررسی پوشش ۱۲ جفت معاملاتی و مسیر fallback نام/لوگوی فارسی؛ سپس چک‌لیست دستگاه واقعی و runtime market validation. هرگونه merge یا تغییر Production همچنان منوط به تأیید صریح مالک است.
+
+
+## شهرام ۱۶۵ — ممیزی read-only جفت‌های معاملاتی Production و CI — ۲۷ نوامبر ۲۰۲۶
+- [x] وضعیت زنده قبل از ثبت: PR #66 باز، Draft، ادغام‌نشده، mergeable=true؛ HEAD `0c9400ff04a977c54944539a1932d49a9f34ae86`؛ شاخه ۶۷ جلو و صفر عقب از Main.
+- [x] سه workflow روی همان HEAD موفق شدند: UI visual run `46023599897`، exact-decimal/PostgreSQL run `46023600024` و Android debug APK run `46023599987`. تمام job/stepهای مشاهده‌شده success بودند. این تست‌های DB در PostgreSQL disposable اجرا شدند، نه Production.
+- [x] ممیزی صرفاً خواندنی Supabase Production: تعداد `demo_trading_pairs` با `is_enabled=true` برابر **۴۲۰** (۴۲۰ نماد یکتا)؛ هر ۴۲۰ نماد در `market_prices` هم‌ردیف داشتند. کل ردیف‌های `market_prices` برابر ۸۹۹ بود. `orders`، `trades` و `order_reservations` هرکدام صفر ردیف بودند.
+- [!] شمار ۴۲۰ جفت فعال با قاعدهٔ ثبت‌شدهٔ قبلی «حفظ ۱۲ جفت معاملاتی فعال» مغایرت دارد. هنوز مشخص نیست ۱۲، فهرست مجاز معاملهٔ آزمایشی است یا صرفاً مجموعهٔ منتخب/پیش‌فرض؛ بنابراین هیچ pair، قیمت، داده، policy، migration یا worker در Production تغییر نکرده است. همچنین تعداد ۴۲۰ از query واقعی COUNT(*) آمده است؛ برآورد ردیف جدول در فهرست schema را نباید جایگزین آن کرد.
+- [x] کد UI در `loadMarkets()` همهٔ ردیف‌های `demo_trading_pairs` با `is_enabled=true` را می‌خواند و بازار را به همان‌ها محدود می‌کند؛ بنابراین ۴۲۰ ردیف فعال بالقوه در رابط به‌عنوان جفت قابل معامله ارائه می‌شوند. نیاز به تصمیم مالک دربارهٔ جداسازی «دارایی قابل نمایش» از «جفت مجاز معامله» وجود دارد.
+- [ ] اقدام بعدی: بدون تغییر Production، تعریف دقیق ۱۲ جفت مجاز را از تاریخچهٔ نیازمندی/seedها استخراج و در شاخهٔ تست یک guard و تست رگرسیون برای جداسازی catalog از trade-enabled pairs طراحی کنیم؛ اعمال هر محدودیت روی Production فقط پس از تأیید صریح مالک.
+- [!] هیچ Merge، deploy، db push، migration، Production write، تغییر Cron/worker/Edge Function، تنظیم امنیتی یا هزینهٔ جدید انجام نشد.
