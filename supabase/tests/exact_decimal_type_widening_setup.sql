@@ -160,13 +160,15 @@ GRANT ALL PRIVILEGES ON public.orders,public.trades,public.asset_balances,public
 INSERT INTO public.orders(id,user_id,symbol,side,order_type,amount,price,status,filled_amount,remaining_amount)
 VALUES
 ('10000000-0000-4000-8000-000000000001','20000000-0000-4000-8000-000000000001','BTCUSDT','buy','limit',1.25,10.5,'pending',0.25,1.00),
-('10000000-0000-4000-8000-000000000002','20000000-0000-4000-8000-000000000001','ETHUSDT','buy','market',0.5,NULL,'pending',0,0.5);
+('10000000-0000-4000-8000-000000000002','20000000-0000-4000-8000-000000000001','ETHUSDT','sell','conditional',0.5,12.25,'pending',0,0.5);
 INSERT INTO public.trades(user_id,symbol,side,amount,price,order_id)
 VALUES ('20000000-0000-4000-8000-000000000001','BTCUSDT','buy',0.25,10.5,'10000000-0000-4000-8000-000000000001');
 INSERT INTO public.asset_balances(user_id,asset,balance)
 VALUES ('20000000-0000-4000-8000-000000000001','BTC',1.25);
 INSERT INTO public.order_reservations(order_id,user_id,asset,reserved_amount,released_amount,consumed_amount)
 VALUES ('10000000-0000-4000-8000-000000000001','20000000-0000-4000-8000-000000000001','USDT',10.5,1.25,2.5);
+INSERT INTO public.order_reservations(order_id,user_id,asset,reserved_amount,released_amount,consumed_amount)
+VALUES ('10000000-0000-4000-8000-000000000002','20000000-0000-4000-8000-000000000001','ETH',0.5,0,0);
 INSERT INTO public.conditional_orders(order_id,user_id,symbol,side,order_kind,trigger_price,amount,status)
 VALUES ('10000000-0000-4000-8000-000000000002','20000000-0000-4000-8000-000000000001','ETHUSDT','sell','take_profit',12.25,0.5,'pending');
 
