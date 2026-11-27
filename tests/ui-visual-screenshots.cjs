@@ -160,6 +160,8 @@ async function resetPageScroll(page) {
     { name:'desktop', width:1440, height:1000, deviceScaleFactor:1 }
   ];
   const themes = ['dark','light','luxury'];
+  const backgroundDiagnostics = [];
+
   const tabs = ['dashboard','markets','toman','chart','trade','assets','orders','history','admin','settings'];
   try {
     for (const viewport of viewports) {
@@ -187,6 +189,22 @@ async function resetPageScroll(page) {
           if (auth) { auth.classList.add('hidden'); auth.style.display='none'; }
           if (app) { app.classList.remove('hidden'); app.classList.add('app-view-active'); app.style.display='block'; }
         }, theme);
+        if (theme === 'light') {
+          backgroundDiagnostics.push(await page.evaluate(() => {
+            const selectors = ['html','body','#appView','#tab-dashboard','.dashboard-panel','.wrap','.mobile-bottom-nav'];
+            const describe = selector => {
+              const el = document.querySelector(selector);
+              if (!el) return {selector, missing:true};
+              const style = getComputedStyle(el);
+              return {selector, tag:el.tagName, className:el.className?.toString?.()||'', backgroundColor:style.backgroundColor, backgroundImage:style.backgroundImage, color:style.color};
+            };
+            const edge = document.elementsFromPoint(2, Math.min(200, innerHeight-1)).slice(0,8).map(el => {
+              const style=getComputedStyle(el);
+              return {tag:el.tagName,id:el.id,className:el.className?.toString?.()||'',backgroundColor:style.backgroundColor,backgroundImage:style.backgroundImage};
+            });
+            return {viewport:{width:innerWidth,height:innerHeight}, bodyClass:document.body.className, selectors:selectors.map(describe), edgeAtX2Y200:edge};
+          }));
+        }
         for (const tab of tabs) {
           const visible = await page.evaluate(name => {
             const sections=[...document.querySelectorAll('[id^="tab-"]')];
@@ -275,6 +293,7 @@ async function resetPageScroll(page) {
     if (files.length!==72) throw new Error('Expected 72 screenshots, got '+files.length);
     fs.writeFileSync(path.join(output,'README.txt'),'DigiArz UI visual review screenshots\n72 captures: 2 viewports x 3 themes x 10 app sections, 6 authentication screens, plus mobile dashboard/market row close-ups.\nSupabase API and logo-proxy requests were blocked; local branded SVG logo fallbacks are used in the visual harness. No production data was changed.\nMarket, dashboard, asset and top-volume rows are synthetic DOM-only fixtures. Authentication captures use the local UI shell only; no credentials are submitted. Mobile row close-ups scroll to the actual rendered asset lists.\n');
     console.log('Created '+files.length+' screenshots in '+output);
+    fs.writeFileSync(path.join(output, 'theme-background-diagnostics.json'), JSON.stringify(backgroundDiagnostics, null, 2));
   } finally {
     await browser.close();
     await new Promise(resolve=>server.close(resolve));
