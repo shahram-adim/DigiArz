@@ -313,8 +313,8 @@ jobs:
         run: |
           psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_authoritative_market_limit_test;"
           psql -h localhost -U postgres -d digiarz_authoritative_market_limit_test -v ON_ERROR_STOP=1 \
-            -f supabase/tests/authoritative_market_limit_source_parity_setup.sql
-            -f supabase/tests/canonical_identity_live_public_current_account_is_active_snapshot.sql
+            -f supabase/tests/authoritative_market_limit_source_parity_setup.sql \
+            -f supabase/tests/canonical_identity_live_public_current_account_is_active_snapshot.sql \
             -f supabase/tests/canonical_identity_live_public_get_demo_trading_fee_rate_snapshot.sql \
             -f supabase/migrations/20261113161641_enforce_active_accounts_in_demo_trade_and_limit_engine.sql \
             -f supabase/tests/authoritative_market_limit_source_parity.sql
