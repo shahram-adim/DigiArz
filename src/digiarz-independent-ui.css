@@ -6501,3 +6501,43 @@ body.luxury-theme #tab-markets .market-board-unit{
   #authView .ref-orbit-ton{left:30%;bottom:0}
 }
 @media(prefers-reduced-motion:reduce){#authView .ref-orbit-coin{animation:none!important}}
+
+/* 2026-11-27: keep the light glass theme genuinely white, with blue-tinted glass rather than gray surfaces. */
+body.light-theme{
+  --da-bg:#ffffff;--da-bg2:#f7fbff;--da-surface:rgba(255,255,255,.96);--da-surface2:#f3f9ff;
+  --da-line:#d5e8fa;--da-text:#172b46;--da-muted:#587493;
+  --da-accent:#2868d7;--da-accent-soft:rgba(40,104,215,.10);
+  --da-blue:#2868d7;--da-green:#13865e;--da-red:#d64e61;--da-purple:#7554c7;
+  background:radial-gradient(ellipse at 90% 0%,rgba(64,145,235,.08),transparent 34%),linear-gradient(145deg,#ffffff 0%,#f8fcff 58%,#ffffff 100%)!important;
+}
+html:has(body.light-theme){background:#ffffff!important}
+body.light-theme .top,
+body.light-theme .tabs,
+body.light-theme .mobile-bottom-nav,
+body.light-theme .card,
+body.light-theme .stat,
+body.light-theme .trade-box,
+body.light-theme .fx-box,
+body.light-theme .performance-item,
+body.light-theme .indicator-panel,
+body.light-theme .asset-row,
+body.light-theme .market-list>div,
+body.light-theme .coin,
+body.light-theme .order-row,
+body.light-theme .history-row,
+body.light-theme .setting-row{
+  background:rgba(255,255,255,.96)!important;
+  border-color:#d8eafb!important;
+}
+body.light-theme .hero,
+body.light-theme .market-hero-v34,
+body.light-theme .trade-workspace-banner-v35,
+body.light-theme .orders-center-v36{
+  background:linear-gradient(120deg,#ffffff 0%,#f1f8ff 68%,#ffffff 100%)!important;
+  border-color:#d1e6fb!important;
+}
+body.light-theme input,
+body.light-theme select,
+body.light-theme textarea{background:#ffffff!important;border-color:#d5e8fa!important}
+body.light-theme #authView .auth-form{background:linear-gradient(145deg,#ffffff,#f5faff)!important}
+body.light-theme #tab-markets .market-board-v34 .coin{background:linear-gradient(145deg,#ffffff,#f5faff)!important;border-color:#d5e8fa!important}
