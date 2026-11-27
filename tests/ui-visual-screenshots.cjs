@@ -105,15 +105,23 @@ const server = http.createServer((req, res) => {
 
 async function renderOfflineLogoFallbacks(page) {
   await page.evaluate(() => {
-    const images = [...document.querySelectorAll('img[data-symbol]')];
+    const images = [...document.querySelectorAll('img[data-symbol], #detailLogo')];
     for (const image of images) {
       const holder = image.parentElement;
+      const rawSymbol = image.dataset.symbol || document.getElementById('chartSymbol')?.textContent || image.alt || '';
       const symbol = typeof cleanCoinSymbol === 'function'
-        ? cleanCoinSymbol(image.dataset.symbol || '')
-        : String(image.dataset.symbol || '').replace(/USDT$/i,'').replace(/[^a-z0-9]/gi,'').toUpperCase();
+        ? cleanCoinSymbol(rawSymbol)
+        : String(rawSymbol).replace(/USDT$/i,'').replace(/[^a-z0-9]/gi,'').toUpperCase();
       if (!holder || typeof renderCoinLogoFallback !== 'function' || !symbol) continue;
-      renderCoinLogoFallback(holder, symbol);
-      image.remove();
+      if (image.id === 'detailLogo' && holder.classList.contains('asset-detail-head')) {
+        const fallback = document.createElement('span');
+        fallback.className = 'asset-logo';
+        renderCoinLogoFallback(fallback, symbol);
+        image.replaceWith(fallback);
+      } else {
+        renderCoinLogoFallback(holder, symbol);
+        image.remove();
+      }
     }
   });
 }
