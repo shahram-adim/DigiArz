@@ -121,6 +121,6 @@ test('activation removes old shell caches and claims clients', async () => {
 test('service worker and document request the current icon-label stylesheet version',()=>{
   const html=fs.readFileSync('index.html','utf8');
   assert.match(workerSource,/digiarz-shell-v67/);
-  assert.match(workerSource,/digiarz-independent-ui\.css\?v=7/);
-  assert.match(html,/digiarz-independent-ui\.css\?v=7/);
+  assert.match(workerSource,/digiarz-independent-ui\.css\?v=8/);
+  assert.match(html,/digiarz-independent-ui\.css\?v=8/);
 });
