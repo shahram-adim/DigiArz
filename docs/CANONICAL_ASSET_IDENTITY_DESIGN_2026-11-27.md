@@ -194,3 +194,24 @@ A read-only catalog query on Recovery-Test (PostgreSQL 17.11) also captured exac
 - RLS is enabled but not FORCE RLS on the listed tables in this snapshot. Policies include public/anon read for catalog/pairs/prices and own-row reads for financial tables. New canonical tables and ID columns must preserve the least-privilege model; workers stay service_role-only.
 
 These are historical Recovery-Test facts, not current Production assertions. The restored project's ACLs were omitted; its role/function privileges are not a valid source for production grants. The source-faithful candidate must retain the current Production ACLs from a separate authorized catalog capture or authoritative migration source.
+
+
+
+## Catalog-admission and pair-admin call-chain audit — historical Recovery-Test source
+
+A metadata/function-definition-only read on the restored Recovery-Test snapshot recovered these function fingerprints. They are historical source evidence, not proof of the current Production definitions:
+
+| Function | Snapshot fingerprint | Relevant behavior / canonical requirement |
+|---|---|---|
+| `refresh_crypto_assets()` | 8,885 bytes; MD5 `f14765ffd1166380f58e391b34163259` | Upserts by `coingecko_id` and updates mutable `crypto_assets.symbol` from provider data. The recovered snapshot had no unique symbol constraint; duplicate tickers can persist. Every provider mapping must resolve to immutable `asset_id`, not symbol. |
+| `private.auto_list_verified_exchange_asset()` | 1,298 bytes; MD5 `49880c0892cad6081acb6ce071090a5d` | Trigger on matched active exchange observations inserts `admin_market_listings` only if exactly one active catalog asset has that ticker and no curated/pair collision exists. This is a product curation gate, not a financial identity guarantee. |
+| `admin_enable_market_pair(text)` | 4,131 bytes; MD5 `848f7c1ebe114c558c1ce73e76dd13bd` | Requires an admin-curated listing, active asset, metadata age <=24h, volume >= USD 1,000,000, rank <=2,000 when present, no pair-symbol collision, and fresh CoinGecko price <=2 minutes. Volume/rank/curation gates conflict with the owner's all-admitted-assets requirement; valid identity and fresh trusted price remain mandatory. |
+| `admin_disable_market_pair(text,text)` | 2,858 bytes; MD5 `07ff2862b133f6dbeb3c0cf5d33c5878` | Finds the selected pair by `base_coingecko_id`, but cancels conditional orders, reservations and orders by `orders.symbol = pair_symbol`, then disables by `pair_symbol`. If same-label pairs are admitted, this symbol-wide cleanup can affect a different canonical asset. All cancellation and reservation cleanup must be scoped by `pair_id` and canonical asset IDs. |
+| `refresh_market_prices()` | 3,101 bytes; MD5 `4c45f1aab59eb15194638bd930015e51` in the historical snapshot | Historical body only. The later checked-in 515-ID migration is a different definition and must remain the source for current source review. It builds provider mappings from `pair_symbol/base_coingecko_id`; a pair-keyed price store and deterministic provider-to-pair mapping are required. |
+
+### Updated admission/admin invariant
+
+- Discovery, exchange matching, curated listing, canonical catalog admission and pair provisioning must become one deterministic lifecycle. A ticker collision must not cause an otherwise valid catalog asset to be permanently display-only, nor may the system pick one asset by symbol.
+- Product gates such as curated-list membership, minimum 24h volume and top-2,000 rank must not block an admitted valid asset. Financial gates remain: immutable identity mapping, supported quote, active asset/pair, trusted positive fresh pair price, account authorization and reservation/accounting invariants.
+- Pair disable must operate on a single `pair_id`; it must never cancel by display symbol. Conditional parent, Stop-Limit child, ordinary Limit child and reservations must all match the same canonical pair/base/quote IDs.
+- The read-only fingerprint now includes catalog writer/admin functions so a future current Production snapshot can verify whether these historical definitions still match. No function from Recovery-Test is copied into Production or used as a live-source claim.
