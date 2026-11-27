@@ -51,7 +51,7 @@ CREATE TABLE canonical_asset_candidate.orders (
   base_asset_id uuid NOT NULL REFERENCES canonical_asset_candidate.assets(asset_id),
   quote_asset_id uuid NOT NULL REFERENCES canonical_asset_candidate.assets(asset_id),
   side text NOT NULL CHECK(side IN ('buy','sell')),
-  order_type text NOT NULL DEFAULT 'market' CHECK(order_type IN ('market','limit')),
+  order_type text NOT NULL DEFAULT 'market' CHECK(order_type IN ('market','limit','conditional')),
   amount numeric NOT NULL CHECK(amount>0),
   price numeric NOT NULL CHECK(price>0),
   limit_price numeric,
@@ -89,6 +89,27 @@ CREATE TABLE canonical_asset_candidate.reservations (
   UNIQUE(order_id),
   FOREIGN KEY(order_id,user_id)
     REFERENCES canonical_asset_candidate.orders(order_id,user_id)
+);
+
+CREATE TABLE canonical_asset_candidate.conditional_orders (
+  conditional_id uuid PRIMARY KEY,
+  order_id uuid NOT NULL UNIQUE,
+  user_id uuid NOT NULL,
+  pair_id uuid NOT NULL,
+  base_asset_id uuid NOT NULL,
+  quote_asset_id uuid NOT NULL,
+  display_pair text NOT NULL,
+  order_kind text NOT NULL CHECK(order_kind IN ('take_profit','stop_loss','stop_limit')),
+  trigger_price numeric NOT NULL CHECK(trigger_price>0),
+  limit_price numeric,
+  status text NOT NULL CHECK(status IN ('pending','triggered','filled','cancelled','rejected')),
+  execution_order_id uuid UNIQUE,
+  FOREIGN KEY(order_id,user_id,pair_id,base_asset_id,quote_asset_id)
+    REFERENCES canonical_asset_candidate.orders(order_id,user_id,pair_id,base_asset_id,quote_asset_id),
+  FOREIGN KEY(execution_order_id,user_id,pair_id,base_asset_id,quote_asset_id)
+    REFERENCES canonical_asset_candidate.orders(order_id,user_id,pair_id,base_asset_id,quote_asset_id),
+  CHECK((order_kind='stop_limit' AND limit_price IS NOT NULL AND limit_price>0)
+     OR (order_kind IN ('take_profit','stop_loss') AND limit_price IS NULL))
 );
 
 CREATE OR REPLACE FUNCTION canonical_asset_candidate.execute_market_trade(
@@ -384,6 +405,10 @@ BEGIN
   WHERE pair_id=p_pair_id AND status='pending';
   GET DIAGNOSTICS v_cancelled = ROW_COUNT;
 
+  UPDATE canonical_asset_candidate.conditional_orders
+  SET status='cancelled'
+  WHERE pair_id=p_pair_id AND status IN ('pending','triggered');
+
   DELETE FROM canonical_asset_candidate.reservations r
   USING canonical_asset_candidate.orders o
   WHERE r.order_id=o.order_id AND o.pair_id=p_pair_id AND o.status='cancelled';
@@ -408,6 +433,10 @@ DECLARE
   v_reserve_amount numeric;
   v_disable_a uuid;
   v_disable_b uuid;
+  v_cond_parent_a uuid;
+  v_cond_parent_b uuid;
+  v_cond_child_a uuid;
+  v_cond_child_b uuid;
   v_processed integer;
   v_a numeric;
   v_b numeric;
@@ -607,19 +636,68 @@ BEGIN
     NULL;
   END;
 
-  -- Disabling one same-label pair must not cancel another pair's orders/reservations.
+  -- Conditional parent and execution child must retain the exact same canonical pair.
+  v_cond_parent_a := gen_random_uuid();
+  v_cond_parent_b := gen_random_uuid();
+  v_cond_child_a := gen_random_uuid();
+  v_cond_child_b := gen_random_uuid();
+  INSERT INTO canonical_asset_candidate.orders(
+    order_id,user_id,pair_id,base_asset_id,quote_asset_id,side,order_type,
+    amount,price,filled_amount,remaining_amount,status
+  ) VALUES
+    (v_cond_parent_a,v_user,v_pair_a,v_dot_a,v_usdt,'sell','conditional',0.1,20,0,0.1,'pending'),
+    (v_cond_parent_b,v_user,v_pair_b,v_dot_b,v_usdt,'sell','conditional',0.1,20,0,0.1,'pending'),
+    (v_cond_child_a,v_user,v_pair_a,v_dot_a,v_usdt,'sell','limit',0.1,19,0,0.1,'pending'),
+    (v_cond_child_b,v_user,v_pair_b,v_dot_b,v_usdt,'sell','limit',0.1,19,0,0.1,'pending');
+  INSERT INTO canonical_asset_candidate.reservations(
+    reservation_id,order_id,user_id,asset_id,amount
+  ) VALUES
+    (gen_random_uuid(),v_cond_parent_a,v_user,v_dot_a,0.1),
+    (gen_random_uuid(),v_cond_parent_b,v_user,v_dot_b,0.1);
+  INSERT INTO canonical_asset_candidate.conditional_orders(
+    conditional_id,order_id,user_id,pair_id,base_asset_id,quote_asset_id,
+    display_pair,order_kind,trigger_price,limit_price,status
+  ) VALUES
+    (gen_random_uuid(),v_cond_parent_a,v_user,v_pair_a,v_dot_a,v_usdt,'DOT/USDT','stop_limit',20,19,'pending'),
+    (gen_random_uuid(),v_cond_parent_b,v_user,v_pair_b,v_dot_b,v_usdt,'DOT/USDT','stop_limit',20,19,'pending');
+
+  -- A child order from the other same-label pair must never attach to this parent.
+  BEGIN
+    UPDATE canonical_asset_candidate.conditional_orders
+    SET status='triggered',execution_order_id=v_cond_child_b
+    WHERE order_id=v_cond_parent_a;
+    RAISE EXCEPTION 'cross-pair conditional child was accepted';
+  EXCEPTION WHEN foreign_key_violation THEN
+    NULL;
+  END;
+  UPDATE canonical_asset_candidate.conditional_orders
+  SET status='triggered',execution_order_id=v_cond_child_a
+  WHERE order_id=v_cond_parent_a;
+  UPDATE canonical_asset_candidate.conditional_orders
+  SET status='triggered',execution_order_id=v_cond_child_b
+  WHERE order_id=v_cond_parent_b;
+
+  -- Disabling one same-label pair must cancel only its parent, child and reservation.
   v_disable_a := canonical_asset_candidate.place_limit_order(v_user,v_pair_a,'sell',0.1,30);
   v_disable_b := canonical_asset_candidate.place_limit_order(v_user,v_pair_b,'sell',0.1,30);
-  IF canonical_asset_candidate.disable_pair(v_pair_a)<>1 THEN
-    RAISE EXCEPTION 'pair disable did not cancel exactly one pending order';
+  IF canonical_asset_candidate.disable_pair(v_pair_a)<>3 THEN
+    RAISE EXCEPTION 'pair disable did not cancel exactly three pending pair-A orders';
   END IF;
   IF (SELECT status FROM canonical_asset_candidate.orders WHERE order_id=v_disable_a)<>'cancelled'
-     OR EXISTS (SELECT 1 FROM canonical_asset_candidate.reservations WHERE order_id=v_disable_a) THEN
-    RAISE EXCEPTION 'disabled pair retained its pending order/reservation';
+     OR EXISTS (SELECT 1 FROM canonical_asset_candidate.reservations WHERE order_id=v_disable_a)
+     OR (SELECT status FROM canonical_asset_candidate.orders WHERE order_id=v_cond_parent_a)<>'cancelled'
+     OR (SELECT status FROM canonical_asset_candidate.orders WHERE order_id=v_cond_child_a)<>'cancelled'
+     OR EXISTS (SELECT 1 FROM canonical_asset_candidate.reservations WHERE order_id=v_cond_parent_a)
+     OR (SELECT status FROM canonical_asset_candidate.conditional_orders WHERE order_id=v_cond_parent_a)<>'cancelled' THEN
+    RAISE EXCEPTION 'disabled pair retained conditional parent/child/reservation';
   END IF;
   IF (SELECT status FROM canonical_asset_candidate.orders WHERE order_id=v_disable_b)<>'pending'
-     OR NOT EXISTS (SELECT 1 FROM canonical_asset_candidate.reservations WHERE order_id=v_disable_b) THEN
-    RAISE EXCEPTION 'pair disable crossed into another same-display-symbol pair';
+     OR NOT EXISTS (SELECT 1 FROM canonical_asset_candidate.reservations WHERE order_id=v_disable_b)
+     OR (SELECT status FROM canonical_asset_candidate.orders WHERE order_id=v_cond_parent_b)<>'pending'
+     OR (SELECT status FROM canonical_asset_candidate.orders WHERE order_id=v_cond_child_b)<>'pending'
+     OR NOT EXISTS (SELECT 1 FROM canonical_asset_candidate.reservations WHERE order_id=v_cond_parent_b)
+     OR (SELECT status FROM canonical_asset_candidate.conditional_orders WHERE order_id=v_cond_parent_b)<>'triggered' THEN
+    RAISE EXCEPTION 'pair disable crossed into another same-display-symbol conditional lifecycle';
   END IF;
   IF NOT (SELECT is_enabled FROM canonical_asset_candidate.pairs WHERE pair_id=v_pair_b) THEN
     RAISE EXCEPTION 'unrelated same-label pair was disabled';
