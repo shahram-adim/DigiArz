@@ -2150,3 +2150,17 @@
 - [!] Existing Market/Limit code enforces `market_prices.updated_at` within one minute. Keep this local receive/update-time execution gate explicit; provider-observed time is a separate field and cannot be substituted without a defined contract.
 - [ ] Next: recover exact source for base financial schema, active-account helper/guard trigger, fee helper, relevant policies/grants and all ticker-based dependent functions; reconcile ambiguous legacy asset balances before implementing canonical ledger changes.
 - [x] No Production query/write, migration, function, grant, RLS, trigger, cron, worker, account or financial-row change; no db push, merge, deploy, APK/Pages publication or cost.
+
+
+## Shahram 187 — authoritative fee and active-account helpers added to Market/Limit harness (2026-11-27)
+
+- [x] Rechecked live PR #67: open, Draft, unmerged; latest branch head before this step was `ba06f93519ad097a193d38b571b57d584b48eb47`, 196 commits ahead and 0 behind main.
+- [x] CI run `46049038024` / workflow #2396 completed SUCCESS on the pre-helper-snapshot head `ba06f93519ad097a193d38b571b57d584b48eb47`.
+- [x] Confirmed fresh read-only Production snapshots now exist for `get_demo_trading_fee_rate(text,text)` and `current_account_is_active()`, including SECURITY DEFINER/search_path/owner/EXECUTE metadata. Fee helper reads enabled maker/taker rates from `demo_trading_fees`; it rejects invalid liquidity types and missing/disabled quote-asset configuration.
+- [x] Improved the disposable authoritative Market/Limit harness: removed its hardcoded constant fee helper and simplified active-account helper; added a fee table/configuration fixture and now loads the exact captured Production function bodies before applying the authoritative Market/Limit migration.
+- [x] Added regression assertions for configured maker/taker fee lookup, missing quote configuration rejection, and disabled fee configuration rejection. Market/Limit financial functions remain the exact checked-in migration bodies.
+- [x] Corrected and verified shell continuations in the CI workflow SQL command after the first edit; all five SQL files now execute in one psql invocation in the intended order.
+- [!] Latest commit `f7a8ae868623c10955595003b42accc48553b552` has not yet returned a new CI run at checkpoint time. Do not claim the helper-snapshot harness passed until its new run completes.
+- [!] This adds exact helper function bodies, not the complete authoritative table schema, fee table constraints/data, trigger/RLS/grants or full Production catalog parity. Historical/live metadata snapshots still require a separately captured, reconciled schema and ACL inventory.
+- [ ] Next: confirm CI for `f7a8ae868623c10955595003b42accc48553b552`; then recover authoritative base ledger DDL/constraints/indexes and reservation/financial table metadata, and test actual helper behavior with source-faithful schema.
+- [x] No Production database query/write in this step; no Production migration, schema/function/ACL/RLS/trigger/Cron/worker/Auth change; no db push, merge, deploy, APK/Pages publication or cost.
