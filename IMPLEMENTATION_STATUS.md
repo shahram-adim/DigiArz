@@ -2786,3 +2786,33 @@
 - [x] فقط SQL تست ایزوله، سند ممیزی و IMPLEMENTATION_STATUS در شاخه Draft تغییر کردند.
 - [x] هیچ Production query/write، DDL، migration، backfill، RPC/Worker/Cron/Edge Function، RLS/ACL، داده مالی یا Auth تغییر نکرد.
 - [x] هیچ merge، rebase، db push، deploy، APK/Pages publication یا هزینه‌ای انجام نشد.
+
+
+## شهرام ۲۱۵ — کنترل idempotency و سازگاری مقادیر سفارش — ۲۸ نوامبر ۲۰۲۶
+
+### بررسی زنده
+- [x] پیش از تغییر: PR #67 باز، Draft، ادغام‌نشده، mergeable=false؛ HEAD برابر `f3cd45419813b7c87f9364fe4cda7892a902c0fd`.
+- [x] Main برابر `e8477b53a1b8c6fc7225572db3e559a1c75607d8`؛ compare برابر ۲۵۸ جلو و ۸ عقب.
+- [x] Check Runs و Actions workflow runs برای HEAD قبلی صفر؛ endpoint مستقیم Actions نیز total_count=0 نشان داد.
+- [x] قابلیت مجاز dispatch/create workflow run در ابزار GitHub موجود نیست؛ از اجرای دستی یا موفقیت CI ادعایی نمی‌شود.
+
+### تغییرات Fixture
+- [x] قید `0 <= filled_amount <= amount` اضافه شد.
+- [x] قید `remaining_amount = amount - filled_amount` اضافه شد.
+- [x] تست idempotency اضافه شد: اجرای دوباره disable باید صفر سفارش تازه لغو و صفر رزرو تازه آزاد کند و مقادیر release قبلی را تغییر ندهد.
+- [x] سند تست به‌روزرسانی شد و محدودیت اجرا را صریحاً حفظ می‌کند.
+
+### وضعیت اعتبارسنجی
+- [x] تغییرات از GitHub branch بازخوانی و از نظر ایستا بررسی شدند.
+- [ ] PostgreSQL fixture و race script هنوز اجرا نشده‌اند؛ نتیجه CI روی HEAD جدید هنوز باید بررسی شود.
+- [ ] این fixture مدل رفتاری مستقل است، نه اثبات parity با RPC/Workerهای Production.
+
+### بعدی
+- [ ] بررسی اجرای Actions روی Commit نهایی این checkpoint؛ در صورت نبود run، مسیر فعال‌سازی workflow در تنظیمات/رویدادهای GitHub باید توسط مالک بررسی شود.
+- [ ] بعد از تست سبز، افزودن regression برای unknown pair، سفارش بدون reservation، reservation نامعتبر و مسیرهای cancellation واقعی در fixture کامل.
+- [ ] قبل از هر طرح Production، بازیابی migration artifacts مفقود و schema/function provenance کامل الزامی است.
+
+### ایمنی
+- [x] فقط SQL تست ایزوله، سند تست و IMPLEMENTATION_STATUS روی شاخه Draft تغییر کردند.
+- [x] هیچ Production SQL/DDL/migration/backfill/RPC/Worker/Cron/Edge Function/RLS/ACL، داده کاربر یا مالی تغییر نکرد.
+- [x] هیچ merge/rebase/db push/deploy/APK/Pages publication یا هزینه‌ای انجام نشد.
