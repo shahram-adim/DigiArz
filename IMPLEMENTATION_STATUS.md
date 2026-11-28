@@ -2545,3 +2545,32 @@
 - [x] هیچ SQL به Supabase یا Production ارسال نشد؛ هیچ Migration، RPC، Worker، Cron، Edge Function، RLS/ACL یا دادهٔ مالی تغییر نکرد.
 - [x] هیچ سفارش، معامله، کیف پول، موجودی یا رزرو Production دستکاری نشد.
 - [x] هیچ merge، rebase، deploy، انتشار APK/Pages یا هزینه‌ای انجام نشد.
+
+
+## شهرام ۲۰۷ — معتبرسازی fixture سفارش‌های رزروشده و بازبینی وضعیت زنده — ۲۸ نوامبر ۲۰۲۶
+
+### بازبینی آغاز مرحله
+- [x] وضعیت زندهٔ شاخه و PR پیش از تغییر بررسی شد: HEAD برابر `066808d0aa05a94e148974541814592998282d3f`، PR #67 باز و Draft، ادغام‌نشده و `mergeable=false` بود؛ مقایسه با Main برابر ۲۳۶ جلو و ۸ عقب، Check Runs صفر و وضعیت commit برابر pending بود.
+- [x] ساختار fixture PostgreSQL بازخوانی شد. جدول تست `order_reservations` در این fixture به `orders` کلید خارجی ندارد؛ بنابراین درج reservation با order_id تنها، سفارش واقعی/مرتبط را تضمین نمی‌کرد.
+
+### اصلاحات
+- [x] برای هر چهار سناریوی رزرو باز Market buy، Market sell، Limit buy و Limit sell، یک ردیف سفارش Limit آزمایشی متناظر در `public.orders` ساخته می‌شود.
+- [x] پس از هر سناریو، reservation و سفارش fixture پاک می‌شوند.
+- [x] Node source guard اکنون دقیقاً چهار fixture سفارش و چهار cleanup سفارش را الزام می‌کند.
+- [x] تغییرات صرفاً در تست‌های disposable و guardهای Node هستند؛ Migration مرجع و توابع Production تغییر نکردند.
+
+### شواهد و محدودیت‌ها
+- [!] ساختار fixture فقط یک مدل آزمایشی تقلیل‌یافته است و چون FK ندارد، این اصلاح صرفاً انسجام منطقی دادهٔ تست را بهتر می‌کند؛ اثبات قیود FK یا parity کامل Production نیست.
+- [!] در این مرحله Node و PostgreSQL اجرا نشدند؛ صحت فعلی فقط با بازبینی منبع و static guard قابل بیان است.
+- [!] اجرای CI روی HEAD جدید هنوز وجود ندارد؛ Check Runs صفر است و نباید موفقیت تست‌ها ادعا شود.
+- [!] مشکل canonical duplicate ticker همچنان مستقل باقی است: توابع authoritative فعلی بر اساس symbol کار می‌کنند و مسیر pair_id/asset_id canonical به آن‌ها متصل نشده است.
+
+### وضعیت انتشار و گام بعد
+1. اجرای واقعی Workflow روی HEAD فعلی و بررسی نتیجهٔ Node و PostgreSQL.
+2. در صورت سبزشدن، طراحی سناریوی دو دارایی canonical با ticker نمایشی یکسان روی همان wallet، asset_balances، reservations و transactions واقعیِ fixture.
+3. ادامهٔ بررسی کامل schema/index/trigger/RLS/ACL و Migrationهای مفقود، بدون حدس‌زدن SQL.
+
+### ایمنی
+- [x] فقط فایل‌های تست و این گزارش در شاخهٔ Draft تغییر کردند.
+- [x] هیچ SQL، Migration، RPC، Worker، Cron، Edge Function، RLS/ACL یا دادهٔ Production/Supabase اجرا یا تغییر داده نشد.
+- [x] هیچ Merge، rebase، deploy، انتشار APK/Pages یا هزینه‌ای انجام نشد.
