@@ -2433,3 +2433,40 @@
 3. ابتدا Market buy/sell و Limit placement/worker را با pair_id-authoritative lookup پیاده‌سازی و تست کن؛ دو pair با display ticker یکسان را هم‌زمان پوشش بده.
 4. قبل از هر DDL قابل انتشار، mapping ambiguity و تمام dependencyهای schema/trigger/RLS/ACL را مستند و reconcile کن.
 5. PR را Draft نگه دار و تا تأیید صریح مالک هیچ اقدام Production انجام نده.
+
+
+
+## شهرام ۲۰۴ — بازبینی زندهٔ شاخه و بررسی مستقل قرارداد مالی Market/Limit — ۲۸ نوامبر ۲۰۲۶
+
+### وضعیت زندهٔ GitHub
+- [x] PR #67 با عنوان `[Draft] Make every DigiArz catalog asset demo-tradable` باز، Draft و ادغام‌نشده است.
+- [x] HEAD شاخه `plan/all-catalog-assets-tradable-2026-11-27`: `f2e53d4056938a42960a36a08754bc46056ecb63`.
+- [x] Main: `e8477b53a1b8c6fc7225572db3e559a1c75607d8`.
+- [x] Compare زنده: ۲۳۰ کامیت جلو و ۸ کامیت عقب؛ merge-base برابر `fbfb5e974e754088a32c9fdcd76fc2ca9ab0f98b`؛ وضعیت diverged.
+- [x] GitHub برای PR مقدار `mergeable=false` و `mergeable_state=dirty` گزارش می‌کند؛ هیچ merge، rebase یا force-push انجام نشد.
+- [x] برای HEAD دقیق `f2e53d4056938a42960a36a08754bc46056ecb63` تعداد Check Run برابر صفر و combined status برابر pending است.
+- [x] جدیدترین اجرای Exact decimal tests که در فهرست Workflow runs دیده شد، run `46052800147` با نتیجه success روی SHA قدیمی‌تر `8f7925ced4c18716ee07e11890fd9572c4fcacf4` است؛ این نتیجه CI برای HEAD فعلی نیست.
+- [!] ابزار متصل در این نشست مسیر ایجاد/dispatch اجرای تازهٔ workflow را ارائه نمی‌کند؛ اجرای Node روی HEAD دقیق همچنان تأیید نشده است.
+
+### بازبینی مستقل منبع Market/Limit
+- [x] سه فایل با blob SHAهای ثبت‌شده دوباره از شاخه خوانده شدند:
+  - Migration مرجع: `de09b1cd391790fcd9d94708a916cb41cd9ccc9f`.
+  - candidate هویت canonical: `42b56965140e6c7f7f20bf26126d06eebd472e24`.
+  - تست قرارداد مالی: `b73a887eb5c98ce27ef26966e57a384548ed358a`.
+- [x] بدنهٔ هر سه تابع authoritative از Migration استخراج شد و ۱۳ گروه بررسی ایستای مستقل برای auth/active-account، enabled pair، تازگی یک‌دقیقه‌ای، fee helper، گردکردن صریح Market، ترتیب قفل wallet-first، رزروها، advisory lock، SKIP LOCKED، partial fill بیست‌وپنج‌درصدی، ledgerهای trade/transaction و lifecycle تجمعی رزرو موفق بود.
+- [x] اختلاف candidate ساده با قرارداد مالی دوباره تأیید شد: جدول generic balances به‌جای wallet/base-ledger، fee ثابت، پنجرهٔ تازگی دو دقیقه، حذف reservation و پرکردن کامل سفارش؛ بنابراین candidate همچنان فقط proof هویت canonical و جداسازی ticker است، نه موتور مالی هم‌ارز Production.
+- [x] تفاوت دقت حفظ شد: Market gross/fee صراحتاً تا ۸ رقم اعشار گرد می‌شوند؛ worker مربوط به Limit چنین گردکردن صریحی در منبع ندارد و نباید بدون تصمیم مستقل تغییر کند.
+- [!] این ۱۳ گروه، بازبینی patternهای منبع در محیط ابزار هستند؛ اجرای واقعی `node --test` یا تست PostgreSQL محسوب نمی‌شوند. فایل تست دارای ۹ بلوک test است و اجرای کامل آن همچنان منتظر CI روی SHA دقیق است.
+
+### موانع و گام بعد
+1. اجرای `node --test tests/*.test.js` در GitHub Actions برای HEAD فعلی و ثبت SHA دقیق نتیجه.
+2. ادامهٔ طراحی fixture مالی canonical فقط در PostgreSQL disposable با Migration و prerequisiteهای کاملاً معتبر؛ دو pair با ticker نمایشی یکسان باید هم‌زمان آزموده شوند.
+3. حفظ wallet + asset_balances + order_reservations + transactions؛ حذف هرگونه generic parallel balance از مسیر مالی candidate.
+4. بازیابی ۱۷ منبع Migration مفقود و حل ۲۰ اختلاف timestamp/name همچنان gate مستقل پیش از هر طرح deployable است.
+5. بررسی divergence هشت‌کامیتی PR از طریق برنامهٔ integration بازبینی‌شده؛ هیچ merge/rebase خودکار انجام نشود.
+
+### ایمنی
+- [x] فقط همین فایل وضعیت پروژه در شاخهٔ PR به‌روزرسانی می‌شود.
+- [x] هیچ SQL روی Supabase اجرا نشد؛ هیچ Migration، RPC، Worker، Cron، Edge Function یا دادهٔ مالی Production تغییر نکرد.
+- [x] هیچ سفارش، معامله، رزرو، کیف پول یا موجودی تغییر نکرد؛ jobهای زمان‌بندی‌شده بدون تغییر ماندند.
+- [x] هیچ merge، rebase، deploy، انتشار APK/Pages یا هزینه‌ای انجام نشد.
