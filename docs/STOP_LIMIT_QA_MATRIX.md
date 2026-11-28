@@ -493,3 +493,42 @@ See \`docs/superpowers/reports/2026-11-15-exact-decimal-implementation-checkpoin
 1. Recover authoritative base DDL and build a disposable PostgreSQL 17 schema/ACL parity harness.
 2. Design and test the eight-decimal USDT settlement fix for the actual Limit worker, including gross/fee/net and reservation edge cases; do not modify Production.
 3. After the Stop-Limit gate, complete the four approved Toman providers and stale-data UI handling.
+
+
+## Applied Stop-Limit migration-chain source parity — 2026-11-28
+
+### Fresh Production and repository state
+- Main HEAD at the start of this QA pass: `95793332330f3fe3e1ffa802a527331e4efedf96`; the preceding status note had not yet recorded this latest documentation commit.
+- Production project `gfoaubfilhttnwjykaox` remains `ACTIVE_HEALTHY`, PostgreSQL 17.11.0.018, with 55 applied migrations through `20261121050216`.
+- Supabase Development Branch listing is empty; no isolated Supabase test branch/project is available in this connection.
+- Live `process_stop_limit_orders()` fingerprint remains `66357ab4a2247019f22a8b6ab6eac6fe`; owner `postgres`, `SECURITY DEFINER`, empty `search_path`, EXECUTE granted to `service_role` only.
+- Cron metadata remains unchanged: job 8 `digiarz-limit-orders` and job 12 `digiarz-stop-limit-orders`, both active at `* * * * *`. Neither job was invoked manually.
+
+### New migration-chain parity guard
+- [x] Added a source-contract test that extracts the worker body from the applied base migration `20261113181827`, extracts the exact `v_old`/`v_new` branch patch from `20261115143827`, reconstructs the resulting worker body, and compares it with the captured Production snapshot after removing SQL comments and normalizing whitespace.
+- [x] The reconstruction check passed against the current checked-in files. This closes a static source-chain gap: the base migration plus its applied bounded-retry patch now has an explicit assertion against the captured Production function body.
+- [x] Test commit: `f0a24d1a68c03e8744d112ed4c3ca623f3bd3b0f` (`fix(test): correct Stop-Limit migration parity regexes`).
+- [x] GitHub Actions Exact-decimal Run #2417 started for that commit. The Node/browser test step, including the new source-chain assertion, completed successfully. The remaining PostgreSQL lifecycle/race steps were still running when this note was written; do not treat the whole workflow as green until its final conclusion is checked.
+
+### Important distinction retained
+- The captured Production worker and applied migration chain use `FOR UPDATE OF c,parent SKIP LOCKED` in the parent/child synchronization query; the child row is not part of that lock clause.
+- The separate draft candidate uses `FOR UPDATE OF c,parent,child SKIP LOCKED`. Its existing two-session race tests therefore do not prove the exact Production worker's child-row locking behavior.
+- The new test proves source reconstruction/parity, not full schema/ACL parity and not that the candidate's stronger lock behavior is deployed.
+
+### Remaining release/QA gates
+1. Recover authoritative missing base DDL and dependent constraints/triggers from a trusted backup or migration artifact; do not reconstruct financial schema from assumptions.
+2. Build a disposable PostgreSQL 17 harness using the authoritative DDL, applied migration chain, captured function definitions, grants, RLS, triggers, and cron metadata.
+3. Run valid Stop-Limit trigger → child Limit placement, partial/full fill, cancellation, retry exhaustion, reservation accounting, idempotency, and two-session races against that source-faithful harness.
+4. Decide the child-row lock behavior as a separately reviewed fix; do not silently promote the draft candidate.
+5. Keep Production unchanged until parity, lifecycle QA, and explicit owner release approval are complete.
+
+### Safety
+- [x] Only project metadata, migration ledger, function catalog/ACL fingerprint, and cron metadata were read.
+- [x] No worker/RPC was invoked; no order, trade, reservation, wallet, balance, transaction, migration, grant, policy, schedule, or Edge Function was changed.
+- [x] No isolated branch/project was created and no cost was incurred.
+
+
+### Final CI result — 2026-11-28
+- [x] Exact-decimal Run #2419 (`46139853183`) completed with `success` on main commit `67570844c8b0301695ff5f8ce4fe987c57e1056e`.
+- [x] All 22 substantive PostgreSQL/Node steps and cleanup succeeded, including the new migration-chain source assertion, exact-decimal regressions, Limit/TP-SL/Stop-Limit lifecycle tests, and two-session cancellation/worker races.
+- [!] This is disposable GitHub Actions PostgreSQL 17 evidence. It does not supply the missing Supabase Development Branch or full Production schema/ACL parity harness.
