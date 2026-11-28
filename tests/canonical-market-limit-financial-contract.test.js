@@ -129,11 +129,11 @@ test('authoritative Market and Limit entrypoints subtract outstanding reservatio
 
 
 test('captured Production fee helper NULL-liquidity gap remains explicit and cannot be mistaken for fail-closed behavior', () => {
-  const feeGuard = feeHelperSnapshot.match(/IF\\s+([\\s\\S]*?)\\s+THEN\\s+RAISE\\s+EXCEPTION\\s+'Invalid liquidity type'/i);
+  const feeGuard = feeHelperSnapshot.match(/IF\s+([\s\S]*?)\s+THEN\s+RAISE\s+EXCEPTION\s+'Invalid liquidity type'/i);
   assert.ok(feeGuard, 'captured Production fee helper validation guard must remain inspectable');
-  assert.match(feeGuard[1], /p_liquidity_type\\s+NOT\\s+IN\\s*\\('maker',\\s*'taker'\\)/i);
-  assert.doesNotMatch(feeGuard[1], /p_liquidity_type\\s+IS\\s+NULL/i);
-  assert.match(feeHelperSnapshot, /ELSE\\s+f\\.taker_fee_rate/i);
+  assert.match(feeGuard[1], /p_liquidity_type\s+NOT\s+IN\s*\('maker',\s*'taker'\)/i);
+  assert.doesNotMatch(feeGuard[1], /p_liquidity_type\s+IS\s+NULL/i);
+  assert.match(feeHelperSnapshot, /ELSE\s+f\.taker_fee_rate/i);
   assert.match(financialContract, /NULL is accepted as taker instead of being rejected/);
   assert.match(financialContract, /must explicitly reject NULL/);
 });
