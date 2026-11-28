@@ -15,12 +15,15 @@ CREATE TABLE canonical_pair_disable.orders (
   status text NOT NULL CHECK (status IN ('pending','partially_filled','filled','cancelled')),
   amount numeric NOT NULL CHECK (amount > 0),
   filled_amount numeric NOT NULL DEFAULT 0,
-  remaining_amount numeric NOT NULL
+  remaining_amount numeric NOT NULL,
+  UNIQUE (order_id, pair_id)
 );
 CREATE TABLE canonical_pair_disable.conditional_orders (
   order_id uuid PRIMARY KEY REFERENCES canonical_pair_disable.orders(order_id),
   pair_id uuid NOT NULL REFERENCES canonical_pair_disable.pairs(pair_id),
-  status text NOT NULL CHECK (status IN ('pending','triggered','filled','cancelled'))
+  status text NOT NULL CHECK (status IN ('pending','triggered','filled','cancelled')),
+  FOREIGN KEY (order_id, pair_id)
+    REFERENCES canonical_pair_disable.orders(order_id, pair_id)
 );
 CREATE TABLE canonical_pair_disable.reservations (
   order_id uuid PRIMARY KEY REFERENCES canonical_pair_disable.orders(order_id),
@@ -28,7 +31,11 @@ CREATE TABLE canonical_pair_disable.reservations (
   reserved_amount numeric NOT NULL CHECK (reserved_amount > 0),
   consumed_amount numeric NOT NULL DEFAULT 0,
   released_amount numeric NOT NULL DEFAULT 0,
-  status text NOT NULL CHECK (status IN ('reserved','consumed','released'))
+  status text NOT NULL CHECK (status IN ('reserved','consumed','released')),
+  CHECK (consumed_amount >= 0 AND consumed_amount <= reserved_amount),
+  CHECK (released_amount >= 0 AND released_amount <= reserved_amount - consumed_amount),
+  FOREIGN KEY (order_id, pair_id)
+    REFERENCES canonical_pair_disable.orders(order_id, pair_id)
 );
 
 CREATE OR REPLACE FUNCTION canonical_pair_disable.disable_pair(p_pair_id uuid)
