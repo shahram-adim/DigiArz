@@ -2,6 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
+const ledgerMappingCandidate = readFileSync(
+  new URL('../supabase/tests/canonical_asset_ledger_key_mapping_candidate.sql', import.meta.url),
+  'utf8'
+);
+
 const migration = readFileSync(
   new URL('../supabase/migrations/20261113161641_enforce_active_accounts_in_demo_trade_and_limit_engine.sql', import.meta.url),
   'utf8'
@@ -52,4 +57,17 @@ test('legacy Market and Limit RPC contracts cannot distinguish canonical pairs s
   const worker = functionBody('process_limit_orders');
   assert.match(worker, /market_prices[\s\S]*?mp\.symbol\s*=\s*v_order\.symbol/i);
   assert.doesNotMatch(worker, /mp\.pair_id\s*=|canonical_pair_id/i);
+});
+
+
+test('canonical ledger mapping freezes identity and verification evidence after financial use', () => {
+  assert.match(ledgerMappingCandidate, /BEFORE UPDATE OF canonical_asset_id, ledger_asset_key, mapping_status, evidence_ref, reviewed_at/);
+  assert.match(ledgerMappingCandidate, /NEW\.canonical_asset_id IS DISTINCT FROM OLD\.canonical_asset_id/);
+  assert.match(ledgerMappingCandidate, /NEW\.mapping_status IS DISTINCT FROM OLD\.mapping_status/);
+  assert.match(ledgerMappingCandidate, /NEW\.evidence_ref IS DISTINCT FROM OLD\.evidence_ref/);
+  assert.match(ledgerMappingCandidate, /NEW\.reviewed_at IS DISTINCT FROM OLD\.reviewed_at/);
+  assert.match(ledgerMappingCandidate, /Canonical ledger mapping identity and verification are immutable after financial use/);
+  assert.match(ledgerMappingCandidate, /referenced canonical identity reassignment unexpectedly accepted/);
+  assert.match(ledgerMappingCandidate, /referenced mapping status change unexpectedly accepted/);
+  assert.match(ledgerMappingCandidate, /referenced mapping evidence change unexpectedly accepted/);
 });
