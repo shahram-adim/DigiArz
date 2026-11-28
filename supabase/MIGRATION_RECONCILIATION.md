@@ -169,3 +169,41 @@ A repository-scoped exact-name commit search was run for all 17 applied migratio
 
 ### Safety
 - [x] This was repository-only search and documentation. No Supabase query, database write, migration replay, schema/function/ACL/RLS/trigger/Cron/worker/Auth change, merge, deploy, APK/Pages publication, or infrastructure spend occurred.
+
+
+## Shahram 243 — follow-up source recovery and CI trigger audit — 2026-11-28
+
+### Re-check of the three latest missing applied migration sources
+
+The repository-scoped GitHub code-search queries for the exact versions `20261121045434`, `20261121045531`, and `20261121050216` returned documentation/status references, but no SQL migration file. The only matching material inspected identifies the same three ledger entries and does not contain their SQL bodies. This search is limited to the connected repository's searchable/default-branch index; it is not proof that the SQL is absent from every historical Git object, fork, deployment artifact, backup, or owner-held archive.
+
+The three entries remain unresolved:
+
+- `20261121045434_digiarz_backpressure_and_exchange_sync_bloat_guards`
+- `20261121045531_snapshot_pg_net_unlogged_queue_before_recovery`
+- `20261121050216_temporarily_throttle_exchange_asset_processors_20261121`
+
+No migration body was reconstructed from a name, live state, or neighboring SQL. The previously recorded total remains 17 missing applied SQL sources and 20 timestamp/name mismatches, based on the historical read-only ledger audit; this session did not query the live Supabase ledger.
+
+### Exact-decimal workflow trigger facts
+
+The current branch copy of `.github/workflows/exact-decimal-tests.yml` was read directly (blob `72b7db61f01af760834770d2771c7e4fb90509e0`). It declares:
+
+- `push` only for `main`;
+- `pull_request` targeting `main`;
+- Node 20 and `node --test tests/*.test.js`, which includes `tests/canonical-market-limit-financial-contract.test.js`;
+- no `workflow_dispatch` trigger.
+
+Therefore the new static fee-helper source-contract test is in the workflow's test glob, but a branch-only push is not a configured trigger. The PR event should be the applicable trigger for PR updates targeting `main`; however, the connected API writes have not yielded a visible run. The cause is not proven from available evidence. Do not modify Actions settings or workflow triggers without owner approval.
+
+At the current branch HEAD `ab8de02fae3b9454801b0b05151ce322c129d655`, the workflow-run lookup returned no PR-triggered runs and the combined commit-status response contained no statuses. Thus no CI result is available for this HEAD.
+
+### Safe next action
+
+An owner-controlled, ordinary Git push that updates PR #67 (or another explicitly authorized event delivery path) is needed to verify whether GitHub dispatches the configured `pull_request` workflow. Before doing so, the owner should inspect repository Actions enablement/permissions and the PR base branch. No workflow file, Actions setting, or permission was changed in this audit.
+
+The 17 missing applied SQL sources and 20 filename timestamp mismatches remain hard deployment blockers. Continue recovery only from independently trusted exact SQL artifacts with provenance/checksum; do not use `supabase db push`, edit migration history, or replay the unresolved set.
+
+### Safety
+
+Repository source inspection only. No Supabase query, SQL execution, migration replay, Actions setting/permission change, Cron/worker change, merge, rebase, deploy, APK/Pages publication, or paid infrastructure change occurred.
