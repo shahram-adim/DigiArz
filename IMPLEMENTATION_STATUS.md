@@ -2857,3 +2857,40 @@
 - [ ] اجرای CI روی HEAD نهایی هنوز وجود ندارد؛ هیچ runtime PASS برای SQL یا race ادعا نمی‌شود.
 - [x] این fixture فقط مدل رفتاری disposable است؛ نه Production RPC patch است و نه اثبات lock-order واقعی workerهای deployed.
 - [x] هیچ Production DB/SQL/DDL/migration/backfill/RPC/Worker/Cron/Edge Function/RLS/ACL، داده کاربر/مالی، تنظیمات Actions، merge/rebase/db push/deploy/APK/Pages یا هزینه‌ای تغییر نکرد.
+
+
+## شهرام ۲۱۸ — اجرای Source Snapshot واقعی برای admin pair-disable — ۲۸ نوامبر ۲۰۲۶
+
+### بازبینی مبنا
+- [x] پیش از تغییر، PR #67، HEAD، Main، Workflow Runs و Check Runs بازبینی شدند.
+- [x] PR #67 باز، Draft و ادغام‌نشده است؛ HEAD ورودی این مرحله `39b404e0ecf257ff54bac59d93e33d527c1e4fa5` و Main برابر `e8477b53a1b8c6fc7225572db3e559a1c75607d8` بود.
+- [x] روی HEAD ورودی Check Runs و PR Workflow Runs صفر بودند؛ این وضعیت به معنی تست موفق نیست.
+- [x] snapshot دقیق Production برای `admin_disable_market_pair(text,text)` از فایل `supabase/tests/canonical_identity_live_admin_disable_market_pair_snapshot.sql` بازیابی شد؛ fingerprint ثبت‌شده `07ff2862b133f6dbeb3c0cf5d33c5878` و capture date برابر 2026-11-27 است.
+
+### یافتهٔ منبع واقعی
+- [x] بدنهٔ captured Production pair را با `base_coingecko_id` انتخاب و قفل می‌کند، اما cleanup سفارش‌های conditional، رزروها و سفارش‌ها را با `orders.symbol = pair_symbol` انجام می‌دهد.
+- [x] به‌روزرسانی نهایی pair نیز با `pair_symbol` است، نه شناسهٔ یکتای pair.
+- [x] نتیجه: در مدل آینده‌ای که دو canonical pair هم‌نماد را مجاز می‌کند، همین بدنه می‌تواند sibling pair را نیز غیرفعال کند و سفارش‌ها/رزروهای آن را تغییر دهد. این یک رفتار مستقیماً قابل استنتاج از snapshot تابع است؛ نه ادعای اینکه schema فعلی Production duplicate pair_symbol را مجاز می‌کند.
+
+### تغییرات شاخهٔ Draft
+- [x] فایل `supabase/tests/canonical_admin_disable_source_parity.sql` اضافه شد؛ این تست exact source snapshot را با psql include بارگذاری می‌کند.
+- [x] fixture دو pair با display symbol یکسان و pair_id/base identity مستقل می‌سازد؛ برای baseline، اثر ticker-scoped تابع captured را characterization می‌کند.
+- [x] در همان fixture یک pair_id-scoped candidate با super-admin guard، قفل ردیف pair، cleanup و accounting رزرو، audit و idempotency اضافه شد.
+- [x] assertionها بررسی می‌کنند candidate فقط pair هدف را لغو/غیرفعال کند و sibling pair، conditional order و reservation آن بدون تغییر بمانند.
+- [x] مرحلهٔ جدید PostgreSQL در `.github/workflows/exact-decimal-tests.yml` اضافه شد تا تست در CI اجرا شود.
+- [x] سند `docs/CAPTURED_ADMIN_DISABLE_SOURCE_PARITY_2026-11-28.md` محدودیت‌ها و مرز ادعا را ثبت کرد.
+
+### اعتبارسنجی و محدودیت
+- [x] فایل‌ها پس از commit از GitHub بازخوانی و از نظر ایستا بررسی شدند.
+- [ ] PostgreSQL/psql محلی در محیط موجود نیست؛ SQL هنوز محلی اجرا نشده است.
+- [ ] CI روی HEAD نهایی این تغییرات هنوز باید مشاهده و job-stepهایش بررسی شود؛ تا آن زمان نتیجه runtime نامعلوم است و PASS ادعا نمی‌شود.
+- [ ] candidate فقط مدل تست است؛ هنوز RPC/migration/worker واقعی را جایگزین نمی‌کند و parity کامل RLS/ACL/schema یا race همهٔ workerها را اثبات نمی‌کند.
+
+### گام بعد
+- [ ] بررسی Actions روی HEAD نهایی و رفع هر خطای واقعی fixture.
+- [ ] توسعهٔ همان source-parity به تمام writer/readerهای pair identity: Market، Limit placement/worker/cancel، TP/SL، Stop-Limit parent/child، reservation read، account deactivation و catalog provisioning.
+- [ ] پیش از هر طرح deploy، تازه‌سازی fingerprint Production و بازیابی/تطبیق migration sourceهای مفقود و timestamp-mismatchها الزامی است.
+
+### ایمنی
+- [x] فقط تست و مستندات شاخهٔ Draft و workflow CI تغییر کردند.
+- [x] هیچ Production SQL/query/write، DDL، migration، backfill، RPC/Worker/Cron/Edge Function، RLS/ACL، Auth، دادهٔ مالی، merge، rebase، db push، deploy، APK/Pages publication یا هزینه‌ای انجام نشد.
