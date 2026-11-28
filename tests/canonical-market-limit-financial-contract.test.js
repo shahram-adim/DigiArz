@@ -75,6 +75,6 @@ test('current canonical identity prototype is explicitly not a financial-source-
   assert.match(canonicalCandidate, /v_fee\s*:=\s*v_quote_value\s*\*\s*0\.001/);
   assert.match(canonicalCandidate, /observed_at\s*>=\s*clock_timestamp\(\)\s*-\s*interval\s+'2 minutes'/);
   assert.match(canonicalCandidate, /DELETE FROM canonical_asset_candidate\.reservations/);
-  assert.match(canonicalCandidate, /v_qty\s*:=\s*v_order\.remaining_amount/);
+  assert.match(canonicalCandidate, /SET status='filled',price=v_price,filled_amount=amount,remaining_amount=0/);
   assert.doesNotMatch(canonicalCandidate, /pg_try_advisory_xact_lock\(739201126\)/);
 });
