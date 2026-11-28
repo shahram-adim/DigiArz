@@ -2605,3 +2605,29 @@
 - [x] فقط سند طراحی و این فایل وضعیت در شاخهٔ Draft ثبت شدند.
 - [x] هیچ SQL روی Supabase یا Production اجرا نشد؛ هیچ Migration، RPC، Worker، Cron، Edge Function، RLS/ACL یا دادهٔ مالی تغییر نکرد.
 - [x] هیچ merge، rebase، db push، deploy، انتشار APK/Pages یا هزینه‌ای انجام نشد.
+
+
+## شهرام ۲۰۹ — ممیزی شکاف مالی prototype canonical — ۲۸ نوامبر ۲۰۲۶
+
+### بازبینی و یافته‌ها
+- [x] پیش از کار، PR #67، شاخه، Main و مقایسهٔ زنده بررسی شدند؛ PR باز و Draft و ادغام‌نشده است؛ HEAD شروع `5e23365dcbf2b7386997de08be452d108f89a383` بود.
+- [x] prototype فعلی canonical دوباره از روی بدنهٔ SQL توابع Market، Limit placement و Limit worker بررسی شد.
+- [x] شکاف‌های واقعی و مشخص ثبت شدند: generic balances به‌جای wallets + asset_balances؛ نبود auth.uid()/active-account؛ نبود کسر رزروهای باز از available funds؛ fee ثابت 0.001؛ freshness دو دقیقه با تحمل timestamp آینده؛ نبود precision صریح Market؛ حذف reservation پس از fill؛ نبود consumed/released/status تجمعی؛ fill کامل سفارش به‌جای سقف ۲۵٪؛ نبود advisory lock سراسری؛ نبود transactions journal و wallet-first ledger parity.
+- [x] نتیجه: prototype فعلی فقط جداسازی هویت در schema ساده‌شده را اثبات می‌کند؛ نه source parity و نه اجرای مالی canonical روی دفترکل authoritative.
+
+### خروجی
+- [x] سند `docs/CANONICAL_PROTOTYPE_FINANCIAL_GAP_AUDIT_2026-11-28.md` ایجاد شد.
+- [x] ترتیب امن اصلاحات ثبت شد: ابتدا mapping قطعی canonical ID به ledger موجود، سپس candidate RPC/worker pair-keyed روی fixture authoritative و فقط در PostgreSQL موقت؛ بعد اجرای duplicate-ticker روی همان موتور مالی.
+- [x] هیچ کد مالی یا SQL migration تغییر نکرد؛ از ترویج prototype فعلی به‌عنوان پیاده‌سازی قابل انتشار جلوگیری شد.
+
+### گام بعد
+- [ ] طراحی schema نگاشت canonical asset ID به کلید legacy `asset_balances.asset` با uniqueness و quarantine برای ambiguity؛ بدون جدول generic balances.
+- [ ] ساخت candidate Market/Limit functionها روی همان wallets، asset_balances، order_reservations، orders، trades و transactions fixture.
+- [ ] افزودن تست دقیق reserved funds، fee helper، freshness یک دقیقه، Market 8dp، چهار چرخهٔ ۲۵٪، reservation cumulative lifecycle، advisory lock و transaction journal.
+- [ ] اجرای PostgreSQL CI روی commit نهایی و فقط سپس ارزیابی duplicate ticker مالی.
+- [ ] CI روی HEAD تازه هنوز باید اجرا و بررسی شود؛ نبود Check Runs به‌معنی موفقیت نیست.
+
+### ایمنی
+- [x] فقط دو سند مستنداتی در شاخهٔ Draft ثبت شدند.
+- [x] هیچ SQL/DDL یا Node/PostgreSQL test اجرا نشد؛ هیچ Production/Supabase، RPC، Worker، Cron، Edge Function، RLS/ACL یا دادهٔ مالی تغییر نکرد.
+- [x] هیچ merge، rebase، db push، deploy، انتشار APK/Pages یا هزینه‌ای انجام نشد.
