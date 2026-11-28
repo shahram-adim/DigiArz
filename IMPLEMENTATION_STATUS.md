@@ -2957,3 +2957,27 @@
 ### ایمنی
 - [x] تغییرات این مرحله فقط فایل تست، workflow و گزارش شاخه Draft هستند.
 - [x] هیچ Production DB، داده مالی، Migration اعمال‌شده، RPC/Worker/Cron، RLS/ACL، Auth، Supabase تنظیمات، merge/rebase، db push، deploy، APK/Pages انتشار یا هزینه‌ای تغییر نکرد.
+
+
+## شهرام ۲۲۲ — تثبیت مانع اتصال canonical به موتور واقعی — ۲۸ نوامبر ۲۰۲۶
+
+### ممیزی منبع authoritative
+- [x] بدنه سه تابع از Migration authoritative خوانده شد: `execute_demo_trade()`، `place_limit_order()` و `process_limit_orders()`.
+- [x] هر سه مسیر هنوز base asset را از ticker جفت با `left(symbol, length(symbol)-4)` استخراج می‌کنند.
+- [x] هیچ‌یک از این سه مسیر `resolve_canonical_ledger_asset_key()` را فراخوانی نمی‌کند؛ بنابراین mapping candidate فعلی به تنهایی مسیر واقعی Market/Limit را canonical نکرده است.
+- [x] آزمون صریح در `tests/canonical-ledger-identity-integration-gate.test.js` اضافه شد تا وابستگی فعلی به ticker و نبود resolver را به‌عنوان مانع انتشار ثبت کند. هنگام پیاده‌سازی canonical واقعی، این blocker test باید با آزمون‌های end-to-end جایگزین شود.
+
+### وضعیت CI و trigger
+- [x] Workflow `exact-decimal-tests.yml` روی Main وجود دارد و trigger آن `pull_request` با base=main است؛ بنابراین نبودن workflow در default branch علت این مورد نیست.
+- [x] برای HEAD فعلی تا زمان بررسی هیچ Actions Run یا Check Run ثبت نشده است.
+- [ ] علت عدم تحویل event هنوز از داده‌های GitHub قابل اثبات نیست؛ تنظیمات Actions/approval و event delivery باید توسط مالک در GitHub بررسی شود. هیچ تغییر trigger یا permission انجام نشد.
+
+### گام بعد
+1. اجرای واقعی workflow روی HEAD شاخه و رفع خطاهای احتمالی fixture.
+2. طراحی migration/candidate additive برای ذخیره canonical_asset_id در orders، trades و reservations و resolver واحد؛ بدون دست‌کاری schema Production.
+3. تغییر آزمایشی Market/Limit placement/worker/cancel تا کلید دارایی از canonical mapping resolve شود، نه ticker.
+4. آزمون end-to-end duplicate ticker در Market و Limit و سپس TP/SL و Stop-Limit؛ سنجش gross/fee/net، precision، reserve/consume/release، stale price و دو نشست هم‌زمان.
+
+### ایمنی
+- [x] فقط یک تست source-gate و این گزارش در شاخه Draft ثبت شدند.
+- [x] هیچ Production، Migration اعمال‌شده، RPC/Worker/Cron، Supabase تنظیمات، RLS/ACL، داده مالی، merge/rebase، db push، deploy، انتشار APK/Pages یا هزینه‌ای تغییر نکرد.
