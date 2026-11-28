@@ -2937,3 +2937,23 @@
 ### ایمنی
 - [x] این مرحله فقط بررسی read-only GitHub بود؛ هیچ فایل، branch، workflow، تنظیم مخزن یا داده‌ای تغییر نکرد.
 - [x] هیچ Production SQL، Migration، db push، RPC/Worker/Cron، merge/rebase، deploy، APK/Pages publication یا هزینه‌ای انجام نشد.
+
+
+## شهرام ۲۲۱ — افزودن آزمون نگاشت دفترکل canonical — ۲۸ نوامبر ۲۰۲۶
+
+- [x] فایل آزمایشی جداگانه `supabase/tests/canonical_asset_ledger_key_mapping_candidate.sql` اضافه شد. این candidate پس از اجرای setup و Migration authoritative Market/Limit، روی همان جدول‌های `asset_balances` و `order_reservations` اجرا می‌شود؛ جدول balances موازی ایجاد نمی‌کند.
+- [x] قید یکتایی `ledger_asset_key`، وضعیت‌های pending/verified/ambiguous/quarantined، الزام evidence و review timestamp برای verified، و resolver با رفتار fail-closed برای mapping تأییدنشده در fixture آزمایشی تعریف شد.
+- [x] سناریوی دو دارایی با ticker نمایشی یکسان و دو ledger key مستقل، جداسازی موجودی ۱۲ و ۲۹، جداسازی رزرو خالص ۳ و ۴، و رد کلید تکراری/نگاشت ambiguous به آزمون اضافه شد.
+- [x] مرحله مستقل CI برای ساخت PostgreSQL دورریختنی، اجرای setup، snapshot helperها، Migration authoritative و candidate mapping به `.github/workflows/exact-decimal-tests.yml` اضافه شد.
+- [ ] این SQL هنوز در PostgreSQL اجرا نشده؛ محیط محلی psql ندارد و GitHub Actions روی HEAD جدید `ffcf43f6fa3f145b6c165341dfff6e9afed88f07` هنوز هیچ Run یا Check Run ثبت نکرده است. نتیجه runtime نامعلوم است؛ PASS ادعا نمی‌شود.
+- [ ] این candidate فقط امکان نگاشت یکتا و جداسازی کلیدهای موجودی/رزرو را اثبات خواهد کرد؛ هنوز توابع Market/Limit canonical، FKهای نهایی، backfill، worker settlement و raceها را پیاده‌سازی یا اثبات نمی‌کند.
+- [x] PR #67 همچنان باز، Draft و ادغام‌نشده است؛ HEAD اکنون `ffcf43f6fa3f145b6c165341dfff6e9afed88f07`. هیچ rebase یا merge انجام نشد.
+
+### گام بعد
+1. از اجرای واقعی CI روی HEAD جدید اطمینان حاصل شود؛ اگر رویداد خودکار تحویل نشد، مالک از مسیر GitHub Actions مجاز آن را اجرا کند.
+2. هر خطای SQL یا YAML از لاگ واقعی برطرف شود؛ تا قبل از آن candidate موفق اعلام نشود.
+3. پس از سبزشدن mapping fixture، candidateهای Market/Limit با همان resolver و همان دفترکل authoritative ساخته شوند؛ سپس TP/SL و Stop-Limit به همان قرارداد منتقل شوند.
+
+### ایمنی
+- [x] تغییرات این مرحله فقط فایل تست، workflow و گزارش شاخه Draft هستند.
+- [x] هیچ Production DB، داده مالی، Migration اعمال‌شده، RPC/Worker/Cron، RLS/ACL، Auth، Supabase تنظیمات، merge/rebase، db push، deploy، APK/Pages انتشار یا هزینه‌ای تغییر نکرد.
