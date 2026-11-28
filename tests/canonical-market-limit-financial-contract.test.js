@@ -121,4 +121,6 @@ test('authoritative Market and Limit entrypoints subtract outstanding reservatio
   assert.match(authoritativeIntegration, /Existing base-asset reservations must reduce available Market-sell funds/);
   assert.match(authoritativeIntegration, /Existing USDT reservations must reduce available Limit-buy funds/);
   assert.match(authoritativeIntegration, /Existing base-asset reservations must reduce available Limit-sell funds/);
+  assert.equal((authoritativeIntegration.match(/INSERT INTO public\.orders\(id,user_id,symbol,side,order_type,amount,price,filled_amount,remaining_amount,status\)/g) || []).length, 4, 'each reservation regression must be backed by a pending order fixture');
+  assert.equal((authoritativeIntegration.match(/DELETE FROM public\.orders WHERE id=/g) || []).length, 4, 'each synthetic pending order must be cleaned up');
 });
