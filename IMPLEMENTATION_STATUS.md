@@ -3001,3 +3001,35 @@
 1. inventory تمام فراخوانی‌کنندگان RPCهای Market/Limit و تمام مصرف‌کنندگان `market_prices.symbol` و `orders.symbol` را تهیه کن.
 2. قرارداد candidate مبتنی بر pair UUID را در disposable PostgreSQL طراحی کن؛ ابتدا schema و FKها، سپس Market، Limit placement، worker، cancel و journal.
 3. قبل از هر backfill، گروه‌های ticker تکراری و balances/reservations موجود را فقط read-only طبقه‌بندی کن؛ هیچ split یا انتقال خودکار مجاز نیست.
+
+
+## شهرام ۲۲۴ — inventory مصرف‌کنندگان pair-ID و قرارداد RPC نسخه‌دار — ۲۸ نوامبر ۲۰۲۶
+
+### بررسی زنده پیش از تغییر
+- [x] PR #67 باز، Draft، ادغام‌نشده و `mergeable=false` است؛ HEAD پیش از این مرحله `79ca8fe129179286248056b7300cf435549fface` بود.
+- [x] مقایسه با Main: شاخه ۲۸۶ کامیت جلو و ۸ کامیت عقب، تاریخچه واگرا.
+- [x] برای HEAD پیش از این مرحله هیچ Actions run و Check Run ثبت نشده بود؛ نتیجه CI برای این HEAD اثبات نشده است.
+
+### inventory مصرف‌کنندگان
+- [x] در `index.html` یک call site برای `execute_demo_trade` و یک call site برای `place_limit_order` تأیید شد؛ هر دو ورودی `p_symbol` می‌فرستند، نه pair ID.
+- [x] مسیر ساخت Market list، `market_prices.symbol` را به `demo_trading_pairs.pair_symbol` متصل می‌کند؛ قیمت‌ها و ردیف‌های سفارش فعال نیز در UI با symbol خوانده/تطبیق داده می‌شوند.
+- [x] چهار محل فراخوانی reservation RPC در فایل بررسی‌شده یافت شد؛ خروجی فعلی text asset در تفسیر/نمایش رزرو استفاده می‌شود.
+- [x] Holdings در `src/market-holdings.js` بر اساس text asset و مشتق‌سازی ticker کار می‌کند؛ تغییر backend به‌تنهایی ناسازگار و پرخطر است.
+- [x] منبع captured مربوط به admin-disable یک ریسک مستقل را تأیید می‌کند: انتخاب pair با CoinGecko ID انجام می‌شود، ولی cleanup سفارش‌ها بر اساس `orders.symbol = pair_symbol` است؛ با duplicate ticker امکان اثرگذاری بر pair دیگر وجود دارد.
+
+### نتیجه و قرارداد candidate
+- [x] سند `docs/CANONICAL_PAIR_ID_CONSUMER_INVENTORY_AND_RPC_CONTRACT_2026-11-28.md` اضافه شد.
+- [x] قرارداد پیشنهادی نسخه‌دار ثبت شد: `execute_demo_trade_by_pair(p_pair_id,...)` و `place_limit_order_by_pair(p_pair_id,...)`؛ از overload کردن امضای legacy اجتناب شود.
+- [x] wrapperهای legacy فقط در صورت تطبیق دقیقاً یک pair فعال می‌توانند ادامه دهند؛ در حالت صفر/چند تطبیق باید fail-closed کنند.
+- [x] pair ID باید از ورودی تا price lookup، order، trade، reservation، worker، cancellation و admin-disable حفظ شود؛ ticker فقط display snapshot است.
+- [x] سند تأکید می‌کند که Market/Limit authoritative financial semantics باید بدون تغییر ناخواسته حفظ شود؛ canonical prototype فعلی جایگزین مالی معتبر نیست.
+
+### باقی‌مانده / گام بعد
+- [ ] inventory کامل repository-wide برای تمام مصرف‌کنندگان `market_prices.symbol`, `orders.symbol`, `asset_balances.asset`, `order_reservations.asset` و تمام client/service-role writerها.
+- [ ] بازیابی و reconciliation migration sourceهای مفقود و timestamp mismatchها؛ تا آن زمان هیچ migration قابل انتشار طراحی/اعمال نشود.
+- [ ] candidate نسخه‌دار Market/Limit و pair-keyed price در PostgreSQL دورریختنی، روی setup و Migration authoritative دقیق؛ سپس تطبیق TP/SL و Stop-Limit و تست duplicate ticker/race.
+- [ ] CI روی HEAD نهایی هنوز باید به‌صورت واقعی مشاهده شود؛ تا آن زمان PASS ادعا نمی‌شود.
+
+### ایمنی
+- [x] فقط یک سند جدید و این status log روی شاخه Draft ثبت شدند.
+- [x] هیچ SQL/Production metadata query، داده کاربر/مالی، Migration/DDL/backfill، RPC/Worker/Cron/Edge Function، RLS/ACL/Auth، merge/rebase، db push، deploy، APK/Pages publication یا هزینه‌ای انجام نشد.
