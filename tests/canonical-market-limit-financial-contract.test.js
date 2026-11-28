@@ -78,3 +78,26 @@ test('current canonical identity prototype is explicitly not a financial-source-
   assert.match(canonicalCandidate, /SET status='filled',price=v_price,filled_amount=amount,remaining_amount=0/);
   assert.doesNotMatch(canonicalCandidate, /pg_try_advisory_xact_lock\(739201126\)/);
 });
+test('authoritative Limit placement serializes wallet before base-ledger reservation and persists the full reservation lifecycle', () => {
+  const walletLock = limitPlacement.indexOf('FROM public.wallets AS w');
+  const baseLock = limitPlacement.indexOf('FROM public.asset_balances AS ab');
+  assert.ok(walletLock >= 0, 'wallet row lock must exist');
+  assert.ok(baseLock > walletLock, 'wallet must be locked before the base-asset row');
+  assert.match(limitPlacement, /SUM\(GREATEST\([\s\S]*?reserved_amount\s*-\s*r\.consumed_amount\s*-\s*r\.released_amount/);
+  assert.match(limitPlacement, /INSERT INTO public\.orders/);
+  assert.match(limitPlacement, /INSERT INTO public\.order_reservations/);
+  assert.match(limitPlacement, /released_amount,\s*consumed_amount,\s*status/);
+});
+
+test('authoritative Limit worker preserves cumulative reservation accounting and wallet-first settlement', () => {
+  assert.match(limitWorker, /v_consumed\s*:=\s*v_reservation\.consumed_amount\s*\+\s*v_total/);
+  assert.match(limitWorker, /v_target_remaining_reserve\s*:=\s*v_new_remaining\s*\*\s*v_order\.price\s*\*\s*\(1\s*\+\s*v_fee_rate\)/);
+  assert.match(limitWorker, /v_released\s*:=\s*GREATEST\([\s\S]*?reserved_amount[\s\S]*?v_consumed[\s\S]*?v_target_remaining_reserve/);
+  assert.match(limitWorker, /v_released\s*:=\s*LEAST\([\s\S]*?reserved_amount\s*-\s*v_consumed/);
+  assert.match(limitWorker, /status\s*=\s*CASE[\s\S]*?WHEN v_new_remaining <= 0 THEN[\s\S]*?'released'[\s\S]*?'consumed'[\s\S]*?ELSE 'reserved'/);
+  const walletLock = limitWorker.indexOf('FROM public.wallets AS w');
+  const baseSettlement = limitWorker.indexOf('UPDATE public.asset_balances');
+  assert.ok(walletLock >= 0, 'wallet row lock must exist');
+  assert.ok(baseSettlement > walletLock, 'wallet must be locked before base-ledger settlement');
+});
+
