@@ -8,6 +8,7 @@ const path = require('node:path');
 const read = (relativePath) => fs.readFileSync(path.join(__dirname, '..', relativePath), 'utf8');
 const authoritative = read('supabase/migrations/20261113161641_enforce_active_accounts_in_demo_trade_and_limit_engine.sql');
 const canonicalCandidate = read('supabase/tests/canonical_asset_identity_candidate.sql');
+const authoritativeIntegration = read('supabase/tests/authoritative_market_limit_source_parity.sql');
 
 function functionBody(source, name, label) {
   const pattern = new RegExp(
@@ -109,4 +110,15 @@ test('authoritative Market execution locks the wallet before sell-side base-ledg
   assert.ok(baseLock > walletLock, 'wallet must be locked before base-asset settlement');
   assert.match(market, /SUM\(r\.reserved_amount\s*-\s*r\.released_amount\s*-\s*r\.consumed_amount\)/);
   assert.match(market, /INSERT INTO public\.transactions/);
+});
+
+test('authoritative Market and Limit entrypoints subtract outstanding reservations before spending', () => {
+  assert.match(market, /SUM\(r\.reserved_amount\s*-\s*r\.released_amount\s*-\s*r\.consumed_amount\)/);
+  assert.match(market, /v_available\s*:=\s*v_balance\s*-\s*v_reserved/);
+  assert.match(market, /v_available\s*:=\s*COALESCE\(v_asset_balance,\s*0\)\s*-\s*v_reserved/);
+  assert.match(limitPlacement, /SUM\(GREATEST\([\s\S]*?r\.reserved_amount\s*-\s*r\.consumed_amount\s*-\s*r\.released_amount/);
+  assert.match(authoritativeIntegration, /Existing USDT reservations must reduce available Market-buy funds/);
+  assert.match(authoritativeIntegration, /Existing base-asset reservations must reduce available Market-sell funds/);
+  assert.match(authoritativeIntegration, /Existing USDT reservations must reduce available Limit-buy funds/);
+  assert.match(authoritativeIntegration, /Existing base-asset reservations must reduce available Limit-sell funds/);
 });
