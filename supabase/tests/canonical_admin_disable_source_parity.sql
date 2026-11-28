@@ -64,7 +64,7 @@ CREATE TABLE private.market_pair_admin_audit (
 );
 
 -- Load the exact captured Production function body, not a rewritten copy.
-\\ir canonical_identity_live_admin_disable_market_pair_snapshot.sql
+\ir canonical_identity_live_admin_disable_market_pair_snapshot.sql
 
 INSERT INTO public.demo_trading_pairs(pair_id,base_coingecko_id,pair_symbol) VALUES
 ('10000000-0000-0000-0000-000000000001','asset-alpha','DUPUSDT'),
