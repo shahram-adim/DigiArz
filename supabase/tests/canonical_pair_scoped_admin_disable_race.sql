@@ -16,6 +16,8 @@ CREATE TABLE canonical_pair_disable.orders (
   amount numeric NOT NULL CHECK (amount > 0),
   filled_amount numeric NOT NULL DEFAULT 0,
   remaining_amount numeric NOT NULL,
+  CHECK (filled_amount >= 0 AND filled_amount <= amount),
+  CHECK (remaining_amount >= 0 AND remaining_amount = amount - filled_amount),
   UNIQUE (order_id, pair_id)
 );
 CREATE TABLE canonical_pair_disable.conditional_orders (
@@ -91,7 +93,27 @@ BEGIN
     'released_reservations', v_released
   );
 END;
-$$;
+$;
+
+-- Repeated disable must be idempotent: no duplicate release or order mutation.
+DO $
+DECLARE
+  v_result jsonb;
+BEGIN
+  v_result := canonical_pair_disable.disable_pair('10000000-0000-0000-0000-000000000001');
+  IF (v_result->>'cancelled_orders')::integer <> 0 THEN
+    RAISE EXCEPTION 'second disable unexpectedly cancelled more orders';
+  END IF;
+  IF (v_result->>'released_reservations')::integer <> 0 THEN
+    RAISE EXCEPTION 'second disable unexpectedly released reservations again';
+  END IF;
+  IF (SELECT count(*) FROM canonical_pair_disable.reservations
+      WHERE pair_id='10000000-0000-0000-0000-000000000001'
+        AND status='released' AND released_amount=75) <> 2 THEN
+    RAISE EXCEPTION 'repeated disable changed cumulative reservation accounting';
+  END IF;
+END;
+$;
 
 -- Worker follows the same pair-then-order lock order as admin disable.
 CREATE OR REPLACE FUNCTION canonical_pair_disable.process_order(
