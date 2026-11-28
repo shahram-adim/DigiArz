@@ -2755,3 +2755,34 @@
 - [x] فقط دو فایل تست ایزوله، workflow CI و اسناد شاخه Draft اضافه/به‌روزرسانی شدند.
 - [x] هیچ Production query/write، DDL، migration، backfill، RPC/Worker/Cron/Edge Function، RLS/ACL، داده مالی یا Auth تغییر نکرد.
 - [x] هیچ merge، rebase، db push، deploy، APK/Pages publication یا هزینه‌ای انجام نشد.
+
+
+## شهرام ۲۱۴ — بازبینی ایستا و سخت‌سازی Fixture — ۲۸ نوامبر ۲۰۲۶
+
+### بازبینی زنده پیش از ادامه
+- [x] PR #67 باز، Draft، ادغام‌نشده و mergeable=false؛ HEAD آغاز `315ad8fd58172b9c9632f8aa20247445c9162bf8`.
+- [x] Main `e8477b53a1b8c6fc7225572db3e559a1c75607d8`؛ compare در آغاز ۲۵۵ جلو و ۸ عقب.
+- [x] روی HEAD آغاز Check Runs صفر و Workflow Runs قابل مشاهده صفر بودند.
+- [x] بعد از commit سخت‌سازی نیز روی HEAD جدید Check Runs صفر و Workflow Runs قابل مشاهده صفرند؛ تست سبز یا اجراشده تلقی نمی‌شود.
+
+### یافته‌ها و اصلاح Fixture
+- [x] بازبینی workflow تأیید کرد PostgreSQL 17 service، psql client و دسترسی ایجاد database در job موجودند؛ step جدید پس از تست candidate و پیش از fingerprint اجرا می‌شود.
+- [x] Race script دو نشست مستقل دارد و با `pg_stat_activity` منتظر می‌ماند تا worker/admin واقعاً وارد critical section شوند؛ از sleep تصادفی برای ترتیب‌دهی استفاده نمی‌کند.
+- [x] Fixture سخت‌تر شد: `orders(order_id,pair_id)` کلید یکتای مرکب دارد؛ conditional_orders و reservations با FK مرکب به همان tuple متصل‌اند.
+- [x] قیود رزرو، consumed/released را غیرمنفی و مجموع آن‌ها را حداکثر برابر reserved می‌کنند؛ cross-pair attribution در خود مدل رد می‌شود.
+- [x] سند `docs/CANONICAL_PAIR_SCOPED_ADMIN_DISABLE_RACE_TEST_2026-11-28.md` جزئیات سخت‌سازی و محدودیت عدم اجرا را ثبت کرد.
+
+### نتیجه
+- [x] SQL و shell script از GitHub branch بازخوانی و به‌صورت ایستا بررسی شدند.
+- [ ] تست‌ها هنوز اجرا نشده‌اند؛ CI برای commit جدید مشاهده نشده است. نتیجه Pass/Fail نامعلوم است.
+- [ ] Fixture همچنان behavioral model کوچک است و full Production schema/function parity را اثبات نمی‌کند.
+
+### گام بعد
+- [ ] دریافت نتیجه GitHub Actions روی HEAD دقیق `15a9bf3e8dd24781064fb30bb5529590f9e3b784`؛ اگر run ساخته نشد، مانع trigger/permissions در مسیر CI ثبت شود، بدون ادعای اجرا.
+- [ ] پس از اجرای موفق، گسترش fixture به تمام مسیرهای pair-aware placement, execution, cancellation, deactivation و admin.
+- [ ] Production fingerprints و migration artifacts مفقود همچنان blocker هر طرح اجرایی Production هستند.
+
+### ایمنی
+- [x] فقط SQL تست ایزوله، سند ممیزی و IMPLEMENTATION_STATUS در شاخه Draft تغییر کردند.
+- [x] هیچ Production query/write، DDL، migration، backfill، RPC/Worker/Cron/Edge Function، RLS/ACL، داده مالی یا Auth تغییر نکرد.
+- [x] هیچ merge، rebase، db push، deploy، APK/Pages publication یا هزینه‌ای انجام نشد.
