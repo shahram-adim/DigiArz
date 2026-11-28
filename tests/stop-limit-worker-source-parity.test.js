@@ -67,3 +67,46 @@ test('the Production snapshot integration exercises ten separate retries and a f
   assert.match(sql, /unexpected place_limit_order call in invalid-reservation regression/);
   assert.match(sql, /invalid reservation was modified during fail-closed handling/);
 });
+
+
+function extractRawWorkerBody(source, label) {
+  const match = source.match(/CREATE OR REPLACE FUNCTION\\s+public\\.process_stop_limit_orders\\s*\\(\\s*\\)\\s*RETURNS\\s+jsonb[\\s\\S]*?AS\\s+\\$function\\$([\\s\\S]*?)\\$function\\$/i);
+  assert.ok(match, label + ': raw process_stop_limit_orders() body not found');
+  return match[1];
+}
+
+function normalizeWorkerBody(source) {
+  return source
+    .replace(/--[^\\n]*/g, '')
+    .replace(/\\s+/g, ' ')
+    .trim();
+}
+
+function extractRetryPatch(source, variableName, tag) {
+  const pattern = new RegExp(
+    '\\b' + variableName + '\\s+text\\s*:=\\s*\\$' + tag + '\\$([\\s\\S]*?)\\$' + tag + '\\$;',
+    'i'
+  );
+  const match = source.match(pattern);
+  assert.ok(match, 'retry migration ' + variableName + ' patch block is missing');
+  return match[1];
+}
+
+test('applied base migration plus bounded-retry patch reconstructs the captured Production Stop-Limit worker', () => {
+  const baseBody = extractRawWorkerBody(migration, 'Applied base migration');
+  const productionBody = extractRawWorkerBody(productionSnapshot, 'Captured Production snapshot');
+  const oldValidationBranch = extractRetryPatch(retryMigration, 'v_old', 'old');
+  const newValidationBranch = extractRetryPatch(retryMigration, 'v_new', 'new');
+
+  assert.ok(
+    baseBody.includes(oldValidationBranch),
+    'the bounded-retry patch must target the exact branch present in the applied base migration'
+  );
+
+  const reconstructedProductionBody = baseBody.replace(oldValidationBranch, newValidationBranch);
+  assert.equal(
+    normalizeWorkerBody(reconstructedProductionBody),
+    normalizeWorkerBody(productionBody),
+    'the checked-in base migration plus its applied retry patch must match the captured Production worker body'
+  );
+});
