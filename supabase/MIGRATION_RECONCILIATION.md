@@ -128,3 +128,44 @@ This report is an inventory and safety analysis only. It changes no database obj
 - [!] این داده‌ها نشانهٔ پایداری بهتر worker در پنجرهٔ اخیرند، اما علت ریشه‌ای شکست‌های قبلی یا اثر مستقل هر Migration را اثبات نمی‌کنند. زمان اجرای job 14 همچنان حدود ۲۰ تا ۲۸ ثانیه است و باید در محیط ایزوله تحلیل شود.
 - [x] هیچ cron، Migration، تابع، schema، grant، queue، سفارش، معامله، رزرو، کیف پول، موجودی یا سابقهٔ مالی در Production تغییر نکرد.
 - [ ] اقدام بعدی: SQL سه Migration جدید را از deployment artifact/backup معتبر بازیابی کن؛ با محتوای live function و schedule تطبیق بده؛ سپس مجموعهٔ بازسازی‌شده را در PostgreSQL 17 دورریختنی replay کن. تا آن زمان `supabase db push` ممنوع بماند.
+
+
+## Shahram 200 — follow-up GitHub commit-source recovery sweep — 2026-11-28
+
+A repository-scoped exact-name commit search was run for all 17 applied migration names listed in the inventory above. This is an additional bounded search; it does not query Supabase or prove absence from all Git objects, forks, backups, deployment artifacts, or other repositories.
+
+| Applied migration name | Exact-name commit search |
+|---|---|
+| `approved_wallet_defaults_fees_and_coin_reviews` | No result |
+| `assign_confirmed_super_admin` | No result |
+| `secure_admin_wallet_management` | One unrelated result; inspected commit patch modifies `index.html` CSS and is not migration SQL |
+| `add_admin_role_probe` | No result |
+| `use_toman_units_in_admin_credit_ui` | No result |
+| `move_admin_privilege_logic_to_private_schema` | No result |
+| `create_exchange_asset_observations` | No result |
+| `schedule_iran_exchange_asset_sync` | No result |
+| `fix_exchange_sync_response_json_cast` | No result |
+| `auto_list_verified_exchange_assets` | No result |
+| `schedule_bit24_exchange_asset_sync` | No result |
+| `admin_exchange_asset_sync_monitoring` | One unrelated result; inspected commit patch modifies `index.html` order-history/admin UI markup and is not migration SQL |
+| `restrict_exchange_sync_worker_execution` | No result |
+| `auto_activate_verified_exchange_pairs` | No result |
+| `digiarz_backpressure_and_exchange_sync_bloat_guards` | No result |
+| `snapshot_pg_net_unlogged_queue_before_recovery` | No result |
+| `temporarily_throttle_exchange_asset_processors_20261121` | No result |
+
+### Result and interpretation
+- [x] The two positive search hits were inspected by commit diff; neither contains an authoritative migration SQL body.
+- [x] No applied migration SQL source was recovered by this 17-name commit-search pass.
+- [!] The inventory remains 17 applied migrations without corresponding local SQL sources, 20 timestamp/name mismatches, and two local-only unrecorded migrations, based on the latest recorded Supabase ledger audit. This count was not freshly queried from Supabase in this GitHub-only pass.
+- [!] Do not synthesize SQL from current live functions, filenames, commit messages, or migration names. Do not rename migration files, edit migration history, or run `supabase db push`.
+- [ ] Next source-recovery avenue: obtain an independently trusted Supabase deployment artifact, backup, or owner-held migration archive with exact per-version SQL/checksum provenance. If unavailable, preserve each entry as unresolved and keep deployment blocked.
+
+### CI and branch state at checkpoint
+- PR #67 remains open and Draft. The latest branch commit is recorded in `IMPLEMENTATION_STATUS.md`.
+- The latest branch HEAD has no GitHub Check Runs and the combined commit status is pending; no new Exact-decimal Actions run was visible for that SHA at the time of this audit.
+- The checked-in workflow listens for `push` to `main` and `pull_request` targeting `main`; the GitHub Contents API commits made during this session did not produce a visible run. The reason is not proven, so do not assume the tests ran. A workflow dispatch capability was not available in the connected GitHub actions for this session.
+- Prior successful CI #2419 is evidence for its own Main SHA and does not validate this PR HEAD.
+
+### Safety
+- [x] This was repository-only search and documentation. No Supabase query, database write, migration replay, schema/function/ACL/RLS/trigger/Cron/worker/Auth change, merge, deploy, APK/Pages publication, or infrastructure spend occurred.
