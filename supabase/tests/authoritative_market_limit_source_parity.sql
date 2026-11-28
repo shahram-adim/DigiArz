@@ -188,6 +188,40 @@ BEGIN
     RAISE EXCEPTION 'Limit sell expected four partial-fill trade rows';
   END IF;
 
+  -- Existing USDT reservations must reduce available Limit-buy funds.
+  INSERT INTO public.order_reservations(
+    order_id,user_id,asset,reserved_amount,consumed_amount,released_amount,status
+  ) VALUES (
+    '21000000-0000-0000-0000-000000000103',v_user,'USDT',
+    (SELECT balance_usdt FROM public.wallets WHERE user_id=v_user),0,0,'reserved'
+  );
+  BEGIN
+    PERFORM public.place_limit_order('DOTUSDT','buy',0.1,10);
+    RAISE EXCEPTION 'Limit buy overspent USDT already reserved by another order';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM='Limit buy overspent USDT already reserved by another order' THEN RAISE; END IF;
+    IF SQLERRM NOT LIKE '%Insufficient available USDT balance%' THEN RAISE; END IF;
+  END;
+  DELETE FROM public.order_reservations
+  WHERE order_id='21000000-0000-0000-0000-000000000103';
+
+  -- Existing base-asset reservations must reduce available Limit-sell funds.
+  INSERT INTO public.order_reservations(
+    order_id,user_id,asset,reserved_amount,consumed_amount,released_amount,status
+  ) VALUES (
+    '21000000-0000-0000-0000-000000000104',v_user,'DOT',
+    (SELECT balance FROM public.asset_balances WHERE user_id=v_user AND asset='DOT'),0,0,'reserved'
+  );
+  BEGIN
+    PERFORM public.place_limit_order('DOTUSDT','sell',0.1,9);
+    RAISE EXCEPTION 'Limit sell overspent DOT already reserved by another order';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM='Limit sell overspent DOT already reserved by another order' THEN RAISE; END IF;
+    IF SQLERRM NOT LIKE '%Insufficient available asset balance%' THEN RAISE; END IF;
+  END;
+  DELETE FROM public.order_reservations
+  WHERE order_id='21000000-0000-0000-0000-000000000104';
+
   -- Stale quote must not consume the pending order or its reservation.
   v_result := public.place_limit_order('DOTUSDT','buy',1,11);
   v_order := (v_result->>'order_id')::uuid;
