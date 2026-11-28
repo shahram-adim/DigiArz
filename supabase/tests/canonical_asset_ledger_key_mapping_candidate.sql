@@ -18,6 +18,31 @@ CREATE TABLE public.canonical_asset_ledger_key_map (
   )
 );
 
+
+-- Once the existing ledger has referenced a mapping, its ledger key is immutable.
+-- Display metadata may change, but a ticker rename must never move balances or reservations.
+CREATE OR REPLACE FUNCTION public.prevent_referenced_ledger_key_reassignment()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path TO ''
+AS $function$
+BEGIN
+  IF NEW.ledger_asset_key IS DISTINCT FROM OLD.ledger_asset_key
+     AND (
+       EXISTS (SELECT 1 FROM public.asset_balances AS b WHERE b.asset = OLD.ledger_asset_key)
+       OR EXISTS (SELECT 1 FROM public.order_reservations AS r WHERE r.asset = OLD.ledger_asset_key)
+     ) THEN
+    RAISE EXCEPTION 'Ledger asset key is immutable after financial use'
+      USING ERRCODE = '23514';
+  END IF;
+  RETURN NEW;
+END;
+$function$;
+
+CREATE TRIGGER canonical_asset_ledger_key_immutable
+BEFORE UPDATE OF ledger_asset_key ON public.canonical_asset_ledger_key_map
+FOR EACH ROW EXECUTE FUNCTION public.prevent_referenced_ledger_key_reassignment();
+
 CREATE OR REPLACE FUNCTION public.resolve_canonical_ledger_asset_key(p_asset_id uuid)
 RETURNS text
 LANGUAGE plpgsql
@@ -119,6 +144,27 @@ BEGIN
   END IF;
   IF v_balance_a-v_reserved_a <> 9 OR v_balance_b-v_reserved_b <> 25 THEN
     RAISE EXCEPTION 'available balance calculation crossed canonical ledger keys';
+  END IF;
+
+  -- A display-symbol rename must not change the financial ledger key.
+  UPDATE public.canonical_asset_ledger_key_map
+  SET display_symbol='ABC-NEW' WHERE canonical_asset_id=v_asset_a;
+  IF public.resolve_canonical_ledger_asset_key(v_asset_a) <> v_key_a THEN
+    RAISE EXCEPTION 'display rename changed the resolved ledger key';
+  END IF;
+
+  -- Once financial rows reference a key, reassignment must fail closed.
+  BEGIN
+    UPDATE public.canonical_asset_ledger_key_map
+    SET ledger_asset_key='asset:22000000-0000-0000-0000-0000000000f5'
+    WHERE canonical_asset_id=v_asset_a;
+    RAISE EXCEPTION 'referenced ledger key reassignment unexpectedly accepted';
+  EXCEPTION WHEN SQLSTATE '23514' THEN
+    IF SQLERRM NOT LIKE '%immutable after financial use%' THEN RAISE; END IF;
+  END;
+
+  IF public.resolve_canonical_ledger_asset_key(v_asset_a) <> v_key_a THEN
+    RAISE EXCEPTION 'failed reassignment changed the canonical ledger mapping';
   END IF;
 END;
 $test$;
