@@ -60,7 +60,7 @@ test('live Production fee helper selects configured maker/taker rates and fails 
 
 test('authoritative Market/Limit CI loads the captured Production fee helper before applying RPC migration', () => {
   const block = workflow.match(
-    /- name: Apply authoritative Market and Limit migration in disposable PostgreSQL([\\s\\S]*?)(?=\\n      - name:|$)/
+    /- name: Apply authoritative Market and Limit migration in disposable PostgreSQL([\s\S]*?)(?=\n      - name:|$)/
   )?.[1] || '';
   const setup = block.indexOf('authoritative_market_limit_source_parity_setup.sql');
   const feeSnapshot = block.indexOf('canonical_identity_live_public_get_demo_trading_fee_rate_snapshot.sql');
@@ -68,7 +68,7 @@ test('authoritative Market/Limit CI loads the captured Production fee helper bef
   const assertions = block.indexOf('authoritative_market_limit_source_parity.sql');
   assert.ok(setup >= 0 && feeSnapshot > setup && migration > feeSnapshot && assertions > migration,
     'the disposable parity DB must load the fee table fixture, captured Production helper, authoritative RPC migration, then assertions');
-  assert.doesNotMatch(marketLimitSetup, /CREATE OR REPLACE FUNCTION public\\.get_demo_trading_fee_rate/i,
+  assert.doesNotMatch(marketLimitSetup, /CREATE OR REPLACE FUNCTION public\.get_demo_trading_fee_rate/i,
     'the setup must not shadow the captured Production helper with a local stub');
 });
 
