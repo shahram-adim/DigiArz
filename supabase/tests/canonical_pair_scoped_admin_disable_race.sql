@@ -96,7 +96,7 @@ END;
 $$;
 
 -- Repeated disable must be idempotent: no duplicate release or order mutation.
-DO $
+DO $$
 DECLARE
   v_result jsonb;
 BEGIN
