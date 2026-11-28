@@ -41,9 +41,19 @@ A pair_id-only addition to `orders` or `market_prices` is therefore insufficient
 
 The current legacy `asset_balances` ticker primary/unique key is a hard compatibility boundary. Do not silently map an ambiguous legacy ticker balance to one canonical asset. Any migration needs an explicit, reviewable reconciliation policy and must stop on ambiguous mappings.
 
-### 4. Fee helper is not recovered as an authoritative source here
+### 4. Production fee helper source is now captured; fee data parity remains open
 
-The passing CI fixture defines `get_demo_trading_fee_rate('USDT', kind)` as a constant 0.1% test helper. The checked-in financial RPCs call that helper, but the reviewed material does not establish that the fixture's constant body is the complete current Production implementation. Fee parity must therefore remain a separate unresolved dependency until the exact live helper definition, volatility/plan-dependent behavior if any, owner, volatility, search_path and grants are captured or an authoritative source migration is located.
+A read-only Production function snapshot was found in the canonical identity source bundle:
+
+- `supabase/tests/canonical_identity_live_public_get_demo_trading_fee_rate_snapshot.sql`
+- Function: `public.get_demo_trading_fee_rate(text,text)`
+- Capture date: 2026-11-27
+- Fingerprint: `546d80d7105228ed97da26c5ed0c7b7f`
+- Metadata: owner=postgres, SECURITY DEFINER, empty search_path, EXECUTE anon=false, authenticated=true, service_role=true.
+
+The captured function validates liquidity type as maker/taker, selects `maker_fee_rate` or `taker_fee_rate` from `public.demo_trading_fees` for the normalized quote asset where `is_enabled IS TRUE`, and fails closed when no enabled row is found. It does not hard-code a 0.1% rate.
+
+The earlier disposable source-parity fixture's constant 0.1% helper is therefore **not** the captured Production helper body. The exact function definition is now available for a source-faithful disposable fixture. However, the Production `demo_trading_fees` table DDL, constraints, RLS/grants and fee configuration rows were not captured in this source snapshot; no business/configuration rows were queried. Therefore configured fee-value parity remains unresolved.
 
 ### 5. Price freshness requires preserving the actual source contract
 
