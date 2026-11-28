@@ -135,10 +135,16 @@ CREATE OR REPLACE FUNCTION public.admin_disable_market_pair_candidate(
 )
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $$
 DECLARE
+  v_admin uuid := auth.uid();
   v_pair public.demo_trading_pairs%ROWTYPE;
   v_cancelled integer := 0;
   v_released integer := 0;
 BEGIN
+  IF v_admin IS NULL OR NOT private.is_super_admin() THEN
+    RAISE EXCEPTION 'Super administrator access required' USING errcode='42501';
+  END IF;
+  IF p_pair_id IS NULL THEN RAISE EXCEPTION 'Pair ID is required'; END IF;
+
   SELECT * INTO v_pair
   FROM public.demo_trading_pairs
   WHERE pair_id=p_pair_id
