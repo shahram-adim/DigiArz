@@ -2908,3 +2908,32 @@
 ### گام بعد
 - [ ] علت عدم تحویل رویداد Actions برای commitهای PR را از صفحهٔ GitHub Actions/timeline مالک بررسی کن؛ ابزار فعلی امکان dispatch workflow ندارد.
 - [ ] پس از اجرای CI، job log و نتیجهٔ step جدید بررسی شود؛ در صورت موفقیت، همین source-parity الگو برای سایر مسیرهای pair-keyed گسترش یابد.
+
+
+## شهرام ۲۲۰ — ممیزی هم‌ترازی Main و وضعیت تحویل CI — ۲۸ نوامبر ۲۰۲۶
+
+### وضعیت زنده GitHub
+- [x] PR #67 دوباره بررسی شد: باز، Draft، ادغام‌نشده و `mergeable=false`؛ HEAD در زمان بررسی `adc08b6d7ad36bf198d75479b292dda4f6265a27` بود.
+- [x] مقایسه با Main در `e8477b53a1b8c6fc7225572db3e559a1c75607d8`: شاخه ۲۷۸ کامیت جلو و ۸ کامیت عقب است؛ دو خط تاریخچه واگرا هستند.
+- [x] آخرین اجرای موفق قابل مشاهده برای شاخه، Actions run `46052800147` روی commit `8f7925ced4c18716ee07e11890fd9572c4fcacf4` در ۲۷ نوامبر است. این commit نسبت به HEAD فعلی ۶۲ کامیت عقب‌تر است و نتیجه آن آزمون HEAD فعلی محسوب نمی‌شود.
+- [x] برای HEAD فعلی `adc08b6d` هیچ Actions run یا Check Run ثبت نشده است. علت عدم تحویل رویداد هنوز اثبات نشده؛ workflow روی Main موجود است و فیلتر pull_request آن با base=main سازگار است.
+
+### بررسی ۸ کامیت عقب‌ماندگی Main
+- [x] فایل‌های متأثر در مقایسه Main فقط `IMPLEMENTATION_STATUS.md`، `docs/STOP_LIMIT_QA_MATRIX.md` و `tests/stop-limit-worker-source-parity.test.js` هستند.
+- [x] محتوای `tests/stop-limit-worker-source-parity.test.js` در HEAD شاخه و Main دقیقاً یکسان است؛ بنابراین این بخش نیازمند حل تعارض محتوایی نیست.
+- [ ] دو سند وضعیت/QA هنوز باید با تغییرات Main هم‌تراز شوند؛ به‌علت ممنوعیت rebase بدون تأیید، هیچ rebase، merge یا cherry-pick انجام نشد.
+
+### نتیجه مالی مهم
+- [x] ممیزی منبع نشان داد canonical prototype از جدول عمومی `balances(user_id,asset_id)` استفاده می‌کند و با دفترکل authoritative یعنی `wallets`، `asset_balances` و `order_reservations` هم‌ارز نیست.
+- [x] طرح نگاشت باید UUID دارایی را به کلید دفترکل متنیِ یکتا و مستقل از ticker نگاشت کند؛ نگاشت مبهم یا نماد تکراری باید fail-closed و قرنطینه شود.
+- [ ] ساخت harness یکپارچه باید ابتدا Migration authoritative Market/Limit را در PostgreSQL دورریختنی اجرا کند و سپس mapping candidate را روی همان جدول‌های واقعی مالی بیازماید؛ fixture فعلی canonical به‌تنهایی قابل ارتقا نیست.
+
+### گام بعد
+1. بازیابی دقیق ۸ کامیت Main و تعیین نیاز به هم‌ترازی مستندات، بدون rebase خودکار.
+2. رفع علت عدم اجرای Actions از مسیر مجاز مالک؛ هیچ dispatch یا تغییر تنظیمات مخزن انجام نشده است.
+3. ساخت candidate mapping روی `asset_balances` و `order_reservations` واقعیِ fixture authoritative، نه ledger موازی.
+4. آزمون duplicate ticker، رزرو و آزادسازی تجمعی، چهار چرخه ۲۵درصدی Limit، کارمزد/precision، قیمت stale و race دو نشست.
+
+### ایمنی
+- [x] این مرحله فقط بررسی read-only GitHub بود؛ هیچ فایل، branch، workflow، تنظیم مخزن یا داده‌ای تغییر نکرد.
+- [x] هیچ Production SQL، Migration، db push، RPC/Worker/Cron، merge/rebase، deploy، APK/Pages publication یا هزینه‌ای انجام نشد.
