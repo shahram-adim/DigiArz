@@ -1649,3 +1649,9 @@
 - [x] هیچ سفارش، معامله، رزرو، کیف پول، موجودی یا سابقه مالی کاربر خوانده یا تغییر داده نشد.
 - [x] هیچ Worker/RPC مالی، Migration، Grant، Policy، Cron، Edge Function، انتشار APK یا عملیات برگشت‌ناپذیر اجرا نشد.
 - [x] هیچ پروژه/branch جدید یا هزینه‌ای ایجاد نشد.
+
+
+### نتیجه نهایی CI برای QA Stop-Limit — ۲۸ نوامبر ۲۰۲۶
+- [x] Exact-decimal Run #2419 با شناسه `46139853183` روی commit `67570844c8b0301695ff5f8ce4fe987c57e1056e` با نتیجه نهایی `success` پایان یافت.
+- [x] هر ۲۲ مرحله اصلی PostgreSQL/Node و cleanup موفق شدند؛ شامل آزمون جدید تطبیق زنجیره Migration با snapshot Production، تست‌های Market/Limit، چرخه Stop-Limit و TP/SL، رقابت دو نشست Worker/Cancellation و آزمون fail-closed ده‌تلاشی.
+- [!] این شواهد مربوط به PostgreSQL 17 دورریختنی GitHub Actions است؛ جایگزین محیط Supabase ایزوله با schema/ACL parity کامل نیست.
