@@ -69,6 +69,13 @@ In PostgreSQL, when `p_liquidity_type` is NULL, the `NOT IN` expression evaluate
 
 This is a source-derived defect in the captured helper, not a proposed behavior change. The current parity fixture does not yet assert the NULL case. Before promoting a canonical candidate, its fee helper must explicitly reject NULL (for example, `p_liquidity_type IS NULL OR p_liquidity_type NOT IN (...)`) and a disposable regression test must prove NULL is rejected while maker/taker and quote normalization remain correct. Do not patch the live Production helper as part of this Draft or silently alter its current behavior in the source-parity baseline.
 
+
+### Disposable NULL-liquidity regression harness
+
+`supabase/tests/canonical_fee_helper_null_regression.sql` runs only in a disposable PostgreSQL database after the captured helper snapshot and the minimal fee-table fixture. It sets deliberately different maker/taker rates (0.002 and 0.001) so the captured function's NULL-to-taker fall-through is observable rather than hidden by equal fixture values. It then tests a separate `canonical_fee_candidate` helper that explicitly rejects NULL and invalid liquidity types while preserving configured rates, quote normalization, and fail-closed behavior for missing quote configuration.
+
+The `exact-decimal-tests.yml` workflow contains a dedicated disposable database step for this harness. The harness is not a Production patch and does not alter the authoritative Market/Limit source-parity baseline. A green CI run is still required before treating the SQL regression as runtime-verified.
+
 ## Why the current canonical prototype cannot be promoted
 
 The current fixture differs in material financial behavior:
