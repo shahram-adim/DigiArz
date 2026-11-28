@@ -2894,3 +2894,17 @@
 ### ایمنی
 - [x] فقط تست و مستندات شاخهٔ Draft و workflow CI تغییر کردند.
 - [x] هیچ Production SQL/query/write، DDL، migration، backfill، RPC/Worker/Cron/Edge Function، RLS/ACL، Auth، دادهٔ مالی، merge، rebase، db push، deploy، APK/Pages publication یا هزینه‌ای انجام نشد.
+
+
+## شهرام ۲۱۹ — سخت‌سازی تست Source Parity خاموش‌سازی — ۲۸ نوامبر ۲۰۲۶
+
+- [x] تست candidate pair-scoped در `supabase/tests/canonical_admin_disable_source_parity.sql` با رزروهای partially consumed سخت‌تر شد: از رزرو ۱۰ واحدی پس از مصرف ۲ واحد، دقیقاً ۸ واحد آزاد می‌شود؛ از رزرو ۵ واحدی پس از مصرف ۱ واحد، دقیقاً ۴ واحد آزاد می‌شود.
+- [x] آزمون منفی مجوز اضافه شد: caller غیر super-admin باید SQLSTATE `42501` بگیرد؛ guard مدیریتی captured source در candidate حفظ شده است.
+- [x] آزمون idempotency برای فراخوانی تکراری disable همچنان برقرار است.
+- [x] سند source parity به‌روزرسانی شد.
+- [ ] روی HEAD فعلی `fee3c4ab50aacb77f7ccede47005ef7dc9352a4e` هیچ GitHub Actions run یا Check Run ثبت نشده است؛ SQL در محیط محلی نیز اجرا نشده. وضعیت runtime نامعلوم است، نه PASS.
+- [x] هیچ Production یا Supabase تغییری نکرد؛ هیچ merge، migration، db push، deploy یا انتشار انجام نشد.
+
+### گام بعد
+- [ ] علت عدم تحویل رویداد Actions برای commitهای PR را از صفحهٔ GitHub Actions/timeline مالک بررسی کن؛ ابزار فعلی امکان dispatch workflow ندارد.
+- [ ] پس از اجرای CI، job log و نتیجهٔ step جدید بررسی شود؛ در صورت موفقیت، همین source-parity الگو برای سایر مسیرهای pair-keyed گسترش یابد.
