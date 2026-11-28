@@ -2507,3 +2507,41 @@
 - [x] این checkpoint فقط مستندات شاخهٔ Draft را تغییر می‌دهد.
 - [x] هیچ SQL اجرا نشد؛ هیچ Migration، RPC، Worker، Cron، Edge Function یا دادهٔ Production تغییر نکرد.
 - [x] هیچ merge، rebase، deploy، APK/Pages publication یا هزینه‌ای انجام نشد.
+
+
+
+## شهرام ۲۰۶ — تقویت آزمون یکپارچهٔ رزروهای باز در Market و Limit — ۲۸ نوامبر ۲۰۲۶
+
+### تغییرات انجام‌شده در شاخهٔ Draft
+- [x] در `supabase/tests/authoritative_market_limit_source_parity.sql` چهار سناریوی integration به harness موجود اضافه شد؛ هر چهار مورد از توابع authoritative واقعی پس از اعمال Migration در PostgreSQL disposable استفاده می‌کنند:
+  1. Market buy نباید USDT رزروشده توسط سفارش دیگر را خرج کند.
+  2. Market sell نباید دارایی پایهٔ رزروشده را خرج کند.
+  3. Limit buy نباید USDT رزروشده را دوباره تخصیص دهد.
+  4. Limit sell نباید دارایی پایهٔ رزروشده را دوباره رزرو کند.
+- [x] هر سناریو خطای مورد انتظار insufficient available balance را assert می‌کند و ردیف reservation آزمایشی را پاک می‌کند؛ خطای موفقیت غیرمنتظره با marker مشخص دوباره raise می‌شود تا false pass رخ ندهد.
+- [x] در `tests/canonical-market-limit-financial-contract.test.js` یک source guard افزوده شد که وجود محاسبات reservation در توابع مرجع و حضور هر چهار سناریوی SQL را الزام می‌کند.
+- [x] بازبینی مستقل الگوهای منبع در محیط ابزار انجام شد: هر چهار marker SQL موجود، فرمول کسر رزرو USDT و base در Market موجود، و تجمیع رزروها در Limit موجود است.
+
+### شناسه‌های فایل
+- Migration authoritative (بدون تغییر): `de09b1cd391790fcd9d94708a916cb41cd9ccc9f`.
+- Integration SQL جدید: `a7d30d3f2e57f511926e08f7d9bcaaf816af7d0c`.
+- Node source guard جدید: `8bd9c82a950b1304f2545a577f69df8d15cd7226`.
+- Workflow: `969f3976a0efb0002699bb156d69f899dd8b9675`؛ همان `node --test tests/*.test.js` و PostgreSQL 17 integration را اجرا می‌کند.
+
+### محدودیت شواهد
+- [!] هیچ اجرای Node یا PostgreSQL در این مرحله انجام نشد؛ بررسی‌های انجام‌شده فقط static pattern checks در محیط ابزار هستند.
+- [!] CI قبلی موفق روی SHA قدیمی‌تر `8f7925ced4c18716ee07e11890fd9572c4fcacf4` اجرا شده بود و تغییرات جدید را پوشش نمی‌دهد.
+- [!] برای SHA جدید باید اجرای کامل workflow تأیید شود؛ تا زمان ثبت Check Run موفق، این چهار سناریو را فقط «اضافه‌شده به harness» می‌دانیم، نه تست اجراشده.
+- [!] آزمون canonical duplicate ticker هنوز به توابع مالی authoritative متصل نیست؛ Migration مرجع فعلی ticker-based است. اتصال pair_id به RPC/worker نیازمند طراحی نسخهٔ توسعه‌یافتهٔ schema و توابع است و نباید با fixture ساده‌شده اشتباه شود.
+
+### وضعیت release و گام بعد
+1. اجرای کامل workflow روی HEAD دقیق این checkpoint و بررسی همهٔ stepها.
+2. در صورت شکست، اصلاح صرفاً در شاخهٔ Draft و تکرار آزمون.
+3. پس از سبزشدن CI، طراحی extension canonical pair-keyed روی همان wallet/base-ledger/reservation/journal؛ دو pair با ticker نمایشی یکسان باید هم‌زمان اجرا شوند.
+4. حل اختلاف ۸ کامیتی Main/branch و بازیابی ۱۷ Migration مفقود و ۲۰ اختلاف نام/زمان همچنان gateهای مستقل هستند.
+
+### ایمنی
+- [x] فقط فایل‌های تست و مستندات شاخهٔ Draft تغییر کردند.
+- [x] هیچ SQL به Supabase یا Production ارسال نشد؛ هیچ Migration، RPC، Worker، Cron، Edge Function، RLS/ACL یا دادهٔ مالی تغییر نکرد.
+- [x] هیچ سفارش، معامله، کیف پول، موجودی یا رزرو Production دستکاری نشد.
+- [x] هیچ merge، rebase، deploy، انتشار APK/Pages یا هزینه‌ای انجام نشد.
