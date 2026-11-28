@@ -2265,3 +2265,35 @@
 - [!] Four exact GitHub commit searches for representative missing applied migration names returned no commits. This is bounded evidence only; 17 missing SQL sources and all 20 deployment timestamp mappings remain unresolved.
 - [ ] Next: obtain exact applied SQL/checksum evidence from a trusted deployment artifact or backup. If unavailable, preserve the unresolved blocker; continue source-parity inventory for catalog/market writers. No inferred SQL.
 - [x] No Production writes/queries in this step; no migration replay/repair, db push, merge, deployment, Cron/worker/ACL/RLS change, APK/Pages publication or cost.
+
+
+
+## شهرام ۱۹۹ — انتقال کنترل‌شدهٔ QA Stop-Limit از Main به شاخهٔ کاتالوگ — ۲۸ نوامبر ۲۰۲۶
+
+### وضعیت زنده پیش از این اقدام
+- [x] مخزن `shahram-adim/DigiArz` بررسی شد؛ PR #67 با عنوان `[Draft] Make every DigiArz catalog asset demo-tradable` باز، Draft و ادغام‌نشده است.
+- [x] HEAD شاخه در شروع این نوبت `8f7925ced4c18716ee07e11890fd9572c4fcacf4` بود؛ Main برابر `e8477b53a1b8c6fc7225572db3e559a1c75607d8` بود. مقایسهٔ زنده: شاخه ۲۱۶ کامیت جلو و ۸ کامیت عقب از Main؛ وضعیت diverged و mergeable=false.
+- [x] CI run `46052800147` روی HEAD قبلی PR با نتیجهٔ success پایان یافته بود؛ این CI فقط شواهد همان HEAD است و تغییرات این checkpoint را پوشش نمی‌دهد.
+
+### تغییرات Main که بررسی و به‌شکل محدود منتقل شدند
+- [x] آزمون `tests/stop-limit-worker-source-parity.test.js` از Main به شاخه منتقل شد. این آزمون بازسازی تابع Stop-Limit را از Migration پایه `20261113181827` به‌علاوه patch دقیق `v_old/v_new` در Migration `20261115143827` با snapshot خواندنی تابع Production مقایسه می‌کند.
+- [x] پیش‌شرط انتقال بررسی شد: چهار فایل authoritative موردنیاز (دو Migration، snapshot تابع Production و آزمون retry exhaustion) در Main و شاخه blob SHA یکسان داشتند.
+- [x] بخش مستند «Applied Stop-Limit migration-chain source parity — 2026-11-28» به انتهای `docs/STOP_LIMIT_QA_MATRIX.md` شاخه افزوده شد؛ شامل نتیجهٔ CI run #2419 / `46139853183` با success و محدودیت آن به PostgreSQL 17 دورریختنی GitHub Actions.
+- [x] فایل `IMPLEMENTATION_STATUS.md` شاخه مستقل باقی ماند؛ نسخهٔ Main جایگزین نشد، زیرا تاریخچه و محتوای این دو فایل به‌طور اساسی واگراست و جایگزینی کامل باعث حذف وضعیت تفصیلی شاخه می‌شد.
+
+### موانع قطعی که همچنان باز هستند
+- [!] PR هنوز با Main واگراست؛ ادغام Main یا rebase انجام نشد.
+- [!] ۱۷ Migration اعمال‌شدهٔ Production بدون فایل SQL منطبق در مخزن و ۲۰ اختلاف timestamp/name همچنان نیازمند مدرک deployment معتبر هستند؛ از نام فایل یا وضعیت catalog برای بازسازی SQL استفاده نشود.
+- [!] شواهد schema fingerprint ثبت‌شده در مرحلهٔ ۱۹۲ شامل metadata فعلی ۱۲ جدول مالی/معاملاتی است، اما جایگزین متن authoritative همهٔ DDLهای پایه و زنجیرهٔ دقیق Migration نیست.
+- [!] CI #2419 سبز است، اما محیط disposable PostgreSQL 17 معادل Supabase Development Branch با schema/ACL parity کامل نیست؛ Development Branch در آخرین بررسی ثبت‌شده خالی بود.
+- [!] تفاوت قفل child-row در تابع زنده/زنجیرهٔ اعمال‌شده (`FOR UPDATE OF c,parent SKIP LOCKED`) با candidate (`FOR UPDATE OF c,parent,child SKIP LOCKED`) بازبینی مستقل می‌خواهد.
+
+### اقدام بعدی
+1. اجرای workflow Exact-decimal برای HEAD جدید PR و بررسی نتیجهٔ نهایی همهٔ مراحل؛ تا دریافت نتیجه، آزمون تازه را موفق اعلام نکن.
+2. بازبینی diff و CI پس از انتقال تست؛ سپس ادامهٔ بازیابی مدرک Migrationهای مفقود و بررسی ۲۰ اختلاف نسخه.
+3. حفظ PR در حالت Draft؛ هیچ merge، rebase، db push یا تغییر Production بدون تأیید صریح مالک.
+
+### ایمنی
+- [x] فقط دو فایل آزمون/مستندات ویرایش‌شده در شاخهٔ GitHub تغییر کردند؛ هیچ Migration اجرایی، تابع، schema یا دادهٔ Production تغییر نکرد.
+- [x] هیچ RPC/Worker/Cron مالی اجرا نشد؛ هیچ سفارش، معامله، رزرو، کیف پول یا موجودی خوانده یا تغییر داده نشد.
+- [x] هیچ Merge، rebase، انتشار APK/Pages، استقرار Edge Function، هزینه یا تغییر Supabase انجام نشد.
