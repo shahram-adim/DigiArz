@@ -2692,3 +2692,34 @@
 - [x] فقط دو فایل مستنداتی در شاخهٔ Draft ثبت شدند.
 - [x] هیچ Production query/SQL، DDL، backfill، balance/reservation write، RPC/worker/Cron invocation، Edge Function deployment یا RLS/ACL change انجام نشد.
 - [x] هیچ merge، rebase، db push، deploy، انتشار APK/Pages یا هزینه‌ای انجام نشد.
+
+
+## شهرام ۲۱۲ — ممیزی قرارداد Frontend و چرخهٔ مدیریتی — ۲۸ نوامبر ۲۰۲۶
+
+### بازبینی زنده
+- [x] PR #67، branch، Main، compare و Check Runs پیش از کار بررسی شدند.
+- [x] HEAD شروع `ec095b1bcabd760de13c10d328f24bdd4b4ecdd3`؛ Main `e8477b53a1b8c6fc7225572db3e559a1c75607d8`؛ compare برابر ۲۴۷ جلو و ۸ عقب، diverged.
+- [x] PR باز، Draft، ادغام‌نشده و mergeable=false؛ Check Runs روی HEAD شروع صفر.
+
+### یافته‌های جدید
+- [x] Frontend spot/Limit/TP-SL/Stop-Limit هنوز RPCها را با `p_symbol` صدا می‌زند، holdings را با `asset` متنی می‌خواند و base asset را از ticker استخراج می‌کند.
+- [x] active orders و reservation UI قیمت را با `market_prices.symbol` تطبیق می‌دهند و API رزرو فقط `asset text` برمی‌گرداند.
+- [x] `src/market-holdings.js` و dashboard filter از ticker-derived base استفاده می‌کنند؛ backend-only re-key باعث شکست/اشتباه در holdings و trade sizing می‌شود.
+- [x] snapshot تابع `admin_disable_market_pair` pair را با CoinGecko ID پیدا می‌کند، اما cleanup سفارش‌ها و رزروها را با `orders.symbol = pair_symbol` انجام می‌دهد؛ در صورت ticker تکراری، احتمال لغو/آزادسازی متعلق به pair دیگر وجود دارد.
+- [x] این ریسک فقط با uniqueness فعلی ticker حل‌شده فرض نمی‌شود؛ canonical admin disable باید pair-scoped باشد و تست دو pair با نماد مشترک لازم است.
+- [x] reservation read و cancellation lifecycle باید owner/bounds/lock/accounting فعلی را حفظ کنند و pair/asset ID را end-to-end حمل کنند.
+
+### خروجی
+- [x] سند `docs/CANONICAL_FRONTEND_ADMIN_LIFECYCLE_COMPATIBILITY_AUDIT_2026-11-28.md` ایجاد شد.
+- [x] برنامهٔ تطبیق API/UI، trade forms، holdings، active orders، reservation read، cancellation و admin pair-disable ثبت شد.
+- [x] snapshotها تاریخی‌اند؛ برابری با Production فعلی در این مرحله بررسی زنده نشده است.
+
+### گام بعد
+- [ ] در دسترس بودن ابزار/دسترسی read-only برای دریافت live metadata fingerprints از Production بررسی شود؛ در نبود آن، موارد مجهول باقی بمانند و ادعای parity نشود.
+- [ ] طراحی fixture canonical pair-scoped برای دو pair با نماد یکسان، از مسیر admin disable و سپس reservation/cancellation آغاز شود.
+- [ ] UI و RPC تا قبل از وجود fixture معتبر تغییر نکنند؛ اجرای تست PostgreSQL و CI روی HEAD جدید هنوز انجام نشده است.
+
+### ایمنی
+- [x] فقط سند طراحی/ممیزی و وضعیت پروژه در شاخهٔ Draft ثبت شدند.
+- [x] هیچ Production query یا write، DDL، migration، backfill، تغییر UI/RPC/Worker/Cron/Edge Function، RLS/ACL، دادهٔ مالی یا Auth انجام نشد.
+- [x] هیچ merge، rebase، db push، deploy، انتشار APK/Pages یا هزینه‌ای انجام نشد.
