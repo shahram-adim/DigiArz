@@ -207,3 +207,35 @@ The 17 missing applied SQL sources and 20 filename timestamp mismatches remain h
 ### Safety
 
 Repository source inspection only. No Supabase query, SQL execution, migration replay, Actions setting/permission change, Cron/worker change, merge, rebase, deploy, APK/Pages publication, or paid infrastructure change occurred.
+
+
+## Shahram 244 — clarify migration inventory chronology and commit-search limits — 2026-11-28
+
+### Reconciled count chronology
+
+The historical sections in this document are snapshots from different audit dates, not contradictory current counts:
+
+- 2026-11-17 initial inventory: 52 applied entries, 40 local SQL files, 14 applied entries without local SQL, 20 timestamp mismatches, and 2 local-only files.
+- Later read-only ledger audit recorded 55 applied entries and three additional applied versions dated 2026-11-21 (`20261121045434`, `20261121045531`, `20261121050216`), bringing the unresolved missing-source inventory to 17.
+- The latest 17-source list consists of the original 14 rows at the beginning of this document plus those three later entries. The 20 timestamp/name mismatches and 2 local-only files remain separately tracked.
+
+This chronology explains why the initial 14 and later 17 counts both appear. The 55-entry ledger count is historical evidence from the recorded audit; it was not freshly queried in this GitHub-only pass.
+
+### Additional commit-search pass
+
+A repository-scoped GitHub commit search was repeated for each exact version and descriptive phrase for the three 2026-11-21 entries. No matching commits were returned for:
+- `20261121045434`
+- `20261121045531`
+- `20261121050216`
+- `digiarz backpressure exchange sync bloat guards`
+- `snapshot pg_net unlogged queue before recovery`
+
+This search does not establish that no source exists in every Git object or external artifact. It only means this connected GitHub commit-search route did not recover a commit/source. The three SQL bodies remain unresolved.
+
+### CI dispatch remains unverified
+
+The current HEAD's workflow-run query and combined status remain empty. The workflow definition's `pull_request` trigger is present, but no run has been observed after connector-originated branch commits. Do not infer whether repository Actions are disabled, whether the app's event delivery is suppressed, or whether a policy is blocking the run without reading the relevant repository settings or an owner-generated event. No push event was manufactured in this pass.
+
+### Safe gate
+
+Keep all 17 missing sources and 20 timestamp/name mismatches as blockers for migration replay/deployment. Recovery requires exact SQL plus independent provenance/checksum. Do not reconstruct, rename, mark applied, replay, or push these migrations.
