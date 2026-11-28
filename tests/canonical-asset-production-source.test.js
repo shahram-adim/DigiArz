@@ -6,6 +6,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const read = (file) => fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
+const workflow = read('.github/workflows/exact-decimal-tests.yml');
+const marketLimitSetup = read('supabase/tests/authoritative_market_limit_source_parity_setup.sql');
 
 function extractDefinition(source, functionName) {
   const start = source.indexOf('CREATE OR REPLACE FUNCTION public.' + functionName + '(');
@@ -54,6 +56,20 @@ test('live Production fee helper selects configured maker/taker rates and fails 
   assert.match(fee, /f\.is_enabled\s+IS TRUE/i);
   assert.match(fee, /Trading fee is not configured for quote asset/i);
   assert.doesNotMatch(fee, /0\.001|0\.1%/i);
+});
+
+test('authoritative Market/Limit CI loads the captured Production fee helper before applying RPC migration', () => {
+  const block = workflow.match(
+    /- name: Apply authoritative Market and Limit migration in disposable PostgreSQL([\\s\\S]*?)(?=\\n      - name:|$)/
+  )?.[1] || '';
+  const setup = block.indexOf('authoritative_market_limit_source_parity_setup.sql');
+  const feeSnapshot = block.indexOf('canonical_identity_live_public_get_demo_trading_fee_rate_snapshot.sql');
+  const migration = block.indexOf('20261113161641_enforce_active_accounts_in_demo_trade_and_limit_engine.sql');
+  const assertions = block.indexOf('authoritative_market_limit_source_parity.sql');
+  assert.ok(setup >= 0 && feeSnapshot > setup && migration > feeSnapshot && assertions > migration,
+    'the disposable parity DB must load the fee table fixture, captured Production helper, authoritative RPC migration, then assertions');
+  assert.doesNotMatch(marketLimitSetup, /CREATE OR REPLACE FUNCTION public\\.get_demo_trading_fee_rate/i,
+    'the setup must not shadow the captured Production helper with a local stub');
 });
 
 test('live Market and conditional entrypoints still resolve the trading pair by mutable display ticker', () => {
