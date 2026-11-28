@@ -41,12 +41,22 @@ BEGIN
     RETURN OLD;
   END IF;
 
-  IF NEW.ledger_asset_key IS DISTINCT FROM OLD.ledger_asset_key
+  IF (
+       NEW.ledger_asset_key IS DISTINCT FROM OLD.ledger_asset_key
+       OR NEW.canonical_asset_id IS DISTINCT FROM OLD.canonical_asset_id
+       OR NEW.mapping_status IS DISTINCT FROM OLD.mapping_status
+       OR NEW.evidence_ref IS DISTINCT FROM OLD.evidence_ref
+       OR NEW.reviewed_at IS DISTINCT FROM OLD.reviewed_at
+     )
      AND (
        EXISTS (SELECT 1 FROM public.asset_balances AS b WHERE b.asset = OLD.ledger_asset_key)
        OR EXISTS (SELECT 1 FROM public.order_reservations AS r WHERE r.asset = OLD.ledger_asset_key)
      ) THEN
-    RAISE EXCEPTION 'Ledger asset key is immutable after financial use'
+    IF NEW.ledger_asset_key IS DISTINCT FROM OLD.ledger_asset_key THEN
+      RAISE EXCEPTION 'Ledger asset key is immutable after financial use'
+        USING ERRCODE = '23514';
+    END IF;
+    RAISE EXCEPTION 'Canonical ledger mapping identity and verification are immutable after financial use'
       USING ERRCODE = '23514';
   END IF;
 
@@ -55,7 +65,7 @@ END;
 $function$;
 
 CREATE TRIGGER canonical_asset_ledger_key_immutable
-BEFORE UPDATE OF ledger_asset_key ON public.canonical_asset_ledger_key_map
+BEFORE UPDATE OF canonical_asset_id, ledger_asset_key, mapping_status, evidence_ref, reviewed_at ON public.canonical_asset_ledger_key_map
 FOR EACH ROW EXECUTE FUNCTION public.prevent_referenced_ledger_key_reassignment();
 
 CREATE TRIGGER canonical_asset_ledger_mapping_no_delete
@@ -183,6 +193,42 @@ BEGIN
 
   IF public.resolve_canonical_ledger_asset_key(v_asset_a) <> v_key_a THEN
     RAISE EXCEPTION 'failed reassignment changed the canonical ledger mapping';
+  END IF;
+
+  -- Canonical identity and verification evidence must remain stable after use.
+  BEGIN
+    UPDATE public.canonical_asset_ledger_key_map
+    SET canonical_asset_id='22000000-0000-0000-0000-0000000000f6'
+    WHERE canonical_asset_id=v_asset_a;
+    RAISE EXCEPTION 'referenced canonical identity reassignment unexpectedly accepted';
+  EXCEPTION WHEN SQLSTATE '23514' THEN
+    IF SQLERRM NOT LIKE '%identity and verification are immutable%' THEN RAISE; END IF;
+  END;
+  BEGIN
+    UPDATE public.canonical_asset_ledger_key_map
+    SET mapping_status='quarantined'
+    WHERE canonical_asset_id=v_asset_a;
+    RAISE EXCEPTION 'referenced mapping status change unexpectedly accepted';
+  EXCEPTION WHEN SQLSTATE '23514' THEN
+    IF SQLERRM NOT LIKE '%identity and verification are immutable%' THEN RAISE; END IF;
+  END;
+  BEGIN
+    UPDATE public.canonical_asset_ledger_key_map
+    SET evidence_ref='test:replaced-evidence'
+    WHERE canonical_asset_id=v_asset_a;
+    RAISE EXCEPTION 'referenced mapping evidence change unexpectedly accepted';
+  EXCEPTION WHEN SQLSTATE '23514' THEN
+    IF SQLERRM NOT LIKE '%identity and verification are immutable%' THEN RAISE; END IF;
+  END;
+  IF public.resolve_canonical_ledger_asset_key(v_asset_a) <> v_key_a THEN
+    RAISE EXCEPTION 'failed identity/verification mutation changed the canonical mapping';
+  END IF;
+
+  -- Display metadata remains editable without changing financial identity.
+  UPDATE public.canonical_asset_ledger_key_map
+  SET display_symbol='ABC-RENAMED' WHERE canonical_asset_id=v_asset_a;
+  IF public.resolve_canonical_ledger_asset_key(v_asset_a) <> v_key_a THEN
+    RAISE EXCEPTION 'display metadata edit changed the canonical ledger mapping';
   END IF;
 
   -- A mapping cannot be deleted while balances or reservations still refer to it.
