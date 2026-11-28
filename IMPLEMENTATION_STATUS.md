@@ -2470,3 +2470,40 @@
 - [x] هیچ SQL روی Supabase اجرا نشد؛ هیچ Migration، RPC، Worker، Cron، Edge Function یا دادهٔ مالی Production تغییر نکرد.
 - [x] هیچ سفارش، معامله، رزرو، کیف پول یا موجودی تغییر نکرد؛ jobهای زمان‌بندی‌شده بدون تغییر ماندند.
 - [x] هیچ merge، rebase، deploy، انتشار APK/Pages یا هزینه‌ای انجام نشد.
+
+
+
+## شهرام ۲۰۵ — اثبات سابقهٔ CI برای Migration واقعی Market/Limit و تفکیک شواهد canonical — ۲۸ نوامبر ۲۰۲۶
+
+### کشف و تأیید منبع آزمون
+- [x] مشخص شد Workflow `.github/workflows/exact-decimal-tests.yml` از قبل مرحلهٔ «Apply authoritative Market and Limit migration in disposable PostgreSQL» دارد؛ این مرحله setup ایزوله، snapshotهای helper، Migration مرجع و SQL یکپارچهٔ منبع را اجرا می‌کند.
+- [x] فایل‌های زیر در HEAD فعلی و در SHA قدیمیِ اجرای موفق `8f7925ced4c18716ee07e11890fd9572c4fcacf4` دقیقاً blob یکسان دارند:
+  - Migration `20261113161641_enforce_active_accounts_in_demo_trade_and_limit_engine.sql`: `de09b1cd391790fcd9d94708a916cb41cd9ccc9f`.
+  - Setup آزمون: `3629184b9ed8e5c2cbcc6b6f74e83e790c5b3d92`.
+  - SQL آزمون یکپارچه: `de0e3d260ec9a9dfaf03fd6b6a693c5975d0ec77`.
+  - Workflow: `969f3976a0efb0002699bb156d69f899dd8b9675`.
+- [x] اجرای GitHub Actions شماره `46052800147` روی SHA قدیمی `8f7925ced4c18716ee07e11890fd9572c4fcacf4` موفق بود؛ job `exact-decimal` و step 28 (اعمال Migration واقعی Market/Limit در PostgreSQL disposable) و step 5 (Node test suite) هر دو success ثبت شده‌اند.
+- [!] این نتیجه شواهد معتبر اجرای همان چهار فایل/منبع در commit قدیمی است؛ اجرای CI روی HEAD فعلی `b397a600cca9682bf56ea681d35ee557f846a98d` را جایگزین نمی‌کند.
+
+### دامنهٔ آزمون یکپارچهٔ موجود
+- [x] SQL آزمون توابع واقعی `execute_demo_trade`، `place_limit_order` و `process_limit_orders` را روی fixture PostgreSQL 17 اجرا می‌کند؛ سناریوهای Market buy/sell، قیمت کهنه، حساب غیرفعال، Limit buy/sell، چهار fill جزئی، جمع consumed/released رزرو، ثبت trade و transaction و ورودی unauthenticated در آن وجود دارد.
+- [x] fixture از schema حداقلی و دادهٔ آزمایشی استفاده می‌کند؛ این آزمون source parity رفتار توابع مرجع در محدودهٔ fixture است، نه اثبات کامل Production schema/RLS/ACL یا پوشش canonical pair_id.
+- [x] آزمون duplicate display ticker در `canonical_asset_identity_candidate.sql` مستقل و ساده‌سازی‌شده است؛ هنوز به wallet/base-ledger، fee helper، قیمت market_prices، رزرو تجمعی و worker واقعی متصل نشده است.
+- [x] تست جدید `tests/canonical-market-limit-financial-contract.test.js` در SHA قدیمی CI وجود نداشت؛ بنابراین اجرای Node موفق قدیمی، این فایل جدید را پوشش نداده است.
+
+### وضعیت CI و PR فعلی
+- [x] PR #67 باز، Draft، ادغام‌نشده و `mergeable=false` است.
+- [x] HEAD فعلی هنگام ثبت این checkpoint: `b397a600cca9682bf56ea681d35ee557f846a98d`.
+- [!] برای HEAD فعلی هنوز Check Run تازه ثبت نشده؛ CI باید روی همین SHA اجرا شود تا تست جدید Node نیز پوشش داده شود.
+- [!] branch همچنان diverged است؛ compare ثبت‌شده ۲۳۱ جلو و ۸ عقب Main. هیچ merge/rebase انجام نشد.
+
+### گام بعد
+1. فراهم‌کردن اجرای Exact decimal workflow روی HEAD دقیق فعلی و بررسی تمام stepها، خصوصاً Node test suite و authoritative Market/Limit PostgreSQL integration.
+2. ساخت آزمون canonical extension که به‌جای schema مالی موازی، همان wallet/base-ledger/fee helper/reservation/journal و worker واقعی را حفظ کند و دو pair با ticker نمایشی یکسان را هم‌زمان اجرا کند.
+3. گسترش پوشش canonical به Market buy/sell، Limit buy/sell، چهار partial fill، stale/missing/future price، disabled pair، inactive account، insufficient balance، cancellation/release، idempotency و raceهای دو session.
+4. عدم تبدیل این harness آزمایشی به migration deployable تا بازیابی ۱۷ Migration مفقود و reconciliation کامل schema/constraints/indexes/triggers/RLS/grants انجام شود.
+
+### ایمنی
+- [x] این checkpoint فقط مستندات شاخهٔ Draft را تغییر می‌دهد.
+- [x] هیچ SQL اجرا نشد؛ هیچ Migration، RPC، Worker، Cron، Edge Function یا دادهٔ Production تغییر نکرد.
+- [x] هیچ merge، rebase، deploy، APK/Pages publication یا هزینه‌ای انجام نشد.
