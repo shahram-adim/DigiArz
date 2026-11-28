@@ -62,3 +62,11 @@ The updated SQL was inspected from the committed branch. It has still not been e
 - Added order arithmetic constraints: filled amount must remain within the original amount, and remaining amount must equal amount minus filled amount.
 - Added a repeated-disable assertion. A second call must cancel zero additional orders and release zero additional reservations; the original cumulative release values must remain unchanged.
 - These are still fixture-only checks and remain unexecuted until an Actions run or local disposable PostgreSQL execution is available.
+
+
+## Shahram 217 — fixture review corrections (2026-11-28)
+- Static review found malformed dollar-quote terminators in the disposable SQL fixture; both function/DO block terminators were corrected to `$$;`, and the idempotency DO block opener was corrected to `DO $$`.
+- The idempotency assertion was also positioned after the initial pair-disable operation and its pair-isolation assertions. Previously it ran before seed rows existed and would have failed with “pair not found”; it now actually tests the second disable call.
+- The race shell script passed `bash -n` syntax validation in the local shell.
+- The SQL fixture was not executed: PostgreSQL/psql is unavailable in this environment. No SQL runtime or CI success is claimed.
+- This remains a disposable behavioral model, not a Production RPC implementation or proof that deployed workers use this lock order.
