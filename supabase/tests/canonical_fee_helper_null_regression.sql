@@ -4,15 +4,25 @@
 -- and tests a fail-closed candidate; it does not alter Production.
 CREATE SCHEMA IF NOT EXISTS canonical_fee_candidate;
 
+-- Distinct configured rates make the NULL-to-taker fall-through observable.
+UPDATE public.demo_trading_fees
+   SET maker_fee_rate = 0.002, taker_fee_rate = 0.001
+ WHERE quote_asset = 'USDT' AND is_enabled IS TRUE;
+
 DO $captured_source$
 DECLARE
+  v_maker numeric;
   v_taker numeric;
   v_null_liquidity numeric;
 BEGIN
+  v_maker := public.get_demo_trading_fee_rate('USDT', 'maker');
   v_taker := public.get_demo_trading_fee_rate('USDT', 'taker');
   v_null_liquidity := public.get_demo_trading_fee_rate('USDT', NULL);
 
-  IF v_null_liquidity IS DISTINCT FROM v_taker THEN
+  IF v_maker IS DISTINCT FROM 0.002::numeric
+     OR v_taker IS DISTINCT FROM 0.001::numeric
+     OR v_null_liquidity IS DISTINCT FROM v_taker
+     OR v_null_liquidity IS NOT DISTINCT FROM v_maker THEN
     RAISE EXCEPTION
       'Captured source characterization changed: NULL liquidity no longer follows the taker ELSE branch';
   END IF;
@@ -59,7 +69,7 @@ BEGIN
   v_maker := canonical_fee_candidate.get_demo_trading_fee_rate(' usdt ', 'maker');
   v_taker := canonical_fee_candidate.get_demo_trading_fee_rate('USDT', 'taker');
 
-  IF v_maker IS DISTINCT FROM 0.001::numeric
+  IF v_maker IS DISTINCT FROM 0.002::numeric
      OR v_taker IS DISTINCT FROM 0.001::numeric THEN
     RAISE EXCEPTION 'Candidate must preserve configured maker/taker rates and quote normalization';
   END IF;
