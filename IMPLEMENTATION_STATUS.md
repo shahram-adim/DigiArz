@@ -2297,3 +2297,39 @@
 - [x] فقط دو فایل آزمون/مستندات ویرایش‌شده در شاخهٔ GitHub تغییر کردند؛ هیچ Migration اجرایی، تابع، schema یا دادهٔ Production تغییر نکرد.
 - [x] هیچ RPC/Worker/Cron مالی اجرا نشد؛ هیچ سفارش، معامله، رزرو، کیف پول یا موجودی خوانده یا تغییر داده نشد.
 - [x] هیچ Merge، rebase، انتشار APK/Pages، استقرار Edge Function، هزینه یا تغییر Supabase انجام نشد.
+
+
+
+## شهرام ۲۰۰ — ممیزی منبع Migration و وضعیت CI شاخه — ۲۸ نوامبر ۲۰۲۶
+
+### وضعیت GitHub پیش از ثبت این checkpoint
+- [x] PR #67 با عنوان `[Draft] Make every DigiArz catalog asset demo-tradable` باز و Draft است؛ base شاخه `main)، head شاخه `plan/all-catalog-assets-tradable-2026-11-27`.
+- [x] HEAD شاخه پیش از این ثبت وضعیت: `b8a49fef4b98c03eeabf4170fe4f874c904efa9a`.
+- [x] آخرین Main مشاهده‌شده: `e8477b53a1b8c6fc7225572db3e559a1c75607d8`.
+- [x] مقایسهٔ شاخه با Main پیش از آخرین مستندات: ۲۱۹ کامیت جلو و ۸ کامیت عقب؛ وضعیت diverged و PR mergeable_state برابر dirty بود. پس از مستندات جدید باید شمارش مجدداً تأیید شود.
+- [!] برای HEAD جدید Check Runs خالی و combined status برابر pending بود؛ هیچ اجرای CI جدیدی برای HEAD جدید مشاهده نشد. اجرای موفق #2419 روی Main و #46052800147 روی HEAD قدیمی‌تر، اعتبارسنجی HEAD فعلی محسوب نمی‌شود.
+- [!] workflow فعلی `.github/workflows/exact-decimal-tests.yml` روی push به main و pull_request به main تنظیم شده است؛ علت عدم مشاهدهٔ run برای commitهای اخیر از این بررسی اثبات نشد. GitHub Actions workflow-dispatch در ابزارهای متصل این نشست در دسترس نبود؛ موفقیت تست جدید را ادعا نکن.
+
+### نتیجهٔ بازیابی منبع ۱۷ Migration
+- [x] جست‌وجوی exact-name در تاریخچهٔ commit مخزن برای هر ۱۷ نام Migration مفقود انجام شد.
+- [x] دو نتیجهٔ مثبت کاذب بازبینی شدند: commit مربوط به `secure_admin_wallet_management` فقط تغییر CSS در `index.html` دارد؛ نتیجهٔ `admin_exchange_asset_sync_monitoring` فقط تغییر markup رابط سفارش/مدیریت در `index.html` دارد. هیچ‌کدام SQL Migration نیستند.
+- [!] در این دور هیچ SQL authoritative بازیابی نشد. آمار آخرین ledger audit ثبت‌شده همچنان ۱۷ منبع مفقود، ۲۰ اختلاف timestamp/name و دو فایل local-only ثبت‌نشده است؛ در این دور GitHub-only، ledger زندهٔ Supabase دوباره خوانده نشد.
+- [!] منبع Migration از روی نام، تابع زنده یا رفتار حدس زده نشود؛ migration history دست‌کاری و `supabase db push` اجرا نشود.
+
+### Commitهای مستنداتی این مرحله
+- [x] `0f16f50ada0810a8a049e2792977d073cbcfb209` — افزودن تست تطبیق زنجیرهٔ Stop-Limit با snapshot تابع Production.
+- [x] `8b1322509d7f0f5442c46e9973e0a0e774a99ab5` — انتقال گزارش QA و CI قبلی.
+- [x] `02d23dc3722e5371a69516ee454e243f2cc7c9d7` — ثبت checkpoint شهرام ۱۹۹.
+- [x] `b8a49fef4b98c03eeabf4170fe4f874c904efa9a` — ثبت دور جدید بازیابی منبع Migration در `supabase/MIGRATION_RECONCILIATION.md`.
+
+### اقدام بعدی
+1. تأیید HEAD نهایی و شمارش دقیق ahead/behind پس از این مستندات.
+2. تعیین مسیر معتبر برای اجرای CI روی HEAD جدید؛ تا آن زمان status pending باقی بماند.
+3. جست‌وجوی منبع معتبر خارج از تاریخچهٔ commit در deployment artifact/backup یا آرشیو مالک برای ۱۷ Migration.
+4. پس از تثبیت CI و منابع، بازبینی conflictهای PR و تهیهٔ برنامهٔ هماهنگ‌سازی با Main؛ بدون merge/rebase خودکار.
+
+### ایمنی و عدم اقدام
+- [x] تغییرات این checkpoint مستندات و تست repository-only در شاخهٔ PR هستند.
+- [x] هیچ Migration اجرایی، schema، تابع، دادهٔ مالی، ACL، RLS، trigger، cron، worker یا Edge Function در Supabase تغییر نکرد.
+- [x] هیچ RPC/worker مالی اجرا نشد؛ jobهای Limit/TP-SL/Stop-Limit دست‌نخورده‌اند.
+- [x] هیچ merge، rebase، db push، deploy، انتشار APK/Pages یا هزینه‌ای انجام نشد.
