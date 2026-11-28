@@ -93,7 +93,7 @@ BEGIN
     'released_reservations', v_released
   );
 END;
-$;
+$$;
 
 -- Repeated disable must be idempotent: no duplicate release or order mutation.
 DO $
@@ -113,7 +113,7 @@ BEGIN
     RAISE EXCEPTION 'repeated disable changed cumulative reservation accounting';
   END IF;
 END;
-$;
+$$;
 
 -- Worker follows the same pair-then-order lock order as admin disable.
 CREATE OR REPLACE FUNCTION canonical_pair_disable.process_order(
