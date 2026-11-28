@@ -9,6 +9,8 @@ const read = (relativePath) => fs.readFileSync(path.join(__dirname, '..', relati
 const authoritative = read('supabase/migrations/20261113161641_enforce_active_accounts_in_demo_trade_and_limit_engine.sql');
 const canonicalCandidate = read('supabase/tests/canonical_asset_identity_candidate.sql');
 const authoritativeIntegration = read('supabase/tests/authoritative_market_limit_source_parity.sql');
+const feeHelperSnapshot = read('supabase/tests/canonical_identity_live_public_get_demo_trading_fee_rate_snapshot.sql');
+const financialContract = read('docs/CANONICAL_MARKET_LIMIT_FINANCIAL_CONTRACT_2026-11-28.md');
 
 function functionBody(source, name, label) {
   const pattern = new RegExp(
@@ -123,4 +125,15 @@ test('authoritative Market and Limit entrypoints subtract outstanding reservatio
   assert.match(authoritativeIntegration, /Existing base-asset reservations must reduce available Limit-sell funds/);
   assert.equal((authoritativeIntegration.match(/INSERT INTO public\.orders\(id,user_id,symbol,side,order_type,amount,price,filled_amount,remaining_amount,status\)/g) || []).length, 4, 'each reservation regression must be backed by a pending order fixture');
   assert.equal((authoritativeIntegration.match(/DELETE FROM public\.orders WHERE id=/g) || []).length, 4, 'each synthetic pending order must be cleaned up');
+});
+
+
+test('captured Production fee helper NULL-liquidity gap remains explicit and cannot be mistaken for fail-closed behavior', () => {
+  const feeGuard = feeHelperSnapshot.match(/IF\\s+([\\s\\S]*?)\\s+THEN\\s+RAISE\\s+EXCEPTION\\s+'Invalid liquidity type'/i);
+  assert.ok(feeGuard, 'captured Production fee helper validation guard must remain inspectable');
+  assert.match(feeGuard[1], /p_liquidity_type\\s+NOT\\s+IN\\s*\\('maker',\\s*'taker'\\)/i);
+  assert.doesNotMatch(feeGuard[1], /p_liquidity_type\\s+IS\\s+NULL/i);
+  assert.match(feeHelperSnapshot, /ELSE\\s+f\\.taker_fee_rate/i);
+  assert.match(financialContract, /NULL is accepted as taker instead of being rejected/);
+  assert.match(financialContract, /must explicitly reject NULL/);
 });
