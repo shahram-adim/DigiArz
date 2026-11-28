@@ -101,3 +101,12 @@ test('authoritative Limit worker preserves cumulative reservation accounting and
   assert.ok(baseSettlement > walletLock, 'wallet must be locked before base-ledger settlement');
 });
 
+
+test('authoritative Market execution locks the wallet before sell-side base-ledger settlement', () => {
+  const walletLock = market.indexOf('FROM public.wallets');
+  const baseLock = market.indexOf('FROM public.asset_balances');
+  assert.ok(walletLock >= 0, 'wallet row lock must exist');
+  assert.ok(baseLock > walletLock, 'wallet must be locked before base-asset settlement');
+  assert.match(market, /SUM\(r\.reserved_amount\s*-\s*r\.released_amount\s*-\s*r\.consumed_amount\)/);
+  assert.match(market, /INSERT INTO public\.transactions/);
+});
