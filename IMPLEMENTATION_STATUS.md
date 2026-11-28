@@ -2981,3 +2981,23 @@
 ### ایمنی
 - [x] فقط یک تست source-gate و این گزارش در شاخه Draft ثبت شدند.
 - [x] هیچ Production، Migration اعمال‌شده، RPC/Worker/Cron، Supabase تنظیمات، RLS/ACL، داده مالی، merge/rebase، db push، deploy، انتشار APK/Pages یا هزینه‌ای تغییر نکرد.
+
+
+## شهرام ۲۲۳ — کشف مانع قرارداد RPC برای دارایی‌های هم‌نماد — ۲۸ نوامبر ۲۰۲۶
+
+### یافتهٔ معماری
+- [x] امضای منبع authoritative نشان داد RPCهای `execute_demo_trade(p_symbol text, ...)` و `place_limit_order(p_symbol text, ...)` فقط نماد نمایشی می‌گیرند؛ شناسهٔ canonical دارایی یا جفت در ورودی وجود ندارد.
+- [x] worker نیز قیمت را با `market_prices.symbol = orders.symbol` پیدا می‌کند. بنابراین حتی اگر ledger key جداگانه resolve شود، درخواست ورودی و قیمت هنوز برای دو جفت دارای ticker یکسان قابل تفکیک نیستند.
+- [x] آزمون source-gate تکمیل شد تا نبود `pair_id/asset_id` در RPCهای Market/Limit و وابستگی worker به symbol را به‌عنوان blocker ثبت کند.
+- [x] نتیجهٔ طراحی: صرفاً افزودن mapping کافی نیست. قرارداد اجرای جدید باید شناسهٔ پایدار pair را بگیرد؛ pair باید base/quote canonical ID داشته باشد؛ قیمت، سفارش، معامله و رزرو باید به همان pair/asset identity متصل باشند. نام و ticker فقط presentation می‌مانند.
+- [ ] نام‌گذاری و سازگاری RPC جدید، انتقال مصرف‌کننده‌های UI/API و سیاست deprecation برای RPCهای قدیمی هنوز طراحی نشده؛ تا تکمیل inventory نباید overload یا جایگزینی Production پیشنهاد/اعمال شود.
+
+### وضعیت اجرا
+- [x] فقط تست منبع در شاخه Draft اضافه شد.
+- [ ] GitHub Actions روی HEAD تازه باید دوباره بررسی شود؛ تا این لحظه اجرای واقعی SQL/Node روی HEAD جدید اثبات نشده است.
+- [x] هیچ Production DB، Migration اعمال‌شده، RPC/Worker/Cron، داده مالی، RLS/ACL، Auth، merge/rebase، db push، deploy، APK/Pages publication یا هزینه‌ای تغییر نکرد.
+
+### گام بعد
+1. inventory تمام فراخوانی‌کنندگان RPCهای Market/Limit و تمام مصرف‌کنندگان `market_prices.symbol` و `orders.symbol` را تهیه کن.
+2. قرارداد candidate مبتنی بر pair UUID را در disposable PostgreSQL طراحی کن؛ ابتدا schema و FKها، سپس Market، Limit placement، worker، cancel و journal.
+3. قبل از هر backfill، گروه‌های ticker تکراری و balances/reservations موجود را فقط read-only طبقه‌بندی کن؛ هیچ split یا انتقال خودکار مجاز نیست.
