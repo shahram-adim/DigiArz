@@ -2333,3 +2333,31 @@
 - [x] هیچ Migration اجرایی، schema، تابع، دادهٔ مالی، ACL، RLS، trigger، cron، worker یا Edge Function در Supabase تغییر نکرد.
 - [x] هیچ RPC/worker مالی اجرا نشد؛ jobهای Limit/TP-SL/Stop-Limit دست‌نخورده‌اند.
 - [x] هیچ merge، rebase، db push، deploy، انتشار APK/Pages یا هزینه‌ای انجام نشد.
+
+
+
+## Shahram 201 — PR ancestry and CI trigger diagnosis — 2026-11-28
+
+### Main-behind analysis (read-only)
+- [x] The PR base SHA recorded by GitHub is `fbfb5e974e754088a32c9fdcd76fc2ca9ab0f98b`; current Main is `e8477b53a1b8c6fc7225572db3e559a1c75607d8`.
+- [x] Comparing that recorded PR base to current Main shows 8 commits ahead on Main and exactly three changed paths: `tests/stop-limit-worker-source-parity.test.js`, `docs/STOP_LIMIT_QA_MATRIX.md`, and `IMPLEMENTATION_STATUS.md`.
+- [x] Current Main and PR branch blob SHAs are identical for the first two paths (test and Stop-Limit QA doc). Their content was selectively carried forward to the PR branch; no additional code/doc delta remains in those two files.
+- [!] `IMPLEMENTATION_STATUS.md` intentionally differs: PR branch retains its longer project-specific history and adds Shahram 199/200 records. Do not replace it with Main's shorter status file.
+- [!] The 8-commit behind count is therefore still a commit-graph/ancestry divergence even though the two non-status file contents are identical. No merge-base update, merge, rebase, cherry-pick, or force push was performed. PR #67 remains diverged and GitHub reports it non-mergeable/dirty.
+- [x] The current PR contains 58 changed files, 7,704 additions and 1 deletion; its full scope remains much broader than the three paths changed on Main since the recorded base.
+
+### CI trigger diagnosis
+- [x] The branch workflow file has only `push: branches: [main]` and `pull_request: branches: [main]`; the PR targets `main`, so the declared pull_request filter itself is consistent.
+- [x] The connected GitHub actions available in this session expose workflow-run inspection and rerun of failed jobs, but no `workflow_dispatch`/create-run action. The latest PR HEAD has no check runs and pending combined status.
+- [!] It is not possible to start a new workflow run for the current HEAD through the available action surface. The exact cause of missing synchronize runs is unproven; token-origin suppression is a possible GitHub behavior only if the write used `GITHUB_TOKEN`, but that token type was not established. Do not claim this as confirmed root cause.
+- [ ] Next CI path: use a repository-authorized GitHub UI/API actor that can trigger a fresh run for the exact PR HEAD, or establish a verified dispatch path. The run must report SHA `8a9f53db46a2717509f1f8954bfb4d22dd1104a0` or a newer explicitly verified HEAD. Do not use an unrelated older successful run as substitute.
+
+### Next engineering sequence
+1. Keep PR #67 Draft; resolve ancestry/dirty state only through a reviewed integration plan, not blind merge/rebase.
+2. Preserve the current source-parity test and QA doc (their Main blobs are already identical).
+3. Continue canonical Market/Limit candidate work by reconciling its behavior with the authoritative Market/Limit migration: wallet/base ledgers, fee helper and 8-decimal rounding, one-minute execution freshness, 25%-of-original partial fills, consumed/released reservation history, advisory lock/row-lock order, active-account guard, orders/trades/transactions writes. The current generic-balance fixture is explicitly not a faithful replacement.
+4. Keep full Production schema/helper/trigger/RLS/ACL source recovery and migration-ledger reconciliation as separate hard gates.
+5. Do not run migrations, db push, financial workers/RPCs, merge, deploy, or alter Production without explicit owner approval.
+
+### Safety
+- [x] This checkpoint records repository metadata and file-content comparisons only. No database or financial operation was performed.
