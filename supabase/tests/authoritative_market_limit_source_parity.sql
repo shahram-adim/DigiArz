@@ -86,6 +86,48 @@ BEGIN
     RAISE EXCEPTION 'Market sell trade ledger missing';
   END IF;
 
+  -- Existing USDT reservations must reduce available Market-buy funds.
+  INSERT INTO public.order_reservations(
+    order_id,user_id,asset,reserved_amount,consumed_amount,released_amount,status
+  ) VALUES (
+    '21000000-0000-0000-0000-000000000101',v_user,'USDT',
+    (SELECT balance_usdt FROM public.wallets WHERE user_id=v_user),0,0,'reserved'
+  );
+  v_wallet_before := (SELECT balance_usdt FROM public.wallets WHERE user_id=v_user);
+  BEGIN
+    PERFORM public.execute_demo_trade('DOTUSDT','buy',0.1,10);
+    RAISE EXCEPTION 'Market buy spent funds already reserved by a Limit order';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM='Market buy spent funds already reserved by a Limit order' THEN RAISE; END IF;
+    IF SQLERRM NOT LIKE '%Insufficient available USDT balance%' THEN RAISE; END IF;
+  END;
+  IF (SELECT balance_usdt FROM public.wallets WHERE user_id=v_user)<>v_wallet_before THEN
+    RAISE EXCEPTION 'failed reserved-funds Market buy changed wallet balance';
+  END IF;
+  DELETE FROM public.order_reservations
+  WHERE order_id='21000000-0000-0000-0000-000000000101';
+
+  -- Existing base-asset reservations must reduce available Market-sell funds.
+  INSERT INTO public.order_reservations(
+    order_id,user_id,asset,reserved_amount,consumed_amount,released_amount,status
+  ) VALUES (
+    '21000000-0000-0000-0000-000000000102',v_user,'DOT',
+    (SELECT balance FROM public.asset_balances WHERE user_id=v_user AND asset='DOT'),0,0,'reserved'
+  );
+  v_filled := (SELECT balance FROM public.asset_balances WHERE user_id=v_user AND asset='DOT');
+  BEGIN
+    PERFORM public.execute_demo_trade('DOTUSDT','sell',0.1,10);
+    RAISE EXCEPTION 'Market sell spent base assets already reserved by a Limit order';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM='Market sell spent base assets already reserved by a Limit order' THEN RAISE; END IF;
+    IF SQLERRM NOT LIKE '%Insufficient available asset balance%' THEN RAISE; END IF;
+  END;
+  IF (SELECT balance FROM public.asset_balances WHERE user_id=v_user AND asset='DOT')<>v_filled THEN
+    RAISE EXCEPTION 'failed reserved-funds Market sell changed base balance';
+  END IF;
+  DELETE FROM public.order_reservations
+  WHERE order_id='21000000-0000-0000-0000-000000000102';
+
   -- Caller-supplied p_price is not authoritative; stale market data must fail closed.
   UPDATE public.market_prices SET updated_at=clock_timestamp()-interval '2 minutes' WHERE symbol='DOTUSDT';
   BEGIN
