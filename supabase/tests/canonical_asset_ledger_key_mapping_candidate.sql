@@ -94,7 +94,6 @@ DECLARE
   v_asset_ambiguous uuid := '22000000-0000-0000-0000-0000000000c3';
   v_key_a text := 'asset:22000000-0000-0000-0000-0000000000a1';
   v_key_b text := 'asset:22000000-0000-0000-0000-0000000000b2';
-  v_resolved text;
   v_balance_a numeric;
   v_balance_b numeric;
   v_reserved_a numeric;
@@ -197,6 +196,34 @@ BEGIN
 
   IF public.resolve_canonical_ledger_asset_key(v_asset_a) <> v_key_a THEN
     RAISE EXCEPTION 'failed deletion changed the canonical ledger mapping';
+  END IF;
+
+  -- Isolate the reservation guard: B has a reservation but no balance row.
+  DELETE FROM public.asset_balances
+  WHERE user_id=v_user AND asset=v_key_b;
+  BEGIN
+    DELETE FROM public.canonical_asset_ledger_key_map
+    WHERE canonical_asset_id=v_asset_b;
+    RAISE EXCEPTION 'reservation-only ledger mapping deletion unexpectedly accepted';
+  EXCEPTION WHEN SQLSTATE '23514' THEN
+    IF SQLERRM NOT LIKE '%cannot be deleted after financial use%' THEN RAISE; END IF;
+  END;
+  IF public.resolve_canonical_ledger_asset_key(v_asset_b) <> v_key_b THEN
+    RAISE EXCEPTION 'reservation-only delete attempt changed the canonical mapping';
+  END IF;
+
+  -- Isolate the balance guard: A retains a balance but no reservation row.
+  DELETE FROM public.order_reservations
+  WHERE order_id='22000000-0000-0000-0000-0000000000e1';
+  BEGIN
+    DELETE FROM public.canonical_asset_ledger_key_map
+    WHERE canonical_asset_id=v_asset_a;
+    RAISE EXCEPTION 'balance-only ledger mapping deletion unexpectedly accepted';
+  EXCEPTION WHEN SQLSTATE '23514' THEN
+    IF SQLERRM NOT LIKE '%cannot be deleted after financial use%' THEN RAISE; END IF;
+  END;
+  IF public.resolve_canonical_ledger_asset_key(v_asset_a) <> v_key_a THEN
+    RAISE EXCEPTION 'balance-only delete attempt changed the canonical mapping';
   END IF;
 END;
 $test$;
