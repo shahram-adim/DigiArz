@@ -129,6 +129,11 @@ INSERT INTO public.order_reservations(id,order_id,reserved_amount,status) VALUES
 ('80000000-0000-0000-0000-000000000003','60000000-0000-0000-0000-000000000003',5,'reserved'),
 ('80000000-0000-0000-0000-000000000004','60000000-0000-0000-0000-000000000004',7,'reserved');
 
+UPDATE public.order_reservations SET consumed_amount=2
+WHERE id='80000000-0000-0000-0000-000000000001';
+UPDATE public.order_reservations SET consumed_amount=1
+WHERE id='80000000-0000-0000-0000-000000000003';
+
 CREATE OR REPLACE FUNCTION public.admin_disable_market_pair_candidate(
   p_pair_id uuid,
   p_reason text DEFAULT NULL
@@ -201,7 +206,9 @@ BEGIN
     RAISE EXCEPTION 'candidate did not cancel exactly target-pair orders';
   END IF;
   IF (SELECT count(*) FROM public.order_reservations r JOIN public.orders o ON o.id=r.order_id
-      WHERE o.pair_id='50000000-0000-0000-0000-000000000001' AND r.status='released') <> 2 THEN
+      WHERE o.pair_id='50000000-0000-0000-0000-000000000001' AND r.status='released'
+        AND ((o.id='60000000-0000-0000-0000-000000000001' AND r.released_amount=8)
+          OR (o.id='60000000-0000-0000-0000-000000000003' AND r.released_amount=4))) <> 2 THEN
     RAISE EXCEPTION 'candidate did not release exactly target-pair reservations';
   END IF;
   IF (SELECT count(*) FROM public.orders WHERE pair_id='50000000-0000-0000-0000-000000000002' AND status='pending') <> 2 THEN
@@ -220,6 +227,23 @@ BEGIN
   END IF;
 END;
 $$;
+
+
+-- The candidate must retain the original super-admin boundary.
+DO $
+BEGIN
+  PERFORM set_config('request.jwt.claim.sub','bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',true);
+  BEGIN
+    PERFORM public.admin_disable_market_pair_candidate(
+      '50000000-0000-0000-0000-000000000002','unauthorized attempt'
+    );
+    RAISE EXCEPTION 'unauthorized candidate call unexpectedly succeeded';
+  EXCEPTION WHEN insufficient_privilege THEN
+    NULL;
+  END;
+  PERFORM set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',true);
+END;
+$;
 
 -- Repeated candidate disable is idempotent and must not release twice.
 DO $$
