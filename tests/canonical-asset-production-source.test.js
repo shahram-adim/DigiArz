@@ -19,6 +19,7 @@ function extractDefinition(source, functionName) {
 
 const entries = [
   ['execute_demo_trade', '4289e358b0c7293fc33f86c2511486d7'],
+  ['get_demo_trading_fee_rate', '546d80d7105228ed97da26c5ed0c7b7f'],
   ['place_conditional_exit_order', 'e4de4667d89e6663f04d92d47ac4d5cf'],
   ['cancel_conditional_exit_order', 'efa4c8a200d299f76b0d2cbe2d0b49e9'],
   ['process_conditional_orders', '5cfbf0e2e73474ae64e42643b3feb28a'],
@@ -43,6 +44,17 @@ for (const [name, fingerprint] of entries) {
     assert.match(definition, /SET search_path TO/i);
   });
 }
+
+test('live Production fee helper selects configured maker/taker rates and fails closed', () => {
+  const fee = definitions.get_demo_trading_fee_rate.definition;
+  assert.match(fee, /p_liquidity_type\s+NOT IN\s*\('maker',\s*'taker'\)/i);
+  assert.match(fee, /f\.maker_fee_rate\s+ELSE\s+f\.taker_fee_rate/i);
+  assert.match(fee, /FROM public\.demo_trading_fees AS f/i);
+  assert.match(fee, /f\.quote_asset\s*=\s*upper\(btrim\(p_quote_asset\)\)/i);
+  assert.match(fee, /f\.is_enabled\s+IS TRUE/i);
+  assert.match(fee, /Trading fee is not configured for quote asset/i);
+  assert.doesNotMatch(fee, /0\.001|0\.1%/i);
+});
 
 test('live Market and conditional entrypoints still resolve the trading pair by mutable display ticker', () => {
   const market = definitions.execute_demo_trade.definition;
