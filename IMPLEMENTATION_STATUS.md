@@ -2816,3 +2816,25 @@
 - [x] فقط SQL تست ایزوله، سند تست و IMPLEMENTATION_STATUS روی شاخه Draft تغییر کردند.
 - [x] هیچ Production SQL/DDL/migration/backfill/RPC/Worker/Cron/Edge Function/RLS/ACL، داده کاربر یا مالی تغییر نکرد.
 - [x] هیچ merge/rebase/db push/deploy/APK/Pages publication یا هزینه‌ای انجام نشد.
+
+
+## شهرام ۲۱۶ — تشخیص علت اجرا نشدن CI روی HEAD جدید — ۲۸ نوامبر ۲۰۲۶
+
+### بررسی زنده و اصلاح فرضیه قبلی
+- [x] PR #67 باز، Draft، ادغام‌نشده و base آن `main` است.
+- [x] Workflow `.github/workflows/exact-decimal-tests.yml` هم روی Main و هم روی PR branch وجود دارد؛ بنابراین فرض «workflow روی base branch وجود ندارد» رد شد.
+- [x] workflow روی Main شامل `pull_request: branches: [main]` است و base PR نیز main است.
+- [x] پنج اجرای تاریخی PR #67 با شناسه‌های 46036165275، 46037695694، 46038127085، 46038710233 و 46038816951 از GitHub بازخوانی شدند؛ همه SUCCESS هستند اما روی SHAهای قدیمی‌ترند و اثبات تست HEAD فعلی نیستند.
+- [x] روی HEAD ورودی این مرحله `c2bb944c2ccbe64e92c3520549933c7e2186ef57`، Check Runs صفر و Actions runs فیلترشده با SHA صفر بود.
+- [x] علت دقیق عدم trigger از شواهد در دسترس اثبات نشد؛ event delivery/credential suppression یا repository Actions policy صرفاً احتمال‌اند، نه یافته قطعی.
+- [x] ابزار موجود create workflow run/dispatch ندارد و run شکست‌خورده‌ای برای rerun وجود ندارد.
+
+### خروجی
+- [x] سند `docs/GITHUB_ACTIONS_TRIGGER_DIAGNOSIS_2026-11-28.md` ایجاد شد؛ شواهد، رد فرضیه اشتباه، runهای تاریخی و گام تشخیصی امن مالک را ثبت می‌کند.
+- [ ] اجرای تست روی HEAD نهایی هنوز لازم است؛ هیچ Pass جدیدی ادعا نمی‌شود.
+- [ ] مالک باید Actions page/workflow state و PR timeline (رویداد synchronize) را بررسی کند. تغییر Actions permissions یا workflow روی Main نیازمند اجازه جداگانه است.
+
+### ایمنی
+- [x] فقط سند تشخیصی و IMPLEMENTATION_STATUS در شاخه Draft تغییر کردند.
+- [x] workflow Main، تنظیمات مخزن، branch protection، Production، DB و داده مالی تغییر نکرد.
+- [x] هیچ merge/rebase/db push/deploy/هزینه‌ای انجام نشد.
