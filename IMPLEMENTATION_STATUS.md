@@ -2574,3 +2574,34 @@
 - [x] فقط فایل‌های تست و این گزارش در شاخهٔ Draft تغییر کردند.
 - [x] هیچ SQL، Migration، RPC، Worker، Cron، Edge Function، RLS/ACL یا دادهٔ Production/Supabase اجرا یا تغییر داده نشد.
 - [x] هیچ Merge، rebase، deploy، انتشار APK/Pages یا هزینه‌ای انجام نشد.
+
+
+## شهرام ۲۰۸ — طراحی آزمون مالی canonical برای tickerهای تکراری — ۲۸ نوامبر ۲۰۲۶
+
+### بازبینی وضعیت زنده
+- [x] پیش از تغییر، PR #67 و شاخهٔ کاری بررسی شدند: PR باز، Draft، ادغام‌نشده و `mergeable=false`؛ HEAD آغاز مرحله `4895ec18e1f18a924c375cf0a53f1e95bfe4e7c0`.
+- [x] Main برابر `e8477b53a1b8c6fc7225572db3e559a1c75607d8` است؛ مقایسهٔ زنده ۲۳۹ commit جلو و ۸ عقب، وضعیت diverged.
+- [x] Check Runs روی HEAD آغاز مرحله صفر و workflow run متصل به همان SHA یافت نشد؛ CI فعلی را سبز فرض نمی‌کنیم.
+
+### یافتهٔ فنی مهم
+- [x] fixture مرجع Market/Limit به‌صورت ticker-keyed ساخته شده: `demo_trading_pairs.pair_symbol` و `market_prices.symbol` کلید اصلی‌اند و توابع Migration مرجع نیز از همان مسیر نماد استفاده می‌کنند.
+- [x] افزودن سادهٔ `pair_id` به این fixture کافی نیست؛ تا وقتی بدنهٔ RPC/worker canonical نشود، توابع همچنان با ticker lookup می‌کنند.
+- [x] prototype canonical مستقل، pair و price را با ID تفکیک می‌کند اما از generic `balances(user_id,asset_id)`، fee ثابت و worker ساده‌شده استفاده می‌کند؛ بنابراین جایگزین دفترکل مالی مرجع نیست.
+- [x] fixture مرجع یک schema تقلیل‌یافته است؛ نبود FK میان reservation و order در آن به‌تنهایی اثبات قیود Production نیست.
+
+### خروجی این مرحله
+- [x] سند `docs/CANONICAL_DUPLICATE_TICKER_FINANCIAL_TEST_PLAN_2026-11-28.md` ایجاد شد.
+- [x] سند مسیر آزمون بعدی را مشخص می‌کند: شروع از fixture و Migration مرجع در PostgreSQL موقت، سپس افزودن candidate canonical RPC/worker فقط در همان محیط disposable.
+- [x] الزامات مالی صریح حفظ شدند: wallets، asset_balances، fee helper، lifecycle رزرو، transactions/trades، active-account، wallet-first locks، advisory lock، freshness یک‌دقیقه‌ای و fill سقف ۲۵٪.
+- [x] ماتریس آزمون duplicate ticker شامل Market/Limit buy/sell، partial fills، cancel/disable isolation، price validation، idempotency و race دو session ثبت شد.
+
+### محدودیت شواهد و گام بعد
+- [!] این مرحله سند طراحی و بازبینی منبع است؛ هیچ SQL یا Node test اجرا نشد و اجرای PostgreSQL canonical integration هنوز وجود ندارد.
+- [!] اجرای CI روی HEAD تازه همچنان لازم است؛ Check Runs صفر بود.
+- [ ] گام بعد: ساخت candidate canonical SQL منفصل که بدنهٔ RPC/worker را واقعاً pair-keyed کند، ولی همان wallet/base-ledger/fee/reservation/journal مرجع را حفظ کند؛ سپس آزمون duplicate ticker روی PostgreSQL disposable.
+- [ ] بازیابی ۱۷ منبع Migration مفقود و حل ۲۰ اختلاف timestamp/name همچنان gate مستقل باقی می‌ماند.
+
+### ایمنی
+- [x] فقط سند طراحی و این فایل وضعیت در شاخهٔ Draft ثبت شدند.
+- [x] هیچ SQL روی Supabase یا Production اجرا نشد؛ هیچ Migration، RPC، Worker، Cron، Edge Function، RLS/ACL یا دادهٔ مالی تغییر نکرد.
+- [x] هیچ merge، rebase، db push، deploy، انتشار APK/Pages یا هزینه‌ای انجام نشد.
