@@ -39,3 +39,17 @@ test('canonical ledger integration remains an explicit release blocker until eve
     );
   }
 });
+
+
+test('legacy Market and Limit RPC contracts cannot distinguish canonical pairs sharing one display ticker', () => {
+  const marketSignature = migration.match(/CREATE OR REPLACE FUNCTION public\\.execute_demo_trade\\s*\\(([^)]*)\\)/i)?.[1] || '';
+  const limitSignature = migration.match(/CREATE OR REPLACE FUNCTION public\\.place_limit_order\\s*\\(([^)]*)\\)/i)?.[1] || '';
+  assert.match(marketSignature, /^\\s*p_symbol\\s+text\\s*,/i);
+  assert.match(limitSignature, /^\\s*p_symbol\\s+text\\s*,/i);
+  assert.doesNotMatch(marketSignature, /pair_id|asset_id/i);
+  assert.doesNotMatch(limitSignature, /pair_id|asset_id/i);
+
+  const worker = functionBody('process_limit_orders');
+  assert.match(worker, /market_prices[\\s\\S]*?mp\\.symbol\\s*=\\s*v_order\\.symbol/i);
+  assert.doesNotMatch(worker, /mp\\.pair_id\\s*=|canonical_pair_id/i);
+});
