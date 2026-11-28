@@ -70,15 +70,15 @@ test('the Production snapshot integration exercises ten separate retries and a f
 
 
 function extractRawWorkerBody(source, label) {
-  const match = source.match(/CREATE OR REPLACE FUNCTION\\s+public\\.process_stop_limit_orders\\s*\\(\\s*\\)\\s*RETURNS\\s+jsonb[\\s\\S]*?AS\\s+\\$function\\$([\\s\\S]*?)\\$function\\$/i);
+  const match = source.match(/CREATE OR REPLACE FUNCTION\s+public\.process_stop_limit_orders\s*\(\s*\)\s*RETURNS\s+jsonb[\s\S]*?AS\s+\$function\$([\s\S]*?)\$function\$/i);
   assert.ok(match, label + ': raw process_stop_limit_orders() body not found');
   return match[1];
 }
 
 function normalizeWorkerBody(source) {
   return source
-    .replace(/--[^\\n]*/g, '')
-    .replace(/\\s+/g, ' ')
+    .replace(/--[^\n]*/g, '')
+    .replace(/\s+/g, ' ')
     .trim();
 }
 
