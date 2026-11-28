@@ -35,12 +35,30 @@ BEGIN
     RAISE EXCEPTION 'Ledger asset key is immutable after financial use'
       USING ERRCODE = '23514';
   END IF;
+  IF TG_OP = 'DELETE' THEN
+    IF EXISTS (
+      SELECT 1 FROM public.asset_balances AS b
+      WHERE b.asset = OLD.ledger_asset_key
+    ) OR EXISTS (
+      SELECT 1 FROM public.order_reservations AS r
+      WHERE r.asset = OLD.ledger_asset_key
+    ) THEN
+      RAISE EXCEPTION 'Ledger asset mapping cannot be deleted after financial use'
+        USING ERRCODE = '23514';
+    END IF;
+    RETURN OLD;
+  END IF;
+
   RETURN NEW;
 END;
 $function$;
 
 CREATE TRIGGER canonical_asset_ledger_key_immutable
 BEFORE UPDATE OF ledger_asset_key ON public.canonical_asset_ledger_key_map
+FOR EACH ROW EXECUTE FUNCTION public.prevent_referenced_ledger_key_reassignment();
+
+CREATE TRIGGER canonical_asset_ledger_mapping_no_delete
+BEFORE DELETE ON public.canonical_asset_ledger_key_map
 FOR EACH ROW EXECUTE FUNCTION public.prevent_referenced_ledger_key_reassignment();
 
 CREATE OR REPLACE FUNCTION public.resolve_canonical_ledger_asset_key(p_asset_id uuid)
@@ -165,6 +183,19 @@ BEGIN
 
   IF public.resolve_canonical_ledger_asset_key(v_asset_a) <> v_key_a THEN
     RAISE EXCEPTION 'failed reassignment changed the canonical ledger mapping';
+  END IF;
+
+  -- A mapping cannot be deleted while balances or reservations still refer to it.
+  BEGIN
+    DELETE FROM public.canonical_asset_ledger_key_map
+    WHERE canonical_asset_id=v_asset_a;
+    RAISE EXCEPTION 'referenced ledger mapping deletion unexpectedly accepted';
+  EXCEPTION WHEN SQLSTATE '23514' THEN
+    IF SQLERRM NOT LIKE '%cannot be deleted after financial use%' THEN RAISE; END IF;
+  END;
+
+  IF public.resolve_canonical_ledger_asset_key(v_asset_a) <> v_key_a THEN
+    RAISE EXCEPTION 'failed deletion changed the canonical ledger mapping';
   END IF;
 END;
 $test$;
