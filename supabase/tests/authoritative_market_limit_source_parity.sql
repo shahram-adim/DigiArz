@@ -274,6 +274,25 @@ BEGIN
   IF v_wallet_before-v_wallet_after <> 0.15256821 THEN
     RAISE EXCEPTION 'Market 8-decimal gross/fee rounding mismatch: %',v_wallet_before-v_wallet_after;
   END IF;
+  IF (v_result->>'price')::numeric <> 1.23456789
+     OR (v_result->>'fee')::numeric <> 0.00015242
+     OR (v_result->>'total')::numeric <> 0.15256821 THEN
+    RAISE EXCEPTION 'Market precision-edge RPC payload mismatch: %',v_result;
+  END IF;
+  v_order := (v_result->>'order_id')::uuid;
+  SELECT amount,price INTO v_filled,v_reserved
+    FROM public.trades WHERE order_id=v_order;
+  IF v_filled <> 0.123456789 OR v_reserved <> 1.23456789 THEN
+    RAISE EXCEPTION 'Market precision-edge trade journal mismatch: amount %, price %',v_filled,v_reserved;
+  END IF;
+  SELECT amount INTO v_consumed
+    FROM public.transactions
+   WHERE user_id=v_user AND transaction_type='buy'
+     AND description='DigiArz demo trade: DOTUSDT'
+   ORDER BY id DESC LIMIT 1;
+  IF v_consumed <> 0.15256821 THEN
+    RAISE EXCEPTION 'Market precision-edge transaction journal mismatch: %',v_consumed;
+  END IF;
 
   -- Unauthenticated entrypoint must fail closed.
   PERFORM set_config('request.jwt.claim.sub','',true);
