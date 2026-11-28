@@ -64,3 +64,11 @@ Production table presently permits duplicate pair symbols.
 No Production query or write, migration, DDL, backfill, RPC, Worker, Cron,
 Edge Function, RLS/ACL, Auth, financial data, merge, rebase, db push, deploy,
 APK/Pages publication, or paid service action was performed.
+
+
+## Follow-up hardening — Shahram 219
+
+- The pair_id-scoped candidate test now seeds partially consumed reservations and asserts only the unconsumed remainder is released (8 from 10 after 2 consumed; 4 from 5 after 1 consumed).
+- Added a negative authorization assertion: a non-super-admin caller must receive SQLSTATE `42501`; the candidate retains the captured function's super-admin gate.
+- Repeated disable remains asserted as idempotent.
+- These changes are committed to PR #67, but no Actions run or check-run exists for the resulting HEAD. Local PostgreSQL is unavailable, so runtime status remains unknown.
