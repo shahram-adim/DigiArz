@@ -306,6 +306,14 @@ jobs:
             -f supabase/tests/canonical_pair_scoped_admin_disable_race.sql
           DB_NAME=digiarz_pair_disable_test bash supabase/tests/canonical_pair_scoped_admin_disable_race.sh
 
+      - name: Exercise captured Production admin-disable RPC and pair-scoped candidate
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_admin_disable_source_parity_test;"
+          psql -h localhost -U postgres -d digiarz_admin_disable_source_parity_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/canonical_admin_disable_source_parity.sql
+
       - name: Verify read-only canonical asset identity schema fingerprint
         env:
           PGPASSWORD: postgres
