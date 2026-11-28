@@ -2838,3 +2838,22 @@
 - [x] فقط سند تشخیصی و IMPLEMENTATION_STATUS در شاخه Draft تغییر کردند.
 - [x] workflow Main، تنظیمات مخزن، branch protection، Production، DB و داده مالی تغییر نکرد.
 - [x] هیچ merge/rebase/db push/deploy/هزینه‌ای انجام نشد.
+
+
+## شهرام ۲۱۷ — اصلاح ایرادهای واقعی Fixture خاموش‌سازی pair — ۲۸ نوامبر ۲۰۲۶
+
+### بررسی زنده
+- [x] پیش از کار، PR #67 و شاخه بررسی شد: PR باز، Draft، ادغام‌نشده و mergeable=false؛ HEAD ورودی `98560812ed61f3a75b5b93d4a37247ab08558a57`؛ Main برابر `e8477b53a1b8c6fc7225572db3e559a1c75607d8`؛ compare برابر 263 ahead / 8 behind؛ Check Runs و Workflow Runs برای HEAD صفر.
+- [x] ابزار dispatch/create-run در GitHub tool surface موجود نیست.
+
+### اصلاحات
+- [x] در `supabase/tests/canonical_pair_scoped_admin_disable_race.sql` دو terminator ناقص dollar-quote به `$$;` اصلاح شد و opener بلوک idempotency به `DO $$` تغییر کرد.
+- [x] آزمون idempotency از قبل seedها به انتهای سناریوی pair-scope منتقل شد؛ اکنون پس از اولین disable اجرا می‌شود و واقعاً فراخوانی دوم را می‌آزماید. جای قبلی قبل از seed باعث خطای pair not found می‌شد.
+- [x] فایل race shell در محیط محلی با `bash -n` بررسی شد و syntax PASS گرفت.
+- [x] سند `docs/CANONICAL_PAIR_SCOPED_ADMIN_DISABLE_RACE_TEST_2026-11-28.md` با اصلاحات و محدودیت‌ها به‌روز شد.
+
+### وضعیت آزمون و ایمنی
+- [ ] SQL fixture در PostgreSQL اجرا نشده؛ `psql`/PostgreSQL محلی در دسترس نیست.
+- [ ] اجرای CI روی HEAD نهایی هنوز وجود ندارد؛ هیچ runtime PASS برای SQL یا race ادعا نمی‌شود.
+- [x] این fixture فقط مدل رفتاری disposable است؛ نه Production RPC patch است و نه اثبات lock-order واقعی workerهای deployed.
+- [x] هیچ Production DB/SQL/DDL/migration/backfill/RPC/Worker/Cron/Edge Function/RLS/ACL، داده کاربر/مالی، تنظیمات Actions، merge/rebase/db push/deploy/APK/Pages یا هزینه‌ای تغییر نکرد.
