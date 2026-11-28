@@ -141,7 +141,7 @@ test('captured Production fee helper NULL-liquidity gap remains explicit and can
 test('disposable fee-helper regression characterizes captured NULL behavior and requires explicit candidate rejection', () => {
   const feeRegression = read('supabase/tests/canonical_fee_helper_null_regression.sql');
   assert.match(feeRegression, /public\.get_demo_trading_fee_rate\('USDT',\s*NULL\)/);
-  assert.match(feeRegression, /maker_fee_rate\\s*=\\s*0\\.002,\\s*taker_fee_rate\\s*=\\s*0\\.001/);
+  assert.match(feeRegression, /maker_fee_rate\s*=\s*0\.002,\s*taker_fee_rate\s*=\s*0\.001/);
   assert.match(feeRegression, /v_null_liquidity\s+IS\s+DISTINCT\s+FROM\s+v_taker/);
   assert.match(feeRegression, /p_liquidity_type\s+IS\s+NULL\s+OR\s+p_liquidity_type\s+NOT\s+IN\s*\('maker',\s*'taker'\)/);
   assert.match(feeRegression, /get_demo_trading_fee_rate\('USDT',\s*NULL\)/);
