@@ -2631,3 +2631,35 @@
 - [x] فقط دو سند مستنداتی در شاخهٔ Draft ثبت شدند.
 - [x] هیچ SQL/DDL یا Node/PostgreSQL test اجرا نشد؛ هیچ Production/Supabase، RPC، Worker، Cron، Edge Function، RLS/ACL یا دادهٔ مالی تغییر نکرد.
 - [x] هیچ merge، rebase، db push، deploy، انتشار APK/Pages یا هزینه‌ای انجام نشد.
+
+
+## شهرام ۲۱۰ — طراحی نگاشت هویت canonical به کلید دفترکل موجود — ۲۸ نوامبر ۲۰۲۶
+
+### بازبینی زنده و مبنا
+- [x] پیش از کار، PR #67، شاخهٔ کاری، Main، compare و Check Runs بررسی شدند.
+- [x] HEAD شروع `2e94a68a2de65fd0bead1529abbc8833a315ae2e`؛ Main `e8477b53a1b8c6fc7225572db3e559a1c75607d8`؛ compare برابر ۲۴۳ جلو و ۸ عقب و diverged بود.
+- [x] PR #67 باز، Draft و ادغام‌نشده است؛ `mergeable=false`. Check Runs روی HEAD شروع صفر بود.
+- [x] fixture مرجع نشان می‌دهد کلید `asset_balances` برابر `(user_id, asset)` و `order_reservations.asset` متن است؛ توابع قدیمی base key را از ticker استخراج می‌کنند.
+
+### تصمیم معماری
+- [x] سه مفهوم از هم جدا شدند: canonical `asset_id`، کلید یکتای دفترکل `ledger_asset_key` و نماد/نام نمایشی.
+- [x] مشخص شد دو canonical asset با ticker یکسان را نمی‌توان به یک legacy text key نگاشت؛ این کار موجودی و رزروها را ادغام می‌کند.
+- [x] کلید دفترکل آینده باید یکتا و مستقل از ticker باشد؛ نمونهٔ namespace داخلی صرفاً گزینهٔ candidate است و هنوز تصمیم Production نیست.
+- [x] گروه‌های ticker مبهم، موجودی‌های تاریخی و رزروهای باز نباید خودکار split/re-key/re-attribute شوند؛ باید quarantine و با شواهد مستقل بررسی شوند.
+- [x] مسیر USDT wallet فعلی حفظ می‌شود؛ ساخت دفترکل عمومی موازی ممنوع است.
+
+### خروجی
+- [x] سند `docs/CANONICAL_ASSET_LEDGER_KEY_MAPPING_DESIGN_2026-11-28.md` ایجاد شد.
+- [x] قیود mapping، provenance، review status، quarantine، backfill امن و آزمون PostgreSQL موقت ثبت شد.
+- [x] ماتریس آزمون duplicate ticker برای Market/Limit، رزروها، چهار fill ۲۵٪، ژورنال مالی، cancellation و race دو session تعریف شد.
+- [x] blockerهای Production مشخص شدند: inventory تمام مصرف‌کنندگان ledger key، parity کامل schema/RLS/grants/triggers، بازیابی ۱۷ migration مفقود، حل ۲۰ mismatch و تعیین تکلیف موجودی/رزروهای مبهم.
+
+### گام بعد
+- [ ] inventory read-only از همهٔ functionها، triggerها، policyها، viewها، jobها، Edge Functionها و API/reporting consumerهایی که `asset_balances.asset` یا `order_reservations.asset` را می‌خوانند/می‌نویسند.
+- [ ] پس از inventory، candidate mapping و RPC/worker pair-keyed در fixture PostgreSQL موقت ساخته شود؛ نه Production.
+- [ ] اجرای Node و PostgreSQL CI روی commit دقیق candidate الزامی است؛ Check Runs صفر را نباید موفقیت تلقی کرد.
+
+### ایمنی
+- [x] فقط سند طراحی و وضعیت پروژه در شاخهٔ Draft ثبت شدند.
+- [x] هیچ DDL، backfill، re-key، SQL/DB test، Production/Supabase write، RPC، Worker، Cron، Edge Function، RLS/ACL یا دادهٔ مالی تغییر نکرد.
+- [x] هیچ merge، rebase، db push، deploy، انتشار APK/Pages یا هزینه‌ای انجام نشد.
