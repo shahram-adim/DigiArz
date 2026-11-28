@@ -55,3 +55,10 @@ The fixture was tightened after static review:
 - These constraints make the test data model itself reject cross-pair attribution, rather than relying only on procedural WHERE clauses.
 
 The updated SQL was inspected from the committed branch. It has still not been executed locally or in CI; no pass is claimed.
+
+
+## Follow-up regression coverage — Shahram 215
+
+- Added order arithmetic constraints: filled amount must remain within the original amount, and remaining amount must equal amount minus filled amount.
+- Added a repeated-disable assertion. A second call must cancel zero additional orders and release zero additional reservations; the original cumulative release values must remain unchanged.
+- These are still fixture-only checks and remain unexecuted until an Actions run or local disposable PostgreSQL execution is available.
