@@ -91,3 +91,34 @@ node --test tests/canonical-market-limit-financial-contract.test.js
 - Do not change Production schema, data, functions, grants, RLS, triggers, Cron, workers, or Edge Functions.
 - Do not invoke Market/Limit/conditional financial RPCs or workers manually.
 - Do not merge, rebase, push migrations, deploy, publish APK/Pages, or incur costs without the owner's explicit approval.
+
+## Canonical identity extension blueprint (no DDL applied)
+
+The safe direction is an additive identity extension of the existing financial ledger, not a second wallet system:
+
+| Existing financial record | Canonical identity to carry | Compatibility rule |
+|---|---|---|
+| demo_trading_pairs | pair_id, base_asset_id, quote_asset_id | Pair ID is authoritative; pair_symbol remains display/API compatibility only |
+| market_prices | pair_id | Price lookup for execution is by pair ID; symbol may remain a denormalized display snapshot |
+| orders | pair_id, base_asset_id, quote_asset_id | Preserve symbol as historical display snapshot; never resolve the traded asset from it |
+| trades | Same pair/base/quote IDs as the parent order | Enforce same-order identity with composite foreign keys |
+| order_reservations | Canonical asset_id in addition to legacy asset | Keep existing consumed/released/status ledger; the ID is authoritative for identity, legacy text is compatibility only |
+| asset_balances | Canonical asset reference for its existing asset key | Preserve the current user/asset balance ledger; do not create a parallel generic balance table |
+| wallets | No new token-specific balance model | Keep the existing USDT wallet as the quote-currency ledger |
+
+### Invariants for the future disposable candidate
+
+1. Pair identity is immutable and unique by (base_asset_id, quote_asset_id). A pair's display ticker is not a key and duplicate display tickers must be allowed when the underlying asset IDs differ.
+2. Every order's (pair_id, base_asset_id, quote_asset_id) must reference one exact pair tuple. Every trade must reference the same tuple as its parent order.
+3. Execution price is fetched by pair_id; never use display_pair or ticker text as an execution join.
+4. Reservation identity must agree with the order side: a buy reserves the pair's quote asset; a sell reserves its base asset. Preserve the authoritative reservation amount, consumed amount, released amount, status, and cumulative formulas.
+5. Keep the production fee helper, wallet and base-ledger tables, row-lock sequence, journal writes, and active-account checks unchanged in semantics.
+6. The canonical asset ID must resolve to the existing balance asset key through an explicit, unique mapping. Do not silently equate provider IDs, display symbols, and legacy balance symbols.
+7. Migration DDL must be additive and backfillable with a deterministic, reviewed mapping. Ambiguous legacy symbols must be quarantined for review rather than auto-assigned.
+8. Candidate functions must be exercised only in a disposable PostgreSQL database after applying the exact authoritative migration and all verified prerequisites. No Production data/function is a test target.
+
+### Deliberate non-decisions
+
+- No DDL is proposed here because the full applied migration chain, constraints, indexes, triggers, RLS, grants, and all 17 unrecovered migration sources are not yet reconciled.
+- No assumption is made that the legacy asset text can be converted to a canonical ID without an ambiguity audit.
+- No change is made to Market/Limit fee precision or to the Limit worker's current per-fill arithmetic.
