@@ -2361,3 +2361,38 @@
 
 ### Safety
 - [x] This checkpoint records repository metadata and file-content comparisons only. No database or financial operation was performed.
+
+
+## شهرام ۲۰۲ — قرارداد مالی Market/Limit و آزمون محافظ منبع — ۲۸ نوامبر ۲۰۲۶
+
+### نتیجهٔ بازبینی منبع
+- [x] Migration مرجع `20261113161641_enforce_active_accounts_in_demo_trade_and_limit_engine.sql` مجدداً بررسی شد.
+- [x] مرز دقت عددی دقیق شد: تابع Market صراحتاً gross و fee را با `round(...,8)` گرد می‌کند؛ تابع worker مربوط به Limit در همین Migration چنین `round(...,8)` صریحی ندارد و gross/fee را مستقیم محاسبه می‌کند. نباید رفتار Market را به Limit تعمیم داد.
+- [x] رفتار Limit از منبع استخراج شد: advisory lock `739201126`، `FOR UPDATE SKIP LOCKED)، فیلتر پروفایل فعال، قیمت حداکثر یک‌دقیقه‌ای، هر چرخه حداکثر ۲۵٪ مقدار اولیه، maker fee helper، reservation با consumed/released/status، و درج trade و transaction به‌ازای هر fill.
+- [x] اختلاف‌های candidate canonical تأیید شد: generic balances به‌جای wallets + asset_balances، fee ثابت 0.001، freshness دو دقیقه و ۳۰ ثانیه آینده، پرکردن کل مقدار باقی‌مانده در یک چرخه و حذف reservation. این candidate همچنان فقط اثبات هویت pair/asset است و parity مالی نیست.
+
+### فایل‌های افزوده‌شده
+- [x] `tests/canonical-market-limit-financial-contract.test.js` — تست ایستای Node برای pin کردن قراردادهای منبع Market/Limit و جلوگیری از معرفی اشتباه candidate به‌عنوان parity مالی.
+- [x] `docs/CANONICAL_MARKET_LIMIT_FINANCIAL_CONTRACT_2026-11-28.md` — سند قرارداد دقیق، اختلاف‌ها، مراحل پیاده‌سازی و release gates.
+
+### وضعیت اعتبارسنجی
+- [!] تست Node تازه به مخزن اضافه شد اما در این نشست اجرا نشده است؛ اجرای CI جدید برای HEAD فعلی در دسترس نبود. نتیجهٔ تست را pending نگه دارید تا CI روی SHA دقیق اجرا شود.
+- [!] تست ایستا جایگزین اجرای Migration واقعی در PostgreSQL 17، آزمون دو جفت با ticker یکسان، آزمون تراکنش/رزرو و race دو نشست نیست.
+- [!] Migrationهای مفقود و موانع schema/ACL/RLS/trigger parity همچنان hard gate هستند.
+
+### Commitهای این گام
+- `9e0892b4ed905ee9f5fe00115481c7abc08917e4` — افزودن تست قرارداد منبع.
+- `f11cc5d006e8e07b66447ff9d28940fc5fcbb5f8` — اصلاح assertion تست برای رفتار full-fill candidate.
+- `61d07dd0852e5ab6bc1190fd239909bd02345a66` — افزودن قرارداد مالی Market/Limit.
+
+### ایمنی
+- [x] فقط فایل تست و مستندات در شاخهٔ Draft PR تغییر کردند.
+- [x] هیچ Migration اجرایی یا تغییر Supabase/Production انجام نشد.
+- [x] هیچ RPC/Worker/Cron مالی اجرا نشد؛ jobهای موجود بدون تغییر ماندند.
+- [x] Merge، rebase، deploy، انتشار APK/Pages یا هزینه‌ای انجام نشد.
+
+### اقدام بعدی
+1. بازبینی و اجرای تست Node جدید در CI روی HEAD دقیق.
+2. ساخت candidate مالی canonical با حفظ wallets، asset_balances، fee helper و reservation ledger؛ بدون دست‌کاری Production.
+3. سپس آزمون source-faithful PostgreSQL 17 و دو pair با display ticker یکسان.
+4. حفظ Draft و توقف پیش از هر اقدام Production تا تأیید صریح مالک.
