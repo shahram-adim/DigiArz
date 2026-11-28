@@ -336,4 +336,16 @@ jobs:
             -f supabase/migrations/20261113161641_enforce_active_accounts_in_demo_trade_and_limit_engine.sql \
             -f supabase/tests/authoritative_market_limit_source_parity.sql
 
+      - name: Prove canonical asset IDs map to isolated existing ledger keys
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_canonical_ledger_mapping_test;"
+          psql -h localhost -U postgres -d digiarz_canonical_ledger_mapping_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/authoritative_market_limit_source_parity_setup.sql \
+            -f supabase/tests/canonical_identity_live_public_current_account_is_active_snapshot.sql \
+            -f supabase/tests/canonical_identity_live_public_get_demo_trading_fee_rate_snapshot.sql \
+            -f supabase/migrations/20261113161641_enforce_active_accounts_in_demo_trade_and_limit_engine.sql \
+            -f supabase/tests/canonical_asset_ledger_key_mapping_candidate.sql
+
 # TP/SL conditional worker diagnostics are enabled in the isolated CI fixture.
