@@ -259,6 +259,22 @@ BEGIN
   END IF;
   UPDATE public.market_prices SET updated_at=clock_timestamp(),price=10 WHERE symbol='DOTUSDT';
 
+  -- Market gross and fee must retain the authoritative explicit 8-decimal rounding.
+  -- gross = round(0.123456789 * 1.23456789, 8) = 0.15241579
+  -- fee   = round(0.15241579 * 0.001, 8) = 0.00015242
+  UPDATE public.market_prices
+     SET price=1.23456789,updated_at=clock_timestamp()
+   WHERE symbol='DOTUSDT';
+  v_wallet_before := (SELECT balance_usdt FROM public.wallets WHERE user_id=v_user);
+  v_result := public.execute_demo_trade('DOTUSDT','buy',0.123456789,999999);
+  IF COALESCE((v_result->>'success')::boolean,false) IS NOT TRUE THEN
+    RAISE EXCEPTION 'Market precision-edge buy failed: %',v_result;
+  END IF;
+  v_wallet_after := (SELECT balance_usdt FROM public.wallets WHERE user_id=v_user);
+  IF v_wallet_before-v_wallet_after <> 0.15256821 THEN
+    RAISE EXCEPTION 'Market 8-decimal gross/fee rounding mismatch: %',v_wallet_before-v_wallet_after;
+  END IF;
+
   -- Unauthenticated entrypoint must fail closed.
   PERFORM set_config('request.jwt.claim.sub','',true);
   BEGIN
