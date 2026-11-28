@@ -43,3 +43,15 @@ Reservation release preserves cumulative accounting: for the seeded partially co
 ## Safety
 
 No Production SQL/query, DDL, migration, backfill, RPC/Worker/Cron/Edge Function change, user/financial row change, RLS/ACL change, merge, rebase, db push, deployment, APK/Pages publication, or paid service action was performed.
+
+
+## Follow-up schema hardening — Shahram 214
+
+The fixture was tightened after static review:
+
+- `orders` now has a unique composite key on `(order_id, pair_id)`.
+- `conditional_orders` and `reservations` use composite foreign keys to the same order/pair tuple, preventing a row from accidentally attaching a valid order ID to a different pair ID.
+- Reservation checks enforce nonnegative consumption/release and prevent consumed plus released amounts from exceeding the reserved amount.
+- These constraints make the test data model itself reject cross-pair attribution, rather than relying only on procedural WHERE clauses.
+
+The updated SQL was inspected from the committed branch. It has still not been executed locally or in CI; no pass is claimed.
