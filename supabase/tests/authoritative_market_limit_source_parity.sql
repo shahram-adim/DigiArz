@@ -87,6 +87,8 @@ BEGIN
   END IF;
 
   -- Existing USDT reservations must reduce available Market-buy funds.
+  INSERT INTO public.orders(id,user_id,symbol,side,order_type,amount,price,filled_amount,remaining_amount,status)
+  VALUES ('21000000-0000-0000-0000-000000000101',v_user,'DOTUSDT','buy','limit',0.1,10,0,0.1,'pending');
   INSERT INTO public.order_reservations(
     order_id,user_id,asset,reserved_amount,consumed_amount,released_amount,status
   ) VALUES (
@@ -106,8 +108,11 @@ BEGIN
   END IF;
   DELETE FROM public.order_reservations
   WHERE order_id='21000000-0000-0000-0000-000000000101';
+  DELETE FROM public.orders WHERE id='21000000-0000-0000-0000-000000000101';
 
   -- Existing base-asset reservations must reduce available Market-sell funds.
+  INSERT INTO public.orders(id,user_id,symbol,side,order_type,amount,price,filled_amount,remaining_amount,status)
+  VALUES ('21000000-0000-0000-0000-000000000102',v_user,'DOTUSDT','sell','limit',0.1,10,0,0.1,'pending');
   INSERT INTO public.order_reservations(
     order_id,user_id,asset,reserved_amount,consumed_amount,released_amount,status
   ) VALUES (
@@ -127,6 +132,7 @@ BEGIN
   END IF;
   DELETE FROM public.order_reservations
   WHERE order_id='21000000-0000-0000-0000-000000000102';
+  DELETE FROM public.orders WHERE id='21000000-0000-0000-0000-000000000102';
 
   -- Caller-supplied p_price is not authoritative; stale market data must fail closed.
   UPDATE public.market_prices SET updated_at=clock_timestamp()-interval '2 minutes' WHERE symbol='DOTUSDT';
@@ -189,6 +195,8 @@ BEGIN
   END IF;
 
   -- Existing USDT reservations must reduce available Limit-buy funds.
+  INSERT INTO public.orders(id,user_id,symbol,side,order_type,amount,price,filled_amount,remaining_amount,status)
+  VALUES ('21000000-0000-0000-0000-000000000103',v_user,'DOTUSDT','buy','limit',0.1,10,0,0.1,'pending');
   INSERT INTO public.order_reservations(
     order_id,user_id,asset,reserved_amount,consumed_amount,released_amount,status
   ) VALUES (
@@ -204,8 +212,11 @@ BEGIN
   END;
   DELETE FROM public.order_reservations
   WHERE order_id='21000000-0000-0000-0000-000000000103';
+  DELETE FROM public.orders WHERE id='21000000-0000-0000-0000-000000000103';
 
   -- Existing base-asset reservations must reduce available Limit-sell funds.
+  INSERT INTO public.orders(id,user_id,symbol,side,order_type,amount,price,filled_amount,remaining_amount,status)
+  VALUES ('21000000-0000-0000-0000-000000000104',v_user,'DOTUSDT','sell','limit',0.1,10,0,0.1,'pending');
   INSERT INTO public.order_reservations(
     order_id,user_id,asset,reserved_amount,consumed_amount,released_amount,status
   ) VALUES (
@@ -221,6 +232,7 @@ BEGIN
   END;
   DELETE FROM public.order_reservations
   WHERE order_id='21000000-0000-0000-0000-000000000104';
+  DELETE FROM public.orders WHERE id='21000000-0000-0000-0000-000000000104';
 
   -- Stale quote must not consume the pending order or its reservation.
   v_result := public.place_limit_order('DOTUSDT','buy',1,11);
