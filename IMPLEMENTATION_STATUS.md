@@ -2723,3 +2723,35 @@
 - [x] فقط سند طراحی/ممیزی و وضعیت پروژه در شاخهٔ Draft ثبت شدند.
 - [x] هیچ Production query یا write، DDL، migration، backfill، تغییر UI/RPC/Worker/Cron/Edge Function، RLS/ACL، دادهٔ مالی یا Auth انجام نشد.
 - [x] هیچ merge، rebase، db push، deploy، انتشار APK/Pages یا هزینه‌ای انجام نشد.
+
+
+## شهرام ۲۱۳ — آزمون ایزولهٔ pair-scoped admin disable و race با Worker — ۲۸ نوامبر ۲۰۲۶
+
+### بازبینی پیش از کار
+- [x] PR #67، شاخه، Main، compare و Check Runs روی HEAD قبلی بررسی شدند.
+- [x] HEAD شروع `9fc54fec80aedf8b697e4df7c7dd65a1e112271a`؛ Main `e8477b53a1b8c6fc7225572db3e559a1c75607d8`؛ ۲۴۹ جلو و ۸ عقب، diverged.
+- [x] PR باز، Draft، ادغام‌نشده و mergeable=false؛ Check Runs صفر.
+
+### کار انجام‌شده
+- [x] Fixture مستقل `supabase/tests/canonical_pair_scoped_admin_disable_race.sql` ساخته شد؛ دو pair با display symbol یکسان ولی pair_id متفاوت دارد.
+- [x] سناریوی disable ثابت می‌کند سفارش‌ها، conditional state و reservationهای pair هدف تغییر می‌کنند و sibling pair دست‌نخورده می‌ماند.
+- [x] reservation release در fixture مقدار باقیمانده را با `reserved_amount - consumed_amount` محاسبه می‌کند.
+- [x] `supabase/tests/canonical_pair_scoped_admin_disable_race.sh` دو interleaving واقعی PostgreSQL را برای Worker-first و Admin-first طراحی می‌کند.
+- [x] هر دو مسیر pair-row-first lock را رعایت می‌کنند؛ در Admin-first، Worker پس از انتظار باید pair غیرفعال را ببیند و اجرا نکند.
+- [x] مرحله CI برای PostgreSQL 17 به `.github/workflows/exact-decimal-tests.yml` اضافه شد.
+- [x] محدودیت‌ها و مرز fixture در `docs/CANONICAL_PAIR_SCOPED_ADMIN_DISABLE_RACE_TEST_2026-11-28.md` مستند شد.
+
+### نتیجه و محدودیت
+- [x] این یک behavioral model ایزوله است، نه اصلاح تابع Production و نه اثبات parity کامل schema/RLS/ACL/worker.
+- [ ] SQL و race script در این نشست اجرا نشدند؛ محیط در دسترس PostgreSQL/psql/Docker ندارد. فقط پس از CI روی commit دقیق می‌توان وضعیت تست را تعیین کرد.
+- [ ] اجرای workflow روی HEAD جدید هنوز مشاهده/تأیید نشده است؛ صفر Check Runs قبلی به معنی تست موفق نیست.
+
+### گام بعد
+- [ ] بررسی اجرای CI دقیقاً روی HEAD نهایی و رسیدگی به خطاها بدون دست‌کاری Production.
+- [ ] اگر CI سبز شد، fixture کامل‌تر با schema و function chain واقعی Market/Limit/TP-SL/Stop-Limit بسازیم؛ pair-scoped بودن همه cancellation و worker paths را جداگانه اثبات کنیم.
+- [ ] قبل از هر طرح پیاده‌سازی Production، fingerprints زنده و artifactهای migration مفقود همچنان blocker هستند.
+
+### ایمنی
+- [x] فقط دو فایل تست ایزوله، workflow CI و اسناد شاخه Draft اضافه/به‌روزرسانی شدند.
+- [x] هیچ Production query/write، DDL، migration، backfill، RPC/Worker/Cron/Edge Function، RLS/ACL، داده مالی یا Auth تغییر نکرد.
+- [x] هیچ merge، rebase، db push، deploy، APK/Pages publication یا هزینه‌ای انجام نشد.
