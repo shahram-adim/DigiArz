@@ -6,6 +6,10 @@ const snapshot = readFileSync(
   new URL('../supabase/tests/stop_limit_production_cancel_limit_order_snapshot.sql', import.meta.url),
   'utf8'
 );
+const workerSnapshot = readFileSync(
+  new URL('../supabase/tests/stop_limit_production_process_limit_orders_snapshot.sql', import.meta.url),
+  'utf8'
+);
 const setup = readFileSync(
   new URL('../supabase/tests/exact_decimal_cancel_setup.sql', import.meta.url),
   'utf8'
@@ -33,5 +37,8 @@ test('Limit cancellation CI loads the captured Production function, not a synthe
     /- name: Run real two-session Limit worker and cancellation race tests([\s\S]*?)(?=\n      - name:|$)/
   )?.[1] || '';
   assert.match(integration, /exact_decimal_cancel_setup\.sql[\s\S]*stop_limit_production_cancel_limit_order_snapshot\.sql[\s\S]*exact_decimal_cancel_integration\.sql/);
-  assert.match(race, /exact_decimal_cancel_setup\.sql[\s\S]*stop_limit_production_cancel_limit_order_snapshot\.sql[\s\S]*exact_decimal_cancel_race_setup\.sql/);
+  assert.match(race, /exact_decimal_cancel_setup\.sql[\s\S]*stop_limit_production_cancel_limit_order_snapshot\.sql[\s\S]*stop_limit_production_process_limit_orders_snapshot\.sql[\s\S]*exact_decimal_cancel_race_setup\.sql/);
+  assert.doesNotMatch(race, /2026-11-15_exact_decimal_process_limit_orders\.sql/);
+  assert.match(workerSnapshot, /md5\(pg_get_functiondef\(\.\.\.\)\): 00ab429596fb99392666632967cde9c0/);
+  assert.match(workerSnapshot, /CREATE OR REPLACE FUNCTION public\.process_limit_orders\(\)/);
 });
