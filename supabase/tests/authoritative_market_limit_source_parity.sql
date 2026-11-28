@@ -57,6 +57,20 @@ BEGIN
     IF SQLERRM NOT LIKE '%Trading fee is not configured%' THEN RAISE; END IF;
   END;
   UPDATE public.demo_trading_fees SET is_enabled=true WHERE quote_asset='USDT';
+
+  -- The captured helper must select distinct maker/taker rates and normalize quote keys.
+  UPDATE public.demo_trading_fees
+     SET maker_fee_rate=0.0007, taker_fee_rate=0.0013
+   WHERE quote_asset='USDT';
+  IF public.get_demo_trading_fee_rate(' usdt ','maker')<>0.0007
+     OR public.get_demo_trading_fee_rate(' usdt ','taker')<>0.0013 THEN
+    RAISE EXCEPTION 'fee helper did not normalize quote asset or select the distinct maker/taker rate';
+  END IF;
+  -- Restore the deterministic rate expected by the downstream financial assertions.
+  UPDATE public.demo_trading_fees
+     SET maker_fee_rate=0.001, taker_fee_rate=0.001
+   WHERE quote_asset='USDT';
+
   INSERT INTO public.market_prices(symbol,price,updated_at) VALUES('DOTUSDT',10,clock_timestamp());
   PERFORM set_config('request.jwt.claim.sub',v_user::text,true);
 
