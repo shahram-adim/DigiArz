@@ -526,3 +526,9 @@ See \`docs/superpowers/reports/2026-11-15-exact-decimal-implementation-checkpoin
 - [x] Only project metadata, migration ledger, function catalog/ACL fingerprint, and cron metadata were read.
 - [x] No worker/RPC was invoked; no order, trade, reservation, wallet, balance, transaction, migration, grant, policy, schedule, or Edge Function was changed.
 - [x] No isolated branch/project was created and no cost was incurred.
+
+
+### Final CI result — 2026-11-28
+- [x] Exact-decimal Run #2419 (`46139853183`) completed with `success` on main commit `67570844c8b0301695ff5f8ce4fe987c57e1056e`.
+- [x] All 22 substantive PostgreSQL/Node steps and cleanup succeeded, including the new migration-chain source assertion, exact-decimal regressions, Limit/TP-SL/Stop-Limit lifecycle tests, and two-session cancellation/worker races.
+- [!] This is disposable GitHub Actions PostgreSQL 17 evidence. It does not supply the missing Supabase Development Branch or full Production schema/ACL parity harness.
