@@ -1655,3 +1655,13 @@
 - [x] Exact-decimal Run #2419 با شناسه `46139853183` روی commit `67570844c8b0301695ff5f8ce4fe987c57e1056e` با نتیجه نهایی `success` پایان یافت.
 - [x] هر ۲۲ مرحله اصلی PostgreSQL/Node و cleanup موفق شدند؛ شامل آزمون جدید تطبیق زنجیره Migration با snapshot Production، تست‌های Market/Limit، چرخه Stop-Limit و TP/SL، رقابت دو نشست Worker/Cancellation و آزمون fail-closed ده‌تلاشی.
 - [!] این شواهد مربوط به PostgreSQL 17 دورریختنی GitHub Actions است؛ جایگزین محیط Supabase ایزوله با schema/ACL parity کامل نیست.
+
+
+## بازبینی ساختار رابط کاربری — ۲۸ نوامبر ۲۰۲۶
+- [x] فایل واقعی `index.html` از `main` خوانده شد؛ اندازه محتوای HTML برابر ۴۹۲٬۹۹۶ بایت/کاراکتر در پاسخ GitHub بود.
+- [x] سند با `lang="fa"` و `dir="rtl"` شروع می‌شود؛ ۲۴۴ شناسه HTML یکتا و بدون تکرار وجود دارد.
+- [x] ده مسیر/تب ناوبری واقعی در DOM شناسایی شد: `dashboard`, `markets`, `toman`, `chart`, `trade`, `assets`, `orders`, `history`, `admin`, `settings`.
+- [x] فرم Stop-Limit دارای ورودی‌های side/symbol/amount/stop/limit، پیام اعتبارسنجی، دکمه ثبت و فهرست سفارش‌های خود کاربر است؛ مسیرهای `place_stop_limit_order`, `cancel_stop_limit_order` و `get_my_order_reservations` در کد رابط وجود دارند.
+- [x] manifest و ثبت Service Worker در رابط وجود دارند.
+- [!] این بررسی ساختاری است؛ تست بصری واقعی Android، لمس‌پذیری کنترل‌ها و سناریوهای responsive هنوز اجرا نشده‌اند. در این نوبت هیچ فایل UI تغییر نکرد.
+- [ ] پس از بستن دروازه QA مالی، تست Android باید ده تب را در عرض‌های موبایل بررسی کند و صفحه سفارش‌ها را برای همگام‌سازی parent/child و نمایش رزرو تأییدنشده پوشش دهد.
