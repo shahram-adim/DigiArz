@@ -206,6 +206,7 @@ jobs:
           psql -h localhost -U postgres -d digiarz_test -v ON_ERROR_STOP=1 \
             -f supabase/tests/exact_decimal_cancel_setup.sql \
             -f supabase/tests/stop_limit_production_cancel_limit_order_snapshot.sql \
+            -f supabase/tests/stop_limit_production_process_limit_orders_snapshot.sql \
             -f supabase/tests/exact_decimal_cancel_race_setup.sql
           bash supabase/tests/exact_decimal_cancel_race.sh
       - name: Run real two-session TP-SL conditional execution and cancellation races
