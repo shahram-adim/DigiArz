@@ -340,6 +340,17 @@ jobs:
             -f supabase/migrations/20261113161641_enforce_active_accounts_in_demo_trade_and_limit_engine.sql \
             -f supabase/tests/authoritative_market_limit_source_parity.sql
 
+
+      - name: Characterize captured fee-helper NULL gap and verify fail-closed candidate
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE digiarz_fee_null_regression_test;"
+          psql -h localhost -U postgres -d digiarz_fee_null_regression_test -v ON_ERROR_STOP=1 \
+            -f supabase/tests/authoritative_market_limit_source_parity_setup.sql \
+            -f supabase/tests/canonical_identity_live_public_get_demo_trading_fee_rate_snapshot.sql \
+            -f supabase/tests/canonical_fee_helper_null_regression.sql
+
       - name: Prove canonical asset IDs map to isolated existing ledger keys
         env:
           PGPASSWORD: postgres
