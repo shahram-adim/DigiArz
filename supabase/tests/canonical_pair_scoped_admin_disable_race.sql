@@ -95,26 +95,6 @@ BEGIN
 END;
 $$;
 
--- Repeated disable must be idempotent: no duplicate release or order mutation.
-DO $$
-DECLARE
-  v_result jsonb;
-BEGIN
-  v_result := canonical_pair_disable.disable_pair('10000000-0000-0000-0000-000000000001');
-  IF (v_result->>'cancelled_orders')::integer <> 0 THEN
-    RAISE EXCEPTION 'second disable unexpectedly cancelled more orders';
-  END IF;
-  IF (v_result->>'released_reservations')::integer <> 0 THEN
-    RAISE EXCEPTION 'second disable unexpectedly released reservations again';
-  END IF;
-  IF (SELECT count(*) FROM canonical_pair_disable.reservations
-      WHERE pair_id='10000000-0000-0000-0000-000000000001'
-        AND status='released' AND released_amount=75) <> 2 THEN
-    RAISE EXCEPTION 'repeated disable changed cumulative reservation accounting';
-  END IF;
-END;
-$$;
-
 -- Worker follows the same pair-then-order lock order as admin disable.
 CREATE OR REPLACE FUNCTION canonical_pair_disable.process_order(
   p_order_id uuid,
@@ -206,5 +186,25 @@ BEGIN
   IF (SELECT count(*) FROM canonical_pair_disable.orders WHERE pair_id='10000000-0000-0000-0000-000000000002' AND status='pending') <> 2 THEN RAISE EXCEPTION 'unrelated same-symbol orders changed'; END IF;
   IF (SELECT count(*) FROM canonical_pair_disable.reservations WHERE pair_id='10000000-0000-0000-0000-000000000002' AND status='reserved') <> 2 THEN RAISE EXCEPTION 'unrelated same-symbol reservations changed'; END IF;
   IF (SELECT status FROM canonical_pair_disable.conditional_orders WHERE order_id='20000000-0000-0000-0000-000000000004') <> 'pending' THEN RAISE EXCEPTION 'unrelated conditional order changed'; END IF;
+END;
+$$;
+
+-- Repeated disable must be idempotent: no duplicate release or order mutation.
+DO $$
+DECLARE
+  v_result jsonb;
+BEGIN
+  v_result := canonical_pair_disable.disable_pair('10000000-0000-0000-0000-000000000001');
+  IF (v_result->>'cancelled_orders')::integer <> 0 THEN
+    RAISE EXCEPTION 'second disable unexpectedly cancelled more orders';
+  END IF;
+  IF (v_result->>'released_reservations')::integer <> 0 THEN
+    RAISE EXCEPTION 'second disable unexpectedly released reservations again';
+  END IF;
+  IF (SELECT count(*) FROM canonical_pair_disable.reservations
+      WHERE pair_id='10000000-0000-0000-0000-000000000001'
+        AND status='released' AND released_amount=75) <> 2 THEN
+    RAISE EXCEPTION 'repeated disable changed cumulative reservation accounting';
+  END IF;
 END;
 $$;
