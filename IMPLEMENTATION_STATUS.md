@@ -2663,3 +2663,32 @@
 - [x] فقط سند طراحی و وضعیت پروژه در شاخهٔ Draft ثبت شدند.
 - [x] هیچ DDL، backfill، re-key، SQL/DB test، Production/Supabase write، RPC، Worker، Cron، Edge Function، RLS/ACL یا دادهٔ مالی تغییر نکرد.
 - [x] هیچ merge، rebase، db push، deploy، انتشار APK/Pages یا هزینه‌ای انجام نشد.
+
+
+## شهرام ۲۱۱ — inventory مصرف‌کنندگان کلید متنی دفترکل — ۲۸ نوامبر ۲۰۲۶
+
+### بازبینی زنده
+- [x] پیش از کار PR #67، branch، Main، compare و Check Runs بررسی شدند.
+- [x] HEAD شروع `2756c0037cc41f0aae55aa347a2a3491f7b1f6bf`؛ Main `e8477b53a1b8c6fc7225572db3e559a1c75607d8`؛ شاخه ۲۴۵ جلو و ۸ عقب، diverged.
+- [x] PR باز، Draft، ادغام‌نشده و mergeable=false؛ Check Runs روی HEAD شروع صفر.
+
+### inventory مستندشده
+- [x] مسیرهای مستقیم Market buy/sell، Limit placement/worker، TP/SL placement/worker، Stop-Limit placement/worker، cancellationها، account deactivation و reservation read API طبقه‌بندی شدند.
+- [x] مسیرهای غیرمستقیم catalog admission، exchange sync/matching، pair activation/disable، market-price refresh/overflow و read APIها ثبت شدند.
+- [x] مرز Edge Function، Cron، service_role و direct privileged write جداگانه مشخص شد؛ مواردی که نسخهٔ deployed یا اثر مستقیم‌شان از سورس repo اثبات نشده، unknown باقی ماندند.
+- [x] نتیجهٔ کلیدی: تغییر ledger key فقط تغییر جدول balance نیست؛ باید زنجیرهٔ سفارش، رزرو، شرطی، Stop-Limit، لغو، غیرفعال‌سازی حساب، قیمت و API هماهنگ شود.
+
+### خروجی
+- [x] سند `docs/CANONICAL_ASSET_LEDGER_TEXT_KEY_CONSUMER_INVENTORY_2026-11-28.md` ایجاد شد.
+- [x] inventory محدود به شواهد repo و snapshotهای موجود است؛ به‌عنوان inventory کامل Production ادعا نشده است.
+- [x] شکاف‌های باقی‌مانده برای live metadata fingerprint، deployed Edge Functions، Cron commandها، direct service-role writes، view/trigger/policy و client/report consumers صریح ثبت شد.
+
+### گام بعد
+- [ ] ادامهٔ بررسی read-only منابع موجود برای هر مصرف‌کنندهٔ مستقیم/غیرمستقیم و تطبیق با نسخهٔ deployed؛ در صورت نبود دسترسی یا snapshot، مورد به‌عنوان blocker ثبت شود.
+- [ ] پس از تکمیل inventory و بازیابی Migrationهای مفقود، طراحی candidate canonical financial functions روی fixture PostgreSQL موقت آغاز شود.
+- [ ] هیچ اجرای PostgreSQL یا CI روی HEAD تازه انجام نشده؛ Check Runs صفر و تست‌ها تأییدنشده‌اند.
+
+### ایمنی
+- [x] فقط دو فایل مستنداتی در شاخهٔ Draft ثبت شدند.
+- [x] هیچ Production query/SQL، DDL، backfill، balance/reservation write، RPC/worker/Cron invocation، Edge Function deployment یا RLS/ACL change انجام نشد.
+- [x] هیچ merge، rebase، db push، deploy، انتشار APK/Pages یا هزینه‌ای انجام نشد.
