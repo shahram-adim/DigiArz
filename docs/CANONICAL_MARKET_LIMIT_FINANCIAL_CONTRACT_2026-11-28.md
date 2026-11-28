@@ -49,6 +49,12 @@ The existing canonical identity prototype is:
 
 **Precision clarification:** the authoritative Market function explicitly rounds gross and fee to 8 decimal places. The authoritative Limit worker in this migration does **not** call `round(...,8)` for each fill; it calculates gross and fee directly and relies on the actual deployed column types/constraints. Do not silently impose Market rounding on Limit or claim that this migration itself implements explicit per-fill 8-decimal rounding. Any Limit rounding change must be a separately reviewed financial behavior change with its own cumulative-reservation and regression analysis.
 
+## Captured Production fee-helper dependency
+
+The exact Production function body is captured at `supabase/tests/canonical_identity_live_public_get_demo_trading_fee_rate_snapshot.sql` (2026-11-27 fingerprint `546d80d7105228ed97da26c5ed0c7b7f`). It validates maker/taker, reads the enabled quote-asset row from `public.demo_trading_fees`, chooses the configured maker or taker rate, and raises when no enabled configuration exists. Its recorded metadata is owner postgres, SECURITY DEFINER, empty search_path, anon execution denied, authenticated/service_role execution allowed.
+
+The disposable authoritative Market/Limit CI step loads this captured helper after the minimal fee-table fixture and before the exact Market/Limit migration. The fixture currently supplies a 0.1% USDT maker/taker row only to make deterministic tests possible. That row is **test data**, not evidence that Production currently configures 0.1%. The table's complete Production DDL, policies/grants and configuration values remain unverified; do not infer them from this function snapshot.
+
 ## Why the current canonical prototype cannot be promoted
 
 The current fixture differs in material financial behavior:
