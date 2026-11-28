@@ -2396,3 +2396,40 @@
 2. ساخت candidate مالی canonical با حفظ wallets، asset_balances، fee helper و reservation ledger؛ بدون دست‌کاری Production.
 3. سپس آزمون source-faithful PostgreSQL 17 و دو pair با display ticker یکسان.
 4. حفظ Draft و توقف پیش از هر اقدام Production تا تأیید صریح مالک.
+
+
+## شهرام ۲۰۳ — تقویت محافظ‌های ترتیب قفل و نقشهٔ اتصال هویت canonical به ledger — ۲۸ نوامبر ۲۰۲۶
+
+### بازبینی دقیق منبع
+- [x] بدنهٔ کامل Migration مرجع Market/Limit دوباره خوانده شد؛ ترتیب واقعی قفل wallet پیش از base-ledger در Market sell، Limit placement و Limit worker تأیید شد.
+- [x] منطق reservation واقعی از منبع بررسی شد: موجودی رزروشدهٔ باقی‌مانده با reserved - consumed - released؛ محاسبهٔ cumulative consumed؛ محاسبهٔ حداقل released لازم برای پوشش remaining reserve؛ و محدودکردن released به reserved - consumed.
+- [x] workflow موجود به‌طور صریح `node --test tests/*.test.js` را اجرا می‌کند؛ بنابراین تست جدید canonical Market/Limit در صورت اجرای workflow به‌طور خودکار در مجموعه قرار می‌گیرد. package.json اسکریپت test جداگانه ندارد.
+
+### تغییرات این گام
+- [x] تست قرارداد منبع تقویت شد تا ترتیب wallet-first در Market sell، Limit placement و Limit worker را pin کند.
+- [x] تست، محاسبات cumulative reservation و lifecycle status را به‌صورت source guard بررسی می‌کند.
+- [x] سند قرارداد، blueprint اتصال canonical IDs به جداول مالی موجود را اضافه کرد: pair_id برای جفت‌ارز/قیمت/سفارش، asset IDs برای سفارش/معامله/رزرو و حفظ wallet/base-balance ledger فعلی.
+- [x] مرز تصمیم‌گیری روشن شد: pair_id مرجع execution است؛ ticker و symbol صرفاً snapshot سازگاری/نمایش‌اند؛ legacy asset text تا پایان mapping audit به canonical ID تبدیل خودکار نمی‌شود.
+
+### Commitهای این گام
+- `87912452434cddd1cff88463d2928867c052c644` — تقویت آزمون ترتیب قفل و reservation در Limit.
+- `845a0a8057c7008b0b4dbed5cf26aa5c6bfdb7c0` — افزودن محافظ wallet-first و reserved-funds برای Market.
+- `04bf5622171b8b87e599285809eb771b67ae322f` — افزودن blueprint هویت canonical روی ledger مالی موجود.
+
+### اعتبارسنجی و محدودیت
+- [!] تست‌ها به صورت source guard نوشته شده‌اند اما در این نشست اجرا نشدند؛ CI روی HEAD دقیق همچنان لازم است.
+- [!] workflow روی PR هدف main تعریف شده و فرمان Node همهٔ فایل‌های tests/*.test.js را می‌گیرد؛ با این حال در HEAD بررسی‌شده Check Run تازه وجود ندارد.
+- [!] هیچ candidate مالی اجرایی جدیدی ساخته نشد؛ تا رفع ابهام‌های migration/schema/ACL/RLS/trigger، تولید DDL یا توابع مالی جدید بدون اجرای disposable source-faithful می‌تواند رفتار حسابداری را حدس بزند.
+- [!] ۱۷ منبع Migration اعمال‌شده هنوز بازیابی نشده و همچنان مانع سخت هر طرح deployable است.
+
+### ایمنی
+- [x] فقط تست و مستندات روی شاخهٔ Draft تغییر کردند.
+- [x] هیچ SQL روی Supabase اجرا نشد؛ هیچ Migration، RPC، Worker، Cron یا دادهٔ مالی Production تغییر نکرد.
+- [x] هیچ merge، rebase، deploy، انتشار APK/Pages یا هزینه‌ای انجام نشد.
+
+### اقدام بعدی
+1. CI را برای SHA دقیق از مسیر مجاز GitHub اجرا/تأیید کن؛ در غیر این صورت pending بماند.
+2. طراحی fixture PostgreSQL 17 ایزوله را با اعمال Migration مرجع و prerequisiteهای معتبر آغاز کن؛ سپس canonical IDها را به همان wallet/base-ledger و reservation model متصل کن.
+3. ابتدا Market buy/sell و Limit placement/worker را با pair_id-authoritative lookup پیاده‌سازی و تست کن؛ دو pair با display ticker یکسان را هم‌زمان پوشش بده.
+4. قبل از هر DDL قابل انتشار، mapping ambiguity و تمام dependencyهای schema/trigger/RLS/ACL را مستند و reconcile کن.
+5. PR را Draft نگه دار و تا تأیید صریح مالک هیچ اقدام Production انجام نده.
