@@ -55,6 +55,20 @@ The exact Production function body is captured at `supabase/tests/canonical_iden
 
 The disposable authoritative Market/Limit CI step loads this captured helper after the minimal fee-table fixture and before the exact Market/Limit migration. The fixture currently supplies a 0.1% USDT maker/taker row only to make deterministic tests possible. That row is **test data**, not evidence that Production currently configures 0.1%. The table's complete Production DDL, policies/grants and configuration values remain unverified; do not infer them from this function snapshot.
 
+## Newly confirmed source-validation gap — NULL liquidity type
+
+The captured Production helper currently validates the liquidity type with:
+
+```sql
+IF p_liquidity_type NOT IN ('maker', 'taker') THEN
+    RAISE EXCEPTION 'Invalid liquidity type';
+END IF;
+```
+
+In PostgreSQL, when `p_liquidity_type` is NULL, the `NOT IN` expression evaluates to NULL rather than TRUE. The IF body is therefore skipped. If the quote asset has an enabled fee row, the subsequent CASE expression's `WHEN p_liquidity_type = 'maker'` is also not TRUE and the ELSE branch returns the taker rate. Thus NULL is accepted as taker instead of being rejected.
+
+This is a source-derived defect in the captured helper, not a proposed behavior change. The current parity fixture does not yet assert the NULL case. Before promoting a canonical candidate, its fee helper must explicitly reject NULL (for example, `p_liquidity_type IS NULL OR p_liquidity_type NOT IN (...)`) and a disposable regression test must prove NULL is rejected while maker/taker and quote normalization remain correct. Do not patch the live Production helper as part of this Draft or silently alter its current behavior in the source-parity baseline.
+
 ## Why the current canonical prototype cannot be promoted
 
 The current fixture differs in material financial behavior:
