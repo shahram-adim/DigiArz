@@ -1,0 +1,41 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+
+const migration = readFileSync(
+  new URL('../supabase/migrations/20261113161641_enforce_active_accounts_in_demo_trade_and_limit_engine.sql', import.meta.url),
+  'utf8'
+);
+
+function functionBody(name) {
+  const marker = `FUNCTION public.${name}`;
+  const start = migration.indexOf(marker);
+  assert.notEqual(start, -1, `authoritative migration is missing ${name}`);
+  const next = migration.indexOf('CREATE OR REPLACE FUNCTION', start + marker.length);
+  return migration.slice(start, next === -1 ? undefined : next);
+}
+
+test('canonical ledger integration remains an explicit release blocker until every writer and worker resolves canonical keys', () => {
+  const market = functionBody('execute_demo_trade');
+  const limitPlacement = functionBody('place_limit_order');
+  const limitWorker = functionBody('process_limit_orders');
+
+  // These assertions deliberately capture the current legacy behavior. When
+  // canonical integration is implemented, replace this blocker test with
+  // end-to-end tests proving the canonical UUID -> unique ledger-key mapping.
+  assert.match(market, /v_base\s*:=\s*left\(v_symbol,\s*length\(v_symbol\)\s*-\s*4\)/i);
+  assert.match(limitPlacement, /v_base_asset\s*:=\s*left\(v_symbol,\s*length\(v_symbol\)\s*-\s*4\)/i);
+  assert.match(limitWorker, /v_base_asset\s*:=\s*left\(v_order\.symbol,\s*length\(v_order\.symbol\)\s*-\s*4\)/i);
+
+  for (const [name, body] of [
+    ['Market', market],
+    ['Limit placement', limitPlacement],
+    ['Limit worker', limitWorker]
+  ]) {
+    assert.doesNotMatch(
+      body,
+      /resolve_canonical_ledger_asset_key\s*\(/i,
+      `${name} still does not resolve the canonical asset ledger key`
+    );
+  }
+});
