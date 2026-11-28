@@ -1611,3 +1611,41 @@
 - [x] تمام queryهای Supabase در این نوبت فقط‌خواندنی و محدود به metadata یا aggregate بازار بودند.
 - [x] هیچ سفارش، معامله، رزرو، موجودی، کیف پول یا سابقه مالی کاربر خوانده یا تغییر داده نشد.
 - [x] هیچ Worker/RPC مالی، Migration، Grant، Policy، Cron، Edge Function Deploy، refresh دستی، حذف داده یا انتشار APK اجرا نشد.
+
+
+## به‌روزرسانی QA موتور Stop-Limit — ۲۸ نوامبر ۲۰۲۶
+
+### وضعیت زنده در شروع این اقدام
+- [x] HEAD شاخه `main` پیش از این اقدام: `95793332330f3fe3e1ffa802a527331e4efedf96`.
+- [x] پروژه Supabase با ref `gfoaubfilhttnwjykaox` در وضعیت `ACTIVE_HEALTHY` و PostgreSQL `17.11.0.018` است؛ ۵۵ migration تا نسخه `20261121050216` ثبت شده است.
+- [x] فهرست Development Branch خالی است؛ محیط Supabase ایزوله در اتصال فعلی در دسترس نیست.
+- [x] fingerprint تابع زنده `public.process_stop_limit_orders()` برابر `66357ab4a2247019f22a8b6ab6eac6fe` است؛ مالک postgres، از نوع SECURITY DEFINER، با search_path خالی و EXECUTE فقط برای service_role.
+- [x] cron شماره ۸ (`digiarz-limit-orders`) و شماره ۱۲ (`digiarz-stop-limit-orders`) فعال و هر دو با فاصله یک دقیقه‌اند. هیچ‌کدام دستی اجرا نشدند.
+
+### اقدام ملموس این نوبت
+- [x] در `tests/stop-limit-worker-source-parity.test.js` آزمون جدیدی اضافه شد که بدنه Worker را از Migration پایه `20261113181827` استخراج می‌کند، patch دقیق `v_old/v_new` از Migration `20261115143827` را اعمال می‌کند و خروجی را پس از حذف commentهای SQL و نرمال‌سازی فاصله‌ها با snapshot تابع Production مقایسه می‌کند.
+- [x] بازسازی مستقل همین زنجیره در این اجرا موفق بود؛ patch دقیقاً در بدنه Migration پایه پیدا شد و بدنه بازسازی‌شده با snapshot Production برابر شد.
+- [x] Commit آزمون: `f0a24d1a68c03e8744d112ed4c3ca623f3bd3b0f`.
+- [x] GitHub Actions Run #2417 روی همین commit آغاز شد؛ مرحله Node/browser شامل آزمون جدید موفق شد. در زمان ثبت این یادداشت، مراحل PostgreSQL و race هنوز در حال اجرا بودند؛ موفقیت کامل Workflow تا دریافت conclusion نهایی اعلام نمی‌شود.
+- [x] گزارش QA در `docs/STOP_LIMIT_QA_MATRIX.md` به‌روزرسانی شد.
+
+### ریسک/محدودیت باقی‌مانده
+- [!] تابع Production و Migrationهای اعمال‌شده از `FOR UPDATE OF c,parent SKIP LOCKED` استفاده می‌کنند؛ child در قفل همگام‌سازی parent/child نیست.
+- [!] Draft candidate از `FOR UPDATE OF c,parent,child SKIP LOCKED` استفاده می‌کند؛ تست race کاندید به‌تنهایی رفتار Production را ثابت نمی‌کند. این تفاوت باید به‌عنوان تصمیم اصلاحی مستقل بررسی شود.
+- [!] آزمون جدید parity منبع تابع را پوشش می‌دهد، اما جایگزین harness کامل schema/ACL نیست. DDL پایه معتبر و بعضی artifactهای migration همچنان باید از منبع قابل اعتماد بازیابی شوند.
+- [!] هیچ Development Branch ایزوله Supabase موجود نیست؛ تست چرخه کامل فقط در PostgreSQL دورریختنی GitHub Actions انجام می‌شود و معادل Supabase Production-parity نیست.
+
+### صفحات و رابط کاربری
+- [x] ساختار صفحات و مسیرهای SPA، فایل `index.html`، manifest، Service Worker و جهت RTL در این نوبت بازبینی شد.
+- [ ] در این اقدام فایل UI تغییر نکرد؛ تمرکز این نوبت روی دروازه QA موتور Stop-Limit بود. تکمیل تست Android و اتصال دقیق‌تر وضعیت سفارش والد/فرزند در رابط همچنان باقی است.
+
+### گام اجرایی بعد
+1. بازیابی DDL پایه معتبر و ساخت harness PostgreSQL 17 با تطبیق schema/constraints/triggers/RLS/ACL.
+2. اجرای lifecycle واقعی Stop-Limit با Migrationهای authoritative، شامل trigger، child Limit، fill جزئی/کامل، لغو، retry، reservation و رقابت دو نشست.
+3. بررسی مستقل قفل child در Production source و طراحی اصلاح فقط در Draft/CI؛ هیچ تغییر زنده بدون تأیید.
+4. پس از بسته‌شدن QA مالی، ادامه تکمیل صفحه معامله و سفارش‌های باز در UI و آزمون Android.
+
+### ایمنی
+- [x] هیچ سفارش، معامله، رزرو، کیف پول، موجودی یا سابقه مالی کاربر خوانده یا تغییر داده نشد.
+- [x] هیچ Worker/RPC مالی، Migration، Grant، Policy، Cron، Edge Function، انتشار APK یا عملیات برگشت‌ناپذیر اجرا نشد.
+- [x] هیچ پروژه/branch جدید یا هزینه‌ای ایجاد نشد.
