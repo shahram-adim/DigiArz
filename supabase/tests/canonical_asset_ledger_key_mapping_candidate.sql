@@ -27,14 +27,6 @@ LANGUAGE plpgsql
 SET search_path TO ''
 AS $function$
 BEGIN
-  IF NEW.ledger_asset_key IS DISTINCT FROM OLD.ledger_asset_key
-     AND (
-       EXISTS (SELECT 1 FROM public.asset_balances AS b WHERE b.asset = OLD.ledger_asset_key)
-       OR EXISTS (SELECT 1 FROM public.order_reservations AS r WHERE r.asset = OLD.ledger_asset_key)
-     ) THEN
-    RAISE EXCEPTION 'Ledger asset key is immutable after financial use'
-      USING ERRCODE = '23514';
-  END IF;
   IF TG_OP = 'DELETE' THEN
     IF EXISTS (
       SELECT 1 FROM public.asset_balances AS b
@@ -47,6 +39,15 @@ BEGIN
         USING ERRCODE = '23514';
     END IF;
     RETURN OLD;
+  END IF;
+
+  IF NEW.ledger_asset_key IS DISTINCT FROM OLD.ledger_asset_key
+     AND (
+       EXISTS (SELECT 1 FROM public.asset_balances AS b WHERE b.asset = OLD.ledger_asset_key)
+       OR EXISTS (SELECT 1 FROM public.order_reservations AS r WHERE r.asset = OLD.ledger_asset_key)
+     ) THEN
+    RAISE EXCEPTION 'Ledger asset key is immutable after financial use'
+      USING ERRCODE = '23514';
   END IF;
 
   RETURN NEW;
